@@ -5,6 +5,8 @@ project(bladeRF C)
 # Project configuration
 ################################################################################
 
+set(CHECKOUT_PATH e:/werk/maharashtra/software_projects/rf_phreaker)
+
 # All build output lands in this directory:
 set(CMAKE_RUNTIME_OUTPUT_DIRECTORY ${CMAKE_CURRENT_BINARY_DIR}/output)
 set(CMAKE_LIBRARY_OUTPUT_DIRECTORY ${CMAKE_CURRENT_BINARY_DIR}/output)

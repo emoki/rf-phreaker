@@ -35,7 +35,7 @@ include(CheckIncludeFile)
 #
 # See http://www.libusb.org/wiki/windows_backend#LatestBinarySnapshots
 set(LIBUSB_PATH
-    "C:/Program Files (x86)/libusbx-1.0.16"
+    "${CHECKOUT_PATH} /third_party/libusbx-1.0.17-win"
     CACHE
     PATH
     "Path to libusb files. (This is generally only needed for Windows users who downloaded binary distributions.)"
@@ -125,6 +125,8 @@ if(LIBUSB_FOUND)
     # Introduced in v1.0.10
     check_library_exists("${usb_LIBRARY}" libusb_get_version "" LIBUSB_HAVE_GET_VERSION)
 
+	set(LIBUSB_SUPPRESS_WARNINGS 1)
+	
     # Introduced in 1.0.16
     check_library_exists("${usb_LIBRARY}" libusb_strerror "" LIBUSB_HAVE_STRERROR)
     if (NOT LIBUSB_HAVE_STRERROR)
@@ -136,4 +138,6 @@ if(LIBUSB_FOUND)
     # Provide a hook to check it hotplug support is provided (1.0.16)
     check_library_exists("${usb_LIBRARY}" libusb_hotplug_register_callback  "" LIBUSB_HAVE_HOTPLUG)
 
+	set(LIBUSB_HAVE_HOTPLUG true)
+	
 endif(LIBUSB_FOUND)
