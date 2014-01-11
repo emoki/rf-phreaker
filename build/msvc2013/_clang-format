@@ -1,0 +1,8 @@
+---
+# BasedOnStyle:  LLVM
+ColumnLimit:     130
+IndentWidth:     4
+TabWidth:        4
+Cpp11BracedListStyle: true
+Standard:        Cpp11
+

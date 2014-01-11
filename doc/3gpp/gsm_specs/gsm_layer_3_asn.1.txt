@@ -1,0 +1,810 @@
+***************************************************
+BEGIN
+IMPORTS
+maxCNdomains,
+maxRBallRABs,
+maxRB
+FROM Constant-definitions;
+-- NOTE : for ActivationTime, value 'now' always appear as default, and is encoded
+-- by absence of the field
+ActivationTime ::= BIT STRING (SIZE (22))
+CN-DomainIdentity ::= ENUMERATED {
+cs-domain,
+ps-domain }
+CN-InformationInfo ::= SEQUENCE {
+plmn-Identity PLMN-Identity OPTIONAL,
+cn-DomainGSM-MAP-NAS-SysInfo NAS-SystemInformationGSM-MAP OPTIONAL,
+cn-DomainRelInfo CN-DomainRelInfo OPTIONAL
+}
+CN-DomainRelInfo ::= SEQUENCE {
+cn-DomainIdentity CN-DomainIdentity,
+cn-DomainGSM-MAP-NAS-SysInfo NAS-SystemInformationGSM-MAP
+}
+CellUpdateCause ::= ENUMERATED {
+cellReselection,
+periodicalCellUpdate,
+uplinkDataTransmission,
+geran-pagingResponse,
+radiolinkFailure,
+rlc-unrecoverableError,
+invalidRLC-MACcontrolmessage,
+spare1 }
+CipheringModeInfo ::= SEQUENCE {
+-- NOTE: The ciphering algorithm is included in the CipheringModeCommand.
+cipheringModeCommand CipheringModeCommand,
+cipheringActivationTimeforDBPSCH ActivationTime OPTIONAL,
+rb-DL-CiphActivationTimeInfo RB-ActivationTimeInfoList OPTIONAL
+}
+CipheringModeCommand ::= CHOICE {
+startRestart CipheringAlgorithm,
+spare NULL
+}
+CipheringAlgorithm ::= BIT STRING {
+-- For each bit value “0” means false/ not supported
+spare15(0),
+spare14(1),
+spare13(2),
+spare12(3),
+spare11(4),
+spare10(5),
+spare9(6),
+spare8(7),
+spare7(8),
+spare6(9),
+spare5(10),
+spare4(11),
+spare3(12),
+spare2(13),
+uea1(14),
+uea0(15)
+} (SIZE (16))
+DL-CounterSynchronisationInfo ::= SEQUENCE {
+rb-WithPDCP-InfoList RB-WithPDCP-InfoList OPTIONAL,
+rb-PDCPContextRelocationList RB-PDCPContextRelocationList OPTIONAL
+}
+Digit ::= INTEGER (0..9)
+FailureCauseWithProtErrTrId ::= SEQUENCE {
+rrc-TransactionIdentifier RRC-TransactionIdentifier,
+failureCause FailureCauseWithProtErr
+}
+FailureCauseWithProtErr ::= CHOICE {
+configurationUnsupported NULL,
+physicalChannelFailure NULL,
+incompatibleSimultaneousReconfiguration
+NULL,
+protocolError ProtocolErrorInformation,
+cellUpdateOccurred NULL,
+invalidConfiguration NULL,
+configurationIncomplete NULL,
+spare7 NULL,
+spare6 NULL,
+spare5 NULL,
+spare4 NULL,
+spare3 NULL,
+spare2 NULL,
+spare1 NULL
+}
+GRA-Identity ::= BIT STRING (SIZE (16))
+GRA-UpdateCause ::= ENUMERATED {
+changeOfGRA,
+periodicGRAUpdate,
+spare2,
+spare1 }
+GERAN-DRX-CycleLengthCoefficient ::= INTEGER (3..9)
+G-RNTI ::= SEQUENCE {
+sbsc-Identity SBSC-Identity,
+s-RNTI S-RNTI
+}
+IntegrityCheckInfo ::= SEQUENCE {
+-- RRC-MessageSequenceNumberList includes RRC-MessageSequenceNumber.
+messageAuthenticationCode MessageAuthenticationCode,
+rrc-MessageSequenceNumberList RRC-MessageSequenceNumberList
+}
+IntegrityProtActivationInfo ::= SEQUENCE {
+-- RRC-MessageSequenceNumberList includes RRC-MessageSequenceNumber
+rrc-MessageSequenceNumberList RRC-MessageSequenceNumberList
+}
+IntegrityProtectionAlgorithm ::= ENUMERATED {
+-- For each NULL means false/ not supported
+uia1 BIT STRING (SIZE (16)),
+spare1 NULL,
+spare2 NULL,
+spare3 NULL,
+spare4 NULL,
+spare5 NULL,
+spare6 NULL,
+spare7 NULL,
+spare8 NULL,
+spare9 NULL,
+spare10 NULL,
+spare11 NULL,
+spare12 NULL,
+spare13 NULL,
+spare14 NULL,
+spare15 NULL
+}
+IntegrityProtectionModeCommand ::= CHOICE {
+startIntegrityProtection SEQUENCE {
+integrityProtInitNumber IntegrityProtInitNumber
+},
+modify SEQUENCE {
+dl-IntegrityProtActivationInfo IntegrityProtActivationInfo
+}
+}
+IntegrityProtInitNumber ::= BIT STRING (SIZE (32))
+IntegrityProtectionModeInfo ::= SEQUENCE {
+-- NOTE: DL integrity protection activation info and Integrity
+-- protection intialisation number have been nested inside
+-- IntegrityProtectionModeCommand.
+integrityProtectionModeCommand IntegrityProtectionModeCommand,
+integrityProtectionAlgorithm IntegrityProtectionAlgorithm OPTIONAL
+}
+MessageAuthenticationCode ::= BIT STRING (SIZE (32))
+MCC ::= SEQUENCE (SIZE (3)) OF
+Digit
+MNC ::= SEQUENCE (SIZE (2..3)) OF
+Digit
+NAS-SystemInformationGSM-MAP ::= OCTET STRING (SIZE (1..8))
+PLMN-Identity ::= SEQUENCE {
+mcc MCC,
+mnc MNC
+}
+PDCP-SN-Info ::= INTEGER (0..65535)
+RB-PDCPContextRelocation ::= SEQUENCE {
+dl-RFC3095-Context-Relocation BOOLEAN,
+ul-RFC3095-Context-Relocation BOOLEAN
+}
+RB-PDCPContextRelocationList ::= SEQUENCE (SIZE (1..maxRBallRABs)) OF
+RB-PDCPContextRelocation
+ProtocolErrorCause ::= ENUMERATED {
+csn1-ViolationOrEncodingError,
+messageTypeNonexistent,
+messageNotCompatibleWithReceiverState,
+ie-ValueNotComprehended,
+informationElementMissing,
+messageContentPartError,
+messageExtensionNotComprehended,
+spare2, spare1 }
+ProtocolErrorIndicator ::=
+CHOICE {
+noError NULL,
+errorOccurred SEQUENCE {
+rrc-TransactionIdentifier RRC-TransactionIdentifier,
+protocolErrorInformation ProtocolErrorInformation
+}
+}
+ProtocolErrorInformation ::= SEQUENCE {
+diagnosticsType CHOICE {
+type1 SEQUENCE {
+protocolErrorCause ProtocolErrorCause
+},
+spare NULL
+}
+}
+Rb-timer-indicator ::= SEQUENCE {
+t314-expired BOOLEAN,
+t315-expired BOOLEAN }
+RB-ActivationTimeInfoList ::= SEQUENCE (SIZE (1..maxRB)) OF
+RB-ActivationTimeInfo
+RB-ActivationTimeInfo ::= SEQUENCE {
+rb-Identity RB-Identity,
+rlc-SequenceNumber RLC-SequenceNumber }
+RLC-SequenceNumber :: = CHOICE {
+rlc-GPRS-SequenceNumber BIT STRING (SIZE (7)),
+rlc-EGPRS-SequenceNumber BIT STRING (SIZE (11)),
+rlc-DCCH-TBFMode-SequenceNumber BIT STRING (SIZE (4)),
+rlc-TCH-TBF-SequenceNumber BIT STRING (SIZE (8))
+}
+RB-Identity ::= INTEGER (1..32)
+RB-WithPDCP-Info ::= SEQUENCE {
+rb-Identity RB-Identity,
+pdcp-SN-Info PDCP-SN-Info
+}
+RB-WithPDCP-InfoList ::= SEQUENCE (SIZE (1..maxRBallRABs)) OF
+RB-WithPDCP-Info
+RRC-MessageSequenceNumber ::= INTEGER (0..15)
+RRC-MessageSequenceNumberList ::= SEQUENCE (SIZE (4..5)) OF
+RRC-MessageSequenceNumber
+RRC-TransactionIdentifier ::= INTEGER (0..3)
+RRC-StateIndicator ::= ENUMERATED {
+rrc-Cell-Dedicated, rrc-Cell-Shared, rrc-GRA-PCH}
+SBSC-Identity ::= BIT STRING (SIZE (12))
+S-RNTI ::= BIT STRING (SIZE (20))
+START-Value ::= BIT STRING (SIZE (20))
+STARTList ::= SEQUENCE (SIZE (1..maxCNdomains)) OF
+STARTSingle
+STARTSingle ::= SEQUENCE {
+cn-DomainIdentity CN-DomainIdentity,
+start-Value START-Value
+}
+END
+
+
+
+
+Class-definitions DEFINITIONS AUTOMATIC TAGS ::=
+BEGIN
+IMPORTS
+CellUpdate,
+GRAUpdate,
+GRAUpdateConfirm,
+Reserved ::= NULL
+FROM PDU-definitions
+-- Mobile Station IEs
+IntegrityCheckInfo
+FROM InformationElements;
+--**************************************************************
+--
+-- Uplink SRB2 messages
+--
+--**************************************************************
+UL-Message ::= SEQUENCE {
+integrityCheckInfo IntegrityCheckInfo OPTIONAL,
+message UL-MessageType
+}
+UL-MessageType ::= CHOICE {
+cellUpdate CellUpdate -- 00000000,
+reserved1 Reserved,
+reserved2 Reserved,
+reserved3 Reserved,
+graUpdate GRAUpdate -- 00000100,
+reserved5 Reserved,
+reserved6 Reserved,
+reserved7 Reserved,
+reserved8 Reserved,
+reserved9 Reserved,
+reserved10 Reserved,
+reserved11 Reserved,
+reserved12 Reserved,
+reserved13 Reserved,
+reserved14 Reserved,
+reserved15 Reserved,
+reserved16 Reserved,
+reserved17 Reserved,
+reserved18 Reserved,
+reserved19 Reserved,
+reserved20 Reserved,
+reserved21 Reserved,
+reserved22 Reserved,
+reserved23 Reserved,
+reserved24 Reserved,
+reserved25 Reserved,
+reserved26 Reserved,
+reserved27 Reserved,
+reserved28 Reserved,
+reserved29 Reserved,
+reserved30 Reserved,
+reserved31 Reserved,
+reserved32 Reserved,
+reserved33 Reserved,
+reserved34 Reserved,
+reserved35 Reserved,
+reserved36 Reserved,
+reserved37 Reserved,
+reserved38 Reserved,
+reserved39 Reserved,
+reserved40 Reserved,
+reserved41 Reserved,
+reserved42 Reserved,
+reserved43 Reserved,
+reserved44 Reserved,
+reserved45 Reserved,
+reserved46 Reserved,
+reserved47 Reserved,
+reserved48 Reserved,
+reserved49 Reserved,
+reserved50 Reserved,
+reserved51 Reserved,
+reserved52 Reserved,
+reserved53 Reserved,
+reserved54 Reserved,
+reserved55 Reserved,
+reserved56 Reserved,
+reserved57 Reserved,
+reserved58 Reserved,
+reserved59 Reserved,
+reserved60 Reserved,
+reserved61 Reserved,
+reserved62 Reserved,
+reserved63 Reserved,
+reserved64 Reserved,
+reserved65 Reserved,
+reserved66 Reserved,
+reserved67 Reserved,
+reserved68 Reserved,
+reserved69 Reserved,
+reserved70 Reserved,
+reserved71 Reserved,
+reserved72 Reserved,
+reserved73 Reserved,
+reserved74 Reserved,
+reserved75 Reserved,
+reserved76 Reserved,
+reserved77 Reserved,
+reserved78 Reserved,
+reserved79 Reserved,
+reserved80 Reserved,
+reserved81 Reserved,
+reserved82 Reserved,
+reserved83 Reserved,
+reserved84 Reserved,
+reserved84 Reserved,
+reserved85 Reserved,
+reserved86 Reserved,
+reserved87 Reserved,
+reserved88 Reserved,
+reserved89 Reserved,
+reserved90 Reserved,
+reserved91 Reserved,
+reserved92 Reserved,
+reserved93 Reserved,
+reserved94 Reserved,
+reserved95 Reserved,
+reserved96 Reserved,
+reserved97 Reserved,
+reserved98 Reserved,
+reserved99 Reserved,
+reserved100 Reserved,
+reserved101 Reserved,
+reserved102 Reserved,
+reserved103 Reserved,
+reserved104 Reserved,
+reserved105 Reserved,
+reserved106 Reserved,
+reserved107 Reserved,
+reserved108 Reserved,
+reserved109 Reserved,
+reserved110 Reserved,
+reserved111 Reserved,
+reserved112 Reserved,
+reserved113 Reserved,
+reserved114 Reserved,
+reserved115 Reserved,
+reserved116 Reserved,
+reserved117 Reserved,
+reserved118 Reserved,
+reserved119 Reserved,
+reserved120 Reserved,
+reserved121 Reserved,
+reserved122 Reserved,
+reserved123 Reserved,
+reserved124 Reserved,
+reserved125 Reserved,
+reserved126 Reserved,
+reserved127 Reserved,
+reserved128 Reserved,
+reserved129 Reserved,
+reserved130 Reserved,
+reserved131 Reserved,
+reserved132 Reserved,
+reserved133 Reserved,
+reserved134 Reserved,
+reserved135 Reserved,
+reserved136 Reserved,
+reserved137 Reserved,
+reserved138 Reserved,
+reserved139 Reserved,
+reserved140 Reserved,
+reserved141 Reserved,
+reserved142 Reserved,
+reserved143 Reserved,
+reserved144 Reserved,
+reserved145 Reserved,
+reserved146 Reserved,
+reserved147 Reserved,
+reserved148 Reserved,
+reserved149 Reserved,
+reserved150 Reserved,
+reserved151 Reserved,
+reserved152 Reserved,
+reserved153 Reserved,
+reserved154 Reserved,
+reserved155 Reserved,
+reserved156 Reserved,
+reserved157 Reserved,
+reserved158 Reserved,
+reserved159 Reserved,
+reserved160 Reserved,
+reserved161 Reserved,
+reserved162 Reserved,
+reserved163 Reserved,
+reserved164 Reserved,
+reserved165 Reserved,
+reserved166 Reserved,
+reserved167 Reserved,
+reserved168 Reserved,
+reserved169 Reserved,
+reserved170 Reserved,
+reserved171 Reserved,
+reserved172 Reserved,
+reserved173 Reserved,
+reserved174 Reserved,
+reserved175 Reserved,
+reserved176 Reserved,
+reserved177 Reserved,
+reserved178 Reserved,
+reserved179 Reserved,
+reserved180 Reserved,
+reserved181 Reserved,
+reserved182 Reserved,
+reserved183 Reserved,
+reserved184 Reserved,
+reserved185 Reserved,
+reserved186 Reserved,
+reserved187 Reserved,
+reserved188 Reserved,
+reserved189 Reserved,
+reserved190 Reserved,
+reserved191 Reserved,
+reserved192 Reserved,
+reserved193 Reserved,
+reserved194 Reserved,
+reserved195 Reserved,
+reserved196 Reserved,
+reserved197 Reserved,
+reserved198 Reserved,
+reserved199 Reserved,
+reserved200 Reserved,
+reserved201 Reserved,
+reserved202 Reserved,
+reserved203 Reserved,
+reserved204 Reserved,
+reserved205 Reserved,
+reserved206 Reserved,
+reserved207 Reserved,
+reserved208 Reserved,
+reserved209 Reserved,
+reserved210 Reserved,
+reserved211 Reserved,
+reserved212 Reserved,
+reserved213 Reserved,
+reserved214 Reserved,
+reserved215 Reserved,
+reserved216 Reserved,
+reserved217 Reserved,
+reserved218 Reserved,
+reserved219 Reserved,
+reserved220 Reserved,
+reserved221 Reserved,
+reserved222 Reserved,
+reserved223 Reserved,
+reserved224 Reserved,
+reserved225 Reserved,
+reserved226 Reserved,
+reserved227 Reserved,
+reserved228 Reserved,
+reserved229 Reserved,
+reserved230 Reserved,
+reserved231 Reserved,
+reserved232 Reserved,
+reserved233 Reserved,
+reserved234 Reserved,
+reserved235 Reserved,
+reserved236 Reserved,
+reserved237 Reserved,
+reserved238 Reserved,
+reserved239 Reserved,
+reserved240 Reserved,
+reserved241 Reserved,
+reserved242 Reserved,
+reserved243 Reserved,
+reserved244 Reserved,
+reserved245 Reserved,
+reserved246 Reserved,
+reserved247 Reserved,
+reserved248 Reserved,
+reserved249 Reserved,
+reserved250 Reserved,
+reserved251 Reserved,
+reserved252 Reserved,
+reserved253 Reserved,
+reserved254 Reserved,
+reserved255 Reserved
+}
+--**************************************************************
+--
+-- Downlink SRB2 messages
+--
+--**************************************************************
+DL-Dedicated-Message ::= SEQUENCE {
+integrityCheckInfo IntegrityCheckInfo OPTIONAL,
+message DL-Dedicated-MessageType
+}
+DL-Dedicated-MessageType ::= CHOICE {
+reserved0 Reserved,
+reserved1 Reserved,
+reserved2 Reserved,
+reserved3 Reserved,
+reserved4 Reserved,
+graUpdateConfirm GRAUpdateConfirm -- 00000101,
+reserved6 Reserved,
+reserved7 Reserved,
+reserved8 Reserved,
+reserved9 Reserved,
+reserved10 Reserved,
+reserved11 Reserved,
+reserved12 Reserved,
+reserved13 Reserved,
+reserved14 Reserved,
+reserved15 Reserved,
+reserved16 Reserved,
+reserved17 Reserved,
+reserved18 Reserved,
+reserved19 Reserved,
+reserved20 Reserved,
+reserved21 Reserved,
+reserved22 Reserved,
+reserved23 Reserved,
+reserved24 Reserved,
+reserved25 Reserved,
+reserved26 Reserved,
+reserved27 Reserved,
+reserved28 Reserved,
+reserved29 Reserved,
+reserved30 Reserved,
+reserved31 Reserved,
+reserved32 Reserved,
+reserved33 Reserved,
+reserved34 Reserved,
+reserved35 Reserved,
+reserved36 Reserved,
+reserved37 Reserved,
+reserved38 Reserved,
+reserved39 Reserved,
+reserved40 Reserved,
+reserved41 Reserved,
+reserved42 Reserved,
+reserved43 Reserved,
+reserved44 Reserved,
+reserved45 Reserved,
+reserved46 Reserved,
+reserved47 Reserved,
+reserved48 Reserved,
+reserved49 Reserved,
+reserved50 Reserved,
+reserved51 Reserved,
+reserved52 Reserved,
+reserved53 Reserved,
+reserved54 Reserved,
+reserved55 Reserved,
+reserved56 Reserved,
+reserved57 Reserved,
+reserved58 Reserved,
+reserved59 Reserved,
+reserved60 Reserved,
+reserved61 Reserved,
+reserved62 Reserved,
+reserved63 Reserved,
+reserved64 Reserved,
+reserved65 Reserved,
+reserved66 Reserved,
+reserved67 Reserved,
+reserved68 Reserved,
+reserved69 Reserved,
+reserved70 Reserved,
+reserved71 Reserved,
+reserved72 Reserved,
+reserved73 Reserved,
+reserved74 Reserved,
+reserved75 Reserved,
+reserved76 Reserved,
+reserved77 Reserved,
+reserved78 Reserved,
+reserved79 Reserved,
+reserved80 Reserved,
+reserved81 Reserved,
+reserved82 Reserved,
+reserved83 Reserved,
+reserved84 Reserved,
+reserved84 Reserved,
+reserved85 Reserved,
+reserved86 Reserved,
+reserved87 Reserved,
+reserved88 Reserved,
+reserved89 Reserved,
+reserved90 Reserved,
+reserved91 Reserved,
+reserved92 Reserved,
+reserved93 Reserved,
+reserved94 Reserved,
+reserved95 Reserved,
+reserved96 Reserved,
+reserved97 Reserved,
+reserved98 Reserved,
+reserved99 Reserved,
+reserved100 Reserved,
+reserved101 Reserved,
+reserved102 Reserved,
+reserved103 Reserved,
+reserved104 Reserved,
+reserved105 Reserved,
+reserved106 Reserved,
+reserved107 Reserved,
+reserved108 Reserved,
+reserved109 Reserved,
+reserved110 Reserved,
+reserved111 Reserved,
+reserved112 Reserved,
+reserved113 Reserved,
+reserved114 Reserved,
+reserved115 Reserved,
+reserved116 Reserved,
+reserved117 Reserved,
+reserved118 Reserved,
+reserved119 Reserved,
+reserved120 Reserved,
+reserved121 Reserved,
+reserved122 Reserved,
+reserved123 Reserved,
+reserved124 Reserved,
+reserved125 Reserved,
+reserved126 Reserved,
+reserved127 Reserved,
+reserved128 Reserved,
+reserved129 Reserved,
+reserved130 Reserved,
+reserved131 Reserved,
+reserved132 Reserved,
+reserved133 Reserved,
+reserved134 Reserved,
+reserved135 Reserved,
+reserved136 Reserved,
+reserved137 Reserved,
+reserved138 Reserved,
+reserved139 Reserved,
+reserved140 Reserved,
+reserved141 Reserved,
+reserved142 Reserved,
+reserved143 Reserved,
+reserved144 Reserved,
+reserved145 Reserved,
+reserved146 Reserved,
+reserved147 Reserved,
+reserved148 Reserved,
+reserved149 Reserved,
+reserved150 Reserved,
+reserved151 Reserved,
+reserved152 Reserved,
+reserved153 Reserved,
+reserved154 Reserved,
+reserved155 Reserved,
+reserved156 Reserved,
+reserved157 Reserved,
+reserved158 Reserved,
+reserved159 Reserved,
+reserved160 Reserved,
+reserved161 Reserved,
+reserved162 Reserved,
+reserved163 Reserved,
+reserved164 Reserved,
+reserved165 Reserved,
+reserved166 Reserved,
+reserved167 Reserved,
+reserved168 Reserved,
+reserved169 Reserved,
+reserved170 Reserved,
+reserved171 Reserved,
+reserved172 Reserved,
+reserved173 Reserved,
+reserved174 Reserved,
+reserved175 Reserved,
+reserved176 Reserved,
+reserved177 Reserved,
+reserved178 Reserved,
+reserved179 Reserved,
+reserved180 Reserved,
+reserved181 Reserved,
+reserved182 Reserved,
+reserved183 Reserved,
+reserved184 Reserved,
+reserved185 Reserved,
+reserved186 Reserved,
+reserved187 Reserved,
+reserved188 Reserved,
+reserved189 Reserved,
+reserved190 Reserved,
+reserved191 Reserved,
+reserved192 Reserved,
+reserved193 Reserved,
+reserved194 Reserved,
+reserved195 Reserved,
+reserved196 Reserved,
+reserved197 Reserved,
+reserved198 Reserved,
+reserved199 Reserved,
+reserved200 Reserved,
+reserved201 Reserved,
+reserved202 Reserved,
+reserved203 Reserved,
+reserved204 Reserved,
+reserved205 Reserved,
+reserved206 Reserved,
+reserved207 Reserved,
+reserved208 Reserved,
+reserved209 Reserved,
+reserved210 Reserved,
+reserved211 Reserved,
+reserved212 Reserved,
+reserved213 Reserved,
+reserved214 Reserved,
+reserved215 Reserved,
+reserved216 Reserved,
+reserved217 Reserved,
+reserved218 Reserved,
+reserved219 Reserved,
+reserved220 Reserved,
+reserved221 Reserved,
+reserved222 Reserved,
+reserved223 Reserved,
+reserved224 Reserved,
+reserved225 Reserved,
+reserved226 Reserved,
+reserved227 Reserved,
+reserved228 Reserved,
+reserved229 Reserved,
+reserved230 Reserved,
+reserved231 Reserved,
+reserved232 Reserved,
+reserved233 Reserved,
+reserved234 Reserved,
+reserved235 Reserved,
+reserved236 Reserved,
+reserved237 Reserved,
+reserved238 Reserved,
+reserved239 Reserved,
+reserved240 Reserved,
+reserved241 Reserved,
+reserved242 Reserved,
+reserved243 Reserved,
+reserved244 Reserved,
+reserved245 Reserved,
+reserved246 Reserved,
+reserved247 Reserved,
+reserved248 Reserved,
+reserved249 Reserved,
+reserved250 Reserved,
+reserved251 Reserved,
+reserved252 Reserved,
+reserved253 Reserved,
+reserved254 Reserved,
+reserved255 Reserved
+}END
+
+
+--**************************************************************
+-- NOTE: The message type and integrity check info are not
+-- visible in this module as they are defined in the class module.
+--**************************************************************
+PDU-definitions DEFINITIONS AUTOMATIC TAGS ::=BEGIN
+--**************************************************************
+--
+-- IE parameter types from other modules
+--
+--**************************************************************
+IMPORTS
+ActivationTime,
+CN-DomainIdentity,
+CN-InformationInfo,
+CellUpdateCause,
+CipheringModeInfo,
+FailureCauseWithProtErrTrId,
+G-RNTI,
+GRA-Identity,
+GERAN-DRX-CycleLengthCoefficient,
+GRA-UpdateCause,
+DL-CounterSynchronisationInfo,
+IntegrityProtectionModeInfo,
+NAS-SystemInformationGSM-MAP,
+ProtocolErrorIndicator,
+PLMN-Identity,
+PDCP-SN-Info,
+RRC-StateIndicator,
+RRC-TransactionIdentifier,
+Rb-timer-indicator,
+RB-WithPDCP-InfoList,
+RB-PDCPContextRelocationList,
+RB-Identity,
+RB-PDCPContextRelocation,
+START-Value,
+STARTList
+FROM InformationElements;

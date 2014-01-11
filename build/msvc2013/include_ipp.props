@@ -1,0 +1,16 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<Project ToolsVersion="4.0" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
+  <ImportGroup Label="PropertySheets" />
+  <PropertyGroup Label="UserMacros" />
+  <PropertyGroup />
+  <ItemDefinitionGroup>
+    <ClCompile>
+      <AdditionalIncludeDirectories>$(SolutionDir)..\..\third_party\ipp\ipp\include;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
+    </ClCompile>
+    <Link>
+      <AdditionalLibraryDirectories>$(SolutionDir)..\..\third_party\ipp\compiler\lib\ia32;$(SolutionDir)\..\..\third_party\ipp\ipp\lib\ia32;%(AdditionalLibraryDirectories)</AdditionalLibraryDirectories>
+      <AdditionalDependencies>libbfp754.lib;libdecimal.lib;libiomp5md.lib;libiompstubs5md.lib;libipgo.lib;libirc.lib;libircmt.lib;libm.lib;libmatmul.lib;libmmd.lib;libmmdd.lib;libmmds.lib;libmmt.lib;svml_disp.lib;svml_dispmd.lib;svml_dispmt.lib;ippac.lib;ippacmt.lib;ippcc.lib;ippccmt.lib;ippch.lib;ippchmt.lib;ippcore.lib;ippcoremt.lib;ippcv.lib;ippcvmt.lib;ippdc.lib;ippdcmt.lib;ippdi.lib;ippdimt.lib;ippgen.lib;ippgenmt.lib;ippi.lib;ippimt.lib;ippj.lib;ippjmt.lib;ippm.lib;ippmmt.lib;ippr.lib;ipprmt.lib;ipps.lib;ippsc.lib;ippscmt.lib;ippsmt.lib;ippvc.lib;ippvcmt.lib;ippvm.lib;ippvmmt.lib;%(AdditionalDependencies)</AdditionalDependencies>
+    </Link>
+  </ItemDefinitionGroup>
+  <ItemGroup />
+</Project>

@@ -1,0 +1,149 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<Project ToolsVersion="4.0" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
+  <ItemGroup>
+    <Filter Include="Source Files">
+      <UniqueIdentifier>{4FC737F1-C7A5-4376-A066-2A32D752A2FF}</UniqueIdentifier>
+      <Extensions>cpp;c;cc;cxx;def;odl;idl;hpj;bat;asm;asmx</Extensions>
+    </Filter>
+    <Filter Include="Header Files">
+      <UniqueIdentifier>{93995380-89BD-4b04-88EB-625FBE52EBFB}</UniqueIdentifier>
+      <Extensions>h;hpp;hxx;hm;inl;inc;xsd</Extensions>
+    </Filter>
+    <Filter Include="Resource Files">
+      <UniqueIdentifier>{67DA6AB6-F800-4c08-8B7A-83BB121AAD01}</UniqueIdentifier>
+      <Extensions>rc;ico;cur;bmp;dlg;rc2;rct;bin;rgs;gif;jpg;jpeg;jpe;resx;tiff;tif;png;wav;mfcribbon-ms</Extensions>
+    </Filter>
+    <Filter Include="layer_3_decoder_common">
+      <UniqueIdentifier>{404bbd59-b2db-4b23-82a1-81e997809793}</UniqueIdentifier>
+    </Filter>
+  </ItemGroup>
+  <ItemGroup>
+    <ClInclude Include="..\..\..\..\src\rf_phreaker\layer_3_decoder_common\asn1_types.h">
+      <Filter>layer_3_decoder_common</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\..\src\rf_phreaker\layer_3_decoder_common\bit_stream_container.h">
+      <Filter>layer_3_decoder_common</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\..\src\rf_phreaker\layer_3_decoder_common\decode_support_functions.h">
+      <Filter>layer_3_decoder_common</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\..\src\rf_phreaker\layer_3_decoder_common\per_decoder_container.h">
+      <Filter>layer_3_decoder_common</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\..\src\rf_phreaker\layer_3_decoder_common\per_decoder_interface.h">
+      <Filter>layer_3_decoder_common</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\..\src\rf_phreaker\layer_3_decoder_common\pdu_element.h">
+      <Filter>layer_3_decoder_common</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\..\src\rf_phreaker\umts_layer_3_decoder\asn_type_descriptor.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\..\src\rf_phreaker\umts_layer_3_decoder\umts_layer_3_decoder.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\..\src\rf_phreaker\umts_layer_3_decoder\resource.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\..\src\rf_phreaker\umts_layer_3_decoder\segmented_sib.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\..\src\rf_phreaker\umts_layer_3_decoder\segmented_sib_container.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\..\src\rf_phreaker\umts_layer_3_decoder\umts_bcch_bch_message.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\..\src\rf_phreaker\umts_layer_3_decoder\umts_mib_container.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\..\src\rf_phreaker\umts_layer_3_decoder\umts_sib_11_and_11_bis_container.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\..\src\rf_phreaker\umts_layer_3_decoder\umts_sib_11_bis_container.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\..\src\rf_phreaker\umts_layer_3_decoder\umts_sib_11_container.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\..\src\rf_phreaker\umts_layer_3_decoder\umts_sib_18_container.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\..\src\rf_phreaker\umts_layer_3_decoder\umts_sib_1_container.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\..\src\rf_phreaker\umts_layer_3_decoder\umts_sib_3_container.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\..\src\rf_phreaker\umts_layer_3_decoder\umts_sib_4_container.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\..\src\rf_phreaker\umts_layer_3_decoder\umts_system_information_container.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+  </ItemGroup>
+  <ItemGroup>
+    <ClCompile Include="..\..\..\..\src\rf_phreaker\layer_3_decoder_common\bit_stream_container.cpp">
+      <Filter>layer_3_decoder_common</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\..\..\src\rf_phreaker\layer_3_decoder_common\per_decoder_container.cpp">
+      <Filter>layer_3_decoder_common</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\..\..\src\rf_phreaker\layer_3_decoder_common\per_decoder_interface.cpp">
+      <Filter>layer_3_decoder_common</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\..\..\src\rf_phreaker\layer_3_decoder_common\pdu_element.cpp">
+      <Filter>layer_3_decoder_common</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\..\..\src\rf_phreaker\umts_layer_3_decoder\asn_type_descriptor.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\..\..\src\rf_phreaker\umts_layer_3_decoder\umts_layer_3_decoder.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\..\..\src\rf_phreaker\umts_layer_3_decoder\segmented_sib_container.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\..\..\src\rf_phreaker\umts_layer_3_decoder\umts_bcch_bch_message.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\..\..\src\rf_phreaker\umts_layer_3_decoder\umts_mib_container.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\..\..\src\rf_phreaker\umts_layer_3_decoder\umts_sib_11_and_11_bis_container.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\..\..\src\rf_phreaker\umts_layer_3_decoder\umts_sib_11_bis_container.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\..\..\src\rf_phreaker\umts_layer_3_decoder\umts_sib_11_container.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\..\..\src\rf_phreaker\umts_layer_3_decoder\umts_sib_18_container.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\..\..\src\rf_phreaker\umts_layer_3_decoder\umts_sib_1_container.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\..\..\src\rf_phreaker\umts_layer_3_decoder\umts_sib_3_container.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\..\..\src\rf_phreaker\umts_layer_3_decoder\umts_sib_4_container.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\..\..\src\rf_phreaker\umts_layer_3_decoder\umts_system_information_container.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\..\..\src\rf_phreaker\arch\win\dllmain.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\..\..\src\rf_phreaker\arch\win\stdafx.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+  </ItemGroup>
+  <ItemGroup>
+    <ResourceCompile Include="..\..\..\..\src\rf_phreaker\umts_layer_3_decoder\umts_layer_3_decoder.rc">
+      <Filter>Resource Files</Filter>
+    </ResourceCompile>
+  </ItemGroup>
+</Project>

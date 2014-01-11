@@ -1,0 +1,198 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<Project ToolsVersion="4.0" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
+  <ItemGroup>
+    <Filter Include="Source Files">
+      <UniqueIdentifier>{4FC737F1-C7A5-4376-A066-2A32D752A2FF}</UniqueIdentifier>
+      <Extensions>cpp;c;cc;cxx;def;odl;idl;hpj;bat;asm;asmx</Extensions>
+    </Filter>
+    <Filter Include="Header Files">
+      <UniqueIdentifier>{93995380-89BD-4b04-88EB-625FBE52EBFB}</UniqueIdentifier>
+      <Extensions>h;hpp;hxx;hm;inl;inc;xsd</Extensions>
+    </Filter>
+    <Filter Include="Resource Files">
+      <UniqueIdentifier>{67DA6AB6-F800-4c08-8B7A-83BB121AAD01}</UniqueIdentifier>
+      <Extensions>rc;ico;cur;bmp;dlg;rc2;rct;bin;rgs;gif;jpg;jpeg;jpe;resx;tiff;tif;png;wav;mfcribbon-ms</Extensions>
+    </Filter>
+    <Filter Include="Header Files\old_scanner">
+      <UniqueIdentifier>{a2153d2b-c780-4589-b6bc-7bf44e944279}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Header Files\old_scanner\old_scanner_comm">
+      <UniqueIdentifier>{694761f0-245e-4faf-b0f3-4cdcc2c39862}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Header Files\old_scanner\old_scanner_packets">
+      <UniqueIdentifier>{75965fb0-e651-4877-a957-cd735921bf59}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Source Files\old_scanner">
+      <UniqueIdentifier>{d0972749-730d-48a7-8ef9-faa5e5d024bb}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Source Files\old_scanner\comm">
+      <UniqueIdentifier>{f2bfec81-5338-47f4-b2e6-78f6c7436e1b}</UniqueIdentifier>
+    </Filter>
+  </ItemGroup>
+  <ItemGroup>
+    <ClInclude Include="..\..\..\..\src\rf_phreaker\scanner\usb_interface.h">
+      <Filter>Header Files\old_scanner\old_scanner_comm</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\..\src\rf_phreaker\scanner\usb_ftdi.h">
+      <Filter>Header Files\old_scanner\old_scanner_comm</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\..\src\rf_phreaker\scanner\usb_defines.h">
+      <Filter>Header Files\old_scanner\old_scanner_comm</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\..\src\rf_phreaker\scanner\scanner_comm_usb.h">
+      <Filter>Header Files\old_scanner\old_scanner_comm</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\..\src\rf_phreaker\scanner\scanner_comm.h">
+      <Filter>Header Files\old_scanner\old_scanner_comm</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\..\src\rf_phreaker\scanner\comm_usb_ftdi_info.h">
+      <Filter>Header Files\old_scanner\old_scanner_comm</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\..\src\rf_phreaker\scanner\comm_usb_info.h">
+      <Filter>Header Files\old_scanner\old_scanner_comm</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\..\src\rf_phreaker\scanner\fake_usb_ftdi.h">
+      <Filter>Header Files\old_scanner\old_scanner_comm</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\..\src\rf_phreaker\scanner\packet_typedefs.h">
+      <Filter>Header Files\old_scanner\old_scanner_packets</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\..\src\rf_phreaker\scanner\packet.h">
+      <Filter>Header Files\old_scanner\old_scanner_packets</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\..\src\rf_phreaker\scanner\packet_class_definitions.h">
+      <Filter>Header Files\old_scanner\old_scanner_packets</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\..\src\rf_phreaker\scanner\packet_container.h">
+      <Filter>Header Files\old_scanner\old_scanner_packets</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\..\src\rf_phreaker\scanner\packet_helper.h">
+      <Filter>Header Files\old_scanner\old_scanner_packets</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\..\src\rf_phreaker\scanner\gain.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\..\src\rf_phreaker\scanner\measurement_info.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\..\src\rf_phreaker\scanner\sampling_rate_conversion.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\..\src\rf_phreaker\scanner\byte_aligned_buffer.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\..\src\rf_phreaker\scanner\io_logger.h">
+      <Filter>Header Files\old_scanner\old_scanner_comm</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\..\src\rf_phreaker\scanner\time_samples_conversion.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\..\src\rf_phreaker\scanner\rf_switch_conversion.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\..\src\rf_phreaker\scanner\scanner_utility.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\..\src\rf_phreaker\scanner\scanner_types.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\..\src\rf_phreaker\scanner\comm_info.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\..\src\rf_phreaker\scanner\vtune.h">
+      <Filter>Header Files\old_scanner</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\..\src\rf_phreaker\scanner\bandwidth_conversion.h">
+      <Filter>Header Files\old_scanner</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\..\src\rf_phreaker\scanner\frequency_conversion.h">
+      <Filter>Header Files\old_scanner</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\..\src\rf_phreaker\scanner\frequency_v_tune.h">
+      <Filter>Header Files\old_scanner</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\..\src\rf_phreaker\scanner\scanner_initialization.h">
+      <Filter>Header Files\old_scanner</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\..\src\rf_phreaker\scanner\scanner_controller.h">
+      <Filter>Header Files\old_scanner</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\..\src\rf_phreaker\scanner\scanner_controller_interface.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\..\src\rf_phreaker\scanner\blade_rf_controller.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\..\src\rf_phreaker\scanner\comm_blade_rf.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\..\src\rf_phreaker\scanner\lms_utilities.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\..\src\rf_phreaker\scanner\lms_defines.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\..\src\rf_phreaker\scanner\scanner.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\..\src\rf_phreaker\scanner\scanner_blade_rf_impl.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\..\src\rf_phreaker\scanner\scanner_blade_rf.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\..\src\rf_phreaker\arch\win\stdafx.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\..\src\rf_phreaker\arch\win\targetver.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+  </ItemGroup>
+  <ItemGroup>
+    <ClCompile Include="..\..\..\..\src\rf_phreaker\scanner\vtune.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\..\..\src\rf_phreaker\scanner\scanner_comm_usb.cpp">
+      <Filter>Source Files\old_scanner\comm</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\..\..\src\rf_phreaker\scanner\usb_ftdi.cpp">
+      <Filter>Source Files\old_scanner\comm</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\..\..\src\rf_phreaker\scanner\comm_usb_ftdi_info.cpp">
+      <Filter>Source Files\old_scanner\comm</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\..\..\src\rf_phreaker\scanner\gain.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\..\..\src\rf_phreaker\scanner\sampling_rate_conversion.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\..\..\src\rf_phreaker\scanner\rf_switch_conversion.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\..\..\src\rf_phreaker\scanner\blade_rf_controller.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\..\..\src\rf_phreaker\scanner\scanner_controller.cpp">
+      <Filter>Source Files\old_scanner</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\..\..\src\rf_phreaker\scanner\scanner_initialization.cpp">
+      <Filter>Source Files\old_scanner</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\..\..\src\rf_phreaker\scanner\bandwidth_conversion.cpp">
+      <Filter>Source Files\old_scanner</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\..\..\src\rf_phreaker\scanner\frequency_v_tune.cpp">
+      <Filter>Source Files\old_scanner</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\..\..\src\rf_phreaker\scanner\frequency_conversion.cpp">
+      <Filter>Source Files\old_scanner</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\..\..\src\rf_phreaker\scanner\scanner_rf_blade.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\..\..\src\rf_phreaker\arch\win\stdafx.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+  </ItemGroup>
+</Project>

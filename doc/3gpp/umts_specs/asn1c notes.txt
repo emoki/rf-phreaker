@@ -1,0 +1,44 @@
+the closing of the muslim mind
+
+Guest 
+Hello Lev, 
+ 
+    I need Visual Studio C++ compatibility for asn1c output files. The structure definitions within parameter lists are warnings with gcc, but errors for VS due to scoping issues. For example: 
+ 
+    A_SEQUENCE_OF(struct xyz { 
+ 
+             int x; 
+ 
+             int y; 
+ 
+             int z; 
+ 
+    }) list; 
+ 
+  will not compile under VS, unless I change to: 
+ 
+      struct xyz { intx; int y;; int z;}; 
+ 
+      A_SEQUENCE_OF(struct xyz) list; 
+ 
+Short of post-processing all the asn1c file output, do you have a better solution? 
+ 
+Thanks, 
+   Kevin
+Wednesday, August 12, 2009, 10:47:30 – Flag – Reply
+
+ Lev Walkin 
+Modify your ASN.1 file to move the specification out of SEQUENCE OF. I.e., if you have SEQUENCE OF SEQUENCE { ... } replace it with the following: 
+ 
+SEQUENCE OF FOO 
+ 
+Foo ::= SEQUENCE { ... }
+
+for rajesh:
+svn login, 
+ipp library documentation,
+lte dll
+
+before 9:30 am wednesday time or afterwards
+
+mvj8ewp09
