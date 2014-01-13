@@ -48,13 +48,13 @@
     <ClInclude Include="..\..\..\..\src\rf_phreaker\common\common_types.h">
       <Filter>Header Files</Filter>
     </ClInclude>
-    <ClInclude Include="..\..\..\..\src\rf_phreaker\common\ConfigFile.h">
-      <Filter>Header Files</Filter>
-    </ClInclude>
     <ClInclude Include="..\..\..\..\src\rf_phreaker\arch\win\stdafx.h">
       <Filter>Header Files</Filter>
     </ClInclude>
     <ClInclude Include="..\..\..\..\src\rf_phreaker\arch\win\targetver.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\..\src\rf_phreaker\common\config_file.h">
       <Filter>Header Files</Filter>
     </ClInclude>
   </ItemGroup>
@@ -62,10 +62,10 @@
     <ClCompile Include="..\..\..\..\src\rf_phreaker\common\operating_band_range_specifier.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
-    <ClCompile Include="..\..\..\..\src\rf_phreaker\common\ConfigFile.cpp">
+    <ClCompile Include="..\..\..\..\src\rf_phreaker\arch\win\stdafx.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
-    <ClCompile Include="..\..\..\..\src\rf_phreaker\arch\win\stdafx.cpp">
+    <ClCompile Include="..\..\..\..\src\rf_phreaker\common\config_file.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
   </ItemGroup>

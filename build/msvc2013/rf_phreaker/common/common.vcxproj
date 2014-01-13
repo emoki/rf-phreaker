@@ -85,7 +85,7 @@
     <ClInclude Include="..\..\..\..\src\rf_phreaker\common\active_object.h" />
     <ClInclude Include="..\..\..\..\src\rf_phreaker\common\benchmark.h" />
     <ClInclude Include="..\..\..\..\src\rf_phreaker\common\concurrent.h" />
-    <ClInclude Include="..\..\..\..\src\rf_phreaker\common\ConfigFile.h" />
+    <ClInclude Include="..\..\..\..\src\rf_phreaker\common\config_file.h" />
     <ClInclude Include="..\..\..\..\src\rf_phreaker\common\exception_types.h" />
     <ClInclude Include="..\..\..\..\src\rf_phreaker\common\log.h" />
     <ClInclude Include="..\..\..\..\src\rf_phreaker\common\measurements.h" />
@@ -96,7 +96,7 @@
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="..\..\..\..\src\rf_phreaker\arch\win\stdafx.cpp" />
-    <ClCompile Include="..\..\..\..\src\rf_phreaker\common\ConfigFile.cpp" />
+    <ClCompile Include="..\..\..\..\src\rf_phreaker\common\config_file.cpp" />
     <ClCompile Include="..\..\..\..\src\rf_phreaker\common\operating_band_range_specifier.cpp" />
   </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
