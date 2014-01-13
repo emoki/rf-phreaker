@@ -1,5 +1,5 @@
-#include "rf_phreaker\scanner\scanner_blade_rf.h"
-#include "rf_phreaker\scanner\scanner_blade_rf_impl.h"
+#include "rf_phreaker/scanner/scanner_blade_rf.h"
+#include "rf_phreaker/scanner/scanner_blade_rf_impl.h"
 
 namespace rf_phreaker {
 	namespace scanner {

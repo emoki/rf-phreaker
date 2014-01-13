@@ -1,6 +1,6 @@
 #pragma once
 
-#include "rf_phreaker\common/common_types.h"
+#include "rf_phreaker/common/common_types.h"
 
 #define khz(x) ((x)*1000)             /**< Convenience for kHz */
 #define mhz(x) ((x)*1000000)          /**< Convenience for MHz */

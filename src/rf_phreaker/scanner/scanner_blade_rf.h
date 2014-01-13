@@ -1,7 +1,7 @@
 #pragma once
 
-#include "rf_phreaker\scanner\scanner.h"
-#include "rf_phreaker\common\common_types.h"
+#include "rf_phreaker/scanner/scanner.h"
+#include "rf_phreaker/common/common_types.h"
 
 #include <memory>
 #include <string>

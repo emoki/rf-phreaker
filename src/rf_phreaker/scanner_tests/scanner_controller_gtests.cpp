@@ -1,4 +1,4 @@
-#include "gtest\gtest.h"
+#include "gtest/gtest.h"
  
 #include "rf_phreaker/scanner/scanner_controller.h"
 #include "rf_phreaker/common/benchmark.h"

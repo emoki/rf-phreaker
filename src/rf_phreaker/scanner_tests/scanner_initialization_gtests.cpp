@@ -1,4 +1,4 @@
-#include "gtest\gtest.h"
+#include "gtest/gtest.h"
 
 #include "rf_phreaker/scanner/packet.h"
 #include "rf_phreaker/scanner/packet_typedefs.h"

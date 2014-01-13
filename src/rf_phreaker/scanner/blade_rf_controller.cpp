@@ -1,5 +1,5 @@
 #include "rf_phreaker/scanner/blade_rf_controller.h"
-#include "rf_phreaker\common\exception_types.h"
+#include "rf_phreaker/common/exception_types.h"
 #include "rf_phreaker/scanner/comm_blade_rf.h"
 #include "rf_phreaker/scanner/bandwidth_conversion.h"
 #include "rf_phreaker/scanner/lms_utilities.h"

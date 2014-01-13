@@ -1,7 +1,7 @@
 #include "rf_phreaker/layer_3_common/lte_rrc_message_aggregate.h"
 #include "rf_phreaker/layer_3_common/umts_bcch_bch_message_aggregate.h"
 #include "rf_phreaker/layer_3_common/pdu_element_types.h"
-#include "rf_phreaker\common\common_types.h"
+#include "rf_phreaker/common/common_types.h"
 
 #include <map>
 

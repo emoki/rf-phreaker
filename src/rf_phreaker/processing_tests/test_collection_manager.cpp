@@ -1,4 +1,4 @@
-#include "gtest\gtest.h"
+#include "gtest/gtest.h"
 
 #include "rf_phreaker/processing/collection_manager.h"
 #include "rf_phreaker/common/common_utility.h"

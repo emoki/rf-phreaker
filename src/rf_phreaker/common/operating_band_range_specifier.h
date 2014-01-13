@@ -3,7 +3,7 @@
 #include <stdint.h>
 #include <vector>
 
-#include "rf_phreaker\common\common_types.h"
+#include "rf_phreaker/common/common_types.h"
 
 namespace rf_phreaker {
 

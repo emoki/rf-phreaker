@@ -1,4 +1,4 @@
-#include "gtest\gtest.h"
+#include "gtest/gtest.h"
 
 #include "rf_phreaker/processing/layer_3_tracker.h"
 #include "rf_phreaker/common/common_types.h"

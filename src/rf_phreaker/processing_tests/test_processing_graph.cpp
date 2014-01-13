@@ -1,4 +1,4 @@
-#include "gtest\gtest.h"
+#include "gtest/gtest.h"
 
 #include "processing_graph.h"
 #include "processing_lte.h"

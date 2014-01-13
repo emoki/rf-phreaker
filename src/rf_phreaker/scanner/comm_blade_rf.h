@@ -1,6 +1,6 @@
 #pragma once
 
-#include "rf_phreaker\scanner\comm_info.h"
+#include "rf_phreaker/scanner/comm_info.h"
 #include "libbladeRF.h"
 
 namespace rf_phreaker {

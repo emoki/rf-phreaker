@@ -1,4 +1,4 @@
-#include "gtest\gtest.h"
+#include "gtest/gtest.h"
  
 #include "rf_phreaker/scanner/byte_aligned_buffer.h"
 

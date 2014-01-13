@@ -1,7 +1,7 @@
-#include "gtest\gtest.h"
+#include "gtest/gtest.h"
 
-#include "rf_phreaker\common\operating_band_range_specifier.h"
-#include "rf_phreaker\common\common_utility.h"
+#include "rf_phreaker/common/operating_band_range_specifier.h"
+#include "rf_phreaker/common/common_utility.h"
 
 using namespace rf_phreaker;
 

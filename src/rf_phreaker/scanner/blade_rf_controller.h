@@ -1,6 +1,6 @@
 #pragma once
 
-#include "rf_phreaker\scanner\scanner_controller_interface.h"
+#include "rf_phreaker/scanner/scanner_controller_interface.h"
 #include "rf_phreaker/common/common_types.h"
 #include "rf_phreaker/common/concurrent.h"
 #include "rf_phreaker/common/measurements.h"

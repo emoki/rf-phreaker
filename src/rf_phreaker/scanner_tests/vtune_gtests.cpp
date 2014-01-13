@@ -1,4 +1,4 @@
-#include "gtest\gtest.h"
+#include "gtest/gtest.h"
 
 #include "rf_phreaker/scanner/vtune.h"
 #include "rf_phreaker/scanner/scanner_comm_usb.h"

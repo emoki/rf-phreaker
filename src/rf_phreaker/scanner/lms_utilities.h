@@ -1,6 +1,6 @@
 #pragma once
 
-#include "rf_phreaker\scanner\lms_defines.h"
+#include "rf_phreaker/scanner/lms_defines.h"
 #include "libbladeRF.h"
 
 bladerf_lna_gain convert(rf_phreaker::scanner::lms::lna_gain_enum gain)
