@@ -1,6 +1,6 @@
 // ConfigFile.cpp
 
-#include "ConfigFile.h"
+#include "rf_phreaker/common/config_file.h"
 
 using std::string;
 

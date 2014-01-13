@@ -3,7 +3,7 @@
 #include <stdint.h>
 #include <math.h>
 #include <boost/assert.hpp>
-#include "rf_phreaker/common/ConfigFile.h"
+#include "rf_phreaker/common/config_file.h"
 #include <Windows.h>
 
 static const bool output_segments_default = false;
