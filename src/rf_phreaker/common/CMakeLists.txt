@@ -16,8 +16,8 @@ set (common_SRCS
 		common_types.h
 		common_utility.h
 		concurrent.h
-		configfile.cpp
-		configfile.h
+		config_file.cpp
+		config_file.h
 		exception_types.h
 		log.h
 		measurements.h
