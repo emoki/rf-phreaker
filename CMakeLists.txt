@@ -33,6 +33,7 @@ elseif (UNIX)
 
 endif ()
 
+add_definitions (-std=c++11)
 
 # Include directories that are common to most, if not all, projects.
 include_directories (${Boost_INCLUDE_DIRS})
