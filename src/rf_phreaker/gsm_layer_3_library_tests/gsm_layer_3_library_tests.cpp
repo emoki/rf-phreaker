@@ -16,7 +16,7 @@
 #include "rf_phreaker/gsm_layer_3_library_tests/test_cell_identity.h"
 #include "rf_phreaker/gsm_layer_3_library_tests/test_location_area_identification.h"
 
-int _tmain(int argc, _TCHAR* argv[])
+int main(int argc, char* argv[])
 {
 	try
 	{

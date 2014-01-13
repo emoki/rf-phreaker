@@ -13,7 +13,7 @@
 #include "rf_phreaker/layer_3_common/pdu_element_types.h"
 #include "rf_phreaker/layer_3_common/bcch_bch_message_aggregate.h"
 
-int _tmain(int argc, _TCHAR* argv[])
+int main(int argc, char* argv[])
 {
 
 	test_segmented_sib test_segments;

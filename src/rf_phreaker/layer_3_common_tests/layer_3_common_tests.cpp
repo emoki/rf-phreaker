@@ -4,7 +4,7 @@
 #include "stdafx.h"
 #include "rf_phreaker/layer_3_common_tests/test_uint16_string.h"
 
-int _tmain(int argc, _TCHAR* argv[])
+int main(int argc, char* argv[])
 {
 	test_uint16_string test;
 
