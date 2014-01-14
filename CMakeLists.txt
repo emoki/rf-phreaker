@@ -46,7 +46,7 @@ include_directories (${Boost_INCLUDE_DIRS})
 include_directories (${SRC_PLATFORM_SPECIFIC})
 include_directories ("${PROJECT_SOURCE_DIR}/src/")
 include_directories ("${PROJECT_SOURCE_DIR}/third_party/gmock/include")
-include_directories ("${PROJECT_SOURCE_DIR}/third_party/gmock/gtest/include")
+include_directories ("${PROJECT_SOURCE_DIR}/third_party/gtest/include")
 
 
 add_subdirectory (third_party/gmock)
