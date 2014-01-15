@@ -14,7 +14,7 @@ option(BUILD_SHARED_LIBS "Build shared libraries (DLLs)." OFF)
 option(
   gtest_force_shared_crt
   "Use shared (DLL) run-time lib even when Google Test is built as static lib."
-  OFF)
+  ON)
 
 option(gtest_build_tests "Build all of gtest's own tests." OFF)
 
@@ -49,7 +49,7 @@ endif()
 # Define helper functions and macros used by Google Test.
 include(cmake/internal_utils.cmake)
 
-#config_compiler_and_linker()  # Defined in internal_utils.cmake.
+config_compiler_and_linker()  # Defined in internal_utils.cmake.
 
 # Where Google Test's .h files can be found.
 include_directories(
