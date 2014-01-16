@@ -40,35 +40,3 @@ void gsm_layer_3_decoder::update_message_decode_list(layer_3_information::bcch_m
 
 
 
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-// This is an example of an exported variable
-GSM_LAYER_3_DECODER_API int ngsm_layer_3_decoder=0;
-
-// This is an example of an exported function.
-GSM_LAYER_3_DECODER_API int fngsm_layer_3_decoder(void)
-{
-	return 42;
-}
-

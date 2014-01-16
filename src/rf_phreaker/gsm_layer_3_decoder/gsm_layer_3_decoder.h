@@ -6,10 +6,35 @@
 // that uses this DLL. This way any other project whose source files include this file see 
 // GSM_LAYER_3_DECODER_API functions as being imported from a DLL, whereas this DLL sees symbols
 // defined with this macro as being exported.
-#ifdef GSM_LAYER_3_DECODER_EXPORTS
-#define GSM_LAYER_3_DECODER_API __declspec(dllexport)
+//#ifdef GSM_LAYER_3_DECODER_EXPORTS
+//#define GSM_LAYER_3_DECODER_API __declspec(dllexport)
+//#else
+//#define GSM_LAYER_3_DECODER_API __declspec(dllimport)
+//#endif
+
+#if defined _WIN32 || defined __CYGWIN__
+#ifdef BUILDING_DLL
+#ifdef __GNUC__
+#define DLL_PUBLIC __attribute__ ((dllexport))
 #else
-#define GSM_LAYER_3_DECODER_API __declspec(dllimport)
+#define DLL_PUBLIC __declspec(dllexport) // Note: actually gcc seems to also supports this syntax.
+#endif
+#else
+#ifdef __GNUC__
+#define DLL_PUBLIC __attribute__ ((dllimport))
+#else
+#define DLL_PUBLIC __declspec(dllimport) // Note: actually gcc seems to also supports this syntax.
+#endif
+#endif
+#define DLL_LOCAL
+#else
+#if __GNUC__ >= 4
+#define DLL_PUBLIC __attribute__ ((visibility ("default")))
+#define DLL_LOCAL  __attribute__ ((visibility ("hidden")))
+#else
+#define DLL_PUBLIC
+#define DLL_LOCAL
+#endif
 #endif
 
 
@@ -19,7 +44,7 @@
 
 class gsm_layer_3_container;
 
-class GSM_LAYER_3_DECODER_API gsm_layer_3_decoder 
+class DLL_PUBLIC gsm_layer_3_decoder
 {
 public:
 	gsm_layer_3_decoder();

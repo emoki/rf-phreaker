@@ -11,14 +11,17 @@ set (fir_filter_VERSION_TWEAK 0)
 
 # Set the source files.
 set (fir_filter_SRCS 
-		filter_specs.h
-		fir_filter.cpp
-		fir_filter.h
-		fir_filter_impl.cpp
-		fir_filter_impl.h
-		resampling_filter_impl.h
-		${SRC_PLATFORM_SPECIFIC}/stdafx.cpp)
+	filter_specs.h
+	fir_filter.cpp
+	fir_filter.h
+	fir_filter_impl.cpp
+	fir_filter_impl.h
+	resampling_filter_impl.h
+	${SRC_PLATFORM_SPECIFIC}/stdafx.cpp
+	${SRC_PLATFORM_SPECIFIC}/dllmain.cpp)
 
-add_library (fir_filter STATIC ${fir_filter_SRCS})
+add_definitions (/DBUILDING_DLL)
+		
+add_library (fir_filter SHARED ${fir_filter_SRCS})
 
-target_link_libraries (fir_filter common)
+target_link_libraries (fir_filter ipp_custom)

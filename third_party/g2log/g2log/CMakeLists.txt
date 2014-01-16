@@ -150,7 +150,7 @@ ENDIF ()
    # ===============================================================================================
    # 1. a simple test example 'g2log-FATAL-example'
    option (USE_SIMPLE_EXAMPLE
-          "Create  simple binaries that runs a few LOG calls. Will exit with a fatal operation" ON)
+          "Create  simple binaries that runs a few LOG calls. Will exit with a fatal operation" OFF)
 
 
    # 2. performance test (average + worst case) for KjellKod's g2log

@@ -1,9 +1,28 @@
 #pragma once
 
-#ifdef FIR_FILTER_EXPORTS
-#define FIR_FILTER_API __declspec(dllexport)
+#if defined _WIN32 || defined __CYGWIN__
+#ifdef BUILDING_DLL
+#ifdef __GNUC__
+#define DLL_PUBLIC __attribute__ ((dllexport))
 #else
-#define FIR_FILTER_API __declspec(dllimport)
+#define DLL_PUBLIC __declspec(dllexport) // Note: actually gcc seems to also supports this syntax.
+#endif
+#else
+#ifdef __GNUC__
+#define DLL_PUBLIC __attribute__ ((dllimport))
+#else
+#define DLL_PUBLIC __declspec(dllimport) // Note: actually gcc seems to also supports this syntax.
+#endif
+#endif
+#define DLL_LOCAL
+#else
+#if __GNUC__ >= 4
+#define DLL_PUBLIC __attribute__ ((visibility ("default")))
+#define DLL_LOCAL  __attribute__ ((visibility ("hidden")))
+#else
+#define DLL_PUBLIC
+#define DLL_LOCAL
+#endif
 #endif
 
 #include "rf_phreaker/ipp_custom/ipp.h"
@@ -13,7 +32,8 @@ namespace rf_phreaker {
 
 class fir_filter_impl;
 
-class FIR_FILTER_API fir_filter {
+class DLL_PUBLIC fir_filter
+{
 public:
 	fir_filter();
 
@@ -54,7 +74,7 @@ private:
 };
 
 
-class FIR_FILTER_API resampling_filter : public fir_filter
+class DLL_PUBLIC resampling_filter : public fir_filter
 {
 public:
 	resampling_filter(int up_factor, int down_factor, const Ipp32fc *filter_coefficients, unsigned int filter_length);
