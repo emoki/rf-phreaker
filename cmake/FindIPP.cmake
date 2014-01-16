@@ -41,7 +41,7 @@ else()
     endif()
 endif()
 
-if(IPP_STATIC)
+if(IPP_STATIC AND WIN32)
     set(IPP_LIBNAME_SUFFIX mt)
 else()
     set(IPP_LIBNAME_SUFFIX "")

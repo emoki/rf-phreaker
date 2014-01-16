@@ -2,4 +2,4 @@
 #include "ipp.h"
 
 auto status = ippInit();
-status = ippSetFlushToZero(1, NULL);
+auto status1 = ippSetFlushToZero(1, 0);

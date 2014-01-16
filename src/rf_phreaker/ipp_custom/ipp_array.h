@@ -101,9 +101,9 @@ template<typename DataType> ipp_array<DataType>::ipp_array(const DataType *data,
 }
 
 template<typename DataType> ipp_array<DataType>::ipp_array(const ipp_array& other)
-	: shallow_copy_(/*true*/other.shallow_copy_)
+	: length_(0)
 	, array_(0)
-	, length_(0)
+	, shallow_copy_(/*true*/other.shallow_copy_)
 {
 	if(other.shallow_copy_)
 	{
@@ -118,9 +118,9 @@ template<typename DataType> ipp_array<DataType>::ipp_array(const ipp_array& othe
 }
 
 template<typename DataType> ipp_array<DataType>::ipp_array(ipp_array&& other)
-	: shallow_copy_(false)
+	: length_(0)
 	, array_(0)
-	, length_(0)
+	, shallow_copy_(false)
 {
 	swap(other);
 }
