@@ -1,6 +1,6 @@
 #pragma once
 
-#include <rf_phreaker/ipp_custom/ipp.h>
+#include "ipp.h"
 #include "rf_phreaker/ipp_custom/ipp_helper.h"
 
 #include <stdint.h>
@@ -60,6 +60,8 @@ public:
 
 	DataType& operator [](int position) { return array_[position]; }
 
+	const DataType& operator [](int position) const { return array_[position]; }
+
 	typedef DataType data_type_;
 
 	void output_text(const std::string &filename = "ipp_array.txt") const;
@@ -73,9 +75,9 @@ private:
 
 	void deallocate();
 
-	DataType *array_;
-
 	int length_;
+
+	DataType *array_;
 
 	bool shallow_copy_;
 };

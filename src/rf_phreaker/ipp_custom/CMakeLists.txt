@@ -22,4 +22,4 @@ add_definitions (/DBUILDING_DLL)
 
 add_library (ipp_custom SHARED ${ipp_custom_SRCS})
 
-target_link_libraries (ipp_custom ${IPP_LIBRARIES})
+target_link_libraries (ipp_custom LINK_PRIVATE ${IPP_LIBRARIES})

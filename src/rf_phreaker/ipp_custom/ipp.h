@@ -13,7 +13,9 @@
 #if !defined( __IPP_H__ )  || defined( _OWN_BLDPCS )
 #define __IPP_H__
 
+#if WIN32
 #pragma warning( disable : 4996)
+#endif
 
 #include "ippversion.h"
 

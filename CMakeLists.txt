@@ -16,7 +16,8 @@ set (CMAKE_RUNTIME_OUTPUT_DIRECTORY "${RF_PHREAKER_ROOT_PATH}/output")
 
 
 # Find IPP.
-find_package(IPP REQUIRED)
+set (IPP_STATIC true)
+find_package (IPP REQUIRED)
 
 
 # Find boost.
@@ -37,6 +38,7 @@ if (MSVC)
 		#          add_definition(-D_VARIADIC_MAX=10)
 		#          https://github.com/anhstudios/swganh/pull/186/files
 		add_definitions (/D_VARIADIC_MAX=10)
+		add_definitions (/wd4996)
 	endif()
 endif()
 
@@ -48,6 +50,7 @@ if (CMAKE_COMPILER_IS_GNUCXX)
     add_definitions(-Wall)
     add_definitions(-Wextra)
     add_definitions(-Wno-unused-parameter)
+	add_definitions(-Wno-deprecated-declarations)
 endif ()
 
 
@@ -57,14 +60,16 @@ include_directories (${SRC_PLATFORM_SPECIFIC})
 include_directories ("${PROJECT_SOURCE_DIR}/src/")
 include_directories ("${PROJECT_SOURCE_DIR}/third_party/gmock/include")
 include_directories ("${PROJECT_SOURCE_DIR}/third_party/gtest/include")
-include_directories (${IPP_INCLUDE_DIR})
+include_directories (${IPP_INCLUDE_DIRS})
 
 
-#add_subdirectory (third_party/gmock)
-#add_subdirectory (third_party/g2log/g2log)
+add_subdirectory (third_party/gmock)
+#add_subdirectory (third_party/gtest) #gtest is automatically added by gmock
+add_subdirectory (third_party/g2log/g2log)
 #add_subdirectory (src/rf_phreaker/common)
 #add_subdirectory (src/rf_phreaker/common_tests)
 add_subdirectory (src/rf_phreaker/fir_filter)
+add_subdirectory (src/rf_phreaker/fir_filter_tests)
 #add_subdirectory (src/rf_phreaker/gsm_layer_3_decoder)
 #add_subdirectory (src/rf_phreaker/gsm_layer_3_decoder_tests)
 #add_subdirectory (src/rf_phreaker/gsm_layer_3_library)

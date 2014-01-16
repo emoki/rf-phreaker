@@ -12,7 +12,13 @@ class filter_specs
 public:
 	filter_specs(void) : up_factor_(0), down_factor_(0) {}
 
-	filter_specs(const char *filename) {
+	filter_specs(int up_factor, int down_factor, const ArrayType &taps)
+		: up_factor_(up_factor)
+		, down_factor_(down_factor)
+		, taps_(taps)
+	{}
+
+	filter_specs(const std::string &filename) {
 		std::ifstream file(filename);
 		
 		if(!file)
@@ -31,11 +37,11 @@ public:
 
 	void set_taps(ArrayType &data) { taps_ = data; }
 
-	template<typename ArrayType>
-	friend std::ostream& operator<<(std::ostream &out, const filter_specs<typename ArrayType> &specs);
+	template<typename ArrayType1>
+	friend std::ostream& operator<<(std::ostream &out, const filter_specs<ArrayType1> &specs);
 
-	template<typename ArrayType>
-	friend std::istream& operator>>(std::istream  &in , filter_specs<typename ArrayType> &specs);
+	template<typename ArrayType1>
+	friend std::istream& operator>>(std::istream  &in , filter_specs<ArrayType1> &specs);
 
 private:
 	int up_factor_;

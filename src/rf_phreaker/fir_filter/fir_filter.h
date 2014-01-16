@@ -25,7 +25,7 @@
 #endif
 #endif
 
-#include "rf_phreaker/ipp_custom/ipp.h"
+#include "ipp.h"
 
 
 namespace rf_phreaker {
