@@ -15,16 +15,16 @@
 include(FindPackageHandleStandardArgs)
 
 if (MSVC)
-	set (IPP_ROOT "${RF_PHREAKER_ROOT_PATH}/third_party/ipp_win/ipp" CACHE PATH "Folder contains IPP")
+	set (IPP_ROOT "${RF_PHREAKER_ROOT_PATH}/third_party/ipp_win" CACHE PATH "Folder contains IPP")
 else()
-	set (IPP_ROOT "${RF_PHREAKER_ROOT_PATH}/third_party/ipp_linux/ipp" CACHE PATH "Folder contains IPP")
+	set (IPP_ROOT "${RF_PHREAKER_ROOT_PATH}/third_party/ipp_linux" CACHE PATH "Folder contains IPP")
 endif()
 
 set (USE_IPP_64_ARCH_LIBS OFF CACHE BOOL "Should we link to IPP 64 bit?")
 
 # Find header file dir
 find_path(IPP_INCLUDE_DIR ipp.h
-    PATHS ${IPP_ROOT}/include)
+    PATHS ${IPP_ROOT}/ipp/include)
 
 # Find libraries
 
@@ -48,9 +48,11 @@ else()
 endif()
 
 if(USE_IPP_64_ARCH_LIBS)
-	set(IPP_LIB_ARCH_PATH "/lib/intel64/")
+	set(IPP_LIB_ARCH_PATH "/ipp/lib/intel64/")
+	set(IPP_COMPILER_ARCH_PATH "/compiler/lib/intel64/")
 else()
-	set(IPP_LIB_ARCH_PATH "/lib/ia32/")
+	set(IPP_LIB_ARCH_PATH "/ipp/lib/ia32/")
+	set(IPP_COMPILER_ARCH_PATH "/compiler/lib/ia32/")
 endif()
 
 macro(find_ipp_library IPP_COMPONENT)
@@ -63,7 +65,25 @@ macro(find_ipp_library IPP_COMPONENT)
                PATHS "${IPP_ROOT}${IPP_LIB_ARCH_PATH}")
 endmacro()
 
+macro(find_ipp_compiler_lib IPP_COMPONENT)
+  string(TOLOWER ${IPP_COMPONENT} IPP_COMPONENT_LOWER)
 
+  # Unset the libraries so that we can reconfigure using different arch if needed.
+  unset (IPP_COMPILER_LIB_${IPP_COMPONENT} CACHE)
+  
+  find_library(IPP_COMPILER_LIB_${IPP_COMPONENT} ${IPP_COMPONENT_LOWER}${IPP_LIBNAME_SUFFIX}
+               PATHS "${IPP_ROOT}${IPP_COMPILER_ARCH_PATH}")
+endmacro()
+
+macro(find_ipp_specific_compiler_lib IPP_COMPONENT)
+  string(TOLOWER ${IPP_COMPONENT} IPP_COMPONENT_LOWER)
+
+  # Unset the libraries so that we can reconfigure using different arch if needed.
+  unset (IPP_COMPILER_LIB_${IPP_COMPONENT} CACHE)
+  
+  find_library(IPP_COMPILER_LIB_${IPP_COMPONENT} ${IPP_COMPONENT_LOWER}
+               PATHS "${IPP_ROOT}${IPP_COMPILER_ARCH_PATH}")
+endmacro()
 
 # IPP components
 # Core
@@ -103,6 +123,14 @@ find_ipp_library(VC)
 # Vector Math
 find_ipp_library(VM)
 
+
+find_ipp_compiler_lib(LIBM)
+find_ipp_compiler_lib(SVML_DISP)
+find_ipp_specific_compiler_lib(LIBIRC)
+find_ipp_specific_compiler_lib(LIBBFP754)
+find_ipp_specific_compiler_lib(LIBDECIMAL)
+
+
 set(IPP_LIBRARY
     ${IPP_LIB_CORE}
     ${IPP_LIB_AC}
@@ -121,7 +149,13 @@ set(IPP_LIBRARY
     ${IPP_LIB_SC}
     ${IPP_LIB_SR}
     ${IPP_LIB_VC}
-    ${IPP_LIB_VM})
+    ${IPP_LIB_VM}
+	
+	${IPP_COMPILER_LIB_LIBM}
+	${IPP_COMPILER_LIB_SVML_DISP}
+	${IPP_COMPILER_LIB_LIBIRC}
+	${IPP_COMPILER_LIB_LIBBFP754}
+	${IPP_COMPILER_LIB_LIBDECIMAL})
 
 set(CMAKE_FIND_LIBRARY_SUFFIXES ${_IPP_ORIG_CMAKE_FIND_LIBRARY_SUFFIXES})
 
