@@ -15,10 +15,12 @@
 include(FindPackageHandleStandardArgs)
 
 if (MSVC)
-	set(IPP_ROOT "${RF_PHREAKER_ROOT_PATH}/third_party/ipp_win/ipp" CACHE PATH "Folder contains IPP")
+	set (IPP_ROOT "${RF_PHREAKER_ROOT_PATH}/third_party/ipp_win/ipp" CACHE PATH "Folder contains IPP")
 else()
-	set(IPP_ROOT "${RF_PHREAKER_ROOT_PATH}/third_party/ipp_linux/ipp" CACHE PATH "Folder contains IPP")
+	set (IPP_ROOT "${RF_PHREAKER_ROOT_PATH}/third_party/ipp_linux/ipp" CACHE PATH "Folder contains IPP")
 endif()
+
+set (USE_IPP_64_ARCH_LIBS OFF CACHE BOOL "Should we link to IPP 64 bit?")
 
 # Find header file dir
 find_path(IPP_INCLUDE_DIR ipp.h
@@ -45,12 +47,23 @@ else()
     set(IPP_LIBNAME_SUFFIX "")
 endif()
 
+if(USE_IPP_64_ARCH_LIBS)
+	set(IPP_LIB_ARCH_PATH "/lib/intel64/")
+else()
+	set(IPP_LIB_ARCH_PATH "/lib/ia32/")
+endif()
+
 macro(find_ipp_library IPP_COMPONENT)
   string(TOLOWER ${IPP_COMPONENT} IPP_COMPONENT_LOWER)
 
+  # Unset the libraries so that we can reconfigure using different arch if needed.
+  unset (IPP_LIB_${IPP_COMPONENT} CACHE)
+  
   find_library(IPP_LIB_${IPP_COMPONENT} ipp${IPP_COMPONENT_LOWER}${IPP_LIBNAME_SUFFIX}
-               PATHS ${IPP_ROOT}/lib/ia32/)
+               PATHS "${IPP_ROOT}${IPP_LIB_ARCH_PATH}")
 endmacro()
+
+
 
 # IPP components
 # Core
