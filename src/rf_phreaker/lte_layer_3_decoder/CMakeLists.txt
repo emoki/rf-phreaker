@@ -11,23 +11,31 @@ set (lte_layer_3_decoder_VERSION_TWEAK 0)
 
 # Set the source files.
 set (lte_layer_3_decoder_SRCS 
-		asn_type_discriptor.cpp
-		asn_type_descriptor.h
-		lte_bcch_dl_sch_message.cpp
-		lte_bcch_dl_sch_message.h
-		lte_layer_3_decoder.cpp
-		lte_layer_3_decoder.h
-		lte_sib_1_parser.cpp
-		lte_sib_1_parser.h
-		${RF_PHREAKER_ROOT_PATH}/src/rf_phreaker/layer_3_decoder_common/asn1_types.h
-		${RF_PHREAKER_ROOT_PATH}/src/rf_phreaker/layer_3_decoder_common/bit_stream_container.cpp
-		${RF_PHREAKER_ROOT_PATH}/src/rf_phreaker/layer_3_decoder_common/bit_stream_container.h
-		${SRC_PLATFORM_SPECIFIC}/stdafx.cpp
-		${SRC_PLATFORM_SPECIFIC}/dllmain.cpp)
+	asn_type_descriptor.h
+	asn_type_descriptor.cpp
+	lte_bcch_dl_sch_message.cpp
+	lte_bcch_dl_sch_message.h
+	lte_layer_3_decoder.cpp
+	lte_layer_3_decoder.h
+	lte_sib_1_parser.cpp
+	lte_sib_1_parser.h
+	${rf_phreaker_SOURCE_DIR}/src/rf_phreaker/layer_3_decoder_common/asn1_config.h
+	${rf_phreaker_SOURCE_DIR}/src/rf_phreaker/layer_3_decoder_common/asn1_types.h
+	${rf_phreaker_SOURCE_DIR}/src/rf_phreaker/layer_3_decoder_common/bit_stream_container.cpp
+	${rf_phreaker_SOURCE_DIR}/src/rf_phreaker/layer_3_decoder_common/bit_stream_container.h
+	${rf_phreaker_SOURCE_DIR}/src/rf_phreaker/layer_3_decoder_common/decode_support_functions.h
+	${rf_phreaker_SOURCE_DIR}/src/rf_phreaker/layer_3_decoder_common/pdu_element.cpp
+	${rf_phreaker_SOURCE_DIR}/src/rf_phreaker/layer_3_decoder_common/pdu_element.h
+	${rf_phreaker_SOURCE_DIR}/src/rf_phreaker/layer_3_decoder_common/per_decoder_container.cpp
+	${rf_phreaker_SOURCE_DIR}/src/rf_phreaker/layer_3_decoder_common/per_decoder_container.h
+	${rf_phreaker_SOURCE_DIR}/src/rf_phreaker/layer_3_decoder_common/per_decoder_interface.cpp
+	${rf_phreaker_SOURCE_DIR}/src/rf_phreaker/layer_3_decoder_common/per_decoder_interface.h
+	${SRC_PLATFORM_SPECIFIC}/stdafx.cpp
+	${SRC_PLATFORM_SPECIFIC}/dllmain.cpp)
 
 
-include_directories ("${RF_PHREAKER_ROOT_PATH}/src/rf_phreaker/lte_rrc_asn_library")
-include_directories ("${RF_PHREAKER_ROOT_PATH}/src/rf_phreaker/lte_layer_3_decoder")
+include_directories ("${rf_phreaker_SOURCE_DIR}/src/rf_phreaker/lte_rrc_asn_library")
+include_directories ("${rf_phreaker_SOURCE_DIR}/src/rf_phreaker/lte_layer_3_decoder")
 
 add_definitions (/DBUILDING_DLL)
 
@@ -35,4 +43,4 @@ add_library (lte_layer_3_decoder SHARED ${lte_layer_3_decoder_SRCS})
 
 target_link_libraries (lte_layer_3_decoder common)
 target_link_libraries (lte_layer_3_decoder layer_3_common)
-target_link_libraries (lte_layer_3_decoder lte_layer_3_library)
+target_link_libraries (lte_layer_3_decoder lte_rrc_asn_library)

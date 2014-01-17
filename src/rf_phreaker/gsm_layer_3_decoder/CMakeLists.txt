@@ -32,8 +32,8 @@ set (gsm_layer_3_decoder_SRCS
 
 add_definitions (/DBUILDING_DLL)
 
-
 add_library (gsm_layer_3_decoder SHARED ${gsm_layer_3_decoder_SRCS})
 
 target_link_libraries (gsm_layer_3_decoder common)
+target_link_libraries (gsm_layer_3_decoder layer_3_common)
 target_link_libraries (gsm_layer_3_decoder gsm_layer_3_library)

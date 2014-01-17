@@ -15,13 +15,13 @@ set (umts_layer_3_decoder_tests_SRCS
 	test_segmented_sib.cpp
 	test_segmented_sib.h
 	umts_layer_3_decoder_tests.cpp
-	${RF_PHREAKER_ROOT_PATH}/src/rf_phreaker/layer_3_decoder_common/asn1_types.h
-	${RF_PHREAKER_ROOT_PATH}/src/rf_phreaker/layer_3_decoder_common/bit_stream_container.cpp
-	${RF_PHREAKER_ROOT_PATH}/src/rf_phreaker/layer_3_decoder_common/bit_stream_container.h
+	${rf_phreaker_SOURCE_DIR}/src/rf_phreaker/layer_3_decoder_common/asn1_types.h
+	${rf_phreaker_SOURCE_DIR}/src/rf_phreaker/layer_3_decoder_common/bit_stream_container.cpp
+	${rf_phreaker_SOURCE_DIR}/src/rf_phreaker/layer_3_decoder_common/bit_stream_container.h
 	${SRC_PLATFORM_SPECIFIC}/stdafx.cpp)
 
-include_directories ("${RF_PHREAKER_ROOT_PATH}/src/rf_phreaker/umts_rrc_asn_library")
-include_directories ("${RF_PHREAKER_ROOT_PATH}/src/rf_phreaker/umts_layer_3_decoder")
+include_directories ("${rf_phreaker_SOURCE_DIR}/src/rf_phreaker/umts_rrc_asn_library")
+include_directories ("${rf_phreaker_SOURCE_DIR}/src/rf_phreaker/umts_layer_3_decoder")
 
 add_executable (umts_layer_3_decoder_tests ${umts_layer_3_decoder_tests_SRCS})
 

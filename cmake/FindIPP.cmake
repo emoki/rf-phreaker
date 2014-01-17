@@ -14,14 +14,6 @@
 
 include(FindPackageHandleStandardArgs)
 
-if (MSVC)
-	set (IPP_ROOT "${RF_PHREAKER_ROOT_PATH}/third_party/ipp_win" CACHE PATH "Folder contains IPP")
-else()
-	set (IPP_ROOT "${RF_PHREAKER_ROOT_PATH}/third_party/ipp_linux" CACHE PATH "Folder contains IPP")
-endif()
-
-set (USE_IPP_64_ARCH_LIBS OFF CACHE BOOL "Should we link to IPP 64 bit?")
-
 # Find header file dir
 find_path(IPP_INCLUDE_DIR ipp.h
     PATHS ${IPP_ROOT}/ipp/include)

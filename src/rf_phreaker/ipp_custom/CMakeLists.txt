@@ -20,7 +20,11 @@ set (ipp_custom_SRCS
 
 add_definitions (/DBUILDING_DLL)
 
-add_library (ipp_custom SHARED ${ipp_custom_SRCS})
+if (CMAKE_COMPILER_IS_GNUCXX)		
+	add_library (ipp_custom STATIC ${ipp_custom_SRCS})
+else ()
+	add_library (ipp_custom SHARED ${ipp_custom_SRCS})
+endif ()
 
 # On linux we cannot export functions therefore we set the target_link to public so  
 # every project that references ipp_custom will also reference the IPP libraries.

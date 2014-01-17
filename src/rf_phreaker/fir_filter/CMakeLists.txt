@@ -21,7 +21,11 @@ set (fir_filter_SRCS
 	${SRC_PLATFORM_SPECIFIC}/dllmain.cpp)
 
 add_definitions (/DBUILDING_DLL)
-		
-add_library (fir_filter SHARED ${fir_filter_SRCS})
+
+if (CMAKE_COMPILER_IS_GNUCXX)		
+	add_library (fir_filter STATIC ${fir_filter_SRCS})
+else ()
+	add_library (fir_filter SHARED ${fir_filter_SRCS})
+endif ()
 
 target_link_libraries (fir_filter ipp_custom)

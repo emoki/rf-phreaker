@@ -1,17 +1,5 @@
 #pragma once
 
-// The following ifdef block is the standard way of creating macros which make exporting 
-// from a DLL simpler. All files within this DLL are compiled with the GSM_LAYER_3_DECODER_EXPORTS
-// symbol defined on the command line. This symbol should not be defined on any project
-// that uses this DLL. This way any other project whose source files include this file see 
-// GSM_LAYER_3_DECODER_API functions as being imported from a DLL, whereas this DLL sees symbols
-// defined with this macro as being exported.
-//#ifdef GSM_LAYER_3_DECODER_EXPORTS
-//#define GSM_LAYER_3_DECODER_API __declspec(dllexport)
-//#else
-//#define GSM_LAYER_3_DECODER_API __declspec(dllimport)
-//#endif
-
 #if defined _WIN32 || defined __CYGWIN__
 #ifdef BUILDING_DLL
 #ifdef __GNUC__
@@ -59,20 +47,3 @@ private:
 	gsm_layer_3_container *gsm_layer_3_container_;
 };
 
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-extern GSM_LAYER_3_DECODER_API int ngsm_layer_3_decoder;
-
-GSM_LAYER_3_DECODER_API int fngsm_layer_3_decoder(void);

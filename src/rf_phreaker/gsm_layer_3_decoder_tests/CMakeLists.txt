@@ -15,7 +15,7 @@ set (gsm_layer_3_decoder_tests_SRCS
 
 add_executable (gsm_layer_3_decoder_tests ${gsm_layer_3_decoder_tests_SRCS})
 
-target_link_libraries (gsm_layer_3_decoder_tests commmon)
+target_link_libraries (gsm_layer_3_decoder_tests common)
 target_link_libraries (gsm_layer_3_decoder_tests gsm_layer_3_library)
 target_link_libraries (gsm_layer_3_decoder_tests gsm_layer_3_decoder)
 target_link_libraries (gsm_layer_3_decoder_tests gmock)
