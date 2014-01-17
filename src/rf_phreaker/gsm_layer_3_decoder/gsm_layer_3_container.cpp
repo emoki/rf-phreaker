@@ -1,4 +1,4 @@
-#include "StdAfx.h"
+#include "stdafx.h"
 #include "rf_phreaker/gsm_layer_3_decoder/gsm_layer_3_container.h"
 #include "rf_phreaker/gsm_layer_3_decoder/si_2_container.h"
 #include "rf_phreaker/gsm_layer_3_decoder/si_2bis_container.h"
