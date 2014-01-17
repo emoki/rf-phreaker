@@ -13,8 +13,7 @@ umts_sib_18_container::~umts_sib_18_container(void)
 {
 }
 
-void umts_sib_18_container::parse_data(umts_bcch_bch_message_aggregate &message)
+void umts_sib_18_container::parse_data(umts_bcch_bch_message_aggregate &/*message*/)
 {
-	SysInfoType18_t *data = (SysInfoType18_t*)decoded_structure();
-	int i = 0;
+    //SysInfoType18_t *data = (SysInfoType18_t*)decoded_structure();
 }

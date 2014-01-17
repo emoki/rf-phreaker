@@ -9,7 +9,7 @@ static int digit_placement[5] = { 1, 10, 100, 1000, 10000 };
 
 inline uint32_t create_num_from_bit_stream(const bit_stream_type &bit_stream)
 {
-	BOOST_VERIFY(bit_stream.size <= sizeof(uint32_t));
+    BOOST_VERIFY(bit_stream.size <= (int)sizeof(uint32_t));
 
 	uint8_t tmp[4];
 	memset(tmp, 0, sizeof(tmp));
@@ -32,7 +32,7 @@ inline layer_3_information::cid_type create_cid(const bit_stream_type &bit_strea
 
 inline uint32_t create_num_from_octet_stream(const octet_stream_type &oct_stream)
 {
-	BOOST_VERIFY(oct_stream.size <= sizeof(uint32_t));
+    BOOST_VERIFY(oct_stream.size <= (int)sizeof(uint32_t));
 
 	uint8_t tmp[4];
 	memset(tmp, 0, sizeof(tmp));

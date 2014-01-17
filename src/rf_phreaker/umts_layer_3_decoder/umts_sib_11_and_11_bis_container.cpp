@@ -115,7 +115,8 @@ void umts_sib_11_and_11_bis_container::parse_sib_11_bis()
 				break;
 
 
-			default:;
+            case MeasurementControlSysInfoExtension__use_of_HCS_PR_NOTHING:
+            default:;
 			}
  		break;
 
@@ -156,7 +157,9 @@ void umts_sib_11_and_11_bis_container::parse_sib_11_bis()
 			case MeasurementControlSysInfoExtension__use_of_HCS_PR_NOTHING:
 			default:;
 			}
-		}
+        case MeasurementControlSysInfoExtension__use_of_HCS_PR_NOTHING:
+        default:;
+        }
 	}
 }
 

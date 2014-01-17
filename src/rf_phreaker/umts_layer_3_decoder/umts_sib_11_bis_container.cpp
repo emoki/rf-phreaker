@@ -14,7 +14,7 @@ umts_sib_11_bis_container::~umts_sib_11_bis_container(void)
 {
 }
 
-void umts_sib_11_bis_container::parse_data(umts_bcch_bch_message_aggregate &message)
+void umts_sib_11_bis_container::parse_data(umts_bcch_bch_message_aggregate &/*message*/)
 {
-	SysInfoType11bis_t *data = (SysInfoType11bis_t*)decoded_structure();
+    //SysInfoType11bis_t *data = (SysInfoType11bis_t*)decoded_structure();
 }

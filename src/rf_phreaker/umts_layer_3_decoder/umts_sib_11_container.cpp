@@ -14,11 +14,7 @@ umts_sib_11_container::~umts_sib_11_container(void)
 {
 }
 
-void umts_sib_11_container::parse_data(umts_bcch_bch_message_aggregate &message)
+void umts_sib_11_container::parse_data(umts_bcch_bch_message_aggregate &/*message*/)
 {
-	SysInfoType11_t *data = (SysInfoType11_t*)decoded_structure();
-	RAT_Type_t *dummy = 0;
-	for(int i = 0; i < data->fach_MeasurementOccasionInfo->inter_RAT_meas_ind->list.count; i++)
-		dummy = data->fach_MeasurementOccasionInfo->inter_RAT_meas_ind->list.array[i];
-
+//	SysInfoType11_t *data = (SysInfoType11_t*)decoded_structure();
 }

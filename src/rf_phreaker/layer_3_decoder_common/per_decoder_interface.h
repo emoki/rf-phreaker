@@ -29,9 +29,9 @@ protected:
 	uint32_t bits_consumed_;
 	
 private:
-	void *decoded_structure_;
+    layer_3_information::pdu_element_type pdu_element_type_;
 
-	layer_3_information::pdu_element_type pdu_element_type_;
+    void *decoded_structure_;
 
 	decode_status current_decode_status_;
 };

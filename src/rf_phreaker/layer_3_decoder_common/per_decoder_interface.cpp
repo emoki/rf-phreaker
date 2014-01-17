@@ -3,10 +3,10 @@
 using namespace layer_3_information;
 
 per_decoder_interface::per_decoder_interface(pdu_element_type type)
-	 : pdu_element_type_(type)
+     : bits_consumed_(0)
+     , pdu_element_type_(type)
 	 , decoded_structure_(0)
 	 , current_decode_status_(decode_failed)
-	 , bits_consumed_(0)
 {
 }
 

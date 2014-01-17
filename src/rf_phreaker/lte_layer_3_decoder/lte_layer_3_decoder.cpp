@@ -35,7 +35,7 @@ int lte_asn1_decoder::decode_bcch_bch_message(const uint8_t* bit_stream, uint32_
 	}
 	catch(const std::exception &err)
 	{
-		printf(err.what());
+        std::cout << err.what();
 		status = -1;
 	}
 	return status;

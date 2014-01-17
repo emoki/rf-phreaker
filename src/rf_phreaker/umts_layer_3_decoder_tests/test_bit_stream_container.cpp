@@ -19,7 +19,6 @@ void test_bit_stream_container::run_automated_tests()
 void test_bit_stream_container::general_test()
 {
 	const int size = 4;
-	char hex_str[] = "11 22 33 ff";
 	std::vector<uint8_t> bytes;
 	bytes.push_back(0x11);
 	bytes.push_back(0x22);
