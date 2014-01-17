@@ -51,11 +51,12 @@ endif()
 # GCC configurations.
 if (CMAKE_COMPILER_IS_GNUCXX)
 	set (SRC_PLATFORM_SPECIFIC "${PROJECT_SOURCE_DIR}/src/rf_phreaker/arch/linux")
-	add_definitions (-std=c++11)
+	add_definitions (-std=c++11) # Enable C++11!
     add_definitions(-Wall)
     add_definitions(-Wextra)
     add_definitions(-Wno-unused-parameter)
-	add_definitions(-Wno-deprecated-declarations)
+	add_definitions(-Wno-deprecated-declarations) # Use until we change IPP deprecated functions.
+	add_definitions(-fPIC) # Use because we want the libraries to be location independent.
 endif ()
 
 

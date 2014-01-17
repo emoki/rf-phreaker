@@ -14,5 +14,9 @@ file (GLOB glob_SRCS *.c *.h)
 set (lte_rrc_asn_library_SRCS
 	${glob_SRCS})
 
+if (CMAKE_COMPILER_IS_GNUCXX)
+	remove_definitions (-std=c++11) 
+endif ()
+
 add_library (lte_rrc_asn_library STATIC ${lte_rrc_asn_library_SRCS})
 
