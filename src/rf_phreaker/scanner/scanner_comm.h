@@ -13,7 +13,7 @@ namespace rf_phreaker { namespace scanner {
 class scanner_comm;
 typedef std::unique_ptr<scanner_comm> scanner_comm_ptr;
 
-class scanner_comm abstract
+class scanner_comm 
 {
 public:
 	virtual ~scanner_comm() {};

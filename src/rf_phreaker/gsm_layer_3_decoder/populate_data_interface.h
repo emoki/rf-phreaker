@@ -4,7 +4,7 @@
 #include "rf_phreaker/layer_3_common/gsm_layer_3_message_aggregate.h"
 
 
-class populate_data_interface abstract
+class populate_data_interface 
 {
 public:
 	virtual ~populate_data_interface() {};

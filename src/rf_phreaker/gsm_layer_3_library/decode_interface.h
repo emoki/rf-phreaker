@@ -2,7 +2,7 @@
 
 #include "rf_phreaker/gsm_layer_3_library/gsm_bit_stream.h"
 
-class decode_interface abstract
+class decode_interface 
 {
 public:
 	virtual ~decode_interface() {};

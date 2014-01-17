@@ -4,7 +4,7 @@
 #include "rf_phreaker/layer_3_common/umts_bcch_bch_message_aggregate.h"
 #include "rf_phreaker/layer_3_common/lte_rrc_message_aggregate.h"
 
-class per_decoder_interface abstract
+class per_decoder_interface 
 {
 public:
 	per_decoder_interface(layer_3_information::pdu_element_type type);

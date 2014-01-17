@@ -8,7 +8,7 @@
 #include "rf_phreaker/layer_3_decoder_common/per_decoder_interface.h"
 #include "rf_phreaker/layer_3_decoder_common/asn1_types.h"
 
-class umts_system_information_container abstract : public per_decoder_interface
+class umts_system_information_container  : public per_decoder_interface
 {
 public:
 	umts_system_information_container(sib_type sib, layer_3_information::pdu_element_type pdu_element);
