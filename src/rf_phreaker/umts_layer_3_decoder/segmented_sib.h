@@ -3,7 +3,7 @@
 #include <stdint.h>
 #include <vector>
 #include <boost/assert.hpp>
-#include <math.h>
+#include <cmath>
 #include "rf_phreaker/layer_3_decoder_common/asn1_types.h"
 #include "rf_phreaker/layer_3_decoder_common/bit_stream_container.h"
 #include "rf_phreaker/layer_3_decoder_common/asn1_config.h"

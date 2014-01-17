@@ -56,7 +56,8 @@ public:
 private:
 	std::string create_path_and_filename(const std::string &filename)
 	{
-		char module_filename_char[MAX_PATH] = "";
+#ifdef WIN32
+        char module_filename_char[MAX_PATH] = "";
 
 		DWORD success = ::GetModuleFileName(0, module_filename_char, sizeof(module_filename_char) - 1);
 
@@ -67,7 +68,10 @@ private:
 		std::string path_and_filename = module_filename.substr(0, module_filename.rfind("\\"));
 
 		return path_and_filename.append("\\").append(filename);
-	}
+#else
+        return std::string();
+#endif
+    }
 
 	bool output_segments_;
 
