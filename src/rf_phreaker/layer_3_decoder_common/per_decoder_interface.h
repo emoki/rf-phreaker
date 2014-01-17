@@ -8,7 +8,7 @@ class per_decoder_interface
 {
 public:
 	per_decoder_interface(layer_3_information::pdu_element_type type);
-	~per_decoder_interface(void);
+    virtual ~per_decoder_interface(void);
 
 	template<typename Message> void populate_data(const bit_stream_container &bit_stream, Message &message);
 

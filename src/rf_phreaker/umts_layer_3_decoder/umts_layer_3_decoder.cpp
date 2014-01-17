@@ -34,7 +34,7 @@ int umts_asn1_decoder::specify_sibs_for_decoding(const pdu_element_type *element
 	}
 	catch(const std::exception &err)
 	{
-		printf(err.what());
+        std::cout << err.what();
 		status = -1;
 	}
 
@@ -52,7 +52,7 @@ int umts_asn1_decoder::decode_bcch_bch_message(const uint8_t* bit_stream, uint32
 	}
 	catch(const std::exception &err)
 	{
-		printf(err.what());
+        std::cout << err.what();
 		status = -1;
 	}
 	return status;
