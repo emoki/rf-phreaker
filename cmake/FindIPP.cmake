@@ -65,24 +65,13 @@ macro(find_ipp_library IPP_COMPONENT)
                PATHS "${IPP_ROOT}${IPP_LIB_ARCH_PATH}")
 endmacro()
 
-macro(find_ipp_compiler_lib IPP_COMPONENT)
-  string(TOLOWER ${IPP_COMPONENT} IPP_COMPONENT_LOWER)
-
-  # Unset the libraries so that we can reconfigure using different arch if needed.
-  unset (IPP_COMPILER_LIB_${IPP_COMPONENT} CACHE)
-  
-  find_library(IPP_COMPILER_LIB_${IPP_COMPONENT} ${IPP_COMPONENT_LOWER}${IPP_LIBNAME_SUFFIX}
-               PATHS "${IPP_ROOT}${IPP_COMPILER_ARCH_PATH}")
-endmacro()
-
 macro(find_ipp_specific_compiler_lib IPP_COMPONENT)
-  string(TOLOWER ${IPP_COMPONENT} IPP_COMPONENT_LOWER)
+	string(TOLOWER ${IPP_COMPONENT} IPP_COMPONENT_LOWER)
 
-  # Unset the libraries so that we can reconfigure using different arch if needed.
-  unset (IPP_COMPILER_LIB_${IPP_COMPONENT} CACHE)
-  
-  find_library(IPP_COMPILER_LIB_${IPP_COMPONENT} ${IPP_COMPONENT_LOWER}
-               PATHS "${IPP_ROOT}${IPP_COMPILER_ARCH_PATH}")
+	# Unset the libraries so that we can reconfigure using different arch if needed.
+	unset (IPP_COMPILER_${IPP_COMPONENT} CACHE)
+	find_library(IPP_COMPILER_${IPP_COMPONENT} ${IPP_COMPONENT_LOWER}${CMAKE_FIND_LIBRARY_SUFFIXES}
+				PATHS "${IPP_ROOT}${IPP_COMPILER_ARCH_PATH}")
 endmacro()
 
 # IPP components
@@ -124,38 +113,54 @@ find_ipp_library(VC)
 find_ipp_library(VM)
 
 
-find_ipp_compiler_lib(LIBM)
-find_ipp_compiler_lib(SVML_DISP)
-find_ipp_specific_compiler_lib(LIBIRC)
-find_ipp_specific_compiler_lib(LIBBFP754)
-find_ipp_specific_compiler_lib(LIBDECIMAL)
+# Not currently used.
+if(0)
+	find_ipp_specific_compiler_lib(LIBBFP754)
+	find_ipp_specific_compiler_lib(LIBDECIMAL)
+	find_ipp_specific_compiler_lib(LIBIMF)
+	find_ipp_specific_compiler_lib(LIBIOMP5)
+	find_ipp_specific_compiler_lib(LIBIOMPSTUBS5)
+	find_ipp_specific_compiler_lib(LIBIRC)	
+	find_ipp_specific_compiler_lib(LIBIRNG)
+	find_ipp_specific_compiler_lib(LIBMATMUL)
+	find_ipp_specific_compiler_lib(LIBPDBX)
+	find_ipp_specific_compiler_lib(LIBPDBXINST)
+	find_ipp_specific_compiler_lib(LIBSVML)
+
+	set(IPP_LIBRARY ${IPP_LIBRARY}
+		${IPP_COMPILER_LIBBFP754}
+		${IPP_COMPILER_LIBDECIMAL}
+		${IPP_COMPILER_LIBIMF}
+		${IPP_COMPILER_LIBIOMP5}
+		${IPP_COMPILER_LIBIOMPSTUBS5}
+		${IPP_COMPILER_LIBIRC}
+		${IPP_COMPILER_LIBIRNG}
+		${IPP_COMPILER_LIBMATMUL}
+		${IPP_COMPILER_LIBPDBX}
+		${IPP_COMPILER_LIBPDBXINST}
+		${IPP_COMPILER_SVML})
+endif()
 
 
 set(IPP_LIBRARY
-    ${IPP_LIB_CORE}
-    ${IPP_LIB_AC}
-    ${IPP_LIB_CC}
-    ${IPP_LIB_CH}
-    ${IPP_LIB_CP}
-    ${IPP_LIB_CV}
-    ${IPP_LIB_DC}
-    ${IPP_LIB_DI}
-    ${IPP_LIB_GEN}
-    ${IPP_LIB_I}
-    ${IPP_LIB_J}
-    ${IPP_LIB_R}
-    ${IPP_LIB_M}
+#    ${IPP_LIB_AC}
+#    ${IPP_LIB_CC}
+#    ${IPP_LIB_CH}
+#    ${IPP_LIB_CP}
+#    ${IPP_LIB_CV}
+#    ${IPP_LIB_DC}
+#    ${IPP_LIB_DI}
+#    ${IPP_LIB_GEN}
+#    ${IPP_LIB_I}
+#    ${IPP_LIB_J}
+#    ${IPP_LIB_R}
+#    ${IPP_LIB_M}
     ${IPP_LIB_S}
-    ${IPP_LIB_SC}
-    ${IPP_LIB_SR}
-    ${IPP_LIB_VC}
+#    ${IPP_LIB_SC}
+#    ${IPP_LIB_SR}
+#    ${IPP_LIB_VC}
     ${IPP_LIB_VM}
-	
-	${IPP_COMPILER_LIB_LIBM}
-	${IPP_COMPILER_LIB_SVML_DISP}
-	${IPP_COMPILER_LIB_LIBIRC}
-	${IPP_COMPILER_LIB_LIBBFP754}
-	${IPP_COMPILER_LIB_LIBDECIMAL})
+    ${IPP_LIB_CORE})
 
 set(CMAKE_FIND_LIBRARY_SUFFIXES ${_IPP_ORIG_CMAKE_FIND_LIBRARY_SUFFIXES})
 
