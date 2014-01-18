@@ -20,6 +20,8 @@
 cmake_minimum_required (VERSION 2.8)
 ENABLE_LANGUAGE(CXX)
 
+include(ExternalProject)
+
 project (rf_phreaker)
 
 set (CMAKE_MODULE_PATH ${CMAKE_MODULE_PATH} "${PROJECT_SOURCE_DIR}/cmake")
@@ -29,7 +31,7 @@ set (CMAKE_RUNTIME_OUTPUT_DIRECTORY "${PROJECT_SOURCE_DIR}/output")
 if (MSVC)
 	set (TBB_DEFAULT_INSTALL_DIR "${rf_phreaker_SOURCE_DIR}/third_party/tbb-win" CACHE PATH "Folder contains TBB")
 else ()
-	set (TBB_DEFAULT_INSTALL_DIR "${rf_phreaker_SOURCE_DIR}/third_party/tbb_linux" CACHE PATH "Folder contains TBB")
+	set (TBB_DEFAULT_INSTALL_DIR "${rf_phreaker_SOURCE_DIR}/third_party/tbb-linux" CACHE PATH "Folder contains TBB")
 endif ()
 find_package(TBB REQUIRED)
 
@@ -55,7 +57,7 @@ find_package (Boost 1.54.0 COMPONENTS thread date_time REQUIRED)
 # Create libusbx if not windows.
 if (CMAKE_COMPILER_IS_GNUCXX)
 	externalproject_add(libusbx
-		URL ""
+		SOURCE_DIR ${rf_phreaker_SOURCE_DIR}/third_party/libusbx
 		UPDATE_COMMAND ""
 		CONFIGURE_COMMAND "configure"
 		BUILD_COMMAND make)
