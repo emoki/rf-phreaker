@@ -1,7 +1,19 @@
 ########################################################################################
 # Installation Notes
-# - Make sure to turn BUILD_SHARED_LIBS for google_mock and google_test. 
-# - Set path to boost using boost_USER_PATH.
+# Make sure to turn BUILD_SHARED_LIBS for google_mock and google_test. 
+# Specify the path to boost libraries using boost_USER_PATH. (apt-get or www.boost.org) 
+# QT 5.2 should be installed from www.qt-project.org.
+# IPP 7 or 8 does not have to be installed, however you need to set IPP_ROOT appropriately.  Look to gonzales/users/public/public documents/installations/intel ipp'. 
+# Windows specific -
+# IP
+# Ubuntu Environment Setup -----------
+# Use Nuand wiki on github for more bladeRF specific setup.
+# sudo apt-get install build-essential cmake libncurses5-dev libtecla1 libtecla1-dev pkg-config git wget libudev-dev
+# 
+# 
+# CMake Configuration
+# Be sure to check USE_IPP_64_ARCH_LIBS if building for 64 architecture. 
+
 
 
 # rf_phreaker project
@@ -72,6 +84,7 @@ include_directories (${IPP_INCLUDE_DIRS})
 add_subdirectory (third_party/gmock)
 #add_subdirectory (third_party/gtest) #gtest is automatically added by gmock
 add_subdirectory (third_party/g2log/g2log)
+add_subdirectory (third_party/libusbx)
 add_subdirectory (src/rf_phreaker/common)
 add_subdirectory (src/rf_phreaker/common_tests)
 add_subdirectory (src/rf_phreaker/fir_filter)
@@ -88,3 +101,7 @@ add_subdirectory (src/rf_phreaker/umts_layer_3_decoder_tests)
 add_subdirectory (src/rf_phreaker/lte_rrc_asn_library)
 add_subdirectory (src/rf_phreaker/lte_layer_3_decoder)
 add_subdirectory (src/rf_phreaker/lte_layer_3_decoder_tests)
+#add_subdirectory (src/rf_phreaker/scanner)
+#add_subdirectory (src/rf_phreaker/scanner_tests)
+#add_subdirectory (src/rf_phreaker/processing)
+#add_subdirectory (src/rf_phreaker/processing_tests)
