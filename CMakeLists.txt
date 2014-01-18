@@ -45,6 +45,15 @@ set (Boost_USE_MULTITHREADED      ON)
 set (Boost_USE_STATIC_RUNTIME    ON)
 find_package (Boost 1.54.0 COMPONENTS thread date_time REQUIRED)
 	
+# Create libusbx if not windows.
+if (CMAKE_COMPILER_IS_GNUCXX)
+	externalproject_add(libusbx
+		URL ""
+		UPDATE_COMMAND ""
+		CONFIGURE_COMMAND "configure"
+		BUILD_COMMAND make)
+endif ()
+
 
 # MSVC configurations.
 if (MSVC)
@@ -80,11 +89,10 @@ include_directories ("${PROJECT_SOURCE_DIR}/third_party/gmock/include")
 include_directories ("${PROJECT_SOURCE_DIR}/third_party/gtest/include")
 include_directories (${IPP_INCLUDE_DIRS})
 
-
 add_subdirectory (third_party/gmock)
 #add_subdirectory (third_party/gtest) #gtest is automatically added by gmock
 add_subdirectory (third_party/g2log/g2log)
-add_subdirectory (third_party/libusbx)
+add_subdirectory (third_party/bladerf/host)
 add_subdirectory (src/rf_phreaker/common)
 add_subdirectory (src/rf_phreaker/common_tests)
 add_subdirectory (src/rf_phreaker/fir_filter)
@@ -101,7 +109,7 @@ add_subdirectory (src/rf_phreaker/umts_layer_3_decoder_tests)
 add_subdirectory (src/rf_phreaker/lte_rrc_asn_library)
 add_subdirectory (src/rf_phreaker/lte_layer_3_decoder)
 add_subdirectory (src/rf_phreaker/lte_layer_3_decoder_tests)
-#add_subdirectory (src/rf_phreaker/scanner)
+add_subdirectory (src/rf_phreaker/scanner)
 #add_subdirectory (src/rf_phreaker/scanner_tests)
 #add_subdirectory (src/rf_phreaker/processing)
 #add_subdirectory (src/rf_phreaker/processing_tests)

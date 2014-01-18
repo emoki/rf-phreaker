@@ -31,12 +31,12 @@ set (scanner_SRCS
 	scanner_blade_rf_impl.h
 	scanner_controller_interface.h
 	scanner_types.h
-	scanner_utilities.h
+	scanner_utility.h
 	time_samples_conversion.h
 	${SRC_PLATFORM_SPECIFIC}/stdafx.cpp)
 
 add_library (scanner STATIC ${scanner_SRCS})
 
 target_link_libraries (scanner common)
-#target_link_libraries (scanner bladeRF)
-#target_link_libraries (scanner ipp_custom)
+target_link_libraries (scanner bladeRF)
+target_link_libraries (scanner ipp_custom)

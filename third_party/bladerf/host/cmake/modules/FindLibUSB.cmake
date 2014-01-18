@@ -35,7 +35,7 @@ include(CheckIncludeFile)
 #
 # See http://www.libusb.org/wiki/windows_backend#LatestBinarySnapshots
 set(LIBUSB_PATH
-    "${CHECKOUT_PATH} /third_party/libusbx-1.0.17-win"
+    "${rf_phreaker_SOURCE_DIR}/third_party/libusbx/libusbx_win_bin"
     CACHE
     PATH
     "Path to libusb files. (This is generally only needed for Windows users who downloaded binary distributions.)"
@@ -104,6 +104,7 @@ else(PKGCONFIG_LIBUSB_FOUND)
         PATH_SUFFIXES
         ${LIBUSB_LIBRARY_PATH_SUFFIX}
        )
+
     mark_as_advanced(usb_LIBRARY)
     if(usb_LIBRARY)
         set(LIBUSB_LIBRARIES ${usb_LIBRARY})
