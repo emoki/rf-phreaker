@@ -25,6 +25,13 @@ project (rf_phreaker)
 set (CMAKE_MODULE_PATH ${CMAKE_MODULE_PATH} "${PROJECT_SOURCE_DIR}/cmake")
 set (CMAKE_RUNTIME_OUTPUT_DIRECTORY "${PROJECT_SOURCE_DIR}/output")
 
+# Find TBB.
+if (MSVC)
+	set (TBB_DEFAULT_INSTALL_DIR "${rf_phreaker_SOURCE_DIR}/third_party/tbb-win" CACHE PATH "Folder contains TBB")
+else ()
+	set (TBB_DEFAULT_INSTALL_DIR "${rf_phreaker_SOURCE_DIR}/third_party/tbb_linux" CACHE PATH "Folder contains TBB")
+endif ()
+find_package(TBB REQUIRED)
 
 # Find IPP.
 if (MSVC)
@@ -88,6 +95,7 @@ include_directories ("${PROJECT_SOURCE_DIR}/src/")
 include_directories ("${PROJECT_SOURCE_DIR}/third_party/gmock/include")
 include_directories ("${PROJECT_SOURCE_DIR}/third_party/gtest/include")
 include_directories (${IPP_INCLUDE_DIRS})
+include_directories (${TBB_INCLUDE_DIRS})
 
 add_subdirectory (third_party/gmock)
 #add_subdirectory (third_party/gtest) #gtest is automatically added by gmock
@@ -110,6 +118,6 @@ add_subdirectory (src/rf_phreaker/lte_rrc_asn_library)
 add_subdirectory (src/rf_phreaker/lte_layer_3_decoder)
 add_subdirectory (src/rf_phreaker/lte_layer_3_decoder_tests)
 add_subdirectory (src/rf_phreaker/scanner)
-#add_subdirectory (src/rf_phreaker/scanner_tests)
-#add_subdirectory (src/rf_phreaker/processing)
-#add_subdirectory (src/rf_phreaker/processing_tests)
+add_subdirectory (src/rf_phreaker/scanner_tests)
+add_subdirectory (src/rf_phreaker/processing)
+add_subdirectory (src/rf_phreaker/processing_tests)

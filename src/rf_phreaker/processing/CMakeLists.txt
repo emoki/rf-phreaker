@@ -22,7 +22,4 @@ set (processing_SRCS
 
 add_library (processing STATIC ${processing_SRCS})
 
-target_link_libraries (processing common)
-#target_link_libraries (processing bladeRF)
-#target_link_libraries (processing ipp_custom)
 target_link_libraries (processing scanner)

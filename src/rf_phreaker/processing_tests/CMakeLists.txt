@@ -17,8 +17,5 @@ set (processing_tests_SRCS
 
 add_executable (processing_tests ${processing_tests_SRCS})
 
-target_link_libraries (processing_tests common)
-target_link_libraries (processing_tests scanner)
-#target_link_libraries (processing bladeRF)
-#target_link_libraries (processing ipp_custom)
+target_link_libraries (processing_tests processing)
 target_link_libraries (processing_tests gmock)

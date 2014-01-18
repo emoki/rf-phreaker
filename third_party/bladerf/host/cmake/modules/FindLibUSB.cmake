@@ -138,7 +138,5 @@ if(LIBUSB_FOUND)
 
     # Provide a hook to check it hotplug support is provided (1.0.16)
     check_library_exists("${usb_LIBRARY}" libusb_hotplug_register_callback  "" LIBUSB_HAVE_HOTPLUG)
-
-	set(LIBUSB_HAVE_HOTPLUG true)
 	
 endif(LIBUSB_FOUND)

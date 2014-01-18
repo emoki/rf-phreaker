@@ -25,3 +25,4 @@ set (layer_3_common_SRCS
 	${SRC_PLATFORM_SPECIFIC}/stdafx.cpp)
 		
 add_library (layer_3_common STATIC ${layer_3_common_SRCS})
+target_link_libraries (layer_3_common debug TBB_DEBUG_LIBRARIES optimized TBB_LIBRARIES)

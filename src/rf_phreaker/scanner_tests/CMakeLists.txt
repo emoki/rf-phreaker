@@ -16,10 +16,10 @@ set (scanner_tests_SRCS
 	scanner_tests.cpp
 	${SRC_PLATFORM_SPECIFIC}/stdafx.cpp)
 
+include_directories(${libbladeRF_SOURCE_DIR}/include)	
+	
 add_executable (scanner_tests ${scanner_tests_SRCS})
 
-target_link_libraries (scanner_tests common)
+#target_link_libraries (scanner_tests common)
 target_link_libraries (scanner_tests scanner)
-#target_link_libraries (scanner bladeRF)
-#target_link_libraries (scanner ipp_custom)
 target_link_libraries (scanner_tests gmock)

@@ -35,8 +35,15 @@ set (scanner_SRCS
 	time_samples_conversion.h
 	${SRC_PLATFORM_SPECIFIC}/stdafx.cpp)
 
+include_directories(${libbladeRF_SOURCE_DIR}/include)	
+
+if (WIN32)
+include_directories(${bladeRF_SOURCE_DIR}/common/include/windows)	
+endif ()
+
 add_library (scanner STATIC ${scanner_SRCS})
 
 target_link_libraries (scanner common)
-target_link_libraries (scanner bladeRF)
+target_link_libraries (scanner libbladerf_shared)
 target_link_libraries (scanner ipp_custom)
+target_link_libraries (scanner optimized ${TBB_LIBRARY_RELEASE} debug ${TBB_LIBRARY_DEBUG})

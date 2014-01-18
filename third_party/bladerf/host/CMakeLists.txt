@@ -5,17 +5,10 @@ project(bladeRF C)
 # Project configuration
 ################################################################################
 
-# All build output lands in this directory:
-#set(CMAKE_RUNTIME_OUTPUT_DIRECTORY ${CMAKE_CURRENT_BINARY_DIR}/output)
-#set(CMAKE_LIBRARY_OUTPUT_DIRECTORY ${CMAKE_CURRENT_BINARY_DIR}/output)
-#set(CMAKE_ARCHIVE_OUTPUT_DIRECTORY ${CMAKE_CURRENT_BINARY_DIR}/output)
+# All build output lands in rf_phreaker:
 set(CMAKE_RUNTIME_OUTPUT_DIRECTORY ${CMAKE_RUNTIME_OUTPUT_DIRECTORY})
 set(CMAKE_LIBRARY_OUTPUT_DIRECTORY ${CMAKE_RUNTIME_OUTPUT_DIRECTORY})
 set(CMAKE_ARCHIVE_OUTPUT_DIRECTORY ${CMAKE_RUNTIME_OUTPUT_DIRECTORY})
-
-message("${CMAKE_RUNTIME_OUTPUT_DIRECTORY}")
-message("${CMAKE_LIBRARY_OUTPUT_DIRECTORY}")
-message("${CMAKE_ARCHIVE_OUTPUT_DIRECTORY}")
 
 if(NOT CMAKE_BUILD_TYPE)
     set(CMAKE_BUILD_TYPE "Release")
