@@ -5,7 +5,7 @@
 #include <memory>
 #include "tbb/flow_graph.h"
 
-#include "rf_phreaker/scanner/scanner_controller.h"
+#include "rf_phreaker/scanner/scanner_controller_interface.h"
 #include "rf_phreaker/processing/collection_manager.h"
 
 namespace rf_phreaker { namespace processing {
@@ -17,7 +17,7 @@ public:
 
 	~processing_graph(void);
 
-	void initialize(rf_phreaker::scanner::scanner_controller &sc);
+    void initialize(rf_phreaker::scanner::scanner_controller_interface *sc);
 
 	void start(const collection_parameters &cp);
 

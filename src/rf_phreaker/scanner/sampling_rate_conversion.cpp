@@ -1,5 +1,4 @@
 #include "rf_phreaker/scanner/sampling_rate_conversion.h"
-#include "rf_phreaker/scanner/packet_typedefs.h"
 
 using namespace rf_phreaker;
 using namespace rf_phreaker::scanner;

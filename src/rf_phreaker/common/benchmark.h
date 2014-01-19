@@ -22,7 +22,7 @@ public:
 
 	void open_benchmark(const std::string &filename, bool append)
 	{
-		file_.open(filename.c_str(), append ? std::ios_base::app : 0);
+        file_.open(filename.c_str(), append ? std::ios_base::app : std::ios_base::trunc);
 		if(!file_)
 			throw std::runtime_error("Unable to open benchmark file.");
 	}

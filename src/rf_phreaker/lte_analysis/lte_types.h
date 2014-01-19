@@ -1,6 +1,8 @@
 #ifndef __VARTYPEDEFS_H__
 #define __VARTYPEDEFS_H__
 
+#include <stdint.h>
+
 // Status flags
 #define GPSNOTLOCKED 0x01
 #define DEADRECKONINGPRESENT 0x02
@@ -15,99 +17,99 @@
 #define CID_NOT_DECODED NOT_DECODED_32
 #define SYSTEM_FRAME_NOT_DECODED NOT_DECODED_16
 
-typedef unsigned __int32 CID_TYPE;
+typedef uint32_t CID_TYPE;
 
-typedef unsigned __int16 SYSTEMFRAMENUMBERTYPE;
+typedef uint16_t SYSTEMFRAMENUMBERTYPE;
 
-typedef unsigned __int32 FREQHZTYPE;
-typedef unsigned __int8 ARFCNBANDTYPE;
-typedef unsigned __int16 ARFCNTYPE; 
+typedef uint32_t FREQHZTYPE;
+typedef uint8_t ARFCNBANDTYPE;
+typedef uint16_t ARFCNTYPE;
 
-typedef unsigned __int32 DASGROUPCODETYPE;
+typedef uint32_t DASGROUPCODETYPE;
 
-typedef unsigned __int16 EARFCNTYPE;
-typedef unsigned __int16 CELLIDTYPE;
-typedef unsigned __int16 PHYSICALCELLIDTYPE;
+typedef uint16_t EARFCNTYPE;
+typedef uint16_t CELLIDTYPE;
+typedef uint16_t PHYSICALCELLIDTYPE;
 typedef double CORRELATIONTYPE;
 typedef double FRAMEBOUNDRYTYPE;
-typedef unsigned __int8 PSCHIDTYPE;
-typedef unsigned __int8 SSCHIDTYPE;
+typedef uint8_t PSCHIDTYPE;
+typedef uint8_t SSCHIDTYPE;
 enum CYCLICPREFIX
 {
 	Normal = 1,
 	Extended = 2
 };
-typedef unsigned __int32 CARRIERBANDWIDTHTYPE;
-typedef unsigned __int16 DELAYSPREADTYPE;
-typedef unsigned __int16 SUBCARRIERSPACING;
+typedef uint32_t CARRIERBANDWIDTHTYPE;
+typedef uint16_t DELAYSPREADTYPE;
+typedef uint16_t SUBCARRIERSPACING;
 
 typedef float LATITUDETYPE;
 typedef float LONGITUDETYPE;
-typedef unsigned __int16 HWIDTYPE;
-typedef unsigned __int32 RECORDNUMTYPE;
-typedef unsigned __int16 UARFCNTYPE;
+typedef uint16_t HWIDTYPE;
+typedef uint32_t RECORDNUMTYPE;
+typedef uint16_t UARFCNTYPE;
 typedef float CARRIERFREQTYPE;
 typedef float CARRIERSLTYPE;
-typedef unsigned __int64 MICROFRAMESRXTYPE;
-typedef unsigned __int64 CHIPSRXTYPE;
+typedef uint64_t MICROFRAMESRXTYPE;
+typedef uint64_t CHIPSRXTYPE;
 typedef float PSCH_ECIOTYPE;
-typedef unsigned __int16 CPICHTYPE;
-typedef __int8 CPICH_RSCPTYPE;
+typedef uint16_t CPICHTYPE;
+typedef int8_t CPICH_RSCPTYPE;
 typedef float CPICH_ECIOTYPE;
 typedef bool STTDTYPE;
-typedef unsigned __int16 MCCTYPE;
-typedef unsigned __int16 MNCTYPE;
-typedef unsigned __int16 LACTYPE;
-typedef unsigned __int16 CELLIDTYPE;
-typedef unsigned __int32 LTE_CELLIDTYPE;
-typedef unsigned __int32 FLAGTYPE;
-typedef unsigned __int32 MCCSTRUCT;
-typedef unsigned __int32 MNCSTRUCT;
+typedef uint16_t MCCTYPE;
+typedef uint16_t MNCTYPE;
+typedef uint16_t LACTYPE;
+typedef uint16_t CELLIDTYPE;
+typedef uint32_t LTE_CELLIDTYPE;
+typedef uint32_t FLAGTYPE;
+typedef uint32_t MCCSTRUCT;
+typedef uint32_t MNCSTRUCT;
 typedef float ECIOTYPE;
 
-typedef unsigned __int64 TIMESINCE1970TYPE;
-typedef unsigned __int16 NUMFREQBINSTYPE;
-typedef unsigned __int32 FREQSTEPSIZEHZTYPE;
-typedef unsigned __int32 FREQBINSIZEHZTYPE;
-typedef unsigned __int32 FREQTYPEHZ;
+typedef uint64_t TIMESINCE1970TYPE;
+typedef uint16_t NUMFREQBINSTYPE;
+typedef uint32_t FREQSTEPSIZEHZTYPE;
+typedef uint32_t FREQBINSIZEHZTYPE;
+typedef uint32_t FREQTYPEHZ;
 
-typedef unsigned __int16 BCCHTYPE;
-typedef unsigned __int8 BSICTYPE;
-typedef unsigned __int32 TDMAFRAMENUMTYPE;
-typedef unsigned __int64 FREQUENCYHZTYPE;
-typedef __int64 TIMESINCE1970;  // compatible with time_t
+typedef uint16_t BCCHTYPE;
+typedef uint8_t BSICTYPE;
+typedef uint32_t TDMAFRAMENUMTYPE;
+typedef uint64_t FREQUENCYHZTYPE;
+typedef int64_t TIMESINCE1970;  // compatible with time_t
 
 
-typedef unsigned __int8 HEADERTYPE;
-typedef unsigned __int8 SUBCOMMAND;
-typedef unsigned __int8 PLLINTTYPE;
-typedef unsigned __int8 PLLFRACTTYPE;
-typedef unsigned __int16 GAINTYPE;
-typedef unsigned __int8 RFBANDTYPE;
-typedef unsigned __int8 RFOSCBANDTYPE;
-typedef unsigned __int8 RFSTATUSTYPE;
-typedef unsigned __int8 DIGITALSTATUSTYPE;
-typedef unsigned __int32 RECORDSIZETYPE;
-typedef unsigned __int8 BUFFERTYPE;
+typedef uint8_t HEADERTYPE;
+typedef uint8_t SUBCOMMAND;
+typedef uint8_t PLLINTTYPE;
+typedef uint8_t PLLFRACTTYPE;
+typedef uint16_t GAINTYPE;
+typedef uint8_t RFBANDTYPE;
+typedef uint8_t RFOSCBANDTYPE;
+typedef uint8_t RFSTATUSTYPE;
+typedef uint8_t DIGITALSTATUSTYPE;
+typedef uint32_t RECORDSIZETYPE;
+typedef uint8_t BUFFERTYPE;
 
-typedef unsigned __int8 FPGAREVISIONTYPE;
-typedef __int64 LASTDELTATIMETYPE;
-typedef unsigned __int64 LONGCOUNTERLATCHEDTYPE;
-typedef unsigned __int16 GPSSTATUSTYPE;
-typedef unsigned __int8 TRACKSATTYPE;
-typedef unsigned __int8 VISIBLESATTYPE;
-typedef unsigned __int16 HEADINGTYPE;
+typedef uint8_t FPGAREVISIONTYPE;
+typedef int64_t LASTDELTATIMETYPE;
+typedef uint64_t LONGCOUNTERLATCHEDTYPE;
+typedef uint16_t GPSSTATUSTYPE;
+typedef uint8_t TRACKSATTYPE;
+typedef uint8_t VISIBLESATTYPE;
+typedef uint16_t HEADINGTYPE;
 typedef float SPEEDTYPE;
-typedef unsigned __int32 HEIGHTTYPE;
+typedef uint32_t HEIGHTTYPE;
 typedef float LONGITUDETYPE;
 typedef float LATITUDETYPE;
-typedef unsigned __int8 SECONDSTYPE;
-typedef unsigned __int8 MINUTESTYPE;
-typedef unsigned __int8 HOURSTYPE;
-typedef unsigned __int16 YEARTYPE;
-typedef unsigned __int8 DAYTYPE;
-typedef unsigned __int8 MONTHTYPE;
-typedef __int16 IQDATA;
+typedef uint8_t SECONDSTYPE;
+typedef uint8_t MINUTESTYPE;
+typedef uint8_t HOURSTYPE;
+typedef uint16_t YEARTYPE;
+typedef uint8_t DAYTYPE;
+typedef uint8_t MONTHTYPE;
+typedef int16_t IQDATA;
 
 struct DATASAMPLE
 {

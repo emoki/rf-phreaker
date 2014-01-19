@@ -1,7 +1,7 @@
 #pragma once
-#include <tuple>
 #include <vector>
 #include <map>
+#include <tuple>
 #include "tbb/flow_graph.h"
 
 #include "rf_phreaker/common/common_types.h"
@@ -111,7 +111,7 @@ public:
 			else
 				++position_;
 
-			if(position_ < 0 || position_ >= manager_.size())
+            if(position_ >= manager_.size())
 				position_ = 0;
 			
 			return manager_[position_];	

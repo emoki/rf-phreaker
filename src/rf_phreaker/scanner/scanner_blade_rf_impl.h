@@ -13,15 +13,15 @@ namespace rf_phreaker {
 			scanner_blade_rf_impl() {};
 
 			scanner_blade_rf_impl(const scanner_blade_rf_impl &impl)
-				: dev_info_(impl.dev_info_)
+                : blade_rf_version_(impl.blade_rf_version_)
+                , fpga_version_(impl.fpga_version_)
+                , firmware_version_(impl.firmware_version_)
+                , dev_info_(impl.dev_info_)
 				, usb_speed_(impl.usb_speed_)
 				, stats_(impl.stats_)
-				, blade_rf_version_(impl.blade_rf_version_)
-				, fpga_version_(impl.fpga_version_)
-				, firmware_version_(impl.firmware_version_)
 				, sampling_(impl.sampling_)
 				, vctcxo_trim_(impl.vctcxo_trim_)
-			{}
+            {}
 
 			~scanner_blade_rf_impl() {};
 

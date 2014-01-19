@@ -5,10 +5,10 @@
 
 generic_information_element::generic_information_element(format_of_information_elements format, int32_t type_bit_size, int32_t value_bit_size, int32_t length_bit_size) 
 	: format_(format)
-	, type_bit_size_(type_bit_size)
 	, value_bit_size_(value_bit_size)
 	, length_bit_size_(length_bit_size)
-{ 	
+    , type_bit_size_(type_bit_size)
+{
 	determine_bits_to_consume(); 
 	resize_raw_bit_stream();
 }
@@ -80,7 +80,12 @@ void generic_information_element::copy_to_raw_bit_stream(const gsm_bit_stream &b
 {
 	uint32_t pos = 0;
 	for(int32_t i = 0; i < bits_to_consume_; i += 8)
-		raw_bit_stream_[pos] = bs.current_position_in_bit_stream()[pos++];
+    {
+        // ecs - I believe this is the behavior Rajesh wanted.
+        //raw_bit_stream_[pos] = bs.current_position_in_bit_stream()[pos];
+        raw_bit_stream_[pos] = bs.current_position_in_bit_stream()[pos];
+        pos++;
+    }
 }
 
 void generic_information_element::calculate_skip_bits(const gsm_bit_stream &bs)

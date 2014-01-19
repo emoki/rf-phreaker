@@ -1,6 +1,7 @@
 #pragma once
 
-#include "rf_phreaker/scanner/scanner_controller.h"
+#include "rf_phreaker/scanner/scanner_controller_interface.h"
+#include "rf_phreaker/common/exception_types.h"
 
 namespace rf_phreaker { namespace processing {
 
@@ -8,12 +9,12 @@ namespace rf_phreaker { namespace processing {
 class scanner_io
 {
 public:
-	scanner_io(rf_phreaker::scanner::scanner_controller &sc)
+    scanner_io(rf_phreaker::scanner::scanner_controller_interface *sc)
 		: sc_(sc)
 	{}
 	rf_phreaker::scanner::measurement_info operator()(const collection_parameters &cp){
 		
-		auto future_data = sc_.get_rf_data(cp.freq_, cp.time_ms_, cp.bandwidth_,cp.sampling_rate_);
+        auto future_data = sc_->get_rf_data(cp.freq_, cp.time_ms_, cp.bandwidth_,cp.sampling_rate_);
 
 #if _DEBUG
 		future_data.wait();
@@ -32,7 +33,7 @@ public:
 		return future_data.get();
 	}
 private:
-	rf_phreaker::scanner::scanner_controller &sc_;
+    rf_phreaker::scanner::scanner_controller_interface *sc_;
 };
 
 }}

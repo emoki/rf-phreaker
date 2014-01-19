@@ -26,7 +26,7 @@ int32_t gsm_layer_3_decoder::decode_bcch_message(const uint8_t *bit_stream, uint
 	}
 	catch(const std::exception &err)
 	{
-		printf(err.what());
+        std::cout << err.what();
 		status = -1;
 	}
 	return status;

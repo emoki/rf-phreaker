@@ -627,8 +627,10 @@ f[0] = w[0];
 	
 	f[k] = (w[0] + n ) % 1024;
 
-	if(f[k] < 0 )
-		f[k] = f[k] + 1024;
+    // ecs - What does Rajesh mean here?  It's a unsigned integer so it's always positive.
+    // Currently removing if statement.
+//	if(f[k] < 0 )
+//		f[k] = f[k] + 1024;
 
 	}
 
@@ -906,9 +908,9 @@ void three_g_neighbour_cell_description::decode(uint8_t *data_bits, uint8_t &ori
 }
 
 si_2_quarter_rest_octets::si_2_quarter_rest_octets(format_of_information_elements format)
-	                      : information_element_type_3(format, si_2_quarter_rest_octects_bit_size),
-						   offset(0),
-						   si_octect_size(20)
+                          : information_element_type_3(format, si_2_quarter_rest_octects_bit_size)
+                          , si_octect_size(20)
+                          , offset(0)
 {
 
 }

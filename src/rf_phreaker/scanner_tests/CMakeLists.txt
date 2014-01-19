@@ -20,6 +20,7 @@ include_directories(${libbladeRF_SOURCE_DIR}/include)
 	
 add_executable (scanner_tests ${scanner_tests_SRCS})
 
-#target_link_libraries (scanner_tests common)
 target_link_libraries (scanner_tests scanner)
 target_link_libraries (scanner_tests gmock)
+target_link_libraries (scanner_tests ${Boost_SYSTEM_LIBRARY} ${Boost_FILESYSTEM_LIBRARY} ${Boost_TIMER_LIBRARY}
+                                        ${Boost_CHRONO_LIBRARY})

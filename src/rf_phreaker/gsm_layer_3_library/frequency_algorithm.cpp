@@ -7,8 +7,10 @@ uint8_t frequency_algorithm::power_of_two[32] =  {1,1,2,2,4,4,4,4,8,8,8,8,8,8,8,
 
 
 frequency_algorithm::frequency_algorithm(uint32_t num, bool ext)
-	                :num_ba(num),
-					 extended(ext)
+                    : extended(ext)
+                    , num_ba(num)
+                    , range(0)
+                    , max_index(0)
 {
 
 

@@ -25,7 +25,7 @@ public:
 		for(unsigned int i = 0; i < wind_lte_data_.NumMeasurements; ++i)
 			container.add(wind_lte_data_.Measurements[i], meas_info);
 
-		return std::make_tuple(std::move(meas_info), std::move(container));
+        return std::make_tuple(std::move(meas_info), std::move(container));
 	}
 	
 private:

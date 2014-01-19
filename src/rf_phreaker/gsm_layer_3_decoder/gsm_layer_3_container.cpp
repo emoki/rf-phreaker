@@ -9,10 +9,10 @@
 
 gsm_layer_3_container::gsm_layer_3_container(void)
 	                  :si_2_added(false),
-					   si_3_added(false),
 					   si_2bis_added(false),
 					   si_2ter_added(false),
-					   si_2quarter_added(false)
+                       si_2quarter_added(false),
+                       si_3_added(false)
 {
 	//messages_to_decode_.insert(std::make_pair<message_type_code, boost::shared_ptr<populate_data_interface>>
 	//	(system_information_type_3, boost::shared_ptr<populate_data_interface>(new si_3_container)));

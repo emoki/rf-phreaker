@@ -16,7 +16,6 @@ uint16_string::uint16_string(uint8_t* digits, int num_digits)
 	BOOST_ASSERT(digits);
 	BOOST_ASSERT(num_digits > 0);
 	for(int i = 0; i < num_digits; i++) {
-		BOOST_ASSERT(digits[i] >= 0);
 		string_ += boost::lexical_cast<std::string>((uint32_t)digits[i]);
 	}
 }

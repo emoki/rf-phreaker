@@ -65,7 +65,10 @@ template<typename Layer_3_type>
 class layer_3_tracker
 {
 public:
-	layer_3_tracker(int max_update) : max_update_(max_update) {}
+
+    int max_update_;
+
+    layer_3_tracker(int max_update) : max_update_(max_update) {}
 
 	bool is_all_decoded() {
 		for (auto freq : wanted_layer_3_) {
@@ -94,11 +97,12 @@ public:
 		auto freq_history = wanted_layer_3_.find(f);
 
 		// Use initializer list?
-		if (freq_history == wanted_layer_3_.end()) {
-			wanted_layer_3_.insert(std::make_pair(f, push_back(freq_layer_3_history(), data)));
+        if (freq_history == wanted_layer_3_.end()) {
+            freq_layer_3_history tmp; // gcc doesn't allow for inplace construction?
+            wanted_layer_3_.insert(std::make_pair(f, push_back(tmp, data)));
 		}
 		else {
-			bool found_cell = false;
+            bool found_cell = false;
 			for (auto &cell_layer_3 : freq_history->second) {
 				if (cell_layer_3.unique_identifer() == data.RsRecord.ID) {
 					cell_layer_3.update(data);
@@ -136,7 +140,7 @@ public:
 
 protected:
 	template<typename Data>
-	std::vector<all_layer_3_decoded<Layer_3_type>> push_back(std::vector<all_layer_3_decoded<Layer_3_type>> &freq_history, const Data &data) {
+    std::vector<all_layer_3_decoded<Layer_3_type>> push_back(std::vector<all_layer_3_decoded<Layer_3_type>> &freq_history, const Data &data) {
 		cell_history layer_3(data.RsRecord.ID, max_update_);
 		layer_3.update(data);
 		freq_history.push_back(layer_3);
@@ -144,15 +148,14 @@ protected:
 	}
 
 
+   typedef all_layer_3_decoded<Layer_3_type> cell_history;
+
+   typedef std::vector<all_layer_3_decoded<Layer_3_type>> freq_layer_3_history;
+
+   std::map<rf_phreaker::frequency_type, freq_layer_3_history> wanted_layer_3_;
 
 
-	int max_update_;
 
-	typedef all_layer_3_decoded<Layer_3_type> cell_history;
-	
-	typedef std::vector<all_layer_3_decoded<Layer_3_type>> freq_layer_3_history;
-	
-	std::map<rf_phreaker::frequency_type, freq_layer_3_history> wanted_layer_3_;
 };
 
 }

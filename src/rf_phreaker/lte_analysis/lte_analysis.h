@@ -1,10 +1,5 @@
 #pragma once
 
-#ifdef LTE_SCANNER_DLL_EXPORTS
-#define LTE_API __declspec(dllexport)
-#else
-#define LTE_API __declspec(dllimport)
-#endif
 
 
 #ifdef __cplusplus
@@ -56,17 +51,17 @@ struct WindPssSearchData
 	bool IsValidLteChannel;
 };
 
-LTE_API int LtePssSearcher(const Ipp32fc* SignalSamples, unsigned int NumSamples,
+/*LTE_API*/ int LtePssSearcher(const Ipp32fc* SignalSamples, unsigned int NumSamples,
 	unsigned int NumIFChannelsToProcess, int StartIF_kHz,
 	double SampleRate, WindPssSearchData *PssSearchData);
 
-LTE_API int lte_decode_data(const Ipp32fc* SignalSamples,
+/*LTE_API*/ int lte_decode_data(const Ipp32fc* SignalSamples,
 					unsigned int NumSamples,
 					unsigned int NumHalfFramesToProcess,
 					hardware_sampling_rate hw_sampling_rate,
 					WindLteData &LteData);
 
-LTE_API int lte_cell_search(const Ipp32fc* SignalSamples,
+/*LTE_API*/ int lte_cell_search(const Ipp32fc* SignalSamples,
 					unsigned int NumSamples,
 					unsigned int NumHalfFramesToProcess,
 					hardware_sampling_rate hw_sampling_rate,

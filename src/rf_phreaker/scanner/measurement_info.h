@@ -30,7 +30,16 @@ public:
 		, time_ms_(time_ms)
 	{}
 
-	measurement_info(measurement_info&& other)
+    measurement_info(const measurement_info& other)
+        : ipp_array_((other.ipp_array_))
+        , bandwidth_((other.bandwidth_))
+        , sampling_rate_((other.sampling_rate_))
+        , frequency_((other.frequency_))
+        , time_ms_((other.time_ms_))
+    {
+    }
+
+    measurement_info(measurement_info&& other)
 		: ipp_array_(std::move(other.ipp_array_))
 		, bandwidth_(std::move(other.bandwidth_))
 		, sampling_rate_(std::move(other.sampling_rate_))
@@ -38,6 +47,22 @@ public:
 		, time_ms_(std::move(other.time_ms_))
 	{
 	}
+
+    measurement_info& operator =(measurement_info other)
+    {
+        measurement_info tmp(other);
+        tmp.swap(*this);
+        return *this;
+    }
+
+    void swap(measurement_info &other)
+    {
+        ipp_array_.swap(other.ipp_array_);
+        std::swap(this->bandwidth_, other.bandwidth_);
+        std::swap(this->sampling_rate_, other.sampling_rate_);
+        std::swap(this->frequency_, other.frequency_);
+        std::swap(this->time_ms_, other.time_ms_);
+    }
 
 	ipp_32fc_array& get_iq() { return ipp_array_; }
 
@@ -57,7 +82,7 @@ public:
 
 	void frequency(rf_phreaker::frequency_type f) { frequency_ = f; }
 
-	int time_ms(int time_ms) { time_ms_ = time_ms; }
+    void time_ms(int time_ms) { time_ms_ = time_ms; }
 
 	friend inline std::ostream& operator<<(std::ostream &os, const rf_phreaker::scanner::measurement_info &t);
 	friend inline std::istream& operator>>(std::istream &os, rf_phreaker::scanner::measurement_info &t);

@@ -19,7 +19,7 @@ processing_graph::~processing_graph(void)
 {
 }
 
-void processing_graph::initialize(scanner_controller &sc)
+void processing_graph::initialize(scanner_controller_interface *sc)
 {
 	auto g = std::shared_ptr<tbb::flow::graph>(new tbb::flow::graph);
 
@@ -53,7 +53,7 @@ void processing_graph::initialize(scanner_controller &sc)
 	//								"rms_signal: " << data.rms_signal_ << "\t" << 
 	//								std::endl;
 	//			
-	//						return add_remove_parameters();
+    //						collection_node_lte_return add_remove_parameters();
 	//					});
 
 	auto tmp_output = std::make_shared<tbb::flow::function_node<lte_package, add_remove_parameters_>>(*g, 1, [](lte_package lte){
@@ -109,8 +109,7 @@ void processing_graph::start(const collection_parameters &cp)
 				
 	std::map<rf_phreaker::frequency_type, collection_parameters> remove;
 
-	auto t = std::make_tuple(add, remove);
-
+    auto t = std::make_tuple(add, remove);
 	//collection_node_lte_->try_put(t);
 }
 

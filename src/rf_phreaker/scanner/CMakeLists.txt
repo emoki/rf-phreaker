@@ -16,13 +16,11 @@ set (scanner_SRCS
 	byte_aligned_buffer.h
 	comm_blade_rf.h
 	comm_info.h
-	gain.cpp
-	gain.h
 	lms_defines.h
 	lms_utilities.h
 	measurement_info.h
-	rf_switch_conversion.cpp
-	rf_switch_conversion.h
+        rf_switch_conversion.cpp
+        rf_switch_conversion.h
 	sampling_rate_conversion.cpp
 	sampling_rate_conversion.h
 	scanner.h

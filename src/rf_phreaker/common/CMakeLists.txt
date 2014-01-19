@@ -27,4 +27,5 @@ set (common_SRCS
 	${SRC_PLATFORM_SPECIFIC}/stdafx.cpp)
 
 add_library (common STATIC ${common_SRCS})
-target_link_libraries (common optimized ${TBB_LIBRARY_RELEASE} debug ${TBB_LIBRARY_DEBUG})
+#target_link_libraries (common optimized ${TBB_LIBRARY_RELEASE} debug ${TBB_LIBRARY_DEBUG})
+target_link_libraries (common ${TBB_LIBRARY})

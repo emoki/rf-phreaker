@@ -14,6 +14,12 @@ class lte_data_container
 public:
 	typedef std::vector<rf_phreaker::lte_data> group_type;
 
+    lte_data_container() {}
+
+    lte_data_container(const lte_data_container &a)
+        : group_(a.group_)
+    {}
+
 	void add(const LteMeasurement &lte, const rf_phreaker::scanner::measurement_info &meas_info)
 	{
 		rf_phreaker::lte_data data;

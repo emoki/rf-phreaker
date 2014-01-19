@@ -9,7 +9,7 @@ namespace rf_phreaker {
 		class comm_blade_rf : public comm_info
 		{
 		public:
-			comm_blade_rf() : is_open_(false), blade_rf_(nullptr) {}
+            comm_blade_rf() : blade_rf_(nullptr), is_open_(false) {}
 
 			comm_blade_rf(bladerf_devinfo &blade)
 				: blade_rf_(nullptr)
