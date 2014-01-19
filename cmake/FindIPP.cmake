@@ -55,6 +55,8 @@ macro(find_ipp_library IPP_COMPONENT)
   
   find_library(IPP_LIB_${IPP_COMPONENT} ipp${IPP_COMPONENT_LOWER}${IPP_LIBNAME_SUFFIX}
                PATHS "${IPP_ROOT}${IPP_LIB_ARCH_PATH}")
+			  
+  MARK_AS_ADVANCED (IPP_LIB_${IPP_COMPONENT})
 endmacro()
 
 macro(find_ipp_specific_compiler_lib IPP_COMPONENT)
@@ -64,6 +66,8 @@ macro(find_ipp_specific_compiler_lib IPP_COMPONENT)
 	unset (IPP_COMPILER_${IPP_COMPONENT} CACHE)
 	find_library(IPP_COMPILER_${IPP_COMPONENT} ${IPP_COMPONENT_LOWER}${CMAKE_FIND_LIBRARY_SUFFIXES}
 				PATHS "${IPP_ROOT}${IPP_COMPILER_ARCH_PATH}")
+				
+  MARK_AS_ADVANCED (IPP_LIB_${IPP_COMPONENT})
 endmacro()
 
 # IPP components

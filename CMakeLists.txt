@@ -37,7 +37,7 @@ find_package(TBB REQUIRED)
 
 # Find IPP.
 if (MSVC)
-	set (IPP_ROOT "${rf_phreaker_SOURCE_DIR}/third_party/ipp_win" CACHE PATH "Folder contains IPP")
+	set (IPP_ROOT "C:/Program Files (x86)/Intel/Composer XE" CACHE PATH "Folder contains IPP")
 else()
 	set (IPP_ROOT "${rf_phreaker_SOURCE_DIR}/third_party/ipp_linux" CACHE PATH "Folder contains IPP")
 endif()
