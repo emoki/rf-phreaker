@@ -9,7 +9,7 @@
 # Ubuntu Environment Setup -----------
 # Use Nuand wiki on github for more bladeRF specific setup.
 # sudo apt-get install build-essential cmake libncurses5-dev libtecla1 libtecla1-dev pkg-config git wget libudev-dev
-# 
+# build libusbx manually and install (Note: configuration and build cannot occur in softlink? external drive? 
 # 
 # CMake Configuration
 # Be sure to check USE_IPP_64_ARCH_LIBS if building for 64 architecture. 
@@ -54,15 +54,6 @@ set (Boost_USE_MULTITHREADED      ON)
 set (Boost_USE_STATIC_RUNTIME    ON)
 find_package (Boost 1.54.0 COMPONENTS thread date_time REQUIRED)
 	
-# Create libusbx if not windows.
-if (CMAKE_COMPILER_IS_GNUCXX)
-	externalproject_add(libusbx
-		SOURCE_DIR ${rf_phreaker_SOURCE_DIR}/third_party/libusbx
-		UPDATE_COMMAND ""
-		CONFIGURE_COMMAND "configure"
-		BUILD_COMMAND make)
-endif ()
-
 
 # MSVC configurations.
 if (MSVC)
