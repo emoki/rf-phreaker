@@ -19,13 +19,12 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
  * THE SOFTWARE.
  */
+#include <cyu3error.h>
+#include <cyu3gpio.h>
+#include <cyu3usb.h>
+#include <cyu3spi.h>
 #include "bladeRF.h"
-#include "cyu3error.h"
-#include "cyu3gpio.h"
-#include "cyu3usb.h"
-#include "cyu3gpif.h"
-#include "cyu3spi.h"
-#include "cyfxgpif_C4loader.h"
+#include "gpif.h"
 #include "spi_flash_lib.h"
 
 /* DMA Channel for RF U2P (USB to P-port) transfers */
@@ -118,18 +117,10 @@ static void NuandFpgaConfigStart(void)
     NuandGPIOReconfigure(CyFalse, !first_call);
     first_call = 0;
 
-
-    /* Load the GPIF configuration for loading the FPGA */
-    apiRetStatus = CyU3PGpifLoad(&C4loader_CyFxGpifConfig);
+    apiRetStatus = NuandConfigureGpif(GPIF_CONFIG_FPGA_LOAD);
     if (apiRetStatus != CY_U3P_SUCCESS) {
-        CyU3PDebugPrint (4, "CyU3PGpifLoad failed, Error Code = %d\n",apiRetStatus);
-        CyFxAppErrorHandler(apiRetStatus);
-    }
-
-    /* Start the state machine. */
-    apiRetStatus = CyU3PGpifSMStart(C4LOADER_START, C4LOADER_ALPHA_START);
-    if (apiRetStatus != CY_U3P_SUCCESS) {
-        CyU3PDebugPrint(4, "CyU3PGpifSMStart failed, Error Code = %d\n",apiRetStatus);
+        CyU3PDebugPrint(4, "Failed to configure GPIF, Error Code = %d\n",
+                        apiRetStatus);
         CyFxAppErrorHandler(apiRetStatus);
     }
 
@@ -208,6 +199,9 @@ void NuandFpgaConfigStop(void)
     CyU3PEpConfig_t epCfg;
     CyU3PReturnStatus_t apiRetStatus = CY_U3P_SUCCESS;
 
+    /* Abort and clear the channel */
+    CyU3PDmaChannelReset(&glChHandlebladeRFUtoP);
+
     /* Flush the endpoint memory */
     CyU3PUsbFlushEp(BLADE_FPGA_EP_PRODUCER);
 
@@ -225,10 +219,16 @@ void NuandFpgaConfigStop(void)
         CyFxAppErrorHandler (apiRetStatus);
     }
 
-    CyU3PGpifDisable(CyTrue);
+    apiRetStatus = NuandConfigureGpif(GPIF_CONFIG_DISABLED);
+    if (apiRetStatus != CY_U3P_SUCCESS) {
+        CyU3PDebugPrint(4, "Failed to disable GPIF, Error Code = %d\n",
+                        apiRetStatus);
+        CyFxAppErrorHandler(apiRetStatus);
+    }
 
     NuandAllowSuspend(CyTrue);
     glAppMode = MODE_NO_CONFIG;
+    CyU3PGpioSetValue(GPIO_SYS_RST, CyTrue);
 }
 
 uint8_t FPGA_status_bits[] = {

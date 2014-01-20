@@ -67,14 +67,6 @@ void bladerf_free_device_list(struct bladerf_devinfo *devices)
     free(devices);
 }
 
-static void init_stats(struct bladerf_stats *stats)
-{
-    stats->rx_overruns = 0;
-    stats->rx_throughput = 0;
-    stats->tx_underruns = 0;
-    stats->tx_throughput = 0;
-}
-
 int bladerf_open_with_devinfo(struct bladerf **device,
                                 struct bladerf_devinfo *devinfo)
 {
@@ -92,7 +84,6 @@ int bladerf_open_with_devinfo(struct bladerf **device,
 
         /* We got a device */
         bladerf_set_error(&opened_device->error, ETYPE_LIBBLADERF, 0);
-        init_stats(&opened_device->stats);
 
         status = opened_device->fn->get_device_speed(opened_device,
                                                      &opened_device->usb_speed);
@@ -176,8 +167,15 @@ void bladerf_close(struct bladerf *dev)
 int bladerf_enable_module(struct bladerf *dev,
                             bladerf_module m, bool enable)
 {
+    int status;
+    log_debug("Enable Module: %s - %s\n",
+                (m == BLADERF_MODULE_RX) ? "RX" : "TX",
+                enable ? "True" : "False") ;
+
     lms_enable_rffe(dev, m, enable);
-    return 0;
+    status = dev->fn->enable_module(dev, m, enable);
+
+    return status;
 }
 
 int bladerf_set_loopback(struct bladerf *dev, bladerf_loopback l)
@@ -488,12 +486,24 @@ int bladerf_get_frequency(struct bladerf *dev,
     return rv;
 }
 
-void bladerf_set_transfer_timeout(struct bladerf *dev, bladerf_module module, int timeout) {
-    dev->fn->set_transfer_timeout(dev, module, timeout);
+int bladerf_set_transfer_timeout(struct bladerf *dev, bladerf_module module,
+                                 unsigned int timeout) {
+    if (dev) {
+        dev->transfer_timeout[module] = timeout;
+        return 0;
+    } else {
+        return BLADERF_ERR_NODEV;
+    }
 }
 
-int get_transfer_timeout(struct bladerf *dev, bladerf_module module) {
-    return dev->fn->get_transfer_timeout(dev, module);
+int bladerf_get_transfer_timeout(struct bladerf *dev, bladerf_module module,
+                                 unsigned int *timeout) {
+    if (dev) {
+        *timeout = dev->transfer_timeout[module];
+        return 0;
+    } else {
+        return BLADERF_ERR_NODEV;
+    }
 }
 
 int bladerf_tx(struct bladerf *dev, bladerf_format format, void *samples,
@@ -563,7 +573,7 @@ int bladerf_init_stream(struct bladerf_stream **stream,
     lstream->buffers = NULL;
 
     switch(format) {
-        case BLADERF_FORMAT_SC16_Q12:
+        case BLADERF_FORMAT_SC16_Q11:
             buffer_size_bytes = c16_samples_to_bytes(samples_per_buffer);
             break;
 
@@ -647,6 +657,9 @@ void bladerf_deinit_stream(struct bladerf_stream *stream)
     return ;
 }
 
+/* No device control calls may be made in this function and the associated
+ * backend stream implementations, as the stream and control functionality are
+ * will generally be executed from separate thread contexts. */
 int bladerf_stream(struct bladerf_stream *stream, bladerf_module module)
 {
     int status;
@@ -697,11 +710,6 @@ int bladerf_fpga_version(struct bladerf *dev, struct bladerf_version *version)
 {
     memcpy(version, &dev->fpga_version, sizeof(*version));
     return 0;
-}
-
-int bladerf_stats(struct bladerf *dev, struct bladerf_stats *stats)
-{
-    return dev->fn->stats(dev, stats);
 }
 
 bladerf_dev_speed bladerf_device_speed(struct bladerf *dev)
@@ -1059,6 +1067,22 @@ int bladerf_config_gpio_write(struct bladerf *dev, uint32_t val)
     return dev->fn->config_gpio_write(dev,val);
 
 }
+
+/*------------------------------------------------------------------------------
+ * IQ Calibration routines
+ *----------------------------------------------------------------------------*/
+int bladerf_set_correction(struct bladerf *dev, bladerf_module module,
+                           bladerf_correction corr, int16_t value)
+{
+    return dev->fn->set_correction(dev, module, corr, value);
+}
+
+int bladerf_get_correction(struct bladerf *dev, bladerf_module module,
+                           bladerf_correction corr, int16_t *value)
+{
+    return dev->fn->get_correction(dev, module, corr, value);
+}
+
 
 /*------------------------------------------------------------------------------
  * VCTCXO DAC register write

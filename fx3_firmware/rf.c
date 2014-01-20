@@ -19,13 +19,12 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
  * THE SOFTWARE.
  */
+#include <cyu3error.h>
+#include <cyu3gpio.h>
+#include <cyu3usb.h>
+#include <cyu3uart.h>
+#include "gpif.h"
 #include "rf.h"
-#include "cyu3error.h"
-#include "cyu3gpio.h"
-#include "cyu3usb.h"
-#include "cyu3gpif.h"
-#include "cyfxgpif_RFlink.h"
-#include "cyu3uart.h"
 
 static CyU3PDmaChannel glChHandlebladeRFUtoUART;   /* DMA Channel for U2P transfers */
 static CyU3PDmaChannel glChHandlebladeRFUARTtoU;   /* DMA Channel for U2P transfers */
@@ -52,7 +51,7 @@ static void UartBridgeStart(void)
 
     /* Set UART configuration */
     CyU3PMemSet ((uint8_t *)&uartConfig, 0, sizeof (uartConfig));
-    uartConfig.baudRate = CY_U3P_UART_BAUDRATE_115200;
+    uartConfig.baudRate = CY_U3P_UART_BAUDRATE_4M; // CY_U3P_UART_BAUDRATE_115200;
     uartConfig.stopBit = CY_U3P_UART_ONE_STOP_BIT;
     uartConfig.parity = CY_U3P_UART_NO_PARITY;
     uartConfig.txEnable = CyTrue;
@@ -225,22 +224,15 @@ static void NuandRFLinkStart(void)
     NuandAllowSuspend(CyFalse);
     NuandGPIOReconfigure(CyTrue, CyTrue);
 
-    /* Load the GPIF configuration for loading the RF transceiver */
-    apiRetStatus = CyU3PGpifLoad(&Rflink_CyFxGpifConfig);
-    if (apiRetStatus != CY_U3P_SUCCESS)
-    {
-        CyU3PDebugPrint (4, "CyU3PGpifLoad failed, Error Code = %d\n",apiRetStatus);
-        CyFxAppErrorHandler(apiRetStatus);
-    }
-
-    // strobe the RESET pin to the FPGA
     CyU3PGpioSetValue(GPIO_SYS_RST, CyTrue);
+    CyU3PGpioSetValue(GPIO_RX_EN, CyFalse);
+    CyU3PGpioSetValue(GPIO_TX_EN, CyFalse);
     CyU3PGpioSetValue(GPIO_SYS_RST, CyFalse);
 
-    /* Start the state machine. */
-    apiRetStatus = CyU3PGpifSMStart(RFLINK_START, RFLINK_ALPHA_START);
+    apiRetStatus = NuandConfigureGpif(GPIF_CONFIG_RF_LINK);
     if (apiRetStatus != CY_U3P_SUCCESS) {
-        CyU3PDebugPrint(4, "CyU3PGpifSMStart failed, Error Code = %d\n",apiRetStatus);
+        CyU3PDebugPrint(4, "Failed to configure GPIF, Error code = %d\n",
+                        apiRetStatus);
         CyFxAppErrorHandler(apiRetStatus);
     }
 
@@ -337,7 +329,6 @@ static void NuandRFLinkStart(void)
     /* Set DMA channel transfer size. */
 
     apiRetStatus = CyU3PDmaChannelSetXfer (&glChHandleUtoP, BLADE_DMA_TX_SIZE);
-
     if (apiRetStatus != CY_U3P_SUCCESS) {
         CyU3PDebugPrint(4, "CyU3PDmaChannelSetXfer Failed, Error code = %d\n", apiRetStatus);
         CyFxAppErrorHandler(apiRetStatus);
@@ -348,7 +339,6 @@ static void NuandRFLinkStart(void)
         CyU3PDebugPrint(4, "CyU3PDmaChannelSetXfer Failed, Error code = %d\n", apiRetStatus);
         CyFxAppErrorHandler(apiRetStatus);
     }
-
 
     UartBridgeStart();
     glAppMode = MODE_RF_CONFIG;
@@ -362,6 +352,10 @@ static void NuandRFLinkStop (void)
 {
     CyU3PEpConfig_t epCfg;
     CyU3PReturnStatus_t apiRetStatus = CY_U3P_SUCCESS;
+
+    CyU3PGpioSetValue(GPIO_SYS_RST, CyTrue);
+    CyU3PGpioSetValue(GPIO_RX_EN, CyFalse);
+    CyU3PGpioSetValue(GPIO_TX_EN, CyFalse);
 
     /* Flush endpoint memory buffers */
     CyU3PUsbFlushEp(BLADE_RF_SAMPLE_EP_PRODUCER);
@@ -390,7 +384,12 @@ static void NuandRFLinkStop (void)
     }
 
     /* Reset the GPIF */
-    CyU3PGpifDisable(CyTrue);
+    apiRetStatus = NuandConfigureGpif(GPIF_CONFIG_DISABLED);
+    if (apiRetStatus != CY_U3P_SUCCESS) {
+        CyU3PDebugPrint(4, "Failed to deinitialize GPIF. Error code = %d\n",
+                        apiRetStatus);
+        CyFxAppErrorHandler(apiRetStatus);
+    }
 
     UartBridgeStop();
     NuandAllowSuspend(CyTrue);

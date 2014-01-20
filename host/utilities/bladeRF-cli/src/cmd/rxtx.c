@@ -178,11 +178,11 @@ void rxtx_print_file_format(struct rxtx_data *rxtx,
     pthread_mutex_unlock(&rxtx->file_mgmt.file_meta_lock);
 
     switch (fmt) {
-        case RXTX_FMT_CSV_SC16Q12:
-            printf("%sSC16 Q12, CSV%s", prefix, suffix);
+        case RXTX_FMT_CSV_SC16Q11:
+            printf("%sSC16 Q11, CSV%s", prefix, suffix);
             break;
-        case RXTX_FMT_BIN_SC16Q12:
-            printf("%sSC16 Q12, Binary%s", prefix, suffix);
+        case RXTX_FMT_BIN_SC16Q11:
+            printf("%sSC16 Q11, Binary%s", prefix, suffix);
             break;
         default:
             printf("%sNot configured%s", prefix, suffix);
@@ -240,9 +240,9 @@ enum rxtx_fmt rxtx_str2fmt(const char *str)
     enum rxtx_fmt ret = RXTX_FMT_INVALID;
 
     if (!strcasecmp("csv", str)) {
-        ret = RXTX_FMT_CSV_SC16Q12;
+        ret = RXTX_FMT_CSV_SC16Q11;
     } else if (!strcasecmp("bin", str)) {
-        ret = RXTX_FMT_BIN_SC16Q12;
+        ret = RXTX_FMT_BIN_SC16Q11;
     }
 
     return ret;
@@ -301,7 +301,7 @@ struct rxtx_data *rxtx_data_alloc(bladerf_module module)
     /* Initialize file management items */
     ret->file_mgmt.file = NULL;
     ret->file_mgmt.path = NULL;
-    ret->file_mgmt.format = RXTX_FMT_BIN_SC16Q12;
+    ret->file_mgmt.format = RXTX_FMT_BIN_SC16Q11;
     pthread_mutex_init(&ret->file_mgmt.file_lock, NULL);
     pthread_mutex_init(&ret->file_mgmt.file_meta_lock, NULL);
 
@@ -614,22 +614,38 @@ void rxtx_task_exec_idle(struct rxtx_data *rxtx, unsigned char *requests)
     *requests = 0;
 }
 
-void rxtx_task_exec_running(struct rxtx_data *rxtx)
+void rxtx_task_exec_running(struct rxtx_data *rxtx, struct cli_state *s)
 {
-    int status = bladerf_stream(rxtx->data_mgmt.stream, rxtx->module);
+    int status, disable_status;
+    struct bladerf *dev = s->dev;
+    pthread_mutex_t *dev_lock = &s->dev_lock;
+
+    pthread_mutex_lock(dev_lock);
+    status = bladerf_enable_module(dev, rxtx->module, true);
+    pthread_mutex_unlock(dev_lock);
 
     if (status < 0) {
         set_last_error(&rxtx->last_error, ETYPE_BLADERF, status);
+    } else {
+        status = bladerf_stream(rxtx->data_mgmt.stream, rxtx->module);
+        if (status < 0) {
+            set_last_error(&rxtx->last_error, ETYPE_BLADERF, status);
+        }
+
+        pthread_mutex_lock(dev_lock);
+        disable_status = bladerf_enable_module(dev, rxtx->module, false);
+        pthread_mutex_unlock(dev_lock);
+
+        if (status == 0 && disable_status < 0) {
+            set_last_error(&rxtx->last_error, ETYPE_BLADERF, status);
+        }
     }
 
     rxtx_set_state(rxtx, RXTX_STATE_STOP);
 }
 
-void rxtx_task_exec_stop(struct rxtx_data *rxtx, unsigned char *requests,
-                         struct bladerf *dev)
+void rxtx_task_exec_stop(struct rxtx_data *rxtx, unsigned char *requests)
 {
-    int status;
-
     *requests = rxtx_get_requests(rxtx,
                                   RXTX_TASK_REQ_STOP | RXTX_TASK_REQ_SHUTDOWN);
 
@@ -649,11 +665,6 @@ void rxtx_task_exec_stop(struct rxtx_data *rxtx, unsigned char *requests,
         rxtx_set_state(rxtx, RXTX_STATE_SHUTDOWN);
     } else {
         rxtx_set_state(rxtx, RXTX_STATE_IDLE);
-    }
-
-    status = bladerf_enable_module(dev, rxtx->module, false);
-    if (status < 0) {
-        set_last_error(&rxtx->last_error, ETYPE_BLADERF, status);
     }
 
     *requests = 0;
