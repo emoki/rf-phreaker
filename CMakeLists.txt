@@ -51,7 +51,7 @@ set (boost_USER_PATH  "e:/bin/boost_1_54_0" CACHE STRING "Enter path to boost li
 set (BOOST_ROOT "${boost_USER_PATH}")
 set (Boost_USE_STATIC_LIBS        ON)
 set (Boost_USE_MULTITHREADED      ON)
-set (Boost_USE_STATIC_RUNTIME    ON)
+set (Boost_USE_STATIC_RUNTIME    OFF)
 find_package (Boost 1.54.0 COMPONENTS system filesystem thread date_time timer chrono REQUIRED)
 	
 

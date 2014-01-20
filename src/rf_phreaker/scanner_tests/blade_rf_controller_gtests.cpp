@@ -30,11 +30,11 @@ TEST(BladeControllerTest, TestBladeControllerGeneral)
 
 			b.start_timer();
 
-			const int num_iterations = 100;
+            const int num_iterations = 1;
 			std::string base_filename = "blade_samples_";
 			rf_phreaker::frequency_type freq = mhz(886);
 			size_t time_ms = 40;
-			rf_phreaker::bandwidth_type bandwidth = mhz(1);
+            rf_phreaker::bandwidth_type bandwidth = mhz(.001);
 			int sampling_rate = mhz(1);
 			int vga1 = 25;
 			int vga2 = 25;
@@ -44,9 +44,9 @@ TEST(BladeControllerTest, TestBladeControllerGeneral)
 			for(int i = 0; i < num_iterations; ++i) {			
 				data = blade.get_rf_data(freq, time_ms, sampling_rate, bandwidth, vga1, vga2, lna_gain);
 
-				//std::string name = base_filename + boost::lexical_cast<std::string>(i) +".txt";
-				//std::ofstream file(name.c_str());
-				//file << data;
+                std::string name = base_filename + boost::lexical_cast<std::string>(i) +".txt";
+                std::ofstream file(name.c_str());
+                file << data;
 			}
 			b.stop_timer();
 
