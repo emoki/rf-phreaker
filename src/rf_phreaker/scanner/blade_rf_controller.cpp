@@ -131,10 +131,10 @@ void blade_rf_controller::refresh_scanner_info()
 
 	// bladerf_stats is not currently supported.  FPGA needs to support behavior.
 	//check_blade_status(bladerf_stats(comm_blade, &blade.stats_));
-	blade.stats_.rx_overruns = 0;
-	blade.stats_.rx_throughput = 0;
-	blade.stats_.tx_throughput = 0;
-	blade.stats_.tx_underruns = 0;
+	//blade.stats_.rx_overruns = 0;
+	//blade.stats_.rx_throughput = 0;
+	//blade.stats_.tx_throughput = 0;
+	//blade.stats_.tx_underruns = 0;
 
 	bladerf_version(&blade.blade_rf_version_);
 

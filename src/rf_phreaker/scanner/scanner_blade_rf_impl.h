@@ -18,7 +18,7 @@ namespace rf_phreaker {
                 , firmware_version_(impl.firmware_version_)
                 , dev_info_(impl.dev_info_)
 				, usb_speed_(impl.usb_speed_)
-				, stats_(impl.stats_)
+				//, stats_(impl.stats_)
 				, sampling_(impl.sampling_)
 				, vctcxo_trim_(impl.vctcxo_trim_)
             {}
@@ -45,22 +45,22 @@ namespace rf_phreaker {
 			{
 				return dev_info_.instance;
 			}
-			uint64_t rx_overruns() const
-			{
-				return stats_.rx_overruns;
-			}
-			uint64_t rx_throughput() const // samples/second
-			{
-				return stats_.rx_throughput;
-			}
-			uint64_t tx_underruns() const
-			{
-				return stats_.tx_underruns;
-			}
-			uint64_t tx_throughput() const // samples/second
-			{
-				return stats_.tx_throughput;
-			}
+			//uint64_t rx_overruns() const
+			//{
+			//	return stats_.rx_overruns;
+			//}
+			//uint64_t rx_throughput() const // samples/second
+			//{
+			//	return stats_.rx_throughput;
+			//}
+			//uint64_t tx_underruns() const
+			//{
+			//	return stats_.tx_underruns;
+			//}
+			//uint64_t tx_throughput() const // samples/second
+			//{
+			//	return stats_.tx_throughput;
+			//}
 			uint16_t vctcxo_trim() const
 			{
 				return vctcxo_trim_;
@@ -123,7 +123,7 @@ namespace rf_phreaker {
 			struct bladerf_version firmware_version_;
 			bladerf_devinfo dev_info_;
 			bladerf_dev_speed usb_speed_;
-			struct bladerf_stats stats_;
+			//struct bladerf_stats stats_;
 			bladerf_sampling sampling_;
 			uint16_t vctcxo_trim_;
 		};

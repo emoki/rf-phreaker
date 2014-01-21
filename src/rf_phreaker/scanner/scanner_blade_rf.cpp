@@ -14,10 +14,10 @@ namespace rf_phreaker {
 		uint8_t scanner_blade_rf::usb_bus() const { return impl_->usb_bus(); }
 		uint8_t scanner_blade_rf::usb_address() const { return impl_->usb_address(); }
 		unsigned int scanner_blade_rf::instance() const { return impl_->instance(); }
-		uint64_t scanner_blade_rf::rx_overruns() const { return impl_->rx_overruns(); }
-		uint64_t scanner_blade_rf::rx_throughput() const { return impl_->rx_throughput(); } // samples/second
-		uint64_t scanner_blade_rf::tx_underruns() const { return impl_->tx_underruns(); }
-		uint64_t scanner_blade_rf::tx_throughput() const { return impl_->tx_throughput(); } // samples/second
+		//uint64_t scanner_blade_rf::rx_overruns() const { return impl_->rx_overruns(); }
+		//uint64_t scanner_blade_rf::rx_throughput() const { return impl_->rx_throughput(); } // samples/second
+		//uint64_t scanner_blade_rf::tx_underruns() const { return impl_->tx_underruns(); }
+		//uint64_t scanner_blade_rf::tx_throughput() const { return impl_->tx_throughput(); } // samples/second
 		uint16_t scanner_blade_rf::vctcxo_trim() const { return impl_->vctcxo_trim(); }
 		int scanner_blade_rf::usb_speed() const { return impl_->usb_speed(); }
 
