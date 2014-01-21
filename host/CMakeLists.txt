@@ -5,8 +5,6 @@ project(bladeRF C)
 # Project configuration
 ################################################################################
 
-set(CHECKOUT_PATH <insert_checkout_path_here>)
-
 # All build output lands in this directory:
 set(CMAKE_RUNTIME_OUTPUT_DIRECTORY ${CMAKE_CURRENT_BINARY_DIR}/output)
 set(CMAKE_LIBRARY_OUTPUT_DIRECTORY ${CMAKE_CURRENT_BINARY_DIR}/output)
