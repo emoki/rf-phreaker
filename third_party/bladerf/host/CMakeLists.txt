@@ -9,6 +9,11 @@ if (CMAKE_COMPILER_IS_GNUCXX)
 	remove_definitions (-std=c++11) 
 endif ()
 
+# All build output lands in this directory:
+set(CMAKE_RUNTIME_OUTPUT_DIRECTORY ${CMAKE_CURRENT_BINARY_DIR}/output)
+set(CMAKE_LIBRARY_OUTPUT_DIRECTORY ${CMAKE_CURRENT_BINARY_DIR}/output)
+set(CMAKE_ARCHIVE_OUTPUT_DIRECTORY ${CMAKE_CURRENT_BINARY_DIR}/output)
+
 if(NOT CMAKE_BUILD_TYPE)
     set(CMAKE_BUILD_TYPE "Release")
     message(STATUS "Build type not specified: defaulting to a release build.")
@@ -54,6 +59,8 @@ include(TestBigEndian)
 TEST_BIG_ENDIAN(BLADERF_BIG_ENDIAN)
 
 # Test for libusb so warnings and such only occur at the top-level
+# TODO Once we enable other backends, we should revisit whether this is a good
+#      location for this
 include(FindLibUSB)
 
 configure_file(

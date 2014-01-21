@@ -123,6 +123,12 @@ struct bladerf_fn {
     int (*config_gpio_write)(struct bladerf *dev, uint32_t val);
     int (*config_gpio_read)(struct bladerf *dev, uint32_t *val);
 
+    /* IQ Calibration Settings */
+    int (*set_correction)(struct bladerf *dev, bladerf_module,
+                          bladerf_correction corr, int16_t value);
+    int (*get_correction)(struct bladerf *dev, bladerf_module module,
+                          bladerf_correction corr, int16_t *value);
+
     /* Si5338 accessors */
     int (*si5338_write)(struct bladerf *dev, uint8_t addr, uint8_t data);
     int (*si5338_read)(struct bladerf *dev, uint8_t addr, uint8_t *data);
@@ -135,18 +141,13 @@ struct bladerf_fn {
     int (*dac_write)(struct bladerf *dev, uint16_t value);
 
     /* Sample stream */
+    int (*enable_module)(struct bladerf *dev, bladerf_module m, bool enable);
     int (*rx)(struct bladerf *dev, bladerf_format format, void *samples, int n, struct bladerf_metadata *metadata);
     int (*tx)(struct bladerf *dev, bladerf_format format, void *samples, int n, struct bladerf_metadata *metadata);
 
     int (*init_stream)(struct bladerf_stream *stream);
     int (*stream)(struct bladerf_stream *stream, bladerf_module module);
     void (*deinit_stream)(struct bladerf_stream *stream);
-
-    void (*set_transfer_timeout)(struct bladerf *dev, bladerf_module module, int timeout);
-    int (*get_transfer_timeout)(struct bladerf *dev, bladerf_module module);
-
-    /* Gather statistics */
-    int (*stats)(struct bladerf *dev, struct bladerf_stats *stats);
 };
 
 #define FW_LEGACY_ALT_SETTING_MAJOR 1
@@ -171,8 +172,6 @@ struct bladerf {
     int legacy;
 
     bladerf_dev_speed usb_speed;
-
-    struct bladerf_stats stats;
 
     /* Last error encountered */
     struct bladerf_error error;

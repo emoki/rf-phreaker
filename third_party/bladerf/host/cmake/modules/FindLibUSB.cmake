@@ -104,7 +104,6 @@ else(PKGCONFIG_LIBUSB_FOUND)
         PATH_SUFFIXES
         ${LIBUSB_LIBRARY_PATH_SUFFIX}
        )
-
     mark_as_advanced(usb_LIBRARY)
     if(usb_LIBRARY)
         set(LIBUSB_LIBRARIES ${usb_LIBRARY})

@@ -26,7 +26,7 @@ include ( CheckLibraryExists )
 include ( CheckIncludeFile )
 
 set(LIBPTHREADSWIN32_PATH
-        "${rf_phreaker_SOURCE_DIR}/third_party/pthreads-win"
+        "${CHECKOUT_PATH} /third_party/pthreads-win32"
 		CACHE
         PATH
         "Path to win-pthreads files. (This is generally only needed for Windows users who downloaded binary distributions.)"

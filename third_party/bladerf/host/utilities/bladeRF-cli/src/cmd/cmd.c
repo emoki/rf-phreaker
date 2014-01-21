@@ -20,6 +20,7 @@
 #include <stdlib.h>
 #include <string.h>
 #include <stdio.h>
+#include <pthread.h>
 
 #include "cmd.h"
 #include "conversions.h"
@@ -28,6 +29,7 @@
 #define DECLARE_CMD(x) int cmd_##x (struct cli_state *, int, char **)
 DECLARE_CMD(calibrate);
 DECLARE_CMD(clear);
+DECLARE_CMD(correct);
 DECLARE_CMD(echo);
 DECLARE_CMD(erase);
 DECLARE_CMD(flash_backup);
@@ -60,6 +62,7 @@ struct cmd {
     const char  *help;
 };
 
+static const char *cmd_names_correct[] = { "correct", NULL };
 static const char *cmd_names_calibrate[] = { "calibrate", "cal", NULL };
 static const char *cmd_names_clear[] = { "clear", "cls", NULL };
 static const char *cmd_names_echo[] = { "echo", NULL };
@@ -448,8 +451,8 @@ static const struct cmd cmd_table[] = {
             "    file          Filename to write received samples to\n"
             "\n"
             "    format        Output file format. One of the following:\n"
-            "                      csv          CSV of SC16 Q12 samples\n"
-            "                      bin          Raw SC16 Q12 DAC samples\n"
+            "                      csv          CSV of SC16 Q11 samples\n"
+            "                      bin          Raw SC16 Q11 DAC samples\n"
             "\n"
             "    samples       Number of samples per buffer to use in the asynchronous\n"
             "                  stream. Must be divisible by 1024 and >= 1024.\n"
@@ -506,8 +509,8 @@ static const struct cmd cmd_table[] = {
             "    file          Filename to read samples from\n"
             "\n"
             "    format        Output file format. One of the following:\n"
-            "                      csv          CSV of SC16 Q12 samples\n"
-            "                      bin          Raw SC16 Q12 DAC samples\n"
+            "                      csv          CSV of SC16 Q11 samples\n"
+            "                      bin          Raw SC16 Q11 DAC samples\n"
             "\n"
             "    repeat        The number of times the file contents should be \n"
             "                  transmitted. 0 implies repeat until stopped.\n"
@@ -569,6 +572,14 @@ static const struct cmd cmd_table[] = {
             "version\n"
             "\n"
             "Prints version information for host software and the current device\n"
+        )
+    },
+    {
+        FIELD_INIT(.names, cmd_names_correct),
+        FIELD_INIT(.exec, cmd_correct),
+        FIELD_INIT(.desc, "Correct for IQ Imbalances"),
+        FIELD_INIT(.help,
+            "correct [tx|rx] [dc|phase|gain] [args]\n"
         )
     },
     /* Always terminate the command entry with a completely NULL entry */
@@ -725,7 +736,13 @@ int cmd_handle(struct cli_state *s, const char *line)
 
         if (cmd) {
             if (cmd->exec) {
+                /* Commands own the device handle while they're executing.
+                 * This is needed to prevent races on the device handle while
+                 * the RX/TX make any necessary control calls while
+                 * starting up or finishing up a stream() call*/
+                pthread_mutex_lock(&s->dev_lock);
                 ret = cmd->exec(s, argc, argv);
+                pthread_mutex_unlock(&s->dev_lock);
             } else {
                 ret = CMD_RET_QUIT;
             }
