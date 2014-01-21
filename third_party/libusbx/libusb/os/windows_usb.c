@@ -1084,11 +1084,46 @@ static int cache_config_descriptors(struct libusb_device *dev, HANDLE hub_handle
 	return LIBUSB_SUCCESS;
 }
 
+static int find_port(struct libusb_context *ctx, char* hubDevicePath, char* deviceKey, uint8_t *port_number)
+{
+	USB_NODE_INFORMATION node_information;
+	USB_NODE_CONNECTION_NAME_FIXED driver_key;
+	char driverKey[MAX_PATH_LENGTH];
+	HANDLE handle;
+	DWORD bytes_read;
+	int curPort;
+	int Result = LIBUSB_ERROR_IO;
+	handle = CreateFileA(hubDevicePath, GENERIC_WRITE, FILE_SHARE_WRITE, NULL, OPEN_EXISTING, FILE_FLAG_OVERLAPPED, NULL);
+	if(handle == INVALID_HANDLE_VALUE) {
+		usbi_warn(ctx, "could not open hub %s: %s", hubDevicePath, windows_error_str(0));
+		return LIBUSB_ERROR_ACCESS;
+	}
+	
+	node_information.NodeType = UsbHub;
+	if(DeviceIoControl(handle, IOCTL_USB_GET_NODE_INFORMATION, &node_information, sizeof(node_information), &node_information, sizeof(node_information), &bytes_read, NULL)) {
+		for(curPort = 1; curPort <= node_information.u.HubInformation.HubDescriptor.bNumberOfPorts; curPort++)
+		{
+			driver_key.ConnectionIndex = curPort;
+			if(DeviceIoControl(handle, IOCTL_USB_GET_NODE_CONNECTION_DRIVERKEY_NAME, &driver_key, sizeof(driver_key), &driver_key, sizeof(driver_key), &bytes_read, NULL)) {
+				wchar_to_utf8_ms(driver_key.NodeName, driverKey, sizeof(driverKey));
+				if(strcmp(driverKey, deviceKey) == 0) {
+					*port_number = (uint8_t)curPort;
+					Result = LIBUSB_SUCCESS;
+					break;	
+				}
+			}
+		}
+	}
+	
+	CloseHandle(handle);
+	return Result;
+}
+
 /*
  * Populate a libusbx device structure
  */
 static int init_device(struct libusb_device* dev, struct libusb_device* parent_dev,
-					   uint8_t port_number, char* device_id, DWORD devinst)
+					   char* deviceKey, char* device_id, DWORD devinst)
 {
 	HANDLE handle;
 	DWORD size;
@@ -1097,6 +1132,7 @@ static int init_device(struct libusb_device* dev, struct libusb_device* parent_d
 	struct libusb_context *ctx = DEVICE_CTX(dev);
 	struct libusb_device* tmp_dev;
 	unsigned i;
+	uint8_t port_number = 0;
 
 	if ((dev == NULL) || (parent_dev == NULL)) {
 		return LIBUSB_ERROR_NOT_FOUND;
@@ -1126,6 +1162,15 @@ static int init_device(struct libusb_device* dev, struct libusb_device* parent_d
 	if (parent_dev->bus_number == 0) {
 		usbi_err(ctx, "program assertion failed: unable to find ancestor bus number for '%s'", device_id);
 		return LIBUSB_ERROR_NOT_FOUND;
+	}
+
+	priv->depth = parent_priv->depth + 1;
+
+	if(priv->depth != 0) {
+		if(find_port(ctx, parent_priv->path, deviceKey, &port_number) != LIBUSB_SUCCESS) {
+			usbi_err(ctx, "program assertion failed: unable to find port number number for '%s'", device_id);
+			return LIBUSB_ERROR_NOT_FOUND;
+		}
 	}
 	dev->bus_number = parent_dev->bus_number;
 	priv->port = port_number;
@@ -1641,7 +1686,7 @@ static int windows_get_device_list(struct libusb_context *ctx, struct discovered
 				}
 				break;
 			case GEN_PASS:
-				r = init_device(dev, parent_dev, (uint8_t)port_nr, dev_id_path, dev_info_data.DevInst);
+				r = init_device(dev, parent_dev, strbuf, dev_id_path, dev_info_data.DevInst);
 				if (r == LIBUSB_SUCCESS) {
 					// Append device to the list of discovered devices
 					discdevs = discovered_devs_append(*_discdevs, dev);
