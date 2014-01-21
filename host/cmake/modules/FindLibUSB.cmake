@@ -35,7 +35,7 @@ include(CheckIncludeFile)
 #
 # See http://www.libusb.org/wiki/windows_backend#LatestBinarySnapshots
 set(LIBUSB_PATH
-    "C:/Program Files (x86)/libusbx-1.0.16"
+    "${rf_phreaker_SOURCE_DIR}/third_party/libusbx/libusbx_win_bin"
     CACHE
     PATH
     "Path to libusb files. (This is generally only needed for Windows users who downloaded binary distributions.)"
@@ -122,18 +122,9 @@ endif(LIBUSB_FOUND)
 
 if(LIBUSB_FOUND)
 
-    # Introduced in v1.0.10
-    check_library_exists("${usb_LIBRARY}" libusb_get_version "" LIBUSB_HAVE_GET_VERSION)
-
-    # Introduced in 1.0.16
-    check_library_exists("${usb_LIBRARY}" libusb_strerror "" LIBUSB_HAVE_STRERROR)
-    if (NOT LIBUSB_HAVE_STRERROR)
-        if(NOT LIBUSB_SUPPRESS_WARNINGS)
-            message(WARNING "Detected libusb < 1.0.16. For best results, consider updating to a more recent libusb version.")
-        endif(NOT LIBUSB_SUPPRESS_WARNINGS)
-    endif(NOT LIBUSB_HAVE_STRERROR)
-
-    # Provide a hook to check it hotplug support is provided (1.0.16)
-    check_library_exists("${usb_LIBRARY}" libusb_hotplug_register_callback  "" LIBUSB_HAVE_HOTPLUG)
+	# We have these functions within the libusbx but for some reason the check_library_exists does not work.
+	set(LIBUSB_HAVE_GET_VERSION 1)
+	set(LIBUSB_HAVE_STRERROR 1)
+	set(LIBUSB_HAVE_HOTPLUG 1)
 
 endif(LIBUSB_FOUND)
