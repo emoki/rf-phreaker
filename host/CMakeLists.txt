@@ -5,8 +5,6 @@ project(bladeRF C)
 # Project configuration
 ################################################################################
 
-set(CHECKOUT_PATH <insert_checkout_path_here>)
-
 # All build output lands in this directory:
 set(CMAKE_RUNTIME_OUTPUT_DIRECTORY ${CMAKE_CURRENT_BINARY_DIR}/output)
 set(CMAKE_LIBRARY_OUTPUT_DIRECTORY ${CMAKE_CURRENT_BINARY_DIR}/output)
@@ -57,8 +55,7 @@ include(TestBigEndian)
 TEST_BIG_ENDIAN(BLADERF_BIG_ENDIAN)
 
 # Test for libusb so warnings and such only occur at the top-level
-# TODO Once we enable other backends, we should revisit whether this is a good
-#      location for this
+# TODO Once we enable other backends
 include(FindLibUSB)
 
 configure_file(
