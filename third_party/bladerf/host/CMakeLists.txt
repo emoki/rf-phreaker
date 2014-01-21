@@ -5,11 +5,6 @@ project(bladeRF C)
 # Project configuration
 ################################################################################
 
-# All build output lands in rf_phreaker:
-set(CMAKE_RUNTIME_OUTPUT_DIRECTORY ${CMAKE_RUNTIME_OUTPUT_DIRECTORY})
-set(CMAKE_LIBRARY_OUTPUT_DIRECTORY ${CMAKE_RUNTIME_OUTPUT_DIRECTORY})
-set(CMAKE_ARCHIVE_OUTPUT_DIRECTORY ${CMAKE_RUNTIME_OUTPUT_DIRECTORY})
-
 if (CMAKE_COMPILER_IS_GNUCXX)
 	remove_definitions (-std=c++11) 
 endif ()
@@ -59,8 +54,6 @@ include(TestBigEndian)
 TEST_BIG_ENDIAN(BLADERF_BIG_ENDIAN)
 
 # Test for libusb so warnings and such only occur at the top-level
-# TODO Once we enable other backends, we should revisit whether this is a good
-#      location for this
 include(FindLibUSB)
 
 configure_file(
