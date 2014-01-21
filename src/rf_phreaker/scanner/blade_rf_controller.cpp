@@ -228,16 +228,16 @@ measurement_info blade_rf_controller::get_rf_data_(rf_phreaker::frequency_type f
 	//aligned_buffer_.get_unaligned_array().output_binary("output_raw_swapped.bin");
 	//aligned_buffer_.get_unaligned_array().output_text("output_raw_swapped.txt");
 
-	for(int i = 0; i < num_samples * 2; ++i)
-		rf_phreaker::sign_extend_12_bits(reinterpret_cast<int16_t*>(aligned_buffer)[i]);
+	//for(int i = 0; i < num_samples * 2; ++i)
+	//	rf_phreaker::sign_extend_12_bits(reinterpret_cast<int16_t*>(aligned_buffer)[i]);
 
 	//aligned_buffer_.get_unaligned_array().output_binary("output_raw_swapped_and_extended.bin");
 	//aligned_buffer_.get_unaligned_array().output_text("output_extended.txt");
 
 	ipp_helper::check_status(ippsConvert_16s32f((Ipp16s*)&(*aligned_buffer_.get_aligned_array()), (Ipp32f*)data.get_iq().get(), data.get_iq().length() * 2));
 
-	////data.get_iq().output_binary("output_formatted.bin");
-	data.get_iq().output_text("output_formatted.txt");
+	//data.get_iq().output_binary("output_formatted.bin");
+	//data.get_iq().output_text("output_formatted.txt");
 
 	return data;
 }
