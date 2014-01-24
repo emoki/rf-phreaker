@@ -16,11 +16,13 @@ set (scanner_SRCS
 	byte_aligned_buffer.h
 	comm_blade_rf.h
 	comm_info.h
+	gain.h
+	gain_manager.h
 	lms_defines.h
 	lms_utilities.h
 	measurement_info.h
-        rf_switch_conversion.cpp
-        rf_switch_conversion.h
+    rf_switch_conversion.cpp
+    rf_switch_conversion.h
 	sampling_rate_conversion.cpp
 	sampling_rate_conversion.h
 	scanner.h
@@ -44,4 +46,4 @@ add_library (scanner STATIC ${scanner_SRCS})
 target_link_libraries (scanner common)
 target_link_libraries (scanner libbladerf_shared)
 target_link_libraries (scanner ipp_custom)
-target_link_libraries (scanner optimized ${TBB_LIBRARY_RELEASE} debug ${TBB_LIBRARY_DEBUG})
+target_link_libraries (scanner ${TBB_LIBRARY})

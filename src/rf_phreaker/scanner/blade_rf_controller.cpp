@@ -187,6 +187,8 @@ gain_type blade_rf_controller::set_auto_gain(frequency_type freq, bandwidth_type
 
 measurement_info blade_rf_controller::get_rf_data(frequency_type frequency, int time_ms, bandwidth_type bandwidth, const gain_type &gain, frequency_type sampling_rate)
 {
+	int throw_away_ms = 3;
+
 	// Per Nyquist a signal must be sampled at a rate greater than twice it's maximum frequency component.  Thus
 	// once converted to baseband the highest pertinent frequency component will be 1/2 the bandwidth so our sampling 
 	// rate should be a little greater than our bandwidth.
@@ -216,7 +218,7 @@ measurement_info blade_rf_controller::get_rf_data(frequency_type frequency, int 
 	check_blade_status(bladerf_set_lpf_mode(comm_blade_rf_->blade_rf(), BLADERF_MODULE_RX,
 		BLADERF_LPF_NORMAL));
 
-	int num_samples = time_samples_conversion_.convert_to_samples(time_ms, blade_sampling_rate);
+	int num_samples = time_samples_conversion_.convert_to_samples(time_ms + throw_away_ms, blade_sampling_rate);
 
 	// BladeRF only accepts data num_samples that are a multiple of 1024.
 	num_samples += 1024 - num_samples % 1024;
