@@ -122,9 +122,25 @@ endif(LIBUSB_FOUND)
 
 if(LIBUSB_FOUND)
 
-	# We have these functions within the libusbx but for some reason the check_library_exists does not work.
-	set(LIBUSB_HAVE_GET_VERSION 1)
-	set(LIBUSB_HAVE_STRERROR 1)
-	set(LIBUSB_HAVE_HOTPLUG 1)
+	if (WIN32)
+		# We have these functions within the libusbx but for some reason the check_library_exists does not work.
+		set(LIBUSB_HAVE_GET_VERSION 1)
+		set(LIBUSB_HAVE_STRERROR 1)
+		set(LIBUSB_HAVE_HOTPLUG 1)
+	else ()
+		# Introduced in v1.0.10
+		check_library_exists("${usb_LIBRARY}" libusb_get_version "" LIBUSB_HAVE_GET_VERSION)
 
+		# Introduced in 1.0.16
+		check_library_exists("${usb_LIBRARY}" libusb_strerror "" LIBUSB_HAVE_STRERROR)
+		if (NOT LIBUSB_HAVE_STRERROR)
+			if(NOT LIBUSB_SUPPRESS_WARNINGS)
+				message(WARNING "Detected libusb < 1.0.16. For best results, consider updating to a more recent libusb version.")
+			endif(NOT LIBUSB_SUPPRESS_WARNINGS)
+		endif(NOT LIBUSB_HAVE_STRERROR)
+
+		# Provide a hook to check it hotplug support is provided (1.0.16)
+		check_library_exists("${usb_LIBRARY}" libusb_hotplug_register_callback  "" LIBUSB_HAVE_HOTPLUG)
+	endif ()
+	
 endif(LIBUSB_FOUND)

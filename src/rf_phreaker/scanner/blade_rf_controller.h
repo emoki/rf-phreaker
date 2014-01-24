@@ -12,61 +12,59 @@
 #include "rf_phreaker/scanner/rf_switch_conversion.h"
 #include "rf_phreaker/scanner/lms_defines.h"
 #include "rf_phreaker/scanner/scanner_blade_rf.h"
+#include "rf_phreaker/scanner/gain_manager.h"
 
-namespace rf_phreaker {
-	namespace scanner {
+namespace rf_phreaker { namespace scanner {
 
-		class comm_blade_rf;
+class comm_blade_rf;
 
-		class blade_rf_controller
-		{
-		public:
-			blade_rf_controller(comm_type comm = USB_BLADE_RF);
+class blade_rf_controller
+{
+public:
+	blade_rf_controller(comm_type comm = USB_BLADE_RF);
 
-			~blade_rf_controller();
+	~blade_rf_controller();
 
-			std::vector<comm_info_ptr> list_available_scanners();
+	std::vector<comm_info_ptr> list_available_scanners();
 
-			void open_scanner(const scanner_id_type &id);
+	void open_scanner(const scanner_id_type &id);
 
-			void close_scanner();
+	void close_scanner();
 
-			void do_initial_scanner_config();
+	void do_initial_scanner_config();
 
-			void config_scanner_for_collection(std::vector<rf_phreaker::frequency_type> &freqs);
+	void config_scanner_for_collection(std::vector<frequency_type> &freqs);
 
-			void update_dds(); // updates values.. does not calculate dds.. that would be done with 
+	void update_dds(); // updates values.. does not calculate dds.. that would be done with 
 
-			const scanner* get_scanner();
+	const scanner* get_scanner();
 
-			const scanner_blade_rf* get_scanner_blade_rf();
+	const scanner_blade_rf* get_scanner_blade_rf();
 
-			rf_phreaker::gps get_gps_data();
+	gps get_gps_data();
 
-			measurement_info get_rf_data(rf_phreaker::frequency_type freq, int time_ms, rf_phreaker::bandwidth_type bandwidth, rf_phreaker::frequency_type sampling_rate = 0);
+	measurement_info get_rf_data_use_auto_gain(frequency_type freq, int time_ms, bandwidth_type bandwidth, frequency_type sampling_rate = 0);
 
-			measurement_info get_rf_data(rf_phreaker::frequency_type freq, int time_ms, rf_phreaker::bandwidth_type bandwidth, rf_phreaker::frequency_type sampling_rate,
-										 int rx_vga_1, int rx_vga_2, lms::lna_gain_enum lna_gain);
+	measurement_info get_rf_data(frequency_type freq, int time_ms, bandwidth_type bandwidth, const gain_type &gain, frequency_type sampling_rate = 0);
 
-		private:
-			measurement_info get_rf_data_(rf_phreaker::frequency_type freq, int time_ms, rf_phreaker::bandwidth_type bandwidth, rf_phreaker::frequency_type sampling_rate = 0);
+	gain_type set_auto_gain(frequency_type freq, bandwidth_type bandwidth, int time_ms = 0, frequency_type sampling_rate = 0);
 
-			void refresh_scanner_info();
+private:
+	void refresh_scanner_info();
 
-			int check_blade_status(int return_status);
+	int check_blade_status(int return_status);
 
-			ipp_16sc_aligned_buffer aligned_buffer_;
+	ipp_16sc_aligned_buffer aligned_buffer_;
 
-			sampling_rate_conversion sampling_rate_conversion_;
+	gain_manager gain_manager_;
 
-			time_samples_conversion time_samples_conversion_;
+	time_samples_conversion time_samples_conversion_;
 
-			rf_switch_conversion rf_switch_conversion_;
+	rf_switch_conversion rf_switch_conversion_;
 
-			std::unique_ptr<comm_blade_rf> comm_blade_rf_;
+	std::unique_ptr<comm_blade_rf> comm_blade_rf_;
 
-			std::shared_ptr<scanner_blade_rf> scanner_blade_rf_;
-		};
+	std::shared_ptr<scanner_blade_rf> scanner_blade_rf_;
+};
 
-	}
-}
+}}

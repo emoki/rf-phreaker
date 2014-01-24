@@ -15,7 +15,10 @@ TEST(BladeControllerTest, TestBladeControllerGeneral)
 	try {
 		blade_rf_controller blade;
 
+		// We ask twice because the first time we don't recieve a valid serial.  An error occurs inside libusb...
 		auto scanner_list = blade.list_available_scanners();
+		if(scanner_list.size() && (*scanner_list.begin())->id() == "")
+			scanner_list = blade.list_available_scanners();
 
 		if(scanner_list.size()) {
 			auto scanner_id = (*scanner_list.begin())->id();
@@ -30,19 +33,25 @@ TEST(BladeControllerTest, TestBladeControllerGeneral)
 
 			b.start_timer();
 
-            const int num_iterations = 1;
+			rf_phreaker::frequency_type nyc_umts_freq = 2152500000;
+			rf_phreaker::frequency_type nyc_lte_freq = 2140000000; // 10 mhz
+
+            const int num_iterations = 10;
 			std::string base_filename = "blade_samples_";
-			rf_phreaker::frequency_type freq = mhz(886);
-			size_t time_ms = 40;
-            rf_phreaker::bandwidth_type bandwidth = mhz(.001);
-			int sampling_rate = mhz(1);
-			int vga1 = 25;
-			int vga2 = 25;
-			auto lna_gain = lms::LNA_MAX;
+			rf_phreaker::frequency_type freq = mhz(925);
+			size_t time_ms = 50;
+            rf_phreaker::bandwidth_type bandwidth = mhz(4);
+			int sampling_rate = khz(7680);
+			rf_phreaker::scanner::gain_type gain(lms::LNA_MAX, 30, 0);
+
 			measurement_info data;
 
 			for(int i = 0; i < num_iterations; ++i) {			
-				data = blade.get_rf_data(freq, time_ms, sampling_rate, bandwidth, vga1, vga2, lna_gain);
+				//freq += mhz(1);
+				
+				gain.rxvga2_ < 20 ?	gain.rxvga2_ = 30 :	gain.rxvga2_ = 0;
+
+				data = blade.get_rf_data(freq, time_ms, bandwidth, gain, sampling_rate);
 
                 std::string name = base_filename + boost::lexical_cast<std::string>(i) +".txt";
                 std::ofstream file(name.c_str());
@@ -65,5 +74,6 @@ TEST(BladeControllerTest, TestBladeControllerGeneral)
 	}
 	catch(const std::exception &err) {
 		std::cout << err.what() << std::endl;
+		ASSERT_TRUE(0)  << "Error while testing with the bladeRF.  Error = " << err.what();
 	}
 }

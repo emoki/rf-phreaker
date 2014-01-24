@@ -1,18 +1,31 @@
 #pragma once
 
 #include "rf_phreaker/scanner/lms_defines.h"
-#include "rf_phreaker/scanner/packet_container.h"
 #include "rf_phreaker/common/common_types.h"
+#include "ipp.h"
+
+
 
 namespace rf_phreaker { namespace scanner {
 
-class gain
+// lna gain (MAX, MID, BYPASS)
+// vga1 (dB, max = 33)
+// vga2 (dB, ~max = 30)
+class gain_type
 {
 public:
+	gain_type() : lna_gain_(lms::LNA_MAX), rxvga1_(33), rxvga2_(0)
+	{}
 
-	static packet_container get_default_gain(rf_phreaker::frequency_type freq);
+	gain_type(lms::lna_gain_enum lna_gain, int rxvga1, int rxvga2)
+		: lna_gain_(lna_gain)
+		, rxvga1_(rxvga1)
+		, rxvga2_(rxvga2)
+	{}
 
-
+	lms::lna_gain_enum lna_gain_;
+	int rxvga1_;
+	int rxvga2_;
 };
 
 }}

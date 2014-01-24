@@ -4,7 +4,9 @@
 
 namespace rf_phreaker {
 
-	typedef int64_t scanner_id_type;
+	const int SCANNER_ID_LENGTH = 33;
+
+	typedef char scanner_serial_type[SCANNER_ID_LENGTH]; // Includes NULL terminator.
 
 	typedef unsigned int frequency_type;
 

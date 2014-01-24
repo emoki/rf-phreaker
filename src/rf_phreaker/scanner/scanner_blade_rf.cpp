@@ -8,7 +8,7 @@ namespace rf_phreaker {
 			: impl_(new scanner_blade_rf_impl(impl))
 		{}
 
-		rf_phreaker::scanner_id_type scanner_blade_rf::scanner_id() { return 0; }
+		std::string scanner_blade_rf::scanner_id() const { return impl_->serial(); }
 		std::string scanner_blade_rf::serial() const { return impl_->serial(); }
 		int scanner_blade_rf::back_end() const { return impl_->back_end(); }
 		uint8_t scanner_blade_rf::usb_bus() const { return impl_->usb_bus(); }
@@ -36,4 +36,5 @@ namespace rf_phreaker {
 		uint16_t scanner_blade_rf::firmware_version_patch() const { return impl_->firmware_version_patch(); }
 		std::string scanner_blade_rf::firmware_version_description() const { return impl_->firmware_version_description(); }
 	}
+
 }

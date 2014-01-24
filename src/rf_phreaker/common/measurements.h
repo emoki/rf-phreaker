@@ -9,7 +9,7 @@ namespace rf_phreaker {
 
 	struct gps
 	{
-		scanner_id_type scanner_id_;
+		scanner_serial_type scanner_id_;
 		bool lock_;
 		int64_t coordinated_universal_time_;  
 		int32_t visible_satelites_;
@@ -23,7 +23,7 @@ namespace rf_phreaker {
 
 	struct basic_technology_data
 	{
-		scanner_id_type scanner_id_;
+		scanner_serial_type scanner_id_;
 		int64_t collection_round_;
 		double carrier_signal_level_;
 		frequency_type carrier_frequency_;

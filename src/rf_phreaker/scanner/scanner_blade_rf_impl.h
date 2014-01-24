@@ -117,7 +117,10 @@ namespace rf_phreaker {
 			{
 				return firmware_version_.describe;
 			}
-
+			unsigned int receive_timeout() const
+			{
+				return rx_timeout_;
+			}
 			struct bladerf_version blade_rf_version_;
 			struct bladerf_version fpga_version_;
 			struct bladerf_version firmware_version_;
@@ -126,6 +129,7 @@ namespace rf_phreaker {
 			//struct bladerf_stats stats_;
 			bladerf_sampling sampling_;
 			uint16_t vctcxo_trim_;
+			unsigned int rx_timeout_;
 		};
 
 	}
