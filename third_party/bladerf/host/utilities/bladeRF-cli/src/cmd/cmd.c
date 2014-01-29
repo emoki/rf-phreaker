@@ -46,7 +46,9 @@ DECLARE_CMD(peek);
 DECLARE_CMD(poke);
 DECLARE_CMD(print);
 DECLARE_CMD(probe);
+#ifdef CLI_LIBUSB_ENABLED
 DECLARE_CMD(recover);
+#endif
 DECLARE_CMD(run);
 DECLARE_CMD(set);
 DECLARE_CMD(rx);
@@ -386,6 +388,7 @@ static const struct cmd cmd_table[] = {
             "Exit the CLI\n"
         )
     },
+#ifdef CLI_LIBUSB_ENABLED
     {
         FIELD_INIT(.names, cmd_names_rec),
         FIELD_INIT(.exec, cmd_recover),
@@ -407,8 +410,12 @@ static const struct cmd cmd_table[] = {
             "device's RAM, users should open the device with the \"open\"\n"
             "command, and write the firmware to flash via \n"
             "\"load fx3 <firmware file>\"\n"
+            "\n"
+            "Note: This command is only available when bladeRF-cli is built\n"
+            "      with libusb support.\n"
         )
     },
+#endif
     {
         FIELD_INIT(.names, cmd_names_run),
         FIELD_INIT(.exec, cmd_run),
@@ -463,17 +470,29 @@ static const struct cmd cmd_table[] = {
             "    xfers         Number of simultaneous transfers to allow the asynchronous\n"
             "                  stream to use. This should be < the 'buffers' parameter.\n"
             "\n"
-            "    The n, samples, buffers, and xfers parameters support the suffixes\n"
-            "    'K', 'M', and 'G', which are multiples of 1024.\n"
+            "    timeout       Data stream timeout. With no suffix, the default unit is ms.\n"
+            "                  The default value is 1s. Valid suffixes are 'ms' and 's'.\n"
             "\n"
             "Example:\n"
-            "  rx config file=/tmp/some_file format=bin n=10K\n"
+            "       Receive (10240 = 10 * 1024) samples, writing them to /tmp/data.bin\n"
+            "       in the binary DAC format.\n"
+            "\n"
+            "           rx config file=/tmp/data.bin format=bin n=10K\n"
             "\n"
             "Notes:\n"
+            "\n"
+            "    The n, samples, buffers, and xfers parameters support the suffixes\n"
+            "    'K', 'M', and 'G', which are multiples of 1024.\n"
             "\n"
             "  An 'rx stop' followed by an 'rx start' will result in the samples file\n"
             "  being truncated. If this is not desired, be sure to run 'rx config' to set\n"
             "  another file before restarting the rx stream.\n"
+            "\n"
+            "  For higher sample rates, it is advised that the binary output format\n"
+            "  be used, and the output file be written to RAM (e.g. /tmp, /dev/shm),\n"
+            "  if space allows. For larger captures at higher sample rates, consider\n"
+            "  using an SSD instead of a HDD.\n"
+            "\n"
         )
     },
     {
@@ -509,8 +528,8 @@ static const struct cmd cmd_table[] = {
             "    file          Filename to read samples from\n"
             "\n"
             "    format        Output file format. One of the following:\n"
-            "                      csv          CSV of SC16 Q11 samples\n"
-            "                      bin          Raw SC16 Q11 DAC samples\n"
+            "                      csv          CSV of SC16 Q11 samples ([-2048, 2047])\n"
+            "                      bin          Raw SC16 Q11 DAC samples ([-2048, 2047])\n"
             "\n"
             "    repeat        The number of times the file contents should be \n"
             "                  transmitted. 0 implies repeat until stopped.\n"
@@ -527,12 +546,31 @@ static const struct cmd cmd_table[] = {
             "    xfers         Number of simultaneous transfers to allow the asynchronous\n"
             "                  stream to use. This should be < the 'buffers' parameter.\n"
             "\n"
+            "    timeout       Data stream timeout. With no suffix, the default unit is ms.\n"
+            "                  The default value is 1s. Valid suffixes are 'ms' and 's'.\n"
+            "\n"
+            "Example:\n"
+            "   Transmitting the contents of data.bin two times, with a ~250ms\n"
+            "   delay between transmissions.\n"
+            "\n"
+            "       tx config file=data.bin format=bin repeat=2 delay=250000\n"
+            "\n"
+            "Notes:\n"
             "\n"
             "    The n, samples, buffers, and xfers parameters support the suffixes\n"
             "    'K', 'M', and 'G', which are multiples of 1024.\n"
             "\n"
-            "Example:\n"
-            "  tx config file=data.bin format=bin repeat=2 delay=250000\n"
+            "   For higher sample rates, it is advised that the input file be\n"
+            "   stored in RAM (e.g. /tmp, /dev/shm) or to an SSD, rather than a HDD.\n"
+            "\n"
+            "   When providing CSV data, this command will first convert it to\n"
+            "   a binary format, stored in a file in the current working directory.\n"
+            "   During this process, out-of-range values will be clamped.\n"
+            "\n"
+            "   When using a binary format, the user is responsible for ensuring\n"
+            "   that the provided data values are within the allowed range.\n"
+            "   This prerequisite alleviates the need for this program to perform\n"
+            "   range checks in time-sensititve callbacks.\n"
             "\n"
         )
     },

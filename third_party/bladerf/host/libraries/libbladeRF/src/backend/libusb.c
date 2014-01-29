@@ -38,7 +38,7 @@
 #include "log.h"
 #include "flash.h"
 
-#define BLADERF_LIBUSB_TIMEOUT_MS 1000
+#define CTRL_TIMEOUT 1000
 #define BULK_TIMEOUT 1000
 
 #define EP_DIR_IN   LIBUSB_ENDPOINT_IN
@@ -140,7 +140,7 @@ static int vendor_command_int(struct bladerf *dev,
                 0,
                 (unsigned char *)&buf,
                 sizeof(buf),
-                BLADERF_LIBUSB_TIMEOUT_MS
+                CTRL_TIMEOUT
              );
 
     if (status < 0) {
@@ -175,7 +175,7 @@ static int vendor_command_int_value(struct bladerf *dev,
                 0,
                 (unsigned char *)&buf,
                 sizeof(buf),
-                BLADERF_LIBUSB_TIMEOUT_MS
+                CTRL_TIMEOUT
              );
 
     if (status < 0) {
@@ -208,7 +208,7 @@ static int vendor_command_int_index(struct bladerf *dev,
                 wIndex,
                 (unsigned char *)&buf,
                 sizeof(buf),
-                BLADERF_LIBUSB_TIMEOUT_MS
+                CTRL_TIMEOUT
              );
 
     if (status < 0) {
@@ -449,7 +449,7 @@ static int lusb_fw_populate_version_legacy(struct bladerf *dev)
                 0,
                 (unsigned char *)&fw_ver,
                 sizeof(fw_ver),
-                BLADERF_LIBUSB_TIMEOUT_MS
+                CTRL_TIMEOUT
              );
 
     if (status < 0) {
@@ -513,7 +513,7 @@ static int access_peripheral(struct bladerf_lusb *lusb, int per, int dir,
     /* Write down the command */
     libusb_status = libusb_bulk_transfer(lusb->handle, 0x02, buf, 16,
                                            &transferred,
-                                           BLADERF_LIBUSB_TIMEOUT_MS);
+                                           CTRL_TIMEOUT);
 
     if (libusb_status < 0) {
         log_error("Failed to access peripheral: %s\n",
@@ -527,7 +527,7 @@ static int access_peripheral(struct bladerf_lusb *lusb, int per, int dir,
     while (libusb_status == 0 && transferred != 16) {
         libusb_status = libusb_bulk_transfer(lusb->handle, 0x82, buf, 16,
                                              &transferred,
-                                             BLADERF_LIBUSB_TIMEOUT_MS);
+                                             CTRL_TIMEOUT);
     }
 
     if (libusb_status < 0) {
@@ -932,7 +932,7 @@ static int lusb_load_fpga(struct bladerf *dev, uint8_t *image, size_t image_size
     /* Send the file down */
     assert(image_size <= INT_MAX);
     status = libusb_bulk_transfer(lusb->handle, 0x2, image, (int)image_size,
-                                  &transferred, 5 * BLADERF_LIBUSB_TIMEOUT_MS);
+                                  &transferred, 5 * CTRL_TIMEOUT);
     if (status < 0) {
         status = error_libusb2bladerf(status);
         bladerf_set_error(&dev->error, ETYPE_LIBBLADERF, status);
@@ -990,7 +990,7 @@ static int erase_sector(struct bladerf *dev, uint16_t sector)
         sector,
         (unsigned char *)&erase_ret,
         sizeof(erase_ret),
-        BLADERF_LIBUSB_TIMEOUT_MS
+        CTRL_TIMEOUT
     );
 
     if (status != sizeof(erase_ret)
@@ -1082,7 +1082,7 @@ static int read_buffer(struct bladerf *dev, uint8_t request,
                     buf_off, /* bytes */
                     &buf[buf_off],
                     read_size,
-                    BLADERF_LIBUSB_TIMEOUT_MS
+                    CTRL_TIMEOUT
         );
 
         if(status < 0) {
@@ -1149,7 +1149,7 @@ static int legacy_read_one_page(struct bladerf *dev,
             page,
             &buf[buf_off],
             read_size,
-            BLADERF_LIBUSB_TIMEOUT_MS
+            CTRL_TIMEOUT
         );
 
         if (status != read_size) {
@@ -1335,7 +1335,7 @@ static int write_buffer(struct bladerf *dev,
             dev->legacy & LEGACY_CONFIG_IF ? page : buf_off,
             &buf[buf_off],
             write_size,
-            BLADERF_LIBUSB_TIMEOUT_MS
+            CTRL_TIMEOUT
         );
 
         if(status < 0) {
@@ -1474,7 +1474,7 @@ static int lusb_device_reset(struct bladerf *dev)
                 0,
                 0,
                 0,
-                BLADERF_LIBUSB_TIMEOUT_MS
+                CTRL_TIMEOUT
              );
 
     if(status != LIBUSB_SUCCESS) {
@@ -1499,7 +1499,7 @@ static int lusb_jump_to_bootloader(struct bladerf *dev)
                 0,
                 0,
                 0,
-                BLADERF_LIBUSB_TIMEOUT_MS
+                CTRL_TIMEOUT
              );
 
     if (status < 0) {
@@ -2087,6 +2087,25 @@ static int lusb_rx(struct bladerf *dev, bladerf_format format, void *samples,
     return (int)ret;
 }
 
+/* At the risk of being a little inefficient, just keep attempting to cancel
+ * everything. If a transfer's no longer active, we'll just get a NOT_FOUND
+ * error -- no big deal.  Just accepting that alleviates the need to track
+ * the status of each transfer...
+ */
+static inline void cancel_all_transfers(struct bladerf_stream *stream)
+{
+    size_t i;
+    int status;
+    struct lusb_stream_data *stream_data = stream->backend_data;
+
+    for (i = 0; i < stream->num_transfers; i++ ) {
+        status = libusb_cancel_transfer(stream_data->transfers[i]);
+        if (status < 0 && status != LIBUSB_ERROR_NOT_FOUND) {
+            log_error("Error canceling transfer (%d): %s\n",
+                    status, libusb_error_name(status));
+        }
+    }
+}
 
 static void LIBUSB_CALL lusb_stream_cb(struct libusb_transfer *transfer)
 {
@@ -2095,8 +2114,6 @@ static void LIBUSB_CALL lusb_stream_cb(struct libusb_transfer *transfer)
     void *next_buffer = NULL;
     struct bladerf_metadata metadata;
     struct lusb_stream_data *stream_data = stream->backend_data;
-    size_t i;
-    int status;
     size_t bytes_per_buffer;
 
     /* Check to see if the transfer has been cancelled or errored */
@@ -2143,14 +2160,7 @@ static void LIBUSB_CALL lusb_stream_cb(struct libusb_transfer *transfer)
 
         /* This transfer is no longer active */
         stream_data->active_transfers--;
-
-        for (i = 0; i < stream->num_transfers; i++ ) {
-            status = libusb_cancel_transfer(stream_data->transfers[i]);
-            if (status < 0 && status != LIBUSB_ERROR_NOT_FOUND) {
-                log_error("Error canceling transfer (%d): %s\n",
-                            status, libusb_error_name(status));
-            }
-        }
+        cancel_all_transfers(stream);
     }
 
     /* Check to see if the stream is still valid */
@@ -2177,6 +2187,7 @@ static void LIBUSB_CALL lusb_stream_cb(struct libusb_transfer *transfer)
         }
     } else {
         stream_data->active_transfers--;
+        cancel_all_transfers(stream);
     }
 
     bytes_per_buffer = c16_samples_to_bytes(stream->samples_per_buffer);
@@ -2194,7 +2205,7 @@ static void LIBUSB_CALL lusb_stream_cb(struct libusb_transfer *transfer)
             (int)bytes_per_buffer,
             lusb_stream_cb,
             stream,
-            BULK_TIMEOUT
+            stream->dev->transfer_timeout[stream->module]
         );
         /* Submit the tranfer */
         libusb_submit_transfer(transfer);

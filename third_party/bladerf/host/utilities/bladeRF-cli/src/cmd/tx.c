@@ -31,6 +31,10 @@
 #include "host_config.h"
 #include "rxtx_impl.h"
 
+/* The DAC range is [-2048, 2047] */
+#define SC16Q11_IQ_MIN  (-2048)
+#define SC16Q11_IQ_MAX  (2047)
+
 struct tx_callback_data
 {
     struct rxtx_data *tx;
@@ -57,8 +61,8 @@ static void *tx_callback(struct bladerf *dev,
 
     unsigned char requests; /* Requests from main control thread */
     size_t read_status;     /* Status from read() calls */
-    size_t n_read;          /* Number of bytes read from file */
-    size_t to_read;         /* Temp var, # of samples to read */
+    size_t n_read;          /* # of int16_t I and Q values already read */
+    size_t to_read;         /* # of int16_t I and Q values to attempt to read */
     bool zero_pad;          /* We need to zero-pad the rest of the buffer */
 
     int16_t *samples_int16 = NULL;
@@ -93,7 +97,7 @@ static void *tx_callback(struct bladerf *dev,
 
     /* Keep reading from the file until we have enough data, or have a
      * a condition in which we'll just zero pad the rest of the buffer */
-    while (n_read < tx->data_mgmt.samples_per_buffer && !zero_pad) {
+    while (n_read < (2 * tx->data_mgmt.samples_per_buffer) && !zero_pad) {
         to_read = 2 * tx->data_mgmt.samples_per_buffer - n_read;
         read_status = fread(samples_int16 + n_read, sizeof(int16_t),
                             to_read, tx->file_mgmt.file);
@@ -173,10 +177,11 @@ static int tx_csv_to_sc16q11(struct cli_state *s)
     FILE *csv = NULL;
     char *bin_name = NULL;
     int line = 1;
+    unsigned int n_clamped = 0;
 
     assert(tx->file_mgmt.path != NULL);
 
-    csv = fopen(tx->file_mgmt.path, "r");
+    csv = expand_and_open(tx->file_mgmt.path, "r");
     if (!csv) {
         status = CMD_RET_FILEOP;
         goto tx_csv_to_sc16q11_out;
@@ -189,7 +194,7 @@ static int tx_csv_to_sc16q11(struct cli_state *s)
         goto tx_csv_to_sc16q11_out;
     }
 
-    bin = fopen(bin_name, "wb+");
+    bin = expand_and_open(bin_name, "wb+");
     if (!bin) {
         status = CMD_RET_FILEOP;
         goto tx_csv_to_sc16q11_out;
@@ -202,6 +207,14 @@ static int tx_csv_to_sc16q11(struct cli_state *s)
 
         if (token) {
             tmp_int = str2int(token, INT16_MIN, INT16_MAX, &ok);
+
+            if (tmp_int < SC16Q11_IQ_MIN) {
+                tmp_int = SC16Q11_IQ_MIN;
+                n_clamped++;
+            } else if (tmp_int > SC16Q11_IQ_MAX) {
+                tmp_int = SC16Q11_IQ_MAX;
+                n_clamped++;
+            }
 
             if (ok) {
                 tmp_iq[0] = tmp_int;
@@ -216,6 +229,14 @@ static int tx_csv_to_sc16q11(struct cli_state *s)
 
             if (token) {
                 tmp_int = str2int(token, INT16_MIN, INT16_MAX, &ok);
+
+                if (tmp_int < SC16Q11_IQ_MIN) {
+                    tmp_int = SC16Q11_IQ_MIN;
+                    n_clamped++;
+                } else if (tmp_int > SC16Q11_IQ_MAX) {
+                    tmp_int = SC16Q11_IQ_MAX;
+                    n_clamped++;
+                }
 
                 if (ok) {
                     tmp_iq[1] = tmp_int;
@@ -252,6 +273,11 @@ static int tx_csv_to_sc16q11(struct cli_state *s)
         tx->file_mgmt.format = RXTX_FMT_BIN_SC16Q11;
         free(tx->file_mgmt.path);
         tx->file_mgmt.path = bin_name;
+
+        if (n_clamped != 0) {
+            printf("    Warning: %u values clamped within DAC SC16 Q11 range "
+                   "of [%d, %d].\n", n_clamped, SC16Q11_IQ_MIN, SC16Q11_IQ_MAX);
+        }
     }
 
 tx_csv_to_sc16q11_out:
@@ -378,49 +404,65 @@ static int tx_cmd_start(struct cli_state *s)
 {
     int status = 0;
 
+    /* Check that we're able to start up in our current state */
     status = rxtx_cmd_start_check(s, s->tx, "tx");
+    if (status != 0) {
+        return status;
+    }
+
+    /* Perform file conversion (if needed) and open input file */
+    pthread_mutex_lock(&s->tx->file_mgmt.file_meta_lock);
+
+    if (s->tx->file_mgmt.format == RXTX_FMT_CSV_SC16Q11) {
+        status = tx_csv_to_sc16q11(s);
+
+        if (status == 0) {
+            printf("    Converted CSV to SC16 Q11 file and "
+                    "switched to converted file.\n\n");
+        }
+    }
 
     if (status == 0) {
-        /* Perform file conversion (if needed) and open input file */
-        pthread_mutex_lock(&s->tx->file_mgmt.file_meta_lock);
+        pthread_mutex_lock(&s->tx->file_mgmt.file_lock);
 
-        if (s->tx->file_mgmt.format == RXTX_FMT_CSV_SC16Q11) {
-            status = tx_csv_to_sc16q11(s);
-
-            if (status == 0) {
-                printf("    Converted CSV to SC16 Q11 file and "
-                        "switched to converted file.\n\n");
-            }
+        assert(s->tx->file_mgmt.format == RXTX_FMT_BIN_SC16Q11);
+        s->tx->file_mgmt.file = expand_and_open(s->tx->file_mgmt.path, "r");
+        if (!s->tx->file_mgmt.file) {
+            set_last_error(&s->tx->last_error, ETYPE_ERRNO, errno);
+            status = CMD_RET_FILEOP;
+        } else {
+            status = 0;
         }
 
-        if (status == 0) {
-            pthread_mutex_lock(&s->tx->file_mgmt.file_lock);
+        pthread_mutex_unlock(&s->tx->file_mgmt.file_lock);
+    }
 
-            assert(s->tx->file_mgmt.format == RXTX_FMT_BIN_SC16Q11);
-            s->tx->file_mgmt.file = fopen(s->tx->file_mgmt.path, "r");
-            if (!s->tx->file_mgmt.file) {
-                set_last_error(&s->tx->last_error, ETYPE_ERRNO, errno);
-                status = CMD_RET_FILEOP;
-            } else {
-                status = 0;
-            }
+    pthread_mutex_unlock(&s->tx->file_mgmt.file_meta_lock);
 
-            pthread_mutex_unlock(&s->tx->file_mgmt.file_lock);
-        }
+    if (status != 0) {
+        return status;
+    }
 
-        pthread_mutex_unlock(&s->tx->file_mgmt.file_meta_lock);
 
-        if (status == 0) {
-            rxtx_submit_request(s->tx, RXTX_TASK_REQ_START);
-            status = rxtx_wait_for_state(s->tx, RXTX_STATE_RUNNING, 3000);
+    /* Set our stream timeout */
+    status = bladerf_set_transfer_timeout(s->dev, BLADERF_MODULE_TX,
+                                          s->tx->data_mgmt.timeout_ms);
 
-            /* This should never occur. If it does, there's likely a defect
-             * present in the tx task */
-            if (status != 0) {
-                cli_err(s, "tx", "TX did not start up in the alloted time\n");
-                status = CMD_RET_UNKNOWN;
-            }
-        }
+    if (status != 0) {
+        s->last_lib_error = status;
+        set_last_error(&s->rx->last_error, ETYPE_BLADERF, s->last_lib_error);
+        return CMD_RET_LIBBLADERF;
+    }
+
+    /* Request thread to start running */
+    rxtx_submit_request(s->tx, RXTX_TASK_REQ_START);
+    status = rxtx_wait_for_state(s->tx, RXTX_STATE_RUNNING, 3000);
+
+    /* This should never occur. If it does, there's likely a defect
+     * present in the tx task */
+    if (status != 0) {
+        cli_err(s, "tx", "TX did not start up in the alloted time\n");
+        status = CMD_RET_UNKNOWN;
     }
 
     return status;

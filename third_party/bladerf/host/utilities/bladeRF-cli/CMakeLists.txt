@@ -7,7 +7,7 @@ project(bladeRF-cli C)
 
 set(VERSION_INFO_MAJOR  0)
 set(VERSION_INFO_MINOR  10)
-set(VERSION_INFO_PATCH  2)
+set(VERSION_INFO_PATCH  3)
 if(NOT DEFINED VERSION_INFO_EXTRA)
     set(VERSION_INFO_EXTRA "git")
 endif()
@@ -103,6 +103,7 @@ set(BLADERF_CLI_SOURCE
         src/cmd/calibrate.c
         src/cmd/cmd.c
         src/cmd/erase.c
+        src/cmd/flash_common.c
         src/cmd/flash_backup.c
         src/cmd/flash_image.c
         src/cmd/flash_init_cal.c
@@ -119,15 +120,20 @@ set(BLADERF_CLI_SOURCE
         src/cmd/rxtx.c
         src/cmd/tx.c
         src/cmd/version.c
-        src/cmd/recover.c
         src/cmd/jump_boot.c
         src/cmd/mimo.c
         src/cmd/correct.c
         src/interactive/interactive.c
         ${BLADERF_HOST_COMMON_SOURCE_DIR}/conversions.c
         ${BLADERF_HOST_COMMON_SOURCE_DIR}/log.c
-        ${UTILITIES_COMMON_SRC}/ezusb.c
 )
+
+if(LIBUSB_FOUND)
+  set(BLADERF_CLI_SOURCE ${BLADERF_CLI_SOURCE}
+          src/cmd/recover.c
+          ${UTILITIES_COMMON_SRC}/ezusb.c
+)
+endif()
 
 # Select the interactive mode (and script handling) backend
 if(ENABLE_LIBTECLA)
