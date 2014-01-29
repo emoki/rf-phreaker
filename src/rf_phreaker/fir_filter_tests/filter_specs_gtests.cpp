@@ -1,7 +1,7 @@
 #include "gtest/gtest.h"
 
 #include "rf_phreaker/fir_filter/filter_specs.h"
-#include "rf_phreaker/ipp_custom/ipp_array.h"
+#include "rf_phreaker/common/ipp_array.h"
 
 using namespace rf_phreaker;
 

@@ -69,6 +69,10 @@ public:
 
 	int num_iterations_required(int num_input_samples_desired) const;
 
+	int up_factor() const;
+
+	int down_factor() const;
+
 private:
 	fir_filter_impl *impl_;
 };

@@ -14,6 +14,8 @@ namespace rf_phreaker {
 
 	typedef int32_t bandwidth_type;
 
+	typedef int64_t time_type;
+
 	// See bottom for more on operating bands.
 	enum operating_band
 	{

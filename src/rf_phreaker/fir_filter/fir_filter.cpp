@@ -5,7 +5,7 @@
 #include "rf_phreaker/fir_filter/fir_filter.h"
 #include "rf_phreaker/fir_filter/fir_filter_impl.h"
 #include "rf_phreaker/fir_filter/filter_specs.h"
-#include "rf_phreaker/ipp_custom/ipp_array.h"
+#include "rf_phreaker/common/ipp_array.h"
 
 using namespace rf_phreaker;
 
@@ -76,6 +76,13 @@ int fir_filter::num_iterations_required(int num_input_samples_desired) const{
 	return impl_->num_iterations_required(num_input_samples_desired);
 }
 	
+int fir_filter::up_factor() const {
+	return impl_->up_factor();
+}
+
+int fir_filter::down_factor() const {
+	return impl_->down_factor();
+}
 
 
 

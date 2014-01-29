@@ -1,6 +1,6 @@
 #pragma once
 
-#include "fft_helper.h"
+#include "rf_phreaker/common/fft_helper.h"
 #include <boost/scoped_ptr.hpp>
 #include <list>
 

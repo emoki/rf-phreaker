@@ -60,7 +60,7 @@ void processing_graph::initialize(scanner_controller_interface *sc)
 						std::cout << 
 							"freq: " << std::get<0>(lte).frequency() << " hz\t" << 
 							"bandwidth: " << std::get<0>(lte).bandwidth() << " hz \t" << 
-							"time: " << std::get<0>(lte).time_ms() << " ms\t" << 
+							"time: " << std::get<0>(lte).time_ns() << " ms\t" << 
 							"sample_rate: " << std::get<0>(lte).sampling_rate() << " hz\t" << 
 							"num_samples: " << std::get<0>(lte).get_iq().length() << "\t" << 
 							std::endl;

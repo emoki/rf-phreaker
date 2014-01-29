@@ -11,12 +11,6 @@ set (ipp_custom_VERSION_TWEAK 0)
 
 # Set the source files.
 set (ipp_custom_SRCS 
-	fft_helper.cpp
-	fft_helper.h
-	ipp_array.h
-	ipp_helper.h
-	moving_window_calculator.cpp
-	moving_window_calculator.h
 	ipp_export.def
 	${SRC_PLATFORM_SPECIFIC}/stdafx.cpp
 	${SRC_PLATFORM_SPECIFIC}/dllmain_ipp_custom.cpp)

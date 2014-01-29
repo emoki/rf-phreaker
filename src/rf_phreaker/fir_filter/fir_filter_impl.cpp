@@ -1,12 +1,8 @@
 #include "rf_phreaker/fir_filter/fir_filter_impl.h"
+#include "rf_phreaker/ipp_custom/ipp.h"
+#include "rf_phreaker/common/exception_types.h"
 
 #include <math.h>
-#include "rf_phreaker/ipp_custom/ipp.h"
-
-#ifdef _DEBUG
-	#include "stdio.h"
-	#include "time.h"
-#endif
 
 using namespace rf_phreaker;
 
@@ -64,7 +60,7 @@ int fir_filter_impl::set_taps(double normFreq, int length, const double normFact
 
 	Ipp64f* pTmpTaps = ippsMalloc_64f(length);
 	if ( pTmpTaps == NULL ) return _WIF_MEMORY_ALLOCATION;
-	ippsFIRGenLowpass_64f((Ipp64f)normFreq, pTmpTaps, length, ippWinHamming, ippFalse);
+	ippsFIRGenLowpass_64f((Ipp64f)normFreq, pTmpTaps, length, /*ippWinBlackman*/ippWinHamming, ippFalse);
 	if ( normFactor != 1.0 )
 	{
 		ippsMulC_64f_I( (Ipp64f)normFactor, pTmpTaps, length );
@@ -122,21 +118,21 @@ int fir_filter_impl::init_state(const Ipp32fc* taps)
 
 	ippsFree(m_DelayLine);
 	m_DelayLine = ippsMalloc_32fc(m_DelayLen);
-	if ( m_DelayLine == NULL ) throw std::runtime_error("fir_filter_impl::InitState null pointer result after allocating delay line.");
+	if ( m_DelayLine == NULL ) throw rf_phreaker::filter_error("fir_filter_impl::InitState null pointer result after allocating delay line.");
 
 	if ( is_multi_rate )
 	{
 		if ( ippsFIRMRInitAlloc_32fc(&m_State, taps, m_Length,
 			m_UpFactor, m_UpPhase, m_DownFactor, m_DownPhase, NULL) != ippStsNoErr )
 		{
-			throw std::runtime_error("fir_filter_impl::InitState error in FIRMRInitAlloc.");
+			throw rf_phreaker::filter_error("fir_filter_impl::InitState error in FIRMRInitAlloc.");
 		}
 	}
 	else
 	{
 		if ( ippsFIRInitAlloc_32fc(&m_State, taps, m_Length, NULL) != ippStsNoErr )
 		{
-			throw std::runtime_error("fir_filter_impl::InitState error in FIRInitAlloc.");
+			throw rf_phreaker::filter_error("fir_filter_impl::InitState error in FIRInitAlloc.");
 		}
 	}
 
@@ -147,9 +143,9 @@ int fir_filter_impl::init_state(const Ipp32fc* taps)
 int fir_filter_impl::filter(Ipp32fc *in, int numIters) const
 {
 	// TODO: note that this doesn't work with ZeroDelay!!!!
-	if ( m_ZeroDelay ) throw std::runtime_error("fir_filter_impl::Filter in-place filtering not allowed with a zero-delay filter");
+	if ( m_ZeroDelay ) throw rf_phreaker::filter_error("fir_filter_impl::Filter in-place filtering not allowed with a zero-delay filter");
 	if ( ippsFIR_32fc_I(in, numIters, m_State) != ippStsNoErr )
-		throw std::runtime_error("fir_filter_impl::Filter error in ippsFIR in-place filter operation");
+		throw rf_phreaker::filter_error("fir_filter_impl::Filter error in ippsFIR in-place filter operation");
 	return _WIF_NO_ERROR;
 }
 
@@ -164,7 +160,7 @@ int fir_filter_impl::filter(const Ipp32fc *in, Ipp32fc *out, int numIters) const
 	ippsFIRSetDlyLine_32fc(m_State, m_DelayLine);
 
 	if ( ippsFIR_32fc(in, out, numIters, m_State) != ippStsNoErr )
-		throw std::runtime_error("fir_filter_impl::Filter error in ippsFIR filter operation");
+		throw rf_phreaker::filter_error("fir_filter_impl::Filter error in ippsFIR filter operation");
 	return _WIF_NO_ERROR;
 }
 
@@ -178,7 +174,7 @@ int fir_filter_impl::filter(const Ipp32fc *in, int num_input_samples_to_filter,
 	if (num_samples_output_buffer_capacity < num_output_filtered_samples)
 	{
 		num_output_filtered_samples = 0;
-		throw std::runtime_error("fir_filter_impl::Filter insufficient output buffer capacity.");
+		throw rf_phreaker::filter_error("fir_filter_impl::Filter insufficient output buffer capacity.");
 	}
 
 	int numIters = num_iterations_required(num_input_samples_to_filter);

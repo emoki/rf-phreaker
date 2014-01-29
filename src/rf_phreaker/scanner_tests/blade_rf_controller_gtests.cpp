@@ -33,25 +33,28 @@ TEST(BladeControllerTest, TestBladeControllerGeneral)
 
 			b.start_timer();
 
-			rf_phreaker::frequency_type nyc_umts_freq = 2152500000;
+			rf_phreaker::frequency_type das_freq = 888000000;
+			rf_phreaker::frequency_type nyc_umts_freq1 = 876800000;
+			rf_phreaker::frequency_type nyc_umts_freq2 = 2152500000;
 			rf_phreaker::frequency_type nyc_lte_freq = 2140000000; // 10 mhz
 
-            const int num_iterations = 10;
-			std::string base_filename = "blade_samples_";
-			rf_phreaker::frequency_type freq = mhz(925);
-			size_t time_ms = 50;
-            rf_phreaker::bandwidth_type bandwidth = mhz(4);
-			int sampling_rate = khz(7680);
-			rf_phreaker::scanner::gain_type gain(lms::LNA_MAX, 30, 0);
+            const int num_iterations = 5;
+			std::string base_filename = "blade_samples_das_";
+			rf_phreaker::frequency_type freq = das_freq;
+			rf_phreaker::time_type time_ns = (rf_phreaker::time_type)0.06e9;
+            rf_phreaker::bandwidth_type bandwidth = mhz(5);
+			int sampling_rate = khz(4875);
+			//int sampling_rate = khz(3840);
+			rf_phreaker::scanner::gain_type gain(lms::LNA_MAX, 25, 0);
 
 			measurement_info data;
 
 			for(int i = 0; i < num_iterations; ++i) {			
 				//freq += mhz(1);
 				
-				gain.rxvga2_ < 20 ?	gain.rxvga2_ = 30 :	gain.rxvga2_ = 0;
+				//gain.rxvga2_ < 20 ?	gain.rxvga2_ = 30 :	gain.rxvga2_ = 0;
 
-				data = blade.get_rf_data(freq, time_ms, bandwidth, gain, sampling_rate);
+				data = blade.get_rf_data(freq, time_ns, bandwidth, gain, sampling_rate);
 
                 std::string name = base_filename + boost::lexical_cast<std::string>(i) +".txt";
                 std::ofstream file(name.c_str());
@@ -68,7 +71,7 @@ TEST(BladeControllerTest, TestBladeControllerGeneral)
 				.append("\taverage_transer_rate B/s:\t")
 				.append(boost::lexical_cast<std::string>(b.total_time_elapsed().wall / ((double)data.get_iq().length() * sizeof(int16_t)* 2 * (num_iterations))))
 				.append("\tsnapshot_time:\t")
-				.append(boost::lexical_cast<std::string>(time_ms));
+				.append(boost::lexical_cast<std::string>(time_ns / 1e9));
 			b.output_time_elapsed(str);
 		}
 	}

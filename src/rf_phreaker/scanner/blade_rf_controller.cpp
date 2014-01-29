@@ -79,15 +79,15 @@ void blade_rf_controller::do_initial_scanner_config()
 	// Is this done inside bladeRF?  If not, this can be done once and 
 	// registry values can be saved in hw and loaded next init phase.
 
-	//check_blade_status(bladerf_calibrate_dc(comm_blade_rf_->blade_rf(), 
-	//	BLADERF_DC_CAL_LPF_TUNING));
+	check_blade_status(bladerf_calibrate_dc(comm_blade_rf_->blade_rf(), 
+		BLADERF_DC_CAL_LPF_TUNING));
 
 
-	//check_blade_status(bladerf_calibrate_dc(comm_blade_rf_->blade_rf(), 
-	//	BLADERF_DC_CAL_RX_LPF));
+	check_blade_status(bladerf_calibrate_dc(comm_blade_rf_->blade_rf(), 
+		BLADERF_DC_CAL_RX_LPF));
 
-	//check_blade_status(bladerf_calibrate_dc(comm_blade_rf_->blade_rf(), 
-	//	BLADERF_DC_CAL_RXVGA2));
+	check_blade_status(bladerf_calibrate_dc(comm_blade_rf_->blade_rf(), 
+		BLADERF_DC_CAL_RXVGA2));
 
 	//check_blade_status(bladerf_set_sampling(comm_blade_rf_->blade_rf(),
 	//	bladerf_sampling::BLADERF_SAMPLING_INTERNAL));
@@ -162,32 +162,32 @@ gps blade_rf_controller::get_gps_data()
 	return gps();
 }
 
-measurement_info blade_rf_controller::get_rf_data_use_auto_gain(frequency_type frequency, int time_ms, bandwidth_type bandwidth, frequency_type sampling_rate)
+measurement_info blade_rf_controller::get_rf_data_use_auto_gain(frequency_type frequency, time_type time_ns, bandwidth_type bandwidth, frequency_type sampling_rate)
 {
 	auto gain = set_auto_gain(frequency, bandwidth);
 
-	return get_rf_data(frequency, time_ms, bandwidth, gain, sampling_rate);
+	return get_rf_data(frequency, time_ns, bandwidth, gain, sampling_rate);
 }
 
-gain_type blade_rf_controller::set_auto_gain(frequency_type freq, bandwidth_type bandwidth, int time_ms, 
+gain_type blade_rf_controller::set_auto_gain(frequency_type freq, bandwidth_type bandwidth, time_type time_ns,
 										frequency_type sampling_rate)
 {
 	// Use lowest sampling rate because we only care about the Max ADC.
-	if(time_ms == 0)
-		time_ms = 5;
+	if(time_ns == 0)
+		time_ns = 5000000;
 
 	sampling_rate = 1920000;
 
 	gain_type gain;
 
-	auto data = get_rf_data(freq, time_ms, bandwidth, gain, sampling_rate);
+	auto data = get_rf_data(freq, time_ns, bandwidth, gain, sampling_rate);
 
 	return gain_manager_.calculate_gain(data);
 }
 
-measurement_info blade_rf_controller::get_rf_data(frequency_type frequency, int time_ms, bandwidth_type bandwidth, const gain_type &gain, frequency_type sampling_rate)
+measurement_info blade_rf_controller::get_rf_data(frequency_type frequency, time_type time_ns, bandwidth_type bandwidth, const gain_type &gain, frequency_type sampling_rate)
 {
-	int throw_away_ms = 3;
+	int throw_away_ns = 3000000;
 
 	// Per Nyquist a signal must be sampled at a rate greater than twice it's maximum frequency component.  Thus
 	// once converted to baseband the highest pertinent frequency component will be 1/2 the bandwidth so our sampling 
@@ -218,7 +218,7 @@ measurement_info blade_rf_controller::get_rf_data(frequency_type frequency, int 
 	check_blade_status(bladerf_set_lpf_mode(comm_blade_rf_->blade_rf(), BLADERF_MODULE_RX,
 		BLADERF_LPF_NORMAL));
 
-	int num_samples = time_samples_conversion_.convert_to_samples(time_ms + throw_away_ms, blade_sampling_rate);
+	int num_samples = time_samples_conversion_.convert_to_samples(time_ns/* + throw_away_ns*/, blade_sampling_rate);
 
 	// BladeRF only accepts data num_samples that are a multiple of 1024.
 	num_samples += 1024 - num_samples % 1024;
@@ -234,7 +234,7 @@ measurement_info blade_rf_controller::get_rf_data(frequency_type frequency, int 
 		aligned_buffer, num_samples, &metadata));
 
 	measurement_info data(num_samples, frequency, blade_bandwidth, blade_sampling_rate,
-		time_ms, gain);
+		gain);
 
 	for(int i = 0; i < num_samples * 2; ++i)
 		sign_extend_12_bits(reinterpret_cast<int16_t*>(aligned_buffer)[i]);

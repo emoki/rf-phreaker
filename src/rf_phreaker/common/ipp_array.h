@@ -1,7 +1,8 @@
 #pragma once
 
 #include "ipp.h"
-#include "rf_phreaker/ipp_custom/ipp_helper.h"
+#include "rf_phreaker/common/ipp_helper.h"
+#include "rf_phreaker/common/exception_types.h"
 
 #include <stdint.h>
 #include <assert.h>
@@ -46,7 +47,12 @@ public:
 
 	void set_array_values(DataType value);
 
+	// Data is copied over.  Reallocates the internal array if necessary; internal data is lost in this case.
 	void copy(const DataType *data, int data_length);
+
+	// Data is copied over at the offset.  Fails if data reallocation is needed.
+	template<typename Class>
+	void copy_at(const Class *data, int data_length, int offset);
 
 	const DataType * get(int position = 0) const;
 
@@ -56,7 +62,7 @@ public:
 
 	int length() const;
 
-	ipp_array create_shallow_copy(int offset) const;
+	const ipp_array create_shallow_copy(int offset) const;
 
 	DataType& operator [](int position) { return array_[position]; }
 
@@ -249,7 +255,35 @@ template<typename DataType>	void ipp_array<DataType>::copy(const DataType *data,
 	memcpy(array_, data, data_length * sizeof(DataType));
 }
 
-template<typename DataType>	ipp_array<DataType> ipp_array<DataType>::create_shallow_copy(int offset) const
+template<typename DataType> template<typename Class>
+void ipp_array<DataType>::copy_at(const Class *data, int data_length, int offset)
+{
+	assert(data_length >= 0);
+
+	if(std::is_same<DataType, Class>::value == false)
+		throw rf_phreaker::ipp_error("Error using ipp_array::copy_at.  No conversion is possible.");
+
+	if(data_length + offset > length_)
+		throw rf_phreaker::ipp_error("Error using ipp_array::copy_at.  Array length is too small.");
+
+	memcpy(&array_[offset], data, data_length * sizeof(DataType));
+}
+
+template<> template<>
+inline void ipp_array<Ipp32fc>::copy_at(const Ipp32f *data, int data_length, int offset)
+{
+	assert(data_length >= 0);
+
+	if(data_length + offset > length_)
+		throw rf_phreaker::ipp_error("Error using ipp_array::copy_at.  Array length is too small.");
+
+	for(int i = 0; i < data_length; ++i) {
+		array_[i + offset].re = data[i];
+		array_[i + offset].im = 0;
+	}
+}
+
+template<typename DataType>	const ipp_array<DataType> ipp_array<DataType>::create_shallow_copy(int offset) const
 {
 	assert(offset < length_);
 

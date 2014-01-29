@@ -24,8 +24,16 @@ set (common_SRCS
 	monitor_object.h
 	operating_band_range_specifier.h
 	operating_band_range_specifier.cpp
+	raw_signal.h
+	fft_helper.cpp
+	fft_helper.h
+	ipp_array.h
+	ipp_helper.h
+	moving_window_calculator.cpp
+	moving_window_calculator.h
+
 	${SRC_PLATFORM_SPECIFIC}/stdafx.cpp)
 
 add_library (common STATIC ${common_SRCS})
-#target_link_libraries (common optimized ${TBB_LIBRARY_RELEASE} debug ${TBB_LIBRARY_DEBUG})
 target_link_libraries (common ${TBB_LIBRARY})
+target_link_libraries (common ipp_custom)

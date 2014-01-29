@@ -126,7 +126,7 @@ if(LIBUSB_FOUND)
 		# We have these functions within the libusbx but for some reason the check_library_exists does not work.
 		set(LIBUSB_HAVE_GET_VERSION 1)
 		set(LIBUSB_HAVE_STRERROR 1)
-		set(LIBUSB_HAVE_HOTPLUG 1)
+		set(LIBUSB_HAVE_HOTPLUG 0)
 	else ()
 		# Introduced in v1.0.10
 		check_library_exists("${usb_LIBRARY}" libusb_get_version "" LIBUSB_HAVE_GET_VERSION)

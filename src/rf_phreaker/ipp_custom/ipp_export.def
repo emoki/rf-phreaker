@@ -15,6 +15,7 @@ EXPORTS
 	ippsMax_32f
 	ippsNormalize_32fc
 	ippsCrossCorr_32fc
+	ippsCrossCorr_32f
 	ippsFIRGenLowpass_64f
 	ippsFIRMRInitAlloc_32fc
 	ippsFIRInitAlloc_32fc
@@ -48,6 +49,7 @@ EXPORTS
 	ippsNorm_L2_32fc64f
 	ippsDivC_32fc_I
 	ippsDivC_32f_I
+	ippsDivC_32f
 	ippsDiv_32f_I
 	ippsSum_32f
 	ippsSqrt_32f

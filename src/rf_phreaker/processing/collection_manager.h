@@ -17,25 +17,25 @@ class collection_parameters
 public:
 	collection_parameters()
 		: freq_(0)
-		, time_ms_(0)
+		, time_ns_(0)
 		, bandwidth_(0)
 		, sampling_rate_(0)
 	{}
 
 	collection_parameters(rf_phreaker::frequency_type freq, int time_ms, rf_phreaker::bandwidth_type bw, rf_phreaker::frequency_type sampling_rate = 0)
 		: freq_(freq)
-		, time_ms_(time_ms)
+		, time_ns_(time_ms)
 		, bandwidth_(bw)
 		, sampling_rate_(sampling_rate)
 	{}
 
 	bool operator==(const collection_parameters &a)
 	{
-		return freq_ == a.freq_ && time_ms_ == a.time_ms_ && bandwidth_ == a.bandwidth_ && sampling_rate_ == a.sampling_rate_;
+		return freq_ == a.freq_ && time_ns_ == a.time_ns_ && bandwidth_ == a.bandwidth_ && sampling_rate_ == a.sampling_rate_;
 	}
 
 	rf_phreaker::frequency_type freq_;
-	int time_ms_;
+	int time_ns_;
 	rf_phreaker::bandwidth_type bandwidth_;
 	rf_phreaker::frequency_type sampling_rate_;
 };

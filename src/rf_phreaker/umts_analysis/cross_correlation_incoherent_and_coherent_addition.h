@@ -1,7 +1,7 @@
 #pragma once
 
-#include "rf_phreaker/ipp_custom/ipp_array.h"
-#include "rf_phreaker/ipp_custom/moving_window_calculator.h"
+#include "rf_phreaker/common/ipp_array.h"
+#include "rf_phreaker/common/moving_window_calculator.h"
 
 class cross_correlation_incoherent_and_coherent_addition
 {
@@ -36,7 +36,7 @@ public:
 
 	ipp_32f_array& get_result() { return total_correlation_magnitude_; }
 
-	Ipp32f get_average_power(int position) const { assert(position < moving_window_calculator_.average_power_length()); return moving_window_calculator_.get_average_power()[position]; }
+	Ipp32f get_rms(int position) const { assert(position < moving_window_calculator_.output_length()); return moving_window_calculator_.get_rms()[position]; }
 
 private:
 	void set_and_verify_slide_length(/*int slide_length*/);

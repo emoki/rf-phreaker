@@ -1,4 +1,4 @@
-#include "rf_phreaker/ipp_custom/ipp_array.h"
+#include "rf_phreaker/common/ipp_array.h"
 
 
 struct sort_peaks_ascending

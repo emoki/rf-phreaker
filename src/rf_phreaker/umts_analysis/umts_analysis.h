@@ -25,29 +25,24 @@
 #endif
 #endif
 
-#include <stdint.h>
-#include "rf_phreaker/layer_3_common/lte_rrc_message_aggregate.h"
-#include "rf_phreaker/layer_3_common/pdu_element_types.h"
+#include "rf_phreaker/umts_analysis/umts_measurement.h"
+#include "rf_phreaker/umts_analysis/umts_config.h"
+#include "rf_phreaker/common/raw_signal.h"
 
-class lte_bcch_dl_sch_message;
+class umts_analysis_impl;
 
 
-
-class DLL_PUBLIC lte_asn1_decoder
+class DLL_PUBLIC umts_analysis
 {
 public:
-	lte_asn1_decoder();
-	~lte_asn1_decoder();
+	umts_analysis();
 	
-	int specify_sibs_for_decoding(const layer_3_information::pdu_element_type *elements, size_t num_elements);
+	~umts_analysis();
 
-	int decode_bcch_bch_message(const uint8_t* bit_stream, uint32_t num_of_bytes, uint32_t unused_bits, layer_3_information::lte_rrc_message_aggregate &message);
+	int cell_search(rf_phreaker::raw_signal &raw_signal, umts_measurement *umts_meas, int &num_umts_meas, uint32_t num_cpich_chips, umts_scan_type scan_type);
+
+	void set_config(const umts_config &config);
 
 private:
-	lte_bcch_dl_sch_message * lte_bcch_bch_message_;
+	umts_analysis_impl *impl_;
 };
-
-
-
-
-

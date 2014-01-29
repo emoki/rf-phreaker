@@ -12,7 +12,12 @@ enum error_codes
 	hardware,
 	misc,
 	file,
-	blade_rf
+	blade_rf,
+	ipp,
+	filter,
+	gsm_analysis,
+	umts_analysis,
+	lte_analysis
 };
 
 class rf_phreaker_error : public std::runtime_error
@@ -41,5 +46,10 @@ typedef specific_error<hardware> hardware_error;
 typedef specific_error<misc> misc_error;
 typedef specific_error<file> file_error;
 typedef specific_error<blade_rf> blade_rf_error;
+typedef specific_error<ipp> ipp_error;
+typedef specific_error<filter> filter_error;
+typedef specific_error<gsm_analysis> gsm_analysis_error;
+typedef specific_error<umts_analysis> umts_analysis_error;
+typedef specific_error<lte_analysis> lte_analysis_error;
 
 }

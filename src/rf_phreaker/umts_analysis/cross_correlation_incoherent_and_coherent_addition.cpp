@@ -55,13 +55,13 @@ void cross_correlation_incoherent_and_coherent_addition::set_input_signal_and_co
 
 void cross_correlation_incoherent_and_coherent_addition::calculate_average_power()
 {
-	moving_window_calculator_.calculate_average_power(signal_ + correlation_offset_, signal_length_ - correlation_offset_, moving_window_length_);
+	moving_window_calculator_.calculate_moving_window_of_rms(signal_ + correlation_offset_, signal_length_ - correlation_offset_, moving_window_length_);
 
-	average_power_inverse_.reset(moving_window_calculator_.average_power_length());
+	average_power_inverse_.reset(moving_window_calculator_.output_length());
 
 	average_power_inverse_.set_array_values(1);
 
-	ipp_helper::check_status(ippsDiv_32f_I(moving_window_calculator_.get_average_power(), average_power_inverse_.get(), moving_window_calculator_.average_power_length()));
+	ipp_helper::check_status(ippsDiv_32f_I(moving_window_calculator_.get_rms().get(), average_power_inverse_.get(), moving_window_calculator_.output_length()));
 }
 
 void cross_correlation_incoherent_and_coherent_addition::do_cross_correlation_and_additions(const Ipp32fc *moving_window/*, int slide_length*/)
