@@ -86,13 +86,11 @@ void cli_state_destroy(struct cli_state *s);
 bool cli_device_is_opened(struct cli_state *s);
 
 /**
- * Query whether the device is busy being used by other tasks
+ * Query whether the device is currently running RX or TX streams
  *
  * @return true if device is in use, false otherwise
  */
-bool cli_device_in_use(struct cli_state *s);
-
-
+bool cli_device_is_streaming(struct cli_state *s);
 
 /**
  * Print an error message, with a line number, if running from a script.
@@ -144,5 +142,20 @@ void get_last_error(struct cli_error *e, enum error_type *type, int *error);
  * @return path string on success, NULL on failure
  */
 char *to_path(FILE *f);
+
+/**
+ * Open the file, expanding the path first, if possible.
+ *
+ * This is a wrapper around fopen() and interactive_expand_path()
+ *
+ * @note The value of errno IS NOT guarenteed to be assoicated with fopen()
+ *       failures when this function returns.
+ *
+ * @param   filename    Filename to expand and open
+ * @param   mode        fopen() access mode string
+ *
+ * @return  File handle on success, NULL on failure.
+ */
+FILE *expand_and_open(const char *filename, const char *mode);
 
 #endif
