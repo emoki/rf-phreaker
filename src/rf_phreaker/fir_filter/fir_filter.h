@@ -49,7 +49,7 @@ public:
 
 	void set_zero_delay(bool zero_delay);
 
-	int set_taps(double norm_freq, int length, const double norm_factor = 1.0);
+	int set_taps(int length, double norm_factor = 1.0, double norm_cutoff_freq = -1.0);
 
 	int set_taps(const Ipp32fc *taps, int length);
 

@@ -42,7 +42,7 @@ void psch_container::generate_resampled_psch(int up_factor, int down_factor)
 	filter.set_zero_delay(true);
 
 	// Use a longer length for the taps because we're only doing this once.
-	filter.set_taps(.1, 6501, 1);
+	filter.set_taps(6501);
 
 	generate_resampled_psch(&filter);
 }

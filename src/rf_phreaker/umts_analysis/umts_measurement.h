@@ -17,4 +17,21 @@ public:
 	int32_t sample_num_;
 	int64_t time_;
 	layer_3_information::umts_bcch_bch_message_aggregate layer_3_;
+
+	umts_measurement& operator=(umts_measurement meas)
+	{
+		meas.swap(*this);
+		return *this;
+	}
+
+	void swap(umts_measurement &meas)
+	{
+		std::swap(meas.cpich_, cpich_);
+		std::swap(meas.norm_corr_, norm_corr_);
+		std::swap(meas.rms_signal_, rms_signal_);
+		std::swap(meas.ecio_, ecio_);
+		std::swap(meas.sample_num_, sample_num_);
+		std::swap(meas.time_, time_);
+		meas.layer_3_.swap(layer_3_);
+	}
 };

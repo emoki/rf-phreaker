@@ -38,8 +38,9 @@ void fir_filter::set_zero_delay(bool zero_delay){
 	impl_->set_zero_delay(zero_delay);
 }
 
-int fir_filter::set_taps(double norm_freq, int length, const double norm_factor){
-	return impl_->set_taps(norm_freq, length, norm_factor);
+int fir_filter::set_taps(int length, double norm_factor, double norm_cutoff_freq)
+{
+	return impl_->set_taps(length, norm_factor, norm_cutoff_freq);
 }
 
 int fir_filter::set_taps(const Ipp32fc *taps, int length){

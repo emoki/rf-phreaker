@@ -12,10 +12,10 @@
 class umts_bch_decoder
 {
 public:
-	umts_bch_decoder(const cpich_table_container &cpich_table, const umts_config &config);
+	umts_bch_decoder(const umts_config &config, const cpich_table_container &cpich_table);
 	~umts_bch_decoder(void);
 
-	int process(const Ipp32fc *umts_signal, int signal_length, int cpich, int start_of_frame, layer_3_information::umts_bcch_bch_message_aggregate& bchinfo, int packetnum);
+	int process(const Ipp32fc *umts_signal, int signal_length, int cpich, int start_of_frame, layer_3_information::umts_bcch_bch_message_aggregate& bchinfo);
 
 	bool convert_to_bitstream(int startofframe);
 
@@ -28,9 +28,8 @@ private:
 	int err;
 	int kdelaylength;
 	const Ipp32fc* cpichtemplate;
-	const Ipp32fc* kaiserfilter;
 	Ipp32fc *inputsignal, *signalscrcorr, *cpichcode, *upsamplecpich, scrcode;
-	Ipp32fc *hammingfilter, *hammingsignal, *kaiserresample, *tti, *kfilterdelay;
+	Ipp32fc *hammingsignal, *kaiserresample, *tti, *kfilterdelay;
 	Ipp32fc val0, val1, *tempmul, *multemp, *lmulmean0, *lmulmean1, *cpich, *ccpch, *meanearly, *hfilterdelay;
 	Ipp32fc *emulmean0, *emulmean1, *omulmean0, *omulmean1, *slotarray, *earlyslot, *ontimeslot, *lateslot, *meanlate;
 	Ipp32fc *tempearlyslot, *tempontimeslot, *templateslot, *meanontime, *cch0cplx, *cch1cplx, *latecplx;
@@ -52,9 +51,7 @@ private:
 	
 	Ipp8u *s1, *s2, *r, *rm, *svcplx, *perm, *dec, *sd, *rn, temp, idx1, idx2, sr1, sr5, sr12;
 	Ipp8u *decoded_bcch_stream,num_decoded_bcch_stream_; 
-	
-	IppsFIRState_32fc *kaiserstate, *hammingstate;
-				
+					
 	std::vector<Ipp32fc*> rsearlyslot, rsontimeslot, rslateslot, latemul0, latemul1, earlymul0, earlymul1, ontimemul0;
 	std::vector<Ipp32fc*> ontimemul1, cchv0, cchv1, w1, a;
 	std::vector<Ipp32f*> ds01, ds02, ds11, ds12, acc;
@@ -87,7 +84,8 @@ private:
 
 	double over_sampling_rate_;
 
-	rf_phreaker::fir_filter filter_;
+	rf_phreaker::fir_filter umts_signal_filter_;
+	rf_phreaker::fir_filter cpich_filter_;
 
 	int up_factor_;
 	int down_factor_;

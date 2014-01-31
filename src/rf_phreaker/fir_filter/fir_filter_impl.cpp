@@ -54,13 +54,18 @@ void fir_filter_impl::set_zero_delay(bool zeroDelay)
 	m_ZeroDelay = zeroDelay;
 }
 
-int fir_filter_impl::set_taps(double normFreq, int length, const double normFactor)
+int fir_filter_impl::set_taps(int length, double normFactor, double norm_cutoff_freq)
 {
 	if ( length < 5 ) throw std::invalid_argument("fir_filter_impl::SetTaps length < 5, not allowed when specifying cut-off frequency.");
 
+	// Rule of thumb for norm cutoff freq is 1 / max(up, down).  We mulitple by .5 because IPP specifies the cutoff freq 
+	// has to be 0 to 0.5.
+	if(norm_cutoff_freq <= 0.0)
+		norm_cutoff_freq = (1.0 / std::max(m_UpFactor, m_DownFactor)) * .5;
+
 	Ipp64f* pTmpTaps = ippsMalloc_64f(length);
 	if ( pTmpTaps == NULL ) return _WIF_MEMORY_ALLOCATION;
-	ippsFIRGenLowpass_64f((Ipp64f)normFreq, pTmpTaps, length, /*ippWinBlackman*/ippWinHamming, ippFalse);
+	ippsFIRGenLowpass_64f((Ipp64f)norm_cutoff_freq, pTmpTaps, length, /*ippWinBlackman*/ippWinHamming, ippFalse);
 	if ( normFactor != 1.0 )
 	{
 		ippsMulC_64f_I( (Ipp64f)normFactor, pTmpTaps, length );

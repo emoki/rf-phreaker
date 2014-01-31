@@ -115,9 +115,9 @@ private:
 
 	double over_sampling_rate_;
 
-	double min_psch_ecio_processing_threshold_;
+	double psch_confidence_threshold_;
 
-	double min_cpich_ecio_processing_threshold_;
+	double cpich_confidence_threshold_;
 
 	int num_samples_per_cpich_;
 

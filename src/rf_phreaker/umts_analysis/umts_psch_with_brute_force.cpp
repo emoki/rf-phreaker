@@ -12,10 +12,7 @@
 
 
 umts_psch_with_brute_force::umts_psch_with_brute_force(const umts_config &config, const cpich_table_container &cpich_table)
-: max_num_psch_peaks_(25)
-, max_num_candidates_(1000)
-, num_coherent_psch_slots_(16)
-, pause_(-1)
+: pause_(-1)
 {
 	cancel_processing_ = false;
 
@@ -27,8 +24,8 @@ umts_psch_with_brute_force::umts_psch_with_brute_force(const umts_config &config
 void umts_psch_with_brute_force::set_config(const umts_config &config)
 {
 	psch_container psch;
-	psch.generate_resampled_psch("E:\\werk\\maharashtra\\projects\\rf_phreaker\\rf_phreaker\\output\\Debug\\psch_taps.txt");
-	//psch.generate_resampled_psch(config.up_factor(), config.down_factor());
+	//psch.generate_resampled_psch("E:\\werk\\maharashtra\\projects\\rf_phreaker\\rf_phreaker\\output\\Debug\\psch_taps.txt");
+	psch.generate_resampled_psch(config.up_factor(), config.down_factor());
 	psch_template_ = psch.resampled_psch_array();
 
 	do_we_benchmark_ = config.benchmark_umts_brute_force();
@@ -38,8 +35,11 @@ void umts_psch_with_brute_force::set_config(const umts_config &config)
 	sample_rate_ = config.sample_rate();
 	clock_rate_ = config.clock_rate();
 	over_sampling_rate_ = config.over_sampling_rate();
-	min_psch_ecio_processing_threshold_ = config.min_psch_ecio_processing_threshold();
-	min_cpich_ecio_processing_threshold_ = config.min_cpich_ecio_processing_threshold();
+	max_num_candidates_ = config.max_num_candidates();
+	max_num_psch_peaks_ = config.max_num_psch_peaks();
+	num_coherent_psch_slots_ = config.num_coherent_psch_slots();
+	psch_confidence_threshold_ = config.psch_confidence_threshold();
+	cpich_confidence_threshold_ = config.cpich_confidence_threshold();
 
 	num_samples_per_cpich_ = static_cast<int>(N_TOTAL_CHIPS_CPICH * over_sampling_rate_);
 	num_samples_per_time_slot_ = static_cast<int>(N_CHIPS_PER_TIMESLOT * over_sampling_rate_);
@@ -101,7 +101,7 @@ umts_measurements umts_psch_with_brute_force::process(const ipp_32fc_array &sign
 	psch_cross_correlator_.do_cross_correlation_and_additions(psch_template_.get());
 
 	Ipp32f min_psch_ecio_watts = (Ipp32f)umts_utilities::calculate_correlation_ecio_watts_threshold(
-		/*min_psch_ecio_processing_threshold_*/11, 
+		psch_confidence_threshold_, 
 		(double)psch_cross_correlator_.num_coherent_windows(), 
 		(double)psch_cross_correlator_.num_iterations(), 
 		(double)psch_cross_correlator_.moving_window_length() / over_sampling_rate_);
@@ -174,7 +174,7 @@ umts_measurements umts_psch_with_brute_force::process(const ipp_32fc_array &sign
 	cpich_cross_correlator_.calculate_average_power();
 
 	min_cpich_ecio_watts_ = (Ipp32f)umts_utilities::calculate_correlation_ecio_watts_threshold(
-		/*min_cpich_ecio_processing_threshold_*/13, 
+		cpich_confidence_threshold_, 
 		(double)cpich_cross_correlator_.num_coherent_windows(), 
 		(double)cpich_cross_correlator_.num_iterations(), 
 		(double)cpich_cross_correlator_.moving_window_length() / over_sampling_rate_);

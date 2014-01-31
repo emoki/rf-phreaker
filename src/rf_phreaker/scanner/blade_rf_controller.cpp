@@ -79,15 +79,15 @@ void blade_rf_controller::do_initial_scanner_config()
 	// Is this done inside bladeRF?  If not, this can be done once and 
 	// registry values can be saved in hw and loaded next init phase.
 
-	check_blade_status(bladerf_calibrate_dc(comm_blade_rf_->blade_rf(), 
-		BLADERF_DC_CAL_LPF_TUNING));
+	//check_blade_status(bladerf_calibrate_dc(comm_blade_rf_->blade_rf(), 
+	//	BLADERF_DC_CAL_LPF_TUNING));
 
 
-	check_blade_status(bladerf_calibrate_dc(comm_blade_rf_->blade_rf(), 
-		BLADERF_DC_CAL_RX_LPF));
+	//check_blade_status(bladerf_calibrate_dc(comm_blade_rf_->blade_rf(), 
+	//	BLADERF_DC_CAL_RX_LPF));
 
-	check_blade_status(bladerf_calibrate_dc(comm_blade_rf_->blade_rf(), 
-		BLADERF_DC_CAL_RXVGA2));
+	//check_blade_status(bladerf_calibrate_dc(comm_blade_rf_->blade_rf(), 
+	//	BLADERF_DC_CAL_RXVGA2));
 
 	//check_blade_status(bladerf_set_sampling(comm_blade_rf_->blade_rf(),
 	//	bladerf_sampling::BLADERF_SAMPLING_INTERNAL));
@@ -212,7 +212,7 @@ measurement_info blade_rf_controller::get_rf_data(frequency_type frequency, time
 	check_blade_status(bladerf_set_bandwidth(comm_blade_rf_->blade_rf(), BLADERF_MODULE_RX,
 		bandwidth, &blade_bandwidth));
 
-	check_blade_status(bladerf_select_band(comm_blade_rf_->blade_rf(), BLADERF_MODULE_RX,
+	check_blade_status(bladerf_set_frequency(comm_blade_rf_->blade_rf(), BLADERF_MODULE_RX,
 		frequency));
 
 	check_blade_status(bladerf_set_lpf_mode(comm_blade_rf_->blade_rf(), BLADERF_MODULE_RX,

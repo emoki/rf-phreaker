@@ -27,6 +27,22 @@ void cpich_table_container::configure(int up_factor, int down_factor, int num_ch
 		throw(rf_phreaker::umts_analysis_error("An invalid size has been requested for the CPICH table."));
 }
 
+void cpich_table_container::generate_raw_cpich_table(int num_chips)
+{
+	configure(1, 1, num_chips);
+
+	cpich_table_.reset(N_CPICH_CODES * num_chips);
+
+	// Get the Gold code sequence, resample, and store appropriately.
+	cpich_generator cpich_generator;
+
+	for(uint32_t i = 0, cpich_idx = 0; i < N_CPICH_CODES; i++) {
+		cpich_generator.create_cpich_signal(&cpich_table_[cpich_idx], i, num_chips_);
+		cpich_idx += resampled_cpich_length_;
+	}
+
+}
+
 
 void cpich_table_container::generate_resampled_cpich_table(int up_factor, int down_factor, int num_chips)
 {	
@@ -36,7 +52,7 @@ void cpich_table_container::generate_resampled_cpich_table(int up_factor, int do
 	filter.set_zero_delay(true);
 
 	// Use a longer length for the taps because we're only doing this once.
-	filter.set_taps(.1, 6501);
+	filter.set_taps(6501);
 
 	generate_resampled_cpich_table(&filter);
 }

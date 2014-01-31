@@ -70,15 +70,20 @@ public:
 
 	umts_bcch_bch_message_aggregate();
 
+	void swap(umts_bcch_bch_message_aggregate &a)
+	{
+		bcch_bch_message_aggregate::swap(a);
+		std::swap(system_frame_number_, a.system_frame_number_);
+		std::swap(neighbor_intra_group_, a.neighbor_intra_group_);
+		std::swap(neighbor_inter_group_, a.neighbor_inter_group_);
+		std::swap(neighbor_inter_rat_group_, a.neighbor_inter_rat_group_);
+	}
+
 	bool is_system_frame_number_decoded() const { return system_frame_number_ != not_decoded_16; }
 
-	umts_bcch_bch_message_aggregate & operator = (const umts_bcch_bch_message_aggregate &a)
+	umts_bcch_bch_message_aggregate & operator = (umts_bcch_bch_message_aggregate a)
 	{
-		bcch_bch_message_aggregate::operator=(a);
-		system_frame_number_ = a.system_frame_number_;
-		neighbor_intra_group_ = a.neighbor_intra_group_;
-		neighbor_inter_group_ = a.neighbor_inter_group_;
-		neighbor_inter_rat_group_ = a.neighbor_inter_rat_group_;
+		a.swap(*this);
 		return *this;
 	}
 

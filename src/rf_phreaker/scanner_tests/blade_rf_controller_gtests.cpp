@@ -38,14 +38,14 @@ TEST(BladeControllerTest, TestBladeControllerGeneral)
 			rf_phreaker::frequency_type nyc_umts_freq2 = 2152500000;
 			rf_phreaker::frequency_type nyc_lte_freq = 2140000000; // 10 mhz
 
-            const int num_iterations = 5;
-			std::string base_filename = "blade_samples_das_";
-			rf_phreaker::frequency_type freq = das_freq;
+            const int num_iterations = 100;
+			std::string base_filename = "blade_samples_umts_higher_gain";
+			rf_phreaker::frequency_type freq = nyc_umts_freq1;
 			rf_phreaker::time_type time_ns = (rf_phreaker::time_type)0.06e9;
             rf_phreaker::bandwidth_type bandwidth = mhz(5);
 			int sampling_rate = khz(4875);
 			//int sampling_rate = khz(3840);
-			rf_phreaker::scanner::gain_type gain(lms::LNA_MAX, 25, 0);
+			rf_phreaker::scanner::gain_type gain(lms::LNA_MAX, 33, 20);
 
 			measurement_info data;
 
@@ -56,9 +56,9 @@ TEST(BladeControllerTest, TestBladeControllerGeneral)
 
 				data = blade.get_rf_data(freq, time_ns, bandwidth, gain, sampling_rate);
 
-                std::string name = base_filename + boost::lexical_cast<std::string>(i) +".txt";
-                std::ofstream file(name.c_str());
-                file << data;
+                //std::string name = base_filename + boost::lexical_cast<std::string>(i) +".txt";
+                //std::ofstream file(name.c_str());
+                //file << data;
 			}
 			b.stop_timer();
 
@@ -69,7 +69,7 @@ TEST(BladeControllerTest, TestBladeControllerGeneral)
 				.append("vtune\t")
 				.append("blade_rf\t")
 				.append("\taverage_transer_rate B/s:\t")
-				.append(boost::lexical_cast<std::string>(b.total_time_elapsed().wall / ((double)data.get_iq().length() * sizeof(int16_t)* 2 * (num_iterations))))
+				.append(boost::lexical_cast<std::string>(((double)data.get_iq().length() * sizeof(int16_t)* 2 * (num_iterations)) / (b.total_time_elapsed().wall / 1e9)))
 				.append("\tsnapshot_time:\t")
 				.append(boost::lexical_cast<std::string>(time_ns / 1e9));
 			b.output_time_elapsed(str);

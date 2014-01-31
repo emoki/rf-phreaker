@@ -60,7 +60,7 @@ public:
 
 	ipp_32fc_array& get_iq() { return ipp_array_; }
 
-	const ipp_32fc_array& get_iq_const() const { return ipp_array_; }
+	const ipp_32fc_array& get_iq() const { return ipp_array_; }
 
 	rf_phreaker::bandwidth_type bandwidth() const { return bandwidth_; }
 
@@ -95,7 +95,7 @@ inline std::ostream& operator<<(std::ostream &os, const rf_phreaker::raw_signal 
 	os << t.frequency_ << "\t";
 	os << t.sampling_rate_ << "\t";
 	os << t.bandwidth_ << "\t";
-	os << t.get_iq_const();
+	os << t.get_iq();
 	return os;
 }
 

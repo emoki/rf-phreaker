@@ -22,18 +22,23 @@ class bcch_bch_message_aggregate
 public:
 	bcch_bch_message_aggregate();
 
+	void swap(bcch_bch_message_aggregate &a)
+	{
+		std::swap(mcc_, a.mcc_);
+		std::swap(mnc_, a.mnc_);
+		std::swap(lac_, a.lac_);
+		std::swap(cid_, a.cid_);
+		std::swap(unique_sector_key_, a.unique_sector_key_);
+	}
+
 	bool is_mcc_decoded() const { return mcc_ != not_decoded_16; }
 	bool is_mnc_decoded() const { return mnc_ != not_decoded_16; }
 	bool is_lac_decoded() const { return lac_ != not_decoded_16; }
 	bool is_cid_decoded() const { return cid_ != not_decoded_32; }
 
-	virtual bcch_bch_message_aggregate & operator = (const bcch_bch_message_aggregate &a)
+	virtual bcch_bch_message_aggregate & operator = (bcch_bch_message_aggregate a)
 	{
-		mcc_ = a.mcc_;
-		mnc_ = a.mnc_;
-		lac_ = a.lac_;
-		cid_ = a.cid_;
-		unique_sector_key_ = a.unique_sector_key_;
+		a.swap(*this);
 		return *this;
 	}
 

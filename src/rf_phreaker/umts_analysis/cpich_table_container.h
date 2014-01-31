@@ -13,6 +13,8 @@ public:
 
 	~cpich_table_container();
 
+	void generate_raw_cpich_table(int num_chips = N_TOTAL_CHIPS_CPICH);
+
 	void generate_resampled_cpich_table(int up_factor, int down_factor, int num_chips = N_TOTAL_CHIPS_CPICH);
 
 	void generate_resampled_cpich_table(const std::string &filter_spec_filename, int num_chips = N_TOTAL_CHIPS_CPICH);
