@@ -4,7 +4,7 @@
 
 #include "rf_phreaker/common/common_types.h"
 #include "rf_phreaker/common/measurements.h"
-#include "rf_phreaker/lte_analysis/lte_common.h"
+#include "rf_phreaker/lte_analysis/lte_measurement.h"
 
 namespace rf_phreaker { namespace processing {
 
@@ -20,7 +20,7 @@ public:
         : group_(a.group_)
     {}
 
-	void add(const LteMeasurement &lte, const rf_phreaker::scanner::measurement_info &meas_info)
+	void add(const lte_measurement &lte, const rf_phreaker::scanner::measurement_info &meas_info)
 	{
 		rf_phreaker::lte_data data;
 
@@ -41,10 +41,10 @@ public:
 		data.rsrp_ = lte.rsrp;
 		data.rssi_ = lte.rssi;
 		data.rsrq_ = lte.rsrq;
-		data. cid_ = lte.cid;
-		data.lac_ = lte.lac;
-		memcpy(data.mcc_, lte.mcc, sizeof(data.mcc_));
-		memcpy(data.mnc_, lte.mnc, sizeof(data.mnc_));
+		//data. cid_ = lte.cid;
+		//data.lac_ = lte.lac;
+		//memcpy(data.mcc_, lte.mcc, sizeof(data.mcc_));
+		//memcpy(data.mnc_, lte.mnc, sizeof(data.mnc_));
 
 		group_.push_back(data);
 	}

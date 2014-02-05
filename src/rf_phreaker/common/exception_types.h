@@ -5,21 +5,6 @@
 
 namespace rf_phreaker {
 
-enum error_codes
-{
-	comm,
-	scanner_init,
-	hardware,
-	misc,
-	file,
-	blade_rf,
-	ipp,
-	filter,
-	gsm_analysis,
-	umts_analysis,
-	lte_analysis
-};
-
 class rf_phreaker_error : public std::runtime_error
 {
 public:
@@ -40,16 +25,16 @@ public:
 	{}
 };
 
-typedef specific_error<comm> comm_error;
-typedef specific_error<scanner_init> scanner_init_error;
-typedef specific_error<hardware> hardware_error;
-typedef specific_error<misc> misc_error;
-typedef specific_error<file> file_error;
-typedef specific_error<blade_rf> blade_rf_error;
-typedef specific_error<ipp> ipp_error;
-typedef specific_error<filter> filter_error;
-typedef specific_error<gsm_analysis> gsm_analysis_error;
-typedef specific_error<umts_analysis> umts_analysis_error;
-typedef specific_error<lte_analysis> lte_analysis_error;
+typedef specific_error<1> comm_error;
+typedef specific_error<2> scanner_init_error;
+typedef specific_error<3> hardware_error;
+typedef specific_error<4> misc_error;
+typedef specific_error<5> file_error;
+typedef specific_error<6> blade_rf_error;
+typedef specific_error<7> ipp_error;
+typedef specific_error<8> filter_error;
+typedef specific_error<9> gsm_analysis_error;
+typedef specific_error<10> umts_analysis_error;
+typedef specific_error<11> lte_analysis_error;
 
 }

@@ -26,5 +26,10 @@ void umts_analysis::set_config(const umts_config &config)
 	return impl_->set_config(config);
 }
 
+void umts_analysis::cancel_processing()
+{
+	return impl_->cancel_processing();
+}
+
 
 

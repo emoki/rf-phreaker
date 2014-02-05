@@ -15,7 +15,7 @@ umts_psch_with_brute_force::umts_psch_with_brute_force(const umts_config &config
 : pause_(-1)
 {
 	cancel_processing_ = false;
-
+	
 	set_config(config);
 		
 	resampled_cpich_table_ = cpich_table.resampled_cpich_table_ptr();

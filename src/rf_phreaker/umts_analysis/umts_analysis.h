@@ -45,6 +45,8 @@ public:
 	
 	void set_config(const umts_config &config);
 
+	void cancel_processing();
+
 private:
 	umts_analysis_impl *impl_;
 };

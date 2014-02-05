@@ -21,7 +21,11 @@ public:
 
 	void set_config(const umts_config &config);
 
+	void cancel_processing();
+
 private:
+	void consolidate_measurements(umts_measurements &group);
+
 	std::unique_ptr<cpich_table_container> cpich_table_;
 
 	std::unique_ptr<cpich_table_container> tmp_cpich_table_;

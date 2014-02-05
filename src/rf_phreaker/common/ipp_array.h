@@ -34,7 +34,7 @@ public:
 	ipp_array(const DataType *data, int length);
 
 	ipp_array(const ipp_array& other);
-	
+
 	ipp_array(ipp_array&& other);
 
 	~ipp_array(void);
@@ -111,13 +111,11 @@ template<typename DataType> ipp_array<DataType>::ipp_array(const ipp_array& othe
 	, array_(0)
 	, shallow_copy_(/*true*/other.shallow_copy_)
 {
-	if(other.shallow_copy_)
-	{
+	if(other.shallow_copy_) {
 		array_ = other.array_;
 		length_ = other.length_;
 	}
-	else
-	{
+	else {
 		reset(other.length_);
 		copy(other.array_, length_);
 	}
@@ -160,8 +158,7 @@ template<typename DataType> void ipp_array<DataType>::reset(int length)
 {
 	assert(length >= 0);
 
-	if(length_ != length)
-	{
+	if(length_ != length) {
 		if(!shallow_copy_)
 			deallocate();
 		allocate(length);
@@ -225,7 +222,7 @@ template<typename DataType> DataType * ipp_array<DataType>::get(int position)
 	return &array_[position];
 }
 
-template<typename DataType> const DataType * ipp_array<DataType>::get(int position) const 
+template<typename DataType> const DataType * ipp_array<DataType>::get(int position) const
 {
 	assert(position >= 0 && position < length_);
 
@@ -241,14 +238,14 @@ template<typename DataType> DataType ipp_array<DataType>::get_value(int position
 
 
 template<typename DataType>	int ipp_array<DataType>::length() const
-{ 
-	return length_; 
+{
+	return length_;
 }
 
 template<typename DataType>	void ipp_array<DataType>::copy(const DataType *data, int data_length)
 {
 	assert(data_length >= 0);
-	
+
 	if(data_length > length_)
 		reset(data_length);
 
@@ -288,9 +285,9 @@ template<typename DataType>	const ipp_array<DataType> ipp_array<DataType>::creat
 	assert(offset < length_);
 
 	ipp_array<DataType> data;
-	
+
 	data.array_ = &array_[offset];
-	
+
 	data.length_ = length_ - offset;
 
 	data.shallow_copy_ = true;
@@ -301,8 +298,7 @@ template<typename DataType>	const ipp_array<DataType> ipp_array<DataType>::creat
 template<typename DataType> void ipp_array<DataType>::output_text(const std::string &filename) const
 {
 	std::ofstream file(filename);
-	if(file.is_open())
-	{
+	if(file.is_open()) {
 		for(int i = 0; i < length_; ++i)
 			file << array_[i] << "\n";
 	}
@@ -318,7 +314,7 @@ template<typename DataType> void ipp_array<DataType>::output_binary(const std::s
 	else
 		throw std::runtime_error("Unable to open file for ipp_array output binary.");
 }
- 
+
 
 inline std::ostream& operator <<(std::ostream &os, const Ipp32fc &t)
 {
@@ -367,3 +363,4 @@ inline std::istream& operator >>(std::istream &is, ipp_array<DataType> &t)
 		is >> t.get()[i];
 	return is;
 }
+

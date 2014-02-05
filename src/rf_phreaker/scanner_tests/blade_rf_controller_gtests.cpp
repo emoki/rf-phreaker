@@ -36,16 +36,18 @@ TEST(BladeControllerTest, TestBladeControllerGeneral)
 			rf_phreaker::frequency_type das_freq = 888000000;
 			rf_phreaker::frequency_type nyc_umts_freq1 = 876800000;
 			rf_phreaker::frequency_type nyc_umts_freq2 = 2152500000;
-			rf_phreaker::frequency_type nyc_lte_freq = 2140000000; // 10 mhz
+			rf_phreaker::frequency_type nyc_lte_freq1 = 2140000000; // 10 mhz
+			rf_phreaker::frequency_type nyc_lte_freq2 = 739000000; // 10 mhz
 
-            const int num_iterations = 100;
-			std::string base_filename = "blade_samples_umts_higher_gain";
-			rf_phreaker::frequency_type freq = nyc_umts_freq1;
+            const int num_iterations = 50;
+			std::string base_filename = "blade_samples_lte_4875_";
+			rf_phreaker::frequency_type freq = nyc_lte_freq2;
 			rf_phreaker::time_type time_ns = (rf_phreaker::time_type)0.06e9;
             rf_phreaker::bandwidth_type bandwidth = mhz(5);
 			int sampling_rate = khz(4875);
 			//int sampling_rate = khz(3840);
-			rf_phreaker::scanner::gain_type gain(lms::LNA_MAX, 33, 20);
+			//int sampling_rate = khz(1920);
+			rf_phreaker::scanner::gain_type gain(lms::LNA_MAX, 33, 5);
 
 			measurement_info data;
 
@@ -56,9 +58,9 @@ TEST(BladeControllerTest, TestBladeControllerGeneral)
 
 				data = blade.get_rf_data(freq, time_ns, bandwidth, gain, sampling_rate);
 
-                //std::string name = base_filename + boost::lexical_cast<std::string>(i) +".txt";
-                //std::ofstream file(name.c_str());
-                //file << data;
+                std::string name = base_filename + boost::lexical_cast<std::string>(i) +".txt";
+                std::ofstream file(name.c_str());
+                file << data;
 			}
 			b.stop_timer();
 

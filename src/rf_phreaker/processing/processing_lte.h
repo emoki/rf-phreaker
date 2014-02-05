@@ -12,7 +12,7 @@ class basic_processing_lte
 {
 public:
 	basic_processing_lte()
-		: wind_lte_data_(lte_measurements_, num_measurements)
+		: lte_measurements_(num_measurements)
 	{}
 
 	lte_package operator()(rf_phreaker::scanner::measurement_info meas_info)
@@ -22,16 +22,16 @@ public:
 
 		lte_data_container container;
 
-		for(unsigned int i = 0; i < wind_lte_data_.NumMeasurements; ++i)
-			container.add(wind_lte_data_.Measurements[i], meas_info);
+		for(auto it = lte_measurements_.begin(), end = lte_measurements_.end(); it != end; ++it)
+			container.add(*it, meas_info);
 
         return std::make_tuple(std::move(meas_info), std::move(container));
 	}
 	
 private:
 	static const int num_measurements = 200;
-	LteMeasurement lte_measurements_[num_measurements];
-	WindLteData wind_lte_data_;
+	lte_measurements lte_measurements_;
+	lte_analysis lte_analysis;
 };
 
 }}
