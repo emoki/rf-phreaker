@@ -35,15 +35,17 @@ class umts_analysis_impl;
 class DLL_PUBLIC umts_analysis
 {
 public:
-	umts_analysis();
+	umts_analysis(const umts_config &config);
 	
+	umts_analysis(umts_analysis &analysis);
+
 	~umts_analysis();
 
-	int cell_search(const rf_phreaker::raw_signal &raw_signal, umts_measurement *umts_meas, int &num_umts_meas, uint32_t num_cpich_chips, umts_scan_type scan_type);
+	int cell_search(const rf_phreaker::raw_signal &raw_signal, umts_measurement *umts_meas, int &num_umts_meas, uint32_t num_cpich_chips, umts_scan_type scan_type, double *rms = nullptr);
 
 	int decode_layer_3(const rf_phreaker::raw_signal &raw_signal, umts_measurement &umts_meas);
 	
-	void set_config(const umts_config &config);
+	//void set_config(const umts_config &config);
 
 	void cancel_processing();
 

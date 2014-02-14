@@ -11,15 +11,30 @@ set (processing_VERSION_TWEAK 0)
 
 # Set the source files.
 set (processing_SRCS 
-	collection_manager.h
+	collection_info.cpp
+	collection_info.h
+	collection_info_container.h
+	collection_manager_body.h
 	layer_3_tracker.h
 	lte_data_container.h
+	measurement_output.cpp
+	measurement_output.h
+	measurement_output_async.h
+	measurement_wrappers.h
+	node_defs.h
+	output_and_feedback_body.h
 	processing_graph.cpp
 	processing_graph.h
 	processing_lte.h
 	scanner_io.h
+	switch_body.h
+	umts_cell_search_body.h
 	${SRC_PLATFORM_SPECIFIC}/stdafx.cpp)
+
+add_definitions (/DTBB_PREVIEW_GRAPH_NODES)
 
 add_library (processing STATIC ${processing_SRCS})
 
 target_link_libraries (processing scanner)
+target_link_libraries (processing umts_analysis)
+target_link_libraries (processing lte_analysis)

@@ -14,6 +14,11 @@ using rf_phreaker::scanner::scanner;
 blade_rf_controller::blade_rf_controller(comm_type)
 {}
 
+blade_rf_controller::blade_rf_controller(blade_rf_controller &&c)
+: comm_blade_rf_(std::move(c.comm_blade_rf_))
+, scanner_blade_rf_(std::move(c.scanner_blade_rf_))
+{}
+
 blade_rf_controller::~blade_rf_controller()
 {
 	if(comm_blade_rf_.get())
@@ -23,11 +28,13 @@ blade_rf_controller::~blade_rf_controller()
 std::vector<comm_info_ptr> blade_rf_controller::list_available_scanners()
 {
 	std::vector<comm_info_ptr> devices;
-	bladerf_devinfo *dev_info;
+	bladerf_devinfo *dev_info = nullptr;
 
 	int num_devices = bladerf_get_device_list(&dev_info);
 
-	check_blade_status(num_devices);
+	// We do not consider no blade devices connected to be an error here.
+	if(num_devices != BLADERF_ERR_NODEV)
+		check_blade_status(num_devices);
 
 	for(int i = 0; i < num_devices; i++) {
 		devices.push_back(comm_info_ptr(new comm_blade_rf(dev_info[i])));
@@ -101,14 +108,14 @@ void blade_rf_controller::do_initial_scanner_config()
 
 }
 
-void blade_rf_controller::config_scanner_for_collection(std::vector<frequency_type> &)
-{
-	// Currently vtune value is calculated on the fly.
-
-	// Check band licensing
-	// find initial gain values
-	// handle vtune on all freqs we will be collecting
-}
+//void blade_rf_controller::config_scanner_for_collection(std::vector<frequency_type> &)
+//{
+//	// Currently vtune value is calculated on the fly.
+//
+//	// Check band licensing
+//	// find initial gain values
+//	// handle vtune on all freqs we will be collecting
+//}
 
 void blade_rf_controller::update_dds()
 {}

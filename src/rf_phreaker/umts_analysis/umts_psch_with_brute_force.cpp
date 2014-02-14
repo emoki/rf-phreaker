@@ -11,48 +11,50 @@
 
 
 
-umts_psch_with_brute_force::umts_psch_with_brute_force(const umts_config &config, const cpich_table_container &cpich_table)
+umts_psch_with_brute_force::umts_psch_with_brute_force(const umts_config &config, const /*cpich_table_container&*/Ipp32fc* resampled_cpich_table)
 : pause_(-1)
+, num_coherent_psch_slots_(4)
+, max_num_psch_peaks_(25)
+, max_num_candidates_(1000)
+, psch_confidence_threshold_(11)
+, cpich_confidence_threshold_(13)
 {
 	cancel_processing_ = false;
 	
 	set_config(config);
 		
-	resampled_cpich_table_ = cpich_table.resampled_cpich_table_ptr();
+	resampled_cpich_table_ = resampled_cpich_table;
 }
 
 void umts_psch_with_brute_force::set_config(const umts_config &config)
 {
 	psch_container psch;
-	//psch.generate_resampled_psch("E:\\werk\\maharashtra\\projects\\rf_phreaker\\rf_phreaker\\output\\Debug\\psch_taps.txt");
 	psch.generate_resampled_psch(config.up_factor(), config.down_factor());
 	psch_template_ = psch.resampled_psch_array();
 
 	do_we_benchmark_ = config.benchmark_umts_brute_force();
+
+#ifdef USE_PSCH_BRUTE_FORCE_BENCHMARK 	
 	if(do_we_benchmark_)
 		benchmark_.open_benchmark(config.umts_brute_force_filename(), false);
+#endif
 
 	sample_rate_ = config.sample_rate();
 	clock_rate_ = config.clock_rate();
 	over_sampling_rate_ = config.over_sampling_rate();
-	max_num_candidates_ = config.max_num_candidates();
-	max_num_psch_peaks_ = config.max_num_psch_peaks();
-	num_coherent_psch_slots_ = config.num_coherent_psch_slots();
-	psch_confidence_threshold_ = config.psch_confidence_threshold();
-	cpich_confidence_threshold_ = config.cpich_confidence_threshold();
-
 	num_samples_per_cpich_ = static_cast<int>(N_TOTAL_CHIPS_CPICH * over_sampling_rate_);
 	num_samples_per_time_slot_ = static_cast<int>(N_CHIPS_PER_TIMESLOT * over_sampling_rate_);
 }
 
 umts_measurements umts_psch_with_brute_force::process(const ipp_32fc_array &signal, const umts_measurements &tracking_measurements, uint32_t num_cpich_chips, umts_scan_type scanning_method)
 {
+#ifdef USE_PSCH_BRUTE_FORCE_BENCHMARK 	
 	if(do_we_benchmark_)
 	{
 		benchmark_.clear();
 		benchmark_.start_timer();
 	}
-
+#endif
 	length_to_process_ = signal.length();
 
 	//spur_nullifier_.reset(signal->length());
@@ -65,12 +67,14 @@ umts_measurements umts_psch_with_brute_force::process(const ipp_32fc_array &sign
 	
 	average_rms_ = ipp_helper::calculate_average_rms(signal.get(), length_to_process_);
 
+#ifdef USE_PSCH_BRUTE_FORCE_BENCHMARK 	
 	if(do_we_benchmark_)
 	{
 		benchmark_.stop_timer();
 		benchmark_.output_time_elapsed(std::string("calculate_sl\t"));
 		benchmark_.start_timer();
 	}
+#endif
 
 	//if(nullify_spurs)
 	//{
@@ -124,12 +128,14 @@ umts_measurements umts_psch_with_brute_force::process(const ipp_32fc_array &sign
 		}
 	}
 
+#ifdef USE_PSCH_BRUTE_FORCE_BENCHMARK 	
 	if(do_we_benchmark_)
 	{
 		benchmark_.stop_timer();
 		benchmark_.output_time_elapsed("psch_correlations");
 		benchmark_.start_timer();
 	}
+#endif
 
 	int total_num_peaks = psch_peaks.size();
 
@@ -147,12 +153,14 @@ umts_measurements umts_psch_with_brute_force::process(const ipp_32fc_array &sign
 
 	calculate_peak_adjustment();
 
+#ifdef USE_PSCH_BRUTE_FORCE_BENCHMARK 	
 	if(do_we_benchmark_)
 	{
 		benchmark_.stop_timer();
 		benchmark_.output_time_elapsed(std::string("remove_psch_peaks\ttotal_num_peaks\t").append(boost::lexical_cast<std::string>(total_num_peaks)));
 		benchmark_.start_timer();
 	}
+#endif
 
 	//  Find cpichs.
 
@@ -181,12 +189,14 @@ umts_measurements umts_psch_with_brute_force::process(const ipp_32fc_array &sign
 
 	cpich_wrap_around_.reset(num_samples_per_cpich_);
 
+#ifdef USE_PSCH_BRUTE_FORCE_BENCHMARK 	
 	if(do_we_benchmark_)
 	{
 		benchmark_.stop_timer();
 		benchmark_.output_time_elapsed(std::string("cpich_correlation_setup"));
 		benchmark_.start_timer();
 	}
+#endif
 
 	umts_measurements new_measurements;
 
@@ -229,12 +239,14 @@ umts_measurements umts_psch_with_brute_force::process(const ipp_32fc_array &sign
 		}
 	}
 
+#ifdef USE_PSCH_BRUTE_FORCE_BENCHMARK 	
 	if(do_we_benchmark_)
 	{
 		benchmark_.stop_timer();
 		benchmark_.output_time_elapsed(std::string("found_cells\t").append(boost::lexical_cast<std::string>(new_measurements.size())));
 		benchmark_.output_total_time_elapsed(std::string("total_time_elapsed\t").append("----------------------------------------------"));
 	}
+#endif
 
 	return new_measurements;
 }
@@ -385,10 +397,5 @@ void umts_psch_with_brute_force::do_cpich_correlation_and_add_candidate(uint32_t
 		meas.norm_corr_ = cpich_ecio_watts;
 		meas.rms_signal_ = cpich_cross_correlator_.get_rms(peak_position);
 		new_measurements.push_back(meas);
-		//CUmtsSearchCandidate candidate(cpich, absolute_frame_starts_uframes, frames_starts_relative_to_packet_start);				
-		//candidate.SetCurrentMicroFrames(absolute_frame_starts_uframes);
-		//candidate.EcIo = 20 * log10(cpich_ecio_watts);
-		//candidate.sigRMS = cpich_cross_correlator_.get_rms(peak_position);
-		//table.add_or_update_candidate_retain_bch_info(candidate);
 	}
 }

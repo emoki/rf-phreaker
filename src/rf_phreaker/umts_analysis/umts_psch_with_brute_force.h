@@ -17,7 +17,7 @@
 class umts_psch_with_brute_force 
 {
 public:
-	umts_psch_with_brute_force(const umts_config &config, const cpich_table_container &cpich_table);
+	umts_psch_with_brute_force(const umts_config &config, const /*cpich_table_container &*/Ipp32fc* cpich_table);
 	
 	umts_measurements process(const ipp_32fc_array &signal, const umts_measurements &tracking_measurements, uint32_t num_cpich_chips, umts_scan_type scanning_method = full_scan_type);
 
@@ -43,13 +43,13 @@ public:
 
 	void cancel_processing() { cancel_processing_ = true; }
 
-	void reset_processing() { cancel_processing_ = false; }
-
-	void set_config(const umts_config &umts_config);
-
-	void set_resampled_cpich_table(const cpich_table_container &cpich_table) { resampled_cpich_table_ = cpich_table.resampled_cpich_table_ptr(); }
+	void allow_processing() { cancel_processing_ = false; }
 
 private:
+
+	void set_resampled_cpich_table(const cpich_table_container &cpich_table) { resampled_cpich_table_ = cpich_table.cpich_table_ptr(); }
+
+	void set_config(const umts_config &umts_config);
 
 	void do_cpich_correlation_and_add_candidate(uint32_t cpich, uint32_t timeslot, uint32_t peak_position, umts_measurements &new_meas);
 
@@ -85,7 +85,7 @@ private:
 
 	double average_rms_;
 
-	rf_phreaker::benchmark benchmark_;
+	//rf_phreaker::benchmark benchmark_;
 
 	Ipp32f min_cpich_ecio_watts_;
 

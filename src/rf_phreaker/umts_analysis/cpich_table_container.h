@@ -21,9 +21,9 @@ public:
 
 	void erase_cpich_table() { cpich_table_.reset(0); }
 
-	const Ipp32fc* resampled_cpich_table_ptr() const { return cpich_table_.get(); }
+	const Ipp32fc* cpich_table_ptr() const { return cpich_table_.get(); }
 
-	const ipp_32fc_array resampled_cpich_table_array() const { return cpich_table_; }
+	const ipp_32fc_array cpich_table_array() const { return cpich_table_; }
 
 	int up_factor() { return up_factor_; }
 

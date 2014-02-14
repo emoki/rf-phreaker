@@ -11,9 +11,9 @@
 
 using namespace layer_3_information;
 
-umts_bch_decoder::umts_bch_decoder(const umts_config &config, const cpich_table_container &cpich_table)
+umts_bch_decoder::umts_bch_decoder(const umts_config &config, const /*cpich_table_container &*/Ipp32fc* cpich_table)
 : kdelaylength(21)
-, cpichtemplate(cpich_table.resampled_cpich_table_ptr())
+, cpichtemplate(cpich_table)
 , bit_stream_counter_(0)
 , successful_decodes_(0)
 , clock_rate_(config.clock_rate())

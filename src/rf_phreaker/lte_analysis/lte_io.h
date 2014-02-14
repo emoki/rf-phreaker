@@ -11,7 +11,7 @@
 static std::string lte_io_delimiter = "\t";
 static std::string lte_io_spacer = " | ";
 
-void output_lte_meas_debug_header(std::ostream &os)
+inline void output_lte_meas_debug_header(std::ostream &os)
 {
 	os	<< "psch_id" << lte_io_delimiter
 		<< "psch_norm_corr" << lte_io_delimiter

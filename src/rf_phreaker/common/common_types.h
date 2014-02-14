@@ -16,6 +16,15 @@ namespace rf_phreaker {
 
 	typedef int64_t time_type;
 
+	enum technology
+	{
+		umts_sweep,
+		umts_layer_3_decode,
+		lte_sweep,
+		lte_layer_3_decode,
+		unknown_tech
+	};
+
 	// See bottom for more on operating bands.
 	enum operating_band
 	{

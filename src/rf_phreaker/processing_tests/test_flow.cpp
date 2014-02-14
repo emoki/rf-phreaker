@@ -19,7 +19,7 @@
 //
 //concurrent<std::ostream&> async_cout(std::cout);
 //
-//struct collection_parameters_tmp
+//struct collection_info_tmp
 //{
 //	rf_phreaker::frequency_type freq_;
 //	int num_samples_;
@@ -27,27 +27,27 @@
 //	rf_phreaker::frequency_type sampling_rate_;
 //};
 //
-//typedef std::tuple<std::map<rf_phreaker::frequency_type, collection_parameters_tmp>, std::map<rf_phreaker::frequency_type, collection_parameters_tmp>> add_remove_parameters_tmp;
+//typedef std::tuple<std::map<rf_phreaker::frequency_type, collection_info_tmp>, std::map<rf_phreaker::frequency_type, collection_info_tmp>> add_remove_collection_info_tmp;
 //
-//struct collection_parameter_manager_tmp
+//struct collection_info_manager_tmp
 //{
-//	collection_parameter_manager_tmp(tbb::flow::graph &g) : g_(g) {}
+//	collection_info_manager_tmp(tbb::flow::graph &g) : g_(g) {}
 //
-//	collection_parameters_tmp operator()(add_remove_parameters_tmp param)
+//	collection_info_tmp operator()(add_remove_collection_info_tmp param)
 //	{		
-//		manager_.erase(std::remove_if(std::begin(manager_), std::end(manager_), [&](const collection_parameters_tmp &p) { 
+//		manager_.erase(std::remove_if(std::begin(manager_), std::end(manager_), [&](const collection_info_tmp &p) { 
 //			return std::get<1>(param).find(p.freq_) != std::get<1>(param).end(); 
 //		}), std::end(manager_));
 //
-//		std::for_each(std::begin(std::get<0>(param)), std::end(std::get<0>(param)), [&](const std::pair<rf_phreaker::frequency_type, collection_parameters_tmp> &p) {
+//		std::for_each(std::begin(std::get<0>(param)), std::end(std::get<0>(param)), [&](const std::pair<rf_phreaker::frequency_type, collection_info_tmp> &p) {
 //			manager_.push_back(p.second);
 //		});
 //
-//		std::sort(std::begin(manager_), std::end(manager_), [=](const collection_parameters_tmp &a, const collection_parameters_tmp &b) {
+//		std::sort(std::begin(manager_), std::end(manager_), [=](const collection_info_tmp &a, const collection_info_tmp &b) {
 //			return a.freq_ < b.freq_;
 //		});
 //
-//		auto it = std::find_if(std::begin(manager_), std::end(manager_), [&](const collection_parameters_tmp &a) {
+//		auto it = std::find_if(std::begin(manager_), std::end(manager_), [&](const collection_info_tmp &a) {
 //			return current_parameters_.freq_ == a.freq_;
 //		});
 //		
@@ -62,9 +62,9 @@
 //		return current_parameters_;
 //	}
 //
-//	typedef std::vector<collection_parameters_tmp> internal_manager;
+//	typedef std::vector<collection_info_tmp> internal_manager;
 //	internal_manager manager_;
-//	collection_parameters_tmp current_parameters_;
+//	collection_info_tmp current_parameters_;
 //
 //	tbb::flow::graph &g_;
 //
@@ -93,9 +93,9 @@
 //
 //
 //
-//	tbb::flow::function_node<add_remove_parameters_tmp, collection_parameters_tmp> collection_parameter_manager_node(g,1, collection_parameter_manager_tmp(g));
+//	tbb::flow::function_node<add_remove_collection_info_tmp, collection_info_tmp> collection_info_manager_node(g,1, collection_info_manager_tmp(g));
 //
-//	tbb::flow::function_node<collection_parameters_tmp, collection_parameters_tmp> output_node(g, 1, [&](collection_parameters_tmp p) {
+//	tbb::flow::function_node<collection_info_tmp, collection_info_tmp> output_node(g, 1, [&](collection_info_tmp p) {
 //		//async_cout([=](std::ostream &cout){
 //		//	cout << p.freq_ << "\t" << p.num_samples_ << std::endl;
 //		//});
@@ -110,35 +110,35 @@
 //		return p;
 //	});
 //
-//	tbb::flow::function_node<collection_parameters_tmp, add_remove_parameters_tmp> remove_node(g, 1, [](collection_parameters_tmp p) { 
-//		std::map<rf_phreaker::frequency_type, collection_parameters_tmp> add;
-//		std::map<rf_phreaker::frequency_type, collection_parameters_tmp> remove;
+//	tbb::flow::function_node<collection_info_tmp, add_remove_collection_info_tmp> remove_node(g, 1, [](collection_info_tmp p) { 
+//		std::map<rf_phreaker::frequency_type, collection_info_tmp> add;
+//		std::map<rf_phreaker::frequency_type, collection_info_tmp> remove;
 //		remove.insert(std::make_pair(p.freq_, p));
 //		return std::make_tuple(add, remove); 
 //	});
 //
 //
-//	tbb::flow::make_edge(collection_parameter_manager_node, output_node);
+//	tbb::flow::make_edge(collection_info_manager_node, output_node);
 //	tbb::flow::make_edge(output_node, remove_node);
-//	tbb::flow::make_edge(remove_node, collection_parameter_manager_node);
+//	tbb::flow::make_edge(remove_node, collection_info_manager_node);
 //
-//	collection_parameters_tmp p;
+//	collection_info_tmp p;
 //	p.freq_ = mhz(1850);
 //	p.num_samples_ = 1;
 //	p.sampling_rate_ = mhz(30);
 //	p.bandwidth_ = mhz(10);
 //
-//	std::map<rf_phreaker::frequency_type, collection_parameters_tmp> add;
+//	std::map<rf_phreaker::frequency_type, collection_info_tmp> add;
 //	for(int i = 1; i < 10; i++)
 //	{
 //		add.insert(std::make_pair(p.freq_, p));
 //		p.freq_ += mhz(1);
 //	}
 //
-//	std::map<rf_phreaker::frequency_type, collection_parameters_tmp> remove;
+//	std::map<rf_phreaker::frequency_type, collection_info_tmp> remove;
 //
 //	auto tup = std::make_tuple(add, remove);
-//	collection_parameter_manager_node.try_put(tup);
+//	collection_info_manager_node.try_put(tup);
 //
 //
 //	//Sleep(10000);

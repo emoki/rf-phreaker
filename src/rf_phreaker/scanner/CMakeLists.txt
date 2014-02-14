@@ -13,6 +13,7 @@ set (scanner_VERSION_TWEAK 0)
 set (scanner_SRCS 
 	blade_rf_controller.cpp
 	blade_rf_controller.h
+	blade_rf_controller_async.h
 	byte_aligned_buffer.h
 	comm_blade_rf.h
 	comm_info.h

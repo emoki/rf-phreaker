@@ -21,6 +21,7 @@ set (common_SRCS
 	exception_types.h
 	log.h
 	measurements.h
+	measurement_io.h
 	monitor_object.h
 	operating_band_range_specifier.h
 	operating_band_range_specifier.cpp

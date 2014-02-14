@@ -36,5 +36,6 @@ typedef specific_error<8> filter_error;
 typedef specific_error<9> gsm_analysis_error;
 typedef specific_error<10> umts_analysis_error;
 typedef specific_error<11> lte_analysis_error;
+typedef specific_error<12> processing_error;
 
 }

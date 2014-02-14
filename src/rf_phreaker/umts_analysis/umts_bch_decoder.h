@@ -12,7 +12,7 @@
 class umts_bch_decoder
 {
 public:
-	umts_bch_decoder(const umts_config &config, const cpich_table_container &cpich_table);
+	umts_bch_decoder(const umts_config &config, const /*cpich_table_container &*/Ipp32fc* cpich_table);
 	~umts_bch_decoder(void);
 
 	int process(const Ipp32fc *umts_signal, int signal_length, int cpich, int start_of_frame, layer_3_information::umts_bcch_bch_message_aggregate& bchinfo);

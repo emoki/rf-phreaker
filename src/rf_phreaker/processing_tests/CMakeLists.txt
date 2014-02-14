@@ -10,9 +10,10 @@ set (processing_tests_VERSION_PATCH 0)
 set (processing_tests_VERSION_TWEAK 0)
 
 set (processing_tests_SRCS 
+	collection_info_container_gtests.cpp
+	layer_3_tracker_gtests.cpp
 	processing_tests.cpp
-	test_flow.cpp
-	test_layer_3_tracker.cpp
+	processing_graph_gtests.cpp
 	${SRC_PLATFORM_SPECIFIC}/stdafx.cpp)
 
 add_executable (processing_tests ${processing_tests_SRCS})

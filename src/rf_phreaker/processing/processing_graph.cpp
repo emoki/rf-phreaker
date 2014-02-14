@@ -1,17 +1,22 @@
 #include "stdafx.h"
-#include "processing_graph.h"
-#include "processing_lte.h"
-//#include "processing_das.h"
-#include "collection_manager.h"
-#include "scanner_io.h"
-#include <iostream>
+#include "rf_phreaker/processing/processing_graph.h"
+#include "rf_phreaker/processing/node_defs.h"
+#include "rf_phreaker/processing/switch_body.h"
+#include "rf_phreaker/processing/collection_manager_body.h"
+#include "rf_phreaker/processing/umts_cell_search_body.h"
+#include "rf_phreaker/processing/output_and_feedback_body.h"
+#include "rf_phreaker/processing/measurement_output_async.h"
+#include "rf_phreaker/processing/processing_lte.h"
 
 
 using namespace rf_phreaker::scanner;
 using namespace rf_phreaker::processing;
 
+std::atomic<bool> processing_;
+
 processing_graph::processing_graph(void)
 {
+	processing_.store(false, std::memory_order_relaxed);
 }
 
 
@@ -19,98 +24,89 @@ processing_graph::~processing_graph(void)
 {
 }
 
-void processing_graph::initialize(scanner_controller_interface *sc)
+void processing_graph::initialize(scanner_controller_interface *sc, const collection_info_containers &collection_info)
 {
 	auto g = std::shared_ptr<tbb::flow::graph>(new tbb::flow::graph);
 
 	graphs_.push_back(g);
 
-	collection_node_lte_.reset(new tbb::flow::function_node<add_remove_parameters_, collection_parameters>(*g, 1, collection_parameter_manager(*g)));
-	//collection_node_lte_.reset(new tbb::flow::function_node<add_remove_parameters, collection_parameters>(*g, 1, collection_parameter_manager(*g)));
-	
-	auto scanner_io_node = std::make_shared<tbb::flow::function_node<collection_parameters, measurement_info>>(*g, 1, scanner_io(sc));
+	io_ = std::make_shared<measurement_output_async>();
 
-	auto basic_processing_lte_node = std::make_shared<tbb::flow::function_node<measurement_info, lte_package>>(*g, 1, basic_processing_lte());
-	//auto basic_processing_lte_node = std::make_shared<tbb::flow::function_node<measurement_info, das_package>>(*g, 1, basic_processing_das());
+	start_node_ = std::make_shared<start_node>(*g, [=](add_remove_collection_info &info) { return processing_.load(std::memory_order_relaxed); }, false);
+	collection_manager_node_ = std::make_shared<collection_manager_node>(*g, 1, collection_manager_body(processing_, sc, collection_info));
+	auto umts_sweep_cell_search = std::make_shared<umts_cell_search_node>(*g, 1, umts_cell_search_body(umts_config()));
+	auto umts_sweep_cell_search1 = std::make_shared<umts_cell_search_node>(*g, 1, umts_cell_search_body(umts_config()));
+	auto umts_sweep_cell_search2 = std::make_shared<umts_cell_search_node>(*g, 1, umts_cell_search_body(umts_config()));
+	auto umts_sweep_output_feedback = std::make_shared<umts_output_and_feedback_node>(*g, tbb::flow::unlimited, sweep_output_and_feedback_body(io_.get()));
+	auto umts_layer_3_cell_search = std::make_shared<umts_cell_search_node>(*g, 1, umts_cell_search_body(umts_config()));
+	auto umts_layer_3_decode = std::make_shared<umts_layer_3_decode_node>(*g, 1, umts_cell_search_body(umts_config()));
+	auto umts_layer_3_output_feedback = std::make_shared<umts_output_and_feedback_node>(*g, tbb::flow::unlimited, layer_3_output_and_feedback_body(io_.get()));
 
-	//auto tmp_output = std::make_shared<tbb::flow::function_node<das_package, add_remove_parameters>>(*g, 1, [](das_package lte){
-	//						std::cout << 
-	//							"freq: " << std::get<0>(lte).frequency() << " hz\t" << 
-	//							" orig_bandwidth: " << std::get<0>(lte).bandwidth() << " hz \t" << 
-	//							"time: " << std::get<0>(lte).time_ms() << " ms\t" << 
-	//							"orig_sample_rate: " << std::get<0>(lte).sampling_rate() << " hz\t" << 
-	//							"num_samples: " << std::get<0>(lte).get_iq().length() << "\t" << 
-	//							std::endl;
+	auto collection_queue = std::make_shared<queue_node>(*g);
 
-	//						for(const /*das::*/das1 &data : std::get<1>(lte))
-	//							std::cout << 
-	//								"freq: " << data.carrier_frequency_ << "\t" << 
-	//								"avg_sig " << data.carrier_signal_level_ << "\t" << 
-	//								"group_code: " << data.group_code_ << "\t" <<
-	//								"ecio: " << data.ecio_ << "\t" << 
-	//								"norm: " << data.norm_corr_ << "\t" << 
-	//								"rms_corr: " << data.rms_corr_ << "\t" << 
-	//								"rms_signal: " << data.rms_signal_ << "\t" << 
-	//								std::endl;
-	//			
-    //						collection_node_lte_return add_remove_parameters();
-	//					});
+	start_node_->register_successor(*collection_manager_node_);
+	collection_queue->register_successor(*collection_manager_node_);
 
-	auto tmp_output = std::make_shared<tbb::flow::function_node<lte_package, add_remove_parameters_>>(*g, 1, [](lte_package lte){
-						std::cout << 
-							"freq: " << std::get<0>(lte).frequency() << " hz\t" << 
-							"bandwidth: " << std::get<0>(lte).bandwidth() << " hz \t" << 
-							"time: " << std::get<0>(lte).time_ns() << " ms\t" << 
-							"sample_rate: " << std::get<0>(lte).sampling_rate() << " hz\t" << 
-							"num_samples: " << std::get<0>(lte).get_iq().length() << "\t" << 
-							std::endl;
+	tbb::flow::output_port<UMTS_SWEEP_PORT>(*collection_manager_node_).register_successor(*umts_sweep_cell_search);
+	tbb::flow::output_port<UMTS_SWEEP_PORT>(*collection_manager_node_).register_successor(*umts_sweep_cell_search1);
+	tbb::flow::output_port<UMTS_SWEEP_PORT>(*collection_manager_node_).register_successor(*umts_sweep_cell_search2);
+	umts_sweep_cell_search->register_successor(*umts_sweep_output_feedback);
+	umts_sweep_cell_search1->register_successor(*umts_sweep_output_feedback);
+	umts_sweep_cell_search2->register_successor(*umts_sweep_output_feedback);
+	tbb::flow::output_port<0>(*umts_sweep_output_feedback).register_successor(*collection_queue);
+	tbb::flow::output_port<1>(*umts_sweep_output_feedback).register_successor(*collection_queue);
 
-						for(const rf_phreaker::lte_data &data : std::get<1>(lte))
-							std::cout << 
-								"freq: " << data.basic_.carrier_frequency_ << "\t" << 
-								"avg digital v: " << data.average_digital_voltage_ << "\t" << 
-								"rssi: " << data.rssi_ << "\t" << 
-								"rsrp: " << data.rsrp_ << "\t" << 
-								"rsrq: " << data.rsrq_ << "\t" << 
-								"frame number: " << data.frame_number << "\t" <<
-								"mcc: " << data.mcc_ << "\t" << 
-								"mnc: " << data.mnc_ << "\t" << 
-								"lac: " << data.lac_ << "\t" << 
-								"cid: " << data.cid_ << "\t" << 
-								std::endl;
-				
-						return add_remove_parameters_();
-					});
+	tbb::flow::output_port<UMTS_LAYER3_PORT>(*collection_manager_node_).register_successor(*umts_layer_3_cell_search);
+	umts_layer_3_cell_search->register_successor(*umts_layer_3_decode);
+	umts_layer_3_decode->register_successor(*umts_layer_3_output_feedback);
+	tbb::flow::output_port<0>(*umts_layer_3_output_feedback).register_successor(*collection_queue);
+	tbb::flow::output_port<1>(*umts_layer_3_output_feedback).register_successor(*collection_queue);
 
-	nodes_.push_back(collection_node_lte_);
-	
-	nodes_.push_back(scanner_io_node);
-
-	nodes_.push_back(basic_processing_lte_node);
-
-	nodes_.push_back(tmp_output);
+	nodes_.push_back(collection_queue);
+	nodes_.push_back(umts_sweep_cell_search);
+	nodes_.push_back(umts_sweep_cell_search1);
+	nodes_.push_back(umts_sweep_cell_search2);
+	nodes_.push_back(umts_sweep_output_feedback);
+	nodes_.push_back(umts_layer_3_cell_search);
+	nodes_.push_back(umts_layer_3_decode);
+	nodes_.push_back(umts_layer_3_output_feedback);
 
 
-	tbb::flow::make_edge(*collection_node_lte_, *scanner_io_node);
+///////////////////////////////////////////////////////
+	//umts_sweep_collection_node_ = std::make_shared<collection_manager_node>(*g, 1, collection_manager_body(sc, umts_sweep, umts_freqs));
+	//umts_layer_3_collection_node_ = std::make_shared<collection_manager_node>(*g, 1, collection_manager_body(sc, umts_layer_3_decode, add_remove_collection_info()));
+	//auto umts_sweep_cell_search = std::make_shared<umts_cell_search_node>(*g, 1, umts_cell_search_body(umts_config()));
+	//auto umts_basic_output_feedback = std::make_shared<basic_tech_output_and_feedback_node>(*g, tbb::flow::unlimited, output_and_feedback_body(io_.get()));
+	//auto umts_sweep_output_feedback = std::make_shared<umts_output_and_feedback_node>(*g, tbb::flow::unlimited, output_and_feedback_body(io_.get()));
+	//auto umts_layer_3_cell_search = std::make_shared<umts_cell_search_node>(*g, 1, umts_cell_search_body(umts_config()));
 
-	tbb::flow::make_edge(*scanner_io_node, *basic_processing_lte_node);
+	//std::vector<node_tech_type> collection_nodes;
+	//collection_nodes.push_back(std::make_pair(umts_sweep, umts_layer_3_collection_node_.get()));
+	//collection_nodes.push_back(std::make_pair(umts_layer_3_decode, umts_sweep_collection_node_.get()));
 
-	tbb::flow::make_edge(*basic_processing_lte_node, *tmp_output);
+	//auto switcher = std::make_shared<switch_node>(*g, 1, switch_body(collection_nodes, start_node_.get()));
 
-	tbb::flow::make_edge(*tmp_output, *collection_node_lte_);
+	//start_node_->register_successor(*umts_sweep_collection_node_);
+	//tbb::flow::output_port<TUPLE_TO_PROCESSING>(*umts_sweep_collection_node_).register_successor(*umts_sweep_cell_search);
+	//tbb::flow::output_port<TUPLE_TO_SWITCHER>(*umts_sweep_collection_node_).register_successor(*switcher);
+	//tbb::flow::output_port<TUPLE_BASIC_INFO>(*umts_sweep_cell_search).register_successor(*umts_basic_output_feedback);
+	//tbb::flow::output_port<TUPLE_UMTS_INFO>(*umts_sweep_cell_search).register_successor(*umts_sweep_output_feedback);
+	//umts_basic_output_feedback->register_successor(*umts_sweep_collection_node_);
+	//tbb::flow::output_port<TUPLE_SWEEP_COLLECTION>(*umts_sweep_output_feedback).register_successor(*umts_sweep_collection_node_);
+	//tbb::flow::output_port<TUPLE_LAYER_3_COLLECTION>(*umts_sweep_output_feedback).register_successor(*umts_layer_3_collection_node_);
 
-
+	//nodes_.push_back(umts_sweep_cell_search);
+	//nodes_.push_back(umts_basic_output_feedback);
+	//nodes_.push_back(umts_sweep_output_feedback);
+	//nodes_.push_back(switcher);
 }
 
-void processing_graph::start(const collection_parameters &cp)
+void processing_graph::start()
 {
-	std::map<rf_phreaker::frequency_type, collection_parameters> add;
-	add.insert(std::make_pair(cp.freq_, cp)); 
-				
-	std::map<rf_phreaker::frequency_type, collection_parameters> remove;
-
-    auto t = std::make_tuple(add, remove);
-	//collection_node_lte_->try_put(t);
+	processing_.store(true, std::memory_order_release);
+	start_node_->activate();
+	//for(int i = 0; i < 20; ++i)
+	//	collection_manager_node_->try_put(add_remove_collection_info());
 }
 
 void processing_graph::wait()
@@ -121,8 +117,10 @@ void processing_graph::wait()
 
 void processing_graph::cancel()
 {
-	for(auto &g : graphs_)
-		g->root_task()->cancel_group_execution();
+	processing_.store(false, std::memory_order_release);
+
+	//for(auto &g : graphs_)
+	//	g->root_task()->cancel_group_execution();
 
 	for(auto &g : graphs_)
 		g->wait_for_all();

@@ -31,6 +31,7 @@ set (umts_analysis_SRCS
 	umts_bch_decoder.cpp
 	umts_bch_decoder.h
 	umts_config.h
+	umts_io.h
 	umts_measurement.h
 	umts_measurement_container.h
 	umts_psch_with_brute_force.cpp

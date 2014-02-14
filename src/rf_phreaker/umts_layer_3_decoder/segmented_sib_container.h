@@ -58,6 +58,6 @@ private:
 
 	uint64_t age_counter_;
 
-	asn1_config config_;
+	//asn1_config config_;
 };
 

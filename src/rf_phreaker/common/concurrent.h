@@ -30,7 +30,7 @@ template <typename T> class concurrent {
         thread_.join();
     }
 
-    template <typename F> auto operator()(F f) const -> std::future<decltype(f(concurrent::t_))> {
+    template <typename F> auto operator()(F f) const -> std::future<decltype(f(/*concurrent::*/t_))> {
             auto p = std::make_shared<std::promise<decltype(f(t_))>>();
 		
 			auto ret = p->get_future();

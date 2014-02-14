@@ -419,11 +419,11 @@ private:
 
 	segment_index_type segment_expected_; 
 	
-	asn1_config config_;
+	//asn1_config config_;
 
 	void append_complete_segment_in_hex_format_to_file()
 	{
-		if(config_.output_combined_segments())
+		if(false/*config_.output_combined_segments()*/)
 		{
 			std::string filename("complete_segments_hex_format.txt");
 
@@ -440,7 +440,7 @@ private:
 
 	void append_complete_segment_in_binary_format_to_file()
 	{
-		if(config_.output_combined_segments())
+		if(false/*config_.output_combined_segments()*/)
 		{
 			std::string filename("complete_segments_binary_format.txt");
 

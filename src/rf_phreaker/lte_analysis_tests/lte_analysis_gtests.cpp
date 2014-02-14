@@ -49,13 +49,13 @@ TEST(LteAnalysisTests, TestGeneral)
 				lte_measurements lte_meas(100);
 				int num_meas = lte_meas.size();
 				
-				int status = analysis.cell_search(info, &lte_meas.at(0), num_meas, info.time_ns() / 1e6 / 5);
+				int status = analysis.cell_search(info, &lte_meas.at(0), num_meas, int(info.time_ns() / 1e6 / 5));
 				EXPECT_EQ(0, status);
 
 
 				
 				for(int j = 0; j < num_meas; ++j) {
-					status = analysis.decode_layer_3(info, &lte_meas.at(0), lte_meas.size(), info.time_ns() / 1e6 / 5);
+					status = analysis.decode_layer_3(info, &lte_meas.at(0), lte_meas.size(), int(info.time_ns() / 1e6 / 5));
 					EXPECT_EQ(0, status);
 
 					std::cout <<

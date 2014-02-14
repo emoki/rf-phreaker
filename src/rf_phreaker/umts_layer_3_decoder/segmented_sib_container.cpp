@@ -92,7 +92,7 @@ void segmented_sib_container::clear_segments(const unique_sector_sib &key)
 
 void segmented_sib_container::open_debug_segment_file()
 {
-	if(config_.output_segments())
+	if(false/*config_.output_segments()*/)
 	{
 		std::ofstream file("debug_segments.txt");
 		if(!file)
@@ -102,7 +102,7 @@ void segmented_sib_container::open_debug_segment_file()
 }
 void segmented_sib_container::output_segment_to_file_if_specified(const unique_sector_sib &sib, segment_count_type seg_count, segment_index_type seg_index, bit_stream_container bit_stream)
 {
-	if(config_.output_segments())
+	if(false/*config_.output_segments()*/)
 	{
 		std::ofstream file("debug_segments.txt", std::ios_base::app);
 	
