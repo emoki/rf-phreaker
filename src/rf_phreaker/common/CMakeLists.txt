@@ -19,20 +19,20 @@ set (common_SRCS
 	config_file.cpp
 	config_file.h
 	exception_types.h
-	log.h
-	measurements.h
-	measurement_io.h
-	monitor_object.h
-	operating_band_range_specifier.h
-	operating_band_range_specifier.cpp
-	raw_signal.h
 	fft_helper.cpp
 	fft_helper.h
 	ipp_array.h
 	ipp_helper.h
+	log.h
+	measurements.h
+	measurement_io.h
+	monitor_object.h
 	moving_window_calculator.cpp
 	moving_window_calculator.h
-
+	operating_band_range_specifier.h
+	operating_band_range_specifier.cpp
+	raw_signal.h
+	settings.h
 	${SRC_PLATFORM_SPECIFIC}/stdafx.cpp)
 
 add_library (common STATIC ${common_SRCS})

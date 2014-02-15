@@ -35,8 +35,6 @@ void processing_graph::initialize(scanner_controller_interface *sc, const collec
 	start_node_ = std::make_shared<start_node>(*g, [=](add_remove_collection_info &info) { return processing_.load(std::memory_order_relaxed); }, false);
 	collection_manager_node_ = std::make_shared<collection_manager_node>(*g, 1, collection_manager_body(processing_, sc, collection_info));
 	auto umts_sweep_cell_search = std::make_shared<umts_cell_search_node>(*g, 1, umts_cell_search_body(umts_config()));
-	auto umts_sweep_cell_search1 = std::make_shared<umts_cell_search_node>(*g, 1, umts_cell_search_body(umts_config()));
-	auto umts_sweep_cell_search2 = std::make_shared<umts_cell_search_node>(*g, 1, umts_cell_search_body(umts_config()));
 	auto umts_sweep_output_feedback = std::make_shared<umts_output_and_feedback_node>(*g, tbb::flow::unlimited, sweep_output_and_feedback_body(io_.get()));
 	auto umts_layer_3_cell_search = std::make_shared<umts_cell_search_node>(*g, 1, umts_cell_search_body(umts_config()));
 	auto umts_layer_3_decode = std::make_shared<umts_layer_3_decode_node>(*g, 1, umts_cell_search_body(umts_config()));
@@ -48,11 +46,7 @@ void processing_graph::initialize(scanner_controller_interface *sc, const collec
 	collection_queue->register_successor(*collection_manager_node_);
 
 	tbb::flow::output_port<UMTS_SWEEP_PORT>(*collection_manager_node_).register_successor(*umts_sweep_cell_search);
-	tbb::flow::output_port<UMTS_SWEEP_PORT>(*collection_manager_node_).register_successor(*umts_sweep_cell_search1);
-	tbb::flow::output_port<UMTS_SWEEP_PORT>(*collection_manager_node_).register_successor(*umts_sweep_cell_search2);
 	umts_sweep_cell_search->register_successor(*umts_sweep_output_feedback);
-	umts_sweep_cell_search1->register_successor(*umts_sweep_output_feedback);
-	umts_sweep_cell_search2->register_successor(*umts_sweep_output_feedback);
 	tbb::flow::output_port<0>(*umts_sweep_output_feedback).register_successor(*collection_queue);
 	tbb::flow::output_port<1>(*umts_sweep_output_feedback).register_successor(*collection_queue);
 
@@ -64,41 +58,10 @@ void processing_graph::initialize(scanner_controller_interface *sc, const collec
 
 	nodes_.push_back(collection_queue);
 	nodes_.push_back(umts_sweep_cell_search);
-	nodes_.push_back(umts_sweep_cell_search1);
-	nodes_.push_back(umts_sweep_cell_search2);
 	nodes_.push_back(umts_sweep_output_feedback);
 	nodes_.push_back(umts_layer_3_cell_search);
 	nodes_.push_back(umts_layer_3_decode);
 	nodes_.push_back(umts_layer_3_output_feedback);
-
-
-///////////////////////////////////////////////////////
-	//umts_sweep_collection_node_ = std::make_shared<collection_manager_node>(*g, 1, collection_manager_body(sc, umts_sweep, umts_freqs));
-	//umts_layer_3_collection_node_ = std::make_shared<collection_manager_node>(*g, 1, collection_manager_body(sc, umts_layer_3_decode, add_remove_collection_info()));
-	//auto umts_sweep_cell_search = std::make_shared<umts_cell_search_node>(*g, 1, umts_cell_search_body(umts_config()));
-	//auto umts_basic_output_feedback = std::make_shared<basic_tech_output_and_feedback_node>(*g, tbb::flow::unlimited, output_and_feedback_body(io_.get()));
-	//auto umts_sweep_output_feedback = std::make_shared<umts_output_and_feedback_node>(*g, tbb::flow::unlimited, output_and_feedback_body(io_.get()));
-	//auto umts_layer_3_cell_search = std::make_shared<umts_cell_search_node>(*g, 1, umts_cell_search_body(umts_config()));
-
-	//std::vector<node_tech_type> collection_nodes;
-	//collection_nodes.push_back(std::make_pair(umts_sweep, umts_layer_3_collection_node_.get()));
-	//collection_nodes.push_back(std::make_pair(umts_layer_3_decode, umts_sweep_collection_node_.get()));
-
-	//auto switcher = std::make_shared<switch_node>(*g, 1, switch_body(collection_nodes, start_node_.get()));
-
-	//start_node_->register_successor(*umts_sweep_collection_node_);
-	//tbb::flow::output_port<TUPLE_TO_PROCESSING>(*umts_sweep_collection_node_).register_successor(*umts_sweep_cell_search);
-	//tbb::flow::output_port<TUPLE_TO_SWITCHER>(*umts_sweep_collection_node_).register_successor(*switcher);
-	//tbb::flow::output_port<TUPLE_BASIC_INFO>(*umts_sweep_cell_search).register_successor(*umts_basic_output_feedback);
-	//tbb::flow::output_port<TUPLE_UMTS_INFO>(*umts_sweep_cell_search).register_successor(*umts_sweep_output_feedback);
-	//umts_basic_output_feedback->register_successor(*umts_sweep_collection_node_);
-	//tbb::flow::output_port<TUPLE_SWEEP_COLLECTION>(*umts_sweep_output_feedback).register_successor(*umts_sweep_collection_node_);
-	//tbb::flow::output_port<TUPLE_LAYER_3_COLLECTION>(*umts_sweep_output_feedback).register_successor(*umts_layer_3_collection_node_);
-
-	//nodes_.push_back(umts_sweep_cell_search);
-	//nodes_.push_back(umts_basic_output_feedback);
-	//nodes_.push_back(umts_sweep_output_feedback);
-	//nodes_.push_back(switcher);
 }
 
 void processing_graph::start()
@@ -119,8 +82,8 @@ void processing_graph::cancel()
 {
 	processing_.store(false, std::memory_order_release);
 
-	//for(auto &g : graphs_)
-	//	g->root_task()->cancel_group_execution();
+	for(auto &g : graphs_)
+		g->root_task()->cancel_group_execution();
 
 	for(auto &g : graphs_)
 		g->wait_for_all();

@@ -24,7 +24,7 @@ include(ExternalProject)
 
 project (rf_phreaker)
 
-set (CMAKE_MODULE_PATH ${CMAKE_MODULE_PATH} "${PROJECT_SOURCE_DIR}/cmake")
+set (CMAKE_MODULE_PATH "${PROJECT_SOURCE_DIR}/cmake" ${CMAKE_MODULE_PATH})
 set (CMAKE_RUNTIME_OUTPUT_DIRECTORY "${PROJECT_SOURCE_DIR}/output")
 
 # Find TBB.
@@ -54,6 +54,13 @@ set (Boost_USE_MULTITHREADED      ON)
 set (Boost_USE_STATIC_RUNTIME    OFF)
 find_package (Boost 1.54.0 COMPONENTS system filesystem thread date_time timer chrono REQUIRED)
 	
+	
+# Set QT
+set (qt_INSTALL_PATH "c:/bin/qt/5.2.0/msvc2012" CACHE STRING "Path to QT.")
+set (CMAKE_PREFIX_PATH ${qt_INSTALL_PATH} ${CMAKE_PREFIX_PATH})
+set (CMAKE_AUTOMOC ON)
+find_package (Qt5Core)
+
 
 # MSVC configurations.
 if (MSVC)
@@ -118,3 +125,4 @@ add_subdirectory (src/rf_phreaker/scanner)
 add_subdirectory (src/rf_phreaker/scanner_tests)
 add_subdirectory (src/rf_phreaker/processing)
 add_subdirectory (src/rf_phreaker/processing_tests)
+add_subdirectory (src/rf_phreaker/qt_specific)
