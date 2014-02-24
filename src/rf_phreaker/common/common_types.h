@@ -8,7 +8,7 @@ namespace rf_phreaker {
 
 	typedef char scanner_serial_type[SCANNER_ID_LENGTH]; // Includes NULL terminator.
 
-	typedef unsigned int frequency_type;
+	typedef int64_t frequency_type;
 
 	typedef int64_t channel_type;
 

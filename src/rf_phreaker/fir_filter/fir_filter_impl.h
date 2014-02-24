@@ -2,6 +2,7 @@
 
 #include <stdexcept>
 #include <rf_phreaker/ipp_custom/ipp.h>
+#include "rf_phreaker/common/common_types.h"
 
 #define _WIF_NO_ERROR			0
 #define _WIF_MEMORY_ALLOCATION	-1
@@ -22,11 +23,15 @@ public:
 
 	fir_filter_impl(int upFactor, int downFactor);
 
+	fir_filter_impl(frequency_type original_sampling_rate, frequency_type new_sampling_rate);
+
 	virtual ~fir_filter_impl();
 
 	int length() const { return m_Length; };
 
 	int num_samples_delay() const { return m_InputDelay; };
+
+	void set_up_down_factor_based_on_sampling_rates(frequency_type original_sampling_rate, frequency_type new_sampling_rate);
 
 	void set_up_down_factor(int up_factor, int down_factor);
 

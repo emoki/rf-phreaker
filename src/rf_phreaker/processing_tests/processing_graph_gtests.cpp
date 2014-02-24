@@ -5,6 +5,7 @@
 #include "rf_phreaker/common/common_utility.h"
 #include "rf_phreaker/common/benchmark.h"
 #include "stdafx.h"
+
 TEST(ProcessingGraph, TestGeneral)
 {
 	using namespace rf_phreaker;

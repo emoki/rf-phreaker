@@ -11,7 +11,7 @@ class CollectionManagerTest : public ::testing::Test
 protected:
 	CollectionManagerTest()
 		: cp(0, 50, 10000000)
-		, cp_manager()
+		, cp_manager(rf_phreaker::unknown_tech, true)
 		, max_num(1000)
 	{
 

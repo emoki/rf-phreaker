@@ -26,6 +26,7 @@
 #endif
 
 #include "ipp.h"
+#include "rf_phreaker/common/common_types.h"
 
 
 namespace rf_phreaker {
@@ -39,11 +40,15 @@ public:
 
 	fir_filter(int up_factor, int down_factor);
 
+	fir_filter(frequency_type original_sampling_rate, frequency_type new_sampling_rate);
+
 	~fir_filter();
 
 	int length() const;
 
 	int num_samples_delay() const;
+
+	void set_up_down_factor_based_on_sampling_rates(frequency_type original_sampling_rate, frequency_type new_sampling_rate);
 
 	void set_up_down_factor(int up_factor, int down_factor);
 

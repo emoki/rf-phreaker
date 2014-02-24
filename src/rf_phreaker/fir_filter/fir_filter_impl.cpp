@@ -1,7 +1,7 @@
 #include "rf_phreaker/fir_filter/fir_filter_impl.h"
 #include "rf_phreaker/ipp_custom/ipp.h"
 #include "rf_phreaker/common/exception_types.h"
-
+#include <boost/math/common_factor.hpp>
 #include <math.h>
 
 using namespace rf_phreaker;
@@ -28,25 +28,47 @@ fir_filter_impl::fir_filter_impl(int upFactor, int downFactor)
 	, m_DelayLen(0)
 	, m_ZeroDelay(false)
 	, m_InputDelay(0)
-	, is_multi_rate(true)
-	, m_UpFactor(upFactor)
-	, m_DownFactor(downFactor)
 	, m_UpPhase(0)
 	, m_DownPhase(0)
 {
-	if ( (upFactor>0xFFFF) || (downFactor>0xFFFF) )
-		throw std::invalid_argument("up/down factors must be < 0xFFFF");
+	set_up_down_factor(upFactor, downFactor);
 }
 
-fir_filter_impl::~fir_filter_impl() { 
+fir_filter_impl::fir_filter_impl(frequency_type original_sampling_rate, frequency_type new_sampling_rate)
+: m_State(NULL)
+, m_DelayLine(NULL)
+, m_Length(0)
+, m_DelayLen(0)
+, m_ZeroDelay(false)
+, m_InputDelay(0)
+, m_UpPhase(0)
+, m_DownPhase(0)
+{
+	set_up_down_factor_based_on_sampling_rates(original_sampling_rate, new_sampling_rate);
+}
+
+fir_filter_impl::~fir_filter_impl()
+{
 	ippsFIRFree_32fc(m_State); ippsFree(m_DelayLine); 
+}
+
+void fir_filter_impl::set_up_down_factor_based_on_sampling_rates(frequency_type original_sampling_rate, frequency_type new_sampling_rate)
+{
+	auto lcm = boost::math::lcm(original_sampling_rate, new_sampling_rate);
+
+	set_up_down_factor(static_cast<int>(lcm / original_sampling_rate), static_cast<int>(new_sampling_rate / lcm));
 }
 
 void fir_filter_impl::set_up_down_factor(int up_factor, int down_factor)
 {
 	m_UpFactor = up_factor;
 	m_DownFactor = down_factor;
-	is_multi_rate = true;
+
+	if((m_UpFactor>0xFFFF) || (m_DownFactor>0xFFFF))
+		throw std::invalid_argument("up/down factors must be < 0xFFFF");
+
+	if(m_UpFactor != 1 && m_DownFactor != 1)
+		is_multi_rate = true;
 }
 
 void fir_filter_impl::set_zero_delay(bool zeroDelay)

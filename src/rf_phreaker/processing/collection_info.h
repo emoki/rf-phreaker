@@ -74,7 +74,7 @@ private:
 class lte_layer_3_collection_info : public collection_info
 {
 public:
-	lte_layer_3_collection_info(rf_phreaker::frequency_type freq, rf_phreaker::bandwidth_type bw = bandwidth__) : collection_info(freq, time_ns__, bw, sampling_rate__) {}
+	lte_layer_3_collection_info(rf_phreaker::frequency_type freq, rf_phreaker::frequency_type sampling_rate = sampling_rate__, rf_phreaker::bandwidth_type bw = bandwidth__) : collection_info(freq, time_ns__, bw, sampling_rate) {}
 private:
 	static rf_phreaker::time_type time_ns__;
 	static rf_phreaker::bandwidth_type bandwidth__;

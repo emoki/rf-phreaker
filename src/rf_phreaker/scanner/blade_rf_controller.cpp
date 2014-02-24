@@ -213,14 +213,15 @@ measurement_info blade_rf_controller::get_rf_data(frequency_type frequency, time
 	unsigned int blade_sampling_rate = 0;
 	unsigned int blade_bandwidth = 0;
 
+	// TODO - We manually convert frequency_type to unsigned int.
 	check_blade_status(bladerf_set_sample_rate(comm_blade_rf_->blade_rf(), BLADERF_MODULE_RX,
-		sampling_rate, &blade_sampling_rate));
+		static_cast<uint32_t>(sampling_rate), &blade_sampling_rate));
 
 	check_blade_status(bladerf_set_bandwidth(comm_blade_rf_->blade_rf(), BLADERF_MODULE_RX,
 		bandwidth, &blade_bandwidth));
 
 	check_blade_status(bladerf_set_frequency(comm_blade_rf_->blade_rf(), BLADERF_MODULE_RX,
-		frequency));
+		static_cast<uint32_t>(frequency)));
 
 	check_blade_status(bladerf_set_lpf_mode(comm_blade_rf_->blade_rf(), BLADERF_MODULE_RX,
 		BLADERF_LPF_NORMAL));

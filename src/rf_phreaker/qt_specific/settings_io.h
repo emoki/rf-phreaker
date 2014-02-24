@@ -2,6 +2,7 @@
 
 #include "rf_phreaker/common/settings.h"
 #include <memory>
+#include <string>
 
 class QSettings;
 
@@ -16,8 +17,15 @@ public:
 
 	void populate_settings(settings &settings);
 
+	void read_collection_settings(collection_settings &settings, const std::string &group_key);
+
+	void read_layer_3_settings(layer_3_settings &settings, const std::string &group_key);
+
+	void read_umts_general_settings(umts_general &settings, const std::string &group_key);
+
+private:
 	std::unique_ptr<QSettings> qsettings_;
 };
 
 
-}
+} 

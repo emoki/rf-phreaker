@@ -103,7 +103,7 @@ TEST(UmtsAnalysisTests, TestMultithreaded)
 
 		std::vector<rf_phreaker::scanner::measurement_info> packets;
 
-		for(int i = 0; i < analyzers.size(); ++i) {
+		for(size_t i = 0; i < analyzers.size(); ++i) {
 			std::ifstream file(base_filename + boost::lexical_cast<std::string>(0) + ".txt");
 			if(file) {
 				rf_phreaker::scanner::measurement_info p;
