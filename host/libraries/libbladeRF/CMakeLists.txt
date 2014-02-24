@@ -6,8 +6,8 @@ project(libbladeRF C)
 ################################################################################
 
 set(VERSION_INFO_MAJOR  0)
-set(VERSION_INFO_MINOR  12)
-set(VERSION_INFO_PATCH  1)
+set(VERSION_INFO_MINOR  13)
+set(VERSION_INFO_PATCH  0)
 
 if(NOT DEFINED VERSION_INFO_EXTRA)
     set(VERSION_INFO_EXTRA "git")
@@ -37,7 +37,12 @@ endif()
 # Configuration options
 ################################################################################
 
-option(ENABLE_LIBBLADERF_LOGGING "Enable log messages in libbladeRF" ON)
+option(ENABLE_LIBBLADERF_LOGGING "Enable log messages in libbladeRF." ON)
+
+option(BUILD_LIBBLADERF_DOCUMENTATION "Build libbladeRF documentation. Requries Doxygen." ${BUILD_DOCUMENTATION})
+if(NOT ${BUILD_DOCUMENTATION})
+    set(BUILD_LIBBLADERF_DOCUMENTATION OFF)
+endif()
 
 ##############################
 # Backend Support
@@ -187,6 +192,7 @@ set(LIBBLADERF_PC_EXEC_PREFIX \${prefix})
 set(LIBBLADERF_PC_LIBDIR \${exec_prefix}/${CMAKE_INSTALL_LIBDIR})
 set(LIBBLADERF_PC_INCLUDEDIR \${prefix}/include)
 set(LIBBLADERF_PC_VERSION ${VERSION})
+set(LIBBLADERF_PC_LIBS "-lbladeRF")
 
 # Use space-delimiter in the .pc file, rather than CMake's semicolon separator
 string(REPLACE ";" " " LIBBLADERF_PC_CFLAGS "${LIBBLADERF_PC_CFLAGS}")
@@ -232,7 +238,7 @@ add_subdirectory(tests)
 ################################################################################
 # Doxygen documentation
 ################################################################################
-if(BUILD_DOCUMENTATION)
+if(BUILD_LIBBLADERF_DOCUMENTATION)
     find_package(Doxygen)
     if(DOXYGEN_FOUND)
         message(STATUS "Configured to build libbladeRF API documentation.")
@@ -242,12 +248,17 @@ if(BUILD_DOCUMENTATION)
             @ONLY
             )
 
-        add_custom_target(doc
-            ${DOXYGEN_EXECUTABLE} ${CMAKE_CURRENT_BINARY_DIR}/doc/doxygen/Doxyfile
+        add_custom_command(
+            OUTPUT ${CMAKE_CURRENT_BINARY_DIR}/doc/doxygen/html/index.html
+            DEPENDS ${CMAKE_CURRENT_BINARY_DIR}/doc/doxygen/Doxyfile ${CMAKE_CURRENT_SOURCE_DIR}/include/libbladeRF.h
+            COMMAND ${DOXYGEN_EXECUTABLE} ${CMAKE_CURRENT_BINARY_DIR}/doc/doxygen/Doxyfile
             WORKING_DIRECTORY ${CMAKE_CURRENT_BINARY_DIR}/doc/doxygen
             COMMENT "Generating libbladeRF API documentation via Doxygen in: ${CMAKE_CURRENT_BINARY_DIR}/doc/doxygen"
         )
+
+    add_custom_target(libbladeRF-doxygen ALL DEPENDS ${CMAKE_CURRENT_BINARY_DIR}/doc/doxygen/html/index.html) 
+
     else(DOXYGEN_FOUND)
         message(WARNING "Could not find Doxygen. libbladeRF API documentation will not be built.")
     endif(DOXYGEN_FOUND)
-endif(BUILD_DOCUMENTATION)
+endif(BUILD_LIBBLADERF_DOCUMENTATION)
