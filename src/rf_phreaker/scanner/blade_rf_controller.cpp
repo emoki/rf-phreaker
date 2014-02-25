@@ -25,6 +25,20 @@ blade_rf_controller::~blade_rf_controller()
 		close_scanner();
 }
 
+int blade_rf_controller::num_available_scanners()
+{
+	std::vector<comm_info_ptr> devices;
+	bladerf_devinfo *dev_info = nullptr;
+
+	int num_devices = bladerf_get_device_list(&dev_info);
+
+	// We do not consider no blade devices connected to be an error here.
+	if(num_devices != BLADERF_ERR_NODEV)
+		check_blade_status(num_devices);
+
+	return num_devices;
+}
+
 std::vector<comm_info_ptr> blade_rf_controller::list_available_scanners()
 {
 	std::vector<comm_info_ptr> devices;
@@ -117,8 +131,25 @@ void blade_rf_controller::do_initial_scanner_config()
 //	// handle vtune on all freqs we will be collecting
 //}
 
-void blade_rf_controller::update_dds()
-{}
+void blade_rf_controller::set_vctcxo_trim(uint16_t trim)
+{
+	check_blade_status(bladerf_dac_write(comm_blade_rf_->blade_rf(), trim));
+}
+
+void blade_rf_controller::read_vctcxo_trim(uint16_t &trim)
+{
+	check_blade_status(bladerf_get_vctcxo_trim(comm_blade_rf_->blade_rf(), &trim));
+}
+
+void blade_rf_controller::set_gpio(uint32_t value)
+{
+	check_blade_status(bladerf_config_gpio_write(comm_blade_rf_->blade_rf(), value));
+}
+
+void blade_rf_controller::read_gpio(uint32_t &value)
+{
+	check_blade_status(bladerf_config_gpio_read(comm_blade_rf_->blade_rf(), &value));
+}
 
 const rf_phreaker::scanner::scanner* blade_rf_controller::get_scanner()
 {

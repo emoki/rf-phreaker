@@ -44,12 +44,6 @@ public:
 
 	//virtual void config_scanner_for_collection(std::vector<rf_phreaker::frequency_type> &freqs) = 0;
 
-	virtual void update_dds()
-	{
-		controller_([=](blade_rf_controller &c) {
-			c.update_dds();
-		});
-	}
 
 	virtual std::future<const scanner*> get_scanner()
 	{

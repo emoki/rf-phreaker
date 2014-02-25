@@ -2,6 +2,8 @@ cmake_minimum_required (VERSION 2.8)
 
 project (qt_specific)
 
+cmake_policy (SET CMP0020 NEW)
+	
 # qt_specific version number.
 # TODO - finish this when you have time!
 set (qt_specific_VERSION_MAJOR 1)

@@ -27,10 +27,9 @@ endif ()
 # On linux we cannot export functions therefore we set the target_link to public so  
 # every project that references ipp_custom will also reference the IPP libraries.
 # Note the IPP libraries should be static.
-if(MSVC)
-	target_link_libraries (ipp_custom LINK_PRIVATE ${IPP_LIBRARIES})
-else()
-	target_link_libraries (ipp_custom LINK_PUBLIC ${IPP_LIBRARIES})
-endif()
+if (MSVC)
+	target_link_libraries (ipp_custom PRIVATE ${IPP_LIBRARIES})
+else ()
+	target_link_libraries (ipp_custom PUBLIC ${IPP_LIBRARIES})
+endif ()
 
-target_link_libraries (ipp_custom ${TBB_LIBRARY})

@@ -26,6 +26,8 @@ public:
 	blade_rf_controller(blade_rf_controller &&c);
 
 	~blade_rf_controller();
+	
+	int num_available_scanners();
 
 	std::vector<comm_info_ptr> list_available_scanners();
 
@@ -37,7 +39,13 @@ public:
 
 	void config_scanner_for_collection(std::vector<frequency_type> &freqs);
 
-	void update_dds(); // updates values.. does not calculate dds.. that would be done with 
+	void set_vctcxo_trim(uint16_t trim);
+
+	void read_vctcxo_trim(uint16_t &trim);
+
+	void set_gpio(uint32_t value);
+
+	void read_gpio(uint32_t &value);
 
 	const scanner* get_scanner();
 

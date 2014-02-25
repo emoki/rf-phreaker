@@ -26,8 +26,6 @@ public:
 
 	//virtual void config_scanner_for_collection(std::vector<rf_phreaker::frequency_type> &freqs) = 0;
 
-	virtual void update_dds() = 0; // updates values.. does not calculate dds.. that would be done with 
-
 	virtual std::future<const scanner*> get_scanner() = 0;
 
 	virtual std::future<rf_phreaker::gps> get_gps_data() = 0;
