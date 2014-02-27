@@ -26,7 +26,7 @@ int num_blade_devices_connected(int *num_devices)
 	return matlab_interface_error_general;
 }
 
-int list_blade_devices(char *device_list, int list_size)
+int list_blade_devices(int8_t *device_list, int list_size)
 {
 	try {
 		check_null(device_list);
@@ -115,7 +115,7 @@ int close_blade_device()
 	return matlab_interface_error_general;
 }
 
-int get_connected_device_info(char *serial, int serial_size, int *usb_speed)
+int get_connected_device_info(int8_t *serial, int serial_size, int *usb_speed)
 {
 	try {
 		check_null(serial);
@@ -182,10 +182,11 @@ int get_rf_data(int64_t frequency_hz, int bandwidth_hz, int64_t sampling_rate_hz
 	return matlab_interface_error_general;
 }
 
-int set_vctcxo_trim(uint16_t trim)
+int set_vctcxo_trim(int trim)
 {
 	try {
-		controller.set_vctcxo_trim(trim);
+		uint16_t tmp_trim = trim;
+		controller.set_vctcxo_trim(tmp_trim);
 		return matlab_interface_no_error;
 	}
 	catch(rf_phreaker::rf_phreaker_error &err) {
@@ -198,11 +199,13 @@ int set_vctcxo_trim(uint16_t trim)
 	return matlab_interface_error_general;
 }
 
-int read_vctcxo_trim(uint16_t *trim)
+int read_vctcxo_trim(int *trim)
 {
 	try {
 		check_null(trim);
-		controller.read_vctcxo_trim(*trim);
+		uint16_t tmp_trim = 0;
+		controller.read_vctcxo_trim(tmp_trim);
+		*trim = tmp_trim;
 		return matlab_interface_no_error;
 	}
 	catch(rf_phreaker::rf_phreaker_error &err) {
@@ -215,7 +218,7 @@ int read_vctcxo_trim(uint16_t *trim)
 	return matlab_interface_error_general;
 }
 
-int read_gpio(uint32_t *value)
+int read_gpio(unsigned int *value)
 {
 	try {
 		check_null(value);
@@ -232,7 +235,7 @@ int read_gpio(uint32_t *value)
 	return matlab_interface_error_general;
 }
 
-int set_gpio(uint32_t value)
+int set_gpio(unsigned int value)
 {
 	try {
 		controller.set_gpio(value);
@@ -248,12 +251,14 @@ int set_gpio(uint32_t value)
 	return matlab_interface_error_general;
 }
 
-int get_last_error(char* description, int description_size)
+int get_last_error(int8_t* description, int description_size)
 {
 	try {
 		check_null(description);
 		
 		check_buf_size(description_size, last_error_, "Last error");
+
+		memset(description, 0, description_size);
 
 		std::copy(last_error_.begin(), last_error_.end(), description);
 

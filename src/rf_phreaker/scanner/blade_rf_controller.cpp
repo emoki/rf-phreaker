@@ -82,12 +82,19 @@ void blade_rf_controller::open_scanner(const scanner_id_type &id)
 
 void blade_rf_controller::close_scanner()
 {
-	bladerf_close(comm_blade_rf_->blade_rf());
-	comm_blade_rf_.reset();
+	//if(comm_blade_rf_.get() == nullptr)
+	//	throw rf_phreaker::comm_error("Unable to close scanner.  Nothing open.");
+
+	if(comm_blade_rf_.get()) {
+		bladerf_close(comm_blade_rf_->blade_rf());
+		comm_blade_rf_.reset();
+	}
 }
 
 void blade_rf_controller::do_initial_scanner_config()
 {
+	check_blade_comm();
+
 	check_blade_status(bladerf_enable_module(comm_blade_rf_->blade_rf(),
 		BLADERF_MODULE_RX,
 		true));
@@ -100,15 +107,15 @@ void blade_rf_controller::do_initial_scanner_config()
 	// Is this done inside bladeRF?  If not, this can be done once and 
 	// registry values can be saved in hw and loaded next init phase.
 
-	//check_blade_status(bladerf_calibrate_dc(comm_blade_rf_->blade_rf(), 
-	//	BLADERF_DC_CAL_LPF_TUNING));
+	check_blade_status(bladerf_calibrate_dc(comm_blade_rf_->blade_rf(), 
+		BLADERF_DC_CAL_LPF_TUNING));
 
 
-	//check_blade_status(bladerf_calibrate_dc(comm_blade_rf_->blade_rf(), 
-	//	BLADERF_DC_CAL_RX_LPF));
+	check_blade_status(bladerf_calibrate_dc(comm_blade_rf_->blade_rf(), 
+		BLADERF_DC_CAL_RX_LPF));
 
-	//check_blade_status(bladerf_calibrate_dc(comm_blade_rf_->blade_rf(), 
-	//	BLADERF_DC_CAL_RXVGA2));
+	check_blade_status(bladerf_calibrate_dc(comm_blade_rf_->blade_rf(), 
+		BLADERF_DC_CAL_RXVGA2));
 
 	//check_blade_status(bladerf_set_sampling(comm_blade_rf_->blade_rf(),
 	//	bladerf_sampling::BLADERF_SAMPLING_INTERNAL));
@@ -133,21 +140,29 @@ void blade_rf_controller::do_initial_scanner_config()
 
 void blade_rf_controller::set_vctcxo_trim(uint16_t trim)
 {
+	check_blade_comm();
+
 	check_blade_status(bladerf_dac_write(comm_blade_rf_->blade_rf(), trim));
 }
 
 void blade_rf_controller::read_vctcxo_trim(uint16_t &trim)
 {
+	check_blade_comm();
+
 	check_blade_status(bladerf_get_vctcxo_trim(comm_blade_rf_->blade_rf(), &trim));
 }
 
 void blade_rf_controller::set_gpio(uint32_t value)
 {
+	check_blade_comm();
+
 	check_blade_status(bladerf_config_gpio_write(comm_blade_rf_->blade_rf(), value));
 }
 
 void blade_rf_controller::read_gpio(uint32_t &value)
 {
+	check_blade_comm();
+
 	check_blade_status(bladerf_config_gpio_read(comm_blade_rf_->blade_rf(), &value));
 }
 
@@ -167,6 +182,8 @@ const scanner_blade_rf* blade_rf_controller::get_scanner_blade_rf()
 
 void blade_rf_controller::refresh_scanner_info()
 {
+	check_blade_comm();
+
 	scanner_blade_rf_impl blade;
 
 	auto comm_blade = comm_blade_rf_->blade_rf();
@@ -197,6 +214,8 @@ void blade_rf_controller::refresh_scanner_info()
 
 gps blade_rf_controller::get_gps_data()
 {
+	check_blade_comm();
+
 	return gps();
 }
 
@@ -225,6 +244,8 @@ gain_type blade_rf_controller::set_auto_gain(frequency_type freq, bandwidth_type
 
 measurement_info blade_rf_controller::get_rf_data(frequency_type frequency, time_type time_ns, bandwidth_type bandwidth, const gain_type &gain, frequency_type sampling_rate)
 {
+	check_blade_comm();
+
 	int throw_away_ns = 3000000;
 
 	// Per Nyquist a signal must be sampled at a rate greater than twice it's maximum frequency component.  Thus
@@ -314,6 +335,13 @@ int blade_rf_controller::check_blade_status(int return_status)
 	//}
 	return return_status;
 }
+
+void blade_rf_controller::check_blade_comm()
+{
+	if(comm_blade_rf_.get() == nullptr)
+		throw rf_phreaker::comm_error("It does not appear there is a valid connection to the device.  Try opening the device.");
+}
+
 
 
 ////////////////////////////////////////////////////////////

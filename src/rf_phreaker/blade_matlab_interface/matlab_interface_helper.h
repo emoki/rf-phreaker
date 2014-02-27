@@ -35,6 +35,12 @@ void check_null(char *ptr)
 		throw matlab_interface_error("Invalid parameter.  char ptr is NULL.", matlab_interface_error_null_detected);
 }
 
+void check_null(int8_t *ptr)
+{
+	if(ptr == nullptr)
+		throw matlab_interface_error("Invalid parameter.  char ptr is NULL.", matlab_interface_error_null_detected);
+}
+
 void check_null(int *ptr)
 {
 	if(ptr == nullptr)

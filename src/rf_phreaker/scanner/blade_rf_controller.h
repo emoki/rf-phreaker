@@ -64,6 +64,8 @@ private:
 
 	int check_blade_status(int return_status);
 
+	void check_blade_comm();
+
 	ipp_16sc_aligned_buffer aligned_buffer_;
 
 	gain_manager gain_manager_;
