@@ -2,6 +2,7 @@
 
 #include "rf_phreaker/umts_analysis/umts_types.h"
 #include "rf_phreaker/common/ipp_array.h"
+#include "rf_phreaker/common/common_types.h"
 #include "ipp.h"
 
 namespace rf_phreaker { class fir_filter; }
@@ -15,7 +16,7 @@ public:
 
 	void generate_raw_cpich_table(int num_chips = N_TOTAL_CHIPS_CPICH);
 
-	void generate_resampled_cpich_table(int up_factor, int down_factor, int num_chips = N_TOTAL_CHIPS_CPICH);
+	void generate_resampled_cpich_table(rf_phreaker::frequency_type sampling_rate, int num_chips = N_TOTAL_CHIPS_CPICH);
 
 	void generate_resampled_cpich_table(const std::string &filter_spec_filename, int num_chips = N_TOTAL_CHIPS_CPICH);
 

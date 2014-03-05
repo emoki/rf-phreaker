@@ -1,5 +1,6 @@
 #include "rf_phreaker/umts_analysis/cpich_table_container.h"
 #include "rf_phreaker/umts_analysis/cpich_generator.h"
+#include "rf_phreaker/umts_analysis/umts_types.h"
 #include "rf_phreaker/common/exception_types.h"
 #include "rf_phreaker/common/ipp_helper.h"
 #include "rf_phreaker/fir_filter/fir_filter.h"
@@ -44,12 +45,12 @@ void cpich_table_container::generate_raw_cpich_table(int num_chips)
 }
 
 
-void cpich_table_container::generate_resampled_cpich_table(int up_factor, int down_factor, int num_chips)
+void cpich_table_container::generate_resampled_cpich_table(rf_phreaker::frequency_type sampling_rate, int num_chips)
 {	
-	configure(up_factor, down_factor, num_chips);
-
-	rf_phreaker::fir_filter filter(up_factor_, down_factor_);
+	rf_phreaker::fir_filter filter(UMTS_CHIP_RATE_HZ, sampling_rate);
 	filter.set_zero_delay(true);
+
+	configure(filter.up_factor(), filter.down_factor(), num_chips);
 
 	// Use a longer length for the taps because we're only doing this once.
 	filter.set_taps(6501);

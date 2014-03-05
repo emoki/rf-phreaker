@@ -1,6 +1,7 @@
 #pragma once
 
 #include "rf_phreaker/umts_analysis/umts_types.h"
+#include "rf_phreaker/common/common_types.h"
 #include "rf_phreaker/common/ipp_array.h"
 #include "ipp.h"
 
@@ -11,13 +12,13 @@ class psch_container
 public:
 	psch_container();
 
-	psch_container(int up_factor, int down_factor);
+	//psch_container(rf_phreaker::frequency_type sampling_rate);
 
-	psch_container(const std::string &filter_spec_filename);
+	//psch_container(const std::string &filter_spec_filename);
 
 	~psch_container();
 
-	void generate_resampled_psch(int up_factor, int down_factor);
+	void generate_resampled_psch(rf_phreaker::frequency_type sampling_rate);
 
 	void generate_resampled_psch(const std::string &filter_spec_filename);
 

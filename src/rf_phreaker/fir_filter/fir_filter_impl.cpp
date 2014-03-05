@@ -21,18 +21,18 @@ fir_filter_impl::fir_filter_impl()
 	, m_DownPhase(0)
 {}
 
-fir_filter_impl::fir_filter_impl(int upFactor, int downFactor) 
-	: m_State(NULL)
-	, m_DelayLine(NULL)
-	, m_Length(0)
-	, m_DelayLen(0)
-	, m_ZeroDelay(false)
-	, m_InputDelay(0)
-	, m_UpPhase(0)
-	, m_DownPhase(0)
-{
-	set_up_down_factor(upFactor, downFactor);
-}
+//fir_filter_impl::fir_filter_impl(int upFactor, int downFactor) 
+//	: m_State(NULL)
+//	, m_DelayLine(NULL)
+//	, m_Length(0)
+//	, m_DelayLen(0)
+//	, m_ZeroDelay(false)
+//	, m_InputDelay(0)
+//	, m_UpPhase(0)
+//	, m_DownPhase(0)
+//{
+//	set_up_down_factor(upFactor, downFactor);
+//}
 
 fir_filter_impl::fir_filter_impl(frequency_type original_sampling_rate, frequency_type new_sampling_rate)
 : m_State(NULL)
@@ -56,7 +56,7 @@ void fir_filter_impl::set_up_down_factor_based_on_sampling_rates(frequency_type 
 {
 	auto lcm = boost::math::lcm(original_sampling_rate, new_sampling_rate);
 
-	set_up_down_factor(static_cast<int>(lcm / original_sampling_rate), static_cast<int>(new_sampling_rate / lcm));
+	set_up_down_factor(static_cast<int>(lcm / original_sampling_rate), static_cast<int>(lcm / new_sampling_rate));
 }
 
 void fir_filter_impl::set_up_down_factor(int up_factor, int down_factor)

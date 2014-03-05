@@ -10,7 +10,7 @@ class collection_settings
 {
 public:
 	frequency_type sampling_rate_;
-	frequency_type bandwidth_;
+	bandwidth_type bandwidth_;
 	time_type collection_time_;
 };
 
@@ -22,7 +22,7 @@ public:
 	double decode_minimum_threshold_;
 };
 
-class umts_general /* Find a better description? */
+class umts_general_settings /* Find a better description? */
 {
 public:
 	double sensitivity_;
@@ -43,8 +43,8 @@ public:
 	layer_3_settings umts_decode_layer_3_;
 	layer_3_settings lte_decode_layer_3_;
 
-	umts_general umts_sweep_general_;
-	umts_general umts_layer_3_general_;
+	umts_general_settings umts_sweep_general_;
+	umts_general_settings umts_layer_3_general_;
 	//double umts_fast_sweep_threshold_;
 	//double umts_deep_sweep_threshold_;
 	//double umts_sweep_threshold_;

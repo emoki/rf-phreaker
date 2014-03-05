@@ -1,28 +1,9 @@
 #pragma once
 
-#if defined _WIN32 || defined __CYGWIN__
 #ifdef BUILDING_DLL
-#ifdef __GNUC__
-#define DLL_PUBLIC __attribute__ ((dllexport))
-#else
 #define DLL_PUBLIC __declspec(dllexport) // Note: actually gcc seems to also supports this syntax.
-#endif
-#else
-#ifdef __GNUC__
-#define DLL_PUBLIC __attribute__ ((dllimport))
 #else
 #define DLL_PUBLIC __declspec(dllimport) // Note: actually gcc seems to also supports this syntax.
-#endif
-#endif
-#define DLL_LOCAL
-#else
-#if __GNUC__ >= 4
-#define DLL_PUBLIC __attribute__ ((visibility ("default")))
-#define DLL_LOCAL  __attribute__ ((visibility ("hidden")))
-#else
-#define DLL_PUBLIC
-#define DLL_LOCAL
-#endif
 #endif
 
 #include <stdint.h>
@@ -61,6 +42,11 @@ extern "C" {
 	int DLL_PUBLIC get_rf_data(__int64 frequency_hz, int bandwidth_hz, __int64 sampling_rate_hz, int lna_gain, int rx_gain_vga1, int rx_gain_vga2, float *iq_data, int num_samples);
 
 	/*
+	Does not change any lms parameters.  Only transfers IQ data.
+	*/
+	int DLL_PUBLIC only_get_rf_data(float *iq_data, int num_samples);
+
+	/*
 		This value may not be saved between power cycles?
 	*/
 	int DLL_PUBLIC set_vctcxo_trim(int trim);
@@ -81,6 +67,15 @@ extern "C" {
 		GPIO bits that may be set by the library internally.
 	*/
 	int DLL_PUBLIC set_gpio(unsigned int value);
+
+	/*
+	*/
+	int DLL_PUBLIC set_lms_reg(int address, int value);
+
+	/*
+	*/
+	int DLL_PUBLIC read_lms_reg(int address, int *value);
+
 
 	/* 
 		Return value of -999 represents description_size is not large enough to contain entire error message.

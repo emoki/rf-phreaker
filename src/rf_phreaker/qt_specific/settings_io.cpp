@@ -47,7 +47,7 @@ void settings_io::read(layer_3_settings &settings, const std::string &group_key)
 	qsettings_->endGroup();
 }
 
-void settings_io::read(umts_general &settings, const std::string &group_key)
+void settings_io::read(umts_general_settings &settings, const std::string &group_key)
 {
 	qsettings_->beginGroup(group_key.c_str());
 	settings.sensitivity_ = qsettings_->value(sensitivity_key.c_str(), settings_umts_general_sensitivity_default).toDouble();
@@ -90,7 +90,7 @@ void settings_io::write(layer_3_settings &settings, const std::string &group_key
 	qsettings_->endGroup();
 }
 
-void settings_io::write(umts_general &settings, const std::string &group_key)
+void settings_io::write(umts_general_settings &settings, const std::string &group_key)
 {
 	qsettings_->beginGroup(group_key.c_str());
 	qsettings_->setValue(sensitivity_key.c_str(), settings.sensitivity_);

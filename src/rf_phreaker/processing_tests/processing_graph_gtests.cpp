@@ -4,6 +4,7 @@
 #include "rf_phreaker/scanner/blade_rf_controller_async.h"
 #include "rf_phreaker/common/common_utility.h"
 #include "rf_phreaker/common/benchmark.h"
+#include "rf_phreaker/qt_specific/settings_io.h"
 #include "stdafx.h"
 
 TEST(ProcessingGraph, TestGeneral)
@@ -36,10 +37,15 @@ TEST(ProcessingGraph, TestGeneral)
 			for(int i = mhz(869); i < mhz(894); i += khz(100))
 				umts_sweep.adjust(add_collection_info(umts_sweep_collection_info(i)));
 
+
+
+			rf_phreaker::settings config;
+			rf_phreaker::settings_io io("rf_phreaker_graph_test", "cappeen");
+			io.read(config);
+
 			processing_graph graph;
 
-
-			graph.initialize(&blade, containers);
+			graph.initialize(&blade, containers, config);
 
 			boost::timer::auto_cpu_timer t;
 

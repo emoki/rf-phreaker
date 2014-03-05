@@ -182,6 +182,27 @@ int get_rf_data(int64_t frequency_hz, int bandwidth_hz, int64_t sampling_rate_hz
 	return matlab_interface_error_general;
 }
 
+int only_get_rf_data(float *iq_data, int num_samples)
+{
+	try {
+		check_null(iq_data);
+
+		auto meas = controller.get_rf_data(num_samples);
+
+		memcpy(iq_data, &meas.get_iq()[0], num_samples * sizeof(ipp_32fc_array::data_type_));
+
+		return matlab_interface_no_error;
+	}
+	catch(rf_phreaker::rf_phreaker_error &err) {
+		last_error_ = err.what();
+		return (int)err.error_code_;
+	}
+	catch(std::exception &err) {
+		last_error_ = err.what();
+	}
+	return matlab_interface_error_general;
+}
+
 int set_vctcxo_trim(int trim)
 {
 	try {
@@ -239,6 +260,40 @@ int set_gpio(unsigned int value)
 {
 	try {
 		controller.set_gpio(value);
+		return matlab_interface_no_error;
+	}
+	catch(rf_phreaker::rf_phreaker_error &err) {
+		last_error_ = err.what();
+		return (int)err.error_code_;
+	}
+	catch(std::exception &err) {
+		last_error_ = err.what();
+	}
+	return matlab_interface_error_general;
+}
+
+int set_lms_reg(int address, int value)
+{
+	try {
+		controller.set_lms_reg(address, value);
+		return matlab_interface_no_error;
+	}
+	catch(rf_phreaker::rf_phreaker_error &err) {
+		last_error_ = err.what();
+		return (int)err.error_code_;
+	}
+	catch(std::exception &err) {
+		last_error_ = err.what();
+	}
+	return matlab_interface_error_general;
+}
+
+int read_lms_reg(int address, int *value)
+{
+	try {
+		uint8_t tmp;
+		controller.read_lms_reg(address, tmp);
+		*value = tmp;
 		return matlab_interface_no_error;
 	}
 	catch(rf_phreaker::rf_phreaker_error &err) {

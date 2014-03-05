@@ -56,7 +56,7 @@ public:
 
 	void read(layer_3_settings &settings, const std::string &group_key);
 
-	void read(umts_general &settings, const std::string &group_key);
+	void read(umts_general_settings &settings, const std::string &group_key);
 
 	void write(settings &settings);
 
@@ -64,7 +64,7 @@ public:
 
 	void write(layer_3_settings &settings, const std::string &group_key);
 
-	void write(umts_general &settings, const std::string &group_key);
+	void write(umts_general_settings &settings, const std::string &group_key);
 
 	void clear();
 

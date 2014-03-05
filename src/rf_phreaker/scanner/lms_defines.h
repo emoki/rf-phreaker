@@ -4,6 +4,7 @@
 #include <stdint.h>
 
 #include "rf_phreaker/scanner/scanner_types.h"
+#include "rf_phreaker/common/exception_types.h"
 
 namespace rf_phreaker { namespace scanner { namespace lms
 {
@@ -229,8 +230,6 @@ inline lms_value_type disable_rx_vga2(lms_value_type v) { return (v & ~0x03); }
 // Figure out how this works!
 //inline lms_value_type set_and_convert_rx_vga2_voltage_control(lms_value_type v, int voltage) { voltage = voltage / 7; return (v & 0xC3) | (static_cast<lms_value_type>(voltage) & 0x0F) << 2; }
 inline lms_value_type get_default_rx_vga2_voltage_control(lms_value_type v) { return (v & 0xC3) | 0x1C; }
-
-
 
 
 

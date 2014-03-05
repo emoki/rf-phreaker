@@ -78,11 +78,13 @@ private:
 
 	int successful_decodes_;
 
-	double sample_rate_;
+	int signal_sampling_rate_;
 
 	double clock_rate_;
 
-	double over_sampling_rate_;
+	int target_sampling_rate_;
+
+	double signal_over_sampling_rate_;
 
 	rf_phreaker::fir_filter umts_signal_filter_;
 	rf_phreaker::fir_filter cpich_filter_;

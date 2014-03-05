@@ -1,4 +1,4 @@
-cmake_minimum_required (VERSION 2.8)
+
 
 project (umts_layer_3_decoder_tests)
 

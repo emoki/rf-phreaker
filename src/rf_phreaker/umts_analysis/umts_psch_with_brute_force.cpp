@@ -29,7 +29,7 @@ umts_psch_with_brute_force::umts_psch_with_brute_force(const umts_config &config
 void umts_psch_with_brute_force::set_config(const umts_config &config)
 {
 	psch_container psch;
-	psch.generate_resampled_psch(config.up_factor(), config.down_factor());
+	psch.generate_resampled_psch(config.sampling_rate());
 	psch_template_ = psch.resampled_psch_array();
 
 	do_we_benchmark_ = config.benchmark_umts_brute_force();
@@ -39,7 +39,7 @@ void umts_psch_with_brute_force::set_config(const umts_config &config)
 		benchmark_.open_benchmark(config.umts_brute_force_filename(), false);
 #endif
 
-	sample_rate_ = config.sample_rate();
+	sample_rate_ = config.sampling_rate();
 	clock_rate_ = config.clock_rate();
 	over_sampling_rate_ = config.over_sampling_rate();
 	num_samples_per_cpich_ = static_cast<int>(N_TOTAL_CHIPS_CPICH * over_sampling_rate_);

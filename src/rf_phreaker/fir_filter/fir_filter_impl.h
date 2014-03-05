@@ -21,7 +21,7 @@ class fir_filter_impl
 public:
 	fir_filter_impl();
 
-	fir_filter_impl(int upFactor, int downFactor);
+	//fir_filter_impl(int upFactor, int downFactor);
 
 	fir_filter_impl(frequency_type original_sampling_rate, frequency_type new_sampling_rate);
 

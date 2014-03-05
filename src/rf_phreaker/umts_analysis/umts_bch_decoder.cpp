@@ -17,19 +17,17 @@ umts_bch_decoder::umts_bch_decoder(const umts_config &config, const /*cpich_tabl
 , bit_stream_counter_(0)
 , successful_decodes_(0)
 , clock_rate_(config.clock_rate())
-, sample_rate_(config.sample_rate())
-, over_sampling_rate_(config.over_sampling_rate())
+, signal_sampling_rate_(config.sampling_rate())
+, target_sampling_rate_(19200000)
 {
-	// Currently hardcoded factors.
-	//up_factor_ = 5;
-	//down_factor_ = 1;
-	up_factor_ = 256;
-	down_factor_ = 65;
-	
-
 	umts_signal_filter_.set_zero_delay(true);
-	umts_signal_filter_.set_up_down_factor(up_factor_, down_factor_);
+	umts_signal_filter_.set_up_down_factor_based_on_sampling_rates(signal_sampling_rate_, target_sampling_rate_);
 	umts_signal_filter_.set_taps(5121);
+
+	up_factor_ = umts_signal_filter_.up_factor();
+	down_factor_ = umts_signal_filter_.down_factor();	
+
+	signal_over_sampling_rate_ = (double)up_factor_ / down_factor_;
 	
 	cpich_resample_factor_ = 5; // Represents the rate above umts chip rate at which we are processing.  So 3.84 * (5) = 19.2.
 
@@ -692,8 +690,8 @@ bool umts_bch_decoder::convert_to_bitstream(int startofframe)
 {	
 	bool successful_decode = false;
 
-	if(startofframe - over_sampling_rate_ * N_TOTAL_CHIPS_CPICH  > 0) 
-		startofframe -= (int)boost::math::round(over_sampling_rate_* N_TOTAL_CHIPS_CPICH);
+	if(startofframe - signal_over_sampling_rate_ * N_TOTAL_CHIPS_CPICH  > 0)
+		startofframe -= (int)boost::math::round(signal_over_sampling_rate_* N_TOTAL_CHIPS_CPICH);
 
 	int esamples = 20;
 	int hamminglength=129, kaiserlength=5121;

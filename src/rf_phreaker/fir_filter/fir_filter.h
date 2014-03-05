@@ -38,7 +38,7 @@ class DLL_PUBLIC fir_filter
 public:
 	fir_filter();
 
-	fir_filter(int up_factor, int down_factor);
+	//fir_filter(int up_factor, int down_factor);
 
 	fir_filter(frequency_type original_sampling_rate, frequency_type new_sampling_rate);
 

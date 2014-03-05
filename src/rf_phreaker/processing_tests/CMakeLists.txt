@@ -1,4 +1,4 @@
-cmake_minimum_required (VERSION 2.8)
+
 
 project (processing_tests)
 
@@ -20,3 +20,4 @@ add_executable (processing_tests ${processing_tests_SRCS})
 
 target_link_libraries (processing_tests processing)
 target_link_libraries (processing_tests gmock)
+target_link_libraries (processing_tests qt_specific)

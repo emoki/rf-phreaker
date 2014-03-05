@@ -14,9 +14,9 @@ fir_filter::fir_filter()
 {}
 
 
-fir_filter::fir_filter(int up_factor, int down_factor)
-	: impl_(new fir_filter_impl(up_factor, down_factor))
-{}
+//fir_filter::fir_filter(int up_factor, int down_factor)
+//	: impl_(new fir_filter_impl(up_factor, down_factor))
+//{}
 
 fir_filter::fir_filter(int64_t original_sampling_rate, int64_t new_sampling_rate)
 : impl_(new fir_filter_impl(original_sampling_rate, new_sampling_rate))

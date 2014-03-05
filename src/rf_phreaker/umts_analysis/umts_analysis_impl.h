@@ -16,7 +16,7 @@ public:
 
 	~umts_analysis_impl();
 
-	int cell_search(const rf_phreaker::raw_signal &raw_signal, umts_measurement *umts_meas, int &num_umts_meas, uint32_t num_cpich_chips, umts_scan_type scan_type, double *rms);
+	int cell_search(const rf_phreaker::raw_signal &raw_signal, umts_measurement *umts_meas, int &num_umts_meas, double sensitivity, umts_scan_type scan_type, double *rms);
 
 	int decode_layer_3(const rf_phreaker::raw_signal &raw_signal, umts_measurement &umts_meas);
 

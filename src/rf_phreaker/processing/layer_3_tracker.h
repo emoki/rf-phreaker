@@ -159,6 +159,11 @@ public:
 		return true;
 	}
 
+	bool is_freq_in_history(rf_phreaker::frequency_type f)
+	{
+		return wanted_layer_3_.find(f) != wanted_layer_3_.end();
+	}
+
 	// Change lte so that it uses the layer_3 lib class.
 	template<typename Data>
 	void update(rf_phreaker::frequency_type f, const Data &data) {

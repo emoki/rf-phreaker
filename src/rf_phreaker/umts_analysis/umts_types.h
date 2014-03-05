@@ -1,5 +1,6 @@
 #pragma once
 
+#define UMTS_CHIP_RATE_HZ 3840000L
 #define N_SLOTS_PER_FRAME	(15)
 #define FRAME_PERIOD_SEC	(0.01)					// Frame duration in seconds
 #define SLOT_PERIOD_SEC		(FRAME_PERIOD_SEC/N_SLOTS_PER_FRAME)	// Slot duration in seconds

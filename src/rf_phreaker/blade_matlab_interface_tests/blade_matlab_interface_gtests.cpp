@@ -36,6 +36,14 @@ TEST(BladeMatlabInterface, TestMain)
 	ipp_32fc_array iq_data(num_samples);
 	EXPECT_EQ(0, get_rf_data(mhz(886), mhz(5), khz(30720), 3, 30, 0, (float*)iq_data.get(), iq_data.length()));
 
+	EXPECT_EQ(0, only_get_rf_data((float*)iq_data.get(), iq_data.length()));
+
+	int lms_add = 0x23;
+	int lms_value = 0;
+	EXPECT_EQ(0, read_lms_reg(lms_add, &lms_value));
+	EXPECT_EQ(0, set_lms_reg(lms_add, lms_value));
+
+
 	int trim = 0;
 	EXPECT_EQ(0, read_vctcxo_trim(&trim));
 

@@ -12,12 +12,11 @@ psch_container::psch_container()
 , resampled_psch_length_(0)
 {}
 
-psch_container::psch_container(int up_factor, int down_factor)
-: num_chips_(256)
-
-{
-	configure(up_factor, down_factor);
-}
+//psch_container::psch_container(rf_phreaker::frequency_type sampling_rate)
+//: num_chips_(256)
+//
+//{
+//}
 
 psch_container::~psch_container()
 {}
@@ -34,12 +33,12 @@ void psch_container::configure(int up_factor, int down_factor)
 }
 
 
-void psch_container::generate_resampled_psch(int up_factor, int down_factor)
+void psch_container::generate_resampled_psch(rf_phreaker::frequency_type sampling_rate)
 {
-	configure(up_factor, down_factor);
-
-	rf_phreaker::fir_filter filter(up_factor_, down_factor_);
+	rf_phreaker::fir_filter filter(UMTS_CHIP_RATE_HZ, sampling_rate);
 	filter.set_zero_delay(true);
+
+	configure(filter.up_factor(), filter.down_factor());
 
 	// Use a longer length for the taps because we're only doing this once.
 	filter.set_taps(6501);

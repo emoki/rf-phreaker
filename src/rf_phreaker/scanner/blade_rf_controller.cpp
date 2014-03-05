@@ -106,15 +106,17 @@ void blade_rf_controller::do_initial_scanner_config()
 	// NOTE - Do not perform any calibrations at this time.
 	// Is this done inside bladeRF?  If not, this can be done once and 
 	// registry values can be saved in hw and loaded next init phase.
+	// The calibrations can return an error.  We should log this but not 
+	// necessarily throw an error.
 
-	check_blade_status(bladerf_calibrate_dc(comm_blade_rf_->blade_rf(), 
+	/*check_blade_status*/(bladerf_calibrate_dc(comm_blade_rf_->blade_rf(), 
 		BLADERF_DC_CAL_LPF_TUNING));
 
 
-	check_blade_status(bladerf_calibrate_dc(comm_blade_rf_->blade_rf(), 
+	/*check_blade_status*/(bladerf_calibrate_dc(comm_blade_rf_->blade_rf(), 
 		BLADERF_DC_CAL_RX_LPF));
 
-	check_blade_status(bladerf_calibrate_dc(comm_blade_rf_->blade_rf(), 
+	/*check_blade_status*/(bladerf_calibrate_dc(comm_blade_rf_->blade_rf(), 
 		BLADERF_DC_CAL_RXVGA2));
 
 	//check_blade_status(bladerf_set_sampling(comm_blade_rf_->blade_rf(),
@@ -165,6 +167,21 @@ void blade_rf_controller::read_gpio(uint32_t &value)
 
 	check_blade_status(bladerf_config_gpio_read(comm_blade_rf_->blade_rf(), &value));
 }
+
+void blade_rf_controller::set_lms_reg(uint8_t address, uint8_t value)
+{
+	check_blade_comm();
+
+	check_blade_status(bladerf_lms_write(comm_blade_rf_->blade_rf(), address, value));
+}
+
+void blade_rf_controller::read_lms_reg(uint8_t address, uint8_t &value)
+{
+	check_blade_comm();
+
+	check_blade_status(bladerf_lms_read(comm_blade_rf_->blade_rf(), address, &value));
+}
+
 
 const rf_phreaker::scanner::scanner* blade_rf_controller::get_scanner()
 {
@@ -229,10 +246,10 @@ measurement_info blade_rf_controller::get_rf_data_use_auto_gain(frequency_type f
 gain_type blade_rf_controller::set_auto_gain(frequency_type freq, bandwidth_type bandwidth, time_type time_ns,
 										frequency_type sampling_rate)
 {
-	// Use lowest sampling rate because we only care about the Max ADC.
 	if(time_ns == 0)
 		time_ns = 5000000;
 
+	// Use lowest sampling rate because we only care about the Max ADC.
 	sampling_rate = 1920000;
 
 	gain_type gain;
@@ -246,7 +263,7 @@ measurement_info blade_rf_controller::get_rf_data(frequency_type frequency, time
 {
 	check_blade_comm();
 
-	int throw_away_ns = 3000000;
+	int throw_away_ns =milli_to_nano(3);
 
 	// Per Nyquist a signal must be sampled at a rate greater than twice it's maximum frequency component.  Thus
 	// once converted to baseband the highest pertinent frequency component will be 1/2 the bandwidth so our sampling 
@@ -278,7 +295,62 @@ measurement_info blade_rf_controller::get_rf_data(frequency_type frequency, time
 	check_blade_status(bladerf_set_lpf_mode(comm_blade_rf_->blade_rf(), BLADERF_MODULE_RX,
 		BLADERF_LPF_NORMAL));
 
-	int num_samples = time_samples_conversion_.convert_to_samples(time_ns/* + throw_away_ns*/, blade_sampling_rate);
+	int throw_away_samples = time_samples_conversion_.convert_to_samples(throw_away_ns, blade_sampling_rate);
+
+	int num_samples = time_samples_conversion_.convert_to_samples(time_ns, blade_sampling_rate);
+
+	throw_away_samples += 1024 - throw_away_samples % 1024;
+
+	// BladeRF only accepts data num_samples that are a multiple of 1024.
+	num_samples += 1024 - num_samples % 1024;
+
+	const auto return_bytes = (num_samples + throw_away_samples) * 2 * sizeof(int16_t);
+
+	aligned_buffer_.align_array(return_bytes);
+	auto aligned_buffer = aligned_buffer_.get_aligned_array();
+
+	bladerf_metadata metadata;
+
+	check_blade_status(bladerf_rx(comm_blade_rf_->blade_rf(), BLADERF_FORMAT_SC16_Q11,
+		aligned_buffer, num_samples, &metadata));
+
+	measurement_info data(num_samples, frequency, blade_bandwidth, blade_sampling_rate,
+		gain);
+
+	for(int i = throw_away_samples; i < (throw_away_samples + num_samples) * 2; ++i)
+		sign_extend_12_bits(reinterpret_cast<int16_t*>(aligned_buffer)[i]);
+
+	const auto beginning_of_iq = (Ipp16s*)&(*aligned_buffer_.get_aligned_array()) + (throw_away_samples * 2);
+
+	ipp_helper::check_status(ippsConvert_16s32f(beginning_of_iq,
+		(Ipp32f*)data.get_iq().get(), data.get_iq().length() * 2));
+
+	return data;
+}
+
+measurement_info blade_rf_controller::get_rf_data(int num_samples)
+{
+	uint32_t frequency;
+	uint32_t blade_bandwidth;
+	uint32_t blade_sampling_rate;
+	bladerf_lna_gain tmp_lna_gain;
+	gain_type gain;
+
+	check_blade_status(bladerf_get_lna_gain(comm_blade_rf_->blade_rf(), &tmp_lna_gain));
+	gain.lna_gain_ = convert(tmp_lna_gain);
+
+	check_blade_status(bladerf_get_rxvga1(comm_blade_rf_->blade_rf(), &gain.rxvga1_));
+
+	check_blade_status(bladerf_get_rxvga2(comm_blade_rf_->blade_rf(), &gain.rxvga2_));
+
+	check_blade_status(bladerf_get_sample_rate(comm_blade_rf_->blade_rf(), BLADERF_MODULE_RX,
+		&blade_sampling_rate));
+
+	check_blade_status(bladerf_get_bandwidth(comm_blade_rf_->blade_rf(), BLADERF_MODULE_RX,
+		&blade_bandwidth));
+
+	check_blade_status(bladerf_get_frequency(comm_blade_rf_->blade_rf(), BLADERF_MODULE_RX,
+		&frequency));
 
 	// BladeRF only accepts data num_samples that are a multiple of 1024.
 	num_samples += 1024 - num_samples % 1024;
@@ -294,12 +366,12 @@ measurement_info blade_rf_controller::get_rf_data(frequency_type frequency, time
 		aligned_buffer, num_samples, &metadata));
 
 	measurement_info data(num_samples, frequency, blade_bandwidth, blade_sampling_rate,
-		gain);
+						  gain);
 
 	for(int i = 0; i < num_samples * 2; ++i)
 		sign_extend_12_bits(reinterpret_cast<int16_t*>(aligned_buffer)[i]);
 
-	ipp_helper::check_status(ippsConvert_16s32f((Ipp16s*)&(*aligned_buffer_.get_aligned_array()), 
+	ipp_helper::check_status(ippsConvert_16s32f((Ipp16s*)&(*aligned_buffer_.get_aligned_array()),
 		(Ipp32f*)data.get_iq().get(), data.get_iq().length() * 2));
 
 	return data;

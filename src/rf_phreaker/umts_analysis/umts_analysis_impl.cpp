@@ -1,4 +1,5 @@
 #include "rf_phreaker/umts_analysis/umts_analysis_impl.h"
+#include "rf_phreaker/umts_analysis/umts_utilities.h"
 
 std::shared_ptr<cpich_table_container> umts_analysis_impl::brute_force_cpich_table_;
 std::shared_ptr<cpich_table_container> umts_analysis_impl::bch_decoder_cpich_table_;
@@ -13,11 +14,19 @@ umts_analysis_impl::~umts_analysis_impl()
 {
 }
 
-int umts_analysis_impl::cell_search(const rf_phreaker::raw_signal &raw_signal, umts_measurement *umts_meas, int &num_umts_meas, uint32_t num_cpich_chips, umts_scan_type scan_type, double *rms)
+int umts_analysis_impl::cell_search(const rf_phreaker::raw_signal &raw_signal, umts_measurement *umts_meas, int &num_umts_meas, double sensitivity, umts_scan_type scan_type, double *rms)
 {
 	int status = 0;
 
 	try {
+		if(sensitivity < -30.0)
+			throw rf_phreaker::umts_analysis_error("UMTS sensitivity threshold is too low.");
+
+		if(sensitivity > 0.0)
+			throw rf_phreaker::umts_analysis_error("UMTS sensitivity threshold is invalid.");
+
+		uint32_t num_cpich_chips = umts_utilities::calculate_num_chips_from_ecio_threshold(sensitivity);
+
 		auto trackign_meas = umts_meas_container_.get_meas(raw_signal.frequency());
 
 		if(!brute_force_)
@@ -99,7 +108,7 @@ const cpich_table_container* umts_analysis_impl::brute_force_cpich_table_ptr()
 		ptr = std::atomic_load(&brute_force_cpich_table_);
 		if(!ptr) {
 			ptr = std::make_shared<cpich_table_container>();
-			ptr->generate_resampled_cpich_table(config_.up_factor(), config_.down_factor());
+			ptr->generate_resampled_cpich_table(config_.sampling_rate());
 			std::atomic_thread_fence(std::memory_order_release);
 			std::atomic_store(&brute_force_cpich_table_, ptr);
 		}
