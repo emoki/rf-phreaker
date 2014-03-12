@@ -14,7 +14,6 @@
 
 namespace
 {
-   const int k_wait_time = 5; // 5s wait between LOG/CHECK FATAL till we say it's too long time
    const std::string log_directory = "./";
 
    bool verifyContent(const std::string &total_text,std::string msg_to_find)
@@ -39,7 +38,7 @@ namespace
       return content;
    }
 
-    g2::internal::FatalMessage g_latest_fatal_message = {"dummy", g2::internal::FatalMessage::kReasonFatal, -1};
+    g2::internal::FatalMessage g_latest_fatal_message("dummy", g2::internal::FatalMessage::kReasonFatal, -1);
     void MockFatalCall (g2::internal::FatalMessage fatalMsg) {
        g_latest_fatal_message = fatalMsg;
     }
@@ -69,7 +68,7 @@ private:
 RestoreLogger::RestoreLogger()
 	: logger_(new g2LogWorker("UNIT_TEST_LOGGER", log_directory))
 {
-        g_latest_fatal_message.message_ = {""};
+        g_latest_fatal_message.message_ = "";
 	g2::initializeLogging(logger_.get());
 	g2::internal::changeFatalInitHandlerForUnitTesting( MockFatalCall );
 
@@ -101,7 +100,7 @@ TEST(Initialization, No_Logger_Initialized___Expecting_LOG_calls_to_be_Still_OK)
       LOG(INFO) << err_msg1;
       LOG(INFO) << err_msg2_ignored;
 
-   } catch (std::exception& e) {
+   } catch (std::exception& ) {
       ADD_FAILURE() << "Should never have thrown even if it is not instantiated";
    }
 
@@ -151,7 +150,72 @@ TEST(CompileTest, LogWithIf) {
    EXPECT_TRUE(verifyContent(content, "Bye 2"));
 }
 
+ 
+TEST(Basics, Shutdown) {
+   std::string file_content;
+   {
+      RestoreLogger logger;
+      LOG(INFO) << "Not yet shutdown. This message should make it";
+      logger.reset(); // force flush of logger (which will trigger a shutdown)
+      LOG(INFO) << "Logger is shutdown,. this message will not make it (but it's safe to try)";
+      file_content = readFileToText(logger.logFile()); // logger is already reset
+      SCOPED_TRACE("LOG_INFO"); // Scope exit be prepared for destructor failure
+   }
+   EXPECT_TRUE(verifyContent(file_content, "Not yet shutdown. This message should make it"));
+   EXPECT_FALSE(verifyContent(file_content, "Logger is shutdown,. this message will not make it (but it's safe to try)"));
+}
 
+TEST(Basics, Shutdownx2) {
+   std::string file_content;
+   {
+      RestoreLogger logger;
+      LOG(INFO) << "Not yet shutdown. This message should make it";
+      logger.reset(); // force flush of logger (which will trigger a shutdown)
+      g2::shutDownLogging(); // already called in reset, but safe to call again
+      LOG(INFO) << "Logger is shutdown,. this message will not make it (but it's safe to try)";
+      logger.reset();
+      file_content = readFileToText(logger.logFile()); // already reset
+      SCOPED_TRACE("LOG_INFO"); // Scope exit be prepared for destructor failure
+   }
+   EXPECT_TRUE(verifyContent(file_content, "Not yet shutdown. This message should make it"));
+   EXPECT_FALSE(verifyContent(file_content, "Logger is shutdown,. this message will not make it (but it's safe to try)"));
+}
+
+TEST(Basics, ShutdownActiveLogger) {
+   std::string file_content;
+   {
+      RestoreLogger logger;
+      LOG(INFO) << "Not yet shutdown. This message should make it";
+      EXPECT_TRUE(g2::shutDownLoggingForActiveOnly(logger.logger_.get()));
+      LOG(INFO) << "Logger is shutdown,. this message will not make it (but it's safe to try)";
+      logger.reset();
+      file_content = readFileToText(logger.logFile());
+      SCOPED_TRACE("LOG_INFO"); // Scope exit be prepared for destructor failure
+   }
+   EXPECT_TRUE(verifyContent(file_content, "Not yet shutdown. This message should make it")) << "\n\n\n***************************\n" << file_content;
+   EXPECT_FALSE(verifyContent(file_content, "Logger is shutdown,. this message will not make it (but it's safe to try)"));
+}
+
+TEST(Basics, DoNotShutdownActiveLogger) {
+   std::string file_content;
+   std::string toRemove;
+   {
+      RestoreLogger logger;
+      LOG(INFO) << "Not yet shutdown. This message should make it";
+      g2LogWorker duplicateLogWorker("test_duplicate","./");
+      toRemove = duplicateLogWorker.logFileName().get();
+
+      EXPECT_FALSE(g2::shutDownLoggingForActiveOnly(&duplicateLogWorker));
+      LOG(INFO) << "Logger is (NOT) shutdown,. this message WILL make it";
+      logger.reset();
+      file_content = readFileToText(logger.logFile());
+      SCOPED_TRACE("LOG_INFO"); // Scope exit be prepared for destructor failure
+   }
+   EXPECT_EQ(0, remove(toRemove.c_str()));
+
+   EXPECT_TRUE(verifyContent(file_content, "Not yet shutdown. This message should make it"));
+   EXPECT_TRUE(verifyContent(file_content, "Logger is (NOT) shutdown,. this message WILL make it")) << file_content;
+}
 
 
 // printf-type log
