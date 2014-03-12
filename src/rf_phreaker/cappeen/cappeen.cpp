@@ -1,5 +1,5 @@
-#include "rf_phreaker/cappeen_api/cappeen_api.h"
-#include "rf_phreaker/cappeen_api/cappeen_impl.h"
+#include "rf_phreaker/cappeen/cappeen.h"
+#include "rf_phreaker/cappeen/cappeen_impl.h"
 #include <memory>
 
 using namespace rf_phreaker::cappeen_api;

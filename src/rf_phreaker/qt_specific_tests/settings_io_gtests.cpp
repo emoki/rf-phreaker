@@ -164,7 +164,8 @@ TEST(QtSpecific, WriteDefaultSettings)
 	using namespace rf_phreaker;
 
 	settings set;
-	settings_io set_io("rf_phreaker_graph_test", "cappeen");
+	//settings_io set_io("rf_phreaker_graph_test", "cappeen");
+	settings_io set_io("cappeen_api.ini");
 
 	set.output_raw_packets_ = false;
 	set.log_level_ = 3;

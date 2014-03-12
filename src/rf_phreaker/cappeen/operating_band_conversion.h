@@ -1,4 +1,4 @@
-#include "rf_phreaker/cappeen_api/beagle_defines.h"
+#include "rf_phreaker/cappeen/beagle_defines.h"
 #include "rf_phreaker/common/common_types.h"
 #include "rf_phreaker/processing/collection_info_container.h"
 #include "rf_phreaker/common/exception_types.h"
@@ -6,7 +6,7 @@
 namespace rf_phreaker {	namespace cappeen_api {
 
 
-rf_phreaker::operating_band convert_band(beagle_api::technologies_and_band_group band)
+rf_phreaker::operating_band convert_band(beagle_api::TECHNOLOGIES_AND_BANDS band)
 {
 	using namespace beagle_api;
 
@@ -26,10 +26,7 @@ rf_phreaker::operating_band convert_band(beagle_api::technologies_and_band_group
 		b = rf_phreaker::UMTS_OPERATING_BAND_2;
 		break;
 	case WCDMA_BAND_2100:
-		b = rf_phreaker::UMTS_OPERATING_BAND_4;
-		break;
-	case WCDMA_BAND_850:
-		b = rf_phreaker::UMTS_OPERATING_BAND_5;
+		b = rf_phreaker::UMTS_OPERATING_BAND_1;
 		break;
 	case LTE_BAND_1:
 		b = rf_phreaker::LTE_OPERATING_BAND_1;

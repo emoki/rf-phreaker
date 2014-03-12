@@ -1,11 +1,13 @@
 #pragma once
 
-#include "rf_phreaker/cappeen_api/beagle_defines.h"
-#include "rf_phreaker/cappeen_api/cappeen_delegate.h"
+#include "rf_phreaker/cappeen/beagle_defines.h"
+#include "rf_phreaker/cappeen/cappeen_delegate.h"
 #include "rf_phreaker/scanner/blade_rf_controller_async.h"
 #include "rf_phreaker/processing/processing_graph.h"
 #include "rf_phreaker/processing/gps_graph.h"
 #include "rf_phreaker/common/settings.h"
+#include "rf_phreaker/common/operating_band_range_specifier.h"
+#include "rf_phreaker/common/log.h"
 #include <memory>
 #include <string>
 
@@ -32,12 +34,11 @@ private:
 
 	void verify_init();
 	void read_settings();
+	rf_phreaker::processing::collection_info_containers create_collection_info_containers(const beagle_api::collection_info &collection);
 
 	bool is_initialized_;
 
 	rf_phreaker::settings config_;
-
-	std::unique_ptr<cappeen_delegate> delegate_;
 
 	std::unique_ptr<rf_phreaker::scanner::blade_rf_controller_async> scanner_;
 
@@ -47,6 +48,11 @@ private:
 
 	std::unique_ptr<rf_phreaker::processing::gps_graph> gps_graph_;
 
+	operating_band_range_specifier operating_bands_;
+
+	std::unique_ptr<g2LogWorker> log_worker_;
+
+	std::unique_ptr<cappeen_delegate> delegate_;
 };
 
 

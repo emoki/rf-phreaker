@@ -131,15 +131,6 @@ void blade_rf_controller::do_initial_scanner_config()
 
 }
 
-//void blade_rf_controller::config_scanner_for_collection(std::vector<frequency_type> &)
-//{
-//	// Currently vtune value is calculated on the fly.
-//
-//	// Check band licensing
-//	// find initial gain values
-//	// handle vtune on all freqs we will be collecting
-//}
-
 void blade_rf_controller::set_vctcxo_trim(uint16_t trim)
 {
 	check_blade_comm();
@@ -243,6 +234,10 @@ gps blade_rf_controller::get_gps_data()
 	g.longitude_ = 0;
 	g.speed_ = 0;
 	g.raw_status_ = 0;
+
+	// Simiulate communicating to the hardware.
+	uint32_t val = 0;
+	check_blade_status(bladerf_config_gpio_read(comm_blade_rf_->blade_rf(), &val));
 
 	return g;
 }

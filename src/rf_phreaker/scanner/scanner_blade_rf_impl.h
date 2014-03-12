@@ -25,6 +25,26 @@ namespace rf_phreaker {
 
 			~scanner_blade_rf_impl() {};
 
+			hardware get_hardware() const
+			{
+				rf_phreaker::hardware hw;
+				switch(usb_speed_) {
+				case BLADERF_DEVICE_SPEED_HIGH:
+					hw.device_speed_ = USB_HI_SPEED;
+					break;
+				case BLADERF_DEVICE_SPEED_SUPER:
+					hw.device_speed_ = USB_SUPER_SPEED;
+					break;
+				case BLADERF_DEVICE_SPEED_UNKNOWN:
+				default:
+					hw.device_speed_ = UNKNOWN_SPEED;
+				}
+				hw.scanner_id_ = serial();
+				hw.rf_calibration_date_ = 0;
+				// TODO - Implement frequency paths.
+				hw.frequency_paths_;
+				return hw;
+			}
 			std::string serial() const
 			{
 				return dev_info_.serial;

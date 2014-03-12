@@ -258,6 +258,13 @@ enum BEAGLESTATE
 
 };
 
+enum DEVICESPEED
+{
+	UNKOWN_SPEED,
+	USB_HI_SPEED,
+	USB_SUPER_SPEED
+};
+
 /**
 Gives a description of the beagle unit.
 */
@@ -287,6 +294,8 @@ struct beagle_info
 	/// when the beagle unit has not had initial GPS lock and is collecting data.  For ideal processing it is good to keep this number 
 	/// under 1 month.
 	int64_t dds_clock_correction_calibration_date_;
+
+	DEVICESPEED device_speed_;
 };
 
 /**
@@ -705,6 +714,7 @@ enum ERRORCODES
 	CRITICAL_SECTION_ERROR = -10000,
 
 	UNKNOWN_ERROR = -50000,
+	GENERAL_ERROR,
 	STD_EXCEPTION_ERROR,
 	BUFFER_TOO_SMALL
 

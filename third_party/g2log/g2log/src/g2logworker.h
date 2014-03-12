@@ -15,10 +15,13 @@
 #include <memory>
 #include <future>
 #include <string>
+#include <boost/signals2.hpp>
 
 #include "g2log.h"
 
 struct g2LogWorkerImpl;
+
+typedef boost::signals2::signal<void(const std::string &, int)> sink_type;
 
 /**
 * \param log_prefix is the 'name' of the binary, this give the log name 'LOG-'name'-...
@@ -44,6 +47,8 @@ public:
   /// Probably only needed for unit-testing or specific log management post logging
   /// request to get log name is processed in FIFO order just like any other background job.
   std::future<std::string> logFileName();
+
+  void connect_sink(boost::function<void (const std::string&, int)>);
 
 private:
   std::unique_ptr<g2LogWorkerImpl> pimpl_;

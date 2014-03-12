@@ -16,6 +16,7 @@ namespace rf_phreaker {
 		public:
 			scanner_blade_rf(const scanner_blade_rf_impl &impl);
 
+			hardware get_hardware() const;
 			std::string scanner_id() const;
 			std::string serial() const;
 			int back_end() const;

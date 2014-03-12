@@ -8,6 +8,8 @@ namespace rf_phreaker {
 			: impl_(new scanner_blade_rf_impl(impl))
 		{}
 
+		hardware scanner_blade_rf::get_hardware() const { return impl_->get_hardware(); }
+
 		std::string scanner_blade_rf::scanner_id() const { return impl_->serial(); }
 		std::string scanner_blade_rf::serial() const { return impl_->serial(); }
 		int scanner_blade_rf::back_end() const { return impl_->back_end(); }
