@@ -9,10 +9,10 @@ using namespace rf_phreaker::processing;
 class CollectionManagerTest : public ::testing::Test 
 {
 protected:
-	CollectionManagerTest()
+	CollectionManagerTest(int num = 1000)
 		: cp(0, 50, 10000000)
-		, cp_manager(rf_phreaker::unknown_tech, true)
-		, max_num(1000)
+		, cp_manager(rf_phreaker::UNKOWN_SPECIFIER, true)
+		, max_num(num)
 	{
 
 	}
@@ -78,8 +78,6 @@ TEST_F(CollectionManagerTest, ResetTest)
 	EXPECT_TRUE(cp_manager.finished_);
 }
 
-
-
 TEST_F(CollectionManagerTest, AddRemoveTest)
 {
 	const int start_remove = 10;
@@ -112,7 +110,6 @@ TEST_F(CollectionManagerTest, AddRemoveTest)
 	EXPECT_FALSE(cp_manager.finished_);
 	EXPECT_EQ(0, cp_manager.try_get_next_info().freq_);
 	EXPECT_TRUE(cp_manager.finished_);
-
 }
 
 TEST_F(CollectionManagerTest, RemoveBeforeCurrentTest)
@@ -157,6 +154,16 @@ TEST_F(CollectionManagerTest, RemoveCurrentTest)
 
 	EXPECT_EQ(start_remove - 1, cp_manager.try_get_current_info().freq_);
 	EXPECT_EQ(end_remove, cp_manager.try_get_next_info().freq_);
+}
+
+TEST_F(CollectionManagerTest, RemoveOneTest)
+{
+	collection_info c(1, 1, 1,1);
+	collection_info_container info;
+	info.adjust(add_collection_info(c));
+	info.adjust(remove_collection_info(c));
+
+	EXPECT_EQ(0, cp_manager.collection_info_group_.size());
 }
 
 TEST_F(CollectionManagerTest, RemoveAfterCurrentTest)

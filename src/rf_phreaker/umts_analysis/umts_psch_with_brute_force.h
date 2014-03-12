@@ -122,5 +122,7 @@ private:
 	int num_samples_per_cpich_;
 
 	int num_samples_per_time_slot_;
+
+	int max_processing_length_;
 };
 

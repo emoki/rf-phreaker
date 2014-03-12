@@ -87,10 +87,7 @@ void cpich_table_container::generate_resampled_cpich_table(rf_phreaker::fir_filt
 	{
 		cpich_generator.create_cpich_signal(tmp_cpich.get(), i, num_chips_);
 		
-		if(up_factor_ == 1 && down_factor_ == 1)
-			memcpy(&cpich_table_[cpich_idx], tmp_cpich.get(), gold_code_cpich_length);
-		else
-			filter->filter(tmp_cpich.get(), &cpich_table_[cpich_idx], num_chips_ / down_factor_);
+		filter->filter(tmp_cpich.get(), &cpich_table_[cpich_idx], num_chips_ / down_factor_);
 
 		ipp_helper::normalize_signal(&cpich_table_[cpich_idx], resampled_cpich_length_);
 		

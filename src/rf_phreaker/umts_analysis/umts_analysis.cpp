@@ -13,7 +13,7 @@ umts_analysis::umts_analysis(const umts_config &config)
 }
 
 umts_analysis::umts_analysis(umts_analysis &analysis)
-: impl_(new umts_analysis_impl(analysis.impl_->get_umts_config()))
+//: impl_(new umts_analysis_impl(analysis.impl_->get_umts_config()))
 {
 	std::lock_guard<std::mutex> lock(umts_analysis_mutex);
 	impl_ = (new umts_analysis_impl(analysis.impl_->get_umts_config()));

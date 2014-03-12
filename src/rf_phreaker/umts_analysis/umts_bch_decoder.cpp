@@ -20,9 +20,10 @@ umts_bch_decoder::umts_bch_decoder(const umts_config &config, const /*cpich_tabl
 , signal_sampling_rate_(config.sampling_rate())
 , target_sampling_rate_(19200000)
 {
+	int taps_length = 5121;
 	umts_signal_filter_.set_zero_delay(true);
 	umts_signal_filter_.set_up_down_factor_based_on_sampling_rates(signal_sampling_rate_, target_sampling_rate_);
-	umts_signal_filter_.set_taps(5121);
+	umts_signal_filter_.set_taps(taps_length);
 
 	up_factor_ = umts_signal_filter_.up_factor();
 	down_factor_ = umts_signal_filter_.down_factor();	
@@ -31,8 +32,9 @@ umts_bch_decoder::umts_bch_decoder(const umts_config &config, const /*cpich_tabl
 	
 	cpich_resample_factor_ = 5; // Represents the rate above umts chip rate at which we are processing.  So 3.84 * (5) = 19.2.
 
-	signallength = config.max_signal_length()/* - ((config.max_signal_length() * up_factor_ / down_factor_) % down_factor_)*/;
-	resamplelength = signallength * up_factor_ / down_factor_; 
+	signal_length_ = config.max_signal_length();
+	signal_length_buffer_ = signal_length_ + (int)(taps_length / (double)up_factor_ + 1);
+	resample_length_ = signal_length_ * up_factor_ / down_factor_; 
 
 	std::vector<layer_3_information::pdu_element_type> elements;
 
@@ -82,8 +84,9 @@ umts_bch_decoder::umts_bch_decoder(const umts_config &config, const /*cpich_tabl
 	ds=0;
 	accconstant=4.0;
 	
-	hammingsignal = ippsMalloc_32fc(signallength);
-	kaiserresample = ippsMalloc_32fc(resamplelength);
+	hammingsignal = ippsMalloc_32fc(signal_length_buffer_);
+	ippsZero_32fc(hammingsignal, signal_length_buffer_);
+	kaiserresample = ippsMalloc_32fc(resample_length_);
 	shortkaiserresample = ippsMalloc_32fc(upsamplelength+esamples);
 	signalscrcorr = ippsMalloc_32fc(upsamplelength+esamples);
 	cpichcode = ippsMalloc_32fc(cpichsamples);
@@ -126,18 +129,18 @@ umts_bch_decoder::umts_bch_decoder(const umts_config &config, const /*cpich_tabl
 	ccpchcplx = ippsMalloc_32fc((nf+2)*cchlength*slot);
 	ccpcheqout = ippsMalloc_32fc((nf+2)*cchlength*slot);
 	ccpchs2 = ippsMalloc_32fc(((nf+2)*cchlength*slot)-cframeno);
-	inputsignal = ippsMalloc_32fc(resamplelength+(cpichsamples*cpich_resample_factor_));
+	inputsignal = ippsMalloc_32fc(resample_length_+(cpichsamples*cpich_resample_factor_));
 		
 	realtemp = ippsMalloc_32f(w1length);
 	imagtemp = ippsMalloc_32f(w1length);
-	magsignal = ippsMalloc_32f(signallength);
-	realfilter = ippsMalloc_32f(signallength);
-	imagfilter = ippsMalloc_32f(signallength);
+	magsignal = ippsMalloc_32f(signal_length_);
+	realfilter = ippsMalloc_32f(signal_length_);
+	imagfilter = ippsMalloc_32f(signal_length_);
 	abscpich = ippsMalloc_32f(upsamplelength);
 	realcpich = ippsMalloc_32f(upsamplelength);
 	imagcpich = ippsMalloc_32f(upsamplelength);
 	abscorr = ippsMalloc_32f(upsamplelength+esamples);
-	avgsignal = ippsMalloc_32f(resamplelength);
+	avgsignal = ippsMalloc_32f(resample_length_);
 	absearly = ippsMalloc_32f(cchlength);
 	absontime = ippsMalloc_32f(cchlength);
 	abslate = ippsMalloc_32f(cchlength);
@@ -591,7 +594,7 @@ int umts_bch_decoder::process(const Ipp32fc *umtssignal, int signal_length, int 
 {
 	sfn=layer_3_information::not_decoded_32;
 
-	if(signal_length < signallength)
+	if(signal_length < signal_length_)
 		throw rf_phreaker::umts_analysis_error("UMTS BCH decoder error.  Signal length is too small to process layer 3.");
 
 	int esamples = 20;
@@ -646,18 +649,18 @@ int umts_bch_decoder::process(const Ipp32fc *umtssignal, int signal_length, int 
 		ippsZero_32f(&acc[i][0], 270);
 
 	// taking average value
-	ippsMagnitude_32fc(umtssignal, magsignal, signallength);
-	ippsSqr_32f_I(magsignal, signallength);
-	ippsMean_32f(magsignal, signallength, &meansignal, ippAlgHintAccurate);
+	ippsMagnitude_32fc(umtssignal, magsignal, signal_length_);
+	ippsSqr_32f_I(magsignal, signal_length_);
+	ippsMean_32f(magsignal, signal_length_, &meansignal, ippAlgHintAccurate);
 	ippsSqrt_32f_I(&meansignal, 1);
 
 	// normalization
-	ippsCplxToReal_32fc(umtssignal, realfilter, imagfilter, signallength);
-	ippsDivC_32f_I(meansignal, realfilter, signallength);
-	ippsDivC_32f_I(meansignal, imagfilter, signallength);
-	ippsRealToCplx_32f(realfilter, imagfilter, hammingsignal, signallength);
+	ippsCplxToReal_32fc(umtssignal, realfilter, imagfilter, signal_length_);
+	ippsDivC_32f_I(meansignal, realfilter, signal_length_);
+	ippsDivC_32f_I(meansignal, imagfilter, signal_length_);
+	ippsRealToCplx_32f(realfilter, imagfilter, hammingsignal, signal_length_);
 
-	umts_signal_filter_.filter(hammingsignal, kaiserresample, signallength / down_factor_);
+	umts_signal_filter_.filter(hammingsignal, kaiserresample, signal_length_ / down_factor_);
 
 	// taking scrambling code array from cpich template
 	ippsCopy_32fc(&(cpichtemplate[scr*cpichsamples]), cpichcode, cpichsamples);
@@ -751,7 +754,7 @@ bool umts_bch_decoder::convert_to_bitstream(int startofframe)
 
 	{
 		Ipp32fc *tmp_kaiser_resample = kaiserresample;
-		int tmp_resample_length = resamplelength;
+		int tmp_resample_length = resample_length_;
 
 		ippsZero_32fc(inputsignal, ((cpichsamples*cpich_resample_factor_)-offset));
 		ippsCopy_32fc(tmp_kaiser_resample, &inputsignal[(cpichsamples*cpich_resample_factor_)-offset], tmp_resample_length);

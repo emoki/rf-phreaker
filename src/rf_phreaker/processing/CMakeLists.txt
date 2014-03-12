@@ -15,13 +15,14 @@ set (processing_SRCS
 	collection_info.h
 	collection_info_container.h
 	collection_manager_body.h
+	gps_body.h
+	gps_graph.h
 	layer_3_tracker.h
 	lte_data_container.h
-	measurement_output.cpp
-	measurement_output.h
-	measurement_output_async.h
-	measurement_wrappers.h
+	measurement_conversion.h
 	node_defs.h
+	data_output.h
+	data_output_async.h
 	output_and_feedback_body.h
 	processing_graph.cpp
 	processing_graph.h

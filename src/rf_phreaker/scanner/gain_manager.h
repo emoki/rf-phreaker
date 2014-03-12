@@ -32,7 +32,7 @@ public:
 	gain_type calculate_gain(const measurement_info &meas)
 	{
 		gain_history history(meas);
-		gain_type gain(lms::LNA_MAX, 33, 5);
+		gain_type gain(lms::LNA_MAX, 30, 30);
 		return gain;
 	}
 };

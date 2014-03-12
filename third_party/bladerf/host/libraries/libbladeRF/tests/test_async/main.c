@@ -114,7 +114,7 @@ int populate_test_data(struct test_data *test_data)
 {
     FILE *in;
 	size_t i;
-    //ssize_t n_read;
+    ssize_t n_read;
 
     test_data->idx = 0;
 
@@ -127,7 +127,7 @@ int populate_test_data(struct test_data *test_data)
         for(i=0;i<test_data->num_buffers;i++) {
             size_t j;
             int16_t *buffer = (int16_t *)test_data->buffers[i];
-            /*
+            
             n_read = fread(test_data->buffers[i], sizeof(int16_t) * 2,
                             test_data->samples_per_buffer, in);
 
@@ -135,7 +135,7 @@ int populate_test_data(struct test_data *test_data)
                 fprintf(stderr, "Hit partial read while gathering test data\n");
                 fclose(in);
                 return -1;
-            }*/
+            }
             for(j = 0 ; j < test_data->samples_per_buffer ; j++) {
                 *buffer = (j % 2048) ;
                 buffer++;

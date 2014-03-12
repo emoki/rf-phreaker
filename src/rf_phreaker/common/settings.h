@@ -6,6 +6,17 @@
 namespace rf_phreaker
 {
 
+class output_settings
+{
+public:
+	bool scanner_;
+	bool gps_;
+	bool umts_sweep_;
+	bool umts_layer_3_;
+	bool lte_sweep_;
+	bool lte_layer_3_;
+};
+
 class collection_settings
 {
 public:
@@ -34,6 +45,11 @@ class settings
 public:
 	bool output_raw_packets_;
 	int log_level_;
+	int gps_collection_period_ms_;
+	int num_items_in_flight_;
+
+	output_settings standard_output_;
+	output_settings signal_slots_;
 
 	collection_settings umts_sweep_collection_;
 	collection_settings umts_layer_3_collection_;

@@ -1,12 +1,13 @@
 #pragma once
 
 #include <stdint.h>
+#include <string>
 
 namespace rf_phreaker {
 
-	const int SCANNER_ID_LENGTH = 33;
-
-	typedef char scanner_serial_type[SCANNER_ID_LENGTH]; // Includes NULL terminator.
+	//const int SCANNER_ID_LENGTH = 33;
+	//typedef char scanner_serial_type[SCANNER_ID_LENGTH]; // Includes NULL terminator.
+	typedef std::string scanner_serial_type; // Includes NULL terminator.
 
 	typedef int64_t frequency_type;
 
@@ -16,13 +17,13 @@ namespace rf_phreaker {
 
 	typedef int64_t time_type;
 
-	enum technology
+	enum specifier
 	{
-		umts_sweep,
-		umts_layer_3_decode,
-		lte_sweep,
-		lte_layer_3_decode,
-		unknown_tech
+		UMTS_SWEEP,
+		UMTS_LAYER_3_DECODE,
+		LTE_SWEEP,
+		LTE_LAYER_3_DECODE,
+		UNKOWN_SPECIFIER
 	};
 
 	// See bottom for more on operating bands.

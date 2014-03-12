@@ -16,7 +16,8 @@ public:
 	collection_manager_body(std::atomic<bool> &processing, rf_phreaker::scanner::scanner_controller_interface *sc, const collection_info_containers &info)
 		: scanner_io_(sc)
 		, containers_(info)
-		, simultaneous_collection_(false)
+		, is_simultaneous_collection_(false)
+		, do_multiple_scans_(true)
 		, processing_(processing)
 	{}
 
@@ -28,36 +29,46 @@ public:
 		if(it != containers_.end())
 			it->adjust(info);
 
+		bool scanning_finished_for_all_containers = true;
+
 		for(auto &c : containers_) {
 			if(!c.is_finished()) {
 				auto ci = c.try_get_next_info();
 				if(c.is_finished()){
-					processing_.store(false);
-					return;
+					//processing_.store(false);
+					//return;
+					continue;
 				}
 				else {
+					scanning_finished_for_all_containers = false;
+
 					auto meas = std::make_shared<scanner::measurement_info>(scanner_io_(ci));
 					meas->collection_round(c.collection_round());
 					switch(c.get_technology()) {
-					case umts_sweep:
+					case UMTS_SWEEP:
 						std::get<UMTS_SWEEP_PORT>(out).try_put(meas);
 						break;
-					case umts_layer_3_decode:
+					case UMTS_LAYER_3_DECODE:
 						std::get<UMTS_LAYER3_PORT>(out).try_put(meas);
 						break;
-					case lte_sweep:
+					case LTE_SWEEP:
 						std::get<LTE_SWEEP_PORT>(out).try_put(meas);
 						break;
-					case lte_layer_3_decode:
+					case LTE_LAYER_3_DECODE:
 						std::get<LTE_LAYER3_PORT>(out).try_put(meas);
 						break;
 					default:
-						throw processing_error("Unknown technology while trying to put meas in output port."); // Do nothing.
+						throw processing_error("Unknown specifier while trying to put meas in output port."); // Do nothing.
 					}
 				}
-				if(!simultaneous_collection_)
+				if(!is_simultaneous_collection_)
 					break;
 			}
+		}
+
+		if(scanning_finished_for_all_containers && do_multiple_scans_) {
+			for(auto &c : containers_)
+				c.reset();
 		}
 	}
 
@@ -66,44 +77,12 @@ private:
 
 	collection_info_containers containers_;
 
-	bool simultaneous_collection_;
+	bool is_simultaneous_collection_;
+
+	bool do_multiple_scans_;
 
 	std::atomic<bool> &processing_;
 };
 
-	//class collection_manager_body
-	//{
-	//public:
-	//	collection_manager_body(rf_phreaker::scanner::scanner_controller_interface *sc, technology tech, const add_remove_collection_info &info)
-	//		: scanner_io_(sc)
-	//		, tech_(tech)
-	//	{
-	//		container_.adjust(info);
-	//	}
-
-	//	void operator()(add_remove_collection_info info, collection_manager_node::output_ports_type &out)
-	//	{
-	//		container_.adjust(info);
-
-	//		if(!container_.finished_) {
-	//			auto cp = container_.try_get_next_info();
-
-	//			if(container_.finished_)
-	//				std::get<TUPLE_TO_SWITCHER>(out).try_put(tech_);
-	//			else {
-	//				auto meas = scanner_io_(cp);
-	//				meas.collection_round(container_.collection_round());
-	//				std::get<TUPLE_TO_PROCESSING>(out).try_put(meas);
-	//			}
-	//		}
-	//	}
-
-	//private:
-	//	scanner_io scanner_io_;
-
-	//	technology tech_;
-
-	//	collection_info_container container_;
-	//};
 
 }}

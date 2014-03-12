@@ -1,13 +1,12 @@
 #include "gtest/gtest.h"
 
-#include "rf_phreaker/processing/processing_graph.h"
+#include "rf_phreaker/processing/gps_graph.h"
 #include "rf_phreaker/scanner/blade_rf_controller_async.h"
 #include "rf_phreaker/common/common_utility.h"
-#include "rf_phreaker/common/benchmark.h"
 #include "rf_phreaker/qt_specific/settings_io.h"
 #include "stdafx.h"
 
-TEST(ProcessingGraph, TestGeneral)
+TEST(ProcessingGpsGraph, TestGeneral)
 {
 	using namespace rf_phreaker;
 	using namespace rf_phreaker::scanner;
@@ -32,35 +31,20 @@ TEST(ProcessingGraph, TestGeneral)
 			rf_phreaker::settings_io io("rf_phreaker_graph_test", "cappeen");
 			io.read(config);
 
-			initialize_collection_info_defaults(config);
-
-			collection_info_containers containers;
-			//containers.push_back(collection_info_container(UMTS_SWEEP, true));
-			containers.push_back(collection_info_container(UMTS_LAYER_3_DECODE, false));
-			auto it = containers.begin();
-			auto &umts_sweep = (*it++);
-			auto &umts_layer_3 = (*it++);
-			for(int i = mhz(869); i < mhz(894); i += khz(100))
-				umts_sweep.adjust(add_collection_info(umts_sweep_collection_info(i)));
-			//umts_sweep.adjust(add_collection_info(umts_sweep_collection_info(876800000)));
-			//umts_layer_3.adjust(add_collection_info(umts_layer_3_collection_info(876800000)));
 
 			data_output_async output;
 			output.set_standard_output(true);
+			gps_graph graph;
 
-			processing_graph graph;
-			
-			graph.initialize_collection(&blade, &output, containers, config);
-
-			boost::timer::auto_cpu_timer t;
+			graph.initialize_comm(&blade, &output, config);
 
 			graph.start();
 
 			//graph.wait();
 
 			//system("pause");
-			//
-			std::this_thread::sleep_for(std::chrono::minutes(45));
+
+			//std::this_thread::sleep_for(std::chrono::seconds(10));
 
 			graph.cancel();
 		}

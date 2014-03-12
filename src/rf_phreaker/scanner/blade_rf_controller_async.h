@@ -20,23 +20,23 @@ public:
 		});
 	}
 
-	virtual void open_scanner(const scanner_id_type &id) 
+	virtual std::future<void> open_scanner(const scanner_id_type &id)
 	{
-		controller_([&](blade_rf_controller &c) {
+		return controller_([&](blade_rf_controller &c) {
 			c.open_scanner(id);
 		});
 	}
 	
-	virtual void close_scanner()
+	virtual std::future<void> close_scanner()
 	{
-		controller_([=](blade_rf_controller &c) {
+		return controller_([=](blade_rf_controller &c) {
 			c.close_scanner();
 		});
 	}
 
-	virtual void do_initial_scanner_config()
+	virtual std::future<void> do_initial_scanner_config()
 	{
-		controller_([=](blade_rf_controller &c) {
+		return controller_([=](blade_rf_controller &c) {
 			c.do_initial_scanner_config();
 		});
 	}

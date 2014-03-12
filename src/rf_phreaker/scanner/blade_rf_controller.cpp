@@ -232,8 +232,19 @@ void blade_rf_controller::refresh_scanner_info()
 gps blade_rf_controller::get_gps_data()
 {
 	check_blade_comm();
+	
+	gps g;
+	g.scanner_id_ = scanner_blade_rf_->serial();
+	g.lock_ = false;
+	g.coordinated_universal_time_ = 0;
+	g.visible_satellites_ = 0;
+	g.tracking_satellites_ = 0;
+	g.latitude_ = 0;
+	g.longitude_ = 0;
+	g.speed_ = 0;
+	g.raw_status_ = 0;
 
-	return gps();
+	return g;
 }
 
 measurement_info blade_rf_controller::get_rf_data_use_auto_gain(frequency_type frequency, time_type time_ns, bandwidth_type bandwidth, frequency_type sampling_rate)
@@ -295,13 +306,11 @@ measurement_info blade_rf_controller::get_rf_data(frequency_type frequency, time
 	check_blade_status(bladerf_set_lpf_mode(comm_blade_rf_->blade_rf(), BLADERF_MODULE_RX,
 		BLADERF_LPF_NORMAL));
 
+	// BladeRF only accepts data num_samples that are a multiple of 1024.
 	int throw_away_samples = time_samples_conversion_.convert_to_samples(throw_away_ns, blade_sampling_rate);
-
-	int num_samples = time_samples_conversion_.convert_to_samples(time_ns, blade_sampling_rate);
-
 	throw_away_samples += 1024 - throw_away_samples % 1024;
 
-	// BladeRF only accepts data num_samples that are a multiple of 1024.
+	int num_samples = time_samples_conversion_.convert_to_samples(time_ns, blade_sampling_rate);
 	num_samples += 1024 - num_samples % 1024;
 
 	const auto return_bytes = (num_samples + throw_away_samples) * 2 * sizeof(int16_t);
@@ -312,7 +321,7 @@ measurement_info blade_rf_controller::get_rf_data(frequency_type frequency, time
 	bladerf_metadata metadata;
 
 	check_blade_status(bladerf_rx(comm_blade_rf_->blade_rf(), BLADERF_FORMAT_SC16_Q11,
-		aligned_buffer, num_samples, &metadata));
+		aligned_buffer, num_samples + throw_away_samples, &metadata));
 
 	measurement_info data(num_samples, frequency, blade_bandwidth, blade_sampling_rate,
 		gain);

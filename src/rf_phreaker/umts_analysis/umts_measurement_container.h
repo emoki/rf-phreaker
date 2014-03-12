@@ -25,6 +25,25 @@ public:
 			return it->second;
 	}
 
+	void update_meas(rf_phreaker::frequency_type freq, const umts_measurements &new_meas)
+	{
+		auto tracking = meas_map_.find(freq);
+		
+		if(tracking  == meas_map_.end())
+			tracking = meas_map_.insert(std::make_pair(freq, umts_measurements())).first;
+		
+		// Assumes at most only one entry for a given cpich.
+		for(auto &umts : new_meas) {
+			auto it = std::find_if(tracking->second.begin(), tracking->second.end(), [&] (const umts_measurement &u) {
+				return umts.cpich_ == u.cpich_;
+			});
+			if(it != tracking->second.end())
+				*it = umts;
+			else
+				tracking->second.push_back(umts);
+		}
+	}
+
 private:
 	measurement_map meas_map_;
 };

@@ -13,7 +13,7 @@
 
 umts_psch_with_brute_force::umts_psch_with_brute_force(const umts_config &config, const /*cpich_table_container&*/Ipp32fc* resampled_cpich_table)
 : pause_(-1)
-, num_coherent_psch_slots_(4)
+, num_coherent_psch_slots_(6)
 , max_num_psch_peaks_(25)
 , max_num_candidates_(1000)
 , psch_confidence_threshold_(11)
@@ -44,6 +44,8 @@ void umts_psch_with_brute_force::set_config(const umts_config &config)
 	over_sampling_rate_ = config.over_sampling_rate();
 	num_samples_per_cpich_ = static_cast<int>(N_TOTAL_CHIPS_CPICH * over_sampling_rate_);
 	num_samples_per_time_slot_ = static_cast<int>(N_CHIPS_PER_TIMESLOT * over_sampling_rate_);
+	max_processing_length_ = num_samples_per_time_slot_ * num_coherent_psch_slots_ * 20; // somewhat arbitrary right now.. perhaps make it configurable?
+
 }
 
 umts_measurements umts_psch_with_brute_force::process(const ipp_32fc_array &signal, const umts_measurements &tracking_measurements, uint32_t num_cpich_chips, umts_scan_type scanning_method)
@@ -55,7 +57,7 @@ umts_measurements umts_psch_with_brute_force::process(const ipp_32fc_array &sign
 		benchmark_.start_timer();
 	}
 #endif
-	length_to_process_ = signal.length();
+	length_to_process_ = signal.length() > max_processing_length_ ? max_processing_length_ : signal.length();
 
 	//spur_nullifier_.reset(signal->length());
 
@@ -99,7 +101,7 @@ umts_measurements umts_psch_with_brute_force::process(const ipp_32fc_array &sign
 		signal, 
 		length_to_process_,
 		psch_template_.length());
-	
+
 	psch_cross_correlator_.calculate_average_power();
 
 	psch_cross_correlator_.do_cross_correlation_and_additions(psch_template_.get());

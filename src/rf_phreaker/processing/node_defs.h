@@ -1,7 +1,6 @@
 #pragma once
 
 #include "rf_phreaker/processing/collection_info_container.h"
-#include "rf_phreaker/processing/collection_manager_body.h"
 #include "rf_phreaker/scanner/measurement_info.h"
 #include "rf_phreaker/common/measurements.h"
 #include "rf_phreaker/umts_analysis/umts_measurement.h"
@@ -44,6 +43,8 @@ typedef analysis_data<lte_measurements> lte_info;
 
 typedef tbb::flow::source_node<add_remove_collection_info> start_node;
 
+typedef tbb::flow::limiter_node<add_remove_collection_info> limiter_node;
+
 typedef tbb::flow::queue_node<add_remove_collection_info> queue_node;
 
 #define UMTS_SWEEP_PORT 0
@@ -53,19 +54,17 @@ typedef tbb::flow::queue_node<add_remove_collection_info> queue_node;
 typedef std::tuple<measurement_package, measurement_package, measurement_package, measurement_package> tech_measurement_ports;
 typedef tbb::flow::multifunction_node<add_remove_collection_info, tech_measurement_ports, tbb::flow::rejecting> collection_manager_node;
 
-
-//typedef tbb::flow::function_node<collection_info, scanner::measurement_info> scanner_io_node;
-
 typedef tbb::flow::function_node<measurement_package, umts_info> umts_cell_search_node;
 typedef tbb::flow::function_node<measurement_package, lte_info> lte_cell_search_node;
 
 typedef tbb::flow::function_node<umts_info, umts_info> umts_layer_3_decode_node;
 typedef tbb::flow::function_node<lte_info, lte_info> lte_layer_3_decode_node;
 
-typedef tbb::flow::multifunction_node<umts_info, std::tuple<add_remove_collection_info, add_remove_collection_info>> umts_output_and_feedback_node;
-typedef tbb::flow::multifunction_node<lte_info, std::tuple<add_remove_collection_info, add_remove_collection_info>> lte_output_and_feedback_node;
+typedef tbb::flow::multifunction_node<umts_info, std::tuple<add_remove_collection_info, tbb::flow::continue_msg>> umts_output_and_feedback_node;
+typedef tbb::flow::multifunction_node<lte_info, std::tuple<add_remove_collection_info, tbb::flow::continue_msg>> lte_output_and_feedback_node;
 
-
+typedef tbb::flow::source_node <tbb::flow::continue_msg> gps_start_node;
+typedef tbb::flow::function_node<tbb::flow::continue_msg, tbb::flow::continue_msg, tbb::flow::rejecting> gps_node;
 
 
 

@@ -10,6 +10,8 @@ class QSettings;
 namespace rf_phreaker
 {
 // Group keys
+static const std::string standard_output_group_key = "standard_output";
+static const std::string signal_slot_output_group_key = "signal_slot_output";
 static const std::string umts_sweep_collection_group_key = "umts_sweep_collection";
 static const std::string umts_layer_3_collection_group_key = "umts_layer_3_collection";
 static const std::string lte_sweep_collection_group_key = "lte_sweep_collection";
@@ -17,9 +19,14 @@ static const std::string lte_layer_3_collection_group_key = "lte_layer_3_collect
 static const std::string umts_decode_thresholds_group_key = "umts_decode_thresholds";
 static const std::string lte_decode_thresholds_group_key = "lte_decode_thresholds";
 static const std::string umts_sweep_general_group_key = "umts_sweep_general";
-static const std::string umte_layer_3_general_group_key = "umts_layer_3_general";
-
+static const std::string umts_layer_3_general_group_key = "umts_layer_3_general";
 // Value keys
+static const std::string scanner_output_key = "scanner_output";
+static const std::string gps_output_key = "gps_output";
+static const std::string umts_sweep_output_key = "umts_sweep_output";
+static const std::string umts_layer_3_output_key = "umts_layer_3_output";
+static const std::string lte_sweep_output_key = "lte_sweep_output";
+static const std::string lte_layer_3_output_key = "lte_layer_3_output";
 static const std::string output_raw_packets_key = "output_raw_packets";
 static const std::string log_level_key = "log_level";
 static const std::string sampling_rate_key = "sampling_rate";
@@ -30,6 +37,8 @@ static const std::string decode_threshold_key = "decode_threshold";
 static const std::string min_decode_threshold_key = "min_decode_threshold";
 static const std::string sensitivity_key = "sensitivity";
 static const std::string full_scan_interval_key = "full_scan_interval";
+static const std::string gps_collection_period_ms_key = "gps_collection_period";
+static const std::string num_items_in_flight_key = "num_items_in_flight";
 
 // Default Values
 static const bool settings_output_raw_packets_default = false;
@@ -42,15 +51,22 @@ static const int settings_layer_3_decode_threshold_default = -13;
 static const int settings_layer_3_min_decode_threshold_default = -25;
 static const int settings_umts_general_sensitivity_default = -25;
 static const int settings_umts_general_full_scan_interval_default = 1;
+static const bool settings_output_default = false;
+static const int gps_collection_period_ms_default = 800;
+static const int num_items_in_flight_default = 0;
 
 class settings_io
 {
 public:
 	settings_io(const std::string &application_name, const std::string &organization);
 
+	settings_io(const std::string &filename);
+
 	~settings_io();
 
 	void read(settings &settings);
+
+	void read(output_settings &settings, const std::string &group_key);
 
 	void read(collection_settings &settings, const std::string &group_key);
 
@@ -58,13 +74,15 @@ public:
 
 	void read(umts_general_settings &settings, const std::string &group_key);
 
-	void write(settings &settings);
+	void write(const settings &settings);
 
-	void write(collection_settings &settings, const std::string &group_key);
+	void write(const output_settings &settings, const std::string &group_key);
 
-	void write(layer_3_settings &settings, const std::string &group_key);
+	void write(const collection_settings &settings, const std::string &group_key);
 
-	void write(umts_general_settings &settings, const std::string &group_key);
+	void write(const layer_3_settings &settings, const std::string &group_key);
+
+	void write(const umts_general_settings &settings, const std::string &group_key);
 
 	void clear();
 

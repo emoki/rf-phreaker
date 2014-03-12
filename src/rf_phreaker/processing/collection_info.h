@@ -1,6 +1,7 @@
 #pragma once
 
 #include "rf_phreaker/common/common_types.h"
+#include "rf_phreaker/common/settings.h"
 #include <vector>
 
 namespace rf_phreaker { namespace processing {
@@ -12,6 +13,8 @@ class lte_sweep_collection_info;
 class lte_layer_3_collection_info;
 
 typedef std::vector<collection_info> collection_info_group_type;
+
+void initialize_collection_info_defaults(const rf_phreaker::settings &config);
 
 class collection_info
 {

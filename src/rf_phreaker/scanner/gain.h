@@ -9,12 +9,12 @@
 namespace rf_phreaker { namespace scanner {
 
 // lna gain (MAX, MID, BYPASS)
-// vga1 (dB, max = 33)
-// vga2 (dB, ~max = 30)
+// vga1 (dB, min = 5, max = 30)
+// vga2 (dB, min = 0, ~max = 30)
 class gain_type
 {
 public:
-	gain_type() : lna_gain_(lms::LNA_MAX), rxvga1_(33), rxvga2_(0)
+	gain_type() : lna_gain_(lms::LNA_MAX), rxvga1_(30), rxvga2_(0)
 	{}
 
 	gain_type(lms::lna_gain_enum lna_gain, int rxvga1, int rxvga2)

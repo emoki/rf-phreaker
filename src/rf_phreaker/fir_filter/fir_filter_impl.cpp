@@ -41,6 +41,7 @@ fir_filter_impl::fir_filter_impl(frequency_type original_sampling_rate, frequenc
 , m_DelayLen(0)
 , m_ZeroDelay(false)
 , m_InputDelay(0)
+, is_multi_rate(false)
 , m_UpPhase(0)
 , m_DownPhase(0)
 {
@@ -67,7 +68,9 @@ void fir_filter_impl::set_up_down_factor(int up_factor, int down_factor)
 	if((m_UpFactor>0xFFFF) || (m_DownFactor>0xFFFF))
 		throw std::invalid_argument("up/down factors must be < 0xFFFF");
 
-	if(m_UpFactor != 1 && m_DownFactor != 1)
+	if(m_UpFactor == 1 && m_DownFactor == 1)
+		is_multi_rate = false;
+	else
 		is_multi_rate = true;
 }
 
@@ -83,7 +86,7 @@ int fir_filter_impl::set_taps(int length, double normFactor, double norm_cutoff_
 	// Rule of thumb for norm cutoff freq is 1 / max(up, down).  We mulitple by .5 because IPP specifies the cutoff freq 
 	// has to be 0 to 0.5.
 	if(norm_cutoff_freq <= 0.0)
-		norm_cutoff_freq = (1.0 / std::max(m_UpFactor, m_DownFactor)) * .5;
+		norm_cutoff_freq = std::min(.49, (1.0 / std::max(m_UpFactor, m_DownFactor)) * .5);
 
 	Ipp64f* pTmpTaps = ippsMalloc_64f(length);
 	if ( pTmpTaps == NULL ) return _WIF_MEMORY_ALLOCATION;

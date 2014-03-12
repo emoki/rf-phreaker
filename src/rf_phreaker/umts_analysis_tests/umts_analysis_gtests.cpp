@@ -8,8 +8,8 @@
 TEST(UmtsAnalysisTests, TestGeneral)
 {
 	try {
-		const int num_iterations = 2;
-		std::string base_filename = "c:/werk/maharashtra/projects/rf_phreaker/rf_phreaker/test_files/blade_samples_umts_";
+		const int num_iterations = 19;
+		std::string base_filename = "e:/werk/maharashtra/projects/rf_phreaker/rf_phreaker/test_files/blade_samples_umts_";
 		//std::string base_filename = "e:/werk/maharashtra/projects/rf_phreaker/rf_phreaker/test_files/blade_samples_4875_";
 		//std::string base_filename = "e:/werk/maharashtra/projects/rf_phreaker/rf_phreaker/test_files/signal_";
 
@@ -21,7 +21,7 @@ TEST(UmtsAnalysisTests, TestGeneral)
 
 		// new hardware - 4875 samplerate
 		config.sampling_rate(4875000);
-		config.clock_rate(9750000);
+		config.clock_rate(4875000);
 		config.max_signal_length(292864);
 		rf_phreaker::scanner::measurement_info info;
 
@@ -41,7 +41,7 @@ TEST(UmtsAnalysisTests, TestGeneral)
 				umts_measurements umts_meas(100);
 				int num_meas = umts_meas.size();
 				
-				int status = analysis.cell_search(info, &umts_meas.at(0), num_meas, /*14952*/8000, umts_scan_type::full_scan_type);
+				int status = analysis.cell_search(info, &umts_meas.at(0), num_meas, /*14952*//*8000*/-25, umts_scan_type::full_scan_type);
 				EXPECT_EQ(0, status);
 
 
@@ -112,7 +112,7 @@ TEST(UmtsAnalysisTests, TestMultithreaded)
 				for(int i = 0; i < num_iterations; ++i) {
 					umts_measurements umts_meas(100);
 					int num_meas = umts_meas.size();
-					int status = anl.cell_search(info, &umts_meas.at(0), num_meas, /*14952*/8000, umts_scan_type::full_scan_type);
+					int status = anl.cell_search(info, &umts_meas.at(0), num_meas, /*14952*//*8000*/-25, umts_scan_type::full_scan_type);
 					EXPECT_EQ(0, status);
 				}
 			}, analysis, *p_it++));

@@ -13,17 +13,17 @@ typedef std::vector<collection_info_container> collection_info_containers;
 class add_remove_collection_info
 {
 public:
-	add_remove_collection_info() : tech_(unknown_tech) {};
+	add_remove_collection_info() : tech_(UNKOWN_SPECIFIER) {};
 	add_remove_collection_info(const add_remove_collection_info &info) : add_(info.add_), remove_(info.remove_), tech_(info.tech_) {};
 	collection_info_group_type add_;
 	collection_info_group_type remove_;
-	technology tech_;
+	specifier tech_;
 };
 
 class add_collection_info : public add_remove_collection_info
 {
 public:
-	add_collection_info(collection_info info, technology tech = unknown_tech)
+	add_collection_info(collection_info info, specifier tech = UNKOWN_SPECIFIER)
 	{
 		add_.push_back(std::move(info));
 		tech_ = tech;
@@ -33,7 +33,7 @@ public:
 class remove_collection_info : public add_remove_collection_info
 {
 public:
-	remove_collection_info(collection_info info, technology tech = unknown_tech)
+	remove_collection_info(collection_info info, specifier tech = UNKOWN_SPECIFIER)
 	{
 		remove_.push_back(std::move(info));
 		tech_ = tech;
@@ -44,7 +44,7 @@ public:
 class collection_info_container
 {
 public:
-	class collection_info_container(technology tech = unknown_tech, bool finish_after_iteration = false)
+	class collection_info_container(specifier tech = UNKOWN_SPECIFIER, bool finish_after_iteration = false)
 		: position_(0)
 		, include_first_position_(true)
 		, finished_(false)
@@ -125,7 +125,8 @@ public:
 	void increment()
 	{
 		if(collection_info_group_.empty()) {
-			reset();
+			position_ = 0;
+			include_first_position_ = true;
 			finished_ = true;
 			}
 			else {
@@ -148,14 +149,15 @@ public:
 
 	int64_t collection_round() { return collection_round_; }
 
-	technology get_technology() { return tech_; }
+	specifier get_technology() { return tech_; }
 
-	void set_technology(technology tech) { tech_ = tech; }
+	void set_technology(specifier tech) { tech_ = tech; }
 
 	bool is_finished() { return finished_; }
 
 	void reset() 
 	{ 
+		collection_round_ = 0;
 		include_first_position_ = true; 
 		position_ = 0; 
 		finished_ = false; 
@@ -171,7 +173,7 @@ public:
 
 	int64_t collection_round_;
 
-	technology tech_;
+	specifier tech_;
 
 	bool finish_after_iteration_;
 };

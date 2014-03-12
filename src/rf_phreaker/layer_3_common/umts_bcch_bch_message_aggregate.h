@@ -70,13 +70,19 @@ public:
 
 	umts_bcch_bch_message_aggregate();
 
+	umts_bcch_bch_message_aggregate(umts_bcch_bch_message_aggregate &&a)
+		//: umts_bcch_bch_message_aggregate()
+	{
+		this->swap(a);
+	}
+
 	void swap(umts_bcch_bch_message_aggregate &a)
 	{
 		bcch_bch_message_aggregate::swap(a);
 		std::swap(system_frame_number_, a.system_frame_number_);
-		std::swap(neighbor_intra_group_, a.neighbor_intra_group_);
-		std::swap(neighbor_inter_group_, a.neighbor_inter_group_);
-		std::swap(neighbor_inter_rat_group_, a.neighbor_inter_rat_group_);
+		neighbor_intra_group_.swap(a.neighbor_intra_group_);
+		neighbor_inter_group_.swap(a.neighbor_inter_group_);
+		neighbor_inter_rat_group_.swap(a.neighbor_inter_rat_group_);
 	}
 
 	bool is_system_frame_number_decoded() const { return system_frame_number_ != not_decoded_16; }
@@ -112,6 +118,8 @@ public:
 			sib_18_group_ = a.sib_18_group_;
 	}
 
+	friend std::ostream& operator<<(std::ostream &os, const umts_bcch_bch_message_aggregate &t);
+
 	system_frame_number_type system_frame_number_;
 
 	std::vector<cpich_type> neighbor_intra_group_;
@@ -122,5 +130,38 @@ public:
 
 	std::vector<sib_18> sib_18_group_;
 };
+
+inline std::ostream& operator<<(std::ostream &os, const umts_bcch_bch_message_aggregate &t)
+{
+	os << static_cast<const bcch_bch_message_aggregate&>(t) << delimiter
+		<< t.system_frame_number_ << delimiter;
+
+	auto size = t.neighbor_intra_group_.size();
+	for(const auto &intra : t.neighbor_intra_group_) {
+		if(--size)
+			os << intra << spacer;
+		else
+			os << intra << delimiter;
+	}
+
+	size = t.neighbor_inter_group_.size();
+	for(const auto &inter : t.neighbor_inter_group_) {
+		if(--size)
+			os << inter.uarfcn_ << spacer2 << inter.cpich_ << spacer;
+		else
+			os << inter.uarfcn_ << spacer2 << inter.cpich_ << delimiter;
+	}
+
+	size = t.neighbor_inter_rat_group_.size();
+	for(const auto &rat : t.neighbor_inter_rat_group_) {
+		if(--size)
+			os << rat.arfcn_ << spacer2 << rat.band_indicator_ << spacer2 << rat.bsic_ << spacer2 << rat.qrx_lev_min_ << spacer;
+		else
+			os << rat.arfcn_ << spacer2 << rat.band_indicator_ << spacer2 << rat.bsic_ << spacer2 << rat.qrx_lev_min_ << delimiter;
+	}
+
+	return os;
+}
+
 
 };

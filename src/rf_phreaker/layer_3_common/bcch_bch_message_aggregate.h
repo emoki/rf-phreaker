@@ -24,8 +24,8 @@ public:
 
 	void swap(bcch_bch_message_aggregate &a)
 	{
-		std::swap(mcc_, a.mcc_);
-		std::swap(mnc_, a.mnc_);
+		mcc_.swap(a.mcc_);
+		mnc_.swap(a.mnc_);
 		std::swap(lac_, a.lac_);
 		std::swap(cid_, a.cid_);
 		std::swap(unique_sector_key_, a.unique_sector_key_);
@@ -62,6 +62,8 @@ public:
 			cid_ = a.cid_;
 	}
 
+	friend std::ostream& operator<<(std::ostream &os, const bcch_bch_message_aggregate &t);
+
 	mcc_type mcc_;
 	mnc_type mnc_;
 	lac_type lac_;
@@ -70,5 +72,17 @@ public:
 	unique_sector_key_type unique_sector_key_; // Key used when recombining segments.
 };
 
+static std::string delimiter = "\t";
+static std::string spacer2 = " : ";
+static std::string spacer = " | ";
+
+inline std::ostream& operator << (std::ostream &os, const bcch_bch_message_aggregate &t)
+{
+	os << t.mcc_ << delimiter
+		<< t.mnc_ << delimiter
+		<< t.lac_ << delimiter
+		<< t.cid_;
+	return os;
+}
 
 };

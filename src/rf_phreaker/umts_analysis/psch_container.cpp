@@ -72,10 +72,7 @@ void psch_container::generate_resampled_psch(rf_phreaker::fir_filter *filter)
 
 	memcpy(padded_psch.get(), generator.psch().get(), generator.psch().length() * sizeof(Ipp32fc));
 
-	if(up_factor_ == 1 && down_factor_ == 1)
-		memcpy(resampled_psch_.get(), padded_psch.get(), num_chips_ / down_factor_);
-	else
-		filter->filter(padded_psch.get(), resampled_psch_.get(), num_chips_ / down_factor_);
+	filter->filter(padded_psch.get(), resampled_psch_.get(), num_chips_ / down_factor_);
 
 	ipp_helper::normalize_signal(resampled_psch_.get(), resampled_psch_.length());
 }

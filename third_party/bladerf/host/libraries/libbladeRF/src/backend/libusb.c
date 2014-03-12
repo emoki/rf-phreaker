@@ -1551,7 +1551,7 @@ static int lusb_get_device_speed(struct bladerf *dev,
 
     speed = libusb_get_device_speed(lusb->dev);
 	// Hard coded speed because it is erroneously reporting speed high.
-	speed = LIBUSB_SPEED_SUPER;
+	//speed = LIBUSB_SPEED_SUPER;
     if (speed == LIBUSB_SPEED_SUPER) {
         *device_speed = BLADERF_DEVICE_SPEED_SUPER;
     } else if (speed == LIBUSB_SPEED_HIGH) {
@@ -2417,6 +2417,11 @@ int lusb_probe(struct bladerf_devinfo_list *info_list)
     }
 
     count = libusb_get_device_list( context, &list );
+	if( count < 0 ) {
+		log_error( "Unable to get device list: %s\n", libusb_error_name(count) );
+		status = count;
+		goto lusb_probe_done;
+	}
     /* Iterate through all the USB devices */
     for( i = 0, n = 0; i < count && status == 0; i++ ) {
         if( lusb_device_is_bladerf(list[i]) ) {

@@ -22,6 +22,11 @@ public:
 
 	uint16_string(/*digit_type*/long **digits, int num_digits);
 
+	void swap(uint16_string &t)
+	{
+		string_.swap(t.string_);
+	}
+	
 	size_t num_characters() const
 	{
 		return string_.length();

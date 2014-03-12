@@ -27,17 +27,17 @@ int umts_analysis_impl::cell_search(const rf_phreaker::raw_signal &raw_signal, u
 
 		uint32_t num_cpich_chips = umts_utilities::calculate_num_chips_from_ecio_threshold(sensitivity);
 
-		auto trackign_meas = umts_meas_container_.get_meas(raw_signal.frequency());
+		auto &tracking_meas = umts_meas_container_.get_meas(raw_signal.frequency());
 
 		if(!brute_force_)
 			brute_force_.reset(new umts_psch_with_brute_force(config_, brute_force_cpich_table_ptr()->cpich_table_ptr()));
 
-		auto new_meas = brute_force_->process(raw_signal.get_iq(), trackign_meas, num_cpich_chips, scan_type);
+		auto new_meas = brute_force_->process(raw_signal.get_iq(), tracking_meas, num_cpich_chips, scan_type);
 
 		consolidate_measurements(new_meas);
-		
-		num_umts_meas = new_meas.size();
 
+		umts_meas_container_.update_meas(raw_signal.frequency(), new_meas);
+		
 		int i = 0;
 		for(auto it = new_meas.begin(), end = new_meas.end(); it != end; ++it) {
 			if(i >= num_umts_meas) {
@@ -46,6 +46,8 @@ int umts_analysis_impl::cell_search(const rf_phreaker::raw_signal &raw_signal, u
 			}
 			umts_meas[i++] = *it;
 		}
+
+		num_umts_meas = new_meas.size();
 
 		if(rms != nullptr)
 			*rms = brute_force_->average_rms();

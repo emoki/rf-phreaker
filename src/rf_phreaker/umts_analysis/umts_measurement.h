@@ -18,6 +18,14 @@ public:
 	int64_t time_;
 	layer_3_information::umts_bcch_bch_message_aggregate layer_3_;
 
+	umts_measurement() {}
+
+	umts_measurement(umts_measurement&& meas)
+		//: umts_measurement()
+	{
+		this->swap(meas);
+	}
+
 	umts_measurement& operator=(umts_measurement meas)
 	{
 		meas.swap(*this);

@@ -18,11 +18,11 @@ public:
 
 	virtual std::future<std::vector<comm_info_ptr>> list_available_scanners() = 0;
 
-	virtual void open_scanner(const scanner_id_type &id) = 0;
+	virtual std::future<void> open_scanner(const scanner_id_type &id) = 0;
 
-	virtual void close_scanner() = 0;
+	virtual std::future<void> close_scanner() = 0;
 
-	virtual void do_initial_scanner_config() = 0;
+	virtual std::future<void> do_initial_scanner_config() = 0;
 
 	//virtual void config_scanner_for_collection(std::vector<rf_phreaker::frequency_type> &freqs) = 0;
 

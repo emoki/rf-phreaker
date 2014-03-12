@@ -10,6 +10,14 @@ namespace rf_phreaker { namespace processing {
 class umts_cell_search_settings
 {
 public:
+	umts_cell_search_settings(const collection_settings &s, const layer_3_settings &l, const umts_general_settings &g)
+		: layer_3_(l), umts_general_(g)
+	{
+		umts_config_.sampling_rate((int)s.sampling_rate_);
+		umts_config_.clock_rate((int)s.sampling_rate_);
+		umts_config_.max_signal_length((int)(s.sampling_rate_ * (s.collection_time_/ 1e9) + 1));
+	}
+	
 	umts_config umts_config_;
 	layer_3_settings layer_3_;
 	umts_general_settings umts_general_;
@@ -22,14 +30,12 @@ public:
 		: analysis_(config.umts_config_)
 		, tracker_(config.layer_3_.max_update_threshold_)
 		, config_(config)
-		, counter_(0)
 	{}
 	
 	umts_cell_search_body(const umts_cell_search_body &body)
 		: analysis_(body.config_.umts_config_)
 		, tracker_(body.tracker_.max_update_)
 		, config_(body.config_)
-		, counter_(0)
 	{}
 
 	//umts_cell_search_body(umts_cell_search_body &&body)
@@ -38,15 +44,14 @@ public:
 
 	umts_info operator()(measurement_package info)
 	{
-		int num_meas = 50;
+		int num_meas = 500;
 		umts_measurements meas(num_meas);
 		double rms = 0;
 		
 		// Change scan_type to candidate_one_timeslot_scan_type once we have tracking.
 		auto scan_type = candidate_all_timeslots_scan_type;
-		if(++counter_ > config_.umts_general_.full_scan_interval_) {
+		if(info->collection_round() % config_.umts_general_.full_scan_interval_ == 0) {
 			scan_type = full_scan_type;
-			counter_ = 0;
 		}
 
 		int status = analysis_.cell_search(*info, &meas[0], num_meas, config_.umts_general_.sensitivity_, scan_type, &rms);
@@ -60,6 +65,12 @@ public:
 
 	umts_info operator()(umts_info info)
 	{
+		// If the collection round is 0 it means we need to start decoding from scratch.
+		if(info.meas_->collection_round() == 0) {
+			tracker_.clear();
+		}
+
+
 		auto freq = info.meas_->frequency();
 		for(auto &data : info.processed_data_) {
 			if(!tracker_.is_fully_decoded(freq, data) && (data.ecio_ > config_.layer_3_.decode_threshold_ || tracker_.in_history(freq, data))) {
@@ -93,7 +104,6 @@ private:
 	umts_analysis analysis_;
 	umts_layer_3_tracker tracker_;
 	umts_cell_search_settings config_;
-	int counter_;
 };
 
 }}
