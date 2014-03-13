@@ -334,8 +334,8 @@ static int rx_cmd_start(struct cli_state *s)
 
     /* Set our stream timeout */
     pthread_mutex_lock(&s->rx->data_mgmt.lock);
-    status = bladerf_set_transfer_timeout(s->dev, BLADERF_MODULE_RX,
-                                          s->rx->data_mgmt.timeout_ms);
+    status = bladerf_set_stream_timeout(s->dev, BLADERF_MODULE_RX,
+                                        s->rx->data_mgmt.timeout_ms);
     pthread_mutex_unlock(&s->rx->data_mgmt.lock);
 
     if (status != 0) {
@@ -420,7 +420,7 @@ static int rx_cmd_config(struct cli_state *s, int argc, char **argv)
                 }
 
             } else {
-                cli_err(s, argv[0], "Unrecognized config parameter: %s", argv[2]);
+                cli_err(s, argv[0], "Unrecognized config parameter: %s", argv[i]);
                 return CMD_RET_INVPARAM;
             }
         }

@@ -1,12 +1,28 @@
 cmake_minimum_required(VERSION 2.8.5)
 project(libbladeRF C)
 
+if(MSVC)
+    find_package(LibPThreadsWin32 REQUIRED)
+    if(LIBPTHREADSWIN32_FOUND)
+        set(HAVE_THREADS true)
+    else()
+        set(HAVE_THREADS false)
+    endif()
+else(MSVC)
+    find_package(Threads REQUIRED)
+    if(Threads_FOUND)
+        set(HAVE_THREADS true)
+    else()
+        set(HAVE_THREADS false)
+    endif()
+endif(MSVC)
+
 ################################################################################
 # Version information
 ################################################################################
 
 set(VERSION_INFO_MAJOR  0)
-set(VERSION_INFO_MINOR  13)
+set(VERSION_INFO_MINOR  14)
 set(VERSION_INFO_PATCH  0)
 
 if(NOT DEFINED VERSION_INFO_EXTRA)
@@ -22,6 +38,15 @@ configure_file(
     ${CMAKE_CURRENT_BINARY_DIR}/src/version.h
     @ONLY
 )
+
+if(MSVC)
+    configure_file(
+        ${CMAKE_CURRENT_SOURCE_DIR}/bladerf.rc.in
+        ${CMAKE_CURRENT_BINARY_DIR}/bladerf.rc
+        @ONLY
+    )
+endif()
+
 
 include(GNUInstallDirs)
 
@@ -59,6 +84,17 @@ option(LIBUSB_DETACH_KERNEL_DRIVER
     "Enable calls to libusb_detach_kernel_driver(). Not supported in Windows."
     ON
 )
+
+option(ENABLE_LIBBLADERF_SYNC
+    "Enable the libbladeRF synchronous data interface. Requires pthreads."
+    ${HAVE_THREADS}
+)
+
+option(ENABLE_LIBBLADERF_SYNC_LOG_VERBOSE
+      "Enable log_verbose() calls in the sync interface's data path. Note that this may harm performance."
+      OFF
+)
+
 
 option(ENABLE_BACKEND_LINUX_DRIVER
     "Enable Linux driver backend support."
@@ -123,6 +159,23 @@ if(ENABLE_BACKEND_LIBUSB)
     endif(NOT LIBUSB_FOUND)
 endif(ENABLE_BACKEND_LIBUSB)
 
+if(ENABLE_LIBBLADERF_SYNC)
+    if(NOT HAVE_THREADS)
+        message(FATAL_ERROR "Pthreads is required for the libbladeRF sync interface")
+    endif()
+
+    if(MSVC)
+        set(LIBBLADERF_INCLUDES ${LIBBLADERF_INCLUDES}
+                ${LIBPTHREADSWIN32_INCLUDE_DIRS})
+    endif()
+
+    add_definitions(-DENABLE_LIBBLADERF_SYNC)
+
+    if(ENABLE_LIBBLADERF_SYNC_LOG_VERBOSE AND ENABLE_LIBBLADERF_LOGGING)
+        add_definitions(-DENABLE_LIBBLADERF_SYNC_LOG_VERBOSE)
+    endif()
+endif(ENABLE_LIBBLADERF_SYNC)
+
 include_directories(${LIBBLADERF_INCLUDES})
 
 ################################################################################
@@ -145,6 +198,10 @@ set(LIBBLADERF_SOURCE
         ${BLADERF_HOST_COMMON_SOURCE_DIR}/log.c
 )
 
+if (MSVC)
+        set(LIBBLADERF_SOURCE ${LIBBLADERF_SOURCE} ${CMAKE_CURRENT_BINARY_DIR}/bladerf.rc)
+endif()
+
 if(LIBUSB_FOUND AND ENABLE_BACKEND_LIBUSB)
     set(LIBBLADERF_SOURCE ${LIBBLADERF_SOURCE} src/backend/libusb.c)
 endif()
@@ -153,9 +210,27 @@ if(ENABLE_BACKEND_DUMMY)
     set(LIBBLADERF_SOURCE ${LIBBLADERF_SOURCE} src/backend/dummy.c)
 endif()
 
-
 if(ENABLE_BACKEND_LINUX_DRIVER)
     set(LIBBLADERF_SOURCE ${LIBBLADERF_SOURCE} src/backend/linux.c)
+endif()
+
+if(ENABLE_LIBBLADERF_SYNC)
+    set(LIBBLADERF_SOURCE ${LIBBLADERF_SOURCE}
+        src/sync.c
+        src/sync_worker.c
+    )
+
+    if(BLADERF_OS_OSX)
+       set(LIBBLADERF_SOURCE ${LIBBLADERF_SOURCE}
+           ${BLADERF_HOST_COMMON_SOURCE_DIR}/osx/clock_gettime.c
+       )
+    endif()
+
+    if(MSVC)
+        set(LIBBLADERF_SOURCE ${LIBBLADERF_SOURCE}
+            ${BLADERF_HOST_COMMON_SOURCE_DIR}/windows/clock_gettime.c
+        )
+    endif()
 endif()
 
 add_library(libbladerf_shared SHARED ${LIBBLADERF_SOURCE})
@@ -164,9 +239,19 @@ add_library(libbladerf_shared SHARED ${LIBBLADERF_SOURCE})
 # Build configuration
 ################################################################################
 
-if(ENABLE_BACKEND_LIBUSB)
-    target_link_libraries(libbladerf_shared ${LIBUSB_LIBRARIES})
+if(ENABLE_LIBBLADERF_SYNC)
+    if(MSVC)
+        set(LIBBLADERF_LIBS ${LIBBLADERF_LIBS} ${LIBPTHREADSWIN32_LIBRARIES})
+    else()
+        set(LIBBLADERF_LIB  ${LIBBLADERF_LIBS} ${CMAKE_THREAD_LIBS_INIT})
+    endif(MSVC)
 endif()
+
+if(ENABLE_BACKEND_LIBUSB)
+    set(LIBBLADERF_LIBS ${LIBBLADERF_LIBS} ${LIBUSB_LIBRARIES})
+endif()
+
+target_link_libraries(libbladerf_shared ${LIBBLADERF_LIBS})
 
 # Adjust our output name
 set_target_properties(libbladerf_shared PROPERTIES OUTPUT_NAME bladeRF)
@@ -256,7 +341,7 @@ if(BUILD_LIBBLADERF_DOCUMENTATION)
             COMMENT "Generating libbladeRF API documentation via Doxygen in: ${CMAKE_CURRENT_BINARY_DIR}/doc/doxygen"
         )
 
-    add_custom_target(libbladeRF-doxygen ALL DEPENDS ${CMAKE_CURRENT_BINARY_DIR}/doc/doxygen/html/index.html) 
+    add_custom_target(libbladeRF-doxygen ALL DEPENDS ${CMAKE_CURRENT_BINARY_DIR}/doc/doxygen/html/index.html)
 
     else(DOXYGEN_FOUND)
         message(WARNING "Could not find Doxygen. libbladeRF API documentation will not be built.")
