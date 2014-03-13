@@ -155,6 +155,11 @@ struct g2LogWorkerImpl
   std::string  backgroundChangeLogFile(const std::string& directory);
   std::string  backgroundFileName();
 
+  void connect_sink(boost::function<void(const std::string&, int)> f)
+  {
+	  sink_.connect(f);
+  }
+
   std::string log_file_with_path_;
   std::string log_prefix_backup_; // needed in case of future log file changes of directory
   std::unique_ptr<kjellkod::Active> bg_;
@@ -165,6 +170,7 @@ private:
   g2LogWorkerImpl& operator=(const g2LogWorkerImpl&); // c++11 feature not yet in vs2010 = delete;
   g2LogWorkerImpl(const g2LogWorkerImpl& other); // c++11 feature not yet in vs2010 = delete;
   std::ofstream& filestream(){return *(outptr_.get());}
+  sink_type sink_;
 };
 
 
@@ -217,6 +223,7 @@ void g2LogWorkerImpl::backgroundFileWrite(LogEntry message)
   out << " " << g2::localtime_formatted(system_time, time_formatted); // TODO: time kommer från LogEntry
   out << "." << chrono::duration_cast<std::chrono::microseconds>(steady_time - steady_start_time_).count(); //microseconds TODO: ta in min g2clocka här StopWatch
   out << "\t" << message << std::flush;
+  sink_(message.c_str(), -49999);
 }
 
 
@@ -311,5 +318,10 @@ std::future<std::string> g2LogWorker::logFileName()
   auto bg_call=[&](){return pimpl_->backgroundFileName();};
   auto future_result = g2::spawn_task(bg_call ,bgWorker);
   return std::move(future_result);
+}
+
+void g2LogWorker::connect_sink(boost::function<void(const std::string&, int)> f)
+{
+	pimpl_->connect_sink(f);
 }
 

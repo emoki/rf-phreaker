@@ -101,14 +101,16 @@ ELSEIF(MSVC)
   #          add_definition(-D_VARIADIC_MAX=10)
   #          https://github.com/anhstudios/swganh/pull/186/files
   ADD_DEFINITIONS (/D_VARIADIC_MAX=10)
-  MESSAGE(STATUS "- MSVC: Set variadic max to 10 for MSVC compatibility")
-  # Remember to set set target properties if using GTEST similar to done below on target "unit_test"
-  # "set_target_properties(unit_test  PROPERTIES COMPILE_DEFINITIONS "GTEST_USE_OWN_TR1_TUPLE=0")
-   MESSAGE("")
-   MESSAGE("Windows: Please run the command [cmake -DCMAKE_BUILD_TYPE=Release -G \"Visual Studio 11\" ..]")
-   MESSAGE("if cmake finishes OK, do 'msbuild g2log_by_kjellkod.sln /p:Configuration=Release'")
-   MESSAGE("then run 'Release\\g2log-FATAL-example.exe'  or whatever performance test you feel like trying")
-   MESSAGE("")
+  ADD_DEFINITIONS (/D_CRT_SECURE_NO_WARNINGS)
+  ADD_DEFINITIONS (/D_SCL_SECURE_NO_WARNINGS)
+#  MESSAGE(STATUS "- MSVC: Set variadic max to 10 for MSVC compatibility")
+#  # Remember to set set target properties if using GTEST similar to done below on target "unit_test"
+#  # "set_target_properties(unit_test  PROPERTIES COMPILE_DEFINITIONS "GTEST_USE_OWN_TR1_TUPLE=0")
+#   MESSAGE("")
+#   MESSAGE("Windows: Please run the command [cmake -DCMAKE_BUILD_TYPE=Release -G \"Visual Studio 11\" ..]")
+#   MESSAGE("if cmake finishes OK, do 'msbuild g2log_by_kjellkod.sln /p:Configuration=Release'")
+#   MESSAGE("then run 'Release\\g2log-FATAL-example.exe'  or whatever performance test you feel like trying")
+#   MESSAGE("")
 ENDIF()
 
 
