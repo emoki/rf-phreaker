@@ -43,13 +43,13 @@ static const std::string num_items_in_flight_key = "num_items_in_flight";
 // Default Values
 static const bool settings_output_raw_packets_default = false;
 static const int settings_log_level_default = 3;
-static const frequency_type settings_sampling_rate_default = 3840000;
+static const frequency_type settings_sampling_rate_default = 4875000;
 static const frequency_type settings_bandwidth_default = 5000000;
 static const time_type settings_collection_time_default = milli_to_nano(32);
 static const int settings_layer_3_max_update_threshold_default = 150;
 static const int settings_layer_3_decode_threshold_default = -13;
-static const int settings_layer_3_min_decode_threshold_default = -25;
-static const int settings_umts_general_sensitivity_default = -25;
+static const int settings_layer_3_min_decode_threshold_default = -21;
+static const int settings_umts_general_sensitivity_default = -23;
 static const int settings_umts_general_full_scan_interval_default = 1;
 static const bool settings_output_default = false;
 static const int gps_collection_period_ms_default = 800;

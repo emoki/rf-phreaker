@@ -122,3 +122,4 @@ EXPORTS
 	ippsSet_16sc
 	ippsSwapBytes_16u_I
 	ippsSwapBytes_32u_I
+	ippsNorm_Inf_32fc32f

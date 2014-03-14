@@ -39,8 +39,12 @@ public:
 
 	void wait()
 	{
-		for(auto &g : graphs_)
-			g->wait_for_all();
+		for(auto &g : graphs_) {
+			try {
+				g->wait_for_all();
+			}
+			catch(...) {}
+		}
 	}
 
 	void cancel()
@@ -49,6 +53,10 @@ public:
 			g->root_task()->cancel_group_execution();
 
 		wait();
+
+		start_node_.reset();
+		nodes_.clear();
+		graphs_.clear();
 	}
 
 private:

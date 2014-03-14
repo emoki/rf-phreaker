@@ -15,7 +15,7 @@ std::atomic<bool> processing_;
 
 processing_graph::processing_graph(void)
 {
-	processing_.store(false, std::memory_order_relaxed);
+	//processing_.store(false, std::memory_order_relaxed);
 }
 
 
@@ -25,13 +25,16 @@ processing_graph::~processing_graph(void)
 
 void processing_graph::initialize_collection(scanner_controller_interface *sc, data_output_async *out, const collection_info_containers &collection_info, const rf_phreaker::settings &config)
 {
+	// If the graph has already been initialized wait for it to stop and clear the previous nodes.
+	if(graphs_.size())
+		wait();
+
 	auto g = std::make_shared<tbb::flow::graph>();
 
 	graphs_.push_back(g);
 
-	start_node_ = std::make_shared<start_node>(*g, [=](add_remove_collection_info &info) { 
-		return processing_.load(std::memory_order_relaxed); 
-	}, false);
+	start_node_ = std::make_shared<start_node>(*g, [=](add_remove_collection_info &info) { return true;	}, false);
+	collection_manager_node_ = std::make_shared<collection_manager_node>(*g, tbb::flow::serial, collection_manager_body(processing_, sc, collection_info));
 
 	auto max_limit =  tbb::task_scheduler_init::default_num_threads();
 	if(config.num_items_in_flight_)
@@ -39,7 +42,6 @@ void processing_graph::initialize_collection(scanner_controller_interface *sc, d
 
 	auto limiter = std::make_shared<limiter_node>(*g, max_limit);
 
-	collection_manager_node_ = std::make_shared<collection_manager_node>(*g, tbb::flow::serial, collection_manager_body(processing_, sc, collection_info));
 	
 	auto umts_sweep_cell_search = std::make_shared<umts_cell_search_node>(*g, tbb::flow::serial, umts_cell_search_body(
 		umts_cell_search_settings(config.umts_sweep_collection_, config.umts_decode_layer_3_, config.umts_sweep_general_)));
@@ -82,16 +84,17 @@ void processing_graph::initialize_collection(scanner_controller_interface *sc, d
 
 void processing_graph::start()
 {
-	processing_.store(true, std::memory_order_release);
 	start_node_->activate();
-	//for(int i = 0; i < 20; ++i)
-	//	collection_manager_node_->try_put(add_remove_collection_info());
 }
 
 void processing_graph::wait()
 {
-	for(auto &g : graphs_)
-		g->wait_for_all();
+	for(auto &g : graphs_) {
+		try {
+			g->wait_for_all();
+		}
+		catch(...) {}
+	}
 }
 
 void processing_graph::cancel()
@@ -102,4 +105,9 @@ void processing_graph::cancel()
 		g->root_task()->cancel_group_execution();
 
 	wait();
+
+	start_node_.reset();
+	collection_manager_node_.reset();
+	nodes_.clear();
+	graphs_.clear();
 }

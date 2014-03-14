@@ -11,7 +11,7 @@ namespace rf_phreaker {
 
 	typedef int64_t frequency_type;
 
-	typedef int64_t channel_type;
+	typedef int32_t channel_type;
 
 	typedef int32_t bandwidth_type;
 

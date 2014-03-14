@@ -13,6 +13,7 @@ set (common_VERSION_TWEAK 0)
 set (common_SRCS 
 	active_object.h
 	benchmark.h
+	channel_conversion.h
 	common_types.h
 	common_utility.h
 	concurrent.h
@@ -23,6 +24,7 @@ set (common_SRCS
 	fft_helper.h
 	ipp_array.h
 	ipp_helper.h
+	log.cpp
 	log.h
 	measurements.h
 	measurement_io.h

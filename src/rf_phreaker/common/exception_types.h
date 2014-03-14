@@ -8,7 +8,7 @@ namespace rf_phreaker {
 class rf_phreaker_error : public std::runtime_error
 {
 public:
-	rf_phreaker_error(const std::string &err, int64_t error_code = 0)
+	rf_phreaker_error(const std::string &err, int error_code = -1)
 		: std::runtime_error(err)
 		, error_code_(error_code)
 	{}
@@ -20,7 +20,7 @@ template<int T>
 class specific_error : public rf_phreaker_error
 {
 public:
-	specific_error(const std::string &err, int64_t error_code = 0)
+	specific_error(const std::string &err, int error_code = -1)
 		: rf_phreaker_error(err, error_code)
 	{}
 };

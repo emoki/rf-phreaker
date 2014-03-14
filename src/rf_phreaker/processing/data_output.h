@@ -34,7 +34,7 @@ public:
 			for(const auto &it : data)
 				std::cout << it << "\n";
 		}
-		if(connection_.connected())
+//		if(connection_.connected())
 			signal_(data);
 	}
 
@@ -43,19 +43,20 @@ public:
 		if(output_to_standard_output_)
 			std::cout << data << "\n";
 
-		if(connection_.connected())
+//		if(connection_.connected())
 			signal_(data);
 	}
 
 	template<typename Func>
 	void connect(Func f)
 	{
-		connection_ = signal_.connect(f);
+		/*connection_ =*/ signal_.connect(f);
 	}
 
 	void disconnect()
 	{
-		connection_.disconnect();
+		signal_.disconnect_all_slots();
+		//connection_.disconnect();
 	}
 
 	void set_standard_output(bool std_output) 
@@ -65,7 +66,7 @@ public:
 
 private:
 	Signal signal_;
-	boost::signals2::connection connection_;
+	//boost::signals2::connection connection_;
 	bool output_to_standard_output_;
 	// Implement google protocol buffer for file output?
 };

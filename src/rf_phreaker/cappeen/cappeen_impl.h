@@ -50,7 +50,7 @@ private:
 
 	operating_band_range_specifier operating_bands_;
 
-	std::unique_ptr<g2LogWorker> log_worker_;
+	//std::unique_ptr<g2LogWorker> log_worker_;
 
 	std::unique_ptr<cappeen_delegate> delegate_;
 };

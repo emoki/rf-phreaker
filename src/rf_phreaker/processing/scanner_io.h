@@ -18,14 +18,14 @@ public:
 
         auto future_data = sc_->get_rf_data(cp.freq_, cp.time_ns_, cp.bandwidth_,cp.sampling_rate_);
 
-		auto future_status = future_data.wait_for(std::chrono::seconds(5));
+		//auto future_status = future_data.wait_for(std::chrono::seconds(2));
 
-		if(!future_data.valid())
-			throw comm_error("Future is not valid within tbb flow graph.");
+		//if(!future_data.valid())
+		//	throw comm_error("Future is not valid within tbb flow graph.");
 
-		if(future_status == std::future_status::timeout) {
-			throw comm_error("Time out occurred during scanner io within tbb flow graph.");
-		}
+		//if(future_status == std::future_status::timeout) {
+		//	throw comm_error("Time out occurred during scanner io within tbb flow graph.");
+		//}
 
 		return future_data.get();
 	}

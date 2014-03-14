@@ -18,7 +18,7 @@ public:
 	void operator()(umts_info info, umts_output_and_feedback_node::output_ports_type &out)
 	{
 		// Output basic tech.
-		io_->output_umts_sweep(convert_to_basic_data(*info.meas_, info.avg_rms_));
+		io_->output_umts_sweep(convert_to_basic_data(*info.meas_, info.avg_rms_)).get();
 
 		if(info.processed_data_.size())
 		{
@@ -31,7 +31,7 @@ public:
 			//std::get<0>(out).try_put(remove_collection_info(umts_sweep_collection_info(info.meas_.frequency()), UMTS_SWEEP));
 
 			// Add the freq to the layer_3_decoder.
-			std::get<0>(out).try_put(add_collection_info(umts_layer_3_collection_info(info.meas_->frequency()), UMTS_LAYER_3_DECODE));
+			std::get<0>(out).try_put(add_collection_info(umts_layer_3_collection_info(info.meas_->frequency(), info.meas_->get_operating_band()), UMTS_LAYER_3_DECODE));
 		}
 	
 		std::get<1>(out).try_put(tbb::flow::continue_msg());
@@ -56,11 +56,11 @@ public:
 			for(const auto &dat : info.processed_data_)
 				umts.push_back(convert_to_umts_data(*info.meas_, dat));
 
-			io_->output(umts);
+			io_->output(umts).get();
 
 			// Add the freq to the layer_3_decoder.
 			if(info.remove_)
-				std::get<0>(out).try_put(remove_collection_info(umts_layer_3_collection_info(info.meas_->frequency()), UMTS_LAYER_3_DECODE));
+				std::get<0>(out).try_put(remove_collection_info(umts_layer_3_collection_info(info.meas_->frequency(), info.meas_->get_operating_band()), UMTS_LAYER_3_DECODE));
 		}
 
 		std::get<1>(out).try_put(tbb::flow::continue_msg());

@@ -33,7 +33,7 @@ TEST(ProcessingGpsGraph, TestGeneral)
 
 
 			data_output_async output;
-			output.set_standard_output(true);
+			output.set_standard_output(true).get();
 			gps_graph graph;
 
 			graph.initialize_comm(&blade, &output, config);

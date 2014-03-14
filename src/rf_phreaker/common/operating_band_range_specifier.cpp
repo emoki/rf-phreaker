@@ -94,27 +94,27 @@ operating_band_range_specifier::~operating_band_range_specifier(void)
 {
 }
 
-operating_band_range operating_band_range_specifier::get_band_freq_range(operating_band band)
+operating_band_range operating_band_range_specifier::get_band_freq_range(operating_band band) const
 {
 	return operating_bands_[band];
 }
 
-std::vector<operating_band_range> operating_band_range_specifier::find_avaliable_gsm_operating_bands(frequency_type freq)
+std::vector<operating_band_range> operating_band_range_specifier::find_avaliable_gsm_operating_bands(frequency_type freq) const
 {
 	return find_avaliable_operating_bands(freq, FIRST_GSM_OPERATING_BAND, LAST_GSM_OPERATING_BAND);
 }
 
-std::vector<operating_band_range> operating_band_range_specifier::find_avaliable_umts_operating_bands(frequency_type freq)
+std::vector<operating_band_range> operating_band_range_specifier::find_avaliable_umts_operating_bands(frequency_type freq) const
 {
 	return find_avaliable_operating_bands(freq, FIRST_UMTS_OPERATING_BAND, LAST_UMTS_OPERATING_BAND);
 }
 
-std::vector<operating_band_range> operating_band_range_specifier::find_avaliable_lte_operating_bands(frequency_type freq)
+std::vector<operating_band_range> operating_band_range_specifier::find_avaliable_lte_operating_bands(frequency_type freq) const
 {
 	return find_avaliable_operating_bands(freq, FIRST_LTE_OPERATING_BAND, LAST_LTE_OPERATING_BAND);
 }
 
-std::vector<operating_band_range> operating_band_range_specifier::find_avaliable_operating_bands(frequency_type freq, operating_band begin, operating_band inclusive_end)
+std::vector<operating_band_range> operating_band_range_specifier::find_avaliable_operating_bands(frequency_type freq, operating_band begin, operating_band inclusive_end) const
 {
 	std::vector<operating_band_range> valid_bands;
 

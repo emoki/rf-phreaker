@@ -12,6 +12,7 @@ set (common_tests_VERSION_TWEAK 0)
 set (common_tests_SRCS 
 	common_tests.cpp
 	test_operating_band_range_specifier.cpp
+	channel_conversion_gtests.cpp
 	${SRC_PLATFORM_SPECIFIC}/stdafx.cpp)
 
 add_executable (common_tests ${common_tests_SRCS})

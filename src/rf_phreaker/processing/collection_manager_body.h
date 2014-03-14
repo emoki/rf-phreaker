@@ -44,6 +44,7 @@ public:
 
 					auto meas = std::make_shared<scanner::measurement_info>(scanner_io_(ci));
 					meas->collection_round(c.collection_round());
+					meas->set_operating_band(ci.operating_band_);
 					switch(c.get_technology()) {
 					case UMTS_SWEEP:
 						std::get<UMTS_SWEEP_PORT>(out).try_put(meas);

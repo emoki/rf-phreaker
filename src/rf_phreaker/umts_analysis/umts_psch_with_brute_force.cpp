@@ -59,7 +59,6 @@ umts_measurements umts_psch_with_brute_force::process(const ipp_32fc_array &sign
 #endif
 	length_to_process_ = signal.length() > max_processing_length_ ? max_processing_length_ : signal.length();
 
-	//spur_nullifier_.reset(signal->length());
 
 	adjust_clock_error_rate();
 
@@ -78,13 +77,6 @@ umts_measurements umts_psch_with_brute_force::process(const ipp_32fc_array &sign
 	}
 #endif
 
-	//if(nullify_spurs)
-	//{
-	//	double signal_level = hw_config_->GetCalibration()->DSPPowerTodBm(UMTSTECH, packet.getFreq(), average_rms_, packet.getGain());
-	//	
-	//	if(signal_level < -80)
-	//		spur_nullifier_.nullify_spurs(const_cast<ipp_32fc_array &>(signal));
-	//}
 	//if(do_we_benchmark_)
 	//{
 	//	benchmark_.stop_timer();
@@ -118,6 +110,7 @@ umts_measurements umts_psch_with_brute_force::process(const ipp_32fc_array &sign
 
 	int length = psch_correlation_result.length() - 1;
 
+	int size = 0;
 	for(int i = 1; i < length; i++)
 	{
 		// Relative peak.
@@ -126,6 +119,9 @@ umts_measurements umts_psch_with_brute_force::process(const ipp_32fc_array &sign
 					possible_peak > psch_correlation_result.get_value(i - 1) &&
 					possible_peak > psch_correlation_result.get_value(i + 1) ))
 		{
+			// If there are these many peaks there is probably something wrong.
+			if(++size > 100)
+				break;
 			psch_peaks.push_back(i);
 		}
 	}

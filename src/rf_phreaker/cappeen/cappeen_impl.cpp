@@ -12,7 +12,7 @@ using namespace beagle_api;
 cappeen_impl::cappeen_impl()
 : is_initialized_(false)
 {		
-	log_worker_.reset(new g2LogWorker("cappeen_log", ""));
+	//log_worker_.reset(new g2LogWorker("cappeen_log", ""));
 }
 
 cappeen_impl::~cappeen_impl()
@@ -23,12 +23,11 @@ long cappeen_impl::initialize(beagle_api::beagle_delegate *del)
 {
 	int status = 0;
 	try{		
-		g2::initializeLogging(log_worker_.get());
-		g2::shutDownLogging();
+		//g2::initializeLogging(log_worker_.get());
 
 		read_settings();
 
-		LOG(INFO) << "Initializing cappeen api.";
+		//LOG(INFO) << "Initializing cappeen api.";
 
 		is_initialized_ = false;
 
@@ -160,11 +159,13 @@ long cappeen_impl::open_unit(const char *serial, unsigned int buf_size)
 	try {
 		verify_init();
 
-		scanner_->open_scanner(serial).wait();
+		scanner_->open_scanner(serial).get();
 
 		auto hw = scanner_->get_scanner().get()->get_hardware();
 		delegate_->initialize_beagle_info(hw);
 		delegate_->change_beagle_state(BEAGLE_USBOPENED);
+
+		scanner_->do_initial_scanner_config().get();
 
 		gps_graph_->initialize_comm(scanner_.get(), data_output_.get(), config_);
 		gps_graph_->start();
@@ -194,7 +195,7 @@ long cappeen_impl::close_unit(const char *serial, unsigned int buf_size)
 		
 		processing_graph_->cancel();
 
-		scanner_->close_scanner().wait();
+		scanner_->close_scanner().get();
 		delegate_->change_beagle_state(BEAGLE_USBCLOSED);
 
 	}
@@ -295,7 +296,7 @@ processing::collection_info_containers cappeen_impl::create_collection_info_cont
 			frequency_range_creation::adjust_umts_sweep_collection_info(operating_bands_.get_band_freq_range(band), *it);
 		}
 		else if(band >= FIRST_LTE_OPERATING_BAND && band <= LAST_LTE_OPERATING_BAND) {
-			continue;
+			throw cappeen_api_error("LTE is not supported.");
 			auto it = std::find_if(containers.begin(), containers.end(), [&](const collection_info_container &c) {
 				return c.tech_ == LTE_SWEEP;
 			});

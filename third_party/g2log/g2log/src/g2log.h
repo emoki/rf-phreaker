@@ -35,7 +35,7 @@ class g2LogWorker;
 
 
 // Levels for logging, made so that it would be easy to change, remove, add levels -- KjellKod
-const int DEBUG = 0, INFO = 1, WARNING = 2, FATAL = 3;
+const int DEBUG = 0, INFO = 1, WARNING = 2, ERROR = 3, FATAL = 4;
 static const std::string k_fatal_log_expression = ""; // using LogContractMessage but no boolean expression
 
 // GCC Predefined macros: http://gcc.gnu.org/onlinedocs/cpp/Standard-Predefined-Macros.html
@@ -120,6 +120,7 @@ And here is possible output
 #define G2_LOGF_INFO     g2::internal::LogMessage(__FILE__, __LINE__, __PRETTY_FUNCTION__,"INFO")
 #define G2_LOGF_DEBUG    g2::internal::LogMessage(__FILE__, __LINE__, __PRETTY_FUNCTION__,"DEBUG")
 #define G2_LOGF_WARNING  g2::internal::LogMessage(__FILE__, __LINE__, __PRETTY_FUNCTION__,"WARNING")
+#define G2_LOGF_ERROR    g2::internal::LogMessage(__FILE__, __LINE__, __PRETTY_FUNCTION__,"ERROR")
 #define G2_LOGF_FATAL    g2::internal::LogContractMessage(__FILE__, __LINE__, __PRETTY_FUNCTION__,k_fatal_log_expression)
 
 // LOGF(level,msg,...) is the API for the "printf" like log

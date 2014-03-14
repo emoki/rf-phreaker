@@ -44,7 +44,7 @@ public:
 
 	umts_info operator()(measurement_package info)
 	{
-		int num_meas = 500;
+		int num_meas = 100;
 		umts_measurements meas(num_meas);
 		double rms = 0;
 		

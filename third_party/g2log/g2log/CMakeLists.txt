@@ -126,7 +126,7 @@ ENDIF()
  
    # Create the g2log library
    include_directories(${LOG_SRC})
-   MESSAGE("  g2logger files: [${SRC_FILES}]")
+   #MESSAGE("  g2logger files: [${SRC_FILES}]")
    add_library(lib_g2logger ${SRC_FILES})
    set_target_properties(lib_g2logger PROPERTIES LINKER_LANGUAGE CXX)
    add_library(lib_g2logger_shared SHARED ${SRC_FILES})

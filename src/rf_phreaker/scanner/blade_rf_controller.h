@@ -63,7 +63,7 @@ public:
 
 	measurement_info get_rf_data(int num_samples);
 
-	gain_type set_auto_gain(frequency_type freq, bandwidth_type bandwidth, time_type time_ns = 0, frequency_type sampling_rate = 0);
+	gain_type get_auto_gain(frequency_type freq, bandwidth_type bandwidth, time_type time_ns = 0, frequency_type sampling_rate = 0);
 
 private:
 	void refresh_scanner_info();

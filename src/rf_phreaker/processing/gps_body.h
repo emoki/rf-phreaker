@@ -30,7 +30,7 @@ public:
 			auto dur = sleep_time_ms_ - time_spent;
 			std::this_thread::sleep_for(dur);
 		}
-		data_output_->output(g);
+		data_output_->output(g).get();
 
 		return tbb::flow::continue_msg();
 	}

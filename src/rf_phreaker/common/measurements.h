@@ -56,7 +56,7 @@ namespace rf_phreaker {
 
 	struct umts_data : public basic_data
 	{
-		int32_t uarfcn_;
+		channel_type uarfcn_;
 		operating_band operating_band_;
 		int32_t cpich_;
 		double ecio_;
@@ -66,7 +66,7 @@ namespace rf_phreaker {
 
 	struct lte_data : public basic_data
 	{
-		int32_t earfcn_;
+		channel_type earfcn_;
 		operating_band operating_band_;
 		int32_t physical_cell_id_;
 		double rsrp_;

@@ -1,6 +1,7 @@
 #pragma once
 
 #include "rf_phreaker/common/measurements.h"
+#include "rf_phreaker/common/channel_conversion.h"
 #include "rf_phreaker/scanner/measurement_info.h"
 #include "rf_phreaker/umts_analysis/umts_measurement.h"
 #include "rf_phreaker/lte_analysis/lte_measurement.h"
@@ -9,7 +10,9 @@ namespace rf_phreaker { namespace processing {
 
 void convert_to_basic_data(basic_data &data, const scanner::measurement_info &info, double avg_rms)
 {
-	data.carrier_signal_level_ = 20 * log10(avg_rms);
+	int offset = -83;
+	// TODO - Assuming the LNA is maxed.
+	data.carrier_signal_level_ = 20 * log10(avg_rms) - info.gain().rxvga1_ - info.gain().rxvga2_ + offset;
 	data.carrier_bandwidth_ = info.bandwidth();
 	data.carrier_frequency_ = info.frequency();
 	data.collection_round_ = info.collection_round();
@@ -29,10 +32,13 @@ void convert_to_umts_data(umts_data &data, const scanner::measurement_info &info
 	convert_to_basic_data(data, info, umts.rms_signal_);
 	data.cpich_ = umts.cpich_;
 	data.ecio_ = umts.ecio_;
-	//data.operating_band_ = umts.;
-	data.rscp_ = data.carrier_signal_level_ - data.ecio_;
-//	data.uarfcn_ = umts.;
+	data.operating_band_ = info.get_operating_band();
+	data.rscp_ = data.carrier_signal_level_ + data.ecio_;
 	data.layer_3_ = umts.layer_3_;
+	static channel_conversion conversion;
+	if(info.get_operating_band() == UMTS_OPERATING_BAND_1 && !(info.frequency() % 200))
+		const_cast<scanner::measurement_info&>(info).set_operating_band(UMTS_OPERATING_BAND_4);
+	data.uarfcn_ = conversion.frequency_to_uarfcn(info.frequency(), info.get_operating_band());
 }
 
 umts_data convert_to_umts_data(const scanner::measurement_info &info, const umts_measurement &umts)

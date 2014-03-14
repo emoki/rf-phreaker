@@ -22,7 +22,7 @@ blade_rf_controller::blade_rf_controller(blade_rf_controller &&c)
 blade_rf_controller::~blade_rf_controller()
 {
 	if(comm_blade_rf_.get())
-		close_scanner();
+		bladerf_close(comm_blade_rf_->blade_rf());
 }
 
 int blade_rf_controller::num_available_scanners()
@@ -67,15 +67,18 @@ void blade_rf_controller::open_scanner(const scanner_id_type &id)
 
 	check_blade_status(bladerf_open(&blade_rf, open_str.c_str()));
 
+	//// Reload FPGA to handle clear any previous errors and start with a fresh slate.
+	//check_blade_status(bladerf_device_reset(blade_rf));
+	//blade_rf = nullptr;
+	//// Wait for reenumeration and reopen.
+	//std::this_thread::sleep_for(std::chrono::seconds(5));
+	//check_blade_status(bladerf_open(&blade_rf, open_str.c_str()));
+
 	bladerf_devinfo dev_info;
 
 	check_blade_status(bladerf_get_devinfo(blade_rf, &dev_info));
 
 	comm_blade_rf_.reset(new comm_blade_rf(dev_info, blade_rf));
-
-	// Reset LMS.
-	//check_blade_status(bladerf_lms_write(comm_blade_rf_->blade_rf(), 0x05, 0x12));
-	//check_blade_status(bladerf_lms_write(comm_blade_rf_->blade_rf(), 0x05, 0x32));
 
 	refresh_scanner_info();
 }
@@ -109,14 +112,13 @@ void blade_rf_controller::do_initial_scanner_config()
 	// The calibrations can return an error.  We should log this but not 
 	// necessarily throw an error.
 
-	/*check_blade_status*/(bladerf_calibrate_dc(comm_blade_rf_->blade_rf(), 
+	check_blade_status(bladerf_calibrate_dc(comm_blade_rf_->blade_rf(), 
 		BLADERF_DC_CAL_LPF_TUNING));
 
-
-	/*check_blade_status*/(bladerf_calibrate_dc(comm_blade_rf_->blade_rf(), 
+	check_blade_status(bladerf_calibrate_dc(comm_blade_rf_->blade_rf(), 
 		BLADERF_DC_CAL_RX_LPF));
 
-	/*check_blade_status*/(bladerf_calibrate_dc(comm_blade_rf_->blade_rf(), 
+	check_blade_status(bladerf_calibrate_dc(comm_blade_rf_->blade_rf(), 
 		BLADERF_DC_CAL_RXVGA2));
 
 	//check_blade_status(bladerf_set_sampling(comm_blade_rf_->blade_rf(),
@@ -244,32 +246,36 @@ gps blade_rf_controller::get_gps_data()
 
 measurement_info blade_rf_controller::get_rf_data_use_auto_gain(frequency_type frequency, time_type time_ns, bandwidth_type bandwidth, frequency_type sampling_rate)
 {
-	auto gain = set_auto_gain(frequency, bandwidth);
+	auto gain = get_auto_gain(frequency, bandwidth);
 
 	return get_rf_data(frequency, time_ns, bandwidth, gain, sampling_rate);
 }
 
-gain_type blade_rf_controller::set_auto_gain(frequency_type freq, bandwidth_type bandwidth, time_type time_ns,
+gain_type blade_rf_controller::get_auto_gain(frequency_type freq, bandwidth_type bandwidth, time_type time_ns,
 										frequency_type sampling_rate)
 {
+	if(gain_manager_.in_history(freq, bandwidth))
+		return gain_manager_.calculate_new_gain(freq, bandwidth);
+
 	if(time_ns == 0)
 		time_ns = 5000000;
 
 	// Use lowest sampling rate because we only care about the Max ADC.
 	sampling_rate = 1920000;
 
-	gain_type gain;
-
-	auto data = get_rf_data(freq, time_ns, bandwidth, gain, sampling_rate);
-
-	return gain_manager_.calculate_gain(data);
+	// If we have no history loop thru a couple times to zero in on the gain.
+	gain_manager_.update_gain(get_rf_data(freq, time_ns, bandwidth, gain_manager_.default_gain(), sampling_rate));
+	for(int i = 0; i < 2; ++i) {	
+		gain_manager_.update_gain(get_rf_data(freq, time_ns, bandwidth, gain_manager_.calculate_new_gain(freq, bandwidth), sampling_rate));
+	}
+	return gain_manager_.calculate_new_gain(freq, bandwidth);
 }
 
 measurement_info blade_rf_controller::get_rf_data(frequency_type frequency, time_type time_ns, bandwidth_type bandwidth, const gain_type &gain, frequency_type sampling_rate)
 {
 	check_blade_comm();
 
-	int throw_away_ns =milli_to_nano(3);
+	int throw_away_ns =milli_to_nano(10);
 
 	// Per Nyquist a signal must be sampled at a rate greater than twice it's maximum frequency component.  Thus
 	// once converted to baseband the highest pertinent frequency component will be 1/2 the bandwidth so our sampling 
@@ -328,6 +334,8 @@ measurement_info blade_rf_controller::get_rf_data(frequency_type frequency, time
 
 	ipp_helper::check_status(ippsConvert_16s32f(beginning_of_iq,
 		(Ipp32f*)data.get_iq().get(), data.get_iq().length() * 2));
+
+	gain_manager_.update_gain(data);
 
 	return data;
 }

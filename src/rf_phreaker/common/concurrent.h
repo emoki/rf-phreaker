@@ -1,9 +1,10 @@
 #pragma once
 
+#include "rf_phreaker/common/log.h"
+#include "tbb/concurrent_queue.h"
 #include <thread>
 #include <future>
 
-#include "tbb/concurrent_queue.h"
 
 namespace rf_phreaker {
 
@@ -41,11 +42,19 @@ template <typename T> class concurrent {
 				{
 					set_value(*p, f, t_);
 				}
-				catch(...)
-				{
+				catch(const rf_phreaker::rf_phreaker_error &err) {
+					logger::rf_phreaker_log().log_error(err.what(), -49999);
 					p->set_exception(std::current_exception());
 				}
-			}); 
+				catch(const std::exception &err) {
+					logger::rf_phreaker_log().log_error(err.what(), -49998);
+					p->set_exception(std::current_exception());
+				}
+				catch(...) {
+					p->set_exception(std::current_exception());
+					logger::rf_phreaker_log().log_error("An unknown error has occurred.", -50000);
+				}
+			});
 
 			return ret;
 		}

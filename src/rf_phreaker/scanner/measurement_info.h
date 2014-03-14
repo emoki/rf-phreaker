@@ -60,18 +60,24 @@ public:
 
 	void collection_round(int64_t cr) { collection_round_ = cr; }
 
+	operating_band get_operating_band() const { return operating_band_; }
+
+	void set_operating_band(operating_band band) { operating_band_ = band; }
+
 	friend inline std::ostream& operator<<(std::ostream &os, const rf_phreaker::scanner::measurement_info &t);
 	friend inline std::istream& operator>>(std::istream &os, rf_phreaker::scanner::measurement_info &t);
 
 private:
 	int64_t collection_round_;
 	gain_type gain_;
+	operating_band operating_band_;
 };
 
 inline std::ostream& operator<<(std::ostream &os, const rf_phreaker::scanner::measurement_info &t)
 {
 	os << 1 << "\t";
 	os << t.collection_round_ << "\t";
+	os << t.operating_band_ << "\t";
 	os << t.gain_.lna_gain_ << "\t";
 	os << t.gain_.rxvga1_ << "\t";
 	os << t.gain_.rxvga2_ << "\n";
@@ -81,10 +87,11 @@ inline std::ostream& operator<<(std::ostream &os, const rf_phreaker::scanner::me
 
 inline std::istream& operator>>(std::istream &is, rf_phreaker::scanner::measurement_info &t)
 {
-	int version;
+	int version, i;
 	is >> version;
 	is >> t.collection_round_;
-	int i; is >> i;  t.gain_.lna_gain_ = static_cast<lms::lna_gain_enum>(i);
+	is >> i; t.operating_band_ = static_cast<operating_band>(i);
+	is >> i;  t.gain_.lna_gain_ = static_cast<lms::lna_gain_enum>(i);
 	is >> t.gain_.rxvga1_;
 	is >> t.gain_.rxvga2_;
 	is >> static_cast<rf_phreaker::raw_signal&>(t);
