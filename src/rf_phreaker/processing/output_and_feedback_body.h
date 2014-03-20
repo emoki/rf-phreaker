@@ -8,66 +8,104 @@
 
 namespace rf_phreaker { namespace processing {
 
-class sweep_output_and_feedback_body
-{
-public:
-	sweep_output_and_feedback_body(data_output_async *io)
-		: io_(io)
-	{}
-
-	void operator()(umts_info info, umts_output_and_feedback_node::output_ports_type &out)
+	class sweep_output_and_feedback_body
 	{
-		// Output basic tech.
-		io_->output_umts_sweep(convert_to_basic_data(*info.meas_, info.avg_rms_)).get();
+	public:
+		sweep_output_and_feedback_body(data_output_async *io)
+			: io_(io)
+		{}
 
-		if(info.processed_data_.size())
+		void operator()(umts_info info, umts_output_and_feedback_node::output_ports_type &out)
 		{
-			// Convert measurements here.
-			// For now just output raw meas.
-			//io_->output(info.processed_data_);
+			// Output basic tech.
+			io_->output_umts_sweep(convert_to_basic_data(*info.meas_, info.avg_rms_)).get();
 
-			// Remove from sweeper surrounding freqs that are within the bandwidth of this valid signal.
-			//for(int i = info.)
-			//std::get<0>(out).try_put(remove_collection_info(umts_sweep_collection_info(info.meas_.frequency()), UMTS_SWEEP));
+			if(info.processed_data_.size()) {
+				// Convert measurements here.
+				// For now just output raw meas.
+				//io_->output(info.processed_data_);
 
-			// Add the freq to the layer_3_decoder.
-			std::get<0>(out).try_put(add_collection_info(umts_layer_3_collection_info(info.meas_->frequency(), info.meas_->get_operating_band()), UMTS_LAYER_3_DECODE));
+				// Remove from sweeper surrounding freqs that are within the bandwidth of this valid signal.
+				//for(int i = info.)
+				//std::get<0>(out).try_put(remove_collection_info(umts_sweep_collection_info(info.meas_.frequency()), UMTS_SWEEP));
+
+				// Add the freq to the layer_3_decoder.
+				std::get<0>(out).try_put(add_collection_info(umts_layer_3_collection_info(info.meas_->frequency(), info.meas_->get_operating_band()), UMTS_LAYER_3_DECODE));
+			}
+
+			std::get<1>(out).try_put(tbb::flow::continue_msg());
 		}
-	
-		std::get<1>(out).try_put(tbb::flow::continue_msg());
-	}
 
-private:
-	data_output_async *io_;
-};
+		void operator()(lte_info info, lte_output_and_feedback_node::output_ports_type &out)
+		{
+			// Output basic tech.
+			io_->output_umts_sweep(convert_to_basic_data(*info.meas_, info.avg_rms_)).get();
 
-class layer_3_output_and_feedback_body
-{
-public:
-	layer_3_output_and_feedback_body(data_output_async *io)
-		: io_(io)
-	{}
+			if(info.processed_data_.size()) {
+				// Convert measurements here.
+				// For now just output raw meas.
+				//io_->output(info.processed_data_);
 
-	void operator()(umts_info info, umts_output_and_feedback_node::output_ports_type &out)
+				// Remove from sweeper surrounding freqs that are within the bandwidth of this valid signal.
+				//for(int i = info.)
+				//std::get<0>(out).try_put(remove_collection_info(umts_sweep_collection_info(info.meas_.frequency()), UMTS_SWEEP));
+
+				// Add the freq to the layer_3_decoder.
+				std::get<0>(out).try_put(add_collection_info(lte_layer_3_collection_info(info.meas_->frequency(), info.meas_->get_operating_band()), LTE_LAYER_3_DECODE));
+			}
+
+			std::get<1>(out).try_put(tbb::flow::continue_msg());
+		}
+
+	private:
+		data_output_async *io_;
+	};
+
+	class layer_3_output_and_feedback_body
 	{
-		if(!info.processed_data_.empty()) {
-			std::vector<umts_data> umts;
-			
-			for(const auto &dat : info.processed_data_)
-				umts.push_back(convert_to_umts_data(*info.meas_, dat));
+	public:
+		layer_3_output_and_feedback_body(data_output_async *io)
+			: io_(io)
+		{}
 
-			io_->output(umts).get();
+		void operator()(umts_info info, umts_output_and_feedback_node::output_ports_type &out)
+		{
+			if(!info.processed_data_.empty()) {
+				std::vector<umts_data> umts;
 
-			// Add the freq to the layer_3_decoder.
-			if(info.remove_)
-				std::get<0>(out).try_put(remove_collection_info(umts_layer_3_collection_info(info.meas_->frequency(), info.meas_->get_operating_band()), UMTS_LAYER_3_DECODE));
+				for(const auto &dat : info.processed_data_)
+					umts.push_back(convert_to_umts_data(*info.meas_, dat));
+
+				io_->output(umts).get();
+
+				// Add the freq to the layer_3_decoder.
+				if(info.remove_)
+					std::get<0>(out).try_put(remove_collection_info(umts_layer_3_collection_info(info.meas_->frequency(), info.meas_->get_operating_band()), UMTS_LAYER_3_DECODE));
+			}
+
+			std::get<1>(out).try_put(tbb::flow::continue_msg());
 		}
 
-		std::get<1>(out).try_put(tbb::flow::continue_msg());
-	}
+		void operator()(lte_info info, lte_output_and_feedback_node::output_ports_type &out)
+		{
+			if(!info.processed_data_.empty()) {
+				std::vector<lte_data> lte;
 
-private:
-	data_output_async *io_;
-};
+				for(const auto &dat : info.processed_data_)
+					lte.push_back(convert_to_lte_data(*info.meas_, dat));
+
+				io_->output(lte).get();
+
+				// Add the freq to the layer_3_decoder.
+				if(info.remove_)
+					std::get<0>(out).try_put(remove_collection_info(lte_layer_3_collection_info(info.meas_->frequency(), info.meas_->get_operating_band()), LTE_LAYER_3_DECODE));
+			}
+
+			std::get<1>(out).try_put(tbb::flow::continue_msg());
+		}
+
+	private:
+		data_output_async *io_;
+	};
 
 }}

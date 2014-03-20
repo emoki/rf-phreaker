@@ -33,7 +33,7 @@ public:
 	channel_type frequency_to_uarfcn(frequency_type freq, operating_band band)
 	{
 		if(freq % khz(200) != 0 && freq % khz(500) != 0)
-			throw misc_error("Error converting to UARFCN.  Frequency (" + std::to_string(freq) + ") cannot a valid channel.");
+			throw misc_error("Error converting to UARFCN.  Frequency (" + std::to_string(freq) + ") is not a valid channel.");
 
 		check_umts_freq(freq, band);
 
@@ -71,12 +71,14 @@ public:
 		case UMTS_OPERATING_BAND_14:	//	700	USMH D	788 – 798	758 – 768
 		case UMTS_OPERATING_BAND_19:	//	800		832.4 – 842.6	877.4 – 887.6
 		case UMTS_OPERATING_BAND_20:	//	800	EUDD	832 – 862	791 – 821
+			channel = calc_uarfcn(freq, mhz(-109));
+			break;
 		case UMTS_OPERATING_BAND_21:	//	1500	UPDC	1447.9 – 1462.9	1495.9 – 1510.9
 		case UMTS_OPERATING_BAND_22:	//	3500		3410 – 3490	3510 – 3590
 		case UMTS_OPERATING_BAND_25:	//	1900	EPCS A-G	1850 – 1915	1930 – 1995
 		case UMTS_OPERATING_BAND_26:    //	850	ECLR	814 – 849	859 – 894
 		default:
-			throw misc_error("Error converting to UARFCN.  Freqeuncy and band are not supported.");
+			throw misc_error("Error converting to UARFCN.  Frequency and band are not supported.");
 		}
 		return channel;
 	}
@@ -95,9 +97,125 @@ public:
 	
 	channel_type frequency_to_earfcn(frequency_type freq, operating_band band)
 	{
+		if(freq % khz(100) != 0)
+			throw misc_error("Error converting to EARFCN.  Frequency (" + std::to_string(freq) + ") is not a valid channel.");
+
 		channel_type channel;
-		throw misc_error("Converting EARFCN is not supported.");
+		switch(band)
+		{
+		case LTE_OPERATING_BAND_1:
+			channel = calc_earfcn(freq, band, 0);
+			break;
+		case LTE_OPERATING_BAND_2:
+			channel = calc_earfcn(freq, band, 600);
+			break;
+		case LTE_OPERATING_BAND_3:
+			channel = calc_earfcn(freq, band, 1200);
+			break;
+		case LTE_OPERATING_BAND_4:
+			channel = calc_earfcn(freq, band, 1950);
+			break;
+		case LTE_OPERATING_BAND_5:
+			channel = calc_earfcn(freq, band, 2400);
+			break;
+		case LTE_OPERATING_BAND_6:
+			channel = calc_earfcn(freq, band, 2650);
+			break;
+		case LTE_OPERATING_BAND_7:
+			channel = calc_earfcn(freq, band, 2750);
+			break;
+		case LTE_OPERATING_BAND_8:
+			channel = calc_earfcn(freq, band, 3450);
+			break;
+		case LTE_OPERATING_BAND_9:
+			channel = calc_earfcn(freq, band, 3800);
+			break;
+		case LTE_OPERATING_BAND_10:
+			channel = calc_earfcn(freq, band, 4150);
+			break;
+		case LTE_OPERATING_BAND_11:
+			channel = calc_earfcn(freq, band, 4750);
+			break;
+		case LTE_OPERATING_BAND_12:
+			channel = calc_earfcn(freq, band, 5010);
+			break;
+		case LTE_OPERATING_BAND_13:
+			channel = calc_earfcn(freq, band, 5180);
+			break;
+		case LTE_OPERATING_BAND_14:
+			channel = calc_earfcn(freq, band, 5280);
+			break;
+		case LTE_OPERATING_BAND_17:
+			channel = calc_earfcn(freq, band, 5730);
+			break;
+		case LTE_OPERATING_BAND_18:
+			channel = calc_earfcn(freq, band, 5850);
+			break;
+		case LTE_OPERATING_BAND_19:
+			channel = calc_earfcn(freq, band, 6000);
+			break;
+		case LTE_OPERATING_BAND_20:
+			channel = calc_earfcn(freq, band, 6150);
+			break;
+		case LTE_OPERATING_BAND_21:
+			channel = calc_earfcn(freq, band, 6450);
+			break;
+		case LTE_OPERATING_BAND_23:
+			channel = calc_earfcn(freq, band, 7500);
+			break;
+		case LTE_OPERATING_BAND_24:
+			channel = calc_earfcn(freq, band, 7700);
+			break;
+		case LTE_OPERATING_BAND_25:
+			channel = calc_earfcn(freq, band, 8040);
+			break;
+		case LTE_OPERATING_BAND_33:
+			channel = calc_earfcn(freq, band, 36000);
+			break;
+		case LTE_OPERATING_BAND_34:
+			channel = calc_earfcn(freq, band, 36200);
+			break;
+		case LTE_OPERATING_BAND_35:
+			channel = calc_earfcn(freq, band, 36350);
+			break;
+		case LTE_OPERATING_BAND_36:
+			channel = calc_earfcn(freq, band, 36950);
+			break;
+		case LTE_OPERATING_BAND_37:
+			channel = calc_earfcn(freq, band, 37550);
+			break;
+		case LTE_OPERATING_BAND_38:
+			channel = calc_earfcn(freq, band, 37750);
+			break;
+		case LTE_OPERATING_BAND_39:
+			channel = calc_earfcn(freq, band, 38250);
+			break;
+		case LTE_OPERATING_BAND_40:
+			channel = calc_earfcn(freq, band, 38650);
+			break;
+		case LTE_OPERATING_BAND_41:
+			channel = calc_earfcn(freq, band, 39650);
+			break;
+		case LTE_OPERATING_BAND_42:
+			channel = calc_earfcn(freq, band, 41590);
+			break;
+		case LTE_OPERATING_BAND_43:
+			channel = calc_earfcn(freq, band, 43590);
+			break;
+
+			break;
+		default:
+			throw misc_error("Error converting to EARFCN.  Frequency and band are not supported.");
+		}
 		return channel;
+	}
+
+	// 3gpp36.101 - 5.7.3
+	// Fdl = Fdl_low + 0.1(Ndl - Noffset)
+	channel_type calc_earfcn(frequency_type freq, operating_band band, int n_offset)
+	{
+		auto r = ranges_.get_band_freq_range(band);
+		return static_cast<channel_type>((freq - r.low_freq_hz_) * 10 + n_offset);
 	}
 
 	operating_band_range_specifier ranges_;

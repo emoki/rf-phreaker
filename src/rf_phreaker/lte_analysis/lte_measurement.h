@@ -31,6 +31,7 @@ public:
 	double rsrp;
 	double rssi;
 	double rsrq;
+	double sync_quality;
 	layer_3_information::lte_rrc_message_aggregate layer_3_;
 
 	lte_measurement& operator=(lte_measurement meas)
@@ -62,6 +63,7 @@ public:
 		std::swap(meas.rsrp, rsrp);
 		std::swap(meas.rssi, rssi);
 		std::swap(meas.rsrq, rsrq);
+		std::swap(meas.sync_quality, sync_quality);
 		meas.layer_3_.swap(layer_3_);
 	}
 };

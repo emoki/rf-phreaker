@@ -3,7 +3,7 @@
 #include "rf_phreaker/processing/node_defs.h"
 #include "rf_phreaker/processing/switch_body.h"
 #include "rf_phreaker/processing/collection_manager_body.h"
-#include "rf_phreaker/processing/umts_cell_search_body.h"
+#include "rf_phreaker/processing/umts_processing_body.h"
 #include "rf_phreaker/processing/output_and_feedback_body.h"
 #include "rf_phreaker/processing/processing_lte.h"
 #include "tbb/task_scheduler_init.h"
@@ -43,12 +43,12 @@ void processing_graph::initialize_collection(scanner_controller_interface *sc, d
 	auto limiter = std::make_shared<limiter_node>(*g, max_limit);
 
 	
-	auto umts_sweep_cell_search = std::make_shared<umts_cell_search_node>(*g, tbb::flow::serial, umts_cell_search_body(
+	auto umts_sweep_cell_search = std::make_shared<umts_cell_search_node>(*g, tbb::flow::serial, umts_processing_body(
 		umts_cell_search_settings(config.umts_sweep_collection_, config.umts_decode_layer_3_, config.umts_sweep_general_)));
 	auto umts_sweep_output_feedback = std::make_shared<umts_output_and_feedback_node>(*g, tbb::flow::serial, sweep_output_and_feedback_body(out));
-	auto umts_layer_3_cell_search = std::make_shared<umts_cell_search_node>(*g, tbb::flow::serial, umts_cell_search_body(
+	auto umts_layer_3_cell_search = std::make_shared<umts_cell_search_node>(*g, tbb::flow::serial, umts_processing_body(
 		umts_cell_search_settings(config.umts_layer_3_collection_, config.umts_decode_layer_3_, config.umts_layer_3_general_)));
-	auto umts_layer_3_decode = std::make_shared<umts_layer_3_decode_node>(*g, tbb::flow::serial, umts_cell_search_body(
+	auto umts_layer_3_decode = std::make_shared<umts_layer_3_decode_node>(*g, tbb::flow::serial, umts_processing_body(
 		umts_cell_search_settings(config.umts_layer_3_collection_, config.umts_decode_layer_3_, config.umts_layer_3_general_)));
 	auto umts_layer_3_output_feedback = std::make_shared<umts_output_and_feedback_node>(*g, tbb::flow::serial, layer_3_output_and_feedback_body(out));
 

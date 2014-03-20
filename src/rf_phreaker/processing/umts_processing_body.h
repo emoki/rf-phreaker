@@ -23,22 +23,22 @@ public:
 	umts_general_settings umts_general_;
 };
 
-class umts_cell_search_body
+class umts_processing_body
 {
 public:
-	umts_cell_search_body(const umts_cell_search_settings &config)
+	umts_processing_body(const umts_cell_search_settings &config)
 		: analysis_(config.umts_config_)
 		, tracker_(config.layer_3_.max_update_threshold_)
 		, config_(config)
 	{}
 	
-	umts_cell_search_body(const umts_cell_search_body &body)
+	umts_processing_body(const umts_processing_body &body)
 		: analysis_(body.config_.umts_config_)
 		, tracker_(body.tracker_.max_update_)
 		, config_(body.config_)
 	{}
 
-	//umts_cell_search_body(umts_cell_search_body &&body)
+	//umts_processing_body(umts_processing_body &&body)
 	//	: umts_analysis_(std::move(body.umts_analysis_))
 	//{}
 

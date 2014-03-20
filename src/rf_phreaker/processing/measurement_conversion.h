@@ -52,11 +52,12 @@ void convert_to_lte_data(lte_data &data, const scanner::measurement_info &info, 
 {
 	convert_to_basic_data(data, info, lte.AvgDigitalVoltage);
 	data.cyclic_prefix_ = lte.CyclicPrefix;
-	//data.earfcn_ = lte.;
 	data.frame_number_ = lte.frame_number;
 	data.layer_3_ = lte.layer_3_;
 	data.num_antenna_ports_ = lte.NumAntennaPorts;
-	//data.operating_band_ = lte.;
+	static channel_conversion conversion;
+	data.operating_band_ = info.get_operating_band();
+	data.earfcn_ = conversion.frequency_to_earfcn(info.frequency(), info.get_operating_band());
 	data.physical_cell_id_ = lte.RsRecord.ID;
 	data.psch_id_ = lte.PschRecord.ID;
 	data.psch_quality_ = 20 * log10(lte.PschRecord.NormCorr);

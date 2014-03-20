@@ -35,17 +35,17 @@ TEST(ProcessingGraph, TestGeneral)
 			initialize_collection_info_defaults(config);
 
 			collection_info_containers containers;
-			containers.push_back(collection_info_container(UMTS_SWEEP, true));
+			//containers.push_back(collection_info_container(UMTS_SWEEP, true));
 			containers.push_back(collection_info_container(UMTS_LAYER_3_DECODE, false));
 			auto it = containers.begin();
-			auto &umts_sweep = (*it++);
+			//auto &umts_sweep = (*it++);
 			auto &umts_layer_3 = (*it++);
 			//for(rf_phreaker::frequency_type i = mhz(869); i < mhz(893); i += khz(100))
 			for(rf_phreaker::frequency_type i = mhz(2110); i < mhz(2170); i += khz(100))
-				umts_sweep.adjust(add_collection_info(umts_sweep_collection_info(i, UMTS_OPERATING_BAND_4)));
+				//umts_sweep.adjust(add_collection_info(umts_sweep_collection_info(i, UMTS_OPERATING_BAND_4)));
 				//umts_sweep.adjust(add_collection_info(umts_sweep_collection_info(i, UMTS_OPERATING_BAND_5)));
 			//umts_sweep.adjust(add_collection_info(umts_sweep_collection_info(876800000)));
-			//umts_layer_3.adjust(add_collection_info(umts_layer_3_collection_info(876800000)));
+			umts_layer_3.adjust(add_collection_info(umts_layer_3_collection_info(khz(2147500), UMTS_OPERATING_BAND_5)));
 
 			data_output_async output;
 			output.set_standard_output(true);

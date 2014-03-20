@@ -154,6 +154,8 @@ int lte_cell_search(const Ipp32fc* SignalSamples,
 
 		LteData[ii].phich_duration = (pbchInfo+ii)->MasterIB.PHICHConfig.PhichDuration;
 		LteData[ii].phich_resources = (pbchInfo+ii)->MasterIB.PHICHConfig.PhichResource;
+
+		LteData[ii].sync_quality = 20 * log10((LteData[ii].PschRecord.NormCorr + LteData[ii].SschRecord.NormCorr) / 2);
 			
 		if(mib_decode_status ==0)
 		{			

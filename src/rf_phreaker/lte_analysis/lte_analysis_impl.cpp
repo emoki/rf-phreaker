@@ -2,7 +2,6 @@
 
 lte_analysis_impl::lte_analysis_impl()
 : lte_measurements_(num_measurements)
-, filter_(256, 650)
 {
 	filter_.set_taps(6501);
 }
@@ -17,11 +16,14 @@ int lte_analysis_impl::cell_search(const rf_phreaker::raw_signal &raw_signal, lt
 	try {
 		int tmp_num_meas = 0;
 
-		//resampled_signal_.reset(filter_.num_output_samples_required(raw_signal.get_iq().length()));
-		//filter_.filter(raw_signal.get_iq().get(), resampled_signal_.get(), filter_.num_iterations_required(raw_signal.get_iq().length()));
-		//status = lte_cell_search(resampled_signal_.get(), resampled_signal_.length(), num_half_frames, lte_measurements_, tmp_num_meas);
+		filter_.set_up_down_factor_based_on_sampling_rates(raw_signal.sampling_rate(), 3840000);
+		filter_.set_taps(6501);
+		resampled_signal_.reset(filter_.num_output_samples_required(raw_signal.get_iq().length()));
+		filter_.filter(raw_signal.get_iq().get(), resampled_signal_.get(), filter_.num_iterations_required(raw_signal.get_iq().length()));
+		
+		status = lte_cell_search(resampled_signal_.get(), resampled_signal_.length(), num_half_frames, lte_measurements_, tmp_num_meas);
 
-		status = lte_cell_search(raw_signal.get_iq().get(), raw_signal.get_iq().length(), num_half_frames, lte_measurements_, tmp_num_meas);
+		//status = lte_cell_search(raw_signal.get_iq().get(), raw_signal.get_iq().length(), num_half_frames, lte_measurements_, tmp_num_meas);
 
 		for(int i = 0; i < tmp_num_meas; ++i) {
 			if(i >= num_lte_meas) {

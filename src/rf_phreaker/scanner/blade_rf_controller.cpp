@@ -71,7 +71,7 @@ void blade_rf_controller::open_scanner(const scanner_id_type &id)
 	//check_blade_status(bladerf_device_reset(blade_rf));
 	//blade_rf = nullptr;
 	//// Wait for reenumeration and reopen.
-	//std::this_thread::sleep_for(std::chrono::seconds(5));
+	//std::this_thread::sleep_for(std::chrono::seconds(10));
 	//check_blade_status(bladerf_open(&blade_rf, open_str.c_str()));
 
 	bladerf_devinfo dev_info;
@@ -85,9 +85,6 @@ void blade_rf_controller::open_scanner(const scanner_id_type &id)
 
 void blade_rf_controller::close_scanner()
 {
-	//if(comm_blade_rf_.get() == nullptr)
-	//	throw rf_phreaker::comm_error("Unable to close scanner.  Nothing open.");
-
 	if(comm_blade_rf_.get()) {
 		bladerf_close(comm_blade_rf_->blade_rf());
 		comm_blade_rf_.reset();
@@ -112,14 +109,35 @@ void blade_rf_controller::do_initial_scanner_config()
 	// The calibrations can return an error.  We should log this but not 
 	// necessarily throw an error.
 
-	check_blade_status(bladerf_calibrate_dc(comm_blade_rf_->blade_rf(), 
-		BLADERF_DC_CAL_LPF_TUNING));
+	int status = 0;
+	for(int i = 0; i < 5; ++i) {
+		status = (bladerf_calibrate_dc(comm_blade_rf_->blade_rf(),
+			BLADERF_DC_CAL_LPF_TUNING));
+		if(status == 0) break;
+	}
+	if(status)
+		throw blade_rf_error("Calibration failed: LPF Tuning Module.");
 
-	check_blade_status(bladerf_calibrate_dc(comm_blade_rf_->blade_rf(), 
-		BLADERF_DC_CAL_RX_LPF));
+	status = 0;
+	for(int i = 0; i < 5; ++i) {
+		status = check_blade_status(bladerf_calibrate_dc(comm_blade_rf_->blade_rf(),
+			BLADERF_DC_CAL_RX_LPF));
+		if(status == 0) break;
+	}
+	if(status)
+		throw blade_rf_error("Calibration failed: DC RX LPT Module.");
 
-	check_blade_status(bladerf_calibrate_dc(comm_blade_rf_->blade_rf(), 
-		BLADERF_DC_CAL_RXVGA2));
+	status = 0;
+	for(int i = 0; i < 5; ++i) {
+		status = (bladerf_calibrate_dc(comm_blade_rf_->blade_rf(),
+			BLADERF_DC_CAL_RXVGA2));
+		if(status == 0) break;
+	}
+	if(status)
+		throw blade_rf_error("Calibration failed: DC RXVGA2 Module.");
+
+	check_blade_status(bladerf_set_lpf_mode(comm_blade_rf_->blade_rf(), BLADERF_MODULE_RX,
+		BLADERF_LPF_NORMAL));
 
 	//check_blade_status(bladerf_set_sampling(comm_blade_rf_->blade_rf(),
 	//	bladerf_sampling::BLADERF_SAMPLING_INTERNAL));
@@ -130,7 +148,6 @@ void blade_rf_controller::do_initial_scanner_config()
 
 	// construction of licensing
 	// construction of calibration table
-
 }
 
 void blade_rf_controller::set_vctcxo_trim(uint16_t trim)
@@ -289,8 +306,6 @@ measurement_info blade_rf_controller::get_rf_data(frequency_type frequency, time
 
 	check_blade_status(bladerf_set_rxvga2(comm_blade_rf_->blade_rf(), gain.rxvga2_));
 
-	// Do we need to allow access to lpf_mode?
-
 	unsigned int blade_sampling_rate = 0;
 	unsigned int blade_bandwidth = 0;
 
@@ -301,11 +316,14 @@ measurement_info blade_rf_controller::get_rf_data(frequency_type frequency, time
 	check_blade_status(bladerf_set_bandwidth(comm_blade_rf_->blade_rf(), BLADERF_MODULE_RX,
 		bandwidth, &blade_bandwidth));
 
-	check_blade_status(bladerf_set_frequency(comm_blade_rf_->blade_rf(), BLADERF_MODULE_RX,
-		static_cast<uint32_t>(frequency)));
-
-	check_blade_status(bladerf_set_lpf_mode(comm_blade_rf_->blade_rf(), BLADERF_MODULE_RX,
-		BLADERF_LPF_NORMAL));
+	int status = 0;
+	for(int i = 0; i < 5; ++i) {
+		status = (bladerf_set_frequency(comm_blade_rf_->blade_rf(), BLADERF_MODULE_RX,
+			static_cast<uint32_t>(frequency)));
+		if(status == 0) break;
+	}
+	if(status)
+		throw blade_rf_error(std::string("Error setting frequency.  ") + bladerf_strerror(status));
 
 	// BladeRF only accepts data num_samples that are a multiple of 1024.
 	int throw_away_samples = time_samples_conversion_.convert_to_samples(throw_away_ns, blade_sampling_rate);
@@ -327,8 +345,8 @@ measurement_info blade_rf_controller::get_rf_data(frequency_type frequency, time
 	measurement_info data(num_samples, frequency, blade_bandwidth, blade_sampling_rate,
 		gain);
 
-	for(int i = throw_away_samples; i < (throw_away_samples + num_samples) * 2; ++i)
-		sign_extend_12_bits(reinterpret_cast<int16_t*>(aligned_buffer)[i]);
+	//for(int i = throw_away_samples; i < (throw_away_samples + num_samples) * 2; ++i)
+	//	sign_extend_12_bits(reinterpret_cast<int16_t*>(aligned_buffer)[i]);
 
 	const auto beginning_of_iq = (Ipp16s*)&(*aligned_buffer_.get_aligned_array()) + (throw_away_samples * 2);
 
@@ -362,7 +380,7 @@ measurement_info blade_rf_controller::get_rf_data(int num_samples)
 		&blade_bandwidth));
 
 	check_blade_status(bladerf_get_frequency(comm_blade_rf_->blade_rf(), BLADERF_MODULE_RX,
-		&frequency));
+			&frequency));
 
 	// BladeRF only accepts data num_samples that are a multiple of 1024.
 	num_samples += 1024 - num_samples % 1024;
@@ -393,30 +411,6 @@ int blade_rf_controller::check_blade_status(int return_status)
 {
 	if(return_status < 0)
 		throw blade_rf_error(bladerf_strerror(return_status), return_status);
-	//switch(return_status) {
-	//	case BLADERF_ERR_UNEXPECTED:
-	//		break;
-	//	case BLADERF_ERR_RANGE:
-	//		break;
-	//	case BLADERF_ERR_INVAL:
-	//		break;
-	//	case BLADERF_ERR_MEM:
-	//		break;
-	//	case BLADERF_ERR_IO:
-	//		break;
-	//	case BLADERF_ERR_TIMEOUT:
-	//		break;
-	//	case BLADERF_ERR_NODEV:
-	//		break;
-	//	case BLADERF_ERR_UNSUPPORTED:
-	//		break;
-	//	case BLADERF_ERR_MISALIGNED:
-	//		break;
-	//	case BLADERF_ERR_CHECKSUM:
-	//		break;
-	//	default:
-	//	}
-	//}
 	return return_status;
 }
 
@@ -426,62 +420,3 @@ void blade_rf_controller::check_blade_comm()
 		throw rf_phreaker::comm_error("It does not appear there is a valid connection to the device.  Try opening the device.");
 }
 
-
-
-////////////////////////////////////////////////////////////
-//struct test_data
-//{
-//	void                **buffers;      /* Transmit buffers */
-//	size_t              num_buffers;    /* Number of buffers */
-//	size_t              samples_per_buffer; /* Number of samples per buffer */
-//	unsigned int        idx;            /* The next one that needs to go out */
-//	bladerf_module      module;         /* Direction */
-//	uint32_t             samples_left;   /* Number of samples left */
-//};
-//static bool shutdown_stream = false;
-//void *stream_callback(struct bladerf *dev, struct bladerf_stream *stream,
-//struct bladerf_metadata *metadata, void *samples,
-//	size_t num_samples, void *user_data)
-//{
-//	struct test_data *my_data = (struct test_data *)user_data;
-//
-//	my_data->samples_left -= num_samples;
-//	if(my_data->samples_left <= 0)
-//		shutdown_stream = true;
-//
-//	if(shutdown_stream) {
-//		return NULL;
-//	}
-//	else {
-//		void *rv = my_data->buffers[my_data->idx];
-//		my_data->idx = (my_data->idx + 1) % my_data->num_buffers;
-//		return rv;
-//	}
-//}
-////////////////////////////////////////////////////////////
-//test_data td;
-//td.module = BLADERF_MODULE_RX;
-//td.idx = 0;
-//td.num_buffers = 12;
-//td.samples_per_buffer = num_samples / td.num_buffers + 1;
-//td.samples_per_buffer += 1024 - td.samples_per_buffer % 1024;
-//td.samples_left = td.samples_per_buffer * td.num_buffers;
-
-//struct bladerf_stream *stream;
-
-//int status = bladerf_init_stream(
-//	&stream,
-//	comm_blade_rf_->blade_rf(),
-//	stream_callback,
-//	&td.buffers,
-//	td.num_buffers,
-//	BLADERF_FORMAT_SC16_Q11,
-//	td.samples_per_buffer,
-//	td.num_buffers,
-//	&td
-//	);
-//
-//status = bladerf_stream(stream, td.module);
-
-//bladerf_deinit_stream(stream);
-////////////////////////////////////////////////////////////

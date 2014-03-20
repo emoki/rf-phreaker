@@ -20,6 +20,7 @@ set (processing_SRCS
 	frequency_range_creation.h
 	layer_3_tracker.h
 	lte_data_container.h
+	lte_processing_body.h
 	measurement_conversion.h
 	node_defs.h
 	data_output.h
@@ -30,7 +31,7 @@ set (processing_SRCS
 	processing_lte.h
 	scanner_io.h
 	switch_body.h
-	umts_cell_search_body.h
+	umts_processing_body.h
 	${SRC_PLATFORM_SPECIFIC}/stdafx.cpp)
 
 add_definitions (/DTBB_PREVIEW_GRAPH_NODES)

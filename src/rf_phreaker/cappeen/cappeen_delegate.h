@@ -35,12 +35,12 @@ public:
 
 	void initialize(processing::data_output_async *data_output)
 	{
-		data_output->connect_hardware(boost::bind(&cappeen_delegate::output_hardware, this, _1)).wait();
-		data_output->connect_gps(boost::bind(&cappeen_delegate::output_gps, this, _1)).wait();
-		data_output->connect_umts_sweep(boost::bind(&cappeen_delegate::output_umts_sweep, this, _1)).wait();
-		data_output->connect_umts_layer_3(boost::bind(&cappeen_delegate::output_umts_layer_3, this, _1)).wait();
-		data_output->connect_lte_sweep(boost::bind(&cappeen_delegate::output_lte_sweep, this, _1)).wait();
-		data_output->connect_lte_layer_3(boost::bind(&cappeen_delegate::output_lte_layer_3, this, _1)).wait();
+		data_output->connect_hardware(boost::bind(&cappeen_delegate::output_hardware, this, _1)).get();
+		data_output->connect_gps(boost::bind(&cappeen_delegate::output_gps, this, _1)).get();
+		data_output->connect_umts_sweep(boost::bind(&cappeen_delegate::output_umts_sweep, this, _1)).get();
+		data_output->connect_umts_layer_3(boost::bind(&cappeen_delegate::output_umts_layer_3, this, _1)).get();
+		data_output->connect_lte_sweep(boost::bind(&cappeen_delegate::output_lte_sweep, this, _1)).get();
+		data_output->connect_lte_layer_3(boost::bind(&cappeen_delegate::output_lte_layer_3, this, _1)).get();
 		logger::rf_phreaker_log().error_sink_.connect(boost::bind(&cappeen_delegate::output_error, this, _1, _2));
 		logger::rf_phreaker_log().message_sink_.connect(boost::bind(&cappeen_delegate::output_message, this, _1, _2));
 	}
@@ -156,7 +156,41 @@ public:
 	}
 	
 	void output_lte_layer_3(const std::vector<lte_data> &t)
-	{}
+	{
+		std::vector<beagle_api::lte_sector_info> v(t.size());
+		std::vector<beagle_api::lte_sib_1> sib1;
+		int i = 0;
+		for(auto &lte : t) {
+			v[i].antenna_ports_ = lte.num_antenna_ports_;
+			v[i].carrier_bandwidth_ = lte.carrier_bandwidth_;
+			v[i].carrier_freq_ = static_cast<int32_t>(lte.carrier_frequency_);
+			v[i].carrier_sl_ = lte.carrier_signal_level_;
+			v[i].collection_round_ = static_cast<uint32_t>(lte.collection_round_);
+			v[i].cyclic_prefix_length_ = lte.cyclic_prefix_;
+			v[i].earfcn_ = lte.earfcn_;
+			v[i].lte_operating_band_ = convert_band_to_tech_band(lte.operating_band_);
+			v[i].physical_cell_id_ = lte.physical_cell_id_;
+			v[i].primary_sync_id_ = lte.psch_id_;
+			v[i].primary_sync_quality_ = lte.psch_quality_;
+			v[i].rsrp_ = lte.rsrp_;
+			v[i].rsrq_ = lte.rsrq_;
+			v[i].rssi_ = lte.rssi_;
+			v[i].secondary_sync_id_ = lte.ssch_id_;
+			v[i].secondary_sync_quality_ = lte.ssch_quality_;
+			v[i].system_frame_number_ = lte.frame_number_;
+			v[i].sib_1_.decoded_ = lte.layer_3_.is_cid_decoded();
+			if(v[i].sib_1_.decoded_) {
+				v[i].sib_1_.plmns_.num_elements_ = 1;
+			}
+			else {
+				v[i].sib_1_.plmns_.num_elements_ = 0;
+			}
+
+			++i;
+		}
+
+		delegate_->available_lte_sector_info(beagle_id_, &v[0], v.size());
+	}
 
 	void output_message(const std::exception &err)
 	{

@@ -42,29 +42,43 @@ class output : public beagle_delegate
 	virtual void __stdcall available_message(long beagle_id, long possible_message_number, const char *str, long buf_size) { std::cout << str << "\n"; }
 };
 
+class bad_output : public beagle_delegate
+{
+	virtual void __stdcall available_beagle_info(long beagle_id, const beagle_info &info) {}
+	virtual void __stdcall available_gps_info(long beagle_id, const gps_info &info) {}
+	virtual void __stdcall available_gsm_sector_info(long beagle_id, const gsm_sector_info *info, long num_records) {}
+	virtual void __stdcall available_umts_sector_info(long beagle_id, const umts_sector_info *info, long num_records) {}
+	virtual void __stdcall available_umts_sweep_info(long beagle_id, const umts_sweep_info *info, long num_records) {}
+	virtual void __stdcall available_lte_sector_info(long beagle_id, const lte_sector_info *info, long num_records) {}
+	virtual void __stdcall available_lte_sweep_info(long beagle_id, const lte_sweep_info *info, long num_records) {}
+	virtual void __stdcall available_error(long beagle_id, long error, const char *str, long buf_size) { std::cout << str << "\n"; }
+	virtual void __stdcall available_message(long beagle_id, long possible_message_number, const char *str, long buf_size) { std::cout << str << "\n"; }
+};
+
 TEST(Cappeen, TestMain)
 {
 	std::cout << cappeen_api_version() << std::endl;
 
+	bad_output bad_out;
+	EXPECT_EQ(0, cappeen_initialize(&bad_out));
 	output out;
-
-	ASSERT_EQ(0, cappeen_initialize(&out));
+	EXPECT_EQ(0, cappeen_initialize(&out));
 
 	std::array<char, 1024 * 10> serials;
-	ASSERT_EQ(0, cappeen_list_available_units(&serials[0], serials.size()));
+	EXPECT_EQ(0, cappeen_list_available_units(&serials[0], serials.size()));
 
 	std::string serial(&serials[0]);
 	serial = serial.substr(0, serial.find_first_of(';'));
 
 	if(!serial.empty()) {
-		ASSERT_EQ(0, cappeen_open_unit(&serial[0], serial.size()));
+		EXPECT_EQ(0, cappeen_open_unit(&serial[0], serial.size()));
 
 		collection_info info;
 		info.collection_filename_ = "test_file";
 		std::vector<TECHNOLOGIES_AND_BANDS> tech_bands;
 		//tech_bands.push_back(WCDMA_BAND_850);
-		//tech_bands.push_back(WCDMA_BAND_2100);
-		tech_bands.push_back(LTE_BAND_12);
+		tech_bands.push_back(WCDMA_BAND_2100);
+		//tech_bands.push_back(LTE_BAND_12);
 		info.tech_and_bands_to_sweep_.elements_ = &tech_bands[0];
 		info.tech_and_bands_to_sweep_.num_elements_ = tech_bands.size();
 
@@ -78,8 +92,10 @@ TEST(Cappeen, TestMain)
 			}
 			EXPECT_EQ(0, cappeen_stop_collection());
 		//}
-		ASSERT_EQ(0, cappeen_close_unit(&serial[0], serial.size()));
+			EXPECT_EQ(0, cappeen_close_unit(&serial[0], serial.size()));
 
-		ASSERT_EQ(0, cappeen_clean_up());
+			EXPECT_EQ(0, cappeen_clean_up());
 	}
+
+	system("pause");
 }

@@ -23,13 +23,13 @@ long cappeen_impl::initialize(beagle_api::beagle_delegate *del)
 {
 	int status = 0;
 	try{		
-		//g2::initializeLogging(log_worker_.get());
+ 		is_initialized_ = false;
 
 		read_settings();
 
-		//LOG(INFO) << "Initializing cappeen api.";
+		//g2::initializeLogging(log_worker_.get());
 
-		is_initialized_ = false;
+		//LOG(INFO) << "Initializing cappeen api.";
 
 		// Release all components before changing delegate.
 		delegate_.release();
@@ -50,7 +50,7 @@ long cappeen_impl::initialize(beagle_api::beagle_delegate *del)
 		processing_graph_.reset(new processing::processing_graph());
 		gps_graph_.reset(new processing::gps_graph());
 
-		delegate_->initialize(data_output_.get());
+		//delegate_->initialize(data_output_.get());
 		//log_worker_->connect_sink(boost::bind(&cappeen_delegate::output_error, delegate_.get(), _1, _2));
 
 		is_initialized_ = true;
@@ -338,5 +338,5 @@ long cappeen_impl::input_new_license(const char *serial, uint32_t serial_buf_siz
 
 const char* cappeen_impl::api_version()
 {
-	return "0.9.1";
+	return "0.9.2";
 }
