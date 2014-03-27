@@ -10,12 +10,16 @@ long cappeen_initialize(beagle_api::beagle_delegate *del)
 {
 	long status = 0;
 	try {
+		if(impl)
+			impl->clean_up();
+
 		impl.reset(new cappeen_impl);
 
 		status = impl->initialize(del);
 	}
 	catch(...) {
-		// log?
+		LOG(ERROR) << "Failed to initialize cappeen api.";
+
 		status = beagle_api::BEAGLEUNABLETOINITIALIZE;
 	}
 	return status;

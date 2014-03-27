@@ -1,10 +1,27 @@
 #include "rf_phreaker/blade_matlab_interface/blade_matlab_interface.h"
 #include "rf_phreaker/blade_matlab_interface/matlab_interface_helper.h"
 #include "rf_phreaker/common/exception_types.h"
+#include "rf_phreaker/common/log.h"
 
 using namespace rf_phreaker;
 using namespace rf_phreaker::scanner;
 using namespace rf_phreaker::matlab_interface;
+
+int start_logging()
+{
+	try {
+		static init_log logger("blade_matlab_interface", "");
+		return 0;
+	}
+	catch(rf_phreaker::rf_phreaker_error &err) {
+		last_error_ = err.what();
+		return (int)err.error_code_;
+	}
+	catch(std::exception &err) {
+		last_error_ = err.what();
+	}
+	return matlab_interface_error_general;
+}
 
 int num_blade_devices_connected(int *num_devices)
 {
@@ -166,7 +183,7 @@ int get_rf_data(int64_t frequency_hz, int bandwidth_hz, int64_t sampling_rate_hz
 
 		gain_type gain(lna_gain_tmp, rx_gain_vga1, rx_gain_vga2);
 
-		auto meas = controller.get_rf_data(frequency_hz, time_samples_conversion::convert_to_time(num_samples, sampling_rate_hz), bandwidth_hz, gain, sampling_rate_hz);
+		auto meas = controller.get_rf_data(frequency_hz, rf_phreaker::convert_to_time(num_samples, sampling_rate_hz), bandwidth_hz, gain, sampling_rate_hz);
 
 		memcpy(iq_data, &meas.get_iq()[0], num_samples * sizeof(ipp_32fc_array::data_type_));
 

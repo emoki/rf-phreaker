@@ -35,14 +35,24 @@ public:
 
 	void initialize(processing::data_output_async *data_output)
 	{
+		LOG(DEBUG) << "Creating connections...";
+		LOG(DEBUG) << "Connecting hardware.";
 		data_output->connect_hardware(boost::bind(&cappeen_delegate::output_hardware, this, _1)).get();
+		LOG(DEBUG) << "Connecting gps.";
 		data_output->connect_gps(boost::bind(&cappeen_delegate::output_gps, this, _1)).get();
+		LOG(DEBUG) << "Connecting umts_sweep.";
 		data_output->connect_umts_sweep(boost::bind(&cappeen_delegate::output_umts_sweep, this, _1)).get();
+		LOG(DEBUG) << "Connecting umts_layer_3.";
 		data_output->connect_umts_layer_3(boost::bind(&cappeen_delegate::output_umts_layer_3, this, _1)).get();
+		LOG(DEBUG) << "Connecting lte_sweep.";
 		data_output->connect_lte_sweep(boost::bind(&cappeen_delegate::output_lte_sweep, this, _1)).get();
+		LOG(DEBUG) << "Connecting lte_layer_3.";
 		data_output->connect_lte_layer_3(boost::bind(&cappeen_delegate::output_lte_layer_3, this, _1)).get();
-		logger::rf_phreaker_log().error_sink_.connect(boost::bind(&cappeen_delegate::output_error, this, _1, _2));
-		logger::rf_phreaker_log().message_sink_.connect(boost::bind(&cappeen_delegate::output_message, this, _1, _2));
+		LOG(DEBUG) << "Creating log sinks...";
+		LOG(DEBUG) << "Connecting error.";
+		delegate_sink::rf_phreaker_log().error_sink_.connect(boost::bind(&cappeen_delegate::output_error, this, _1, _2));
+		LOG(DEBUG) << "Connecting message.";
+		delegate_sink::rf_phreaker_log().message_sink_.connect(boost::bind(&cappeen_delegate::output_message, this, _1, _2));
 	}
 
 	void output_hardware(const hardware &t)
@@ -159,6 +169,7 @@ public:
 	{
 		std::vector<beagle_api::lte_sector_info> v(t.size());
 		std::vector<beagle_api::lte_sib_1> sib1;
+		std::vector<beagle_api::plmn> plmns;
 		int i = 0;
 		for(auto &lte : t) {
 			v[i].antenna_ports_ = lte.num_antenna_ports_;
@@ -181,9 +192,15 @@ public:
 			v[i].sib_1_.decoded_ = lte.layer_3_.is_cid_decoded();
 			if(v[i].sib_1_.decoded_) {
 				v[i].sib_1_.plmns_.num_elements_ = 1;
+				beagle_api::plmn p;
+				memcpy(p.mcc_, lte.layer_3_.mcc_.to_string(), lte.layer_3_.mcc_.num_characters());
+				memcpy(p.mnc_, lte.layer_3_.mnc_.to_string(), lte.layer_3_.mnc_.num_characters());
+				plmns.push_back(p);
+				v[i].sib_1_.plmns_.elements_ = &plmns[0];
 			}
 			else {
 				v[i].sib_1_.plmns_.num_elements_ = 0;
+				v[i].sib_1_.plmns_.elements_ = 0;
 			}
 
 			++i;

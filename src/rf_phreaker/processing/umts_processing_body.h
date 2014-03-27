@@ -3,6 +3,7 @@
 #include "rf_phreaker/processing/layer_3_tracker.h"
 #include "rf_phreaker/umts_analysis/umts_analysis.h"
 #include "rf_phreaker/common/settings.h"
+#include "rf_phreaker/common/common_utility.h"
 #include "tbb/flow_graph.h"
 
 namespace rf_phreaker { namespace processing {
@@ -15,7 +16,7 @@ public:
 	{
 		umts_config_.sampling_rate((int)s.sampling_rate_);
 		umts_config_.clock_rate((int)s.sampling_rate_);
-		umts_config_.max_signal_length((int)(s.sampling_rate_ * (s.collection_time_/ 1e9) + 1));
+		umts_config_.max_signal_length(rf_phreaker::convert_to_samples(s.collection_time_, s.sampling_rate_));
 	}
 	
 	umts_config umts_config_;
@@ -94,7 +95,7 @@ public:
 				tracker_.update(freq, meas);
 		}
 
-		if(tracker_.is_all_decoded_on_freq(freq))
+		if(tracker_.is_all_decoded_on_freq(freq) && info.meas_->collection_round() > config_.layer_3_.minimum_collection_round_)
 			info.remove_ = true;
 
 		return info;

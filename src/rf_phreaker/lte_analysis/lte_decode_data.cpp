@@ -3,6 +3,8 @@
 #include <math.h>
 #include <stdio.h>
 
+#include "rf_phreaker/common/ipp_array.h"
+
 #include "lte_analysis.h"
 #include "lte_synchronization.h"
 
@@ -32,7 +34,14 @@ int lte_decode_data(const Ipp32fc* SignalSamples,
 {
 unsigned int signalLength384,signalLength768, processSignalLength,current_frame_number = 0;
 double delayTime1, delayTime2;
-Ipp32fc *signal_384;
+
+// TODO - Declaring the signal statically is OK for now because the processing functions are protected by a mutex 
+// so only thread will ever be in this function.  However once multhreading is implmented we should switch it to 
+// a member variable.
+static ipp_32fc_array signal_384;
+if(signal_384.length() < NumSamples)
+	signal_384.reset(NumSamples);
+
 unsigned int num_filter_output =0;
 unsigned int frameStartSampleIndex,subframeStartSampleIndex;
 unsigned int ii;
@@ -41,8 +50,6 @@ Ipp32f hNoiseVariance[256];
 int status;	
 double SampleRate;
 
-signal_384 = ippsMalloc_32fc(2*signal_max_size);
-bool has_resampled = false;
 for(unsigned int ii = 0; ii <LteData.size(); ii++)
 {
 
@@ -75,41 +82,32 @@ for(unsigned int ii = 0; ii <LteData.size(); ii++)
 			LteData[ii].fft_subcarrier_start_index = ((LteData[ii].fftSize)
 					                                            - (LteData[ii].numResouceBlocks *NUM_SUBCARRIER_PER_RESOURCE_BLOCK))/2;
 			LteData[ii].num_bits_dci_1A = NUM_BITS_DCI_1A_5MHZ;
-			//Resample
-			
-			//if (!has_resampled)
-			//{
-			//	has_resampled = true;
-			//	status = resample_1536.Filter(SignalSamples, NumSamples, signal_384, NumSamples, num_filter_output/* / 2*/);
-			//}
 			break;
 
-		//case LteBandwidth_10MHZ:
-		//	SampleRate = 15.36e6;
-		//	LteData[ii].fftSize = FFTSIZE_1024;
-		//	LteData[ii].frameNumSamples = FRAMENUMSAMPLES_FFT1024;
-		//	LteData[ii].cPSamplesSymbol0 = CP_SAMPLES_FFT1024_SYMBOL_0;
-		//	LteData[ii].cPSamplesSymbol1to6 = CP_SAMPLES_FFT1024_SYMBOL_1TO6; 
-		//	LteData[ii].numResouceBlocks = NUMRESOURCEBLOCKS_FFT1024;
-		//	LteData[ii].fft_subcarrier_start_index = ((LteData[ii].fftSize)
-		//			                                            - (LteData[ii].numResouceBlocks *NUM_SUBCARRIER_PER_RESOURCE_BLOCK))/2;
-		//	LteData[ii].num_bits_dci_1A = NUM_BITS_DCI_1A_10MHZ;
-		//	
-		//	status = resample_1536.Filter(SignalSamples, NumSamples,signal_384, NumSamples,num_filter_output/* / 2*/);
-		//	
-		//	break;
+		case LteBandwidth_10MHZ:
+			SampleRate = 15.36e6;
+			LteData[ii].fftSize = FFTSIZE_1024;
+			LteData[ii].frameNumSamples = FRAMENUMSAMPLES_FFT1024;
+			LteData[ii].cPSamplesSymbol0 = CP_SAMPLES_FFT1024_SYMBOL_0;
+			LteData[ii].cPSamplesSymbol1to6 = CP_SAMPLES_FFT1024_SYMBOL_1TO6; 
+			LteData[ii].numResouceBlocks = NUMRESOURCEBLOCKS_FFT1024;
+			LteData[ii].fft_subcarrier_start_index = ((LteData[ii].fftSize)
+					                                            - (LteData[ii].numResouceBlocks *NUM_SUBCARRIER_PER_RESOURCE_BLOCK))/2;
+			LteData[ii].num_bits_dci_1A = NUM_BITS_DCI_1A_10MHZ;
+						
+			break;
 
-		//case LteBandwidth_15MHZ:
-		//	SampleRate = 23.04e6;
-		//	LteData[ii].fftSize = FFTSIZE_1536;
-		//	LteData[ii].frameNumSamples = FRAMENUMSAMPLES_FFT512;
-		//	break;
+		case LteBandwidth_15MHZ:
+			SampleRate = 23.04e6;
+			LteData[ii].fftSize = FFTSIZE_1536;
+			LteData[ii].frameNumSamples = FRAMENUMSAMPLES_FFT512;
+			break;
 
-		//case LteBandwidth_20MHZ:
-		//	SampleRate = 30.72e6;
-		//	LteData[ii].fftSize = FFTSIZE_2048;
-		//	LteData[ii].frameNumSamples = FRAMENUMSAMPLES_FFT512;
-		//	break;
+		case LteBandwidth_20MHZ:
+			SampleRate = 30.72e6;
+			LteData[ii].fftSize = FFTSIZE_2048;
+			LteData[ii].frameNumSamples = FRAMENUMSAMPLES_FFT512;
+			break;
 
 		default:
 			LteData[ii].fftSize = FFTSIZE_UNKNOWN;
@@ -117,9 +115,9 @@ for(unsigned int ii = 0; ii <LteData.size(); ii++)
 			break;
 
 	}
-if(LteData[ii].fftSize == FFTSIZE_UNKNOWN || LteData[ii].fftSize == FFTSIZE_128) 
+	if(LteData[ii].fftSize == FFTSIZE_UNKNOWN || LteData[ii].fftSize == FFTSIZE_128 || LteData[ii].fftSize == FFTSIZE_1024
+	   || LteData[ii].fftSize == FFTSIZE_1536 || LteData[ii].fftSize == FFTSIZE_2048)
 {
-	//ippsFree(signal_384);
 	continue;
 }
 
@@ -141,7 +139,7 @@ while((frameStartSampleIndex + LteData[ii].frameNumSamples) < (6*LteData[ii].fra
 			{
 				LteChannelEst(h_est+antNum * OFDM_SYMBOLS_PER_FRAME * NUM_FRAMES * LteData[ii].fftSize ,
 									hNoiseVariance+ antNum*NUM_SUBFRAMES_PER_FRAME,
-									signal_384,//signal768,
+									signal_384.get(),//signal768,
 									frameStartSampleIndex,
 									LteData[ii].RsRecord.ID,
 									LteData[ii].CyclicPrefix,   
@@ -165,7 +163,7 @@ while((frameStartSampleIndex + LteData[ii].frameNumSamples) < (6*LteData[ii].fra
 				//printf("Decoding :          Frame Number  == %d        SubFrame Number == %d\n",current_frame_number,subFrameIndex);
 
 				
-				 lteDecodePCFICH(signal_384,//signal768,
+				 lteDecodePCFICH(signal_384.get(),//signal768,
 									h_est,
 									hNoiseVariance,	
 									LteData,
@@ -182,7 +180,7 @@ while((frameStartSampleIndex + LteData[ii].frameNumSamples) < (6*LteData[ii].fra
 					xx=0;
 				}
 
-                 lte_decode_pdcch(signal_384,//signal768,
+                 lte_decode_pdcch(signal_384.get(),//signal768,
 	                              h_est,
 	                              hNoiseVariance,	
 	                              LteData,
@@ -198,7 +196,7 @@ while((frameStartSampleIndex + LteData[ii].frameNumSamples) < (6*LteData[ii].fra
 
 				 for(unsigned int index_dci_1a = 0;index_dci_1a<dci_format_info.num_dci_format_1a;index_dci_1a++)
 				 {
-					 lte_pdsch_decode(signal_384,//signal768,
+					 lte_pdsch_decode(signal_384.get(),//signal768,
 	                              h_est,
 	                              hNoiseVariance,	
 	                              LteData,
@@ -228,8 +226,6 @@ while((frameStartSampleIndex + LteData[ii].frameNumSamples) < (6*LteData[ii].fra
 		}//while
 
 }//for
-
-ippsFree(signal_384);
 
 return 0;
 };

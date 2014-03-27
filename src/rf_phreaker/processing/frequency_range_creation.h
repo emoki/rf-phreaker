@@ -21,7 +21,7 @@ public:
 	static void adjust_lte_sweep_collection_info(const operating_band_range &range, collection_info_container &c)
 	{
 		for(auto freq = range.low_freq_hz_ - khz(1400), end_freq = range.high_freq_hz_ + khz(1400); freq <= end_freq; freq += khz(100)) {
-			c.adjust(add_collection_info(lte_sweep_collection_info(freq, range.band_)));
+			c.adjust(add_collection_info(lte_sweep_collection_info(freq, lte_sweep_collection_info::bandwidth__, range.band_)));
 		}
 	}
 };

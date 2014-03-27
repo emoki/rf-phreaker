@@ -1,5 +1,6 @@
 #pragma once
 
+#include "rf_phreaker/common/common_utility.h"
 #include <stdint.h>
 
 #define TRUE							1
@@ -27,6 +28,13 @@
 
 #define OFDM_SYMBOLS_PER_FRAME  OFDM_SYMBOLS_PER_SLOT * NUM_SLOTS_PER_SUBFRAME * NUM_SUBFRAMES_PER_FRAME
 #define OFDM_SYMBOLS_PER_SUBFRAME OFDM_SYMBOLS_PER_SLOT * NUM_SLOTS_PER_SUBFRAME
+
+static const rf_phreaker::frequency_type lte_bandwidth_1_4_mhz_sampling_rate = khz(1920);
+static const rf_phreaker::frequency_type lte_bandwidth_3_mhz_sampling_rate = khz(3840); 
+static const rf_phreaker::frequency_type lte_bandwidth_5_mhz_sampling_rate = khz(7680);
+static const rf_phreaker::frequency_type lte_bandwidth_10_mhz_sampling_rate = khz(15360);
+static const rf_phreaker::frequency_type lte_bandwidth_15_mhz_sampling_rate = khz(23040);
+static const rf_phreaker::frequency_type lte_bandwidth_20_mhz_sampling_rate = khz(30720);
 
 enum LteChannelBandwidth
 {

@@ -7,7 +7,6 @@
 #include "rf_phreaker/processing/gps_graph.h"
 #include "rf_phreaker/common/settings.h"
 #include "rf_phreaker/common/operating_band_range_specifier.h"
-#include "rf_phreaker/common/log.h"
 #include <memory>
 #include <string>
 
@@ -50,9 +49,9 @@ private:
 
 	operating_band_range_specifier operating_bands_;
 
-	//std::unique_ptr<g2LogWorker> log_worker_;
-
 	std::unique_ptr<cappeen_delegate> delegate_;
+
+	std::unique_ptr<init_log> logger_;
 };
 
 

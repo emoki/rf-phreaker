@@ -33,7 +33,6 @@ set (scanner_SRCS
 	scanner_controller_interface.h
 	scanner_types.h
 	scanner_utility.h
-	time_samples_conversion.h
 	${SRC_PLATFORM_SPECIFIC}/stdafx.cpp)
 
 include_directories(${libbladeRF_SOURCE_DIR}/include)	

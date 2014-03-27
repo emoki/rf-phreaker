@@ -16,6 +16,8 @@ TEST(BladeMatlabInterface, TestMain)
 	char devices[buf_size];
 	int num_devices;
 
+	EXPECT_EQ(0, start_logging());
+
 	EXPECT_EQ(0, num_blade_devices_connected(&num_devices));
 
 	EXPECT_EQ(0, list_blade_devices((int8_t*)devices, buf_size));

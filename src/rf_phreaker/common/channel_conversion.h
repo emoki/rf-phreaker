@@ -215,7 +215,7 @@ public:
 	channel_type calc_earfcn(frequency_type freq, operating_band band, int n_offset)
 	{
 		auto r = ranges_.get_band_freq_range(band);
-		return static_cast<channel_type>((freq - r.low_freq_hz_) * 10 + n_offset);
+		return static_cast<channel_type>(boost::math::tr1::round((freq - r.low_freq_hz_) / 1e5) + n_offset);
 	}
 
 	operating_band_range_specifier ranges_;

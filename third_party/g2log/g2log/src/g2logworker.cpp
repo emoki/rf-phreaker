@@ -97,8 +97,8 @@ std::string createLogFileName(const std::string& verified_prefix)
 {
   std::stringstream oss_name;
   oss_name.fill('0');
-  oss_name << verified_prefix << ".g2log.";
-  oss_name << g2::localtime_formatted(g2::systemtime_now(), file_name_time_formatted);
+  oss_name << verified_prefix /*<< ".g2log."*/;
+  //oss_name << g2::localtime_formatted(g2::systemtime_now(), file_name_time_formatted);
   oss_name << ".log";
   return oss_name.str();
 }
@@ -106,8 +106,8 @@ std::string createLogFileName(const std::string& verified_prefix)
 
 bool openLogFile(const std::string& complete_file_with_path, std::ofstream& outstream)
 {
-  std::ios_base::openmode mode = std::ios_base::out; // for clarity: it's really overkill since it's an ofstream
-  mode |= std::ios_base::trunc;
+  std::ios_base::openmode mode = std::ios_base::app; // for clarity: it's really overkill since it's an ofstream
+  //mode |= std::ios_base::trunc;
   outstream.open(complete_file_with_path, mode);
   if(!outstream.is_open())
   {
@@ -118,11 +118,11 @@ bool openLogFile(const std::string& complete_file_with_path, std::ofstream& outs
     outstream.close();
     return false;
   }
-  std::ostringstream ss_entry;
-  //  Day Month Date Time Year: is written as "%a %b %d %H:%M:%S %Y" and formatted output as : Wed Sep 19 08:28:16 2012
-  ss_entry << "\t\tg2log created log file at: "<< g2::localtime_formatted(g2::systemtime_now(), "%a %b %d %H:%M:%S %Y") << "\n";
-  ss_entry << "\t\tLOG format: [YYYY/MM/DD hh:mm:ss.uuu* LEVEL FILE:LINE] message\n\n"; // TODO: if(header)
-  outstream << ss_entry.str() << std::flush;
+  //std::ostringstream ss_entry;
+  ////  Day Month Date Time Year: is written as "%a %b %d %H:%M:%S %Y" and formatted output as : Wed Sep 19 08:28:16 2012
+  //ss_entry << "\t\tg2log created log file at: "<< g2::localtime_formatted(g2::systemtime_now(), "%a %b %d %H:%M:%S %Y") << "\n";
+  //ss_entry << "\t\tLOG format: [YYYY/MM/DD hh:mm:ss.uuu* LEVEL FILE:LINE] message\n\n"; // TODO: if(header)
+  //outstream << ss_entry.str() << std::flush;
   outstream.fill('0');
   return true;
 }

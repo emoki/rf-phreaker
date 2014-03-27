@@ -32,6 +32,7 @@
 #include <thread>
 
 namespace {
+
    std::once_flag g_initialize_flag;
    g2LogWorker* g_logger_instance = nullptr; // instantiated and OWNED somewhere else (main)
    std::mutex g_logging_init_mutex;

@@ -43,16 +43,16 @@ template <typename T> class concurrent {
 					set_value(*p, f, t_);
 				}
 				catch(const rf_phreaker::rf_phreaker_error &err) {
-					logger::rf_phreaker_log().log_error(err.what(), -49999);
+					delegate_sink::rf_phreaker_log().log_error(err.what(), -49999);
 					p->set_exception(std::current_exception());
 				}
 				catch(const std::exception &err) {
-					logger::rf_phreaker_log().log_error(err.what(), -49998);
+					delegate_sink::rf_phreaker_log().log_error(err.what(), -49998);
 					p->set_exception(std::current_exception());
 				}
 				catch(...) {
 					p->set_exception(std::current_exception());
-					logger::rf_phreaker_log().log_error("An unknown error has occurred.", -50000);
+					delegate_sink::rf_phreaker_log().log_error("An unknown error has occurred.", -50000);
 				}
 			});
 

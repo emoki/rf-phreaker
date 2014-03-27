@@ -29,6 +29,7 @@ class layer_3_settings
 {
 public:
 	int32_t max_update_threshold_;
+	int32_t minimum_collection_round_;
 	double decode_threshold_;
 	double decode_minimum_threshold_;
 };

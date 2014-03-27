@@ -66,4 +66,29 @@ public:
 		std::swap(meas.sync_quality, sync_quality);
 		meas.layer_3_.swap(layer_3_);
 	}
+
+	void clear()
+	{
+		PschRecord.ID = 0;
+		PschRecord.NormCorr = 0;
+		PschRecord.RMSCorr = 0;
+		PschRecord.StartSampleNum = 0;
+		SschRecord.ID = 0;
+		SschRecord.NormCorr = 0;
+		SschRecord.RMSCorr = 0;
+		SschRecord.StartSampleNum = 0;
+		RsRecord.ID = 0;
+		RsRecord.NormCorr = 0;
+		RsRecord.RMSCorr = 0;
+		RsRecord.StartSampleNum = 0;
+		NumAntennaPorts = LteAntPorts_Unknown;
+		AvgDigitalVoltage = 0;
+		Bandwidth = LteBandwidth_Unknown;
+		frame_number = 0;
+		rsrp = 0;
+		rssi = 0;
+		rsrq = 0;
+		sync_quality = 0;
+		layer_3_.clear();
+	}
 };

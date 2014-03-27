@@ -49,10 +49,12 @@ TEST(QtSpecific, TestSettingsIO)
 	EXPECT_EQ(settings_collection_time_default, set.lte_layer_3_collection_.collection_time_);
 
 	EXPECT_EQ(settings_layer_3_max_update_threshold_default, set.umts_decode_layer_3_.max_update_threshold_);
+	EXPECT_EQ(settings_layer_3_min_collection_round_default, set.umts_decode_layer_3_.minimum_collection_round_);
 	EXPECT_EQ(settings_layer_3_decode_threshold_default, set.umts_decode_layer_3_.decode_threshold_);
 	EXPECT_EQ(settings_layer_3_min_decode_threshold_default, set.umts_decode_layer_3_.decode_minimum_threshold_);
 
 	EXPECT_EQ(settings_layer_3_max_update_threshold_default, set.lte_decode_layer_3_.max_update_threshold_);
+	EXPECT_EQ(settings_layer_3_min_collection_round_default, set.lte_decode_layer_3_.minimum_collection_round_);
 	EXPECT_EQ(settings_layer_3_decode_threshold_default, set.lte_decode_layer_3_.decode_threshold_);
 	EXPECT_EQ(settings_layer_3_min_decode_threshold_default, set.lte_decode_layer_3_.decode_minimum_threshold_);
 
@@ -92,9 +94,11 @@ TEST(QtSpecific, TestSettingsIO)
 	set.lte_layer_3_collection_.bandwidth_ = tmp++;
 	set.lte_layer_3_collection_.collection_time_ = tmp++;
 	set.umts_decode_layer_3_.max_update_threshold_ = tmp++;
+	set.umts_decode_layer_3_.minimum_collection_round_= tmp++;
 	set.umts_decode_layer_3_.decode_threshold_ = tmp++;
 	set.umts_decode_layer_3_.decode_minimum_threshold_ = tmp++;
 	set.lte_decode_layer_3_.max_update_threshold_ = tmp++;
+	set.lte_decode_layer_3_.minimum_collection_round_ = tmp++;
 	set.lte_decode_layer_3_.decode_threshold_ = tmp++;
 	set.lte_decode_layer_3_.decode_minimum_threshold_ = tmp++;
 	set.umts_sweep_general_.sensitivity_ = tmp++;
@@ -140,10 +144,12 @@ TEST(QtSpecific, TestSettingsIO)
 	EXPECT_EQ(set.lte_layer_3_collection_.collection_time_, set2.lte_layer_3_collection_.collection_time_);
 
 	EXPECT_EQ(set.umts_decode_layer_3_.max_update_threshold_, set2.umts_decode_layer_3_.max_update_threshold_);
+	EXPECT_EQ(set.umts_decode_layer_3_.minimum_collection_round_, set2.umts_decode_layer_3_.minimum_collection_round_);
 	EXPECT_EQ(set.umts_decode_layer_3_.decode_threshold_, set2.umts_decode_layer_3_.decode_threshold_);
 	EXPECT_EQ(set.umts_decode_layer_3_.decode_minimum_threshold_, set2.umts_decode_layer_3_.decode_minimum_threshold_);
 
 	EXPECT_EQ(set.lte_decode_layer_3_.max_update_threshold_, set2.lte_decode_layer_3_.max_update_threshold_);
+	EXPECT_EQ(set.lte_decode_layer_3_.minimum_collection_round_, set2.lte_decode_layer_3_.minimum_collection_round_);
 	EXPECT_EQ(set.lte_decode_layer_3_.decode_threshold_, set2.lte_decode_layer_3_.decode_threshold_);
 	EXPECT_EQ(set.lte_decode_layer_3_.decode_minimum_threshold_, set2.lte_decode_layer_3_.decode_minimum_threshold_);
 
@@ -195,6 +201,7 @@ TEST(QtSpecific, WriteDefaultSettings)
 	set.umts_layer_3_collection_.collection_time_ = milli_to_nano(170);
 
 	set.umts_decode_layer_3_.max_update_threshold_ = 11000;
+	set.umts_decode_layer_3_.minimum_collection_round_ = 5;
 	set.umts_decode_layer_3_.decode_threshold_ = -13;
 	set.umts_decode_layer_3_.decode_minimum_threshold_ = -25;
 
@@ -204,15 +211,16 @@ TEST(QtSpecific, WriteDefaultSettings)
 	set.umts_layer_3_general_.sensitivity_ = -23;
 	set.umts_layer_3_general_.full_scan_interval_ = 110;
 
-	set.lte_sweep_collection_.sampling_rate_ = khz(3840);
-	set.lte_sweep_collection_.bandwidth_ = mhz(5);
-	set.lte_sweep_collection_.collection_time_ = milli_to_nano(32);
+	set.lte_sweep_collection_.sampling_rate_ = khz(4875);
+	set.lte_sweep_collection_.bandwidth_ = khz(2500);
+	set.lte_sweep_collection_.collection_time_ = milli_to_nano(42);
 
-	set.lte_layer_3_collection_.sampling_rate_ = khz(3840);
-	set.lte_layer_3_collection_.bandwidth_ = mhz(5);
-	set.lte_layer_3_collection_.collection_time_ = milli_to_nano(32);
+	set.lte_layer_3_collection_.sampling_rate_ = khz(4875);
+	set.lte_layer_3_collection_.bandwidth_ = khz(2500);
+	set.lte_layer_3_collection_.collection_time_ = milli_to_nano(42);
 
 	set.lte_decode_layer_3_.max_update_threshold_ = 110;
+	set.lte_decode_layer_3_.minimum_collection_round_ = 5;
 	set.lte_decode_layer_3_.decode_threshold_ = -13;
 	set.lte_decode_layer_3_.decode_minimum_threshold_ = -25;
 

@@ -54,4 +54,15 @@ inline int16_t sign_extend_12_bits(int16_t &var)
 	return var;
 }
 
+inline int convert_to_samples(time_type time_ns, frequency_type actual_sampling_rate_used)
+{
+	return static_cast<int>(time_ns / 1e9 * actual_sampling_rate_used);
+}
+
+inline time_type convert_to_time(int num_samples, frequency_type actual_sampling_rate_used)
+{
+	return static_cast<time_type>(((double)num_samples / actual_sampling_rate_used) * 1e9);
+}
+
+
 }

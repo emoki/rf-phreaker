@@ -43,12 +43,12 @@ TEST(BladeControllerTest, TestBladeControllerGeneral)
 			rf_phreaker::frequency_type nyc_lte_freq2 = 739000000; // 10 mhz
 
             const int num_iterations = 30;
-			std::string base_filename = "blade_samples_umts_4875_";
-			rf_phreaker::frequency_type freq = nyc_umts_freq4;
-			rf_phreaker::time_type time_ns = milli_to_nano(60);
-            rf_phreaker::bandwidth_type bandwidth = mhz(5);
+			std::string base_filename = "blade_samples_lte_739_";
+			rf_phreaker::frequency_type freq = nyc_lte_freq2;
+			rf_phreaker::time_type time_ns = milli_to_nano(42);
+			rf_phreaker::bandwidth_type bandwidth = khz(2500);
 			//int sampling_rate = khz(30720); 
-			int sampling_rate = khz(4875); 
+			int sampling_rate = khz(4875);
 			//int sampling_rate = khz(3840);
 			//int sampling_rate = khz(1920);
 			rf_phreaker::scanner::gain_type gain(lms::LNA_MAX, 30, 0);
@@ -62,12 +62,12 @@ TEST(BladeControllerTest, TestBladeControllerGeneral)
 
 
 
-			data = blade.get_rf_data_use_auto_gain(freq, time_ns, bandwidth, sampling_rate);
-			std::ofstream file2("blade_umts_band_lpf_bypassed-2100.txt");
-			file2 << data;
-			data = blade.get_rf_data_use_auto_gain(mhz(2110), time_ns, bandwidth, sampling_rate);
-			std::ofstream file1("blade_no_tech_band_lpf_bypassed-2100.txt");
-			file1 << data;
+			//data = blade.get_rf_data_use_auto_gain(freq, time_ns, bandwidth, sampling_rate);
+			//std::ofstream file2("blade_umts_band_lpf_bypassed-2100.txt");
+			//file2 << data;
+			//data = blade.get_rf_data_use_auto_gain(mhz(2110), time_ns, bandwidth, sampling_rate);
+			//std::ofstream file1("blade_no_tech_band_lpf_bypassed-2100.txt");
+			//file1 << data;
 
 			//for(int j = 0; j < 2; ++j) {
 				for(int i = 5; i <= 60; ++i) {
@@ -85,15 +85,15 @@ TEST(BladeControllerTest, TestBladeControllerGeneral)
 
 					auto avg_rms_auto = ipp_helper::calculate_average_rms(data.get_iq().get(), data.get_iq().length());
 
-					/*file_auto*/std::cout << freq << "\t" << gain.rxvga1_ << "\t" << gain.rxvga2_ << "\t" << gain.rxvga1_ + gain.rxvga2_ << "\t" << 
+					/*file_auto*/std::cout << freq << "\t" << data.gain().rxvga1_ << "\t" << data.gain().rxvga2_ << "\t" << data.gain().rxvga1_ + data.gain().rxvga2_ << "\t" <<
 						tmp_auto.max_adc_ << "\t" << 20 * log10(tmp_auto.max_adc_) << "\t" << 
 						avg_rms_auto << "\t" << 20 * log10(avg_rms_auto) << "\n";
 
-					//data.collection_round(i);
+					data.collection_round(i);
 
-					//std::string name = base_filename + boost::lexical_cast<std::string>(i) +".txt";
-					//std::ofstream file(name.c_str());
-					//file << data;
+					std::string name = base_filename + boost::lexical_cast<std::string>(i) +".txt";
+					std::ofstream file(name.c_str());
+					file << data;
 				}
 			//}
 			b.stop_timer();

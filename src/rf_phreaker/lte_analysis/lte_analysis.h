@@ -26,21 +26,24 @@
 #endif
 
 #include "rf_phreaker/lte_analysis/lte_measurement.h"
-//#include "rf_phreaker/lte_analysis/lte_config.h"
+#include "rf_phreaker/lte_analysis/lte_config.h"
 #include "rf_phreaker/common/raw_signal.h"
+
 
 class lte_analysis_impl;
 
 class DLL_PUBLIC lte_analysis
 {
 public:
-	lte_analysis();
+	lte_analysis(const lte_config &config);
+
+	lte_analysis(const lte_analysis &analysis);
 
 	~lte_analysis();
 
-	int cell_search(const rf_phreaker::raw_signal &raw_signal, lte_measurement *lte_meas, int &num_lte_meas, int num_half_frames);
+	int cell_search(const rf_phreaker::raw_signal &raw_signal, lte_measurements &lte_meas, int num_half_frames);
 
-	int decode_layer_3(const rf_phreaker::raw_signal &raw_signal, lte_measurement *lte_meas, int num_lte_meas, int num_half_frames);
+	int decode_layer_3(const rf_phreaker::raw_signal &raw_signal, lte_measurements &lte_meas, int num_half_frames);
 
 	//void set_config(const lte_config &config);
 

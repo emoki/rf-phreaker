@@ -11,35 +11,34 @@ namespace rf_phreaker { namespace processing {
 class lte_processing_settings
 {
 public:
-	lte_processing_settings(/*const collection_settings &s, */const layer_3_settings &l/*, const umts_general_settings &g*/)
+	lte_processing_settings(const collection_settings &s, const layer_3_settings &l/*, const umts_general_settings &g*/)
 		: layer_3_(l)/*, umts_general_(g)*/
 	{
-		//lte_config_.sampling_rate((int)s.sampling_rate_);
-		//lte_config_.clock_rate((int)s.sampling_rate_);
-		//lte_config_.max_signal_length((int)(s.sampling_rate_ * (s.collection_time_ / 1e9) + 1));
+		lte_config_.sampling_rate((int)s.sampling_rate_);
+		lte_config_.clock_rate((int)s.sampling_rate_);
+		lte_config_.max_signal_length(rf_phreaker::convert_to_samples(s.collection_time_, s.sampling_rate_));
 	}
 
-	//lte_config lte_config_;
+	lte_config lte_config_;
 	layer_3_settings layer_3_;
 };
 
 class lte_processing_body
 {
+public:
 	lte_processing_body(const lte_processing_settings &config)
-		: tracker_(config.layer_3_.max_update_threshold_)
-		, config_(config)
+		: config_(config)
+		, tracker_(config.layer_3_.max_update_threshold_)
+		, analysis_(config.lte_config_)
 	{}
 
 	lte_info operator()(measurement_package info)
 	{
-		int num_meas = 100;
-		lte_measurements meas(num_meas);
+		lte_measurements meas;
 
-		int status = analysis_.cell_search(*info, &meas[0], num_meas, calculate_num_half_frames(info->time_ns()));
+		int status = analysis_.cell_search(*info, meas, calculate_num_half_frames(info->time_ns()));
 		if(status != 0)
 			throw lte_analysis_error("Error processing lte.");
-
-		meas.resize(num_meas);
 
 		double avg_rms = ipp_helper::calculate_average_rms(info->get_iq().get(), info->get_iq().length());
 
@@ -55,30 +54,44 @@ class lte_processing_body
 		}
 
 		auto freq = info.meas_->frequency();
-		int status = analysis_.decode_layer_3(*info.meas_, &info.processed_data_[0], info.processed_data_.size(), calculate_num_half_frames(info.meas_->time_ns()));
-		if(status != 0)
-			throw umts_analysis_error("Error decoding umts layer 3.");
 
-		for(auto &data : info.processed_data_) {
-			if(!tracker_.is_fully_decoded(freq, data) && (data.sync_quality > config_.layer_3_.decode_threshold_ || tracker_.in_history(freq, data))) {
-				tracker_.update(freq, data);
-			}
-		}
+		if(info.processed_data_.size()) {
+			int status = analysis_.decode_layer_3(*info.meas_, info.processed_data_, calculate_num_half_frames(info.meas_->time_ns()));
+			if(status != 0)
+				throw umts_analysis_error("Error decoding umts layer 3.");
 
-		// If no measurements were greater than the decode_threshold and we are not tracking any cells on this freq, add the cell with the greatest ecio if
-		// it meets the min decode threshold.
-		if(!tracker_.is_freq_in_history(freq)) {
-			lte_measurement meas;
-			double tmp_sync_quality = -99;
+			// Only allow processing of bandwidths that can be decoded by LTE dll, i.e. 5mhz.
+			bool valid_bw = false;
 			for(auto &data : info.processed_data_) {
-				if(data.sync_quality > tmp_sync_quality)
-					meas = data;
+				if(data.Bandwidth == LteBandwidth_5MHZ) {
+					valid_bw = true;
+					break;
+				}
 			}
-			if(meas.sync_quality > config_.layer_3_.decode_minimum_threshold_)
-				tracker_.update(freq, meas);
+
+			if(valid_bw) {
+				for(auto &data : info.processed_data_) {
+					if((!tracker_.is_fully_decoded(freq, data) && (data.sync_quality > config_.layer_3_.decode_threshold_ || tracker_.in_history(freq, data)))) {
+						tracker_.update(freq, data);
+					}
+				}
+
+				// If no measurements were greater than the decode_threshold and we are not tracking any cells on this freq, add the cell with the greatest ecio if
+				// it meets the min decode threshold.
+				if(!tracker_.is_freq_in_history(freq)) {
+					lte_measurement meas;
+					double tmp_sync_quality = -99;
+					for(auto &data : info.processed_data_) {
+						if(data.sync_quality > tmp_sync_quality)
+							meas = data;
+					}
+					if(meas.sync_quality > config_.layer_3_.decode_minimum_threshold_)
+						tracker_.update(freq, meas);
+				}
+			}
 		}
 
-		if(tracker_.is_all_decoded_on_freq(freq))
+		if(tracker_.is_all_decoded_on_freq(freq) && info.meas_->collection_round() > config_.layer_3_.minimum_collection_round_)
 			info.remove_ = true;
 
 		return info;
@@ -90,9 +103,9 @@ class lte_processing_body
 	}
 
 private:
-	lte_analysis analysis_;
-	lte_layer_3_tracker tracker_;
 	lte_processing_settings config_;
+	lte_layer_3_tracker tracker_;
+	lte_analysis analysis_;
 };
 
 

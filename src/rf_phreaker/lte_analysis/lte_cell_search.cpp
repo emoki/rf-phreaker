@@ -117,6 +117,8 @@ int lte_cell_search(const Ipp32fc* SignalSamples,
 		(pbchInfo+ii)->MasterIB.Bandwidth = LteBandwidth_Unknown;
 		(pbchInfo+ii)->NumAntPorts = LteAntPorts_Unknown;
 
+		mib_decode_status = 0;
+
 		// Attempt PBCH decode only if we have a psch corr > threshold 
 		// and DecodeBandwidthAntennaPort == true
 		if (pschCorrRecord[ii].NormCorr >= 0.1f /*0.6f*/ /*0.8f*/ )
@@ -138,34 +140,29 @@ int lte_cell_search(const Ipp32fc* SignalSamples,
 			// std::cout << "Lte PBCH Time elapsed: " << lte_diffclock(end,begin) << " ms\n";
 		}
 
-		sschCorrRecord[ii].RMSCorr *= sschCorrRecord[ii].NormCorr;	
-		
+		sschCorrRecord[ii].RMSCorr *= sschCorrRecord[ii].NormCorr;
 
-		memcpy(&(LteData[ii].PschRecord), pschCorrRecord+ii, sizeof(*pschCorrRecord));
-		memcpy(&(LteData[ii].SschRecord), sschCorrRecord+ii, sizeof(*sschCorrRecord));
+		memcpy(&(LteData[ii].PschRecord), pschCorrRecord + ii, sizeof(*pschCorrRecord));
+		memcpy(&(LteData[ii].SschRecord), sschCorrRecord + ii, sizeof(*sschCorrRecord));
 		LteData[ii].RsRecord.ID = sschCorrRecord[ii].ID;
 		LteData[ii].SschRecord.ID /= 3;
-		
+
 		LteData[ii].CyclicPrefix = cyclicPrefixMode[ii];
-	
 
-		LteData[ii].NumAntennaPorts = (pbchInfo+ii)->NumAntPorts;		
-		LteData[ii].Bandwidth = (pbchInfo+ii)->MasterIB.Bandwidth;
+		LteData[ii].NumAntennaPorts = (pbchInfo + ii)->NumAntPorts;
+		LteData[ii].Bandwidth = (pbchInfo + ii)->MasterIB.Bandwidth;
 
-		LteData[ii].phich_duration = (pbchInfo+ii)->MasterIB.PHICHConfig.PhichDuration;
-		LteData[ii].phich_resources = (pbchInfo+ii)->MasterIB.PHICHConfig.PhichResource;
+		LteData[ii].phich_duration = (pbchInfo + ii)->MasterIB.PHICHConfig.PhichDuration;
+		LteData[ii].phich_resources = (pbchInfo + ii)->MasterIB.PHICHConfig.PhichResource;
 
 		LteData[ii].sync_quality = 20 * log10((LteData[ii].PschRecord.NormCorr + LteData[ii].SschRecord.NormCorr) / 2);
-			
-		if(mib_decode_status ==0)
+
+		if(mib_decode_status == 0)
 		{			
 		 //ippsFree(signal_384);
 		 continue;
 		}
 
-	
-
-		
 	    switch(LteData[ii].Bandwidth)
 		{
 		 case LteBandwidth_1_4MHZ:

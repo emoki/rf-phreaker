@@ -11,6 +11,30 @@
 
 namespace rf_phreaker { namespace scanner {
 
+// Not all bandwidths are created equal.  This will return bandwidth the blade will actually be using when collecting.
+inline bandwidth_type find_valid_bandwidth(bandwidth_type bw)
+{
+	bandwidth_type valid_bw;
+	if(bw <= khz(1500)) valid_bw = khz(1500);
+	else if(bw <= khz(1750)) valid_bw = khz(1750);
+	else if(bw <= khz(2500)) valid_bw = khz(2500);
+	else if(bw <= khz(2750)) valid_bw = khz(2750);
+	else if(bw <= mhz(3))  valid_bw = mhz(3);
+	else if(bw <= khz(3840)) valid_bw = khz(3840);
+	else if(bw <= mhz(5))  valid_bw = mhz(5);
+	else if(bw <= khz(5500)) valid_bw = khz(5500);
+	else if(bw <= mhz(6))  valid_bw = mhz(6);
+	else if(bw <= mhz(7))  valid_bw = mhz(7);
+	else if(bw <= khz(8750)) valid_bw = khz(8750);
+	else if(bw <= mhz(10))  valid_bw = mhz(10);
+	else if(bw <= mhz(12))  valid_bw = mhz(12);
+	else if(bw <= mhz(14))  valid_bw = mhz(14);
+	else if(bw <= mhz(20))  valid_bw = mhz(20);
+	else                       valid_bw = mhz(28);
+
+	return valid_bw;
+}
+
 class gain_manager
 {
 public:
@@ -22,7 +46,7 @@ public:
 	public:
 		gain_history(const measurement_info &meas)
 			: freq_(meas.frequency())
-			, bw_(meas.bandwidth())
+			, bw_(find_valid_bandwidth(meas.bandwidth()))
 			, gain_(meas.gain())
 			, max_adc_(0)
 		{		
@@ -41,7 +65,7 @@ public:
 	{
 	public:
 		gain_history_key(const gain_history &h) : freq_(h.freq_), bw_(h.bw_) {}
-		gain_history_key(frequency_type freq, bandwidth_type bw) : freq_(freq), bw_(bw) {}
+		gain_history_key(frequency_type freq, bandwidth_type bw) : freq_(freq), bw_(find_valid_bandwidth(bw)) {}
 		rf_phreaker::frequency_type freq_;
 		rf_phreaker::bandwidth_type bw_;
 	};

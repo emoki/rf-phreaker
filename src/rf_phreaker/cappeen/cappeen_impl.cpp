@@ -4,6 +4,7 @@
 #include "rf_phreaker/qt_specific/settings_io.h"
 #include "rf_phreaker/common/exception_types.h"
 #include "rf_phreaker/processing/frequency_range_creation.h"
+#include "rf_phreaker/common/log.h"
 
 using namespace rf_phreaker;
 using namespace rf_phreaker::cappeen_api;
@@ -11,61 +12,76 @@ using namespace beagle_api;
 
 cappeen_impl::cappeen_impl()
 : is_initialized_(false)
-{		
-	//log_worker_.reset(new g2LogWorker("cappeen_log", ""));
+{
 }
 
 cappeen_impl::~cappeen_impl()
-{
-}
+{}
 
 long cappeen_impl::initialize(beagle_api::beagle_delegate *del)
 {
 	int status = 0;
-	try{		
- 		is_initialized_ = false;
+	try{	
+		// If logging fails continue anyway.
+		try {
+			logger_.reset(new init_log("cappeen_api", ""));
+		}
+		catch(...) {}
 
+		LOG(INFO) << "Initializing cappeen api version " << api_version();
+
+		is_initialized_ = false;
+
+		LOG(DEBUG) << "Reading settings.";
 		read_settings();
-
-		//g2::initializeLogging(log_worker_.get());
-
-		//LOG(INFO) << "Initializing cappeen api.";
 
 		// Release all components before changing delegate.
 		delegate_.release();
 		scanner_.release();
 		data_output_.release();
 		if(processing_graph_) {
+			LOG(DEBUG) << "Found processing graph on heap.  Sending cancel request and releasing it.";
 			processing_graph_->cancel();
 			processing_graph_.release();
 		}
 		if(gps_graph_) {
+			LOG(DEBUG) << "Found gps graph on heap.  Sending cancel request and releasing it.";
 			gps_graph_->cancel();
 			gps_graph_.release();
 		}
 
+		LOG(DEBUG) << "Constructing cappeen_delegate.";
 		delegate_.reset(new cappeen_delegate(del));
+		LOG(DEBUG) << "Constructing blade_rf_controller_async.";
 		scanner_.reset(new scanner::blade_rf_controller_async(scanner::USB_BLADE_RF));
+		LOG(DEBUG) << "Constructing data_output_async.";
 		data_output_.reset(new processing::data_output_async());
+		LOG(DEBUG) << "Constructing processing_graph.";
 		processing_graph_.reset(new processing::processing_graph());
+		LOG(DEBUG) << "Constructing gps_graph.";
 		gps_graph_.reset(new processing::gps_graph());
 
-		//delegate_->initialize(data_output_.get());
+		LOG(DEBUG) << "Initializing cappeen_delegate.";
+		delegate_->initialize(data_output_.get());
 		//log_worker_->connect_sink(boost::bind(&cappeen_delegate::output_error, delegate_.get(), _1, _2));
 
+		LOG(INFO) << "Initialization complete.";
 		is_initialized_ = true;
 	}
 	catch(const rf_phreaker::rf_phreaker_error &err) {
 		if(delegate_) delegate_->output_message(err);
 		status = (long)err.error_code_;
+		LOG(ERROR) << err.what() << "  Error code: " << err.error_code_ << ".";
 	}
 	catch(const std::exception &err) {
 		if(delegate_) delegate_->output_message(err);
 		status = STD_EXCEPTION_ERROR;
+		LOG(ERROR) << err.what();
 	}
 	catch(...) {
-		if(delegate_) delegate_->output_message("Unknown error has occurred.", -1000);
+		if(delegate_) delegate_->output_message("Unknown error has occurred.", UNKNOWN_ERROR);
 		status = UNKNOWN_ERROR;
+		LOG(ERROR) << "Unknown error.";
 	}
 	return status;
 }
@@ -82,6 +98,8 @@ long cappeen_impl::clean_up()
 {
 	long status = 0;
 	try {
+		LOG(INFO) << "Cleaning up...";
+
 		// Do more!
 		processing_graph_->cancel();
 		gps_graph_->cancel();
@@ -91,6 +109,7 @@ long cappeen_impl::clean_up()
 		data_output_.release();
 		processing_graph_.release();
 		gps_graph_.release();
+		LOG(INFO) << "Cleaned up successfully.";
 	}
 	catch(const rf_phreaker::rf_phreaker_error &err) {
 		if(delegate_) delegate_->output_message(err);
@@ -101,9 +120,14 @@ long cappeen_impl::clean_up()
 		status = STD_EXCEPTION_ERROR;
 	}
 	catch(...) {
-		if(delegate_) delegate_->output_message("Unknown error has occurred.", -1000);
+		if(delegate_) delegate_->output_message("Unknown error has occurred.", UNKNOWN_ERROR);
 		status = UNKNOWN_ERROR;
 	}
+
+	try {
+		logger_.release();
+	}
+	catch(...) {}
 	return status;
 }
 
@@ -112,6 +136,7 @@ long cappeen_impl::list_available_units(char *list, unsigned int buf_size)
 {
 	long status = 0;
 	try {
+		LOG(INFO) << "Listing units...";
 		verify_init();
 
 		memset(list, 0, buf_size);
@@ -131,6 +156,7 @@ long cappeen_impl::list_available_units(char *list, unsigned int buf_size)
 			+ boost::lexical_cast<std::string>(str.size() + 1) + ".", BUFFER_TOO_SMALL);
 		else
 			memcpy(list, str.c_str(), str.size() + 1);
+		LOG(INFO) << "Listed units successfully.";
 	}
 	catch(const rf_phreaker::rf_phreaker_error &err) {
 		if(delegate_) delegate_->output_message(err);
@@ -141,7 +167,7 @@ long cappeen_impl::list_available_units(char *list, unsigned int buf_size)
 		status = STD_EXCEPTION_ERROR;
 	}
 	catch(...) {
-		if(delegate_) delegate_->output_message("Unknown error has occurred.", -1000);
+		if(delegate_) delegate_->output_message("Unknown error has occurred.", UNKNOWN_ERROR);
 		status = UNKNOWN_ERROR;
 	}
 	return status;
@@ -157,6 +183,7 @@ long cappeen_impl::open_unit(const char *serial, unsigned int buf_size)
 {
 	long status = 0;
 	try {
+		LOG(INFO) << "Opening unit " << serial << "...";
 		verify_init();
 
 		scanner_->open_scanner(serial).get();
@@ -169,6 +196,7 @@ long cappeen_impl::open_unit(const char *serial, unsigned int buf_size)
 
 		gps_graph_->initialize_comm(scanner_.get(), data_output_.get(), config_);
 		gps_graph_->start();
+		LOG(INFO) << "Opened unit " << serial << " successfully.";
 	}
 	catch(const rf_phreaker::rf_phreaker_error &err) {
 		if(delegate_) delegate_->output_message(err);
@@ -179,7 +207,7 @@ long cappeen_impl::open_unit(const char *serial, unsigned int buf_size)
 		status = STD_EXCEPTION_ERROR;
 	}
 	catch(...) {
-		if(delegate_) delegate_->output_message("Unknown error has occurred.", -1000);
+		if(delegate_) delegate_->output_message("Unknown error has occurred.", UNKNOWN_ERROR);
 		status = UNKNOWN_ERROR;
 	}
 	return status;
@@ -189,6 +217,7 @@ long cappeen_impl::close_unit(const char *serial, unsigned int buf_size)
 {
 	long status = 0;
 	try{
+		LOG(INFO) << "Closing unit " << serial << "...";
 		verify_init();
 
 		gps_graph_->cancel();
@@ -197,7 +226,7 @@ long cappeen_impl::close_unit(const char *serial, unsigned int buf_size)
 
 		scanner_->close_scanner().get();
 		delegate_->change_beagle_state(BEAGLE_USBCLOSED);
-
+		LOG(INFO) << "Closed unit " << serial << " successfully.";
 	}
 	catch(const rf_phreaker::rf_phreaker_error &err) {
 		if(delegate_) delegate_->output_message(err);
@@ -208,7 +237,7 @@ long cappeen_impl::close_unit(const char *serial, unsigned int buf_size)
 		status = STD_EXCEPTION_ERROR;
 	}
 	catch(...) {
-		if(delegate_) delegate_->output_message("Unknown error has occurred.", -1000);
+		if(delegate_) delegate_->output_message("Unknown error has occurred.", UNKNOWN_ERROR);
 		status = UNKNOWN_ERROR;
 	}
 	return status;
@@ -218,9 +247,10 @@ long cappeen_impl::stop_collection()
 {
 	long status = 0;
 	try {
+		LOG(INFO) << "Stopping collection...";
 		processing_graph_->cancel();
 		delegate_->change_beagle_state(BEAGLE_READY);
-
+		LOG(INFO) << "Stopped collection successfully.";
 	}
 	catch(const rf_phreaker::rf_phreaker_error &err) {
 		if(delegate_) delegate_->output_message(err);
@@ -231,7 +261,7 @@ long cappeen_impl::stop_collection()
 		status = STD_EXCEPTION_ERROR;
 	}
 	catch(...) {
-		if(delegate_) delegate_->output_message("Unknown error has occurred.", -1000);
+		if(delegate_) delegate_->output_message("Unknown error has occurred.", UNKNOWN_ERROR);
 		status = UNKNOWN_ERROR;
 	}
 	return status;
@@ -241,6 +271,7 @@ long cappeen_impl::start_collection(const beagle_api::collection_info &collectio
 {
 	long status = 0;
 	try {
+		LOG(INFO) << "Starting collection...";
 		// Initialize packet sizes.
 		read_settings();
 		processing::initialize_collection_info_defaults(config_);
@@ -252,6 +283,7 @@ long cappeen_impl::start_collection(const beagle_api::collection_info &collectio
 		processing_graph_->start();
 
 		delegate_->change_beagle_state(BEAGLE_COLLECTING);
+		LOG(INFO) << "Started collection successfully.";
 	}
 	catch(const rf_phreaker::rf_phreaker_error &err) {
 		if(delegate_) delegate_->output_message(err);
@@ -262,7 +294,7 @@ long cappeen_impl::start_collection(const beagle_api::collection_info &collectio
 		status = STD_EXCEPTION_ERROR;
 	}
 	catch(...) {
-		if(delegate_) delegate_->output_message("Unknown error has occurred.", -1000);
+		if(delegate_) delegate_->output_message("Unknown error has occurred.", UNKNOWN_ERROR);
 		status = UNKNOWN_ERROR;
 	}
 	return status;
@@ -296,7 +328,6 @@ processing::collection_info_containers cappeen_impl::create_collection_info_cont
 			frequency_range_creation::adjust_umts_sweep_collection_info(operating_bands_.get_band_freq_range(band), *it);
 		}
 		else if(band >= FIRST_LTE_OPERATING_BAND && band <= LAST_LTE_OPERATING_BAND) {
-			throw cappeen_api_error("LTE is not supported.");
 			auto it = std::find_if(containers.begin(), containers.end(), [&](const collection_info_container &c) {
 				return c.tech_ == LTE_SWEEP;
 			});
@@ -319,7 +350,9 @@ long cappeen_impl::input_new_license(const char *serial, uint32_t serial_buf_siz
 {
 	long status = 0;
 	try {
+		LOG(INFO) << "Updating new license...";
 		throw std::exception("Updating the license is not currently supported.");
+		LOG(INFO) << "Updated license successfully.";
 	}
 	catch(const rf_phreaker::rf_phreaker_error &err) {
 		if(delegate_) delegate_->output_message(err);
@@ -330,7 +363,7 @@ long cappeen_impl::input_new_license(const char *serial, uint32_t serial_buf_siz
 		status = STD_EXCEPTION_ERROR;
 	}
 	catch(...) {
-		if(delegate_) delegate_->output_message("Unknown error has occurred.", -1000);
+		if(delegate_) delegate_->output_message("Unknown error has occurred.", UNKNOWN_ERROR);
 		status = UNKNOWN_ERROR;
 	}
 	return status;
@@ -338,5 +371,5 @@ long cappeen_impl::input_new_license(const char *serial, uint32_t serial_buf_siz
 
 const char* cappeen_impl::api_version()
 {
-	return "0.9.2";
+	return "0.9.2.1";
 }

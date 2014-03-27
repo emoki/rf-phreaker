@@ -63,6 +63,7 @@ void settings_io::read(layer_3_settings &settings, const std::string &group_key)
 {
 	qsettings_->beginGroup(group_key.c_str());
 	settings.max_update_threshold_ = qsettings_->value(max_update_threshold_key.c_str(), settings_layer_3_max_update_threshold_default).toInt();
+	settings.minimum_collection_round_ = qsettings_->value(min_collection_round_key.c_str(), settings_layer_3_min_collection_round_default).toInt();
 	settings.decode_threshold_ = qsettings_->value(decode_threshold_key.c_str(), settings_layer_3_decode_threshold_default).toDouble();
 	settings.decode_minimum_threshold_ = qsettings_->value(min_decode_threshold_key.c_str(), settings_layer_3_min_decode_threshold_default).toDouble();
 	qsettings_->endGroup();
@@ -123,6 +124,7 @@ void settings_io::write(const layer_3_settings &settings, const std::string &gro
 {
 	qsettings_->beginGroup(group_key.c_str());
 	qsettings_->setValue(max_update_threshold_key.c_str(), settings.max_update_threshold_);
+	qsettings_->setValue(min_collection_round_key.c_str(), settings.minimum_collection_round_);
 	qsettings_->setValue(decode_threshold_key.c_str(), settings.decode_threshold_);
 	qsettings_->setValue(min_decode_threshold_key.c_str(), settings.decode_minimum_threshold_);
 	qsettings_->endGroup();

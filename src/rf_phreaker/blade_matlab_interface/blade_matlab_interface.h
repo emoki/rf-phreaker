@@ -13,6 +13,8 @@ extern "C" {
 #endif
 
 
+	int DLL_PUBLIC start_logging();
+
 	int DLL_PUBLIC num_blade_devices_connected(int *num_devices);
 
 	/*
