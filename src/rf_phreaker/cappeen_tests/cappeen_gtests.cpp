@@ -13,7 +13,7 @@ class output : public beagle_delegate
 		std::cout << info.beagle_serial_ << "\t" << info.state_ << "\n";
 	}
 	virtual void __stdcall available_gps_info(long beagle_id, const gps_info &info){
-		std::cout << info.utc_time_ << "\t" << info.raw_gps_status_ << "\n";
+		//std::cout << info.utc_time_ << "\t" << info.raw_gps_status_ << "\n";
 	}
 	virtual void __stdcall available_gsm_sector_info(long beagle_id, const gsm_sector_info *info, long num_records){}
 	virtual void __stdcall available_umts_sector_info(long beagle_id, const umts_sector_info *info, long num_records){
@@ -76,12 +76,13 @@ TEST(Cappeen, TestMain)
 		collection_info info;
 		info.collection_filename_ = "test_file";
 		std::vector<TECHNOLOGIES_AND_BANDS> tech_bands;
-		//tech_bands.push_back(WCDMA_BAND_850);
+		tech_bands.push_back(WCDMA_BAND_850);
+		//tech_bands.push_back(WCDMA_BAND_1900);
 		//tech_bands.push_back(WCDMA_BAND_2100);
 		tech_bands.push_back(LTE_BAND_12);
-		tech_bands.push_back(LTE_BAND_1);
-		tech_bands.push_back(LTE_BAND_2);
-		tech_bands.push_back(LTE_BAND_5);
+		//tech_bands.push_back(LTE_BAND_1);
+		//tech_bands.push_back(LTE_BAND_2);
+		//tech_bands.push_back(LTE_BAND_5);
 		info.tech_and_bands_to_sweep_.elements_ = &tech_bands[0];
 		info.tech_and_bands_to_sweep_.num_elements_ = tech_bands.size();
 

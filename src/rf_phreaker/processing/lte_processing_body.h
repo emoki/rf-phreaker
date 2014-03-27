@@ -63,7 +63,7 @@ public:
 			// Only allow processing of bandwidths that can be decoded by LTE dll, i.e. 5mhz.
 			bool valid_bw = false;
 			for(auto &data : info.processed_data_) {
-				if(data.Bandwidth == LteBandwidth_5MHZ) {
+				if(data.Bandwidth == LteBandwidth_5MHZ && data.NumAntennaPorts != LteAntPorts_Unknown && data.AvgDigitalVoltage > 0.1) {
 					valid_bw = true;
 					break;
 				}

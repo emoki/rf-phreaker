@@ -13,7 +13,7 @@
 
 umts_psch_with_brute_force::umts_psch_with_brute_force(const umts_config &config, const /*cpich_table_container&*/Ipp32fc* resampled_cpich_table)
 : pause_(-1)
-, num_coherent_psch_slots_(6)
+, num_coherent_psch_slots_(2)
 , max_num_psch_peaks_(25)
 , max_num_candidates_(1000)
 , psch_confidence_threshold_(11)
