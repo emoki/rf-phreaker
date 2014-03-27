@@ -275,35 +275,35 @@ public:
 		valid_licenses_.push_back(beagle_api::WCDMA_BAND_1900);
 		valid_licenses_.push_back(beagle_api::WCDMA_BAND_2100);
 		
-		//valid_licenses_.push_back(beagle_api::LTE_BAND_12);
-		//valid_licenses_.push_back(beagle_api::LTE_BAND_13);
-		//valid_licenses_.push_back(beagle_api::LTE_BAND_14);
-		//valid_licenses_.push_back(beagle_api::LTE_BAND_17);
-		//valid_licenses_.push_back(beagle_api::LTE_BAND_28);
-		//valid_licenses_.push_back(beagle_api::LTE_BAND_29);
+		valid_licenses_.push_back(beagle_api::LTE_BAND_12);
+		valid_licenses_.push_back(beagle_api::LTE_BAND_13);
+		valid_licenses_.push_back(beagle_api::LTE_BAND_14);
+		valid_licenses_.push_back(beagle_api::LTE_BAND_17);
+		valid_licenses_.push_back(beagle_api::LTE_BAND_28);
+		valid_licenses_.push_back(beagle_api::LTE_BAND_29);
 
-		//valid_licenses_.push_back(beagle_api::LTE_BAND_5);
-		//valid_licenses_.push_back(beagle_api::LTE_BAND_6);
-		//valid_licenses_.push_back(beagle_api::LTE_BAND_18);
-		//valid_licenses_.push_back(beagle_api::LTE_BAND_19);
-		//valid_licenses_.push_back(beagle_api::LTE_BAND_20);
-		//valid_licenses_.push_back(beagle_api::LTE_BAND_26);
-		//valid_licenses_.push_back(beagle_api::LTE_BAND_27);
+		valid_licenses_.push_back(beagle_api::LTE_BAND_5);
+		valid_licenses_.push_back(beagle_api::LTE_BAND_6);
+		valid_licenses_.push_back(beagle_api::LTE_BAND_18);
+		valid_licenses_.push_back(beagle_api::LTE_BAND_19);
+		valid_licenses_.push_back(beagle_api::LTE_BAND_20);
+		valid_licenses_.push_back(beagle_api::LTE_BAND_26);
+		valid_licenses_.push_back(beagle_api::LTE_BAND_27);
 
-		//valid_licenses_.push_back(beagle_api::LTE_BAND_8);
+		valid_licenses_.push_back(beagle_api::LTE_BAND_8);
 
-		//valid_licenses_.push_back(beagle_api::LTE_BAND_3);
-		//valid_licenses_.push_back(beagle_api::LTE_BAND_9);
+		valid_licenses_.push_back(beagle_api::LTE_BAND_3);
+		valid_licenses_.push_back(beagle_api::LTE_BAND_9);
 
-		//valid_licenses_.push_back(beagle_api::LTE_BAND_2);
-		//valid_licenses_.push_back(beagle_api::LTE_BAND_25);
+		valid_licenses_.push_back(beagle_api::LTE_BAND_2);
+		valid_licenses_.push_back(beagle_api::LTE_BAND_25);
 
-		//valid_licenses_.push_back(beagle_api::LTE_BAND_1);
-		//valid_licenses_.push_back(beagle_api::LTE_BAND_4);
-		//valid_licenses_.push_back(beagle_api::LTE_BAND_10);
-		//valid_licenses_.push_back(beagle_api::LTE_BAND_23);
+		valid_licenses_.push_back(beagle_api::LTE_BAND_1);
+		valid_licenses_.push_back(beagle_api::LTE_BAND_4);
+		valid_licenses_.push_back(beagle_api::LTE_BAND_10);
+		valid_licenses_.push_back(beagle_api::LTE_BAND_23);
 
-		//valid_licenses_.push_back(beagle_api::LTE_BAND_7);
+		valid_licenses_.push_back(beagle_api::LTE_BAND_7);
 
 		beagle_info_.valid_licenses_.num_elements_ = valid_licenses_.size();
 		beagle_info_.valid_licenses_.elements_ = &valid_licenses_[0];
