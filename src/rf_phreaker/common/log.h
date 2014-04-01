@@ -4,30 +4,8 @@
 
 #include "rf_phreaker/../../third_party/g2log/g2log/src/g2log.h"
 #include "rf_phreaker/../../third_party/g2log/g2log/src/g2logworker.h"
-#include <boost/signals2.hpp>
 
 namespace rf_phreaker {
-
-typedef boost::signals2::signal<void(const std::string &, int)> sink_type;
-
-class delegate_sink
-{
-public:
-	void log_error(const std::string &str, int code)
-	{
-		error_sink_(str, code);
-	}
-	
-	void log_message(const std::string &str, int code)
-	{
-		message_sink_(str, code);
-	}
-
-	sink_type error_sink_;
-	sink_type message_sink_;
-
-	static delegate_sink& rf_phreaker_log();
-};
 
 class init_log
 {

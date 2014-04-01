@@ -35,7 +35,7 @@ class g2LogWorker;
 
 
 // Levels for logging, made so that it would be easy to change, remove, add levels -- KjellKod
-static const int gDEBUG = 1, gINFO = 2, gWARNING = 3, gERROR = 4, gFATAL = 5;
+static const int gVERBOSE = 0, gDEBUG = 1, gINFO = 2, gWARNING = 3, gERROR = 4, gFATAL = 5;
 static const std::string k_fatal_log_expression = ""; // using LogContractMessage but no boolean expression
 
 // GCC Predefined macros: http://gcc.gnu.org/onlinedocs/cpp/Standard-Predefined-Macros.html
@@ -48,6 +48,7 @@ static const std::string k_fatal_log_expression = ""; // using LogContractMessag
 
 
 // BELOW -- LOG stream syntax
+#define G2_LOG_VERBOSE  g2::internal::LogMessage(__FILE__,__LINE__,__PRETTY_FUNCTION__,"VERBOSE")
 #define G2_LOG_DEBUG  g2::internal::LogMessage(__FILE__,__LINE__,__PRETTY_FUNCTION__,"DEBUG")
 #define G2_LOG_INFO  g2::internal::LogMessage(__FILE__,__LINE__,__PRETTY_FUNCTION__,"INFO")
 #define G2_LOG_WARNING  g2::internal::LogMessage(__FILE__,__LINE__,__PRETTY_FUNCTION__,"WARNING")
@@ -61,6 +62,11 @@ static const std::string k_fatal_log_expression = ""; // using LogContractMessag
 #define LOG_IF(level, boolean_expression)  \
   if(true == boolean_expression)          \
      G2_LOG_##level.messageStream()
+
+// conditional logging based on log level.
+#define LOG_L(level)  \
+	if(g##level >= g2::LoggingLevel::Level)          \
+		G2_LOG_##level.messageStream()
 
 // Design By Contract, stream API. Throws std::runtime_eror if contract breaks
 #define CHECK(boolean_expression)                                                    \
@@ -149,6 +155,14 @@ And here is possible output
   * --- Thanks for a great 2011 and good luck with 'g2' --- KjellKod */
 namespace g2
 {
+// Level indicates current logging level.  All levels >= will be outputted.
+class LoggingLevel
+{
+public:
+	static void changeLoggingLevel(int level);
+	static int Level;
+};
+
 /** Should be called at very first startup of the software with \ref g2LogWorker pointer. Ownership of the \ref g2LogWorker is
 * the responsibilkity of the caller */
 void initializeLogging(g2LogWorker *logger);

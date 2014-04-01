@@ -160,6 +160,11 @@ struct g2LogWorkerImpl
 	  sink_.connect(f);
   }
 
+  void changeLoggingLevel(int level)
+  {
+	  g2::LoggingLevel::changeLoggingLevel(level);
+  }
+
   std::string log_file_with_path_;
   std::string log_prefix_backup_; // needed in case of future log file changes of directory
   std::unique_ptr<kjellkod::Active> bg_;
@@ -323,5 +328,10 @@ std::future<std::string> g2LogWorker::logFileName()
 void g2LogWorker::connect_sink(boost::function<void(const std::string&, int)> f)
 {
 	pimpl_->connect_sink(f);
+}
+
+void g2LogWorker::changeLoggingLevel(int level)
+{
+	pimpl_->changeLoggingLevel(level);
 }
 

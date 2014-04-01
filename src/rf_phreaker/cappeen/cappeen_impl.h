@@ -9,6 +9,7 @@
 #include "rf_phreaker/common/operating_band_range_specifier.h"
 #include <memory>
 #include <string>
+#include <mutex>
 
 namespace rf_phreaker { namespace cappeen_api {
 
@@ -27,7 +28,7 @@ public:
 	long stop_collection();
 	long start_collection(const beagle_api::collection_info &collection);
 	long input_new_license(const char *serial, uint32_t serial_buf_size, const char *new_license_filename, uint32_t license_buf_size);
-	const char* api_version();
+	const char* api_version() const;
 
 private:
 
@@ -52,6 +53,8 @@ private:
 	std::unique_ptr<cappeen_delegate> delegate_;
 
 	std::unique_ptr<init_log> logger_;
+
+	std::mutex mutex_;
 };
 
 

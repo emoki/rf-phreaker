@@ -4,9 +4,9 @@ using namespace rf_phreaker;
 
 
 
-delegate_sink& delegate_sink::rf_phreaker_log()
-{
-	static delegate_sink log;
-	return log;
-}
+//delegate_sink& delegate_sink::rf_phreaker_log()
+//{
+//	static delegate_sink log;
+//	return log;
+//}
 

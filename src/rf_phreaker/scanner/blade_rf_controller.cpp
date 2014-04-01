@@ -61,18 +61,13 @@ std::vector<comm_info_ptr> blade_rf_controller::list_available_scanners()
 
 void blade_rf_controller::open_scanner(const scanner_id_type &id)
 {
+	close_scanner();
+
 	std::string open_str = "libusb:serial=" + id;
 
 	bladerf *blade_rf;
 
 	check_blade_status(bladerf_open(&blade_rf, open_str.c_str()));
-
-	//// Reload FPGA to handle clear any previous errors and start with a fresh slate.
-	//check_blade_status(bladerf_device_reset(blade_rf));
-	//blade_rf = nullptr;
-	//// Wait for reenumeration and reopen.
-	//std::this_thread::sleep_for(std::chrono::seconds(10));
-	//check_blade_status(bladerf_open(&blade_rf, open_str.c_str()));
 
 	bladerf_devinfo dev_info;
 
@@ -106,17 +101,12 @@ void blade_rf_controller::do_initial_scanner_config()
 		BLADERF_MODULE_TX,
 		false));
 
-	// NOTE - Do not perform any calibrations at this time.
-	// Is this done inside bladeRF?  If not, this can be done once and 
-	// registry values can be saved in hw and loaded next init phase.
-	// The calibrations can return an error.  We should log this but not 
-	// necessarily throw an error.
-
 	int status = 0;
 	for(int i = 0; i < 5; ++i) {
 		status = (bladerf_calibrate_dc(comm_blade_rf_->blade_rf(),
 			BLADERF_DC_CAL_LPF_TUNING));
 		if(status == 0) break;
+		LOG_L(DEBUG) << "Calibration attempt failed: LPF Tuning Module. Retrying...";
 	}
 	if(status)
 		throw blade_rf_error("Calibration failed: LPF Tuning Module.");
@@ -126,6 +116,7 @@ void blade_rf_controller::do_initial_scanner_config()
 		status = check_blade_status(bladerf_calibrate_dc(comm_blade_rf_->blade_rf(),
 			BLADERF_DC_CAL_RX_LPF));
 		if(status == 0) break;
+		LOG_L(DEBUG) << "Calibration attempt failed: DC RX LPT Module. Retrying...";
 	}
 	if(status)
 		throw blade_rf_error("Calibration failed: DC RX LPT Module.");
@@ -135,6 +126,7 @@ void blade_rf_controller::do_initial_scanner_config()
 		status = (bladerf_calibrate_dc(comm_blade_rf_->blade_rf(),
 			BLADERF_DC_CAL_RXVGA2));
 		if(status == 0) break;
+		LOG_L(DEBUG) << "Calibration attempt failed: DC RXVGA2 Module. Retrying...";
 	}
 	if(status)
 		throw blade_rf_error("Calibration failed: DC RXVGA2 Module.");
@@ -281,7 +273,7 @@ gain_type blade_rf_controller::get_auto_gain(frequency_type freq, bandwidth_type
 		time_ns = 5000000;
 
 	// Use lowest sampling rate because we only care about the Max ADC.
-	sampling_rate = mhz(10);
+	sampling_rate = mhz(32);
 
 	// If we have no history loop thru a couple times to zero in on the gain.
 	gain_manager_.update_gain(get_rf_data(freq, time_ns, bandwidth, gain_manager_.default_gain(), sampling_rate));
@@ -293,10 +285,10 @@ gain_type blade_rf_controller::get_auto_gain(frequency_type freq, bandwidth_type
 
 measurement_info blade_rf_controller::get_rf_data(frequency_type frequency, time_type time_ns, bandwidth_type bandwidth, const gain_type &gain, frequency_type sampling_rate)
 {
-	//LOG(DEBUG) << "Taking snapshot... " << "frequency: " << frequency / 1e6 << "mhz | time_milliseconds: "
-	//	<< time_ns / 1e6 << "ms | bandwidth: " << bandwidth / 1e6 
-	//	<< "mhz | sampling_rate: " << sampling_rate / 1e6 << "mhz | gain: "
-	//	<< gain.lna_gain_ << " " << gain.rxvga1_ << " " << gain.rxvga2_;
+	LOG_L(VERBOSE) << "Taking snapshot... " << "frequency: " << frequency / 1e6 << "mhz | time: "
+		<< time_ns / 1e6 << "ms | bandwidth: " << bandwidth / 1e6 
+		<< "mhz | sampling_rate: " << sampling_rate / 1e6 << "mhz | gain: "
+		<< gain.lna_gain_ << " " << gain.rxvga1_ << " " << gain.rxvga2_;
 
 	check_blade_comm();
 
@@ -308,37 +300,36 @@ measurement_info blade_rf_controller::get_rf_data(frequency_type frequency, time
 	if(sampling_rate == 0)
 		sampling_rate = static_cast<frequency_type>(bandwidth * 1.2);
 
-	//LOG(DEBUG) << "Setting LNA gain.";
 	check_blade_status(bladerf_set_lna_gain(comm_blade_rf_->blade_rf(), convert(gain.lna_gain_)));
 
-	//LOG(DEBUG) << "Setting rxvga1.";
 	check_blade_status(bladerf_set_rxvga1(comm_blade_rf_->blade_rf(), gain.rxvga1_));
 
-	//LOG(DEBUG) << "Setting rxvga2.";
 	check_blade_status(bladerf_set_rxvga2(comm_blade_rf_->blade_rf(), gain.rxvga2_));
 
 	unsigned int blade_sampling_rate = 0;
 	unsigned int blade_bandwidth = 0;
 
-	//LOG(DEBUG) << "Setting sampling_rate.";
 	// TODO - We manually convert frequency_type to unsigned int.
 	check_blade_status(bladerf_set_sample_rate(comm_blade_rf_->blade_rf(), BLADERF_MODULE_RX,
 		static_cast<uint32_t>(sampling_rate), &blade_sampling_rate));
 
-	//LOG(DEBUG) << "Setting bandwidth.";
 	check_blade_status(bladerf_set_bandwidth(comm_blade_rf_->blade_rf(), BLADERF_MODULE_RX,
 		bandwidth, &blade_bandwidth));
 
-	//LOG(DEBUG) << "Setting frequency.";
 	int status = 0;
 	for(int i = 0; i < 5; ++i) {
 		status = (bladerf_set_frequency(comm_blade_rf_->blade_rf(), BLADERF_MODULE_RX,
 			static_cast<uint32_t>(frequency)));
 		if(status == 0) break;
-		//LOG(DEBUG) << "Failed to set frequency.";
+		LOG_L(DEBUG) << "Setting frequency (" << frequency / 1e6 << "mhz) failed. Retrying...";
 	}
 	if(status)
 		throw blade_rf_error(std::string("Error setting frequency.  ") + bladerf_strerror(status));
+
+	uint32_t gpio = 0;
+	check_blade_status(bladerf_config_gpio_read(comm_blade_rf_->blade_rf(), &gpio));
+	check_blade_status(bladerf_config_gpio_write(comm_blade_rf_->blade_rf(), 
+		rf_switch_conversion_.convert_to_gpio(frequency, bandwidth, gpio)));
 
 	// BladeRF only accepts data num_samples that are a multiple of 1024.
 	int throw_away_samples = 10240*4;
@@ -354,21 +345,17 @@ measurement_info blade_rf_controller::get_rf_data(frequency_type frequency, time
 
 	bladerf_metadata metadata;
 
-
-	//LOG(DEBUG) << "Collecting " << num_samples << " num_samples plus " << throw_away_samples << " throw_away_samples.";
 	check_blade_status(bladerf_rx(comm_blade_rf_->blade_rf(), BLADERF_FORMAT_SC16_Q11,
 		aligned_buffer, num_samples_to_transfer + throw_away_samples, &metadata));
 
 	measurement_info data(num_samples, frequency, blade_bandwidth, blade_sampling_rate,
 		gain);
 
-	//LOG(DEBUG) << "Masking bytes.";
 	for(int i = throw_away_samples; i < (throw_away_samples + num_samples) * 2; ++i)
 		sign_extend_12_bits(reinterpret_cast<int16_t*>(aligned_buffer)[i]);
 
 	const auto beginning_of_iq = (Ipp16s*)&(*aligned_buffer_.get_aligned_array()) + (throw_away_samples * 2);
 
-	//LOG(DEBUG) << "Converting to float.";
 	ipp_helper::check_status(ippsConvert_16s32f(beginning_of_iq,
 		(Ipp32f*)data.get_iq().get(), data.get_iq().length() * 2));
 

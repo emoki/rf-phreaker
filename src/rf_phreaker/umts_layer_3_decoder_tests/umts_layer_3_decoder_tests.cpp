@@ -91,7 +91,10 @@ int main(int argc, char* argv[])
 			umts_message.mnc_.num_characters() << "|" << 
 			umts_message.mnc_.to_string() << "," << 
 			umts_message.lac_ << "," << 
-			umts_message.cid_ << "," << 
+			umts_message.cid_ << "," <<
+			umts_message.neighbor_intra_group_.size() << "," <<
+			umts_message.neighbor_inter_group_.size() << "," <<
+			umts_message.neighbor_inter_rat_group_.size() << "," <<
 			umts_message.unique_sector_key_ << std::endl;
 
 		std::cout <<
@@ -102,6 +105,9 @@ int main(int argc, char* argv[])
 			umts_message.mnc_.to_string() << "," << 
 			umts_message.lac_ << "," << 
 			umts_message.cid_ << "," << 
+			umts_message.neighbor_intra_group_.size() << "," <<
+			umts_message.neighbor_inter_group_.size() << "," <<
+			umts_message.neighbor_inter_rat_group_.size() << "," <<
 			umts_message.unique_sector_key_ << std::endl;
 	}
 

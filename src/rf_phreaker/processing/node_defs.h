@@ -51,7 +51,8 @@ typedef tbb::flow::queue_node<add_remove_collection_info> queue_node;
 #define UMTS_LAYER3_PORT 1
 #define LTE_SWEEP_PORT 2
 #define LTE_LAYER3_PORT 3
-typedef std::tuple<measurement_package, measurement_package, measurement_package, measurement_package> tech_measurement_ports;
+#define LIMITER_PORT 4
+typedef std::tuple<measurement_package, measurement_package, measurement_package, measurement_package, tbb::flow::continue_msg> tech_measurement_ports;
 typedef tbb::flow::multifunction_node<add_remove_collection_info, tech_measurement_ports, tbb::flow::rejecting> collection_manager_node;
 
 typedef tbb::flow::function_node<measurement_package, umts_info> umts_cell_search_node;

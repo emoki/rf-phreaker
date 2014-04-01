@@ -38,7 +38,7 @@ inline bandwidth_type find_valid_bandwidth(bandwidth_type bw)
 class gain_manager
 {
 public:
-	gain_manager() : set_point_(1700), increment_(90)
+	gain_manager() : set_point_(1500), increment_(90)
 	{}
 
 	class gain_history
@@ -122,11 +122,6 @@ public:
 			history_.insert(std::make_pair(gain_history_key(meas), h));
 		else
 			it->second = h;
-
-		if(0) {
-			std::ofstream f("tmp_sig.txt");
-			f << meas;
-		}
 	}
 	
 	std::map<gain_history_key, gain_history, gain_history_sort>  history_;

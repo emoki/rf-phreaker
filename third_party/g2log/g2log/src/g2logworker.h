@@ -50,6 +50,8 @@ public:
 
   void connect_sink(boost::function<void(const std::string&, int)>);
 
+  void changeLoggingLevel(int level);
+
 private:
   std::unique_ptr<g2LogWorkerImpl> pimpl_;
   const std::string log_file_with_path_;

@@ -5,6 +5,7 @@
 #include "rf_phreaker/processing/data_output_async.h"
 #include "rf_phreaker/scanner/scanner_controller_interface.h"
 #include "rf_phreaker/common/settings.h"
+#include "rf_phreaker/common/delegate_sink.h"
 #include <memory>
 
 
@@ -13,59 +14,82 @@ namespace rf_phreaker { namespace processing {
 class gps_graph
 {
 public:
-	gps_graph() {}
+	gps_graph() 
+	{}
 
 	~gps_graph() {}
 
-	void initialize_comm(rf_phreaker::scanner::scanner_controller_interface *sc, data_output_async *out, const settings &config)
+	void start(rf_phreaker::scanner::scanner_controller_interface *sc, data_output_async *out, const settings &config)
 	{
-		auto g = std::make_shared<tbb::flow::graph>();
+		std::lock_guard<std::mutex> lock(mutex_);
 
-		graphs_.push_back(g);
+		if(thread_ && thread_->joinable()) {
+			cancel();
+			wait();
+		}
 
-		start_node_ = std::make_shared<gps_start_node> (*g, [=](tbb::flow::continue_msg&) { return true; }, false);
+		thread_.reset(new std::thread([this](rf_phreaker::scanner::scanner_controller_interface *sc, data_output_async *out, const settings &config) {
+			try {
+				start_node_.reset();
+				nodes_.clear();
 
-		auto gps = std::make_shared<gps_node>(*g, tbb::flow::serial, gps_body(sc, out, config));
+				graph_ = (std::make_shared<tbb::flow::graph>());
 
-		start_node_->register_successor(*gps);
+				start_node_ = std::make_shared<gps_start_node>(*graph_, [=](tbb::flow::continue_msg&) { return true; }, false);
 
-		nodes_.push_back(gps);
+				auto gps = std::make_shared<gps_node>(*graph_, tbb::flow::serial, gps_body(sc, out, config));
+
+				start_node_->register_successor(*gps);
+
+				nodes_.push_back(gps);
+
+				start_node_->activate();
+
+				graph_->wait_for_all();
+			}
+			catch(const rf_phreaker::rf_phreaker_error &err) {
+				delegate_sink_async::instance().log_error(err.what(), -49999);
+			}
+			catch(const std::exception &err) {
+				delegate_sink_async::instance().log_error(err.what(), -49998);
+			}
+			catch(...) {
+				delegate_sink_async::instance().log_error("An unknown error has occurred.", -50000);
+			}
+		}, sc, out, config));
 	}
 
-	void start()
+	void cancel_and_wait()
 	{
-		start_node_->activate();
+		std::lock_guard<std::mutex> lock(mutex_);
+		cancel();
+		wait();
 	}
+
+private:
 
 	void wait()
 	{
-		for(auto &g : graphs_) {
-			try {
-				g->wait_for_all();
-			}
-			catch(...) {}
+		if(thread_ && thread_->joinable()) {
+			thread_->join();
 		}
 	}
 
 	void cancel()
 	{
-		for(auto &g : graphs_)
-			g->root_task()->cancel_group_execution();
-
-		wait();
-
-		start_node_.reset();
-		nodes_.clear();
-		graphs_.clear();
+		if(thread_ && thread_->joinable()) {
+			graph_->root_task()->cancel_group_execution();
+		}
 	}
-
-private:
-	std::vector<std::shared_ptr<tbb::flow::graph>> graphs_;
+	std::shared_ptr<tbb::flow::graph> graph_;
 
 	std::vector<std::shared_ptr<tbb::flow::graph_node>> nodes_;
 
 	std::shared_ptr<gps_start_node> start_node_;
-};
 
+	std::unique_ptr<std::thread> thread_;
+
+	std::mutex mutex_;
+};
 
 }}

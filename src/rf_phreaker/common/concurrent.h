@@ -1,6 +1,7 @@
 #pragma once
 
-#include "rf_phreaker/common/log.h"
+#include "rf_phreaker/common/delegate_sink_tmp.h"
+#include "rf_phreaker/common/exception_types.h"
 #include "tbb/concurrent_queue.h"
 #include <thread>
 #include <future>
@@ -43,16 +44,16 @@ template <typename T> class concurrent {
 					set_value(*p, f, t_);
 				}
 				catch(const rf_phreaker::rf_phreaker_error &err) {
-					delegate_sink::rf_phreaker_log().log_error(err.what(), -49999);
+					g_delegate_sink.log_error(err.what(), -49999);
 					p->set_exception(std::current_exception());
 				}
 				catch(const std::exception &err) {
-					delegate_sink::rf_phreaker_log().log_error(err.what(), -49998);
+					g_delegate_sink.log_error(err.what(), -49998);
 					p->set_exception(std::current_exception());
 				}
 				catch(...) {
+					g_delegate_sink.log_error("An unknown error has occurred.", -50000);
 					p->set_exception(std::current_exception());
-					delegate_sink::rf_phreaker_log().log_error("An unknown error has occurred.", -50000);
 				}
 			});
 

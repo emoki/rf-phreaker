@@ -19,12 +19,14 @@ set (common_SRCS
 	concurrent.h
 	config_file.cpp
 	config_file.h
+	delegate_sink.h
+	delegate_sink_tmp.h
+	delegate_sink_tmp.cpp
 	exception_types.h
 	fft_helper.cpp
 	fft_helper.h
 	ipp_array.h
 	ipp_helper.h
-	log.cpp
 	log.h
 	measurements.h
 	measurement_io.h

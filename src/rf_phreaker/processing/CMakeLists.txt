@@ -17,6 +17,7 @@ set (processing_SRCS
 	collection_manager_body.h
 	gps_body.h
 	gps_graph.h
+	graph_observer.h
 	frequency_range_creation.h
 	layer_3_tracker.h
 	lte_output_and_feedback_body.h

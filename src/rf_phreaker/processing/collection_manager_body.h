@@ -70,6 +70,10 @@ public:
 		if(scanning_finished_for_all_containers && do_multiple_scans_) {
 			for(auto &c : containers_)
 				c.reset();
+
+			// If scanning has finished for all containers then we will not process any packets this time thru which 
+			// means we need to send a continue msg to the limiter node directly.
+			std::get<LIMITER_PORT>(out).try_put(tbb::flow::continue_msg());
 		}
 	}
 

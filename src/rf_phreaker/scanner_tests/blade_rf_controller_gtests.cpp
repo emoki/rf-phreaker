@@ -43,10 +43,10 @@ TEST(BladeControllerTest, TestBladeControllerGeneral)
 			rf_phreaker::frequency_type nyc_lte_freq2 = 739000000; // 10 mhz
 
             const int num_iterations = 30;
-			std::string base_filename = "blade_samples_lte_739_";
-			rf_phreaker::frequency_type freq = nyc_lte_freq2;
+			std::string base_filename = "blade_samples_umts_876.8_";
+			rf_phreaker::frequency_type freq = nyc_umts_freq2;
 			rf_phreaker::time_type time_ns = milli_to_nano(42);
-			rf_phreaker::bandwidth_type bandwidth = khz(2500);
+			rf_phreaker::bandwidth_type bandwidth = khz(00);
 			//int sampling_rate = khz(30720); 
 			int sampling_rate = khz(4875);
 			//int sampling_rate = khz(3840);
@@ -70,24 +70,25 @@ TEST(BladeControllerTest, TestBladeControllerGeneral)
 			//file1 << data;
 
 			//for(int j = 0; j < 2; ++j) {
-				for(int i = 5; i <= 60; ++i) {
-					gain.rxvga1_ = i <= 30 ? i : 30;
-					gain.rxvga2_ = i > 30 ? i - 30 : 0;
+			//for(int i = 5; i <= 60; ++i) {
+				for(int i = 1; i <= 60; ++i) {
+					//gain.rxvga1_ = i <= 30 ? i : 30;
+					//gain.rxvga2_ = i > 30 ? i - 30 : 0;
 
-					//data = blade.get_rf_data(freq, time_ns, bandwidth, gain, sampling_rate);
+					data = blade.get_rf_data(freq, time_ns, bandwidth, gain, sampling_rate);
 					//gain_manager::gain_history tmp(data);
 					//auto avg_rms_ = ipp_helper::calculate_average_rms(data.get_iq().get(), data.get_iq().length());
 					//file << freq << "\t" << gain.rxvga1_ << "\t" << gain.rxvga2_ << "\t" << gain.rxvga1_ + gain.rxvga2_  << "\t" << 
 					//	tmp.max_adc_ << "\t" << 20 * log10(tmp.max_adc_) << "\t" << avg_rms_ << "\t" << 20 * log10(avg_rms_) << "\n";
 
-					data = blade.get_rf_data_use_auto_gain(freq, time_ns, bandwidth, sampling_rate);
-					gain_manager::gain_history tmp_auto(data);
+					//data = blade.get_rf_data_use_auto_gain(freq, time_ns, bandwidth, sampling_rate);
+					//gain_manager::gain_history tmp_auto(data);
 
-					auto avg_rms_auto = ipp_helper::calculate_average_rms(data.get_iq().get(), data.get_iq().length());
+					//auto avg_rms_auto = ipp_helper::calculate_average_rms(data.get_iq().get(), data.get_iq().length());
 
-					/*file_auto*/std::cout << freq << "\t" << data.gain().rxvga1_ << "\t" << data.gain().rxvga2_ << "\t" << data.gain().rxvga1_ + data.gain().rxvga2_ << "\t" <<
-						tmp_auto.max_adc_ << "\t" << 20 * log10(tmp_auto.max_adc_) << "\t" << 
-						avg_rms_auto << "\t" << 20 * log10(avg_rms_auto) << "\n";
+					///*file_auto*/std::cout << freq << "\t" << data.gain().rxvga1_ << "\t" << data.gain().rxvga2_ << "\t" << data.gain().rxvga1_ + data.gain().rxvga2_ << "\t" <<
+					//	tmp_auto.max_adc_ << "\t" << 20 * log10(tmp_auto.max_adc_) << "\t" << 
+					//	avg_rms_auto << "\t" << 20 * log10(avg_rms_auto) << "\n";
 
 					data.collection_round(i);
 

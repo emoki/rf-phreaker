@@ -3,9 +3,13 @@
 #include "rf_phreaker/cappeen/beagle_defines.h"
 #include "rf_phreaker/cappeen/operating_band_conversion.h"
 #include "rf_phreaker/common/measurements.h"
-#include "rf_phreaker/processing/data_output_async.h"
 #include "rf_phreaker/common/exception_types.h"
 #include "rf_phreaker/common/log.h"
+#include "rf_phreaker/common/channel_conversion.h"
+#include "rf_phreaker/common/delegate_sink.h"
+#include "rf_phreaker/processing/data_output_async.h"
+#include "rf_phreaker/processing/processing_graph.h"
+#include "rf_phreaker/processing/gps_graph.h"
 
 namespace rf_phreaker { namespace cappeen_api {
 
@@ -33,26 +37,30 @@ public:
 	~cappeen_delegate()
 	{}
 
-	void initialize(processing::data_output_async *data_output)
+	void initialize(processing::data_output_async *data_output, processing::processing_graph *pro, processing::gps_graph *gps)
 	{
-		LOG(DEBUG) << "Creating connections...";
-		LOG(DEBUG) << "Connecting hardware.";
+		LOG_L(VERBOSE) << "Creating connections...";
+		LOG_L(VERBOSE) << "Connecting hardware.";
 		data_output->connect_hardware(boost::bind(&cappeen_delegate::output_hardware, this, _1)).get();
-		LOG(DEBUG) << "Connecting gps.";
+		LOG_L(VERBOSE) << "Connecting gps.";
 		data_output->connect_gps(boost::bind(&cappeen_delegate::output_gps, this, _1)).get();
-		LOG(DEBUG) << "Connecting umts_sweep.";
+		LOG_L(VERBOSE) << "Connecting umts_sweep.";
 		data_output->connect_umts_sweep(boost::bind(&cappeen_delegate::output_umts_sweep, this, _1)).get();
-		LOG(DEBUG) << "Connecting umts_layer_3.";
+		LOG_L(VERBOSE) << "Connecting umts_layer_3.";
 		data_output->connect_umts_layer_3(boost::bind(&cappeen_delegate::output_umts_layer_3, this, _1)).get();
-		LOG(DEBUG) << "Connecting lte_sweep.";
+		LOG_L(VERBOSE) << "Connecting lte_sweep.";
 		data_output->connect_lte_sweep(boost::bind(&cappeen_delegate::output_lte_sweep, this, _1)).get();
-		LOG(DEBUG) << "Connecting lte_layer_3.";
+		LOG_L(VERBOSE) << "Connecting lte_layer_3.";
 		data_output->connect_lte_layer_3(boost::bind(&cappeen_delegate::output_lte_layer_3, this, _1)).get();
-		LOG(DEBUG) << "Creating log sinks...";
-		LOG(DEBUG) << "Connecting error.";
-		delegate_sink::rf_phreaker_log().error_sink_.connect(boost::bind(&cappeen_delegate::output_error, this, _1, _2));
-		LOG(DEBUG) << "Connecting message.";
-		delegate_sink::rf_phreaker_log().message_sink_.connect(boost::bind(&cappeen_delegate::output_message, this, _1, _2));
+
+		LOG_L(VERBOSE) << "Creating log sinks...";
+		LOG_L(VERBOSE) << "Connecting error.";
+		delegate_sink_async::instance().connect_error(boost::bind(&cappeen_delegate::output_error, this, _1, _2)).get();
+		LOG_L(VERBOSE) << "Connecting message.";
+		delegate_sink_async::instance().connect_message(boost::bind(&cappeen_delegate::output_message, this, _1, _2)).get();
+
+		processing_graph_ = pro;
+		gps_graph_ = gps;
 	}
 
 	void output_hardware(const hardware &t)
@@ -96,9 +104,24 @@ public:
 			v[i].carrier_sl_ = umts.carrier_signal_level_;
 			v[i].collection_round_ = (uint32_t)umts.collection_round_;
 			v[i].cpich_ = umts.cpich_;
+
+			// To comply with beagle_api we make sure that any umts freqs that are within umts_operating_band_iv 
+			// are matched with umts_operating_band_iv
+			if(umts.carrier_frequency_ >= mhz(2110) && umts.carrier_frequency_ <= khz(2152600LL)) {
+				static channel_conversion conversion;
+				try {
+					v[i].uarfcn_ = conversion.frequency_to_uarfcn(umts.carrier_frequency_, UMTS_OPERATING_BAND_4);
+				}
+				catch(...)
+				{
+					LOG_L(WARNING) << "Error converting frequency (" << umts.carrier_frequency_ / 1e6 << "mhz) to UARFCN.";
+				}
+			}
+			else
+				v[i].uarfcn_ = umts.uarfcn_;
+
 			v[i].ecio_ = umts.ecio_;
 			v[i].rscp_ = umts.rscp_;
-			v[i].uarfcn_ = umts.uarfcn_;
 			v[i].mcc_ = umts.layer_3_.mcc_.to_uint16();
 			v[i].mcc_three_digits_ = umts.layer_3_.mcc_.num_characters() == 3 ? true : false;
 			v[i].mnc_ = umts.layer_3_.mnc_.to_uint16();
@@ -174,7 +197,7 @@ public:
 		for(auto &lte : t) {
 			v[i].antenna_ports_ = lte.num_antenna_ports_;
 			v[i].carrier_bandwidth_ = lte.carrier_bandwidth_;
-			v[i].carrier_freq_ = static_cast<int32_t>(lte.carrier_frequency_);
+			v[i].carrier_freq_ = static_cast<uint32_t>(lte.carrier_frequency_);
 			v[i].carrier_sl_ = lte.carrier_signal_level_;
 			v[i].collection_round_ = static_cast<uint32_t>(lte.collection_round_);
 			v[i].cyclic_prefix_length_ = lte.cyclic_prefix_;
@@ -209,30 +232,44 @@ public:
 		delegate_->available_lte_sector_info(beagle_id_, &v[0], v.size());
 	}
 
-	void output_message(const std::exception &err)
+	void output_error_as_message(const std::exception &err)
 	{
+		LOG_L(ERROR) << err.what();
 		output_error(err.what(), beagle_api::STD_EXCEPTION_ERROR);
 	}
 
-	void output_message(const rf_phreaker::rf_phreaker_error &err)
+	void output_error_as_message(const rf_phreaker::rf_phreaker_error &err)
 	{
+		LOG_L(ERROR) << err.what();
 		output_message(err.what(), (int)err.error_code_);
+	}
+
+	void output_error_as_message(const std::string &s, int code)
+	{
+		LOG_L(ERROR) << s;
+		if(delegate_ != nullptr)
+			delegate_->available_error(beagle_id_, code, s.c_str(), s.size() + 1);
 	}
 
 	void output_error(const std::string &s, int code)
 	{
+		LOG_L(ERROR) << s;
 		if(delegate_ != nullptr) {
-			delegate_->available_error(beagle_id_, code, s.c_str(), s.size() + 1);
 			if(beagle_info_.state_ == beagle_api::BEAGLE_COLLECTING
 				   || beagle_info_.state_ == beagle_api::BEAGLE_USBOPENED
 				   || beagle_info_.state_ == beagle_api::BEAGLE_READY
-				   || beagle_info_.state_ == beagle_api::BEAGLE_WARMINGUP)
-			   change_beagle_state(beagle_api::BEAGLE_ERROR);
+				   || beagle_info_.state_ == beagle_api::BEAGLE_WARMINGUP) {
+				processing_graph_->cancel_and_wait();
+				gps_graph_->cancel_and_wait();
+				change_beagle_state(beagle_api::BEAGLE_ERROR);
+			}
+			delegate_->available_error(beagle_id_, code, s.c_str(), s.size() + 1);
 		}
 	}
 
 	void output_message(const std::string &s, int code)
 	{
+		LOG_L(INFO) << s;
 		if(delegate_ != nullptr)
 			delegate_->available_error(beagle_id_, code, s.c_str(), s.size() + 1);
 	}
@@ -320,6 +357,9 @@ public:
 			beagle_info_.device_speed_ = beagle_api::UNKOWN_SPEED;
 		}
 	}
+
+	beagle_api::BEAGLESTATE current_beagle_state() { return beagle_info_.state_; }
+
 private:
 	beagle_api::beagle_delegate *delegate_;
 
@@ -331,6 +371,8 @@ private:
 
 	static const int beagle_id_ = 1;
 
+	processing::processing_graph *processing_graph_;
+	processing::gps_graph *gps_graph_;
 };
 
 }}

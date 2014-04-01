@@ -18,7 +18,7 @@ namespace rf_phreaker { namespace processing {
 		void operator()(umts_info info, umts_output_and_feedback_node::output_ports_type &out)
 		{
 			// Output basic tech.
-			io_->output_umts_sweep(convert_to_basic_data(*info.meas_, info.avg_rms_)).get();
+			io_->output_umts_sweep(convert_to_basic_data(*info.meas_, info.avg_rms_))/*.get()*/;
 
 			if(info.processed_data_.size()) {
 				// Add the freq to the layer_3_decoder.
@@ -51,7 +51,7 @@ namespace rf_phreaker { namespace processing {
 				for(const auto &dat : info.processed_data_)
 					umts.push_back(convert_to_umts_data(*info.meas_, dat));
 
-				io_->output(umts).get();
+				io_->output(umts)/*.get()*/;
 
 			}
 

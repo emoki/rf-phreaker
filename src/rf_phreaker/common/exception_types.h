@@ -13,7 +13,7 @@ public:
 		, error_code_(error_code)
 	{}
 
-	int64_t error_code_;
+	int error_code_;
 };
 
 template<int T>

@@ -84,6 +84,12 @@ std::string splitFileName(const std::string& str)
 namespace g2
 {
 
+int LoggingLevel::Level = gINFO;
+
+void LoggingLevel::changeLoggingLevel(int level)
+{
+	Level = level;
+}
 
 // signalhandler and internal clock is only needed to install once
 // for unit testing purposes the initializeLogging might be called

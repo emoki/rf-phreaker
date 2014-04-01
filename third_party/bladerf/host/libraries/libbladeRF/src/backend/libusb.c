@@ -1551,7 +1551,7 @@ static int lusb_get_device_speed(struct bladerf *dev,
 
     speed = libusb_get_device_speed(lusb->dev);
 	// Hard coded speed because it is erroneously reporting speed high.
-	speed = LIBUSB_SPEED_SUPER;
+	//speed = LIBUSB_SPEED_SUPER;
     if (speed == LIBUSB_SPEED_SUPER) {
         *device_speed = BLADERF_DEVICE_SPEED_SUPER;
     } else if (speed == LIBUSB_SPEED_HIGH) {

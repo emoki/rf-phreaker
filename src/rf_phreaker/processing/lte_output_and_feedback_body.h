@@ -70,7 +70,7 @@ public:
 	void operator()(lte_info info, lte_output_and_feedback_node::output_ports_type &out)
 	{
 		// Output basic tech.
-		io_->output_lte_sweep(convert_to_basic_data(*info.meas_, info.avg_rms_)).get();
+		io_->output_lte_sweep(convert_to_basic_data(*info.meas_, info.avg_rms_))/*.get()*/;
 
 		if(info.processed_data_.size()) {
 			auto bw = look_for_valid_bandwidth(info.processed_data_);
@@ -110,7 +110,7 @@ public:
 				}
 			}
 			if(lte.size()) {
-				io_->output(lte).get();
+				io_->output(lte)/*.get()*/;
 
 				// Check to see if the sampling_rate is correct for the bandwidth.  If not, remove old collection_info and add new one with correct bandwidth and sampling_rate.
 				auto bw = look_for_valid_bandwidth(info.processed_data_);

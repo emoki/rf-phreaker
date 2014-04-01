@@ -36,9 +36,7 @@ TEST(ProcessingGpsGraph, TestGeneral)
 			output.set_standard_output(true).get();
 			gps_graph graph;
 
-			graph.initialize_comm(&blade, &output, config);
-
-			graph.start();
+			graph.start(&blade, &output, config);
 
 			//graph.wait();
 
@@ -46,7 +44,7 @@ TEST(ProcessingGpsGraph, TestGeneral)
 
 			//std::this_thread::sleep_for(std::chrono::seconds(10));
 
-			graph.cancel();
+			graph.cancel_and_wait();
 		}
 		else
 			std::cout << "Unable to communicate to the scanner." << std::endl;

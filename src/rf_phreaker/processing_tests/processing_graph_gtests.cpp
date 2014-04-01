@@ -52,16 +52,14 @@ TEST(ProcessingGraph, TestGeneral)
 
 			processing_graph graph;
 			
-			graph.initialize_collection(&blade, &output, containers, config);
-
-			graph.start();
+			graph.start(&blade, &output, containers, config);
 
 			//graph.wait();
 
 			std::this_thread::sleep_for(std::chrono::minutes(45));
 			//std::this_thread::sleep_for(std::chrono::seconds(45));
 
-			graph.cancel();
+			graph.cancel_and_wait();
 		}
 		else
 			std::cout << "Unable to communicate to the scanner." << std::endl;
