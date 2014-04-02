@@ -33,7 +33,7 @@ enum TECHNOLOGIES_AND_BANDS
 	GSM_BAND_1800, // [1805 - 1880 MHZ]
 	GSM_BAND_1900, // [1930 - 1960 MHZ]
 	WCDMA_BAND_850, // operating band 5 [869 - 894 MHZ]
-	WCDMA_BAND_900, // operating band 8 [925 – 960 MHZ]
+	WCDMA_BAND_900, // operating band 8 [925 – 960 MHZ] **also includes [921 - 925 MHZ]**
 	WCDMA_BAND_1800, // operating band 3 [1805 - 1880 MHZ]
 	WCDMA_BAND_1900, // operating band 2 [1930 - 1990 MHZ]
 	WCDMA_BAND_2100, // operating band 1 and 4 [2110 - 2170 MHZ]

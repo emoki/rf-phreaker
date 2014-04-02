@@ -27,6 +27,8 @@ static rf_phreaker::operating_band convert_band(beagle_api::TECHNOLOGIES_AND_BAN
 	case WCDMA_BAND_1900:
 		b = rf_phreaker::UMTS_OPERATING_BAND_2;
 		break;
+	// Comply with beagle_api behavior.  The 2100 band is considered UMTS band 1 except for freqs xxxx.5 
+	// which are only valid in UMTS band 4. 
 	case WCDMA_BAND_2100:
 		b = rf_phreaker::UMTS_OPERATING_BAND_1;
 		break;

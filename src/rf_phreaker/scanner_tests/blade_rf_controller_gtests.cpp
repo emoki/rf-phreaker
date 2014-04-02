@@ -30,10 +30,6 @@ TEST(BladeControllerTest, TestBladeControllerGeneral)
 
 			auto blade_info = blade.get_scanner_blade_rf();
 
-			rf_phreaker::benchmark b("blade_benchmark_1.txt", true);
-
-			b.start_timer();
-
 			rf_phreaker::frequency_type das_freq = 888000000;
 			rf_phreaker::frequency_type nyc_umts_freq1 = 871800000;
 			rf_phreaker::frequency_type nyc_umts_freq2 = 876800000;
@@ -46,19 +42,63 @@ TEST(BladeControllerTest, TestBladeControllerGeneral)
 			std::string base_filename = "blade_samples_umts_876.8_";
 			rf_phreaker::frequency_type freq = nyc_umts_freq2;
 			rf_phreaker::time_type time_ns = milli_to_nano(42);
-			rf_phreaker::bandwidth_type bandwidth = khz(00);
-			//int sampling_rate = khz(30720); 
+			rf_phreaker::bandwidth_type bandwidth = khz(5000);
 			int sampling_rate = khz(4875);
 			//int sampling_rate = khz(3840);
 			//int sampling_rate = khz(1920);
-			rf_phreaker::scanner::gain_type gain(lms::LNA_MAX, 30, 0);
+			//int sampling_rate = khz(30720); 
+			rf_phreaker::scanner::gain_type gain(lms::LNA_MAX, 30, 30);
 
 			measurement_info data;
-			//for(int i = mhz(869); i < mhz(894); i += khz(100))
-			//	data = blade.get_rf_data(i, time_ns, bandwidth, gain, sampling_rate);
-			
-			std::ofstream file("gain_test.txt");
-			std::ofstream file_auto("gain_test_auto.txt");
+			//int errors = 0;
+			//for(int j = 0; j < 50; ++j) {
+			//	for(rf_phreaker::frequency_type i = mhz(2110); i <= mhz(2170); i += khz(200)) {
+			//		try {
+			//			data = blade.get_rf_data_use_auto_gain(i, time_ns, bandwidth, sampling_rate);
+			//		}
+			//		catch(const std::exception &err) {
+			//			std::cout << err.what();
+			//			++errors;
+			//		}
+			//	}
+			//	for(rf_phreaker::frequency_type i = mhz(921); i <= mhz(960); i += khz(200)) {
+			//		try {
+			//			data = blade.get_rf_data_use_auto_gain(i, time_ns, bandwidth, sampling_rate);
+			//		}
+			//		catch(const std::exception &err) {
+			//			std::cout << err.what();
+			//			++errors;
+			//		}
+			//	}
+			//}
+			//std::cout << "Total errors: " << errors << std::endl;
+
+			for(rf_phreaker::frequency_type i = mhz(2110); i <= mhz(2170); i += khz(200)) {
+				rf_phreaker::scanner::gain_type gain(lms::LNA_MAX, 30, 30);
+				data = blade.get_rf_data(i, time_ns, bandwidth, gain, sampling_rate);
+				//data = blade.get_rf_data_use_auto_gain(i, time_ns, bandwidth, sampling_rate);
+				auto avg_rms = ipp_helper::calculate_average_rms(data.get_iq().get(), data.get_iq().length());
+				gain_manager::gain_history g_history(data);
+
+				std::ofstream file("gain_test_nst_plus.txt", std::ios::app);
+				file << i / 1e6 << "\t" << data.gain().rxvga1_ << "\t" << data.gain().rxvga2_ << "\t" << data.gain().rxvga1_ + data.gain().rxvga2_ << "\t"
+					<< g_history.max_adc_ << "\t" << 20 * log10(g_history.max_adc_) << "\t"
+					<< avg_rms << "\t" << 20 * log10(avg_rms) << "\t" << 20 * log10(avg_rms) - data.gain().rxvga1_ - data.gain().rxvga2_ - 83 << "\n";
+			}
+			for(rf_phreaker::frequency_type i = mhz(921); i <= mhz(960); i += khz(200)) {
+				rf_phreaker::scanner::gain_type gain(lms::LNA_MAX, 30, 10);
+				data = blade.get_rf_data(i, time_ns, bandwidth, gain, sampling_rate);
+				//data = blade.get_rf_data_use_auto_gain(i, time_ns, bandwidth, sampling_rate);
+				auto avg_rms = ipp_helper::calculate_average_rms(data.get_iq().get(), data.get_iq().length());
+				gain_manager::gain_history g_history(data);
+
+				std::ofstream file("gain_test_nst_plus.txt", std::ios::app);
+				file << i / 1e6 << "\t" << data.gain().rxvga1_ << "\t" << data.gain().rxvga2_ << "\t" << data.gain().rxvga1_ + data.gain().rxvga2_ << "\t"
+					<< g_history.max_adc_ << "\t" << 20 * log10(g_history.max_adc_) << "\t"
+					<< avg_rms << "\t" << 20 * log10(avg_rms) << "\t" << 20 * log10(avg_rms) - data.gain().rxvga1_ - data.gain().rxvga2_ - 83 << "\n";
+			}
+			//std::ofstream file("gain_test.txt");
+			//std::ofstream file_auto("gain_test_auto.txt");
 
 
 
@@ -71,46 +111,32 @@ TEST(BladeControllerTest, TestBladeControllerGeneral)
 
 			//for(int j = 0; j < 2; ++j) {
 			//for(int i = 5; i <= 60; ++i) {
-				for(int i = 1; i <= 60; ++i) {
-					//gain.rxvga1_ = i <= 30 ? i : 30;
-					//gain.rxvga2_ = i > 30 ? i - 30 : 0;
+				//for(int i = 1; i <= 60; ++i) {
+				//	//gain.rxvga1_ = i <= 30 ? i : 30;
+				//	//gain.rxvga2_ = i > 30 ? i - 30 : 0;
 
-					data = blade.get_rf_data(freq, time_ns, bandwidth, gain, sampling_rate);
-					//gain_manager::gain_history tmp(data);
-					//auto avg_rms_ = ipp_helper::calculate_average_rms(data.get_iq().get(), data.get_iq().length());
-					//file << freq << "\t" << gain.rxvga1_ << "\t" << gain.rxvga2_ << "\t" << gain.rxvga1_ + gain.rxvga2_  << "\t" << 
-					//	tmp.max_adc_ << "\t" << 20 * log10(tmp.max_adc_) << "\t" << avg_rms_ << "\t" << 20 * log10(avg_rms_) << "\n";
+				//	data = blade.get_rf_data(freq, time_ns, bandwidth, gain, sampling_rate);
+				//	//gain_manager::gain_history tmp(data);
+				//	//auto avg_rms_ = ipp_helper::calculate_average_rms(data.get_iq().get(), data.get_iq().length());
+				//	//file << freq << "\t" << gain.rxvga1_ << "\t" << gain.rxvga2_ << "\t" << gain.rxvga1_ + gain.rxvga2_  << "\t" << 
+				//	//	tmp.max_adc_ << "\t" << 20 * log10(tmp.max_adc_) << "\t" << avg_rms_ << "\t" << 20 * log10(avg_rms_) << "\n";
 
-					//data = blade.get_rf_data_use_auto_gain(freq, time_ns, bandwidth, sampling_rate);
-					//gain_manager::gain_history tmp_auto(data);
+				//	//data = blade.get_rf_data_use_auto_gain(freq, time_ns, bandwidth, sampling_rate);
+				//	//gain_manager::gain_history tmp_auto(data);
 
-					//auto avg_rms_auto = ipp_helper::calculate_average_rms(data.get_iq().get(), data.get_iq().length());
+				//	//auto avg_rms_auto = ipp_helper::calculate_average_rms(data.get_iq().get(), data.get_iq().length());
 
-					///*file_auto*/std::cout << freq << "\t" << data.gain().rxvga1_ << "\t" << data.gain().rxvga2_ << "\t" << data.gain().rxvga1_ + data.gain().rxvga2_ << "\t" <<
-					//	tmp_auto.max_adc_ << "\t" << 20 * log10(tmp_auto.max_adc_) << "\t" << 
-					//	avg_rms_auto << "\t" << 20 * log10(avg_rms_auto) << "\n";
+				//	///*file_auto*/std::cout << freq << "\t" << data.gain().rxvga1_ << "\t" << data.gain().rxvga2_ << "\t" << data.gain().rxvga1_ + data.gain().rxvga2_ << "\t" <<
+				//	//	tmp_auto.max_adc_ << "\t" << 20 * log10(tmp_auto.max_adc_) << "\t" << 
+				//	//	avg_rms_auto << "\t" << 20 * log10(avg_rms_auto) << "\n";
 
-					data.collection_round(i);
+				//	data.collection_round(i);
 
-					std::string name = base_filename + boost::lexical_cast<std::string>(i) +".txt";
-					std::ofstream file(name.c_str());
-					file << data;
-				}
+				//	std::string name = base_filename + boost::lexical_cast<std::string>(i) +".txt";
+				//	std::ofstream file(name.c_str());
+				//	file << data;
+				//}
 			//}
-			b.stop_timer();
-			auto t = b.total_time_elapsed();
-			std::cout << t.wall / 1e9 << " wall, " << t.user / 1e9 << " user + " << t.system / 1e9 << " system" << std::endl;
-			blade_info = blade.get_scanner_blade_rf();
-
-			std::string str;
-			str.append("release_mode\t")
-				.append("vtune\t")
-				.append("blade_rf\t")
-				.append("\taverage_transer_rate B/s:\t")
-				.append(boost::lexical_cast<std::string>(((double)data.get_iq().length() * sizeof(int16_t)* 2 * (num_iterations)) / (b.total_time_elapsed().wall / 1e9)))
-				.append("\tsnapshot_time:\t")
-				.append(boost::lexical_cast<std::string>(time_ns / 1e9));
-			b.output_time_elapsed(str);
 		}
 	}
 	catch(const std::exception &err) {

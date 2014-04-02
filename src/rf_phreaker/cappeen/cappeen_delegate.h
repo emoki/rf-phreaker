@@ -104,22 +104,7 @@ public:
 			v[i].carrier_sl_ = umts.carrier_signal_level_;
 			v[i].collection_round_ = (uint32_t)umts.collection_round_;
 			v[i].cpich_ = umts.cpich_;
-
-			// To comply with beagle_api we make sure that any umts freqs that are within umts_operating_band_iv 
-			// are matched with umts_operating_band_iv
-			if(umts.carrier_frequency_ >= mhz(2110) && umts.carrier_frequency_ <= khz(2152600LL)) {
-				static channel_conversion conversion;
-				try {
-					v[i].uarfcn_ = conversion.frequency_to_uarfcn(umts.carrier_frequency_, UMTS_OPERATING_BAND_4);
-				}
-				catch(...)
-				{
-					LOG_L(WARNING) << "Error converting frequency (" << umts.carrier_frequency_ / 1e6 << "mhz) to UARFCN.";
-				}
-			}
-			else
-				v[i].uarfcn_ = umts.uarfcn_;
-
+			v[i].uarfcn_ = umts.uarfcn_;
 			v[i].ecio_ = umts.ecio_;
 			v[i].rscp_ = umts.rscp_;
 			v[i].mcc_ = umts.layer_3_.mcc_.to_uint16();

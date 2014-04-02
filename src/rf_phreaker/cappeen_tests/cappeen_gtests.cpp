@@ -88,6 +88,7 @@ TEST(Cappeen, TestMain)
 		info.collection_filename_ = "test_file";
 		std::vector<TECHNOLOGIES_AND_BANDS> tech_bands;
 		//tech_bands.push_back(WCDMA_BAND_850);
+		//tech_bands.push_back(WCDMA_BAND_900);
 		//tech_bands.push_back(WCDMA_BAND_1900);
 		//tech_bands.push_back(WCDMA_BAND_1800);
 		tech_bands.push_back(WCDMA_BAND_2100);

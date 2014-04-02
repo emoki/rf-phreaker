@@ -36,8 +36,6 @@ void convert_to_umts_data(umts_data &data, const scanner::measurement_info &info
 	data.rscp_ = data.carrier_signal_level_ + data.ecio_;
 	data.layer_3_ = umts.layer_3_;
 	static channel_conversion conversion;
-	if(info.get_operating_band() == UMTS_OPERATING_BAND_1 && !(info.frequency() % 200))
-		const_cast<scanner::measurement_info&>(info).set_operating_band(UMTS_OPERATING_BAND_4);
 	data.uarfcn_ = conversion.frequency_to_uarfcn(info.frequency(), info.get_operating_band());
 }
 

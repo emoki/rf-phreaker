@@ -347,7 +347,11 @@ processing::collection_info_containers cappeen_impl::create_collection_info_cont
 				});
 			}
 
-			frequency_range_creation::adjust_umts_sweep_collection_info(operating_bands_.get_band_freq_range(band), *it);
+			auto range = operating_bands_.get_band_freq_range(band);
+			// Comply with beagle_api behavior.  Adjust starting freq for operating band 8 so that it contains [921 - 925].
+			if(band == UMTS_OPERATING_BAND_8)
+				range.low_freq_hz_ = mhz(921) + khz(2400);
+			frequency_range_creation::adjust_umts_sweep_collection_info(range, *it);
 		}
 		else if(band >= FIRST_LTE_OPERATING_BAND && band <= LAST_LTE_OPERATING_BAND) {
 			auto it = std::find_if(containers.begin(), containers.end(), [&](const collection_info_container &c) {
@@ -365,6 +369,19 @@ processing::collection_info_containers cappeen_impl::create_collection_info_cont
 			frequency_range_creation::adjust_lte_sweep_collection_info(operating_bands_.get_band_freq_range(band), *it);
 		}
 	}
+
+
+	// Comply with beagle_api behavior.  Go thru and change any xxxx.5 freqs that are in the operating band 1 to operating band 4.
+	auto it = std::find_if(containers.begin(), containers.end(), [&](const collection_info_container &c) {
+		return c.tech_ == UMTS_SWEEP;
+	});
+	if(it != containers.end()) {
+		for(auto &ci : it->collection_info_group_) {
+			if(ci.operating_band_ == UMTS_OPERATING_BAND_1 && ci.freq_ % khz(200) != 0)
+				ci.operating_band_ = UMTS_OPERATING_BAND_4;
+		}
+	}
+
 	return containers;
 }
 
@@ -394,5 +411,5 @@ long cappeen_impl::input_new_license(const char *serial, uint32_t serial_buf_siz
 
 const char* cappeen_impl::api_version() const
 {
-	return "0.9.5";
+	return "0.9.6";
 }
