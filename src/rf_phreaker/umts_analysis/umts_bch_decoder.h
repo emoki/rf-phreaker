@@ -7,6 +7,8 @@
 #include "ipps.h"
 #include <vector>
 
+namespace rf_phreaker {
+
 #define UMTS_DECODE_FRAME_NUM_MAX                 16
 
 class umts_bch_decoder
@@ -94,3 +96,5 @@ private:
 	int down_factor_;
 	int cpich_resample_factor_;
 };
+
+}

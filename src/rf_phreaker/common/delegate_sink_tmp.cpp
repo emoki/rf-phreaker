@@ -1,9 +1,9 @@
 #include "rf_phreaker/common/delegate_sink_tmp.h"
 #include "rf_phreaker/common/delegate_sink.h"
 
-using namespace rf_phreaker;
-
 rf_phreaker::delegate_sink_tmp g_delegate_sink;
+
+namespace rf_phreaker {
 
 std::future<void> delegate_sink_tmp::log_error(const std::string &str, int code)
 {
@@ -25,4 +25,6 @@ template<typename Func>
 std::future<void> delegate_sink_tmp::connect_message(Func &func)
 {
 	return delegate_sink_async::instance().connect_message(func);
+}
+
 }

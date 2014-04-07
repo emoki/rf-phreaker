@@ -36,16 +36,22 @@ TEST(ProcessingGraph, TestGeneral)
 
 			collection_info_containers containers;
 			//containers.push_back(collection_info_container(UMTS_SWEEP, true));
-			containers.push_back(collection_info_container(UMTS_LAYER_3_DECODE, false));
+			//containers.push_back(collection_info_container(UMTS_LAYER_3_DECODE, false));
+			containers.push_back(collection_info_container(LTE_LAYER_3_DECODE, false));
 			auto it = containers.begin();
 			//auto &umts_sweep = (*it++);
-			auto &umts_layer_3 = (*it++);
+			//auto &umts_layer_3 = (*it++);
+			auto &lte_layer_3 = (*it++);
 			//for(rf_phreaker::frequency_type i = mhz(869); i < mhz(893); i += khz(100))
-			for(rf_phreaker::frequency_type i = mhz(2110); i < mhz(2170); i += khz(100))
+			//for(rf_phreaker::frequency_type i = mhz(2110); i < mhz(2170); i += khz(100))
 				//umts_sweep.adjust(add_collection_info(umts_sweep_collection_info(i, UMTS_OPERATING_BAND_4)));
 				//umts_sweep.adjust(add_collection_info(umts_sweep_collection_info(i, UMTS_OPERATING_BAND_5)));
 			//umts_sweep.adjust(add_collection_info(umts_sweep_collection_info(876800000)));
-			umts_layer_3.adjust(add_collection_info(umts_layer_3_collection_info(khz(2147500), UMTS_OPERATING_BAND_5)));
+			lte_layer_3.adjust(add_collection_info(lte_layer_3_collection_info(khz(2147500), lte_bandwidth_10_mhz_sampling_rate, mhz(10), LTE_OPERATING_BAND_1)));
+			lte_layer_3.adjust(add_collection_info(lte_layer_3_collection_info(mhz(2140), lte_bandwidth_10_mhz_sampling_rate, mhz(10), LTE_OPERATING_BAND_1)));
+			lte_layer_3.adjust(add_collection_info(lte_layer_3_collection_info(mhz(2120), lte_bandwidth_20_mhz_sampling_rate, mhz(20), LTE_OPERATING_BAND_1)));
+			//umts_layer_3.adjust(add_collection_info(lte_layer_3_collection_info(khz(2147500), UMTS_OPERATING_BAND_5)));
+			//umts_layer_3.adjust(add_collection_info(lte_layer_3_collection_info(khz(2147500), UMTS_OPERATING_BAND_5)));
 
 			data_output_async output;
 			output.set_standard_output(true);

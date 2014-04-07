@@ -16,6 +16,8 @@
 #include "lte_turbo_code.h"
 #include <iostream>
 
+namespace rf_phreaker {
+
 #define _LTEANALYSIS_PSCHSSCH_
 
 // LTE_CORR_METHOD will find peak correlations for combined PSCH/SSCH templates
@@ -229,3 +231,4 @@ int lte_cell_search(const Ipp32fc* SignalSamples,
 	
 }
 
+}

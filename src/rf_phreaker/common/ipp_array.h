@@ -9,6 +9,8 @@
 #include <stdexcept>
 #include <fstream>
 
+namespace rf_phreaker
+{
 
 template<typename D>
 class ipp_array;
@@ -364,3 +366,4 @@ inline std::istream& operator >>(std::istream &is, ipp_array<DataType> &t)
 	return is;
 }
 
+}

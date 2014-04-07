@@ -1,6 +1,7 @@
 #pragma once
 
 #include "rf_phreaker/common/common_types.h"
+#include "rf_phreaker/common/common_utility.h"
 #include "rf_phreaker/common/ipp_array.h"
 #include <iostream>
 
@@ -91,22 +92,43 @@ private:
 
 inline std::ostream& operator<<(std::ostream &os, const rf_phreaker::raw_signal &t)
 {
+	const char* header = "signal";
+	os << header << "\t";
 	os << 1 << "\t";
 	os << t.frequency_ << "\t";
 	os << t.sampling_rate_ << "\t";
-	os << t.bandwidth_ << "\t";
+	os << t.bandwidth_ << "\n";
 	os << t.get_iq();
 	return os;
 }
 
 inline std::istream& operator>>(std::istream &is, rf_phreaker::raw_signal &t)
 {
-	int version;
-	is >> version;
-	is >> t.frequency_;
-	is >> t.sampling_rate_;
-	is >> t.bandwidth_;
-	is >> t.get_iq();
+	const char* header = "signal";
+	std::string tmp;
+	std::vector<std::string> parsed_data;
+	std::regex pattern("\t");
+	do {
+		std::getline(is, tmp);
+		parsed_data = tokenize(tmp, pattern);
+	}
+	while(is.good() && (parsed_data.size() == 0 || parsed_data.begin()->compare(header) != 0));
+
+	if(parsed_data.size() && parsed_data.begin()->compare(header) == 0) {
+
+		int version = stoi(parsed_data[1]);
+		if(version >= 1) {
+			t.frequency_ = stoll(parsed_data[2]);
+			t.sampling_rate_ = stoll(parsed_data[3]);
+			t.bandwidth_ = stol(parsed_data[4]);
+		}
+
+		is >> t.get_iq();
+	}
+	else
+		throw rf_phreaker_error("Error reading raw_signal.");
+	
+	
 	return is;
 }
 

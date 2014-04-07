@@ -17,6 +17,8 @@
 #include "lte_turbo_code.h"
 #include <iostream>
 
+namespace rf_phreaker {
+
 /* Static Allocation of  memory for Channel Estimates per frame for all the antennas */	
 Ipp32fc h_est[OFDM_SYMBOLS_PER_FRAME * NUM_FRAMES * FFT_SIZE * NUM_ANTENNA_MAX];
 
@@ -229,3 +231,5 @@ while((frameStartSampleIndex + LteData[ii].frameNumSamples) < (6*LteData[ii].fra
 
 return 0;
 };
+
+}

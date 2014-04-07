@@ -7,6 +7,8 @@
 #include <iostream>
 #include <iomanip>
 
+namespace rf_phreaker {
+
 
 static std::string lte_io_delimiter = "\t";
 static std::string lte_io_spacer = " | ";
@@ -261,4 +263,4 @@ inline std::ostream& operator<<( std::ostream &os, const lte_measurement &t)
 	return os;
 }
 
-
+}

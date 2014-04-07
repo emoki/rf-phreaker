@@ -5,14 +5,14 @@
 #include "rf_phreaker/scanner/measurement_info.h"
 #include "rf_phreaker/umts_analysis/umts_measurement.h"
 #include "rf_phreaker/lte_analysis/lte_measurement.h"
+#include "rf_phreaker/scanner/calibration.h"
 
 namespace rf_phreaker { namespace processing {
 
 void convert_to_basic_data(basic_data &data, const scanner::measurement_info &info, double avg_rms)
 {
-	int offset = -83;
-	// TODO - Assuming the LNA is maxed.
-	data.carrier_signal_level_ = 20 * log10(avg_rms) - info.gain().rxvga1_ - info.gain().rxvga2_ + offset;
+	static scanner::calibration cali;
+	data.carrier_signal_level_ = cali.calculate_sl(avg_rms, info.gain());
 	data.carrier_bandwidth_ = info.bandwidth();
 	data.carrier_frequency_ = info.frequency();
 	data.collection_round_ = info.collection_round();

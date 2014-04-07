@@ -5,11 +5,7 @@
 #include "boost/math/special_functions.hpp"
 #include <map>
 
-//#include "frequency_correction.h"
-
-
-
-
+namespace rf_phreaker {
 
 umts_psch_with_brute_force::umts_psch_with_brute_force(const umts_config &config, const /*cpich_table_container&*/Ipp32fc* resampled_cpich_table)
 : pause_(-1)
@@ -396,4 +392,6 @@ void umts_psch_with_brute_force::do_cpich_correlation_and_add_candidate(uint32_t
 		meas.rms_signal_ = cpich_cross_correlator_.get_rms(peak_position);
 		new_measurements.push_back(meas);
 	}
+}
+
 }

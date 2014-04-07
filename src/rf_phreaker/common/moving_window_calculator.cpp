@@ -3,6 +3,8 @@
 #include "tbb/parallel_for.h"
 #include "tbb/tbb.h"
 
+namespace rf_phreaker {
+
 moving_window_calculator::moving_window_calculator()
 : output_length_(0)
 , moving_window_length_(0)
@@ -75,4 +77,6 @@ void moving_window_calculator::calculate_moving_window_of_rms(const Ipp32fc *sig
 	//});
 	ipp_helper::check_status(ippsDivC_32f(&total_energy_[0], (Ipp32f)moving_window_length, &rms_[0], rms_.length()));
 	ipp_helper::check_status(ippsSqrt_32f_I(&rms_[0], rms_.length()));
+}
+
 }

@@ -11,9 +11,9 @@ set (lte_analysis_VERSION_TWEAK 0)
 
 # Set the source files.
 set (lte_analysis_SRCS 
-	cc_tb.c
+	cc_tb.cpp
 	cc_tb.h
-	crc.c
+	crc.cpp
 	crc.h
 	lte_analysis.cpp
 	lte_analysis.h
@@ -25,10 +25,9 @@ set (lte_analysis_SRCS
 	lte_common.cpp
 	lte_common.h
 	lte_config.h
-	lte_crc_16.c
+	lte_crc_16.cpp
 	lte_crc_16.h
 	lte_decode_data.cpp
-	lte_decode_data.h
 	lte_errors.h
 	lte_fft.cpp
 	lte_fft.h
@@ -49,6 +48,7 @@ set (lte_analysis_SRCS
 	lte_synchronization.h
 	lte_turbo_code.cpp
 	lte_turbo_code.h
+	lte_turbo_code_init_data.h
 	lte_turbo_code_rate_match.cpp
 	lte_turbo_code_rate_match.h
 	lte_types.h

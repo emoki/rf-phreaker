@@ -276,9 +276,9 @@ gain_type blade_rf_controller::get_auto_gain(frequency_type freq, bandwidth_type
 	sampling_rate = mhz(32);
 
 	// If we have no history loop thru a couple times to zero in on the gain.
-	gain_manager_.update_gain(get_rf_data(freq, time_ns, bandwidth, gain_manager_.default_gain(), sampling_rate));
+	get_rf_data(freq, time_ns, bandwidth, gain_manager_.default_gain(), sampling_rate);
 	for(int i = 0; i < 2; ++i) {	
-		gain_manager_.update_gain(get_rf_data(freq, time_ns, bandwidth, gain_manager_.calculate_new_gain(freq, bandwidth), sampling_rate));
+		get_rf_data(freq, time_ns, bandwidth, gain_manager_.calculate_new_gain(freq, bandwidth), sampling_rate);
 	}
 	return gain_manager_.calculate_new_gain(freq, bandwidth);
 }
@@ -332,7 +332,7 @@ measurement_info blade_rf_controller::get_rf_data(frequency_type frequency, time
 		rf_switch_conversion_.convert_to_gpio(frequency, bandwidth, gpio)));
 
 	// BladeRF only accepts data num_samples that are a multiple of 1024.
-	int throw_away_samples = 10240*4;
+	int throw_away_samples = 10240*2;
 	throw_away_samples += 1024 - throw_away_samples % 1024;
 
 	int num_samples = rf_phreaker::convert_to_samples(time_ns, blade_sampling_rate);
@@ -351,8 +351,8 @@ measurement_info blade_rf_controller::get_rf_data(frequency_type frequency, time
 	measurement_info data(num_samples, frequency, blade_bandwidth, blade_sampling_rate,
 		gain);
 
-	for(int i = throw_away_samples; i < (throw_away_samples + num_samples) * 2; ++i)
-		sign_extend_12_bits(reinterpret_cast<int16_t*>(aligned_buffer)[i]);
+	//for(int i = throw_away_samples; i < (throw_away_samples + num_samples) * 2; ++i)
+	//	sign_extend_12_bits(reinterpret_cast<int16_t*>(aligned_buffer)[i]);
 
 	const auto beginning_of_iq = (Ipp16s*)&(*aligned_buffer_.get_aligned_array()) + (throw_away_samples * 2);
 
@@ -360,6 +360,8 @@ measurement_info blade_rf_controller::get_rf_data(frequency_type frequency, time
 		(Ipp32f*)data.get_iq().get(), data.get_iq().length() * 2));
 
 	gain_manager_.update_gain(data);
+
+	ipp_helper::subtract_dc(data.get_iq().get(), data.get_iq().length());
 
 	return data;
 }
@@ -409,6 +411,8 @@ measurement_info blade_rf_controller::get_rf_data(int num_samples)
 
 	ipp_helper::check_status(ippsConvert_16s32f((Ipp16s*)&(*aligned_buffer_.get_aligned_array()),
 		(Ipp32f*)data.get_iq().get(), data.get_iq().length() * 2));
+
+	ipp_helper::subtract_dc(data.get_iq().get(), data.get_iq().length());
 
 	return data;
 }

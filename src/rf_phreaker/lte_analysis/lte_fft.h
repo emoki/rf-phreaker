@@ -2,6 +2,8 @@
 
 #include "Ipp.h"
 
+namespace rf_phreaker {
+
 int Init_FFT_1024(int init );
 int FFT_1024( const Ipp32fc *Src, Ipp32fc *Dst );
 int InverseFFT_1024( const Ipp32fc *Src, Ipp32fc *Dst );
@@ -51,3 +53,5 @@ protected:
 	IppsFFTSpec_C_32fc* const m_FftSpec;
 	int m_Order;
 };
+
+}

@@ -4,6 +4,8 @@
 #include <cmath>
 #include <stdint.h>
 
+namespace rf_phreaker {
+
 class umts_utilities
 {
 public:
@@ -41,6 +43,6 @@ public:
 	}
 };
 
-
+}
 
 #endif

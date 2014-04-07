@@ -11,6 +11,8 @@
 #ifndef  __LTEPDCCH_H__
 #define  __LTEPDCCH_H__
 
+namespace rf_phreaker {
+
 #define LOG2_BASE_E                   1.44269504088896340736 
 
 #define LTE_NULL                      0xFFFF //Used as NULL in the interleaver/de-interleaver functions
@@ -149,5 +151,6 @@ int lte_cc_rate_dematching(Ipp32f *output_llr,Ipp32u output_len,Ipp32f *input_ll
 
 int lte_get_info_dci_format_1a(Ipp32u *dci_1a_bits,lte_info_dci_format &dci_format_info,lte_measurements &LteData,unsigned int cell_no);
 
+}
 
 #endif

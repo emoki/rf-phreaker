@@ -3,6 +3,8 @@
 #include "rf_phreaker/common/ipp_array.h"
 #include "rf_phreaker/common/moving_window_calculator.h"
 
+namespace rf_phreaker {
+
 class cross_correlation_incoherent_and_coherent_addition
 {
 public:
@@ -76,3 +78,4 @@ private:
 	int correlation_offset_;
 };
 
+}

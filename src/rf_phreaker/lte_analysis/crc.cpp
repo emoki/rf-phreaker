@@ -18,6 +18,8 @@
 
 #include "crc.h"
 
+namespace rf_phreaker {
+
 /*
  * Derive parameters from the standard-specific parameters in crc.h.
  */
@@ -304,3 +306,5 @@ crc crcFast(unsigned char const message[], int nBytes,unsigned int crc_num_bits)
     return (REFLECT_REMAINDER(remainder) ^ FINAL_XOR_VALUE);
 
 }   /* crcFast() */
+
+}

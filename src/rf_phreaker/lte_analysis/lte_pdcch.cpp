@@ -19,6 +19,7 @@
 #include "lte_pdcch_dci_table.h"
 #include "lte_crc_16.h"
 
+namespace rf_phreaker {
 
 //lte_info_dci_format_1a pdcch_info_dci_format_1a[6];
 lte_info_dci_format dci_format_info;
@@ -877,4 +878,6 @@ temp =0;
 //	     dci_format_info.pdcch_info_dci_format_1a[index_dci_1a].end_rb_idx,dci_format_info.pdcch_info_dci_format_1a[index_dci_1a].redundancy_version,dci_format_info.pdcch_info_dci_format_1a[index_dci_1a].tbs_size);
 
 return LTE_SUCCESS;
+}
+
 }

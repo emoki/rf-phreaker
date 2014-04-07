@@ -13,6 +13,7 @@ set (scanner_tests_SRCS
 	blade_rf_controller_gtests.cpp
 	byte_aligned_buffer_gtests.cpp
 	mock_scanner_comm.h
+	measurement_info_gtests.cpp
 	scanner_tests.cpp
 	${SRC_PLATFORM_SPECIFIC}/stdafx.cpp)
 

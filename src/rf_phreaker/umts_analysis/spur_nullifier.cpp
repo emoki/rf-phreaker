@@ -3,6 +3,8 @@
 
 #include <cmath>
 
+namespace rf_phreaker {
+
 spur_nullifier::spur_nullifier(double ecio_threshold_dbm, int signal_length)
 	: peak_threshold_(ecio_threshold_dbm)
 	, max_num_peaks_(500)
@@ -103,3 +105,4 @@ void spur_nullifier::null_relative_peaks_within_threshold()
 	}
 }
 
+}

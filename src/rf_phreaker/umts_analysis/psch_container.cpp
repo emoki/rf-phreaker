@@ -4,6 +4,8 @@
 #include "rf_phreaker/fir_filter/fir_filter.h"
 #include "rf_phreaker/common/ipp_helper.h"
 
+namespace rf_phreaker {
+
 psch_container::psch_container()
 : up_factor_(0)
 , down_factor_(0)
@@ -75,4 +77,6 @@ void psch_container::generate_resampled_psch(rf_phreaker::fir_filter *filter)
 	filter->filter(padded_psch.get(), resampled_psch_.get(), num_chips_ / down_factor_);
 
 	ipp_helper::normalize_signal(resampled_psch_.get(), resampled_psch_.length());
+}
+
 }

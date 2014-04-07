@@ -41,12 +41,12 @@ extern "C" {
 		rx_gain_vga1 valid values: 5 <-> 30
 		rx_gain_vga2 values: 0 <-> 30
 	*/
-	int DLL_PUBLIC get_rf_data(__int64 frequency_hz, int bandwidth_hz, __int64 sampling_rate_hz, int lna_gain, int rx_gain_vga1, int rx_gain_vga2, float *iq_data, int num_samples);
+	int DLL_PUBLIC get_rf_data(__int64 frequency_hz, int bandwidth_hz, __int64 sampling_rate_hz, int lna_gain, int rx_gain_vga1, int rx_gain_vga2, float *iq_data, int num_samples, float *signal_level);
 
 	/*
 	Does not change any lms parameters.  Only transfers IQ data.
 	*/
-	int DLL_PUBLIC only_get_rf_data(float *iq_data, int num_samples);
+	int DLL_PUBLIC only_get_rf_data(float *iq_data, int num_samples, float *signal_level);
 
 	/*
 		This value may not be saved between power cycles?
@@ -77,7 +77,6 @@ extern "C" {
 	/*
 	*/
 	int DLL_PUBLIC read_lms_reg(int address, int *value);
-
 
 	/* 
 		Return value of -999 represents description_size is not large enough to contain entire error message.

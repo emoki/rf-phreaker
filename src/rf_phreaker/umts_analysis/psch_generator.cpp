@@ -1,5 +1,7 @@
 #include "rf_phreaker/umts_analysis/psch_generator.h"
 
+namespace rf_phreaker {
+
 psch_generator::psch_generator()
 : a_(16)
 , neg_a_(16)
@@ -67,4 +69,6 @@ psch_generator::psch_generator()
 	index += a_.length();
 	psch_.copy_at(a_.get(), a_.length(), index);
 	index += a_.length();
+}
+
 }

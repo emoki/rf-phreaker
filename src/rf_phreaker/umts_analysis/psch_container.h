@@ -7,6 +7,8 @@
 
 namespace rf_phreaker { class fir_filter; }
 
+namespace rf_phreaker {
+
 class psch_container
 {
 public:
@@ -43,3 +45,4 @@ private:
 	int resampled_psch_length_;
 };
 
+}

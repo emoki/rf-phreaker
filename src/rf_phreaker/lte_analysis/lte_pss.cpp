@@ -2,6 +2,8 @@
 #include "lte_fft.h"
 #include <math.h>
 
+namespace rf_phreaker {
+
 #define LTE_SUBCARRIER_BW_HZ	15000
 #define PI						3.1415926
 
@@ -63,4 +65,6 @@ LtePrimarySyncSequence::~LtePrimarySyncSequence()
 		ippsFree(m_SeqT[psid]);
 		ippsFree(m_SeqF[psid]);
 	}
+}
+
 }

@@ -1,6 +1,8 @@
 #include "rf_phreaker/umts_analysis/umts_analysis_impl.h"
 #include "rf_phreaker/umts_analysis/umts_utilities.h"
 
+namespace rf_phreaker {
+
 std::shared_ptr<cpich_table_container> umts_analysis_impl::brute_force_cpich_table_;
 std::shared_ptr<cpich_table_container> umts_analysis_impl::bch_decoder_cpich_table_;
 std::mutex umts_analysis_impl::mutex_;
@@ -139,3 +141,4 @@ const cpich_table_container* umts_analysis_impl::bch_decoder_cpich_table_ptr()
 }
 
 
+}

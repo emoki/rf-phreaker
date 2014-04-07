@@ -5,9 +5,11 @@
 #include "rf_phreaker/lte_analysis/lte_measurement.h"
 #include "ipp.h"
 
-#ifdef __cplusplus
-extern "C" {
-#endif
+//#ifdef __cplusplus
+//extern "C" {
+//#endif
+
+namespace rf_phreaker {
 
 void generate_cell_RS(Ipp32fc *cell_RS, unsigned int *OFDM_SymbNos, unsigned int *pSymbNum, 
 	Ipp16u *frquencyIdx, unsigned int slotNo, unsigned int cellID, CYCLICPREFIX cyclicPrefixMode, 
@@ -54,7 +56,8 @@ void stDiversityDet(Ipp32f* detLLR, Ipp32fc* signalF, Ipp32fc* H, unsigned int s
 void softDeSrambling(Ipp32f* outLLR, Ipp32f* inLLR, unsigned int len, 
 	unsigned int *scramblingBits);
 
-#ifdef __cplusplus
-}
-#endif
+//#ifdef __cplusplus
+//}
+//#endif
 
+}

@@ -5,6 +5,8 @@
 #include <map>
 #include <vector>
 
+namespace rf_phreaker {
+
 typedef std::map<rf_phreaker::frequency_type, umts_measurements> measurement_map;
 
 class umts_measurement_container
@@ -47,3 +49,5 @@ public:
 private:
 	measurement_map meas_map_;
 };
+
+}

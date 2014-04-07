@@ -1,5 +1,6 @@
 #include "rf_phreaker/common/fft_helper.h"
 
+namespace rf_phreaker {
 
 fft_helper::fft_helper(int fft_order, int flag)
 : fft_spec_(0)
@@ -47,3 +48,4 @@ void fft_helper::fft_inverse(ipp_32fc_array &src, ipp_32fc_array &dst)
 	ipp_helper::check_status(ippsFFTInv_CToC_32fc(src.get(), dst.get(), fft_spec_, internal_buffer_.get()));
 }
 
+}

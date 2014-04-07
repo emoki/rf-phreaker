@@ -4,6 +4,9 @@
 #include <memory.h>
 
 #include "CC_Tb.h"
+#include "rf_phreaker/lte_analysis/lte_common.h"
+
+namespace rf_phreaker {
 
 #define MAXLOG 1e10  /* Define infinity */
 
@@ -268,3 +271,4 @@ void cc_decoding( unsigned int *decBits, Ipp32f* inLLR, unsigned int codeLen,
 }
 
 
+}

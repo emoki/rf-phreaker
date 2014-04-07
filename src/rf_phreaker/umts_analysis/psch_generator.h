@@ -2,6 +2,8 @@
 
 #include "rf_phreaker/common/ipp_array.h"
 
+namespace rf_phreaker {
+
 class psch_generator
 {
 public:
@@ -20,3 +22,5 @@ private:
 
 	ipp_32fc_array psch_;
 };
+
+}

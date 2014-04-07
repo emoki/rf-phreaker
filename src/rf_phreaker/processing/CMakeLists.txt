@@ -18,6 +18,9 @@ set (processing_SRCS
 	gps_body.h
 	gps_graph.h
 	graph_observer.h
+	frequency_correction_body.h
+	frequency_correction_graph.cpp
+	frequency_correction_graph.h
 	frequency_range_creation.h
 	layer_3_tracker.h
 	lte_output_and_feedback_body.h
@@ -28,7 +31,6 @@ set (processing_SRCS
 	data_output_async.h
 	processing_graph.cpp
 	processing_graph.h
-	processing_lte.h
 	scanner_io.h
 	switch_body.h
 	umts_output_and_feedback_body.h

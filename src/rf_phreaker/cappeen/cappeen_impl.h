@@ -54,7 +54,7 @@ private:
 
 	std::unique_ptr<init_log> logger_;
 
-	std::mutex mutex_;
+	std::recursive_mutex mutex_;
 };
 
 

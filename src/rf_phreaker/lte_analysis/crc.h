@@ -15,9 +15,11 @@
 
 #pragma once
 
-#ifdef __cplusplus
-extern "C" {
-#endif
+namespace rf_phreaker {
+
+//#ifdef __cplusplus
+//extern "C" {
+//#endif
 
 #ifndef _crc_h
 #define _crc_h
@@ -84,6 +86,8 @@ crc   crcFast(unsigned char const message[], int nBytes,unsigned int crc_num_bit
 
 #endif /* _crc_h */
 
-#ifdef __cplusplus
+//#ifdef __cplusplus
+//}
+//#endif
+
 }
-#endif

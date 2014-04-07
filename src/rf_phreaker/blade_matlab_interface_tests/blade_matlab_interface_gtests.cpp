@@ -34,11 +34,16 @@ TEST(BladeMatlabInterface, TestMain)
 	int usb_speed;
 	EXPECT_EQ(0, get_connected_device_info((int8_t*)device, buf_size, &usb_speed));
 
-	int num_samples = 100000;
+	int num_samples = /*100000*/500;
 	ipp_32fc_array iq_data(num_samples);
-	EXPECT_EQ(0, get_rf_data(mhz(886), mhz(5), khz(30720), 3, 30, 0, (float*)iq_data.get(), iq_data.length()));
+	float sl = 0;
+	EXPECT_EQ(0, get_rf_data(mhz(886), mhz(5), khz(30720), 3, 30, 0, (float*)iq_data.get(), iq_data.length(), &sl));
 
-	EXPECT_EQ(0, only_get_rf_data((float*)iq_data.get(), iq_data.length()));
+	EXPECT_EQ(0, only_get_rf_data((float*)iq_data.get(), iq_data.length(), &sl));
+
+	EXPECT_EQ(0, get_rf_data(mhz(886), mhz(5), khz(30720), 3, 30, 0, (float*)iq_data.get(), iq_data.length(), 0));
+
+	EXPECT_EQ(0, only_get_rf_data((float*)iq_data.get(), iq_data.length(), 0));
 
 	int lms_add = 0x23;
 	int lms_value = 0;

@@ -1,7 +1,7 @@
 #include "rf_phreaker/common/operating_band_range_specifier.h"
 #include "rf_phreaker/common/common_utility.h"
 
-using namespace rf_phreaker;
+namespace rf_phreaker {
 
 operating_band_range_specifier::operating_band_range_specifier(void)
 {
@@ -125,4 +125,6 @@ std::vector<operating_band_range> operating_band_range_specifier::find_avaliable
 	}
 
 	return valid_bands;
+}
+
 }

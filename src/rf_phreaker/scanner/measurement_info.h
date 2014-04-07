@@ -26,18 +26,21 @@ public:
 					 : raw_signal(num_samples, frequency, bandwidth, sampling_rate)
 					 , gain_(gain)
 					 , collection_round_(cr)
+					 , operating_band_(OPERATING_BAND_UNKNOWN)
 	{}
 
 	measurement_info(const measurement_info& other)
 		: raw_signal(other)
 		, gain_(other.gain_)
 		, collection_round_(other.collection_round_)
+		, operating_band_(other.operating_band_)
 	{}
 
 	measurement_info(measurement_info&& other)
 		: raw_signal(std::move(other))
 		, gain_(std::move(other.gain_))
 		, collection_round_(std::move(other.collection_round_))
+		, operating_band_(std::move(other.operating_band_))
 	{}
 
 	measurement_info& operator =(measurement_info other)
@@ -52,6 +55,7 @@ public:
 		raw_signal::swap(other);
 		std::swap(this->gain_, other.gain_);
 		std::swap(this->collection_round_, other.collection_round_);
+		std::swap(this->operating_band_, other.operating_band_);
 	}
 
 	const gain_type& gain() const { return gain_; }
@@ -75,6 +79,8 @@ private:
 
 inline std::ostream& operator<<(std::ostream &os, const rf_phreaker::scanner::measurement_info &t)
 {
+	const char* header = "measurement";
+	os << header << "\t";
 	os << 1 << "\t";
 	os << t.collection_round_ << "\t";
 	os << t.operating_band_ << "\t";
@@ -87,15 +93,34 @@ inline std::ostream& operator<<(std::ostream &os, const rf_phreaker::scanner::me
 
 inline std::istream& operator>>(std::istream &is, rf_phreaker::scanner::measurement_info &t)
 {
-	int version, i;
-	is >> version;
-	is >> t.collection_round_;
-	is >> i; t.operating_band_ = static_cast<operating_band>(i);
-	is >> i;  t.gain_.lna_gain_ = static_cast<lms::lna_gain_enum>(i);
-	is >> t.gain_.rxvga1_;
-	is >> t.gain_.rxvga2_;
-	is >> static_cast<rf_phreaker::raw_signal&>(t);
+	const char* header = "measurement";
+	std::string tmp;
+	std::vector<std::string> parsed_data;
+	std::regex pattern("\t");
+	do {
+		std::getline(is, tmp);
+		parsed_data = tokenize(tmp, pattern);
+	}
+	while(is.good() && (parsed_data.size() == 0 || parsed_data.begin()->compare(header) != 0));
+
+	if(parsed_data.size() && parsed_data.begin()->compare(header) == 0) {
+
+		int version = stoi(parsed_data[1]);
+		if(version >= 1) {
+			t.collection_round_ = stoll(parsed_data[2]);
+			int i = stoi(parsed_data[3]); t.operating_band_ = static_cast<operating_band>(i);
+			i = stoi(parsed_data[4]);  t.gain_.lna_gain_ = static_cast<lms::lna_gain_enum>(i);
+			t.gain_.rxvga1_ = stoi(parsed_data[5]);
+			t.gain_.rxvga2_ = stoi(parsed_data[6]);
+		}
+
+		is >> static_cast<rf_phreaker::raw_signal&>(t);
+	}
+	else
+		throw rf_phreaker_error("Error reading measurement_info.");
+
 	return is;
+
 }
 
 }}

@@ -3,13 +3,14 @@
 #include <stdint.h>
 #include "rf_phreaker/common/ipp_array.h"
 
+namespace rf_phreaker {
+
 class moving_window_calculator
 {
 public:
 	moving_window_calculator();
 	
 	~moving_window_calculator(void);
-
 
 	void calculate_moving_window_of_energy(const ipp_32fc_array &signal, int32_t moving_window_length);
 
@@ -45,3 +46,4 @@ private:
 	ipp_32f_array moving_window_ones_;
 };
 
+}

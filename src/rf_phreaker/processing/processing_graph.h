@@ -30,10 +30,6 @@ private:
 
 	void cancel();
 
-	void add_lte_sweep();
-
-	void add_gsm_sweep();
-
 	std::shared_ptr<tbb::flow::graph> graph_;
 
 	std::vector<std::shared_ptr<tbb::flow::graph_node>> nodes_;
@@ -44,7 +40,7 @@ private:
 
 	std::unique_ptr<std::thread> thread_;
 
-	std::mutex mutex_;
+	std::recursive_mutex mutex_;
 };
 
 

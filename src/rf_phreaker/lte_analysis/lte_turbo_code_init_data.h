@@ -11,6 +11,8 @@
 #ifndef  __LTE_TURBO_CODE_H__
 #define  __LTE_TURBO_CODE_H__ 
 
+namespace rf_phreaker {
+
 #define LTE_TURBO_CODE_NUM_STATES            8
 #define LTE_TURBO_CODE_CONSTRAINT_LENGHT     4 
 #define LTE_TURBO_CODE_INFINITY              10e10
@@ -257,5 +259,5 @@ int last_state_output[LTE_TURBO_CODE_NUM_STATES][4] = {-1,-1, 1, 1,
 
 
 
-
+}
 #endif

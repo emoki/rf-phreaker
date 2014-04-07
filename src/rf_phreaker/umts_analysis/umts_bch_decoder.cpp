@@ -9,6 +9,7 @@
 #include <assert.h>
 #include <iomanip>
 
+namespace rf_phreaker {
 using namespace layer_3_information;
 
 umts_bch_decoder::umts_bch_decoder(const umts_config &config, const /*cpich_table_container &*/Ipp32fc* cpich_table)
@@ -1296,4 +1297,6 @@ void umts_bch_decoder::consolidate_bit_stream(unsigned char bit_stream_index)
 		//consolidated_bit_stream_[bit_stream_position] = (uint8_t)bintodec(&dec[bit_stream_position*8], 8);
 	    consolidated_bit_stream_[bit_stream_position] = (uint8_t)bintodec(&decoded_bcch_stream[(UMTS_BCCH_TTI_BITSIZE*bit_stream_index)+(bit_stream_position*8)], 8); 
 	}
+}
+
 }

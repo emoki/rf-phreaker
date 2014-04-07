@@ -5,6 +5,8 @@
 #include <iostream>
 #include <thread>
 
+using namespace rf_phreaker;
+
 TEST(UmtsAnalysisTests, TestGeneral)
 {
 	try {

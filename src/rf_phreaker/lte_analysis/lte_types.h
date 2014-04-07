@@ -3,6 +3,8 @@
 #include "rf_phreaker/common/common_utility.h"
 #include <stdint.h>
 
+namespace rf_phreaker {
+
 #define TRUE							1
 #define FALSE							0
 #define PI								3.1415926
@@ -166,3 +168,4 @@ typedef uint32_t CARRIERBANDWIDTHTYPE;
 typedef uint16_t DELAYSPREADTYPE;
 typedef uint16_t SUBCARRIERSPACING;
 
+}

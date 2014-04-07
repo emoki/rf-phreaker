@@ -11,7 +11,7 @@
 #include "lte_crc_16.h"
 #include "pbch_interleaver_idx.h"
 
-
+namespace rf_phreaker {
 
 void getPBCHFreqIdx(unsigned int *PBCHFreqIdx0, CYCLICPREFIX cyclicPrefixMode, 
 	CELLIDTYPE cellID, unsigned int FFTSize)
@@ -441,4 +441,4 @@ int BCH_decoding(PBCHINFO* pbchInfo, Ipp32fc* inSignal, Ipp32fc* H,  Ipp32f* noi
 
 }
 
-
+}

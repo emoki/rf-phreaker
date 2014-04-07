@@ -4,6 +4,8 @@
 #include <boost/scoped_ptr.hpp>
 #include <list>
 
+namespace rf_phreaker {
+
 class spur_nullifier
 {
 public:
@@ -43,3 +45,4 @@ private:
 	std::size_t max_num_peaks_;
 };
 
+}

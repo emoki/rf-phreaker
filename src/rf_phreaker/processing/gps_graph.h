@@ -21,7 +21,7 @@ public:
 
 	void start(rf_phreaker::scanner::scanner_controller_interface *sc, data_output_async *out, const settings &config)
 	{
-		std::lock_guard<std::mutex> lock(mutex_);
+		std::lock_guard<std::recursive_mutex> lock(mutex_);
 
 		if(thread_ && thread_->joinable()) {
 			cancel();
@@ -61,7 +61,7 @@ public:
 
 	void cancel_and_wait()
 	{
-		std::lock_guard<std::mutex> lock(mutex_);
+		std::lock_guard<std::recursive_mutex> lock(mutex_);
 		cancel();
 		wait();
 	}
@@ -70,6 +70,7 @@ private:
 
 	void wait()
 	{
+		std::lock_guard<std::recursive_mutex> lock(mutex_);
 		if(thread_ && thread_->joinable()) {
 			thread_->join();
 		}
@@ -77,6 +78,7 @@ private:
 
 	void cancel()
 	{
+		std::lock_guard<std::recursive_mutex> lock(mutex_);
 		if(thread_ && thread_->joinable()) {
 			graph_->root_task()->cancel_group_execution();
 		}
@@ -89,7 +91,7 @@ private:
 
 	std::unique_ptr<std::thread> thread_;
 
-	std::mutex mutex_;
+	std::recursive_mutex mutex_;
 };
 
 }}

@@ -13,6 +13,7 @@
 
 #include "lte_common.h"
 
+namespace rf_phreaker {
 
 int lteDecodePCFICH(Ipp32fc* inSignal,
 	                Ipp32fc* hEst,
@@ -23,7 +24,7 @@ int lteDecodePCFICH(Ipp32fc* inSignal,
 					unsigned int subframeStartSampleIndex
 					);
 
-
+}
 
 
 

@@ -3,6 +3,8 @@
 
 #include "lte_fft.h"
 
+namespace rf_phreaker {
+
 /*****************************************************************************/
 /*
 * fft512()
@@ -383,4 +385,6 @@ int LteFFT::FftShift(const Ipp32fc *Src, Ipp32fc *Dst) const
 	ippsCopy_32fc(Src+halfLen, Dst, halfLen);
 
 	return 0;
+}
+
 }

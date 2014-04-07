@@ -16,6 +16,7 @@
 #include "lte_common.h"
 #include "lte_analysis.h"
 
+namespace rf_phreaker {
 
 int lteGetFrequencyIndicesPHICH( unsigned int *ltePCFICHFreqIndices,
 	                             lte_measurements &LteData,
@@ -207,5 +208,7 @@ ltePCFICHFreqIndices[4*zp +3] = k + index[3];
 }
 
 return LTE_SUCCESS;
+
+}
 
 }

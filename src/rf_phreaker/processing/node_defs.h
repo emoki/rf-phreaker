@@ -63,6 +63,7 @@ typedef tbb::flow::function_node<lte_info, lte_info> lte_layer_3_decode_node;
 
 typedef tbb::flow::multifunction_node<umts_info, std::tuple<add_remove_collection_info, tbb::flow::continue_msg>> umts_output_and_feedback_node;
 typedef tbb::flow::multifunction_node<lte_info, std::tuple<add_remove_collection_info, tbb::flow::continue_msg>> lte_output_and_feedback_node;
+typedef tbb::flow::multifunction_node<measurement_package, std::tuple<add_remove_collection_info, tbb::flow::continue_msg>> frequency_correction_node;
 
 typedef tbb::flow::source_node <tbb::flow::continue_msg> gps_start_node;
 typedef tbb::flow::function_node<tbb::flow::continue_msg, tbb::flow::continue_msg, tbb::flow::rejecting> gps_node;

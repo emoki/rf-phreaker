@@ -25,6 +25,7 @@ set (common_SRCS
 	exception_types.h
 	fft_helper.cpp
 	fft_helper.h
+	frequency_shifter.h
 	ipp_array.h
 	ipp_helper.h
 	log.h

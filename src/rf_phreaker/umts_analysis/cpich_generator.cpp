@@ -2,6 +2,7 @@
 #include "rf_phreaker/common/exception_types.h"
 #include <memory.h>
 
+namespace rf_phreaker {
 
 // NOTE: uninitialized static class members must be defined at file scope
 // in addition to declared in the class definition
@@ -89,3 +90,4 @@ void cpich_generator::create_cpich_signal(Ipp32fc *dst, uint32_t cpich_num, uint
 	}
 }
 
+}

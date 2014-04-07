@@ -1,4 +1,6 @@
 
+namespace rf_phreaker {
+
 
 unsigned int PBCHInterIdx0[1920]={
 	10, 26, 18, 2, 34, 14, 30, 22, 6, 38, 12, 28, 20, 4, 36, 16, 32, 24, 8, 40, 9, 25, 17, 1, 33, 13, 
@@ -159,3 +161,4 @@ unsigned int PBCHInterIdx1[1728]={
 
 			
 
+}

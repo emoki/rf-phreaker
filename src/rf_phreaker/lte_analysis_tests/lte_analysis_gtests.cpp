@@ -6,14 +6,16 @@
 #include <boost/lexical_cast.hpp>
 #include <iostream>
 
+using namespace rf_phreaker;
+
 TEST(LteAnalysisTests, TestGeneral)
 {
 	try {
 		const int num_iterations = 60;
-		//std::string base_filename = "e:/werk/maharashtra/projects/rf_phreaker/rf_phreaker/test_files/blade_samples_lte_4875_";
-		std::string base_filename = "e:/werk/maharashtra/projects/rf_phreaker/rf_phreaker/test_files/blade_samples_lte_739_";
-		//std::string base_filename = "e:/werk/maharashtra/projects/rf_phreaker/rf_phreaker/test_files/blade_samples_4875_";
-		//std::string base_filename = "e:/werk/maharashtra/projects/rf_phreaker/rf_phreaker/test_files/signal_lte_4875_";
+		//std::string base_filename = "../../../../rf_phreaker/test_files/blade_samples_lte_4875_";
+		std::string base_filename = "../../../../rf_phreaker/test_files/blade_samples_lte_739_";
+		//std::string base_filename = "../../../../rf_phreaker/test_files/blade_samples_4875_";
+		//std::string base_filename = "../../../../rf_phreaker/test_files/signal_lte_4875_";
 
 		lte_config config;
 		config.sampling_rate(khz(4875));

@@ -4,6 +4,8 @@
 #include "rf_phreaker/layer_3_common/lte_rrc_message_aggregate.h"
 #include <vector>
 
+namespace rf_phreaker {
+
 class lte_measurement;
 typedef std::vector<lte_measurement> lte_measurements;
 
@@ -92,3 +94,5 @@ public:
 		layer_3_.clear();
 	}
 };
+
+}

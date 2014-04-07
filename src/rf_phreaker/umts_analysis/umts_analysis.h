@@ -29,8 +29,10 @@
 #include "rf_phreaker/umts_analysis/umts_config.h"
 #include "rf_phreaker/common/raw_signal.h"
 
-class umts_analysis_impl;
 
+namespace rf_phreaker { 
+
+class umts_analysis_impl;
 
 class DLL_PUBLIC umts_analysis
 {
@@ -52,3 +54,5 @@ public:
 private:
 	umts_analysis_impl *impl_;
 };
+
+}

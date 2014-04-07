@@ -18,12 +18,11 @@ processing_graph::processing_graph(void)
 {}
 
 processing_graph::~processing_graph(void)
-{
-}
+{}
 
 void processing_graph::start(scanner_controller_interface *sc, data_output_async *out, const collection_info_containers &collection_info, const rf_phreaker::settings &config)
 {
-	std::lock_guard<std::mutex> lock(mutex_);
+	std::lock_guard<std::recursive_mutex> lock(mutex_);
 
 	if(thread_ && thread_->joinable()) {
 		cancel();
@@ -41,13 +40,13 @@ void processing_graph::start(scanner_controller_interface *sc, data_output_async
 			start_node_ = std::make_shared<start_node>(*graph_, [=](add_remove_collection_info &info) { return true;	}, false);
 			collection_manager_node_ = std::make_shared<collection_manager_node>(*graph_, tbb::flow::serial, collection_manager_body(processing_, sc, collection_info));
 
-			auto max_limit =  tbb::task_scheduler_init::default_num_threads();
+			auto max_limit = tbb::task_scheduler_init::default_num_threads();
 			if(config.num_items_in_flight_)
 				max_limit = config.num_items_in_flight_;
 
 			auto limiter = std::make_shared<limiter_node>(*graph_, max_limit);
 
-	
+
 			auto umts_sweep_cell_search = std::make_shared<umts_cell_search_node>(*graph_, tbb::flow::serial, umts_processing_body(
 				umts_cell_search_settings(config.umts_sweep_collection_, config.umts_decode_layer_3_, config.umts_sweep_general_)));
 			auto umts_sweep_output_feedback = std::make_shared<umts_output_and_feedback_node>(*graph_, tbb::flow::serial, umts_sweep_output_and_feedback_body(out));
@@ -132,6 +131,7 @@ void processing_graph::start(scanner_controller_interface *sc, data_output_async
 
 void processing_graph::wait()
 {
+	std::lock_guard<std::recursive_mutex> lock(mutex_);
 	if(thread_ && thread_->joinable()) {
 		thread_->join();
 	}
@@ -139,6 +139,7 @@ void processing_graph::wait()
 
 void processing_graph::cancel()
 {
+	std::lock_guard<std::recursive_mutex> lock(mutex_);
 	if(thread_ && thread_->joinable()) {
 		graph_->root_task()->cancel_group_execution();
 	}
@@ -146,7 +147,7 @@ void processing_graph::cancel()
 
 void processing_graph::cancel_and_wait()
 {
-	std::lock_guard<std::mutex> lock(mutex_);
+	std::lock_guard<std::recursive_mutex> lock(mutex_);
 	cancel();
 	wait();
 }

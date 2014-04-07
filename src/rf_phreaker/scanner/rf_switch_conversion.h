@@ -28,7 +28,7 @@ class rf_switch_conversion
 public:
 	rf_switch_conversion(void)
 	{
-		switches_.push_back(rf_switch(mhz(700), mhz(760), BOOST_BINARY(001 0100 001 0000 0000)));
+		//switches_.push_back(rf_switch(mhz(700), mhz(760), BOOST_BINARY(001 0100 001 0000 0000)));
 		switches_.push_back(rf_switch(mhz(921), mhz(960), BOOST_BINARY(001 1010 010 0000 0000)));
 		switches_.push_back(rf_switch(mhz(1805), mhz(1880), BOOST_BINARY(001 1111 010 0000 0000)));
 		switches_.push_back(rf_switch(mhz(2110), mhz(2170), BOOST_BINARY(001 0100 100 0000 0000)));
@@ -56,9 +56,9 @@ public:
 
 		if(rf_sw != nullptr)
 			new_gpio |= rf_sw->setting_;
-		else {
-			LOG_L(WARNING) << "Frequency (" << freq / 1e6 << "mhz) and bandwidth (" << bw / 1e6 << "mhz) is outside the available RF paths.";
-		}
+		//else {
+		//	LOG_L(WARNING) << "Frequency (" << freq / 1e6 << "mhz) and bandwidth (" << bw / 1e6 << "mhz) is outside the available RF paths.";
+		//}
 		return new_gpio;
 	}
 

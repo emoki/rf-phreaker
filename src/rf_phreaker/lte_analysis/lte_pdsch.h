@@ -11,7 +11,7 @@
 #ifndef  __LTEPDSCH_H__
 #define  __LTEPDSCH_H__
 
-
+namespace rf_phreaker {
 
 #define LTE_PDSCH_CRC_LEN              24
 #define LTE_PDSCH_TURBO_TAIL_BITS       4
@@ -55,12 +55,6 @@ int lte_pdsch_get_symbols (Ipp32fc* inSignal,
 						   unsigned int end_rd);
 
 
-
-
-
-
-
-
-
+}
 
 #endif

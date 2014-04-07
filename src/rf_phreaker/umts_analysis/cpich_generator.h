@@ -4,6 +4,8 @@
 #include "ipp.h"
 #include <stdint.h>
 
+namespace rf_phreaker {
+
 class cpich_generator
 {
 public:
@@ -18,3 +20,4 @@ protected:
 	static __int8 *m_Zn[N_CPICH_CODES][2];
 };
 
+}

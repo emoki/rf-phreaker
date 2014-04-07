@@ -12,12 +12,10 @@ class umts_cell_search_settings
 {
 public:
 	umts_cell_search_settings(const collection_settings &s, const layer_3_settings &l, const umts_general_settings &g)
-		: layer_3_(l), umts_general_(g)
-	{
-		umts_config_.sampling_rate((int)s.sampling_rate_);
-		umts_config_.clock_rate((int)s.sampling_rate_);
-		umts_config_.max_signal_length(rf_phreaker::convert_to_samples(s.collection_time_, s.sampling_rate_));
-	}
+		: layer_3_(l)
+		, umts_general_(g)
+		, umts_config_((int)s.sampling_rate_, (int)s.sampling_rate_, rf_phreaker::convert_to_samples(s.collection_time_, s.sampling_rate_))
+	{}
 	
 	umts_config umts_config_;
 	layer_3_settings layer_3_;
@@ -85,7 +83,7 @@ public:
 		// If no measurements were greater than the decode_threshold and we are not tracking any cells on this freq, add the cell with the greatest ecio if
 		// it meets the min decode threshold.
 		if(!tracker_.is_freq_in_history(freq)) {
-			umts_measurement meas; 
+			umts_measurement meas;
 			meas.ecio_ = -99;
 			for(auto &data : info.processed_data_) {
 				if(data.ecio_ > meas.ecio_)

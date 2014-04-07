@@ -5,7 +5,9 @@
 #include "rf_phreaker/common/common_types.h"
 #include "ipp.h"
 
-namespace rf_phreaker { class fir_filter; }
+namespace rf_phreaker {
+
+class fir_filter;
 
 class cpich_table_container
 {
@@ -34,7 +36,7 @@ private:
 
 	void configure(int up_factor, int down_factor, int num_chips);
 
-	void generate_resampled_cpich_table(rf_phreaker::fir_filter *filter);
+	void generate_resampled_cpich_table(fir_filter *filter);
 
 	ipp_32fc_array cpich_table_;
 	int num_chips_;
@@ -44,3 +46,4 @@ private:
 	int resampled_cpich_length_;
 };
 
+}

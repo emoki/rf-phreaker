@@ -4,6 +4,8 @@
 #include "lte_pss.h"
 
 
+namespace rf_phreaker {
+
 //typedef struct
 //{
 //	unsigned int ID;
@@ -64,3 +66,4 @@ int calculateRSValues(const Ipp32fc *signal384, unsigned int cellIDAll,
 //	int IFUpShiftOne(const Ipp32fc *Src, Ipp32fc *Dst, unsigned int NumSamples) const;
 //};
 
+}

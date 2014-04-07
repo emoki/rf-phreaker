@@ -17,6 +17,8 @@
 #include "lte_turbo_code_rate_match.h"
 
 
+namespace rf_phreaker {
+
 Ipp32f adjusted_input[6144],adjusted_input_1[6144],sequence_intrvd_0[6144],sequence_intrvd_1[6144],sequence_intrvd_2[6144];
 Ipp32f output_sequence_0[6144],output_sequence_1[6144],output_sequence_2[6144];
 Ipp32f sequence_0_matrix[128][32], sequence_1_matrix[128][32];
@@ -192,4 +194,6 @@ index = index+3;
 
 
 return LTE_SUCCESS;
+}
+
 }

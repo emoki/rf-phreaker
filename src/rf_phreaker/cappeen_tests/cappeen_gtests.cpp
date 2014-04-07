@@ -91,12 +91,11 @@ TEST(Cappeen, TestMain)
 		//tech_bands.push_back(WCDMA_BAND_900);
 		//tech_bands.push_back(WCDMA_BAND_1900);
 		//tech_bands.push_back(WCDMA_BAND_1800);
-		tech_bands.push_back(WCDMA_BAND_2100);
-		//tech_bands.push_back(LTE_BAND_12);
-		//tech_bands.push_back(LTE_BAND_1);
-		//tech_bands.push_back(LTE_BAND_2);
-		//tech_bands.push_back(LTE_BAND_5);
-		//tech_bands.push_back(LTE_BAND_23);
+		//tech_bands.push_back(WCDMA_BAND_2100);
+		tech_bands.push_back(LTE_BAND_1);
+		tech_bands.push_back(LTE_BAND_12);
+		tech_bands.push_back(LTE_BAND_2);
+		tech_bands.push_back(LTE_BAND_5);
 		info.tech_and_bands_to_sweep_.elements_ = &tech_bands[0];
 		info.tech_and_bands_to_sweep_.num_elements_ = tech_bands.size();
 
@@ -134,4 +133,100 @@ TEST(Cappeen, TestMain)
 
 	EXPECT_EQ(0, cappeen_clean_up());
 	//system("pause");
+}
+
+TEST(Cappeen, NoCleanup)
+{
+	//system("pause");
+
+	std::cout << cappeen_api_version() << std::endl;
+
+	output out;
+	EXPECT_EQ(0, cappeen_initialize(&out));
+
+	std::array<char, 1024 * 10> serials;
+	EXPECT_EQ(0, cappeen_list_available_units(&serials[0], serials.size()));
+
+	std::string serial(&serials[0]);
+	serial = serial.substr(0, serial.find_first_of(';'));
+
+	if(!serial.empty()) {
+
+		collection_info info;
+		info.collection_filename_ = "test_file";
+		std::vector<TECHNOLOGIES_AND_BANDS> tech_bands;
+		tech_bands.push_back(LTE_BAND_1);
+		info.tech_and_bands_to_sweep_.elements_ = &tech_bands[0];
+		info.tech_and_bands_to_sweep_.num_elements_ = tech_bands.size();
+
+		EXPECT_EQ(0, cappeen_open_unit(&serial[0], serial.size()));
+		EXPECT_EQ(0, cappeen_start_collection(info));
+
+		std::this_thread::sleep_for(std::chrono::seconds(10));
+
+		EXPECT_EQ(0, cappeen_stop_collection());
+		EXPECT_EQ(0, cappeen_close_unit(&serial[0], serial.size()));
+	}
+}
+
+TEST(Cappeen, NoCleanupNoClose)
+{
+	//system("pause");
+
+	std::cout << cappeen_api_version() << std::endl;
+
+	output out;
+	EXPECT_EQ(0, cappeen_initialize(&out));
+
+	std::array<char, 1024 * 10> serials;
+	EXPECT_EQ(0, cappeen_list_available_units(&serials[0], serials.size()));
+
+	std::string serial(&serials[0]);
+	serial = serial.substr(0, serial.find_first_of(';'));
+
+	if(!serial.empty()) {
+
+		collection_info info;
+		info.collection_filename_ = "test_file";
+		std::vector<TECHNOLOGIES_AND_BANDS> tech_bands;
+		tech_bands.push_back(LTE_BAND_1);
+		info.tech_and_bands_to_sweep_.elements_ = &tech_bands[0];
+		info.tech_and_bands_to_sweep_.num_elements_ = tech_bands.size();
+
+		EXPECT_EQ(0, cappeen_open_unit(&serial[0], serial.size()));
+		EXPECT_EQ(0, cappeen_start_collection(info));
+
+		std::this_thread::sleep_for(std::chrono::seconds(1));
+
+		EXPECT_EQ(0, cappeen_stop_collection());
+	}
+}
+
+TEST(Cappeen, NoCleanupNoCloseNoStop)
+{
+	std::cout << cappeen_api_version() << std::endl;
+
+	output out;
+	EXPECT_EQ(0, cappeen_initialize(&out));
+
+	std::array<char, 1024 * 10> serials;
+	EXPECT_EQ(0, cappeen_list_available_units(&serials[0], serials.size()));
+
+	std::string serial(&serials[0]);
+	serial = serial.substr(0, serial.find_first_of(';'));
+
+	if(!serial.empty()) {
+
+		collection_info info;
+		info.collection_filename_ = "test_file";
+		std::vector<TECHNOLOGIES_AND_BANDS> tech_bands;
+		tech_bands.push_back(LTE_BAND_1);
+		info.tech_and_bands_to_sweep_.elements_ = &tech_bands[0];
+		info.tech_and_bands_to_sweep_.num_elements_ = tech_bands.size();
+
+		EXPECT_EQ(0, cappeen_open_unit(&serial[0], serial.size()));
+		EXPECT_EQ(0, cappeen_start_collection(info));
+
+		std::this_thread::sleep_for(std::chrono::seconds(1));
+	}
 }

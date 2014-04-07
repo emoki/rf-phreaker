@@ -10,6 +10,8 @@
 #include "lte_fft.h"
 
 
+namespace rf_phreaker {
+
 void generate_cell_RS(Ipp32fc *cell_RS, unsigned int *OFDM_SymbNos, unsigned int *pSymbNum, 
 	Ipp16u *frquencyIdx, unsigned int slotNo, unsigned int cellID, CYCLICPREFIX cyclicPrefixMode, 
 	unsigned int N_RB_DL, unsigned int N_RB_max_DL, unsigned int antPort)
@@ -817,3 +819,4 @@ void *allocate(unsigned N, unsigned size)
 }
 
 
+}

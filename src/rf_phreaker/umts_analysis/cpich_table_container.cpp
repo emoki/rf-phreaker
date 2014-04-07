@@ -5,6 +5,8 @@
 #include "rf_phreaker/common/ipp_helper.h"
 #include "rf_phreaker/fir_filter/fir_filter.h"
 
+namespace rf_phreaker {
+
 cpich_table_container::cpich_table_container()
 	: up_factor_(0)
 	, down_factor_(0)
@@ -93,4 +95,6 @@ void cpich_table_container::generate_resampled_cpich_table(rf_phreaker::fir_filt
 		
 		cpich_idx += resampled_cpich_length_;
 	}
+}
+
 }

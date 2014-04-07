@@ -2,6 +2,8 @@
 
 #include <stdint.h>
 
+namespace rf_phreaker {
+
 class lte_config
 {
 public:
@@ -24,3 +26,5 @@ private:
 	int clock_rate_;
 	int max_signal_length_;
 };
+
+}

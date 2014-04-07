@@ -3,8 +3,7 @@
 #include "rf_phreaker/common/concurrent.h"
 #include <boost/signals2.hpp>
 
-namespace rf_phreaker
-{
+namespace rf_phreaker {
 
 typedef boost::signals2::signal<void(const std::string &, int)> sink_type;
 

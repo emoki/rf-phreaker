@@ -1,6 +1,8 @@
 #include "rf_phreaker/umts_analysis/cross_correlation_incoherent_and_coherent_addition.h"
 #include <assert.h>
 
+namespace rf_phreaker {
+
 cross_correlation_incoherent_and_coherent_addition::cross_correlation_incoherent_and_coherent_addition(void)
 	: num_coherent_windows_(0)
 	, num_iterations_(0)
@@ -143,3 +145,4 @@ void cross_correlation_incoherent_and_coherent_addition::normalize_output()
 }
 
 
+}

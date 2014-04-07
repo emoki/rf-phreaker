@@ -2,10 +2,18 @@
 #include "rf_phreaker/blade_matlab_interface/matlab_interface_helper.h"
 #include "rf_phreaker/common/exception_types.h"
 #include "rf_phreaker/common/log.h"
+#include "rf_phreaker/scanner/calibration.h"
 
 using namespace rf_phreaker;
 using namespace rf_phreaker::scanner;
 using namespace rf_phreaker::matlab_interface;
+
+float calculate_sl(measurement_info &meas)
+{
+	auto rms = ipp_helper::calculate_average_rms(meas.get_iq().get(), meas.get_iq().length());
+	calibration cali;
+	return (float)cali.calculate_sl(rms, meas.gain());
+}
 
 int start_logging()
 {
@@ -160,7 +168,7 @@ int get_connected_device_info(int8_t *serial, int serial_size, int *usb_speed)
 	return matlab_interface_error_general;
 }
 
-int get_rf_data(int64_t frequency_hz, int bandwidth_hz, int64_t sampling_rate_hz, int lna_gain, int rx_gain_vga1, int rx_gain_vga2, float *iq_data, int num_samples)
+int get_rf_data(int64_t frequency_hz, int bandwidth_hz, int64_t sampling_rate_hz, int lna_gain, int rx_gain_vga1, int rx_gain_vga2, float *iq_data, int num_samples, float *sl)
 {
 	try {
 		check_null(iq_data);
@@ -187,6 +195,9 @@ int get_rf_data(int64_t frequency_hz, int bandwidth_hz, int64_t sampling_rate_hz
 
 		memcpy(iq_data, &meas.get_iq()[0], num_samples * sizeof(ipp_32fc_array::data_type_));
 
+		if(sl != nullptr) 
+			*sl = calculate_sl(meas);
+
 		return matlab_interface_no_error;
 	}
 	catch(rf_phreaker::rf_phreaker_error &err) {
@@ -199,7 +210,7 @@ int get_rf_data(int64_t frequency_hz, int bandwidth_hz, int64_t sampling_rate_hz
 	return matlab_interface_error_general;
 }
 
-int only_get_rf_data(float *iq_data, int num_samples)
+int only_get_rf_data(float *iq_data, int num_samples, float *sl)
 {
 	try {
 		check_null(iq_data);
@@ -207,6 +218,9 @@ int only_get_rf_data(float *iq_data, int num_samples)
 		auto meas = controller.get_rf_data(num_samples);
 
 		memcpy(iq_data, &meas.get_iq()[0], num_samples * sizeof(ipp_32fc_array::data_type_));
+
+		if(sl != nullptr) 
+			*sl = calculate_sl(meas);
 
 		return matlab_interface_no_error;
 	}

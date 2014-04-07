@@ -1,5 +1,7 @@
 #pragma once
 
+namespace rf_phreaker {
+
 #define UMTS_CHIP_RATE_HZ 3840000L
 #define N_SLOTS_PER_FRAME	(15)
 #define FRAME_PERIOD_SEC	(0.01)					// Frame duration in seconds
@@ -15,3 +17,4 @@
 
 #define UMTS_BCCH_TTI_BITSIZE        270
 
+}

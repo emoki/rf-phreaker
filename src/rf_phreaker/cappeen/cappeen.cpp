@@ -2,9 +2,10 @@
 #include "rf_phreaker/cappeen/cappeen_impl.h"
 #include <memory>
 
-using namespace rf_phreaker::cappeen_api;
 
-std::unique_ptr<cappeen_impl> impl;
+namespace rf_phreaker { namespace cappeen_api { std::unique_ptr<cappeen_impl> impl; }}
+
+using namespace rf_phreaker::cappeen_api;
 
 long cappeen_initialize(beagle_api::beagle_delegate *del)
 {
@@ -65,3 +66,4 @@ const char* cappeen_api_version()
 {
 	return impl->api_version();
 }
+

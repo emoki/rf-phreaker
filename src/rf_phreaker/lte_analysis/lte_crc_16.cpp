@@ -7,6 +7,8 @@
 
 #include "crc.h"
 
+namespace rf_phreaker {
+
 #define WIDTH    (8 * sizeof(crc))
 #define TOPBIT   (1 << (WIDTH - 1))
 
@@ -77,5 +79,7 @@ void lte_crc_24(unsigned int *outSeq, unsigned char *inSeq, unsigned int num_byt
 	results1 = crcFast(inSeq, num_bytes,24);
 	//results2 = crcSlow(inSeq,num_bytes);
 	*outSeq = results1;
+
+}
 
 }

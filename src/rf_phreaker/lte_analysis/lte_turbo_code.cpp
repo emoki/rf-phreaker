@@ -17,6 +17,8 @@
 #include "lte_turbo_code_init_data.h"
 #include "lte_turbo_code.h"
 
+namespace rf_phreaker {
+
 /*
 *********************************************************************************************************
 * Function:
@@ -260,4 +262,6 @@ for(unsigned int mm=0;mm<num_bits;mm++)
 }
 
 return LTE_SUCCESS;
+}
+
 }

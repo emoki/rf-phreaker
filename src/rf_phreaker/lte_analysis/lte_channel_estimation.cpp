@@ -8,6 +8,8 @@
 #include "lte_channel_estimation.h"
 #include "lte_common.h"
 
+namespace rf_phreaker {
+
 
 // Output full format of channel matrix for a subframe
 /*
@@ -1174,7 +1176,7 @@ clock_t end_nvar=clock();
 }
 
 
-
+}
 
 
 

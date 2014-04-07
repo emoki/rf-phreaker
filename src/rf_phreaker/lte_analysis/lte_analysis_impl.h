@@ -7,9 +7,7 @@
 #include <map>
 #include <mutex>
 
-#define LTE_ANALYSIS_IF_STEPSIZE_KHZ			100
-#define LTE_ANALYSIS_PSS_SEARCH_MAX_IF_KHZ		1500
-#define LTE_ANALYSIS_PSS_SEARCH_MAX_NUM_IF		(((2*LTE_ANALYSIS_PSS_SEARCH_MAX_IF_KHZ)/LTE_ANALYSIS_IF_STEPSIZE_KHZ) + 1)
+namespace rf_phreaker {
 
 int lte_cell_search(const Ipp32fc* SignalSamples,
 					unsigned int NumSamples,
@@ -20,6 +18,10 @@ int lte_decode_data(const Ipp32fc* SignalSamples,
 					unsigned int NumSamples,
 					unsigned int NumHalfFramesToProcess,
 					lte_measurements &LteData);
+
+#define LTE_ANALYSIS_IF_STEPSIZE_KHZ			100
+#define LTE_ANALYSIS_PSS_SEARCH_MAX_IF_KHZ		1500
+#define LTE_ANALYSIS_PSS_SEARCH_MAX_NUM_IF		(((2*LTE_ANALYSIS_PSS_SEARCH_MAX_IF_KHZ)/LTE_ANALYSIS_IF_STEPSIZE_KHZ) + 1)
 
 class lte_analysis_impl
 {
@@ -72,3 +74,4 @@ private:
 	static std::mutex processing_mutex;
 };
 
+}

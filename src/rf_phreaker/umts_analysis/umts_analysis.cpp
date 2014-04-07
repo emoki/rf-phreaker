@@ -2,6 +2,8 @@
 #include "rf_phreaker/umts_analysis/umts_analysis_impl.h"
 #include <mutex>
 
+namespace rf_phreaker {
+
 std::mutex umts_analysis_mutex;
 
 umts_analysis::umts_analysis(const umts_config &config)
@@ -46,5 +48,4 @@ void umts_analysis::cancel_processing()
 	return impl_->cancel_processing();
 }
 
-
-
+}

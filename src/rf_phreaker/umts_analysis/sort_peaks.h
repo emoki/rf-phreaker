@@ -1,5 +1,6 @@
 #include "rf_phreaker/common/ipp_array.h"
 
+namespace rf_phreaker {
 
 struct sort_peaks_ascending
 {
@@ -28,3 +29,5 @@ struct sort_peaks_descending
 
 	const ipp_32f_array &magnitude_;
 };
+
+}

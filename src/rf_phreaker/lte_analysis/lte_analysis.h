@@ -29,6 +29,7 @@
 #include "rf_phreaker/lte_analysis/lte_config.h"
 #include "rf_phreaker/common/raw_signal.h"
 
+namespace rf_phreaker {
 
 class lte_analysis_impl;
 
@@ -51,3 +52,4 @@ private:
 	lte_analysis_impl *impl_;
 };
 
+}

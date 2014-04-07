@@ -1,6 +1,7 @@
 #pragma once
 
 #include "rf_phreaker/common/common_types.h"
+#include <regex>
 
 #define khz(x) (static_cast<rf_phreaker::frequency_type>(x)*1000)             /**< Convenience for kHz */
 #define mhz(x) (static_cast<rf_phreaker::frequency_type>(x)*1000000)          /**< Convenience for MHz */
@@ -64,5 +65,12 @@ inline time_type convert_to_time(int num_samples, frequency_type actual_sampling
 	return static_cast<time_type>(((double)num_samples / actual_sampling_rate_used) * 1e9);
 }
 
+inline std::vector<std::string> tokenize(const std::string& input, const std::regex& pattern)
+{
+	// Passing -1 as the submatch index parameter performs splitting
+	std::sregex_token_iterator first(input.begin(), input.end(), pattern, -1);
+	std::sregex_token_iterator last;
+	return std::vector<std::string>(first, last);
+}
 
 }

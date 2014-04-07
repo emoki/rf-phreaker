@@ -4,6 +4,8 @@
 #include <vector>
 #include <stdint.h>
 
+namespace rf_phreaker {
+
 class umts_measurement;
 typedef std::vector<umts_measurement> umts_measurements;
 
@@ -43,3 +45,5 @@ public:
 		meas.layer_3_.swap(layer_3_);
 	}
 };
+
+}

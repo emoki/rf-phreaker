@@ -17,13 +17,23 @@ cappeen_impl::cappeen_impl()
 
 cappeen_impl::~cappeen_impl()
 {
+	try {
+		// Do not stop graphs as this will cause an access volation in std::mutex.
+		delegate_.release();
+		scanner_.release();
+		data_output_.release();
+		processing_graph_.release();
+		gps_graph_.release();
+		logger_.release();
+	}
+	catch(...) {}
 }
 
 long cappeen_impl::initialize(beagle_api::beagle_delegate *del)
 {
 	int status = 0;
 	try {
-		std::lock_guard<std::mutex> lock(mutex_);
+		std::lock_guard<std::recursive_mutex> lock(mutex_);
 		// If logging fails continue anyway.
 		try {
 			logger_.reset(new init_log("cappeen_api", ""));
@@ -104,7 +114,7 @@ long cappeen_impl::clean_up()
 	long status = 0;
 	try {
 		LOG_L(INFO) << "Cleaning up...";
-		std::lock_guard<std::mutex> lock(mutex_);
+		std::lock_guard<std::recursive_mutex> lock(mutex_);
 
 		// Do more!
 		processing_graph_->cancel_and_wait();
@@ -143,7 +153,7 @@ long cappeen_impl::list_available_units(char *list, unsigned int buf_size)
 	long status = 0;
 	try {
 		LOG_L(INFO) << "Listing units...";
-		std::lock_guard<std::mutex> lock(mutex_);
+		std::lock_guard<std::recursive_mutex> lock(mutex_);
 		verify_init();
 
 		memset(list, 0, buf_size);
@@ -191,7 +201,7 @@ long cappeen_impl::open_unit(const char *serial, unsigned int buf_size)
 	long status = 0;
 	try {
 		LOG_L(INFO) << "Opening unit " << serial << "...";
-		std::lock_guard<std::mutex> lock(mutex_);
+		std::lock_guard<std::recursive_mutex> lock(mutex_);
 		verify_init();
 
 		scanner_->open_scanner(serial).get();
@@ -225,7 +235,7 @@ long cappeen_impl::close_unit(const char *serial, unsigned int buf_size)
 	long status = 0;
 	try{
 		LOG_L(INFO) << "Closing unit " << serial << "...";
-		std::lock_guard<std::mutex> lock(mutex_);
+		std::lock_guard<std::recursive_mutex> lock(mutex_);
 		verify_init();
 
 		gps_graph_->cancel_and_wait();
@@ -261,7 +271,7 @@ long cappeen_impl::stop_collection()
 	long status = 0;
 	try {
 		LOG_L(INFO) << "Stopping collection...";
-		std::lock_guard<std::mutex> lock(mutex_);
+		std::lock_guard<std::recursive_mutex> lock(mutex_);
 
 		auto state = delegate_->current_beagle_state();
 		if(state != BEAGLE_COLLECTING)
@@ -291,7 +301,7 @@ long cappeen_impl::start_collection(const beagle_api::collection_info &collectio
 	long status = 0;
 	try {
 		LOG_L(INFO) << "Starting collection...";
-		std::lock_guard<std::mutex> lock(mutex_);
+		std::lock_guard<std::recursive_mutex> lock(mutex_);
 
 		auto state = delegate_->current_beagle_state();
 		if(state != BEAGLE_WARMINGUP && state != BEAGLE_READY && state != BEAGLE_USBOPENED)
@@ -390,7 +400,7 @@ long cappeen_impl::input_new_license(const char *serial, uint32_t serial_buf_siz
 	long status = 0;
 	try {
 		LOG_L(INFO) << "Updating new license...";
-		std::lock_guard<std::mutex> lock(mutex_);
+		std::lock_guard<std::recursive_mutex> lock(mutex_);
 		throw std::exception("Updating the license is not currently supported.");
 		LOG_L(INFO) << "Updated license successfully.";
 	}

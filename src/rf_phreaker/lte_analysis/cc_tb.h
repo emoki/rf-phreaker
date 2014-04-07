@@ -5,9 +5,11 @@
 
 #include "ipp.h"
 
-#ifdef __cplusplus
-extern "C" {
-#endif
+namespace rf_phreaker {
+
+//#ifdef __cplusplus
+//extern "C" {
+//#endif
 
 void nsc_transit(int* output_p, int* trans_p, int input, int* g,
 	int KK,	int nn );
@@ -23,9 +25,11 @@ void cc_decoding( unsigned int *decBits, Ipp32f* inLLR, unsigned int codeLen,
 	unsigned int *genPoly, unsigned int row, unsigned int col);
 
 		
-#ifdef __cplusplus
+//#ifdef __cplusplus
+//}
+//#endif
+
 }
-#endif
 
 #endif
 

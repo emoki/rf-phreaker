@@ -7,6 +7,7 @@
 #include "lte_pss.h"
 #include "lte_common.h"
 
+namespace rf_phreaker {
 
 #define _LTE_PROC_MAX_NUM_PSCH_PEAKS	100
 #define WINDIPP_MEM_ALIGN_SIZE			32
@@ -1308,3 +1309,5 @@ void generate_SSS(Ipp32fc *SSS_seq, int cellID1, int cellID2)
 //}
 //
 //
+
+}

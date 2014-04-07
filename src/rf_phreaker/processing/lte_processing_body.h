@@ -23,6 +23,7 @@ public:
 	layer_3_settings layer_3_;
 };
 
+int count = 0;
 class lte_processing_body
 {
 public:
@@ -58,7 +59,7 @@ public:
 		if(info.processed_data_.size()) {
 			int status = analysis_.decode_layer_3(*info.meas_, info.processed_data_, calculate_num_half_frames(info.meas_->time_ns()));
 			if(status != 0)
-				throw umts_analysis_error("Error decoding umts layer 3.");
+				throw lte_analysis_error("Error decoding lte layer 3.");
 
 			// Only allow processing of bandwidths that can be decoded by LTE dll, i.e. 5mhz.
 			bool valid_bw = false;
@@ -68,6 +69,20 @@ public:
 					break;
 				}
 			}
+
+			//bool valid_snapshot = false;
+			//for(auto &data : info.processed_data_) {
+			//	if(data.NumAntennaPorts != LteAntPorts_Unknown && data.AvgDigitalVoltage > 0.1 && info.meas_->sampling_rate() != khz(1920)) {
+			//		valid_snapshot = true;
+			//		break;
+			//	}
+			//}
+			//if(valid_snapshot) {
+			//	std::ofstream file(std::string("lte_signal_") + std::to_string(++count) + ".txt");
+			//	if(!file)
+			//		throw rf_phreaker_error("Unable to open debug file for LTE signal output.");
+			//	file << *info.meas_;
+			//}
 
 			if(valid_bw) {
 				for(auto &data : info.processed_data_) {

@@ -9,6 +9,8 @@
 #include <atomic>
 #include <mutex>
 
+namespace rf_phreaker {
+
 class umts_analysis_impl
 {
 public:
@@ -47,3 +49,5 @@ private:
 
 	static std::mutex mutex_;
 };
+
+}

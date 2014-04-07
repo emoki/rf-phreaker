@@ -2,6 +2,8 @@
 
 #include "Ipp.h"
 
+namespace rf_phreaker {
+
 
 #define LTE_NUM_PSS		3
 #define LTE_MAX_SAMPLE_RATE_KHZ			30720
@@ -27,3 +29,4 @@ protected:
 	Ipp32fc *m_SeqT[LTE_NUM_PSS], *m_SeqF[LTE_NUM_PSS];
 };
 
+}

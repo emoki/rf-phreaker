@@ -4,6 +4,8 @@
 #include "ipp.h"
 #include "lte_common.h"
 
+namespace rf_phreaker {
+
 
 typedef struct
 {
@@ -16,3 +18,4 @@ int BCH_decoding(PBCHINFO* pbchInfo, Ipp32fc* inSignal, Ipp32fc* H,  Ipp32f* noi
 	CELLIDTYPE cellID, CYCLICPREFIX cyclicPrefixMode, unsigned int frameStart, 
 	unsigned int framesToProcess, LteChannelBandwidth Bandwidth);
 
+}

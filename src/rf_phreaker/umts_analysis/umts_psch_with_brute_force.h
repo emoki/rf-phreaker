@@ -14,6 +14,8 @@
 #include <list>
 #include <atomic>
 
+namespace rf_phreaker {
+
 class umts_psch_with_brute_force 
 {
 public:
@@ -126,3 +128,4 @@ private:
 	int max_processing_length_;
 };
 
+}

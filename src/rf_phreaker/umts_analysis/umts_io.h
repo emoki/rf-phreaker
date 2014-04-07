@@ -2,6 +2,8 @@
 
 #include "rf_phreaker/umts_analysis/umts_measurement.h"
 
+namespace rf_phreaker {
+
 static std::string umts_io_delimiter = "\t";
 static std::string umts_io_spacer = " | ";
 
@@ -35,4 +37,4 @@ inline std::ostream& operator<<(std::ostream &os, const umts_measurement &t)
 	return os;
 }
 
-
+}

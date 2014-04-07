@@ -15,6 +15,7 @@ set (scanner_SRCS
 	blade_rf_controller.h
 	blade_rf_controller_async.h
 	byte_aligned_buffer.h
+	calibration.h
 	comm_blade_rf.h
 	comm_info.h
 	gain.h

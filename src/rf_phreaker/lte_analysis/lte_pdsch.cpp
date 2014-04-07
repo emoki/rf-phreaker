@@ -33,6 +33,7 @@
 #include "rf_phreaker/lte_layer_3_decoder/lte_layer_3_decoder.h"
 #include "rf_phreaker/layer_3_common/lte_rrc_message_aggregate.h"
 
+namespace rf_phreaker {
 
 unsigned int lte_subframe_map[OFDM_SYMBOLS_PER_SUBFRAME][MAX_FFT_SIZE];
 unsigned int scrambling_seq_pdsch[6144],turbo_decoded_bits[6144];
@@ -392,3 +393,4 @@ for (unsigned int antNum =0 ; antNum < LteData[cell_no].NumAntennaPorts; antNum+
 return LTE_SUCCESS;
 }
 
+}

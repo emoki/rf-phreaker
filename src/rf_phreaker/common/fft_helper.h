@@ -2,6 +2,8 @@
 
 #include "rf_phreaker/common/ipp_array.h"
 
+namespace rf_phreaker {
+
 class fft_helper
 {
 public:
@@ -25,3 +27,4 @@ private:
 	ipp_array<Ipp8u> internal_buffer_; 
 };
 
+}

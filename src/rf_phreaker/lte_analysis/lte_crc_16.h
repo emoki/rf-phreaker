@@ -4,12 +4,14 @@
 
 #include <stdlib.h>
 
-#ifdef __cplusplus
-extern "C" {
-#endif
+namespace rf_phreaker {
+
+//#ifdef __cplusplus
+//extern "C" {
+//#endif
 
 
- 
+
 
 void LteCRC16(unsigned char *outSeq, unsigned char *inSeq, unsigned int len);
 
@@ -21,8 +23,10 @@ void lte_crc_24(unsigned int *outSeq, unsigned char *inSeq, unsigned int num_byt
 
 
 
-#ifdef __cplusplus
-}           /* closing brace for extern "C" */
-#endif
+//#ifdef __cplusplus
+//}           /* closing brace for extern "C" */
+//#endif
+
+}
 
 #endif      /* __CRC___H__ */

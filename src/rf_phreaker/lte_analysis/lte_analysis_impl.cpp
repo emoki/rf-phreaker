@@ -1,5 +1,7 @@
 #include "rf_phreaker/lte_analysis/lte_analysis_impl.h"
 
+namespace rf_phreaker {
+
 std::mutex lte_analysis_impl::processing_mutex;
 
 lte_analysis_impl::lte_analysis_impl(const lte_config &config)
@@ -150,3 +152,4 @@ rf_phreaker::frequency_type lte_analysis_impl::determine_sampling_rate(const rf_
 	return sampling_rate;
 }
 
+}
