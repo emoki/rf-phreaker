@@ -36,7 +36,7 @@ For further info please see ERRORCODES.
 CAPPEEN_API long cappeen_initialize(beagle_api::beagle_delegate *del);
 
 /**
-Closes connection to any units, ensures all threads have stopped, deletes main class, main events, timers, and semaphores.
+Closes connection to any units, ensures all threads have stopped, deletes main class.
 @return
 Returns status in form of a long\n
 0 if operation completed successfully\n
@@ -63,7 +63,7 @@ CAPPEEN_API long cappeen_list_available_units(char *list, unsigned int buf_size)
 Opens a communications channel to a specific unit.  This also starts GPS collection.
 	Prior to starting collection the unit must be "opened" using this function.
 @param serial Contains the serial number (Hardware ID) of the unit to open.
-@param buf_size Size (in bytes) of the buffer for serial.  Should be at least 1024.
+@param buf_size Size (in bytes) of the buffer for serial.  
 @return
 Returns status in form of a long\n
 0 if operation completed successfully\n
@@ -76,7 +76,7 @@ CAPPEEN_API long cappeen_open_unit(const char *serial, unsigned int buf_size);
 /**
 Closes the communication channel to a specific unit.  
 @param serial Contains the serial number of the unit to close.
-@param buf_size Size (in bytes) of the buffer for serial.  Should be at least 1024.
+@param buf_size Size (in bytes) of the buffer for serial.  
 @return
 Returns status in form of a long\n
 0 if operation completed successfully\n
@@ -109,9 +109,15 @@ Before starting collection BEAGLESTATE should be BEAGLE_READY.  Collecting with 
 CAPPEEN_API long cappeen_start_collection(const beagle_api::collection_info &collection);
 
 /**
+Starts the frequency correction process.  The WCDMA bands specified will be scanned for valid WCDMA cells.  Using the WCDMA cells found, the API will adjust 
+VCTCXO trim to minimize any frequency error within the hardware.
+*/
+CAPPEEN_API long cappeen_start_frequency_correction(const beagle_api::collection_info &collection);
+
+/**
 Inputs new license.
 @param serial Specifies which unit will have it's license updated.
-@param buf_size Size (in bytes) of the serial.  Should be at least 1024.
+@param buf_size Size (in bytes) of the serial.  
 @param new_license_filename Specifies the license filename to be used when updating the unit.
 @param license_buf_size Size (in bytes) of the new_license_filename.
 @return

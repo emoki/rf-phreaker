@@ -9,7 +9,7 @@
 
 namespace rf_phreaker { namespace processing {
 
-void convert_to_basic_data(basic_data &data, const scanner::measurement_info &info, double avg_rms)
+inline void convert_to_basic_data(basic_data &data, const scanner::measurement_info &info, double avg_rms)
 {
 	static scanner::calibration cali;
 	data.carrier_signal_level_ = cali.calculate_sl(avg_rms, info.gain());
@@ -20,14 +20,14 @@ void convert_to_basic_data(basic_data &data, const scanner::measurement_info &in
 	data.time_ = info.time_ns();
 }
 	
-basic_data convert_to_basic_data(const scanner::measurement_info &info, double avg_rms)
+inline basic_data convert_to_basic_data(const scanner::measurement_info &info, double avg_rms)
 {		
 	basic_data data;
 	convert_to_basic_data(data, info, avg_rms);
 	return data;
 }
 
-void convert_to_umts_data(umts_data &data, const scanner::measurement_info &info, const umts_measurement &umts)
+inline void convert_to_umts_data(umts_data &data, const scanner::measurement_info &info, const umts_measurement &umts)
 {
 	convert_to_basic_data(data, info, umts.rms_signal_);
 	data.cpich_ = umts.cpich_;
@@ -39,14 +39,14 @@ void convert_to_umts_data(umts_data &data, const scanner::measurement_info &info
 	data.uarfcn_ = conversion.frequency_to_uarfcn(info.frequency(), info.get_operating_band());
 }
 
-umts_data convert_to_umts_data(const scanner::measurement_info &info, const umts_measurement &umts)
+inline umts_data convert_to_umts_data(const scanner::measurement_info &info, const umts_measurement &umts)
 {
 	umts_data data;
 	convert_to_umts_data(data, info, umts);
 	return data;
 }
 
-void convert_to_lte_data(lte_data &data, const scanner::measurement_info &info, const lte_measurement &lte)
+inline void convert_to_lte_data(lte_data &data, const scanner::measurement_info &info, const lte_measurement &lte)
 {
 	convert_to_basic_data(data, info, lte.AvgDigitalVoltage);
 	data.cyclic_prefix_ = lte.CyclicPrefix;
@@ -67,7 +67,7 @@ void convert_to_lte_data(lte_data &data, const scanner::measurement_info &info, 
 	data.ssch_quality_ = 20 * log10(lte.SschRecord.NormCorr);
 }
 
-lte_data convert_to_lte_data(const scanner::measurement_info &info, const lte_measurement &lte)
+inline lte_data convert_to_lte_data(const scanner::measurement_info &info, const lte_measurement &lte)
 {
 	lte_data data;
 	convert_to_lte_data(data, info, lte);

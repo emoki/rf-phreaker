@@ -166,6 +166,20 @@ void blade_rf_controller::set_gpio(uint32_t value)
 	check_blade_status(bladerf_config_gpio_write(comm_blade_rf_->blade_rf(), value));
 }
 
+void blade_rf_controller::update_vctcxo_trim(frequency_type carrier_freq, frequency_type freq_shift)
+{
+	check_blade_comm();
+
+	static uint16_t trim = 0;
+	if(trim == 0)
+		check_blade_status(bladerf_get_vctcxo_trim(comm_blade_rf_->blade_rf(), &trim));
+
+	auto adjust = freq_shift;/*(freq_shift * carrier_freq / 3.5484e9) * 2*/;
+	trim -= (int16_t)adjust;
+
+	check_blade_status(bladerf_dac_write(comm_blade_rf_->blade_rf(), trim));
+}
+
 void blade_rf_controller::read_gpio(uint32_t &value)
 {
 	check_blade_comm();
@@ -251,7 +265,7 @@ gps blade_rf_controller::get_gps_data()
 
 	// Simiulate communicating to the hardware.
 	uint32_t val = 0;
-	check_blade_status(bladerf_config_gpio_read(comm_blade_rf_->blade_rf(), &val));
+	//check_blade_status(bladerf_config_gpio_read(comm_blade_rf_->blade_rf(), &val));
 
 	return g;
 }

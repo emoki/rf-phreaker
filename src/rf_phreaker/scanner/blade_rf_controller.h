@@ -43,6 +43,8 @@ public:
 
 	void read_vctcxo_trim(uint16_t &trim);
 
+	void update_vctcxo_trim(frequency_type carrier_freq, frequency_type freq_shift);
+
 	void set_gpio(uint32_t value);
 
 	void read_gpio(uint32_t &value);

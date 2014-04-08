@@ -4,6 +4,7 @@
 #include "rf_phreaker/cappeen/cappeen_delegate.h"
 #include "rf_phreaker/scanner/blade_rf_controller_async.h"
 #include "rf_phreaker/processing/processing_graph.h"
+#include "rf_phreaker/processing/frequency_correction_graph.h"
 #include "rf_phreaker/processing/gps_graph.h"
 #include "rf_phreaker/common/settings.h"
 #include "rf_phreaker/common/operating_band_range_specifier.h"
@@ -27,6 +28,7 @@ public:
 	long close_unit(const char *serial, unsigned int buf_size);
 	long stop_collection();
 	long start_collection(const beagle_api::collection_info &collection);
+	long start_frequency_correction(const beagle_api::collection_info &collection);
 	long input_new_license(const char *serial, uint32_t serial_buf_size, const char *new_license_filename, uint32_t license_buf_size);
 	const char* api_version() const;
 
@@ -47,6 +49,8 @@ private:
 	std::unique_ptr<rf_phreaker::processing::processing_graph> processing_graph_;
 
 	std::unique_ptr<rf_phreaker::processing::gps_graph> gps_graph_;
+
+	std::unique_ptr<rf_phreaker::processing::frequency_correction_graph> frequency_correction_graph_;
 
 	operating_band_range_specifier operating_bands_;
 

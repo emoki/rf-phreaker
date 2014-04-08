@@ -67,3 +67,7 @@ const char* cappeen_api_version()
 	return impl->api_version();
 }
 
+long cappeen_start_frequency_correction(const beagle_api::collection_info &collection)
+{
+	return impl->start_frequency_correction(collection);
+}

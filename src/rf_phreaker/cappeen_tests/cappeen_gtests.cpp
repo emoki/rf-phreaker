@@ -91,16 +91,25 @@ TEST(Cappeen, TestMain)
 		//tech_bands.push_back(WCDMA_BAND_900);
 		//tech_bands.push_back(WCDMA_BAND_1900);
 		//tech_bands.push_back(WCDMA_BAND_1800);
-		//tech_bands.push_back(WCDMA_BAND_2100);
+		tech_bands.push_back(WCDMA_BAND_2100);
 		tech_bands.push_back(LTE_BAND_1);
-		tech_bands.push_back(LTE_BAND_12);
-		tech_bands.push_back(LTE_BAND_2);
-		tech_bands.push_back(LTE_BAND_5);
+		//tech_bands.push_back(LTE_BAND_12);
+		//tech_bands.push_back(LTE_BAND_2);
+		//tech_bands.push_back(LTE_BAND_5);
 		info.tech_and_bands_to_sweep_.elements_ = &tech_bands[0];
 		info.tech_and_bands_to_sweep_.num_elements_ = tech_bands.size();
 
 		for(int i = 0; i < 5000000; ++i) {
 			EXPECT_EQ(0, cappeen_open_unit(&serial[0], serial.size()));
+
+			EXPECT_EQ(0, cappeen_start_frequency_correction(info));
+
+			for(int i = 0; i < 10000; ++i) {
+				std::this_thread::sleep_for(std::chrono::seconds(1));
+				if(out.error_occurred_)
+					break;
+			}
+
 			EXPECT_EQ(0, cappeen_start_collection(info));
 
 			for(int i = 0; i < 1000; ++i) {

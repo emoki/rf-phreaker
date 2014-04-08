@@ -12,6 +12,7 @@ set (processing_tests_VERSION_TWEAK 0)
 set (processing_tests_SRCS 
 	collection_info_container_gtests.cpp
 	gps_graph_gtests.cpp
+	frequency_correction_graph_gtests.cpp
 	layer_3_tracker_gtests.cpp
 	processing_tests.cpp
 	processing_graph_gtests.cpp
