@@ -170,14 +170,13 @@ void blade_rf_controller::update_vctcxo_trim(frequency_type carrier_freq, freque
 {
 	check_blade_comm();
 
-	static uint16_t trim = 0;
-	if(trim == 0)
-		check_blade_status(bladerf_get_vctcxo_trim(comm_blade_rf_->blade_rf(), &trim));
+	auto adjust = freq_shift / (carrier_freq * 3.5484e9);
 
-	auto adjust = freq_shift;/*(freq_shift * carrier_freq / 3.5484e9) * 2*/;
-	trim -= (int16_t)adjust;
+	auto new_trim = scanner_blade_rf_->vctcxo_trim() - (int16_t)adjust;
 
-	check_blade_status(bladerf_dac_write(comm_blade_rf_->blade_rf(), trim));
+	check_blade_status(bladerf_dac_write(comm_blade_rf_->blade_rf(), new_trim));
+
+	scanner_blade_rf_->set_vctcxo_trim(new_trim);
 }
 
 void blade_rf_controller::read_gpio(uint32_t &value)

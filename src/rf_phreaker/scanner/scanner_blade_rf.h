@@ -45,6 +45,7 @@ namespace rf_phreaker {
 			uint16_t firmware_version_patch() const;
 			std::string firmware_version_description() const;
 
+			void set_vctcxo_trim(uint16_t trim);
 		private:
 			std::unique_ptr<scanner_blade_rf_impl> impl_;
 		};

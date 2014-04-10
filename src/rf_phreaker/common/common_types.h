@@ -26,6 +26,12 @@ namespace rf_phreaker {
 		UNKOWN_SPECIFIER
 	};
 
+	enum messages
+	{
+		FREQUENCY_CORRECTION_SUCCESSFUL,
+		FREQUENCY_CORRECTION_FAILED
+	};
+
 	// See bottom for more on operating bands.
 	enum operating_band
 	{

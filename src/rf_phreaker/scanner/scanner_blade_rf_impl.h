@@ -141,6 +141,12 @@ namespace rf_phreaker {
 			{
 				return rx_timeout_;
 			}
+
+			void set_vctcxo_trim(uint16_t trim)
+			{
+				vctcxo_trim_ = trim;
+			}
+
 			struct bladerf_version blade_rf_version_;
 			struct bladerf_version fpga_version_;
 			struct bladerf_version firmware_version_;

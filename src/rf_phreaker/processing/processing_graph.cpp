@@ -7,6 +7,7 @@
 #include "rf_phreaker/processing/umts_output_and_feedback_body.h"
 #include "rf_phreaker/processing/lte_processing_body.h"
 #include "rf_phreaker/processing/lte_output_and_feedback_body.h"
+#include "rf_phreaker/common/delegate_sink.h"
 #include "tbb/task_scheduler_init.h"
 
 using namespace rf_phreaker::scanner;

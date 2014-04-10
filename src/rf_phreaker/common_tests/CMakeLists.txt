@@ -20,3 +20,7 @@ add_executable (common_tests ${common_tests_SRCS})
 
 target_link_libraries (common_tests common)
 target_link_libraries (common_tests gmock)
+
+# For some reason, cmake wasn't adding boost libraries to this project
+# so we're adding them manually.  Revist later after upgrading cmake.
+target_link_libraries (common_tests ${Boost_LIBRARIES}) 

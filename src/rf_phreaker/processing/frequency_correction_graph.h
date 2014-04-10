@@ -5,7 +5,6 @@
 #include "rf_phreaker/scanner/scanner_controller_interface.h"
 #include "rf_phreaker/processing/collection_manager_body.h"
 #include "rf_phreaker/processing/data_output_async.h"
-#include "rf_phreaker/processing/graph_observer.h"
 #include "rf_phreaker/common/settings.h"
 #include "tbb/flow_graph.h"
 #include <memory>

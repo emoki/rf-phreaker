@@ -17,7 +17,6 @@ set (processing_SRCS
 	collection_manager_body.h
 	gps_body.h
 	gps_graph.h
-	graph_observer.h
 	frequency_correction_body.h
 	frequency_correction_graph.cpp
 	frequency_correction_graph.h

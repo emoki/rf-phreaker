@@ -39,6 +39,7 @@ class umts_general_settings /* Find a better description? */
 public:
 	double sensitivity_;
 	int32_t full_scan_interval_;
+	int32_t num_coherent_slots_;
 };
 
 class settings
@@ -48,6 +49,9 @@ public:
 	int log_level_;
 	int gps_collection_period_ms_;
 	int num_items_in_flight_;
+
+	int frequency_correction_range_start_;
+	int frequency_correction_range_end_;
 
 	output_settings standard_output_;
 	output_settings signal_slots_;

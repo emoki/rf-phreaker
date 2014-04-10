@@ -37,6 +37,9 @@ namespace rf_phreaker {
 		uint16_t scanner_blade_rf::firmware_version_minor() const { return impl_->firmware_version_minor(); }
 		uint16_t scanner_blade_rf::firmware_version_patch() const { return impl_->firmware_version_patch(); }
 		std::string scanner_blade_rf::firmware_version_description() const { return impl_->firmware_version_description(); }
+
+		void scanner_blade_rf::set_vctcxo_trim(uint16_t trim) { impl_->set_vctcxo_trim(trim); }
+
 	}
 
 }
