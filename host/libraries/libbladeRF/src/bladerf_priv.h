@@ -32,10 +32,20 @@
 #include <limits.h>
 #include <libbladeRF.h>
 #include "host_config.h"
+
+#if BLADERF_OS_WINDOWS || BLADERF_OS_OSX
+#include "clock_gettime.h"
+#else
+#include <time.h>
+#endif
+
 #include "minmax.h"
 #include "conversions.h"
 #include "devinfo.h"
 #include "flash.h"
+
+/* 1 TX, 1 RX */
+#define NUM_MODULES 2
 
 /* For >= 1.5 GHz uses the high band should be used. Otherwise, the low
  * band should be selected */
@@ -51,34 +61,6 @@ typedef enum {
 struct bladerf_error {
     bladerf_error_type type;
     int value;
-};
-
-typedef enum {
-    STREAM_IDLE,            /* Idle and initialized */
-    STREAM_RUNNING,         /* Currently running */
-    STREAM_SHUTTING_DOWN,   /* Currently tearing down.
-                             * See bladerf_stream->error_code to determine
-                             * whether or not the shutdown was a clean exit
-                             * or due to an error. */
-    STREAM_DONE             /* Done and deallocated */
-} bladerf_stream_state;
-
-struct bladerf_stream {
-    struct bladerf *dev;
-    bladerf_module module;
-    int error_code;
-    bladerf_stream_state state;
-
-    size_t samples_per_buffer;
-    size_t num_buffers;
-    size_t num_transfers;
-    bladerf_format format;
-
-    void **buffers;
-    void *backend_data;
-
-    bladerf_stream_cb cb;
-    void *user_data;
 };
 
 /* Forward declaration for the function table */
@@ -126,11 +108,20 @@ struct bladerf_fn {
     int (*config_gpio_write)(struct bladerf *dev, uint32_t val);
     int (*config_gpio_read)(struct bladerf *dev, uint32_t *val);
 
+    /* Expansion GPIO accessors */
+    int (*expansion_gpio_write)(struct bladerf *dev, uint32_t val);
+    int (*expansion_gpio_read)(struct bladerf *dev, uint32_t *val);
+    int (*expansion_gpio_dir_write)(struct bladerf *dev, uint32_t val);
+    int (*expansion_gpio_dir_read)(struct bladerf *dev, uint32_t *val);
+
     /* IQ Calibration Settings */
     int (*set_correction)(struct bladerf *dev, bladerf_module,
                           bladerf_correction corr, int16_t value);
     int (*get_correction)(struct bladerf *dev, bladerf_module module,
                           bladerf_correction corr, int16_t *value);
+
+    /* Get current timestamp counter values */
+    int (*get_timestamp)(struct bladerf *dev, bladerf_module mod, uint64_t *value);
 
     /* Si5338 accessors */
     int (*si5338_write)(struct bladerf *dev, uint8_t addr, uint8_t data);
@@ -143,13 +134,19 @@ struct bladerf_fn {
     /* VCTCXO accessor */
     int (*dac_write)(struct bladerf *dev, uint16_t value);
 
+    /* Expansion board SPI */
+    int (*xb_spi)(struct bladerf *dev, uint32_t value);
+
+    /* Configure firmware loopback */
+    int (*set_firmware_loopback)(struct bladerf *dev, bool enable);
+
     /* Sample stream */
     int (*enable_module)(struct bladerf *dev, bladerf_module m, bool enable);
-    int (*rx)(struct bladerf *dev, bladerf_format format, void *samples, int n, struct bladerf_metadata *metadata);
-    int (*tx)(struct bladerf *dev, bladerf_format format, void *samples, int n, struct bladerf_metadata *metadata);
 
-    int (*init_stream)(struct bladerf_stream *stream);
+    int (*init_stream)(struct bladerf_stream *stream, size_t num_transfers);
     int (*stream)(struct bladerf_stream *stream, bladerf_module module);
+    int (*submit_stream_buffer)(struct bladerf_stream *stream, void *buffer,
+                                unsigned int timeout_ms);
     void (*deinit_stream)(struct bladerf_stream *stream);
 };
 
@@ -185,7 +182,11 @@ struct bladerf {
     /* Driver-sppecific implementations */
     const struct bladerf_fn *fn;
 
-    int transfer_timeout[2];
+    /* Stream transfer timeouts for RX and TX */
+    int transfer_timeout[NUM_MODULES];
+
+    /* Synchronous interface handles */
+    struct bladerf_sync *sync[NUM_MODULES];
 };
 
 /**
@@ -298,5 +299,14 @@ int encode_field(char *ptr, int len, int *idx, const char *field,
  */
 int add_field(char *buf, int len, const char *field, const char *val);
 
+/**
+ * Populate the provided timeval structure for the specified timeout
+ *
+ * @param[out]  t_abs       Absolute timeout structure to populate
+ * @param[in]   timeout_ms  Desired timeout in ms.
+ *
+ * 0 on success, BLADERF_ERR_UNEXPECTED on failure
+ */
+int populate_abs_timeout(struct timespec *t_abs, unsigned int timeout_ms);
 
 #endif

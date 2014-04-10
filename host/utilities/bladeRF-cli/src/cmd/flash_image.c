@@ -34,7 +34,7 @@
 
 struct params
 {
-    const char *img_file;
+    char *img_file;
     char *data_file;
     char serial[BLADERF_SERIAL_LENGTH];
     uint32_t address;
@@ -53,7 +53,8 @@ static int handle_param(const char *param, char *val,
     int status = 0;
 
     if (!strcasecmp("data", param)) {
-        p->data_file = val;
+        free(p->data_file);
+        p->data_file = interactive_expand_path(val);
     } else if (!strcasecmp("serial", param)) {
         size_t i;
         size_t len = strlen(val);
@@ -152,7 +153,7 @@ int parse_cmdline(int argc, char **argv, struct params *p, struct cli_state *s)
                         "Only one image file parameter is permitted.");
                 status = CMD_RET_INVPARAM;
             } else {
-                p->img_file = argv[i];
+                p->img_file = interactive_expand_path(argv[i]);
             }
         } else {
             *sep = '\0';
@@ -217,7 +218,9 @@ static int print_image_metadata(struct cli_state *s, struct params *p,
         } else {
             strncpy(datetime, "Invalid value", sizeof(datetime));
         }
+
         printf("Timestamp: %s\n", datetime);
+        printf("Serial #: %s\n", image->serial);
 
         switch (image->type) {
             case BLADERF_IMAGE_TYPE_RAW:
@@ -342,5 +345,7 @@ int cmd_flash_image(struct cli_state *state, int argc, char **argv)
         }
     }
 
+    free(p.data_file);
+    free(p.img_file);
     return status;
 }

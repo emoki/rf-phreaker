@@ -125,8 +125,27 @@ endif(MSVC)
 # Linux (TODO determine if this will actually be sufficient for BSD)
 if(${CMAKE_SYSTEM_NAME} MATCHES "Linux" OR ${CMAKE_SYSTEM_NAME} MATCHES "BSD")
     set(BLADERF_OS_LINUX 1)
+
+    try_run(LIBC_VERSION_RUN_RESULT LIBC_VERSION_COMPILE_RESULT
+            ${CMAKE_CURRENT_BINARY_DIR}/cmake/helpers
+            ${CMAKE_CURRENT_SOURCE_DIR}/cmake/helpers/libc_version.c
+            RUN_OUTPUT_VARIABLE LIBC_VERSION)
+
+    if(LIBC_VERSION)
+        message(STATUS "libc version: ${LIBC_VERSION}")
+    else()
+        message(WARNING "Unable to determine libc version")
+    endif()
+
 elseif(${CMAKE_SYSTEM_NAME} MATCHES "Darwin")
     set(BLADERF_OS_OSX 1)
+
+    # We also need to add some headers that the system will not provide
+    set(BLADERF_HOST_COMMON_INCLUDE_DIRS
+            ${BLADERF_HOST_COMMON_INCLUDE_DIRS}
+            ${CMAKE_CURRENT_LIST_DIR}/common/include/osx
+    )
+
 elseif(${CMAKE_SYSTEM_NAME} MATCHES "Windows")
     set(BLADERF_OS_WINDOWS 1)
 

@@ -32,6 +32,7 @@
 #include <libusb.h>
 
 #include "bladerf_priv.h"
+#include "async.h"
 #include "backend/libusb.h"
 #include "conversions.h"
 #include "minmax.h"
@@ -61,18 +62,19 @@ typedef enum {
 
 const struct bladerf_fn bladerf_lusb_fn;
 
-struct lusb_stream_data {
-    struct libusb_transfer **transfers;
-    size_t active_transfers;
+typedef enum {
+    TRANSFER_UNINITIALIZED = 0,
+    TRANSFER_AVAIL,
+    TRANSFER_IN_FLIGHT,
+    TRANSFER_CANCEL_PENDING
+} transfer_status;
 
-    /* libusb recommends use of libusb_handle_events_timeout_completed() for
-     * multithreaded applications.
-     *    http://libusb.sourceforge.net/api-1.0/mtasync.html
-     *
-     * In our case, "completion" is associated with a transistion to the done
-     * state.
-     */
-    int  libusb_completed;
+struct lusb_stream_data {
+    size_t num_transfers;                   /**< Total number of allocated transfers */
+    size_t num_avail_transfers;
+    size_t i;                               /**< Index to next transfer */
+    struct libusb_transfer **transfers;
+    transfer_status *transfer_status;        /**< Status of each transfer */
 };
 
 static int error_libusb2bladerf(int error)
@@ -496,20 +498,23 @@ static int lusb_populate_fw_version(struct bladerf *dev)
 }
 
 /* Returns BLADERF_ERR_* on failure */
-static int access_peripheral(struct bladerf_lusb *lusb, int per, int dir,
-                                struct uart_cmd *cmd)
+static int access_peripheral_v(struct bladerf_lusb *lusb, int per, int dir,
+                                struct uart_cmd *cmd, int len)
 {
     uint8_t buf[16] = { 0 };    /* Zeroing out to avoid some valgrind noise
                                  * on the reserved items that aren't currently
                                  * used (i.e., bytes 4-15 */
 
     int status, libusb_status, transferred;
+    int i;
 
     /* Populate the buffer for transfer */
     buf[0] = UART_PKT_MAGIC;
-    buf[1] = dir | per | 0x01;
-    buf[2] = cmd->addr;
-    buf[3] = cmd->data;
+    buf[1] = dir | per | len;
+    for (i = 0; i < len ; i++) {
+        buf[2 + i * 2] = cmd[i].addr;
+        buf[3 + i * 2] = cmd[i].data;
+    }
 
     log_verbose("Peripheral access: [ 0x%02x, 0x%02x, 0x%02x, 0x%02x ]\n",
                 buf[0], buf[1], buf[2], buf[3]);
@@ -540,21 +545,31 @@ static int access_peripheral(struct bladerf_lusb *lusb, int per, int dir,
 
     /* Save off the result if it was a read */
     if (dir == UART_PKT_MODE_DIR_READ) {
-        cmd->data = buf[3];
+        for (i = 0; i < len; i++) {
+            cmd[i].data = buf[3 + i * 2];
+        }
     }
 
     return status;
 }
 
-static int lusb_fpga_version_read(struct bladerf *dev, uint32_t *version) {
-    int i = 0;
+/* Returns BLADERF_ERR_* on failure */
+static int access_peripheral(struct bladerf_lusb *lusb, int per, int dir,
+                                struct uart_cmd *cmd)
+{
+    return access_peripheral_v(lusb, per, dir, cmd, 1);
+}
+
+static int _read_bytes(struct bladerf *dev, int addr,
+                       size_t len, uint32_t *val) {
+    size_t i = 0;
     int status = 0;
     struct uart_cmd cmd;
     struct bladerf_lusb *lusb = dev->backend;
-    *version = 0;
+    *val = 0;
 
-    for (i = 0; i < 4; i++){
-        cmd.addr = i + UART_PKT_DEV_FGPA_VERSION_ID;
+    for (i = 0; i < len; i++){
+        cmd.addr = addr + i;
         cmd.data = 0xff;
 
         status = access_peripheral(
@@ -568,7 +583,7 @@ static int lusb_fpga_version_read(struct bladerf *dev, uint32_t *version) {
             break;
         }
 
-        *version |= (cmd.data << (i * 8));
+        *val |= (cmd.data << (i * 8));
     }
 
     if (status < 0){
@@ -576,6 +591,36 @@ static int lusb_fpga_version_read(struct bladerf *dev, uint32_t *version) {
     }
 
     return status;
+}
+
+static int _write_bytes(struct bladerf *dev, int addr,
+                        size_t len, uint32_t val) {
+    int status = 0;
+    struct uart_cmd cmd;
+    struct bladerf_lusb *lusb = dev->backend;
+
+    size_t i;
+    for (i = 0; i < len; i++) {
+        cmd.addr = addr + i;
+        cmd.data = (val >> (i * 8)) & 0xff ;
+        status = access_peripheral(lusb, UART_PKT_DEV_GPIO,
+                UART_PKT_MODE_DIR_WRITE, &cmd);
+
+        if (status < 0) {
+            bladerf_set_error(&dev->error, ETYPE_LIBBLADERF, status);
+            return status;
+        }
+    }
+
+    if (status < 0) {
+        bladerf_set_error(&dev->error, ETYPE_LIBBLADERF, status);
+    }
+
+    return status;
+}
+
+static int lusb_fpga_version_read(struct bladerf *dev, uint32_t *version) {
+    return _read_bytes(dev, UART_PKT_DEV_FGPA_VERSION_ID, 4, version);
 }
 
 
@@ -902,6 +947,18 @@ static int lusb_close(struct bladerf *dev)
     free(dev);
 
     return ret;
+}
+
+static int lusb_set_firmware_loopback(struct bladerf *dev, bool enable) {
+    int result;
+    int status = vendor_command_int_value(dev, BLADE_USB_CMD_SET_LOOPBACK, enable, &result);
+    status |= change_setting(dev, USB_IF_NULL);
+    status |= change_setting(dev, USB_IF_RF_LINK);
+
+    if (status) {
+        return status;
+    }
+    return 0;
 }
 
 static int lusb_load_fpga(struct bladerf *dev, uint8_t *image, size_t image_size)
@@ -1575,62 +1632,32 @@ static int lusb_get_device_speed(struct bladerf *dev,
 
 static int lusb_config_gpio_write(struct bladerf *dev, uint32_t val)
 {
-    int i = 0;
-    int status = 0;
-    struct uart_cmd cmd;
-    struct bladerf_lusb *lusb = dev->backend;
-
-    for (i = 0; status == 0 && i < 4; i++) {
-        cmd.addr = i;
-        cmd.data = (val>>(8*i))&0xff;
-        status = access_peripheral(
-                                    lusb,
-                                    UART_PKT_DEV_GPIO,
-                                    UART_PKT_MODE_DIR_WRITE,
-                                    &cmd
-                                  );
-
-        if (status < 0) {
-            break;
-        }
-    }
-
-    if (status < 0) {
-        bladerf_set_error(&dev->error, ETYPE_LIBBLADERF, status);
-    }
-
-    return status;
+    return _write_bytes(dev, 0, 4, val);
 }
 
 static int lusb_config_gpio_read(struct bladerf *dev, uint32_t *val)
 {
-    int i = 0;
-    int status = 0;
-    struct uart_cmd cmd;
-    struct bladerf_lusb *lusb = dev->backend;
+    return _read_bytes(dev, 0, 4, val);
+}
 
-    *val = 0;
-    for(i = UART_PKT_DEV_GPIO_ADDR; status == 0 && i < 4; i++) {
-        cmd.addr = i;
-        cmd.data = 0xff;
-        status = access_peripheral(
-                                    lusb,
-                                    UART_PKT_DEV_GPIO, UART_PKT_MODE_DIR_READ,
-                                    &cmd
-                                  );
+static int lusb_expansion_gpio_write(struct bladerf *dev, uint32_t val)
+{
+    return _write_bytes(dev, 40, 4, val);
+}
 
-        if (status < 0) {
-            break;
-        }
+static int lusb_expansion_gpio_read(struct bladerf *dev, uint32_t *val)
+{
+    return _read_bytes(dev, 40, 4, val);
+}
 
-        *val |= (cmd.data << (8*i));
-    }
+static int lusb_expansion_gpio_dir_write(struct bladerf *dev, uint32_t val)
+{
+    return _write_bytes(dev, 44, 4, val);
+}
 
-    if (status < 0) {
-        bladerf_set_error(&dev->error, ETYPE_LIBBLADERF, status);
-    }
-
-    return status;
+static int lusb_expansion_gpio_dir_read(struct bladerf *dev, uint32_t *val)
+{
+    return _read_bytes(dev, 44, 4, val);
 }
 
 static int lusb_si5338_write(struct bladerf *dev, uint8_t addr, uint8_t data)
@@ -1726,9 +1753,9 @@ static int lusb_dac_write(struct bladerf *dev, uint16_t value)
     struct uart_cmd cmd;
     struct bladerf_lusb *lusb = dev->backend;
 
-    cmd.addr = 0 ;
+    cmd.addr = 34 ;
     cmd.data = value & 0xff ;
-    status = access_peripheral(lusb, UART_PKT_DEV_VCTCXO,
+    status = access_peripheral(lusb, UART_PKT_DEV_GPIO,
                                UART_PKT_MODE_DIR_WRITE, &cmd);
 
     if (status < 0) {
@@ -1736,9 +1763,9 @@ static int lusb_dac_write(struct bladerf *dev, uint16_t value)
         return status;
     }
 
-    cmd.addr = 1 ;
+    cmd.addr = 35 ;
     cmd.data = (value>>8)&0xff ;
-    status = access_peripheral(lusb, UART_PKT_DEV_VCTCXO,
+    status = access_peripheral(lusb, UART_PKT_DEV_GPIO,
                                UART_PKT_MODE_DIR_WRITE, &cmd);
 
     if (status < 0) {
@@ -1747,6 +1774,33 @@ static int lusb_dac_write(struct bladerf *dev, uint16_t value)
 
     return status;
 }
+
+static int lusb_xb_spi(struct bladerf *dev, uint32_t value)
+{
+    int status;
+    struct uart_cmd cmd;
+    struct bladerf_lusb *lusb = dev->backend;
+
+    int i;
+    for (i = 0; i < 4; i++) {
+        cmd.addr = 36 + i;
+        cmd.data = (value >> (i * 8)) & 0xff ;
+        status = access_peripheral(lusb, UART_PKT_DEV_GPIO,
+                UART_PKT_MODE_DIR_WRITE, &cmd);
+
+        if (status < 0) {
+            bladerf_set_error(&dev->error, ETYPE_LIBBLADERF, status);
+            return status;
+        }
+    }
+
+    if (status < 0) {
+        bladerf_set_error(&dev->error, ETYPE_LIBBLADERF, status);
+    }
+
+    return status;
+}
+
 
 static const char * corr2str(bladerf_correction c)
 {
@@ -1952,6 +2006,57 @@ static int get_fpga_correction(struct bladerf *dev,
     return status;
 }
 
+int lusb_get_timestamp(struct bladerf *dev, bladerf_module mod, uint64_t *value)
+{
+    int status = 0;
+    struct uart_cmd cmds[4];
+    unsigned char timestamp_bytes[8];
+    int i;
+
+    // offset 16 is the time tamer according to the Nios firmware
+    cmds[0].addr = (mod == BLADERF_MODULE_RX ? 16 : 24);
+    cmds[1].addr = (mod == BLADERF_MODULE_RX ? 17 : 25);
+    cmds[2].addr = (mod == BLADERF_MODULE_RX ? 18 : 26);
+    cmds[3].addr = (mod == BLADERF_MODULE_RX ? 19 : 27);
+    cmds[0].data = cmds[1].data = cmds[2].data = cmds[3].data = 0xff;
+    status = access_peripheral_v(
+            dev->backend,
+            UART_PKT_DEV_GPIO,
+            UART_PKT_MODE_DIR_READ,
+            cmds, 4
+            );
+
+    if (status)
+        return status;
+
+    for (i = 0; i < 4; i++)
+        timestamp_bytes[i] = cmds[i].data;
+
+    cmds[0].addr = (mod == BLADERF_MODULE_RX ? 20 : 28);
+    cmds[1].addr = (mod == BLADERF_MODULE_RX ? 21 : 29);
+    cmds[2].addr = (mod == BLADERF_MODULE_RX ? 22 : 30);
+    cmds[3].addr = (mod == BLADERF_MODULE_RX ? 23 : 31);
+    cmds[0].data = cmds[1].data = cmds[2].data = cmds[3].data = 0xff;
+    status = access_peripheral_v(
+            dev->backend,
+            UART_PKT_DEV_GPIO,
+            UART_PKT_MODE_DIR_READ,
+            cmds, 4
+            );
+
+    if (status)
+        return status;
+
+    for (i = 0; i < 4; i++)
+        timestamp_bytes[i + 4] = cmds[i].data;
+
+    *value = 0;
+    for (i = 7; i >= 0; i--) {
+        *value |= ((uint64_t)timestamp_bytes[i]) << (i * 8);
+    }
+    return 0;
+}
+
 static int get_lms_correction(struct bladerf *dev,
                                 bladerf_module module,
                                 uint8_t addr, int16_t *value)
@@ -2008,89 +2113,6 @@ static int lusb_get_correction(struct bladerf *dev, bladerf_module module,
     return status;
 }
 
-
-static int lusb_tx(struct bladerf *dev, bladerf_format format, void *samples,
-                   int n, struct bladerf_metadata *metadata)
-{
-    size_t bytes_total, bytes_remaining, ret;
-    struct bladerf_lusb *lusb = (struct bladerf_lusb *)dev->backend;
-    uint8_t *samples8 = (uint8_t *)samples;
-    int transferred, status;
-
-    /* This is the only format we currently support */
-    assert(format == BLADERF_FORMAT_SC16_Q11);
-
-    bytes_total = bytes_remaining = c16_samples_to_bytes(n);
-
-    assert(bytes_remaining <= INT_MAX);
-
-    while( bytes_remaining > 0 ) {
-        transferred = 0;
-        status = libusb_bulk_transfer(
-                    lusb->handle,
-                    EP_OUT(0x1),
-                    samples8,
-                    (int)bytes_remaining,
-                    &transferred,
-                    dev->transfer_timeout[BLADERF_MODULE_TX]
-                );
-        if( status < 0 ) {
-            log_error( "Error transmitting samples (%d): %s\n", status, libusb_error_name(status) );
-            return BLADERF_ERR_IO;
-        } else {
-            assert(transferred > 0);
-            assert(bytes_remaining >= (size_t)transferred);
-            bytes_remaining -= transferred;
-            samples8 += transferred;
-        }
-    }
-
-    ret = bytes_to_c16_samples(bytes_total - bytes_remaining);
-    assert(ret <= INT_MAX);
-    return (int)ret;
-}
-
-static int lusb_rx(struct bladerf *dev, bladerf_format format, void *samples,
-                   int n, struct bladerf_metadata *metadata)
-{
-    size_t bytes_total, bytes_remaining, ret;
-    struct bladerf_lusb *lusb = (struct bladerf_lusb *)dev->backend;
-    uint8_t *samples8 = (uint8_t *)samples;
-    int transferred, status;
-
-    /* The only format currently is assumed here */
-    assert(format == BLADERF_FORMAT_SC16_Q11);
-    bytes_total = bytes_remaining = c16_samples_to_bytes(n);
-
-    assert(bytes_remaining <= INT_MAX);
-
-    while( bytes_remaining ) {
-        transferred = 0;
-        status = libusb_bulk_transfer(
-                    lusb->handle,
-                    EP_IN(0x1),
-                    samples8,
-                    (int)bytes_remaining,
-                    &transferred,
-                    dev->transfer_timeout[BLADERF_MODULE_RX]
-                );
-        if( status < 0 ) {
-            log_error( "Error reading samples (%d): %s\n", status, libusb_error_name(status) );
-            return BLADERF_ERR_IO;
-        } else {
-            assert(transferred > 0);
-            assert(bytes_remaining >= (size_t)transferred);
-            bytes_remaining -= transferred;
-            samples8 += transferred;
-        }
-    }
-
-    assert(bytes_total >= bytes_remaining);
-    ret = bytes_to_c16_samples(bytes_total - bytes_remaining);
-    assert(ret <= INT_MAX);
-    return (int)ret;
-}
-
 /* At the risk of being a little inefficient, just keep attempting to cancel
  * everything. If a transfer's no longer active, we'll just get a NOT_FOUND
  * error -- no big deal.  Just accepting that alleviates the need to track
@@ -2102,26 +2124,112 @@ static inline void cancel_all_transfers(struct bladerf_stream *stream)
     int status;
     struct lusb_stream_data *stream_data = stream->backend_data;
 
-    for (i = 0; i < stream->num_transfers; i++ ) {
-        status = libusb_cancel_transfer(stream_data->transfers[i]);
-        if (status < 0 && status != LIBUSB_ERROR_NOT_FOUND) {
-            log_error("Error canceling transfer (%d): %s\n",
-                    status, libusb_error_name(status));
+    for (i = 0; i < stream_data->num_transfers; i++) {
+        if (stream_data->transfer_status[i] == TRANSFER_IN_FLIGHT) {
+
+            status = libusb_cancel_transfer(stream_data->transfers[i]);
+            if (status < 0 && status != LIBUSB_ERROR_NOT_FOUND) {
+                log_error("Error canceling transfer (%d): %s\r\n",
+                        status, libusb_error_name(status));
+            } else {
+                stream_data->transfer_status[i] = TRANSFER_CANCEL_PENDING;
+            }
         }
     }
+}
+
+static inline size_t transfer_idx(struct lusb_stream_data *stream_data,
+                                  struct libusb_transfer *transfer)
+{
+    size_t i;
+    for (i = 0; i < stream_data->num_transfers; i++) {
+        if (stream_data->transfers[i] == transfer) {
+            return i;
+        }
+    }
+
+    return UINT_MAX;
+}
+
+static void LIBUSB_CALL lusb_stream_cb(struct libusb_transfer *transfer);
+
+/* Precondition: A transfer is available. */
+static int submit_transfer(struct bladerf_stream *stream, void *buffer)
+{
+    int status;
+    struct bladerf_lusb *lusb = stream->dev->backend;
+    struct lusb_stream_data *stream_data = stream->backend_data;
+    struct libusb_transfer *transfer;
+    size_t bytes_per_buffer;
+    const unsigned char ep =
+        stream->module == BLADERF_MODULE_TX ? EP_OUT(0x01) : EP_IN(0x01);
+
+    assert(stream_data->transfer_status[stream_data->i] == TRANSFER_AVAIL);
+    transfer = stream_data->transfers[stream_data->i];
+
+    switch (stream->format) {
+        case BLADERF_FORMAT_SC16_Q11:
+            bytes_per_buffer = c16_samples_to_bytes(stream->samples_per_buffer);
+            break;
+
+        default:
+            assert(!"Unexpected format");
+            return BLADERF_ERR_INVAL;
+    }
+
+    assert(bytes_per_buffer <= INT_MAX);
+    libusb_fill_bulk_transfer(transfer,
+                              lusb->handle,
+                              ep,
+                              buffer,
+                              bytes_per_buffer,
+                              lusb_stream_cb,
+                              stream,
+                              stream->dev->transfer_timeout[stream->module]);
+
+    status = libusb_submit_transfer(transfer);
+
+    if (status == 0) {
+        stream_data->transfer_status[stream_data->i] = TRANSFER_IN_FLIGHT;
+        stream_data->i = (stream_data->i + 1) % stream_data->num_transfers;
+        assert(stream_data->num_avail_transfers != 0);
+        stream_data->num_avail_transfers--;
+    } else {
+        log_error("Failed to submit transfer in %s: %s\n",
+                  __FUNCTION__, libusb_error_name(status));
+    }
+
+    return error_libusb2bladerf(status);
 }
 
 static void LIBUSB_CALL lusb_stream_cb(struct libusb_transfer *transfer)
 {
     struct bladerf_stream *stream  = transfer->user_data;
-    struct bladerf_lusb *lusb = stream->dev->backend;
     void *next_buffer = NULL;
     struct bladerf_metadata metadata;
     struct lusb_stream_data *stream_data = stream->backend_data;
-    size_t bytes_per_buffer;
+    size_t transfer_i;
+
+    /* Currently unused - zero out for out own debugging sanity... */
+    memset(&metadata, 0, sizeof(metadata));
+
+    pthread_mutex_lock(&stream->lock);
+
+    transfer_i = transfer_idx(stream_data, transfer);
+    assert(stream_data->transfer_status[transfer_i] == TRANSFER_IN_FLIGHT ||
+           stream_data->transfer_status[transfer_i] == TRANSFER_CANCEL_PENDING);
+
+    if (transfer_i >= stream_data->num_transfers) {
+        log_error("Unable to find transfer");
+        stream->state = STREAM_SHUTTING_DOWN;
+    } else {
+        stream_data->transfer_status[transfer_i] = TRANSFER_AVAIL;
+        stream_data->num_avail_transfers++;
+        pthread_cond_signal(&stream->can_submit_buffer);
+    }
 
     /* Check to see if the transfer has been cancelled or errored */
-    if( transfer->status != LIBUSB_TRANSFER_COMPLETED ) {
+    if (transfer->status != LIBUSB_TRANSFER_COMPLETED) {
 
         /* Errored out for some reason .. */
         stream->state = STREAM_SHUTTING_DOWN;
@@ -2138,7 +2246,7 @@ static void LIBUSB_CALL lusb_stream_cb(struct libusb_transfer *transfer)
 
             case LIBUSB_TRANSFER_ERROR:
                 log_error("Got transfer error for buffer %p\n",
-                            transfer->buffer);
+                          transfer->buffer);
                 stream->error_code = BLADERF_ERR_IO;
                 break;
 
@@ -2162,70 +2270,59 @@ static void LIBUSB_CALL lusb_stream_cb(struct libusb_transfer *transfer)
                 break;
         }
 
-        /* This transfer is no longer active */
-        stream_data->active_transfers--;
-        cancel_all_transfers(stream);
     }
 
-    /* Check to see if the stream is still valid */
-    else if( stream->state == STREAM_RUNNING ) {
+    if (stream->state == STREAM_RUNNING) {
 
-        /* Call user callback requesting more data to transmit */
+        /* Sanity check for debugging purposes */
         if (transfer->length != transfer->actual_length) {
             log_warning( "Received short transfer\n" );
+
+            /* For the SC16Q11 format, we're 4 bytes per samples... */
             if ((transfer->actual_length & 3) != 0) {
                 log_warning( "Fractional samples received - stream likely corrupt\n" );
             }
         }
+
+       /* Call user callback requesting more data to transmit */
         next_buffer = stream->cb(
                         stream->dev,
                         stream,
                         &metadata,
                         transfer->buffer,
                         bytes_to_c16_samples(transfer->actual_length),
-                        stream->user_data
-                      );
-        if( next_buffer == NULL ) {
+                        stream->user_data);
+
+        if (next_buffer == BLADERF_STREAM_SHUTDOWN) {
             stream->state = STREAM_SHUTTING_DOWN;
-            stream_data->active_transfers--;
+        } else if (next_buffer != BLADERF_STREAM_NO_DATA) {
+            int status = submit_transfer(stream, next_buffer);
+            if (status != 0) {
+                /* If this fails, we probably have a serious problem...so just
+                 * shut it down. */
+                stream->state = STREAM_SHUTTING_DOWN;
+            }
         }
-    } else {
-        stream_data->active_transfers--;
-        cancel_all_transfers(stream);
     }
 
-    bytes_per_buffer = c16_samples_to_bytes(stream->samples_per_buffer);
-    assert(bytes_per_buffer <= INT_MAX);
-
-    /* Check the stream to make sure we're still valid and submit transfer,
-     * as the user may want to stop the stream by returning NULL for the next buffer */
-    if( next_buffer != NULL ) {
-        /* Fill up the bulk transfer request */
-        libusb_fill_bulk_transfer(
-            transfer,
-            lusb->handle,
-            stream->module == BLADERF_MODULE_TX ? EP_OUT(0x01) : EP_IN(0x01),
-            next_buffer,
-            (int)bytes_per_buffer,
-            lusb_stream_cb,
-            stream,
-            stream->dev->transfer_timeout[stream->module]
-        );
-        /* Submit the tranfer */
-        libusb_submit_transfer(transfer);
-    }
 
     /* Check to see if all the transfers have been cancelled,
      * and if so, clean up the stream */
-    if( stream->state == STREAM_SHUTTING_DOWN ) {
-        if( stream_data->active_transfers == 0 ) {
+    if (stream->state == STREAM_SHUTTING_DOWN) {
+
+        /* We know we're done when all of our transfers have returned to their
+         * "available" states */
+        if (stream_data->num_avail_transfers == stream_data->num_transfers) {
             stream->state = STREAM_DONE;
-            stream_data->libusb_completed = 1;
+        } else {
+            cancel_all_transfers(stream);
         }
     }
+
+    pthread_mutex_unlock(&stream->lock);
 }
 
-static int lusb_stream_init(struct bladerf_stream *stream)
+static int lusb_stream_init(struct bladerf_stream *stream, size_t num_transfers)
 {
     size_t i;
     struct lusb_stream_data *stream_data;
@@ -2240,28 +2337,31 @@ static int lusb_stream_init(struct bladerf_stream *stream)
     /* Backend stream information */
     stream->backend_data = stream_data;
 
-    stream_data->libusb_completed = 0;
+    stream_data->num_transfers = num_transfers;
+    stream_data->num_avail_transfers = 0;
+    stream_data->i = 0;
 
-    /* Pointers for libusb transfers */
-    stream_data->transfers =
-        calloc(stream->num_transfers, sizeof(struct libusb_transfer *));
-
-    if (!stream_data->transfers) {
+    stream_data->transfers = malloc(num_transfers * sizeof(struct libusb_transfer *));
+    if (stream_data->transfers == NULL) {
         log_error("Failed to allocate libusb tranfers\n");
-        free(stream_data);
-        stream->backend_data = NULL;
-        return BLADERF_ERR_MEM;
+        status = BLADERF_ERR_MEM;
+        goto error;
     }
 
-    stream_data->active_transfers = 0;
+    stream_data->transfer_status = calloc(num_transfers, sizeof(transfer_status));
+    if (stream_data->transfer_status == NULL) {
+        log_error("Failed to allocated libusb transfer status array\n");
+        status = BLADERF_ERR_MEM;
+        goto error;
+    }
 
     /* Create the libusb transfers */
-    for( i = 0; i < stream->num_transfers; i++ ) {
+    for (i = 0; i < stream_data->num_transfers; i++) {
         stream_data->transfers[i] = libusb_alloc_transfer(0);
 
         /* Upon error, start tearing down anything we've started allocating
          * and report that the stream is in a bad state */
-        if (!stream_data->transfers[i]) {
+        if (stream_data->transfers[i] == NULL) {
 
             /* Note: <= 0 not appropriate as we're dealing
              *       with an unsigned index */
@@ -2269,50 +2369,64 @@ static int lusb_stream_init(struct bladerf_stream *stream)
                 if (--i) {
                     libusb_free_transfer(stream_data->transfers[i]);
                     stream_data->transfers[i] = NULL;
+                    stream_data->transfer_status[i] = TRANSFER_UNINITIALIZED;
+                    stream_data->num_avail_transfers--;
                 }
             }
 
             status = BLADERF_ERR_MEM;
             break;
+        } else {
+            stream_data->transfer_status[i] = TRANSFER_AVAIL;
+            stream_data->num_avail_transfers++;
         }
+    }
+
+error:
+    if (status != 0) {
+        free(stream_data->transfer_status);
+        free(stream_data->transfers);
+        free(stream_data);
+        stream->backend_data = NULL;
     }
 
     return status;
 }
 
+#ifndef LIBUSB_HANDLE_EVENTS_TIMEOUT_NSEC
+#   define LIBUSB_HANDLE_EVENTS_TIMEOUT_NSEC    (15 * 1000)
+#endif
+
 static int lusb_stream(struct bladerf_stream *stream, bladerf_module module)
 {
     size_t i;
-    int status;
+    int status = 0;
     void *buffer;
     struct bladerf_metadata metadata;
     struct bladerf *dev = stream->dev;
     struct bladerf_lusb *lusb = dev->backend;
     struct lusb_stream_data *stream_data = stream->backend_data;
-    struct timeval tv = { 5, 0 };
-    const size_t buffer_size = c16_samples_to_bytes(stream->samples_per_buffer);
-
-    assert(buffer_size <= INT_MAX);
+    struct timeval tv = { 0, LIBUSB_HANDLE_EVENTS_TIMEOUT_NSEC };
 
     /* Currently unused, so zero it out for a sanity check when debugging */
     memset(&metadata, 0, sizeof(metadata));
 
-    /* Set up initial set of buffers */
-    for( i = 0; i < stream->num_transfers; i++ ) {
-        if( module == BLADERF_MODULE_TX ) {
-            buffer = stream->cb(
-                        dev,
-                        stream,
-                        &metadata,
-                        NULL,
-                        stream->samples_per_buffer,
-                        stream->user_data
-                     );
+    pthread_mutex_lock(&stream->lock);
 
-            if (!buffer) {
+    /* Set up initial set of buffers */
+    for (i = 0; i < stream_data->num_transfers; i++) {
+        if (module == BLADERF_MODULE_TX) {
+            buffer = stream->cb(dev,
+                                stream,
+                                &metadata,
+                                NULL,
+                                stream->samples_per_buffer,
+                                stream->user_data);
+
+            if (buffer == BLADERF_STREAM_SHUTDOWN) {
                 /* If we have transfers in flight and the user prematurely
                  * cancels the stream, we'll start shutting down */
-                if (stream_data->active_transfers > 0) {
+                if (stream_data->num_avail_transfers != stream_data->num_transfers) {
                     stream->state = STREAM_SHUTTING_DOWN;
                 } else {
                     /* No transfers have been shipped out yet so we can
@@ -2328,74 +2442,91 @@ static int lusb_stream(struct bladerf_stream *stream, bladerf_module module)
             buffer = stream->buffers[i];
         }
 
-        /* Fill and submit the bulk transfer request */
-        libusb_fill_bulk_transfer(
-                stream_data->transfers[i],
-                lusb->handle,
-                module == BLADERF_MODULE_TX ? EP_OUT(0x01) : EP_IN(0x01),
-                buffer,
-                (int)buffer_size,
-                lusb_stream_cb,
-                stream,
-                dev->transfer_timeout[module]
-                );
+        if (buffer != BLADERF_STREAM_NO_DATA) {
+            status = submit_transfer(stream, buffer);
 
-        log_debug("Initial transfer with buffer: %p (i=" PRIu64 ")\n",
-                  buffer, (uint64_t)i);
-
-        stream_data->active_transfers++;
-        status = libusb_submit_transfer(stream_data->transfers[i]);
-
-        /* If we failed to submit any transfers, cancel everything in flight.
-         * We'll leave the stream in the running state so we can have
-         * libusb fire off callbacks with the cancelled status*/
-        if (status < 0) {
-            stream->error_code = error_libusb2bladerf(status);
-
-            /* Note: <= 0 not appropriate as we're dealing
-             *       with an unsigned index */
-            while (i > 0) {
-                if (--i) {
-                    status = libusb_cancel_transfer(stream_data->transfers[i]);
-                    if (status < 0) {
-                        log_error("Failed to cancel transfer " PRIu64 ": %s\n",
-                                  (uint64_t)i, libusb_error_name(status));
-                    }
-                }
+            /* If we failed to submit any transfers, cancel everything in
+             * flight.  We'll leave the stream in the running state so we can
+             * have libusb fire off callbacks with the cancelled status*/
+            if (status < 0) {
+                stream->error_code = status;
+                cancel_all_transfers(stream);
             }
         }
     }
+    pthread_mutex_unlock(&stream->lock);
 
     /* This loop is required so libusb can do callbacks and whatnot */
-    while( stream->state != STREAM_DONE ) {
-        status = libusb_handle_events_timeout_completed(lusb->context, &tv,
-                                                &stream_data->libusb_completed);
+    while (stream->state != STREAM_DONE) {
+        status = libusb_handle_events_timeout(lusb->context, &tv);
 
         if (status < 0 && status != LIBUSB_ERROR_INTERRUPTED) {
             log_warning("unexpected value from events processing: "
-                                "%d: %s\n", status, libusb_error_name(status));
+                        "%d: %s\n", status, libusb_error_name(status));
+            status = error_libusb2bladerf(status);
         }
     }
 
-    return 0;
+    return status;
 }
+
+/* The top-level code will have aquired the stream->lock for us */
+int lusb_submit_stream_buffer(struct bladerf_stream *stream,
+                              void *buffer,
+                              unsigned int timeout_ms)
+{
+    int status;
+    struct lusb_stream_data *stream_data = stream->backend_data;
+    struct timespec timeout_abs;
+
+    if (buffer == BLADERF_STREAM_SHUTDOWN) {
+        if (stream_data->num_avail_transfers == stream_data->num_transfers) {
+            stream->state = STREAM_DONE;
+        } else {
+            stream->state = STREAM_SHUTTING_DOWN;
+        }
+
+        return 0;
+    }
+
+
+    status = populate_abs_timeout(&timeout_abs, timeout_ms);
+    if (status != 0) {
+        return BLADERF_ERR_UNEXPECTED;
+    }
+
+    while (stream_data->num_avail_transfers == 0 && status == 0) {
+        status = pthread_cond_timedwait(&stream->can_submit_buffer,
+                                        &stream->lock,
+                                        &timeout_abs);
+    }
+
+    if (status == ETIMEDOUT) {
+        return BLADERF_ERR_TIMEOUT;
+    } else if (status != 0) {
+        return BLADERF_ERR_UNEXPECTED;
+    } else {
+        return submit_transfer(stream, buffer);
+    }
+}
+
 
 void lusb_deinit_stream(struct bladerf_stream *stream)
 {
     size_t i;
     struct lusb_stream_data *stream_data = stream->backend_data;
 
-    for (i = 0; i < stream->num_transfers; i++ ) {
+    for (i = 0; i < stream_data->num_transfers; i++) {
         libusb_free_transfer(stream_data->transfers[i]);
         stream_data->transfers[i] = NULL;
+        stream_data->transfer_status[i] = TRANSFER_UNINITIALIZED;
     }
 
     free(stream_data->transfers);
+    free(stream_data->transfer_status);
     free(stream->backend_data);
 
     stream->backend_data = NULL;
-
-    return;
 }
 
 int lusb_probe(struct bladerf_devinfo_list *info_list)
@@ -2483,8 +2614,16 @@ const struct bladerf_fn bladerf_lusb_fn = {
     FIELD_INIT(.config_gpio_write, lusb_config_gpio_write),
     FIELD_INIT(.config_gpio_read, lusb_config_gpio_read),
 
+    FIELD_INIT(.expansion_gpio_write, lusb_expansion_gpio_write),
+    FIELD_INIT(.expansion_gpio_read, lusb_expansion_gpio_read),
+
+    FIELD_INIT(.expansion_gpio_dir_write, lusb_expansion_gpio_dir_write),
+    FIELD_INIT(.expansion_gpio_dir_read, lusb_expansion_gpio_dir_read),
+
     FIELD_INIT(.set_correction, lusb_set_correction),
     FIELD_INIT(.get_correction, lusb_get_correction),
+
+    FIELD_INIT(.get_timestamp, lusb_get_timestamp),
 
     FIELD_INIT(.si5338_write, lusb_si5338_write),
     FIELD_INIT(.si5338_read, lusb_si5338_read),
@@ -2493,12 +2632,14 @@ const struct bladerf_fn bladerf_lusb_fn = {
     FIELD_INIT(.lms_read, lusb_lms_read),
 
     FIELD_INIT(.dac_write, lusb_dac_write),
+    FIELD_INIT(.xb_spi, lusb_xb_spi),
+
+    FIELD_INIT(.set_firmware_loopback, lusb_set_firmware_loopback),
 
     FIELD_INIT(.enable_module, lusb_enable_module),
-    FIELD_INIT(.rx, lusb_rx),
-    FIELD_INIT(.tx, lusb_tx),
 
     FIELD_INIT(.init_stream, lusb_stream_init),
     FIELD_INIT(.stream, lusb_stream),
+    FIELD_INIT(.submit_stream_buffer, lusb_submit_stream_buffer),
     FIELD_INIT(.deinit_stream, lusb_deinit_stream),
 };

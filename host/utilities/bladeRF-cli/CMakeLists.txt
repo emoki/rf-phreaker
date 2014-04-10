@@ -7,7 +7,7 @@ project(bladeRF-cli C)
 
 set(VERSION_INFO_MAJOR  0)
 set(VERSION_INFO_MINOR  10)
-set(VERSION_INFO_PATCH  5)
+set(VERSION_INFO_PATCH  7)
 if(NOT DEFINED VERSION_INFO_EXTRA)
     set(VERSION_INFO_EXTRA "git")
 endif()
@@ -81,14 +81,13 @@ endif()
 if(MSVC)
     set(CLI_INCLUDE_DIRS ${CLI_INCLUDE_DIRS}
         ${BLADERF_HOST_COMMON_INCLUDE_DIRS}/windows
-        ${UTILITIES_COMMON_INC_DIR}/windows
         ${LIBPTHREADSWIN32_INCLUDE_DIRS}
     )
 endif()
 
 if(APPLE)
     set(CLI_INCLUDE_DIRS ${CLI_INCLUDE_DIRS}
-        ${UTILITIES_COMMON_INC_DIR}/osx
+        ${BLADERF_HOST_COMMON_INCLUDE_DIRS}/osx
     )
 endif()
 
@@ -146,13 +145,13 @@ endif()
 if(MSVC)
     set(BLADERF_CLI_SOURCE ${BLADERF_CLI_SOURCE}
             ${BLADERF_HOST_COMMON_SOURCE_DIR}/windows/getopt_long.c
-            ${UTILITIES_COMMON_SRC}/windows/clock_gettime.c
+            ${BLADERF_HOST_COMMON_SOURCE_DIR}/windows/clock_gettime.c
     )
 endif()
 
 if(APPLE)
     set(BLADERF_CLI_SOURCE ${BLADERF_CLI_SOURCE}
-            ${UTILITIES_COMMON_SRC}/osx/clock_gettime.c
+            ${BLADERF_HOST_COMMON_SOURCE_DIR}/osx/clock_gettime.c
     )
 endif()
 
@@ -184,6 +183,13 @@ endif()
 
 if(LIBPTHREADSWIN32_FOUND)
     set(CLI_LINK_LIBRARIES ${CLI_LINK_LIBRARIES} ${LIBPTHREADSWIN32_LIBRARIES})
+endif()
+
+if(LIBC_VERSION)
+    # clock_gettime() was moved from librt -> libc in 2.17
+    if(${LIBC_VERSION} VERSION_LESS "2.17")
+        set(CLI_LINK_LIBRARIES ${CLI_LINK_LIBRARIES} rt)
+    endif()
 endif()
 
 target_link_libraries(bladeRF-cli ${CLI_LINK_LIBRARIES})

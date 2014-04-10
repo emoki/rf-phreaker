@@ -68,6 +68,9 @@ PRINTSET_DECL(rxvga2)
 PRINTSET_DECL(samplerate)
 PRINTSET_DECL(sampling)
 PRINTSET_DECL(trimdac)
+PRINTSET_DECL(xb_spi)
+PRINTSET_DECL(xb_gpio)
+PRINTSET_DECL(xb_gpio_dir)
 PRINTSET_DECL(txvga1)
 PRINTSET_DECL(txvga2)
 
@@ -90,6 +93,9 @@ struct printset_entry printset_table[] = {
     PRINTSET_ENTRY(samplerate),
     PRINTSET_ENTRY(sampling),
     PRINTSET_ENTRY(trimdac),
+    PRINTSET_ENTRY(xb_spi),
+    PRINTSET_ENTRY(xb_gpio),
+    PRINTSET_ENTRY(xb_gpio_dir),
     PRINTSET_ENTRY(txvga1),
     PRINTSET_ENTRY(txvga2),
 
@@ -214,8 +220,9 @@ int set_bandwidth(struct cli_state *state, int argc, char **argv)
         }
 
         /* Parse bandwidth */
-        bw = str2uint_suffix( argv[3], 0, UINT_MAX,
-                FREQ_SUFFIXES, NUM_FREQ_SUFFIXES, &ok );
+        bw = str2uint_suffix( argv[3],
+                              BLADERF_BANDWIDTH_MIN, BLADERF_BANDWIDTH_MAX,
+                              FREQ_SUFFIXES, NUM_FREQ_SUFFIXES, &ok );
         if( !ok ) {
             cli_err(state, argv[0], "Invalid bandwidth (%s)", argv[3]);
             rv = CMD_RET_INVPARAM;
@@ -225,8 +232,9 @@ int set_bandwidth(struct cli_state *state, int argc, char **argv)
     /* No module, just bandwidth */
     else if( argc == 3 ) {
         bool ok;
-        bw = str2uint_suffix( argv[2], 0, UINT_MAX,
-                FREQ_SUFFIXES, NUM_FREQ_SUFFIXES, &ok );
+        bw = str2uint_suffix( argv[2],
+                              BLADERF_BANDWIDTH_MIN, BLADERF_BANDWIDTH_MAX,
+                              FREQ_SUFFIXES, NUM_FREQ_SUFFIXES, &ok );
         if( !ok ) {
             cli_err(state, argv[0], "Invalid bandwidth (%s)", argv[2]);
             rv = CMD_RET_INVPARAM;
@@ -365,8 +373,9 @@ int set_frequency(struct cli_state *state, int argc, char **argv)
     if( argc > 2 && rv == CMD_RET_OK ) {
         bool ok;
         /* Parse out frequency */
-        freq = str2uint_suffix( argv[argc-1], 225000000, 3900000000u,
-                FREQ_SUFFIXES, NUM_FREQ_SUFFIXES, &ok );
+        freq = str2uint_suffix( argv[argc-1],
+                                BLADERF_FREQUENCY_MIN, BLADERF_FREQUENCY_MAX,
+                                FREQ_SUFFIXES, NUM_FREQ_SUFFIXES, &ok );
 
         if( !ok ) {
             cli_err(state, argv[0], "Invalid frequency (%s)", argv[argc - 1]);
@@ -476,6 +485,81 @@ int set_gpio(struct cli_state *state, int argc, char **argv)
     return rv;
 }
 
+int print_xb_gpio(struct cli_state *state, int argc, char **argv) {
+    int rv = CMD_RET_OK, status;
+    unsigned int val;
+
+    status = bladerf_expansion_gpio_read( state->dev, &val );
+
+    if (status < 0) {
+        state->last_lib_error = status;
+        rv = CMD_RET_LIBBLADERF;
+    } else {
+        printf( "\n" );
+        printf( "Expansion GPIO: 0x%8.8x\n", val );
+        printf( "\n" );
+    }
+    return rv;
+}
+
+int set_xb_gpio(struct cli_state *state, int argc, char **argv)
+{
+    /* set gpio <value> */
+    int rv = CMD_RET_OK;
+    uint32_t val;
+    bool ok;
+
+    if( argc == 3 ) {
+        val = str2uint( argv[2], 0, UINT_MAX, &ok );
+        if( !ok ) {
+            cli_err(state, argv[0], "Invalid xb gpio value (%s)", argv[2]);
+            rv = CMD_RET_INVPARAM;
+        } else {
+            bladerf_expansion_gpio_write ( state->dev,val );
+        }
+    } else {
+        rv = CMD_RET_NARGS;
+    }
+    return rv;
+}
+
+int print_xb_gpio_dir(struct cli_state *state, int argc, char **argv) {
+    int rv = CMD_RET_OK, status;
+    unsigned int val;
+
+    status = bladerf_expansion_gpio_dir_read( state->dev, &val );
+
+    if (status < 0) {
+        state->last_lib_error = status;
+        rv = CMD_RET_LIBBLADERF;
+    } else {
+        printf( "\n" );
+        printf( "Expansion GPIO direction (1=output): 0x%8.8x\n", val );
+        printf( "\n" );
+    }
+    return rv;
+}
+
+int set_xb_gpio_dir(struct cli_state *state, int argc, char **argv)
+{
+    /* set gpio <value> */
+    int rv = CMD_RET_OK;
+    uint32_t val;
+    bool ok;
+
+    if( argc == 3 ) {
+        val = str2uint( argv[2], 0, UINT_MAX, &ok );
+        if( !ok ) {
+            cli_err(state, argv[0], "Invalid xb gpio dir value (%s)", argv[2]);
+            rv = CMD_RET_INVPARAM;
+        } else {
+            bladerf_expansion_gpio_dir_write ( state->dev,val );
+        }
+    } else {
+        rv = CMD_RET_NARGS;
+    }
+    return rv;
+}
 
 int print_lmsregs(struct cli_state *state, int argc, char **argv)
 {
@@ -739,7 +823,8 @@ int set_rxvga1(struct cli_state *state, int argc, char **argv)
         rv = CMD_RET_NARGS;
     } else {
         bool ok;
-        gain = str2int( argv[2], INT_MIN, INT_MAX, &ok );
+        gain = str2int( argv[2], BLADERF_RXVGA1_GAIN_MIN,
+                        BLADERF_RXVGA1_GAIN_MAX, &ok );
         if( !ok ) {
             invalid_gain(state, argv[0], argv[1], argv[2]);
             rv = CMD_RET_INVPARAM;
@@ -779,7 +864,9 @@ int set_rxvga2(struct cli_state *state, int argc, char **argv)
         rv = CMD_RET_NARGS;
     } else {
         bool ok;
-        gain = str2int( argv[2], INT_MIN, INT_MAX, &ok );
+        gain = str2int( argv[2], BLADERF_RXVGA2_GAIN_MIN,
+                        BLADERF_RXVGA2_GAIN_MAX, &ok );
+
         if( !ok ) {
             invalid_gain(state, argv[0], argv[1], argv[2]);
             rv = CMD_RET_INVPARAM;
@@ -898,8 +985,10 @@ int set_samplerate(struct cli_state *state, int argc, char **argv)
             idx = 3;
         }
 
-        rate.integer = str2uint_suffix( argv[idx], 80000, 40000000,
-            FREQ_SUFFIXES, NUM_FREQ_SUFFIXES, &ok );
+        rate.integer = str2uint_suffix( argv[idx],
+                                        BLADERF_SAMPLERATE_MIN,
+                                        UINT_MAX,
+                                        FREQ_SUFFIXES, NUM_FREQ_SUFFIXES, &ok );
 
         /* Integer portion didn't make it */
         if( !ok ) {
@@ -1058,6 +1147,36 @@ int set_trimdac(struct cli_state *state, int argc, char **argv)
     return rv;
 }
 
+int print_xb_spi(struct cli_state *state, int argc, char **argv)
+{
+    /* All of the SPI devices so far are write-only */
+    return CMD_RET_OK;
+}
+
+int set_xb_spi(struct cli_state *state, int argc, char **argv)
+{
+    int rv = CMD_RET_OK;
+    unsigned int val;
+
+    if( argc != 3) {
+        rv = CMD_RET_NARGS;
+    } else {
+        bool ok;
+        val = str2uint( argv[2], 0, -1, &ok );
+        if( !ok ) {
+            cli_err(state, argv[0], "Invalid XB SPI value (%s)", argv[2]);
+            rv = CMD_RET_INVPARAM;
+        } else {
+            int status = bladerf_xb_spi_write( state->dev, val );
+            if (status < 0) {
+                state->last_lib_error = status;
+                rv = CMD_RET_LIBBLADERF;
+            }
+        }
+    }
+    return rv;
+}
+
 int print_txvga1(struct cli_state *state, int argc, char **argv)
 {
     /* Usage: print txvga1 */
@@ -1083,7 +1202,8 @@ int set_txvga1(struct cli_state *state, int argc, char **argv)
 
     if( argc == 3 ) {
         bool ok ;
-        gain = str2int( argv[2], INT_MIN, INT_MAX, &ok );
+        gain = str2int( argv[2], BLADERF_TXVGA1_GAIN_MIN,
+                        BLADERF_TXVGA1_GAIN_MAX, &ok );
 
         if( !ok ) {
             invalid_gain(state, argv[0], argv[1], argv[2]);
@@ -1132,7 +1252,8 @@ int set_txvga2(struct cli_state *state, int argc, char **argv)
     } else {
         bool ok;
         int gain;
-        gain = str2int( argv[2], INT_MIN, INT_MAX, &ok );
+        gain = str2int( argv[2], BLADERF_TXVGA2_GAIN_MIN,
+                        BLADERF_TXVGA2_GAIN_MAX, &ok );
         if( !ok ) {
             invalid_gain(state, argv[0], argv[1], argv[2]);
             rv = CMD_RET_INVPARAM;

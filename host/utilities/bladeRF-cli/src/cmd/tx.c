@@ -426,7 +426,7 @@ static int tx_cmd_start(struct cli_state *s)
         pthread_mutex_lock(&s->tx->file_mgmt.file_lock);
 
         assert(s->tx->file_mgmt.format == RXTX_FMT_BIN_SC16Q11);
-        s->tx->file_mgmt.file = expand_and_open(s->tx->file_mgmt.path, "r");
+        s->tx->file_mgmt.file = expand_and_open(s->tx->file_mgmt.path, "rb");
         if (!s->tx->file_mgmt.file) {
             set_last_error(&s->tx->last_error, ETYPE_ERRNO, errno);
             status = CMD_RET_FILEOP;
@@ -445,8 +445,8 @@ static int tx_cmd_start(struct cli_state *s)
 
 
     /* Set our stream timeout */
-    status = bladerf_set_transfer_timeout(s->dev, BLADERF_MODULE_TX,
-                                          s->tx->data_mgmt.timeout_ms);
+    status = bladerf_set_stream_timeout(s->dev, BLADERF_MODULE_TX,
+                                        s->tx->data_mgmt.timeout_ms);
 
     if (status != 0) {
         s->last_lib_error = status;
