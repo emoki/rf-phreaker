@@ -145,19 +145,19 @@ namespace internal
   * message and kills the software with the fatal signal.
 */
 void fatalCallToLogger(FatalMessage message) {
-   if (!isLoggingInitialized()) {
-      std::ostringstream error;
-      error << "FATAL CALL but logger is NOT initialized\n"
-      << "SIGNAL: " << g2::internal::signalName(message.signal_id_)
-      << "\nMessage: \n" << message.message_ << std::flush;
-      std::cerr << error.str();
-      
-      internal::exitWithDefaultSignalHandler(message.signal_id_);
-   }
-   g_logger_instance->fatal(message);
-   while (true) {
-      std::this_thread::sleep_for(std::chrono::seconds(1));
-   }
+   //if (!isLoggingInitialized()) {
+   //   std::ostringstream error;
+   //   error << "FATAL CALL but logger is NOT initialized\n"
+   //   << "SIGNAL: " << g2::internal::signalName(message.signal_id_)
+   //   << "\nMessage: \n" << message.message_ << std::flush;
+   //   std::cerr << error.str();
+   //   
+   //   internal::exitWithDefaultSignalHandler(message.signal_id_);
+   //}
+   //g_logger_instance->fatal(message);
+   //while (true) {
+   //   std::this_thread::sleep_for(std::chrono::seconds(1));
+   //}
 }
 
 // By default this function pointer goes to \ref callFatalInitial;
