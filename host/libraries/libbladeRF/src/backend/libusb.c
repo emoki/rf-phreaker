@@ -560,7 +560,7 @@ static int access_peripheral(struct bladerf_lusb *lusb, int per, int dir,
     return access_peripheral_v(lusb, per, dir, cmd, 1);
 }
 
-static int _read_bytes(struct bladerf *dev, int addr,
+static int _read_bytes(struct bladerf *dev, uint8_t addr,
                        size_t len, uint32_t *val) {
     size_t i = 0;
     int status = 0;
@@ -569,7 +569,8 @@ static int _read_bytes(struct bladerf *dev, int addr,
     *val = 0;
 
     for (i = 0; i < len; i++){
-        cmd.addr = addr + i;
+        assert((addr + i) <= UINT8_MAX);
+        cmd.addr = (uint8_t)(addr + i);
         cmd.data = 0xff;
 
         status = access_peripheral(
@@ -593,7 +594,7 @@ static int _read_bytes(struct bladerf *dev, int addr,
     return status;
 }
 
-static int _write_bytes(struct bladerf *dev, int addr,
+static int _write_bytes(struct bladerf *dev, uint8_t addr,
                         size_t len, uint32_t val) {
     int status = 0;
     struct uart_cmd cmd;
@@ -601,7 +602,8 @@ static int _write_bytes(struct bladerf *dev, int addr,
 
     size_t i;
     for (i = 0; i < len; i++) {
-        cmd.addr = addr + i;
+        assert((addr + i) <= UINT8_MAX);
+        cmd.addr = (uint8_t)(addr + i);
         cmd.data = (val >> (i * 8)) & 0xff ;
         status = access_peripheral(lusb, UART_PKT_DEV_GPIO,
                 UART_PKT_MODE_DIR_WRITE, &cmd);
@@ -1777,7 +1779,7 @@ static int lusb_dac_write(struct bladerf *dev, uint16_t value)
 
 static int lusb_xb_spi(struct bladerf *dev, uint32_t value)
 {
-    int status;
+    int status = 0;
     struct uart_cmd cmd;
     struct bladerf_lusb *lusb = dev->backend;
 
@@ -1792,10 +1794,6 @@ static int lusb_xb_spi(struct bladerf *dev, uint32_t value)
             bladerf_set_error(&dev->error, ETYPE_LIBBLADERF, status);
             return status;
         }
-    }
-
-    if (status < 0) {
-        bladerf_set_error(&dev->error, ETYPE_LIBBLADERF, status);
     }
 
     return status;
@@ -2182,7 +2180,7 @@ static int submit_transfer(struct bladerf_stream *stream, void *buffer)
                               lusb->handle,
                               ep,
                               buffer,
-                              bytes_per_buffer,
+                              (int)bytes_per_buffer,
                               lusb_stream_cb,
                               stream,
                               stream->dev->transfer_timeout[stream->module]);

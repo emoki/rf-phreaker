@@ -98,6 +98,7 @@ int sync_init(struct bladerf *dev,
     sync->state = SYNC_STATE_CHECK_WORKER;
 
     sync->buf_mgmt.num_buffers = num_buffers;
+    sync->buf_mgmt.resubmit_count = 0;
 
     sync->stream_config.module = module;
     sync->stream_config.format = format;
@@ -219,18 +220,21 @@ int sync_rx(struct bladerf *dev, void *samples, unsigned num_samples,
              struct bladerf_metadata *metadata, unsigned int timeout_ms)
 {
     struct bladerf_sync *s = dev->sync[BLADERF_MODULE_RX];
-    struct buffer_mgmt *b = &s->buf_mgmt;
+    struct buffer_mgmt *b;
 
     int status = 0;
     unsigned int samples_returned = 0;
     uint8_t *samples_dest = (uint8_t*)samples;
     uint8_t *buf_src;
     unsigned int samples_to_copy;
-    const unsigned int samples_per_buffer = s->stream_config.samples_per_buffer;
+    unsigned int samples_per_buffer;
 
     if (s == NULL || samples == NULL) {
         return BLADERF_ERR_INVAL;
     }
+
+    b = &s->buf_mgmt;
+    samples_per_buffer = s->stream_config.samples_per_buffer;
 
     while (samples_returned < num_samples && status == 0) {
 
@@ -358,18 +362,21 @@ int sync_tx(struct bladerf *dev, void *samples, unsigned int num_samples,
              struct bladerf_metadata *metadata, unsigned int timeout_ms)
 {
     struct bladerf_sync *s = dev->sync[BLADERF_MODULE_TX];
-    struct buffer_mgmt *b = &s->buf_mgmt;
+    struct buffer_mgmt *b;
 
     int status = 0;
     unsigned int samples_written = 0;
     unsigned int samples_to_copy;
-    const unsigned int samples_per_buffer = s->stream_config.samples_per_buffer;
+    unsigned int samples_per_buffer;
     uint8_t *samples_src = (uint8_t*)samples;
     uint8_t *buf_dest;
 
     if (s == NULL || samples == NULL) {
         return BLADERF_ERR_INVAL;
     }
+
+    b = &s->buf_mgmt;
+    samples_per_buffer = s->stream_config.samples_per_buffer;
 
     while (status == 0 && samples_written < num_samples) {
 
