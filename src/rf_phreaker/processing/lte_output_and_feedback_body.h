@@ -100,7 +100,8 @@ public:
 			std::get<0>(out).try_put(remove_collection_info(lte_layer_3_collection_info(info.meas_->frequency(), info.meas_->sampling_rate(),
 				info.meas_->bandwidth(), info.meas_->get_operating_band()), LTE_LAYER_3_DECODE));
 		}
-		else if(!info.processed_data_.empty()) {
+		
+		if(!info.processed_data_.empty()) {
 			std::vector<lte_data> lte;
 
 			// Until we get the LTE dll sorted out only output measurements with known bandwidths.

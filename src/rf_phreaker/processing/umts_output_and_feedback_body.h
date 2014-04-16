@@ -45,7 +45,8 @@ public:
 		if(info.remove_) {
 			std::get<0>(out).try_put(remove_collection_info(umts_layer_3_collection_info(info.meas_->frequency(), info.meas_->get_operating_band()), UMTS_LAYER_3_DECODE));
 		}
-		else if(!info.processed_data_.empty()) {
+		
+		if(!info.processed_data_.empty()) {
 			std::vector<umts_data> umts;
 
 			for(const auto &dat : info.processed_data_)
