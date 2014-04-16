@@ -58,7 +58,7 @@ void moving_window_calculator::calculate_moving_window_of_energy(const Ipp32fc *
 	//});
 	stat = ippsPowerSpectr_32fc(&signal[0], &power_spectrum_[0], power_spectrum_.length());
 
-	stat = ippsCrossCorr_32f(moving_window_ones_.get(), moving_window_length, power_spectrum_.get(), output_length_, total_energy_.get(), output_length_, 0);
+	stat = ippsCrossCorr_32f(moving_window_ones_.get(), moving_window_length, power_spectrum_.get(), power_spectrum_.length(), total_energy_.get(), output_length_, 0);
 	if(stat != ippStsNoErr)
 		throw std::runtime_error("Error crosscorrelating moving window of energy.");
 }
