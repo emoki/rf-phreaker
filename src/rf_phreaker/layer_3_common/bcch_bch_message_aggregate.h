@@ -15,7 +15,7 @@ typedef uint16_string mcc_type;
 typedef uint16_string mnc_type;
 typedef uint16_t lac_type;
 typedef uint32_t cid_type;
-typedef uint32_t unique_sector_key_type;
+typedef int64_t unique_sector_key_type;
 
 class bcch_bch_message_aggregate
 {

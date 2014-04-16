@@ -85,6 +85,10 @@ int umts_analysis_impl::decode_layer_3(const rf_phreaker::raw_signal &raw_signal
 	try {
 		if(!decoder_)
 			decoder_.reset(new umts_bch_decoder(config_, bch_decoder_cpich_table_ptr()->cpich_table_ptr()));
+		
+		// TODO - Make better unique_key.
+		umts_meas.layer_3_.unique_sector_key_ = raw_signal.frequency() << 32;
+		umts_meas.layer_3_.unique_sector_key_ |= umts_meas.cpich_;
 
 		status = decoder_->process(raw_signal.get_iq().get(), raw_signal.get_iq().length(), umts_meas.cpich_, umts_meas.sample_num_, umts_meas.layer_3_);
 	}
