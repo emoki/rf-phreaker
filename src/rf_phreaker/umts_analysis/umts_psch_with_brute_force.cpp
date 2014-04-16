@@ -157,9 +157,8 @@ umts_measurements umts_psch_with_brute_force::process(const ipp_32fc_array &sign
 #endif
 
 	//  Find cpichs.
-
 	int32_t samples_per_correlation_segment = (int32_t)boost::math::round(num_cpich_chips * over_sampling_rate_);
-	int32_t pertinent_signal_length = samples_per_correlation_segment < num_samples_per_time_slot_ 
+	int32_t pertinent_signal_length = samples_per_correlation_segment < num_samples_per_time_slot_
 		? num_samples_per_time_slot_ * 2 + 1 
 		: samples_per_correlation_segment * 2 + 1 ;
 	pertinent_signal_length += psch_peak_adjustment_;
