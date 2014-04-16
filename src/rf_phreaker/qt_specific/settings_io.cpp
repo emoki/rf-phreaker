@@ -74,6 +74,7 @@ void settings_io::read(umts_general_settings &settings, const std::string &group
 	qsettings_->beginGroup(group_key.c_str());
 	settings.sensitivity_ = qsettings_->value(sensitivity_key.c_str(), settings_umts_general_sensitivity_default).toDouble();
 	settings.full_scan_interval_ = qsettings_->value(full_scan_interval_key.c_str(), settings_umts_general_full_scan_interval_default).toInt();
+	settings.num_coherent_slots_ = qsettings_->value(num_coherent_slots_key.c_str(), settings_umts_general_num_coherent_slots_default).toInt();
 	qsettings_->endGroup();
 }
 
@@ -135,6 +136,8 @@ void settings_io::write(const umts_general_settings &settings, const std::string
 	qsettings_->beginGroup(group_key.c_str());
 	qsettings_->setValue(sensitivity_key.c_str(), settings.sensitivity_);
 	qsettings_->setValue(full_scan_interval_key.c_str(), settings.full_scan_interval_);
+	qsettings_->setValue(num_coherent_slots_key.c_str(), settings.num_coherent_slots_);
+	qsettings_->endGroup();
 	qsettings_->endGroup();
 }
 

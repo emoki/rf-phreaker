@@ -97,6 +97,12 @@ int umts_analysis_impl::decode_layer_3(const rf_phreaker::raw_signal &raw_signal
 	return status;
 }
 
+int umts_analysis_impl::set_num_coherent_slots_for_psch(int num_coherent_slots)
+{
+	brute_force_->set_num_coherent_psch_slots_and_reset_iterations(num_coherent_slots);
+	return 0;
+}
+
 void umts_analysis_impl::cancel_processing()
 {
 	if(brute_force_.get() != nullptr)

@@ -24,6 +24,8 @@ public:
 
 	double get_rms_value();
 
+	int set_num_coherent_slots_for_psch(int num_coherent_slots);
+
 	void cancel_processing();
 
 	umts_config get_umts_config() { return config_; }

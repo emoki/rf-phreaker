@@ -60,13 +60,15 @@ TEST(QtSpecific, TestSettingsIO)
 
 	EXPECT_EQ(settings_umts_general_sensitivity_default, set.umts_sweep_general_.sensitivity_);
 	EXPECT_EQ(settings_umts_general_full_scan_interval_default, set.umts_sweep_general_.full_scan_interval_);
+	EXPECT_EQ(settings_umts_general_num_coherent_slots_default, set.umts_sweep_general_.num_coherent_slots_);
 
 	EXPECT_EQ(settings_umts_general_sensitivity_default, set.umts_layer_3_general_.sensitivity_);
 	EXPECT_EQ(settings_umts_general_full_scan_interval_default, set.umts_layer_3_general_.full_scan_interval_);
+	EXPECT_EQ(settings_umts_general_num_coherent_slots_default, set.umts_layer_3_general_.num_coherent_slots_);
+
 
 	// Alter and store new settings. 
 	int tmp = 0;
-	set.output_raw_packets_ = true;
 	set.log_level_ = tmp++;
 	set.gps_collection_period_ms_ = tmp++;
 	set.standard_output_.scanner_ = true;
@@ -103,6 +105,7 @@ TEST(QtSpecific, TestSettingsIO)
 	set.lte_decode_layer_3_.decode_minimum_threshold_ = tmp++;
 	set.umts_sweep_general_.sensitivity_ = tmp++;
 	set.umts_sweep_general_.full_scan_interval_ = tmp++;
+	set.umts_sweep_general_.num_coherent_slots_ = tmp++;
 	set.umts_layer_3_general_.sensitivity_ = tmp++;
 	set.umts_layer_3_general_.full_scan_interval_ = tmp++;
 	set_io.write(set);
@@ -155,9 +158,12 @@ TEST(QtSpecific, TestSettingsIO)
 
 	EXPECT_EQ(set.umts_sweep_general_.sensitivity_, set2.umts_sweep_general_.sensitivity_);
 	EXPECT_EQ(set.umts_sweep_general_.full_scan_interval_, set2.umts_sweep_general_.full_scan_interval_);
+	EXPECT_EQ(set.umts_sweep_general_.num_coherent_slots_, set2.umts_sweep_general_.num_coherent_slots_);
 
 	EXPECT_EQ(set.umts_layer_3_general_.sensitivity_, set2.umts_layer_3_general_.sensitivity_);
 	EXPECT_EQ(set.umts_layer_3_general_.full_scan_interval_, set2.umts_layer_3_general_.full_scan_interval_);
+	EXPECT_EQ(set.umts_layer_3_general_.num_coherent_slots_, set2.umts_layer_3_general_.num_coherent_slots_);
+
 
 	// Store default settings.
 	set_io.clear();
@@ -207,9 +213,11 @@ TEST(QtSpecific, WriteDefaultSettings)
 
 	set.umts_sweep_general_.sensitivity_ = -21;
 	set.umts_sweep_general_.full_scan_interval_ = 1;
+	set.umts_sweep_general_.num_coherent_slots_= 8;
 
 	set.umts_layer_3_general_.sensitivity_ = -23;
 	set.umts_layer_3_general_.full_scan_interval_ = 110;
+	set.umts_layer_3_general_.num_coherent_slots_ = 14;
 
 	set.lte_sweep_collection_.sampling_rate_ = khz(4875);
 	set.lte_sweep_collection_.bandwidth_ = khz(2500);

@@ -34,7 +34,7 @@ void umts_psch_with_brute_force::set_config(const umts_config &config)
 	if(do_we_benchmark_)
 		benchmark_.open_benchmark(config.umts_brute_force_filename(), false);
 #endif
-
+	num_coherent_psch_slots_ = config.num_coherent_psch_slots();
 	sample_rate_ = config.sampling_rate();
 	clock_rate_ = config.clock_rate();
 	over_sampling_rate_ = config.over_sampling_rate();

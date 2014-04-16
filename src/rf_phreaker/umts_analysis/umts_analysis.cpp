@@ -38,6 +38,11 @@ int umts_analysis::decode_layer_3(const rf_phreaker::raw_signal &raw_signal, umt
 	return impl_->decode_layer_3(raw_signal, umts_meas);
 }
 
+int umts_analysis::set_num_coherent_slots_for_psch(int num_coherent_slots)
+{
+	return impl_->set_num_coherent_slots_for_psch(num_coherent_slots);
+}
+
 //void umts_analysis::set_config(const umts_config &config)
 //{
 //	return impl_->set_config(config);

@@ -38,6 +38,7 @@ static const std::string decode_threshold_key = "decode_threshold";
 static const std::string min_decode_threshold_key = "min_decode_threshold";
 static const std::string sensitivity_key = "sensitivity";
 static const std::string full_scan_interval_key = "full_scan_interval";
+static const std::string num_coherent_slots_key = "num_coherent_slots";
 static const std::string gps_collection_period_ms_key = "gps_collection_period";
 static const std::string num_items_in_flight_key = "num_items_in_flight";
 
@@ -53,6 +54,7 @@ static const int settings_layer_3_decode_threshold_default = -13;
 static const int settings_layer_3_min_decode_threshold_default = -21;
 static const int settings_umts_general_sensitivity_default = -23;
 static const int settings_umts_general_full_scan_interval_default = 1;
+static const int settings_umts_general_num_coherent_slots_default = 2;
 static const bool settings_output_default = false;
 static const int gps_collection_period_ms_default = 800;
 static const int num_items_in_flight_default = 0;

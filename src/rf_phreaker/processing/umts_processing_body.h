@@ -14,7 +14,7 @@ public:
 	umts_cell_search_settings(const collection_settings &s, const layer_3_settings &l, const umts_general_settings &g)
 		: layer_3_(l)
 		, umts_general_(g)
-		, umts_config_((int)s.sampling_rate_, (int)s.sampling_rate_, rf_phreaker::convert_to_samples(s.collection_time_, s.sampling_rate_))
+		, umts_config_((int)s.sampling_rate_, (int)s.sampling_rate_, rf_phreaker::convert_to_samples(s.collection_time_, s.sampling_rate_), g.num_coherent_slots_)
 	{}
 	
 	umts_config umts_config_;

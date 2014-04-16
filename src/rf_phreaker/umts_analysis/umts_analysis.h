@@ -46,6 +46,8 @@ public:
 	int cell_search(const rf_phreaker::raw_signal &raw_signal, umts_measurement *umts_meas, int &num_umts_meas, double sensitivity, umts_scan_type scan_type, double *rms = nullptr);
 
 	int decode_layer_3(const rf_phreaker::raw_signal &raw_signal, umts_measurement &umts_meas);
+
+	int set_num_coherent_slots_for_psch(int num_coherent_slots);
 	
 	//void set_config(const umts_config &config);
 
