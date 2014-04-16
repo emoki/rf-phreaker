@@ -63,34 +63,6 @@ struct bladerf_error {
     int value;
 };
 
-typedef enum {
-    STREAM_IDLE,            /* Idle and initialized */
-    STREAM_RUNNING,         /* Currently running */
-    STREAM_SHUTTING_DOWN,   /* Currently tearing down.
-                             * See bladerf_stream->error_code to determine
-                             * whether or not the shutdown was a clean exit
-                             * or due to an error. */
-    STREAM_DONE             /* Done and deallocated */
-} bladerf_stream_state;
-
-struct bladerf_stream {
-    struct bladerf *dev;
-    bladerf_module module;
-    int error_code;
-    bladerf_stream_state state;
-
-    size_t samples_per_buffer;
-    size_t num_buffers;
-    size_t num_transfers;
-    bladerf_format format;
-
-    void **buffers;
-    void *backend_data;
-
-    bladerf_stream_cb cb;
-    void *user_data;
-};
-
 /* Forward declaration for the function table */
 struct bladerf;
 
@@ -136,11 +108,20 @@ struct bladerf_fn {
     int (*config_gpio_write)(struct bladerf *dev, uint32_t val);
     int (*config_gpio_read)(struct bladerf *dev, uint32_t *val);
 
+    /* Expansion GPIO accessors */
+    int (*expansion_gpio_write)(struct bladerf *dev, uint32_t val);
+    int (*expansion_gpio_read)(struct bladerf *dev, uint32_t *val);
+    int (*expansion_gpio_dir_write)(struct bladerf *dev, uint32_t val);
+    int (*expansion_gpio_dir_read)(struct bladerf *dev, uint32_t *val);
+
     /* IQ Calibration Settings */
     int (*set_correction)(struct bladerf *dev, bladerf_module,
                           bladerf_correction corr, int16_t value);
     int (*get_correction)(struct bladerf *dev, bladerf_module module,
                           bladerf_correction corr, int16_t *value);
+
+    /* Get current timestamp counter values */
+    int (*get_timestamp)(struct bladerf *dev, bladerf_module mod, uint64_t *value);
 
     /* Si5338 accessors */
     int (*si5338_write)(struct bladerf *dev, uint8_t addr, uint8_t data);
@@ -153,11 +134,19 @@ struct bladerf_fn {
     /* VCTCXO accessor */
     int (*dac_write)(struct bladerf *dev, uint16_t value);
 
+    /* Expansion board SPI */
+    int (*xb_spi)(struct bladerf *dev, uint32_t value);
+
+    /* Configure firmware loopback */
+    int (*set_firmware_loopback)(struct bladerf *dev, bool enable);
+
     /* Sample stream */
     int (*enable_module)(struct bladerf *dev, bladerf_module m, bool enable);
 
-    int (*init_stream)(struct bladerf_stream *stream);
+    int (*init_stream)(struct bladerf_stream *stream, size_t num_transfers);
     int (*stream)(struct bladerf_stream *stream, bladerf_module module);
+    int (*submit_stream_buffer)(struct bladerf_stream *stream, void *buffer,
+                                unsigned int timeout_ms);
     void (*deinit_stream)(struct bladerf_stream *stream);
 };
 

@@ -26,6 +26,7 @@
 
 #include "libbladeRF.h"     /* Public API */
 #include "bladerf_priv.h"   /* Implementation-specific items ("private") */
+#include "async.h"
 #include "sync.h"
 #include "lms.h"
 #include "si5338.h"
@@ -197,11 +198,16 @@ int bladerf_enable_module(struct bladerf *dev,
 
 int bladerf_set_loopback(struct bladerf *dev, bladerf_loopback l)
 {
-    return lms_set_loopback_mode(dev, l);
+    if (l == BLADERF_LB_FIRMWARE) {
+        return dev->fn->set_firmware_loopback(dev, true);
+    } else {
+        return lms_set_loopback_mode(dev, l);
+    }
 }
 
 int bladerf_get_loopback(struct bladerf *dev, bladerf_loopback *l)
 {
+    /* NOTE: Cannot detect firmware loopback mode yet */
     return lms_get_loopback_mode(dev, l);
 }
 
@@ -374,9 +380,18 @@ int bladerf_set_bandwidth(struct bladerf *dev, bladerf_module module,
                           unsigned int *actual)
 {
     int status;
-    const lms_bw bw = lms_uint2bw(bandwidth);
+    lms_bw bw;
+
+    if (bandwidth < BLADERF_BANDWIDTH_MIN) {
+        bandwidth = BLADERF_BANDWIDTH_MIN;
+        log_info("Clamping bandwidth to %d Hz\n", bandwidth);
+    } else if (bandwidth > BLADERF_BANDWIDTH_MAX) {
+        bandwidth = BLADERF_BANDWIDTH_MAX;
+        log_info("Clamping bandwidth to %d Hz\n", bandwidth);
+    }
 
     *actual = 0;
+    bw = lms_uint2bw(bandwidth);
 
     status = lms_lpf_enable(dev, module, true);
     if (status != 0) {
@@ -423,7 +438,17 @@ int bladerf_select_band(struct bladerf *dev, bladerf_module module,
 {
     int status;
     uint32_t gpio;
-    uint32_t band = (frequency >= BLADERF_BAND_HIGH) ? 1 : 2;
+    uint32_t band;
+
+    if (frequency < BLADERF_FREQUENCY_MIN) {
+        frequency = BLADERF_FREQUENCY_MIN;
+        log_info("Clamping frequency to %u\n", frequency);
+    } else if (frequency > BLADERF_FREQUENCY_MAX) {
+        frequency = BLADERF_FREQUENCY_MAX;
+        log_info("Clamping frequency to %u\n", frequency);
+    }
+
+    band = (frequency >= BLADERF_BAND_HIGH) ? 1 : 2;
 
     status = lms_select_band(dev, module, frequency);
     if (status != 0) {
@@ -543,145 +568,30 @@ int bladerf_init_stream(struct bladerf_stream **stream,
                         bladerf_format format,
                         size_t samples_per_buffer,
                         size_t num_transfers,
-                        void *user_data)
+                        void *data)
 {
+    return async_init_stream(stream, dev, callback, buffers, num_buffers,
+                             format, samples_per_buffer, num_transfers, data);
+}
 
-    struct bladerf_stream *lstream;
-    size_t buffer_size_bytes;
-    size_t i;
-    int status = 0;
+/* Reminder: No device control calls may be made here */
+int bladerf_stream(struct bladerf_stream *stream, bladerf_module module)
+{
+    return async_run_stream(stream, module);
+}
 
-    if (num_transfers > num_buffers) {
-        log_debug("num_transfers must be <= num_buffers\n");
-        return BLADERF_ERR_INVAL;
-    }
-
-    if (samples_per_buffer < 1024 || samples_per_buffer% 1024 != 0) {
-        log_debug("samples_per_buffer must be multiples of 1024\n");
-        return BLADERF_ERR_INVAL;
-    }
-
-    /* Create a stream and populate it with the appropriate information */
-    lstream = malloc(sizeof(struct bladerf_stream));
-
-    if (!lstream) {
-        return BLADERF_ERR_MEM;
-    }
-
-    lstream->dev = dev;
-    lstream->error_code = 0;
-    lstream->state = STREAM_IDLE;
-    lstream->samples_per_buffer = samples_per_buffer;
-    lstream->num_buffers = num_buffers;
-    lstream->num_transfers = num_transfers;
-    lstream->format = format;
-    lstream->cb = callback;
-    lstream->user_data = user_data;
-    lstream->buffers = NULL;
-
-    switch(format) {
-        case BLADERF_FORMAT_SC16_Q11:
-            buffer_size_bytes = c16_samples_to_bytes(samples_per_buffer);
-            break;
-
-        default:
-            status = BLADERF_ERR_INVAL;
-            break;
-    }
-
-    if (!status) {
-        lstream->buffers = calloc(num_buffers, sizeof(lstream->buffers[0]));
-        if (lstream->buffers) {
-            for (i = 0; i < num_buffers && !status; i++) {
-                lstream->buffers[i] = calloc(1, buffer_size_bytes);
-                if (!lstream->buffers[i]) {
-                    status = BLADERF_ERR_MEM;
-                }
-            }
-        } else {
-            status = BLADERF_ERR_MEM;
-        }
-    }
-
-    /* Clean up everything we've allocated if we hit any errors */
-    if (status) {
-
-        if (lstream->buffers) {
-            for (i = 0; i < num_buffers; i++) {
-                free(lstream->buffers[i]);
-            }
-
-            free(lstream->buffers);
-        }
-
-        free(lstream);
-    } else {
-        /* Perform any backend-specific stream initialization */
-        status = dev->fn->init_stream(lstream);
-
-        if (status < 0) {
-            bladerf_deinit_stream(lstream);
-            *stream = NULL;
-        } else {
-            /* Update the caller's pointers */
-            *stream = lstream;
-
-            if (buffers) {
-                *buffers = lstream->buffers;
-            }
-        }
-    }
-
-
-    return status;
+int bladerf_submit_stream_buffer(struct bladerf_stream *stream,
+                                 void *buffer,
+                                 unsigned int timeout_ms)
+{
+    return async_submit_stream_buffer(stream, buffer, timeout_ms);
 }
 
 void bladerf_deinit_stream(struct bladerf_stream *stream)
 {
-    size_t i;
-
-    if (!stream) {
-        return;
-    }
-
-    while(stream->state != STREAM_DONE && stream->state != STREAM_IDLE) {
-        log_verbose( "Stream not done...\n" );
-        usleep(1000000);
-    }
-
-    /* Free up the backend data */
-    stream->dev->fn->deinit_stream(stream);
-
-    /* Free up the buffers */
-    for (i = 0; i < stream->num_buffers; i++) {
-        free(stream->buffers[i]);
-    }
-
-    /* Free up the pointer to the buffers */
-    free(stream->buffers);
-
-    /* Free up the stream itself */
-    free(stream);
-
-    /* Done */
-    return ;
+    async_deinit_stream(stream);
 }
 
-/* No device control calls may be made in this function and the associated
- * backend stream implementations, as the stream and control functionality are
- * will generally be executed from separate thread contexts. */
-int bladerf_stream(struct bladerf_stream *stream, bladerf_module module)
-{
-    int status;
-    struct bladerf *dev = stream->dev;
-
-    stream->module = module;
-    stream->state = STREAM_RUNNING;
-    status = dev->fn->stream(stream, module);
-
-    /* Backend return value takes precedence over stream error status */
-    return status == 0 ? stream->error_code : status;
-}
 
 /*------------------------------------------------------------------------------
  * Device Info
@@ -1079,6 +989,34 @@ int bladerf_config_gpio_write(struct bladerf *dev, uint32_t val)
 }
 
 /*------------------------------------------------------------------------------
+ * Expansion board GPIO register read / write functions
+ *----------------------------------------------------------------------------*/
+
+int bladerf_expansion_gpio_read(struct bladerf *dev, uint32_t *val)
+{
+    return dev->fn->expansion_gpio_read(dev,val);
+}
+
+int bladerf_expansion_gpio_write(struct bladerf *dev, uint32_t val)
+{
+    return dev->fn->expansion_gpio_write(dev,val);
+}
+
+/*------------------------------------------------------------------------------
+ * Expansion board GPIO direction register read / write functions
+ *----------------------------------------------------------------------------*/
+
+int bladerf_expansion_gpio_dir_read(struct bladerf *dev, uint32_t *val)
+{
+    return dev->fn->expansion_gpio_dir_read(dev,val);
+}
+
+int bladerf_expansion_gpio_dir_write(struct bladerf *dev, uint32_t val)
+{
+    return dev->fn->expansion_gpio_dir_write(dev,val);
+}
+
+/*------------------------------------------------------------------------------
  * IQ Calibration routines
  *----------------------------------------------------------------------------*/
 int bladerf_set_correction(struct bladerf *dev, bladerf_module module,
@@ -1093,6 +1031,13 @@ int bladerf_get_correction(struct bladerf *dev, bladerf_module module,
     return dev->fn->get_correction(dev, module, corr, value);
 }
 
+/*------------------------------------------------------------------------------
+ * Get current timestamp counter
+ *----------------------------------------------------------------------------*/
+int bladerf_get_timestamp(struct bladerf *dev, bladerf_module module, uint64_t *value)
+{
+    return dev->fn->get_timestamp(dev,module,value);
+}
 
 /*------------------------------------------------------------------------------
  * VCTCXO DAC register write
@@ -1101,6 +1046,16 @@ int bladerf_get_correction(struct bladerf *dev, bladerf_module module,
 int bladerf_dac_write(struct bladerf *dev, uint16_t val)
 {
     return dev->fn->dac_write(dev,val);
+}
+
+
+/*------------------------------------------------------------------------------
+ * XB SPI register write
+ *----------------------------------------------------------------------------*/
+
+int bladerf_xb_spi_write(struct bladerf *dev, uint32_t val)
+{
+    return dev->fn->xb_spi(dev,val);
 }
 
 /*------------------------------------------------------------------------------

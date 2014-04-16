@@ -95,6 +95,10 @@ int sync_init(struct bladerf *dev,
     }
 
     sync->dev = dev;
+    sync->state = SYNC_STATE_CHECK_WORKER;
+
+    sync->buf_mgmt.num_buffers = num_buffers;
+    sync->buf_mgmt.resubmit_count = 0;
 
     sync->stream_config.module = module;
     sync->stream_config.format = format;
@@ -103,11 +107,9 @@ int sync_init(struct bladerf *dev,
     sync->stream_config.timeout_ms = stream_timeout;
     sync->stream_config.bytes_per_sample = bytes_per_sample;
 
-    sync->buf_mgmt.num_buffers = num_buffers;
 
     pthread_mutex_init(&sync->buf_mgmt.lock, NULL);
-    pthread_cond_init(&sync->buf_mgmt.buf_consumed, NULL);
-    pthread_cond_init(&sync->buf_mgmt.buf_produced, NULL);
+    pthread_cond_init(&sync->buf_mgmt.buf_ready, NULL);
 
     sync->buf_mgmt.status = (sync_buffer_status*) malloc(num_buffers * sizeof(sync_buffer_status));
     if (sync->buf_mgmt.status == NULL) {
@@ -161,13 +163,16 @@ void sync_deinit(struct bladerf_sync *sync)
             case BLADERF_MODULE_RX:
                 sync_worker_deinit(sync->worker,
                                    &sync->buf_mgmt.lock,
-                                   &sync->buf_mgmt.buf_consumed);
+                                   &sync->buf_mgmt.buf_ready);
                 break;
 
             case BLADERF_MODULE_TX:
+                bladerf_submit_stream_buffer(sync->worker->stream,
+                                             BLADERF_STREAM_SHUTDOWN, 0);
+
                 sync_worker_deinit(sync->worker,
                                    &sync->buf_mgmt.lock,
-                                   &sync->buf_mgmt.buf_produced);
+                                   &sync->buf_mgmt.buf_ready);
                 break;
 
             default:
@@ -181,125 +186,172 @@ void sync_deinit(struct bladerf_sync *sync)
     }
 }
 
-static int check_worker(struct bladerf_sync *s)
+static int wait_for_buffer(struct buffer_mgmt *b, unsigned int timeout_ms,
+                           const char *dbg_name, unsigned int dbg_idx)
 {
-    sync_worker_state state;
-    int status = 0;
-    const int max_retries = 8;
-    int retry = 0;
+    int status;
+    struct timespec timeout;
 
-    do {
-        state = sync_worker_get_state(s->worker);
-
-        if (state != SYNC_WORKER_STATE_RUNNING) {
-
-            /* We need to start up the worker */
-            log_debug("%s: Worker not running (state=%d)... %s\n",
-                        __FUNCTION__, state,
-                        retry == 0 ? "starting it." : "retrying.");
-
-            sync_worker_submit_request(s->worker, SYNC_WORKER_START);
-            status = sync_worker_wait_for_state(s->worker,
-                                                SYNC_WORKER_STATE_RUNNING, 250);
-            if (status == 0) {
-                state = SYNC_WORKER_STATE_RUNNING;
-                log_debug("%s: Worker is now running.\n", __FUNCTION__);
-            }
-        }
-    } while ((state != SYNC_WORKER_STATE_RUNNING) && (++retry <= max_retries));
-
-    /* By this point, our worker should be running */
-    if (status != 0 || state != SYNC_WORKER_STATE_RUNNING) {
+    if (timeout_ms == 0) {
+        log_verbose("%s: Infinite wait for [%d] to fill.\n", dbg_name, dbg_idx);
+        status = pthread_cond_wait(&b->buf_ready, &b->lock);
+    } else {
+        log_verbose("%s: Timed wait for [%d] to fill.\n", dbg_name, dbg_idx);
+        status = populate_abs_timeout(&timeout, timeout_ms);
         if (status == 0) {
-            status = BLADERF_ERR_UNEXPECTED;
+            status = pthread_cond_timedwait(&b->buf_ready, &b->lock, &timeout);
         }
+    }
 
-        log_debug("%s: %s worker failed to start (state=%d): %s\n",
-                  __FUNCTION__, module2str(s->stream_config.module),
-                  state, bladerf_strerror(status));
+    if (status == ETIMEDOUT) {
+        status = BLADERF_ERR_TIMEOUT;
+    } else if (status != 0) {
+        status = BLADERF_ERR_UNEXPECTED;
     }
 
     return status;
 }
 
+#ifndef SYNC_WORKER_START_TIMEOUT_MS
+#   define SYNC_WORKER_START_TIMEOUT_MS 250
+#endif
+
 int sync_rx(struct bladerf *dev, void *samples, unsigned num_samples,
              struct bladerf_metadata *metadata, unsigned int timeout_ms)
 {
-    int status;
     struct bladerf_sync *s = dev->sync[BLADERF_MODULE_RX];
-    struct buffer_mgmt *b = &s->buf_mgmt;
-    unsigned int samples_returned = 0;
-    struct timespec timeout_abs;
+    struct buffer_mgmt *b;
 
-    if (s == NULL) {
+    int status = 0;
+    unsigned int samples_returned = 0;
+    uint8_t *samples_dest = (uint8_t*)samples;
+    uint8_t *buf_src;
+    unsigned int samples_to_copy;
+    unsigned int samples_per_buffer;
+
+    if (s == NULL || samples == NULL) {
         return BLADERF_ERR_INVAL;
     }
 
-    /* Check if our worker thread is running, and start it if it's not */
-    status = check_worker(s);
+    b = &s->buf_mgmt;
+    samples_per_buffer = s->stream_config.samples_per_buffer;
 
-    while(status == 0 && samples_returned < num_samples) {
-        pthread_mutex_lock(&b->lock);
+    while (samples_returned < num_samples && status == 0) {
 
-        /* If we have a fresh buffer, mark that we're consuming it */
-        if (b->status[b->cons_i] == SYNC_BUFFER_FULL) {
-            b->status[b->cons_i] = SYNC_BUFFER_PARTIAL;
-            b->partial_off = 0;
-        }
+        switch (s->state) {
+            case SYNC_STATE_CHECK_WORKER: {
+                sync_worker_state worker_state = sync_worker_get_state(s->worker);
 
-        if (b->status[b->cons_i] == SYNC_BUFFER_PARTIAL) {
-            /* We currently have a buffer to remove samples from */
-            uint8_t *samples_dest = (uint8_t*)samples;
-            uint8_t *buf_src = (uint8_t*)b->buffers[b->cons_i];
-            const unsigned int samples_to_copy =
-                uint_min(num_samples - samples_returned,
-                         s->stream_config.samples_per_buffer - b->partial_off);
+                if (worker_state == SYNC_WORKER_STATE_IDLE) {
+                    log_debug("%s: Worker is idle. Going to reset buf mgmt.\n",
+                              __FUNCTION__);
+                    s->state = SYNC_STATE_RESET_BUF_MGMT;
+                } else if (worker_state == SYNC_WORKER_STATE_RUNNING) {
+                    s->state = SYNC_STATE_WAIT_FOR_BUFFER;
+                } else {
+                    status = BLADERF_ERR_UNEXPECTED;
+                    log_debug("%s: Unexpected worker state=%d\n",
+                              __FUNCTION__, worker_state);
+                }
 
-            memcpy(samples_dest + samples2bytes(s, samples_returned),
-                   buf_src + samples2bytes(s, b->partial_off),
-                   samples2bytes(s, samples_to_copy));
-
-            b->partial_off += samples_to_copy;
-            samples_returned += samples_to_copy;
-
-            log_verbose("%s: Provided %u samples to caller\n",
-                        __FUNCTION__, samples_to_copy);
-
-            /* We've finished consuming this buffer and can start looking
-             * for available samples in the next buffer */
-            if (b->partial_off >= s->stream_config.samples_per_buffer) {
-                log_verbose("%s: Marking buf[%u] empty.\n",
-                            __FUNCTION__, b->cons_i);
-
-                b->status[b->cons_i] = SYNC_BUFFER_EMPTY;
-                b->cons_i = (b->cons_i + 1) % b->num_buffers;
-                pthread_cond_signal(&b->buf_consumed);
+                break;
             }
 
-        } else {
-            /* Need to wait for a buffer to become available */
-            if (timeout_ms == 0) {
-                status = pthread_cond_wait(&b->buf_produced, &b->lock);
-                log_verbose("%s: Infinite wait for [%d] to fill.\n",
-                           __FUNCTION__, b->cons_i);
-            } else {
-                log_verbose("%s: Timed wait for [%d] to fill.\n",
-                           __FUNCTION__, b->cons_i);
-               status = populate_abs_timeout(&timeout_abs, timeout_ms);
-               if (status == 0) {
-                   status = pthread_cond_timedwait(&b->buf_produced, &b->lock,
-                                                   &timeout_abs);
-               }
-            }
-        }
-        pthread_mutex_unlock(&b->lock);
+            case SYNC_STATE_RESET_BUF_MGMT:
+                pthread_mutex_lock(&b->lock);
+                /* When the RX stream starts up, it will submit the first T
+                 * transfers, so the consumer index must be reset to 0 */
+                b->cons_i = 0;
+                pthread_mutex_unlock(&b->lock);
+                log_debug("%s: Reset buf_mgmt consumer index\n", __FUNCTION__);
+                s->state = SYNC_STATE_START_WORKER;
+                break;
 
-        if (status == -ETIMEDOUT) {
-            status = BLADERF_ERR_TIMEOUT;
-        } else if (status != 0) {
-            status = BLADERF_ERR_UNEXPECTED;
-        } else {
-            status = check_worker(s);
+
+            case SYNC_STATE_START_WORKER:
+                sync_worker_submit_request(s->worker, SYNC_WORKER_START);
+
+                status = sync_worker_wait_for_state(
+                                                s->worker,
+                                                SYNC_WORKER_STATE_RUNNING,
+                                                SYNC_WORKER_START_TIMEOUT_MS);
+
+                if (status == 0) {
+                    s->state = SYNC_STATE_WAIT_FOR_BUFFER;
+                    log_debug("%s: Worker is now running.\n", __FUNCTION__);
+                } else {
+                    log_debug("%s: Failed to start worker, (%d)\n",
+                              __FUNCTION__, status);
+                }
+                break;
+
+            case SYNC_STATE_WAIT_FOR_BUFFER:
+                pthread_mutex_lock(&b->lock);
+
+                /* Check the buffer state, as the worker may have produced one
+                 * since we last queried the status */
+                if (b->status[b->cons_i] == SYNC_BUFFER_FULL) {
+                    s->state = SYNC_STATE_BUFFER_READY;
+                } else {
+                    status = wait_for_buffer(b, timeout_ms,
+                                             __FUNCTION__, b->cons_i);
+
+                    if (status == BLADERF_ERR_TIMEOUT) {
+                        log_debug("%s: Timed out waiting for buffer %u\n",
+                                  __FUNCTION__, b->cons_i);
+
+                        s->state = SYNC_STATE_CHECK_WORKER;
+                    }
+                }
+
+                pthread_mutex_unlock(&b->lock);
+                break;
+
+            case SYNC_STATE_BUFFER_READY:
+                pthread_mutex_lock(&b->lock);
+                b->status[b->cons_i] = SYNC_BUFFER_PARTIAL;
+                b->partial_off = 0;
+                pthread_mutex_unlock(&b->lock);
+
+                s->state= SYNC_STATE_USING_BUFFER;
+                break;
+
+            case SYNC_STATE_USING_BUFFER:
+                pthread_mutex_lock(&b->lock);
+
+                buf_src = (uint8_t*)b->buffers[b->cons_i];
+
+                samples_to_copy = uint_min(num_samples - samples_returned,
+                                           samples_per_buffer - b->partial_off);
+
+                memcpy(samples_dest + samples2bytes(s, samples_returned),
+                       buf_src + samples2bytes(s, b->partial_off),
+                       samples2bytes(s, samples_to_copy));
+
+                b->partial_off += samples_to_copy;
+                samples_returned += samples_to_copy;
+
+                log_verbose("%s: Provided %u samples to caller\n",
+                            __FUNCTION__, samples_to_copy);
+
+                /* We've finished consuming this buffer and can start looking
+                 * for available samples in the next buffer */
+                if (b->partial_off >= samples_per_buffer) {
+
+                    /* Check for symptom of out-of-bounds accesses */
+                    assert(b->partial_off == samples_per_buffer);
+
+                    log_verbose("%s: Marking buf[%u] empty.\n",
+                                __FUNCTION__, b->cons_i);
+
+                    b->status[b->cons_i] = SYNC_BUFFER_EMPTY;
+                    b->cons_i = (b->cons_i + 1) % b->num_buffers;
+
+                    s->state = SYNC_STATE_WAIT_FOR_BUFFER;
+                }
+
+                pthread_mutex_unlock(&b->lock);
+                break;
         }
     }
 
@@ -310,79 +362,138 @@ int sync_tx(struct bladerf *dev, void *samples, unsigned int num_samples,
              struct bladerf_metadata *metadata, unsigned int timeout_ms)
 {
     struct bladerf_sync *s = dev->sync[BLADERF_MODULE_TX];
-    struct buffer_mgmt *b = &s->buf_mgmt;
-    struct timespec timeout_abs;
-    unsigned int samples_written = 0;
-    int status = 0;
+    struct buffer_mgmt *b;
 
-    if (s == NULL) {
+    int status = 0;
+    unsigned int samples_written = 0;
+    unsigned int samples_to_copy;
+    unsigned int samples_per_buffer;
+    uint8_t *samples_src = (uint8_t*)samples;
+    uint8_t *buf_dest;
+
+    if (s == NULL || samples == NULL) {
         return BLADERF_ERR_INVAL;
     }
 
-    /* Check that our work thread is running, and start it if it's not */
-    status = check_worker(s);
+    b = &s->buf_mgmt;
+    samples_per_buffer = s->stream_config.samples_per_buffer;
+
     while (status == 0 && samples_written < num_samples) {
-        pthread_mutex_lock(&b->lock);
 
-        /* If we've got an empty buffer, mark that we're producing it */
-        if (b->status[b->prod_i] == SYNC_BUFFER_EMPTY) {
-            b->status[b->prod_i] = SYNC_BUFFER_PARTIAL;
-            b->partial_off = 0;
-        }
+        switch (s->state) {
+            case SYNC_STATE_CHECK_WORKER: {
+                sync_worker_state worker_state = sync_worker_get_state(s->worker);
 
-        if (b->status[b->prod_i] == SYNC_BUFFER_PARTIAL) {
-            /* We're currently filling a buffer */
-            uint8_t *buf_dest = (uint8_t*)b->buffers[b->prod_i];
-            uint8_t *samples_src = (uint8_t*)samples;
-
-            const unsigned int samples_to_copy =
-                uint_min(num_samples - samples_written,
-                         s->stream_config.samples_per_buffer - b->partial_off);
-
-            memcpy(buf_dest + samples2bytes(s, b->partial_off),
-                   samples_src + samples2bytes(s, samples_written),
-                   samples2bytes(s, samples_to_copy));
-
-            b->partial_off += samples_to_copy;
-            samples_written += samples_to_copy;
-
-            log_verbose("%s: Buffered %u samples from caller\n",
-                        __FUNCTION__, samples_to_copy);
-
-            if (b->partial_off >= s->stream_config.samples_per_buffer) {
-                log_verbose("%s: Marking buf[%u] full\n",
-                            __FUNCTION__, b->prod_i);
-
-                b->status[b->prod_i] = SYNC_BUFFER_FULL;
-                b->prod_i = (b->prod_i + 1) % b->num_buffers;
-                pthread_cond_signal(&b->buf_produced);
-            }
-
-        } else {
-            /* We need to wait for a buffer to be emptied by the worker */
-            if (timeout_ms == 0) {
-                log_verbose("%s: Infinite wait for [%d] to empty.\n",
-                           __FUNCTION__, b->prod_i);
-                status = pthread_cond_wait(&b->buf_consumed, &b->lock);
-            } else {
-                status = populate_abs_timeout(&timeout_abs, timeout_ms);
-                if (status == 0) {
-                    log_verbose("%s: Timed wait for [%d] to empty.\n",
-                                __FUNCTION__, b->prod_i);
-                    status = pthread_cond_timedwait(&b->buf_consumed, &b->lock,
-                                                    &timeout_abs);
+                if (worker_state == SYNC_WORKER_STATE_IDLE) {
+                    /* No need to reset any buffer managment for TX since
+                     * the TX stream does not submit an initial set of buffers.
+                     * Therefore the RESET_BUF_MGMT state is skipped here. */
+                    s->state = SYNC_STATE_START_WORKER;
                 }
+                break;
             }
-        }
 
-        pthread_mutex_unlock(&b->lock);
+            case SYNC_STATE_RESET_BUF_MGMT:
+                assert(!"Bug");
+                break;
 
-        if (status == -ETIMEDOUT) {
-            status = BLADERF_ERR_TIMEOUT;
-        } else if (status != 0) {
-            status = BLADERF_ERR_UNEXPECTED;
-        } else {
-            status = check_worker(s);
+            case SYNC_STATE_START_WORKER:
+                sync_worker_submit_request(s->worker, SYNC_WORKER_START);
+
+                status = sync_worker_wait_for_state(
+                        s->worker,
+                        SYNC_WORKER_STATE_RUNNING,
+                        SYNC_WORKER_START_TIMEOUT_MS);
+
+                if (status == 0) {
+                    s->state = SYNC_STATE_WAIT_FOR_BUFFER;
+                    log_debug("%s: Worker is now running.\n", __FUNCTION__);
+                }
+                break;
+
+            case SYNC_STATE_WAIT_FOR_BUFFER:
+                pthread_mutex_lock(&b->lock);
+
+                /* Check the buffer state, as the worker may have consumed one
+                 * since we last queried the status */
+                if (b->status[b->prod_i] == SYNC_BUFFER_EMPTY) {
+                    s->state = SYNC_STATE_BUFFER_READY;
+                } else {
+                    status = wait_for_buffer(b, timeout_ms,
+                                             __FUNCTION__, b->prod_i);
+                }
+
+                pthread_mutex_unlock(&b->lock);
+                break;
+
+            case SYNC_STATE_BUFFER_READY:
+                pthread_mutex_lock(&b->lock);
+                b->status[b->prod_i] = SYNC_BUFFER_PARTIAL;
+                b->partial_off = 0;
+                pthread_mutex_unlock(&b->lock);
+
+                s->state= SYNC_STATE_USING_BUFFER;
+                break;
+
+
+            case SYNC_STATE_USING_BUFFER:
+                pthread_mutex_lock(&b->lock);
+
+                buf_dest = (uint8_t*)b->buffers[b->prod_i];
+                samples_to_copy = uint_min(num_samples - samples_written,
+                                           samples_per_buffer - b->partial_off);
+
+                memcpy(buf_dest + samples2bytes(s, b->partial_off),
+                        samples_src + samples2bytes(s, samples_written),
+                        samples2bytes(s, samples_to_copy));
+
+                b->partial_off += samples_to_copy;
+                samples_written += samples_to_copy;
+
+                log_verbose("%s: Buffered %u samples from caller\n",
+                            __FUNCTION__, samples_to_copy);
+
+                if (b->partial_off >= samples_per_buffer) {
+                    /* Check for symptom of out-of-bounds accesses */
+                    assert(b->partial_off == samples_per_buffer);
+
+                    log_verbose("%s: Marking buf[%u] full\n",
+                                __FUNCTION__, b->prod_i);
+
+                    b->status[b->prod_i] = SYNC_BUFFER_IN_FLIGHT;
+                    pthread_mutex_unlock(&b->lock);
+
+                    /* This call may block and it results in a per-stream lock
+                     * being held, so the buffer lock must be dropped.
+                     *
+                     * A callback may occur in the meantime, but this will
+                     * not touch the status for this this buffer, or the
+                     * producer index.
+                     */
+                    status = bladerf_submit_stream_buffer(
+                                                s->worker->stream,
+                                                buf_dest,
+                                                s->stream_config.timeout_ms);
+
+                    pthread_mutex_lock(&b->lock);
+
+                    if (status == 0) {
+                        b->prod_i = (b->prod_i + 1) % b->num_buffers;
+
+                        /* Go handle the next buffer, if we have one available.
+                         * Otherwise, check up on the worker's state and restart
+                         * it if needed. */
+                        if (b->status[b->prod_i] == SYNC_BUFFER_EMPTY) {
+                            s->state = SYNC_STATE_BUFFER_READY;
+                        } else {
+                            s->state = SYNC_STATE_CHECK_WORKER;
+                        }
+
+                    }
+                }
+
+                pthread_mutex_unlock(&b->lock);
+                break;
         }
     }
 
