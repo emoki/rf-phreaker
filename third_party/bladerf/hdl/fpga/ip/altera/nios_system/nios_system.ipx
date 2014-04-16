@@ -1,3 +1,0 @@
-<library>
-	<path path="../../opencores/i2c/**/*"/>
-</library>
