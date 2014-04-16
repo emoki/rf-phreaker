@@ -42,6 +42,14 @@ public:
 	int32_t num_coherent_slots_;
 };
 
+class frequency_correction_settings
+{
+public:
+	int frequency_correction_range_start_;
+	int frequency_correction_range_end_;
+	umts_general_settings general_settings_;
+};
+
 class settings
 {
 public:
@@ -50,9 +58,6 @@ public:
 	int num_items_in_flight_;
 
 	output_settings packet_output_;
-	int frequency_correction_range_start_;
-	int frequency_correction_range_end_;
-
 	output_settings standard_output_;
 	output_settings signal_slots_;
 
@@ -66,6 +71,10 @@ public:
 
 	umts_general_settings umts_sweep_general_;
 	umts_general_settings umts_layer_3_general_;
+
+	frequency_correction_settings frequency_correction_settings_;
+
+
 	//double umts_fast_sweep_threshold_;
 	//double umts_deep_sweep_threshold_;
 	//double umts_sweep_threshold_;

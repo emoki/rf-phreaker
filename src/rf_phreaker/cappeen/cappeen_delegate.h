@@ -84,7 +84,8 @@ public:
 
 	void output_hardware(const hardware &t)
 	{
-		// Do nothing.  Do we need hardware output??
+		initialize_beagle_info(t);
+		change_beagle_state(current_beagle_state());
 		//delegate_->available_beagle_info(beagle_id_, *beagle_info_);
 	}
 	
@@ -289,7 +290,7 @@ public:
 		beagle_info_.beagle_id_ = beagle_id_;
 		memset(beagle_info_.beagle_serial_, 0, sizeof(beagle_info_.beagle_serial_));
 		memcpy(beagle_info_.beagle_serial_, t.scanner_id_.c_str(), t.scanner_id_.size());
-		beagle_info_.dds_clock_correction_calibration_date_ = 0;
+		beagle_info_.dds_clock_correction_calibration_date_ = t.frequency_correction_calibration_date_;
 		beagle_info_.rf_calibration_date_ = t.rf_calibration_date_;
 
 		bands_.clear();

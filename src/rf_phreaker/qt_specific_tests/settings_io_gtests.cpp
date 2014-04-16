@@ -65,6 +65,11 @@ TEST(QtSpecific, TestSettingsIO)
 	EXPECT_EQ(settings_umts_general_full_scan_interval_default, set.umts_layer_3_general_.full_scan_interval_);
 	EXPECT_EQ(settings_umts_general_num_coherent_slots_default, set.umts_layer_3_general_.num_coherent_slots_);
 
+	EXPECT_EQ(frequency_correction_offset_start_default, set.frequency_correction_settings_.frequency_correction_range_start_);
+	EXPECT_EQ(frequency_correction_offset_end_default, set.frequency_correction_settings_.frequency_correction_range_end_);
+	EXPECT_EQ(settings_umts_general_sensitivity_default, set.frequency_correction_settings_.general_settings_.sensitivity_);
+	EXPECT_EQ(settings_umts_general_full_scan_interval_default, set.frequency_correction_settings_.general_settings_.full_scan_interval_);
+	EXPECT_EQ(settings_umts_general_num_coherent_slots_default, set.frequency_correction_settings_.general_settings_.num_coherent_slots_);
 
 	// Alter and store new settings. 
 	int tmp = 0;
@@ -107,6 +112,11 @@ TEST(QtSpecific, TestSettingsIO)
 	set.umts_sweep_general_.num_coherent_slots_ = tmp++;
 	set.umts_layer_3_general_.sensitivity_ = tmp++;
 	set.umts_layer_3_general_.full_scan_interval_ = tmp++;
+	set.frequency_correction_settings_.frequency_correction_range_start_ = tmp++;
+	set.frequency_correction_settings_.frequency_correction_range_end_ = tmp++;
+	set.frequency_correction_settings_.general_settings_.full_scan_interval_ = tmp++;
+	set.frequency_correction_settings_.general_settings_.num_coherent_slots_ = tmp++;
+	set.frequency_correction_settings_.general_settings_.sensitivity_ = tmp++;
 	set_io.write(set);
 	
 	settings set2;
@@ -162,6 +172,11 @@ TEST(QtSpecific, TestSettingsIO)
 	EXPECT_EQ(set.umts_layer_3_general_.full_scan_interval_, set2.umts_layer_3_general_.full_scan_interval_);
 	EXPECT_EQ(set.umts_layer_3_general_.num_coherent_slots_, set2.umts_layer_3_general_.num_coherent_slots_);
 
+	EXPECT_EQ(set.frequency_correction_settings_.frequency_correction_range_start_, set2.frequency_correction_settings_.frequency_correction_range_start_);
+	EXPECT_EQ(set.frequency_correction_settings_.frequency_correction_range_end_, set2.frequency_correction_settings_.frequency_correction_range_end_);
+	EXPECT_EQ(set.frequency_correction_settings_.general_settings_.full_scan_interval_, set2.frequency_correction_settings_.general_settings_.full_scan_interval_);
+	EXPECT_EQ(set.frequency_correction_settings_.general_settings_.num_coherent_slots_, set2.frequency_correction_settings_.general_settings_.num_coherent_slots_);
+	EXPECT_EQ(set.frequency_correction_settings_.general_settings_.sensitivity_, set2.frequency_correction_settings_.general_settings_.sensitivity_);
 
 	// Store default settings.
 	set_io.clear();
@@ -208,11 +223,11 @@ TEST(QtSpecific, WriteDefaultSettings)
 	set.umts_decode_layer_3_.decode_threshold_ = -13;
 	set.umts_decode_layer_3_.decode_minimum_threshold_ = -25;
 
-	set.umts_sweep_general_.sensitivity_ = -21;
+	set.umts_sweep_general_.sensitivity_ = -25;
 	set.umts_sweep_general_.full_scan_interval_ = 1;
 	set.umts_sweep_general_.num_coherent_slots_= 8;
 
-	set.umts_layer_3_general_.sensitivity_ = -23;
+	set.umts_layer_3_general_.sensitivity_ = -28;
 	set.umts_layer_3_general_.full_scan_interval_ = 110;
 	set.umts_layer_3_general_.num_coherent_slots_ = 14;
 
@@ -228,6 +243,12 @@ TEST(QtSpecific, WriteDefaultSettings)
 	set.lte_decode_layer_3_.minimum_collection_round_ = 5;
 	set.lte_decode_layer_3_.decode_threshold_ = -13;
 	set.lte_decode_layer_3_.decode_minimum_threshold_ = -25;
+
+	set.frequency_correction_settings_.frequency_correction_range_start_ = khz(-2);
+	set.frequency_correction_settings_.frequency_correction_range_end_ = khz(2);
+	set.frequency_correction_settings_.general_settings_.full_scan_interval_ = 1;
+	set.frequency_correction_settings_.general_settings_.num_coherent_slots_ = 2;
+	set.frequency_correction_settings_.general_settings_.sensitivity_ = -23;
 
 	set_io.write(set);
 }

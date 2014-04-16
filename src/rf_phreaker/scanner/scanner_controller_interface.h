@@ -28,6 +28,8 @@ public:
 
 	virtual std::future<const scanner*> get_scanner() = 0;
 
+	virtual std::future<void> write_vctcxo_trim(frequency_type carrier_freq, frequency_type freq_shift) = 0;
+
 	virtual std::future<void> update_vctcxo_trim(frequency_type carrier_freq, frequency_type freq_shift) = 0;
 
 	virtual std::future<rf_phreaker::gps> get_gps_data() = 0;

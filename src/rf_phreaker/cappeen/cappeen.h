@@ -109,10 +109,19 @@ Before starting collection BEAGLESTATE should be BEAGLE_READY.  Collecting with 
 CAPPEEN_API long cappeen_start_collection(const beagle_api::collection_info &collection);
 
 /**
-Starts the frequency correction process.  The WCDMA bands specified will be scanned for valid WCDMA cells.  Using the WCDMA cells found, the API will adjust 
-VCTCXO trim to minimize any frequency error within the hardware.
+Starts the frequency correction process.  The WCDMA bands specified will be scanned for valid WCDMA cells.  Using the WCDMA cells found, the API will adjust
+VCTCXO trim to minimize any frequency error within the hardware.  If successful the API will output an updated beagle_info with the new correction value
+and date.  If unable to find valid UMTS cells after the sweeping the bands correction frequency process fails.  Currently this is not treated as an error 
+and the user is alerted via a message.
 */
-CAPPEEN_API long cappeen_start_frequency_correction(const beagle_api::collection_info &collection);
+CAPPEEN_API long cappeen_start_frequency_correction_using_sweep(const beagle_api::collection_info &collection);
+
+/**
+Starts the frequency correction process.  Using the WCDMA channels specified, the API will adjust VCTCXO trim to minimize any frequency error within the hardware.  
+If successful the API will output an updated beagle_info with the new correction value and date.  If unable to find valid UMTS cells in the frequencies specified 
+the frequency process fails.  Currently this is not treated as an error and the user is alerted via a message.
+*/
+CAPPEEN_API long cappeen_start_frequency_correction_using_frequencies(uint32_t *wcdma_frequencies, int num_channels);
 
 /**
 Inputs new license.

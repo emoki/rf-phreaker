@@ -133,12 +133,15 @@ long cappeen_impl::clean_up()
 		if(gps_graph_)
 			gps_graph_->cancel_and_wait();
 
+		if(frequency_correction_graph_)
+			frequency_correction_graph_->cancel_and_wait();
 
 		delegate_.release();
 		scanner_.release();
 		data_output_.release();
 		processing_graph_.release();
 		gps_graph_.release();
+		frequency_correction_graph_.release();
 		LOG_L(INFO) << "Cleaned up successfully.";
 	}
 	catch(const rf_phreaker::rf_phreaker_error &err) {
@@ -321,6 +324,9 @@ long cappeen_impl::start_collection(const beagle_api::collection_info &collectio
 		if(state != BEAGLE_WARMINGUP && state != BEAGLE_READY && state != BEAGLE_USBOPENED)
 			throw cappeen_api_error("Cannot start collection.  Wrong beagle state.", WRONGBEAGLESTATE);
 
+		if(frequency_correction_graph_)
+			frequency_correction_graph_->cancel_and_wait();
+
 		// Initialize packet sizes.
 		read_settings();
 		processing::initialize_collection_info_defaults(config_);
@@ -416,7 +422,7 @@ long cappeen_impl::start_frequency_correction(const beagle_api::collection_info 
 {
 	long status = 0;
 	try {
-		LOG_L(INFO) << "Starting frequency correction...";
+		LOG_L(INFO) << "Starting frequency correction using WCDMA bands...";
 		std::lock_guard<std::recursive_mutex> lock(mutex_);
 
 		auto state = delegate_->current_beagle_state();
@@ -425,6 +431,7 @@ long cappeen_impl::start_frequency_correction(const beagle_api::collection_info 
 
 		// Initialize packet sizes.
 		read_settings();
+		config_.umts_layer_3_collection_.collection_time_ = milli_to_nano(60);
 		processing::initialize_collection_info_defaults(config_);
 
 		auto collection_containers = create_collection_info_containers(collection);
@@ -436,7 +443,10 @@ long cappeen_impl::start_frequency_correction(const beagle_api::collection_info 
 		if(collection_containers.empty())
 			throw cappeen_api_error("Please input at least one WCDMA band to start frequency correction.");
 
-		frequency_correction_graph_->start(scanner_.get(), collection_containers, config_);
+		frequency_correction_graph_->start(scanner_.get(), data_output_.get(), collection_containers, config_);
+
+		// Temp sleep to allow graph thread to get going.
+		std::this_thread::sleep_for(std::chrono::seconds(1));
 
 		LOG_L(INFO) << "Frequency collection started successfully.";
 	}
@@ -453,6 +463,57 @@ long cappeen_impl::start_frequency_correction(const beagle_api::collection_info 
 		status = UNKNOWN_ERROR;
 	}
 	return status;
+}
+
+long cappeen_impl::start_frequency_correction(uint32_t *wcdma_frequencies, int num_channels)
+{
+	using namespace processing;
+
+	long status = 0;
+	try {
+		LOG_L(INFO) << "Starting frequency correction using WCDMA channels...";
+		std::lock_guard<std::recursive_mutex> lock(mutex_);
+
+		auto state = delegate_->current_beagle_state();
+		if(state != BEAGLE_WARMINGUP && state != BEAGLE_READY && state != BEAGLE_USBOPENED)
+			throw cappeen_api_error("Cannot start collection.  Wrong beagle state.", WRONGBEAGLESTATE);
+
+		// Initialize packet sizes.
+		read_settings();
+		config_.umts_layer_3_collection_.collection_time_ = milli_to_nano(60);
+		processing::initialize_collection_info_defaults(config_);
+
+		collection_info_containers containers;
+		
+		containers.push_back(collection_info_container(UMTS_LAYER_3_DECODE, false));
+
+		for(int i = 0; i < num_channels; ++i)
+			containers[0].adjust(add_collection_info(umts_layer_3_collection_info(wcdma_frequencies[i])));
+
+		if(num_channels <= 0)
+			throw cappeen_api_error("Please input at least one WCDMA frequency to start frequency correction.");
+
+		frequency_correction_graph_->start(scanner_.get(), data_output_.get(), containers, config_);
+
+		// Temp sleep to allow graph thread to get going.
+		std::this_thread::sleep_for(std::chrono::seconds(1));
+
+		LOG_L(INFO) << "Frequency collection started successfully.";
+	}
+	catch(const rf_phreaker::rf_phreaker_error &err) {
+		if(delegate_) delegate_->output_error_as_message(err);
+		status = (long)err.error_code_;
+	}
+	catch(const std::exception &err) {
+		if(delegate_) delegate_->output_error_as_message(err);
+		status = STD_EXCEPTION_ERROR;
+	}
+	catch(...) {
+		if(delegate_) delegate_->output_error_as_message("Unknown error has occurred.", UNKNOWN_ERROR);
+		status = UNKNOWN_ERROR;
+	}
+	return status;
+
 }
 
 long cappeen_impl::input_new_license(const char *serial, uint32_t serial_buf_size, const char *new_license_filename, uint32_t license_buf_size)

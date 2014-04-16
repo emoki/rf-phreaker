@@ -1,5 +1,6 @@
 #pragma once
 
+#include "rf_phreaker/common/measurements.h"
 #include "libbladeRF.h"
 
 #include <string>
@@ -10,7 +11,11 @@ namespace rf_phreaker {
 		class scanner_blade_rf_impl
 		{
 		public:
-			scanner_blade_rf_impl() {};
+			scanner_blade_rf_impl() 
+				: usb_speed_(BLADERF_DEVICE_SPEED_UNKNOWN)
+				, vctcxo_trim_value_(0)
+				, vctcxo_trim_date_(0)
+			{}
 
 			scanner_blade_rf_impl(const scanner_blade_rf_impl &impl)
                 : blade_rf_version_(impl.blade_rf_version_)
@@ -20,8 +25,9 @@ namespace rf_phreaker {
 				, usb_speed_(impl.usb_speed_)
 				//, stats_(impl.stats_)
 				, sampling_(impl.sampling_)
-				, vctcxo_trim_(impl.vctcxo_trim_)
-            {}
+				, vctcxo_trim_value_(impl.vctcxo_trim_value_)
+				, vctcxo_trim_date_(impl.vctcxo_trim_date_)
+			{}
 
 			~scanner_blade_rf_impl() {};
 
@@ -40,11 +46,21 @@ namespace rf_phreaker {
 					hw.device_speed_ = UNKNOWN_SPEED;
 				}
 				hw.scanner_id_ = serial();
+				hw.frequency_correction_calibration_date_ = get_frequency_correction_date();
 				hw.rf_calibration_date_ = 0;
 				// TODO - Implement frequency paths.
 				hw.frequency_paths_;
 				return hw;
 			}
+			int get_frequency_correction_value() const
+			{
+				return vctcxo_trim_value_;
+			}
+			time_t get_frequency_correction_date() const
+			{
+				return vctcxo_trim_date_;
+			}
+
 			std::string serial() const
 			{
 				return dev_info_.serial;
@@ -83,7 +99,7 @@ namespace rf_phreaker {
 			//}
 			uint16_t vctcxo_trim() const
 			{
-				return vctcxo_trim_;
+				return vctcxo_trim_value_;
 			}
 			int usb_speed() const { return usb_speed_; }
 
@@ -141,10 +157,13 @@ namespace rf_phreaker {
 			{
 				return rx_timeout_;
 			}
-
-			void set_vctcxo_trim(uint16_t trim)
+			void set_vctcxo_trim_value(uint16_t trim)
 			{
-				vctcxo_trim_ = trim;
+				vctcxo_trim_value_ = trim;
+			}
+			void set_vctcxo_trim_date(time_t date)
+			{
+				vctcxo_trim_date_ = date;
 			}
 
 			struct bladerf_version blade_rf_version_;
@@ -154,7 +173,8 @@ namespace rf_phreaker {
 			bladerf_dev_speed usb_speed_;
 			//struct bladerf_stats stats_;
 			bladerf_sampling sampling_;
-			uint16_t vctcxo_trim_;
+			uint16_t vctcxo_trim_value_;
+			time_t vctcxo_trim_date_;
 			unsigned int rx_timeout_;
 		};
 

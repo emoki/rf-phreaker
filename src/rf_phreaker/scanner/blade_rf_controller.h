@@ -39,13 +39,15 @@ public:
 
 	void config_scanner_for_collection(std::vector<frequency_type> &freqs);
 
-	void set_vctcxo_trim(uint16_t trim);
+	void write_vctcxo_trim(uint16_t trim);
+	void write_vctcxo_trim(frequency_type carrier_freq, frequency_type freq_shift);
+	
+	void update_vctcxo_trim(frequency_type carrier_freq, frequency_type freq_shift);
+	void update_vctcxo_trim(uint16_t trim);
 
 	void read_vctcxo_trim(uint16_t &trim);
 
-	void update_vctcxo_trim(frequency_type carrier_freq, frequency_type freq_shift);
-
-	void set_gpio(uint32_t value);
+	void write_gpio(uint32_t value);
 
 	void read_gpio(uint32_t &value);
 
@@ -73,6 +75,8 @@ private:
 	int check_blade_status(int return_status);
 
 	void check_blade_comm();
+
+	uint16_t calculate_vctcxo_trim_value(frequency_type carrier_freq, frequency_type freq_shift);
 
 	ipp_16sc_aligned_buffer aligned_buffer_;
 

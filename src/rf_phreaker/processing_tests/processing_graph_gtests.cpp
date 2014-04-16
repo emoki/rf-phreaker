@@ -50,8 +50,8 @@ TEST(ProcessingGraph, DISABLEDTestGeneral)
 			lte_layer_3.adjust(add_collection_info(lte_layer_3_collection_info(khz(2147500), lte_bandwidth_10_mhz_sampling_rate, mhz(10), LTE_OPERATING_BAND_1)));
 			lte_layer_3.adjust(add_collection_info(lte_layer_3_collection_info(mhz(2140), lte_bandwidth_10_mhz_sampling_rate, mhz(10), LTE_OPERATING_BAND_1)));
 			lte_layer_3.adjust(add_collection_info(lte_layer_3_collection_info(mhz(2120), lte_bandwidth_20_mhz_sampling_rate, mhz(20), LTE_OPERATING_BAND_1)));
-			//umts_layer_3.adjust(add_collection_info(lte_layer_3_collection_info(khz(2147500), UMTS_OPERATING_BAND_5)));
-			//umts_layer_3.adjust(add_collection_info(lte_layer_3_collection_info(khz(2147500), UMTS_OPERATING_BAND_5)));
+			//umts_layer_3.adjust(add_collection_info(umts_layer_3_collection_info(khz(2147500), UMTS_OPERATING_BAND_5)));
+			//umts_layer_3.adjust(add_collection_info(umts_layer_3_collection_info(khz(2147500), UMTS_OPERATING_BAND_5)));
 
 			data_output_async output;
 			output.set_standard_output(true);

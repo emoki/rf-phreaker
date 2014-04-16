@@ -238,7 +238,7 @@ int set_vctcxo_trim(int trim)
 {
 	try {
 		uint16_t tmp_trim = trim;
-		controller.set_vctcxo_trim(tmp_trim);
+		controller.write_vctcxo_trim(tmp_trim);
 		return matlab_interface_no_error;
 	}
 	catch(rf_phreaker::rf_phreaker_error &err) {
@@ -290,7 +290,7 @@ int read_gpio(unsigned int *value)
 int set_gpio(unsigned int value)
 {
 	try {
-		controller.set_gpio(value);
+		controller.write_gpio(value);
 		return matlab_interface_no_error;
 	}
 	catch(rf_phreaker::rf_phreaker_error &err) {

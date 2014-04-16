@@ -17,6 +17,9 @@ namespace rf_phreaker {
 			scanner_blade_rf(const scanner_blade_rf_impl &impl);
 
 			hardware get_hardware() const;
+			int get_frequency_correction_value() const;
+			time_t get_frequency_correction_date() const;
+
 			std::string scanner_id() const;
 			std::string serial() const;
 			int back_end() const;
@@ -45,7 +48,8 @@ namespace rf_phreaker {
 			uint16_t firmware_version_patch() const;
 			std::string firmware_version_description() const;
 
-			void set_vctcxo_trim(uint16_t trim);
+			void set_vctcxo_trim_value(uint16_t trim);
+			void set_vctcxo_trim_date(time_t date);
 		private:
 			std::unique_ptr<scanner_blade_rf_impl> impl_;
 		};

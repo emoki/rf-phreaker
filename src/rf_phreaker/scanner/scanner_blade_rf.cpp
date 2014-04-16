@@ -9,6 +9,8 @@ namespace rf_phreaker {
 		{}
 
 		hardware scanner_blade_rf::get_hardware() const { return impl_->get_hardware(); }
+		int scanner_blade_rf::get_frequency_correction_value() const { return impl_->get_frequency_correction_value(); }
+		time_t scanner_blade_rf::get_frequency_correction_date() const { return impl_->get_frequency_correction_date(); }
 
 		std::string scanner_blade_rf::scanner_id() const { return impl_->serial(); }
 		std::string scanner_blade_rf::serial() const { return impl_->serial(); }
@@ -38,7 +40,8 @@ namespace rf_phreaker {
 		uint16_t scanner_blade_rf::firmware_version_patch() const { return impl_->firmware_version_patch(); }
 		std::string scanner_blade_rf::firmware_version_description() const { return impl_->firmware_version_description(); }
 
-		void scanner_blade_rf::set_vctcxo_trim(uint16_t trim) { impl_->set_vctcxo_trim(trim); }
+		void scanner_blade_rf::set_vctcxo_trim_value(uint16_t trim) { impl_->set_vctcxo_trim_value(trim); }
+		void scanner_blade_rf::set_vctcxo_trim_date(time_t date) { impl_->set_vctcxo_trim_date(date); }
 
 	}
 

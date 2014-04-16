@@ -19,7 +19,7 @@ public:
 
 	~frequency_correction_graph(void);
 
-	void start(rf_phreaker::scanner::scanner_controller_interface *sc, const collection_info_containers &collection_info, const settings &config);
+	void start(rf_phreaker::scanner::scanner_controller_interface *sc, data_output_async *out, const collection_info_containers &collection_info, const settings &config);
 
 	void cancel_and_wait();
 

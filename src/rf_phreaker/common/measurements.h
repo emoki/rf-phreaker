@@ -26,6 +26,7 @@ namespace rf_phreaker {
 		scanner_serial_type scanner_id_;
 		std::vector<frequency_path> frequency_paths_;
 		device_speed device_speed_;
+		int64_t frequency_correction_calibration_date_;
 		int64_t rf_calibration_date_;
 	};
 

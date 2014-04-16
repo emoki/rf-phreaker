@@ -3,13 +3,12 @@
 #include "rf_phreaker/scanner/comm_blade_rf.h"
 #include "rf_phreaker/scanner/bandwidth_conversion.h"
 #include "rf_phreaker/scanner/lms_utilities.h"
+#include "rf_phreaker/scanner/scanner_utility.h"
 #include "rf_phreaker/common/common_utility.h"
 #include "rf_phreaker/scanner/scanner_blade_rf_impl.h"
 #include "libbladeRF.h"
 
-using namespace rf_phreaker;
-using namespace rf_phreaker::scanner;
-using rf_phreaker::scanner::scanner;
+namespace rf_phreaker { namespace scanner {
 
 blade_rf_controller::blade_rf_controller(comm_type)
 {}
@@ -76,7 +75,53 @@ void blade_rf_controller::open_scanner(const scanner_id_type &id)
 	comm_blade_rf_.reset(new comm_blade_rf(dev_info, blade_rf));
 
 	refresh_scanner_info();
+
+	LOG_L(DEBUG) << "Opened scanner " << scanner_blade_rf_->serial() << ".  Device speed is " << to_string(scanner_blade_rf_->usb_speed()) << ". VCTCXO trim value is " << scanner_blade_rf_->vctcxo_trim() << ".";
 }
+
+void blade_rf_controller::refresh_scanner_info()
+{
+	check_blade_comm();
+
+	scanner_blade_rf_impl blade;
+
+	auto comm_blade = comm_blade_rf_->blade_rf();
+
+	check_blade_status(bladerf_get_devinfo(comm_blade, &blade.dev_info_));
+
+	blade.usb_speed_ = static_cast<bladerf_dev_speed>(check_blade_status(bladerf_device_speed(comm_blade_rf_->blade_rf())));
+
+	// bladerf_stats is not currently supported.  FPGA needs to support behavior.
+	//check_blade_status(bladerf_stats(comm_blade, &blade.stats_));
+	//blade.stats_.rx_overruns = 0;
+	//blade.stats_.rx_throughput = 0;
+	//blade.stats_.tx_throughput = 0;
+	//blade.stats_.tx_underruns = 0;
+
+	bladerf_version(&blade.blade_rf_version_);
+
+	check_blade_status(bladerf_fw_version(comm_blade, &blade.firmware_version_));
+
+	check_blade_status(bladerf_fpga_version(comm_blade, &blade.fpga_version_));
+
+	check_blade_status(bladerf_get_vctcxo_trim(comm_blade, &blade.vctcxo_trim_value_));
+
+	check_blade_status(bladerf_get_transfer_timeout(comm_blade, BLADERF_MODULE_RX, &blade.rx_timeout_));
+
+	// TODO - Temporary measure until we add trim value date to calibration info.
+	time_t date = 0;
+	uint16_t value = 0;
+	if(scanner_blade_rf_ && scanner_blade_rf_->serial() == blade.serial()) {
+		date = scanner_blade_rf_->get_frequency_correction_date();
+		value = scanner_blade_rf_->get_frequency_correction_value();
+	}
+	scanner_blade_rf_ = std::make_shared<scanner_blade_rf>(blade);
+	if(date || value) {
+		scanner_blade_rf_->set_vctcxo_trim_date(date);
+		scanner_blade_rf_->set_vctcxo_trim_value(value);
+	}
+}
+
 
 void blade_rf_controller::close_scanner()
 {
@@ -145,11 +190,61 @@ void blade_rf_controller::do_initial_scanner_config()
 	// construction of calibration table
 }
 
-void blade_rf_controller::set_vctcxo_trim(uint16_t trim)
+void blade_rf_controller::write_vctcxo_trim(frequency_type carrier_freq, frequency_type freq_shift)
+{
+	auto trim = calculate_vctcxo_trim_value(carrier_freq, freq_shift);
+	update_vctcxo_trim(trim);
+	write_vctcxo_trim(trim);
+}
+
+uint16_t blade_rf_controller::calculate_vctcxo_trim_value(frequency_type carrier_freq, frequency_type freq_shift)
+{
+	check_blade_comm();
+
+	auto adjust = boost::math::round(freq_shift / (carrier_freq / 38.4e6) * 74.5);
+
+	return scanner_blade_rf_->vctcxo_trim() - (int16_t)adjust;
+}
+
+void blade_rf_controller::write_vctcxo_trim(uint16_t trim)
+{
+	check_blade_comm();
+
+	auto image = bladerf_alloc_cal_image(BLADERF_FPGA_40KLE, trim);
+	if(image == nullptr)
+		throw blade_rf_error("Unable to create calibration image.");
+
+	LOG_L(DEBUG) << "Writing vctcxo trim value of " << trim << " to scanner " << comm_blade_rf_->id() << ".";
+
+	check_blade_status(bladerf_program_flash_unaligned(comm_blade_rf_->blade_rf(), image->address,
+		image->data, image->length));
+
+	// We must reopen device for it to become effective.
+
+	LOG_L(DEBUG) << "Reopening scanner to initialize with new vctcxo.";
+	
+	try { get_rf_data(10000); }
+	catch(...) {}
+
+	open_scanner(comm_blade_rf_->id());
+	do_initial_scanner_config();
+}
+
+void blade_rf_controller::update_vctcxo_trim(frequency_type carrier_freq, frequency_type freq_shift)
+{
+	auto trim = calculate_vctcxo_trim_value(carrier_freq, freq_shift);
+	update_vctcxo_trim(trim);
+}
+
+void blade_rf_controller::update_vctcxo_trim(uint16_t trim)
 {
 	check_blade_comm();
 
 	check_blade_status(bladerf_dac_write(comm_blade_rf_->blade_rf(), trim));
+
+	scanner_blade_rf_->set_vctcxo_trim_value(trim);
+
+	scanner_blade_rf_->set_vctcxo_trim_date(std::chrono::system_clock::to_time_t(std::chrono::system_clock::now()));
 }
 
 void blade_rf_controller::read_vctcxo_trim(uint16_t &trim)
@@ -159,24 +254,11 @@ void blade_rf_controller::read_vctcxo_trim(uint16_t &trim)
 	check_blade_status(bladerf_get_vctcxo_trim(comm_blade_rf_->blade_rf(), &trim));
 }
 
-void blade_rf_controller::set_gpio(uint32_t value)
+void blade_rf_controller::write_gpio(uint32_t value)
 {
 	check_blade_comm();
 
 	check_blade_status(bladerf_config_gpio_write(comm_blade_rf_->blade_rf(), value));
-}
-
-void blade_rf_controller::update_vctcxo_trim(frequency_type carrier_freq, frequency_type freq_shift)
-{
-	check_blade_comm();
-
-	auto adjust = freq_shift / (carrier_freq * 3.5484e9);
-
-	auto new_trim = scanner_blade_rf_->vctcxo_trim() - (int16_t)adjust;
-
-	check_blade_status(bladerf_dac_write(comm_blade_rf_->blade_rf(), new_trim));
-
-	scanner_blade_rf_->set_vctcxo_trim(new_trim);
 }
 
 void blade_rf_controller::read_gpio(uint32_t &value)
@@ -213,38 +295,6 @@ const scanner_blade_rf* blade_rf_controller::get_scanner_blade_rf()
 	refresh_scanner_info();
 
 	return scanner_blade_rf_.get();
-}
-
-void blade_rf_controller::refresh_scanner_info()
-{
-	check_blade_comm();
-
-	scanner_blade_rf_impl blade;
-
-	auto comm_blade = comm_blade_rf_->blade_rf();
-
-	check_blade_status(bladerf_get_devinfo(comm_blade, &blade.dev_info_));
-
-	blade.usb_speed_ = static_cast<bladerf_dev_speed>(check_blade_status(bladerf_device_speed(comm_blade_rf_->blade_rf())));
-
-	// bladerf_stats is not currently supported.  FPGA needs to support behavior.
-	//check_blade_status(bladerf_stats(comm_blade, &blade.stats_));
-	//blade.stats_.rx_overruns = 0;
-	//blade.stats_.rx_throughput = 0;
-	//blade.stats_.tx_throughput = 0;
-	//blade.stats_.tx_underruns = 0;
-
-	bladerf_version(&blade.blade_rf_version_);
-
-	check_blade_status(bladerf_fw_version(comm_blade, &blade.firmware_version_));
-
-	check_blade_status(bladerf_fpga_version(comm_blade, &blade.fpga_version_));
-
-	check_blade_status(bladerf_get_vctcxo_trim(comm_blade, &blade.vctcxo_trim_));
-
-	check_blade_status(bladerf_get_transfer_timeout(comm_blade, BLADERF_MODULE_RX, &blade.rx_timeout_));
-
-	scanner_blade_rf_ = std::make_shared<scanner_blade_rf>(blade);
 }
 
 gps blade_rf_controller::get_gps_data()
@@ -364,8 +414,8 @@ measurement_info blade_rf_controller::get_rf_data(frequency_type frequency, time
 	measurement_info data(num_samples, frequency, blade_bandwidth, blade_sampling_rate,
 		gain);
 
-	//for(int i = throw_away_samples; i < (throw_away_samples + num_samples) * 2; ++i)
-	//	sign_extend_12_bits(reinterpret_cast<int16_t*>(aligned_buffer)[i]);
+	for(int i = throw_away_samples; i < (throw_away_samples + num_samples) * 2; ++i)
+		sign_extend_12_bits(reinterpret_cast<int16_t*>(aligned_buffer)[i]);
 
 	const auto beginning_of_iq = (Ipp16s*)&(*aligned_buffer_.get_aligned_array()) + (throw_away_samples * 2);
 
@@ -443,3 +493,4 @@ void blade_rf_controller::check_blade_comm()
 		throw rf_phreaker::comm_error("It does not appear there is a valid connection to the device.  Try opening the device.");
 }
 
+}}

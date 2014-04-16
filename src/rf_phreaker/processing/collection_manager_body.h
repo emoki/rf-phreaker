@@ -14,8 +14,9 @@ namespace rf_phreaker { namespace processing {
 class collection_manager_body
 {
 public:
-	collection_manager_body(std::atomic<bool> &processing, rf_phreaker::scanner::scanner_controller_interface *sc, const collection_info_containers &info)
+	collection_manager_body(tbb::flow::graph *graph, rf_phreaker::scanner::scanner_controller_interface *sc, const collection_info_containers &info, const output_settings &p_output)
 		: scanner_io_(sc)
+		, graph_(graph)
 		, containers_(info)
 		, is_simultaneous_collection_(false)
 		, do_multiple_scans_(true)
@@ -25,7 +26,6 @@ public:
 		, lte_sweep_(0)
 		, lte_layer_3_(0)
 
-		, processing_(processing)
 	{}
 
 	void operator()(add_remove_collection_info info, collection_manager_node::output_ports_type &out)
@@ -78,9 +78,13 @@ public:
 			}
 		}
 
-		if(scanning_finished_for_all_containers && do_multiple_scans_) {
-			for(auto &c : containers_)
-				c.reset();
+		if(scanning_finished_for_all_containers) {
+			if(do_multiple_scans_) {
+				for(auto &c : containers_)
+					c.reset();
+			}
+			else
+				finished_scanning();
 
 			// If scanning has finished for all containers then we will not process any packets this time thru which 
 			// means we need to send a continue msg to the limiter node directly.
@@ -88,7 +92,7 @@ public:
 		}
 	}
 
-private:
+protected:
 	void output(scanner::measurement_info *meas, std::string name, int count)
 	{
 		if(timestamp.empty())
@@ -99,7 +103,11 @@ private:
 			file << *meas;
 	}
 
+	virtual void finished_scanning() { throw processing_error("Finished scanning not supported."); }
+
 	scanner_io scanner_io_;
+
+	tbb::flow::graph *graph_;
 
 	collection_info_containers containers_;
 
@@ -114,8 +122,23 @@ private:
 	int lte_layer_3_;
 
 	std::string timestamp;
-	std::atomic<bool> &processing_;
 };
 
+class freq_correction_collection_manager_body : public collection_manager_body
+{
+public:
+	freq_correction_collection_manager_body(tbb::flow::graph *graph, rf_phreaker::scanner::scanner_controller_interface *sc, const collection_info_containers &info, const output_settings &p_output)
+	: collection_manager_body(graph, sc, info, p_output)
+	{
+		do_multiple_scans_ = false;
+	}
+
+protected:
+	void finished_scanning() 
+	{
+		delegate_sink_async::instance().log_message("Frequency correction failed.", FREQUENCY_CORRECTION_FAILED);
+		graph_->root_task()->cancel_group_execution();
+	}
+};
 
 }}

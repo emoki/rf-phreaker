@@ -67,7 +67,12 @@ const char* cappeen_api_version()
 	return impl->api_version();
 }
 
-long cappeen_start_frequency_correction(const beagle_api::collection_info &collection)
+long cappeen_start_frequency_correction_using_sweep(const beagle_api::collection_info &collection)
 {
 	return impl->start_frequency_correction(collection);
+}
+
+long cappeen_start_frequency_correction_using_frequencies(uint32_t *wcdma_frequencies, int num_channels)
+{
+	return impl->start_frequency_correction(wcdma_frequencies, num_channels);
 }

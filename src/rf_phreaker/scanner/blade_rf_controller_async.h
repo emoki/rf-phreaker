@@ -52,9 +52,16 @@ public:
 		});
 	}
 
+	virtual std::future<void> write_vctcxo_trim(frequency_type carrier_freq, frequency_type freq_shift)
+	{
+		return controller_([=](blade_rf_controller &c) {
+			return c.write_vctcxo_trim(carrier_freq, freq_shift);
+		});
+	}
+
 	virtual std::future<void> update_vctcxo_trim(frequency_type carrier_freq, frequency_type freq_shift)
 	{
-		return controller_([=](blade_rf_controller &c){
+		return controller_([=](blade_rf_controller &c) {
 			return c.update_vctcxo_trim(carrier_freq, freq_shift);
 		});
 	}

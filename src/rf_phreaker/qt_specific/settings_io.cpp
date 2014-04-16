@@ -35,6 +35,8 @@ void settings_io::read(settings &settings)
 
 	read(settings.umts_sweep_general_, umts_sweep_general_group_key);
 	read(settings.umts_layer_3_general_, umts_layer_3_general_group_key);
+
+	read(settings.frequency_correction_settings_, frequency_correction_group_key);
 }
 
 void settings_io::read(output_settings &settings, const std::string &group_key)
@@ -78,6 +80,17 @@ void settings_io::read(umts_general_settings &settings, const std::string &group
 	qsettings_->endGroup();
 }
 
+void settings_io::read(frequency_correction_settings &settings, const std::string &group_key)
+{
+	qsettings_->beginGroup(group_key.c_str());
+	settings.frequency_correction_range_start_ = qsettings_->value(frequency_correction_offset_start_key.c_str(), frequency_correction_offset_start_default).toDouble();
+	settings.frequency_correction_range_end_ = qsettings_->value(frequency_correction_offset_end_key.c_str(), frequency_correction_offset_end_default).toInt();
+	qsettings_->endGroup();
+	read(settings.general_settings_, group_key);
+}
+
+
+
 void settings_io::write(const settings &settings)
 {
 	qsettings_->setValue(log_level_key.c_str(), settings.log_level_);
@@ -98,6 +111,8 @@ void settings_io::write(const settings &settings)
 
 	write(settings.umts_sweep_general_, umts_sweep_general_group_key);
 	write(settings.umts_layer_3_general_, umts_layer_3_general_group_key);
+
+	write(settings.frequency_correction_settings_, frequency_correction_group_key);
 }
 
 void settings_io::write(const output_settings &settings, const std::string &group_key)
@@ -138,7 +153,15 @@ void settings_io::write(const umts_general_settings &settings, const std::string
 	qsettings_->setValue(full_scan_interval_key.c_str(), settings.full_scan_interval_);
 	qsettings_->setValue(num_coherent_slots_key.c_str(), settings.num_coherent_slots_);
 	qsettings_->endGroup();
+}
+
+void settings_io::write(const frequency_correction_settings &settings, const std::string &group_key)
+{
+	qsettings_->beginGroup(group_key.c_str());
+	qsettings_->setValue(frequency_correction_offset_start_key.c_str(), settings.frequency_correction_range_start_);
+	qsettings_->setValue(frequency_correction_offset_end_key.c_str(), settings.frequency_correction_range_end_);
 	qsettings_->endGroup();
+	write(settings.general_settings_, group_key);
 }
 
 void settings_io::clear()

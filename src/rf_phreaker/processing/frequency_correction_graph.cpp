@@ -12,15 +12,13 @@
 using namespace rf_phreaker::scanner;
 using namespace rf_phreaker::processing;
 
-std::atomic<bool> freq_correct_processing_;
-
 frequency_correction_graph::frequency_correction_graph(void)
 {}
 
 frequency_correction_graph::~frequency_correction_graph(void)
 {}
 
-void frequency_correction_graph::start(scanner_controller_interface *sc, const collection_info_containers &collection_info, const rf_phreaker::settings &config)
+void frequency_correction_graph::start(scanner_controller_interface *sc, data_output_async *out, const collection_info_containers &collection_info, const rf_phreaker::settings &config)
 {
 	std::lock_guard<std::recursive_mutex> lock(mutex_);
 
@@ -29,7 +27,7 @@ void frequency_correction_graph::start(scanner_controller_interface *sc, const c
 		wait();
 	}
 
-	thread_.reset(new std::thread([this](scanner_controller_interface *sc, const collection_info_containers &collection_info, const rf_phreaker::settings &config) {
+	thread_.reset(new std::thread([this](scanner_controller_interface *sc, data_output_async *out, const collection_info_containers &collection_info, const rf_phreaker::settings &config) {
 		try {
 			data_output_async tmp_data_output;
 
@@ -39,8 +37,8 @@ void frequency_correction_graph::start(scanner_controller_interface *sc, const c
 
 			graph_ = (std::make_shared<tbb::flow::graph>());
 
-			start_node_ = std::make_shared<start_node>(*graph_, [=](add_remove_collection_info &info) { return true;	}, false);
-			collection_manager_node_ = std::make_shared<collection_manager_node>(*graph_, tbb::flow::serial, collection_manager_body(freq_correct_processing_, sc, collection_info));
+			start_node_ = std::make_shared<start_node>(*graph_, [=](add_remove_collection_info &info) { return true; }, false);
+			collection_manager_node_ = std::make_shared<collection_manager_node>(*graph_, tbb::flow::serial, freq_correction_collection_manager_body(graph_.get(), sc, collection_info, config.packet_output_));
 
 			// Only allow one item in flight - this allows us to change the trim value and have it affect all subsequent packets collected.
 			auto max_limit = 1;
@@ -48,10 +46,10 @@ void frequency_correction_graph::start(scanner_controller_interface *sc, const c
 			auto limiter = std::make_shared<limiter_node>(*graph_, max_limit);
 
 			auto umts_sweep_cell_search = std::make_shared<umts_cell_search_node>(*graph_, tbb::flow::serial, umts_processing_body(
-				umts_cell_search_settings(config.umts_sweep_collection_, config.umts_decode_layer_3_, config.umts_sweep_general_)));
+				umts_cell_search_settings(config.umts_sweep_collection_, config.umts_decode_layer_3_, config.frequency_correction_settings_.general_settings_)));
 			auto umts_sweep_output_feedback = std::make_shared<umts_output_and_feedback_node>(*graph_, tbb::flow::serial, umts_sweep_output_and_feedback_body(&tmp_data_output));
-			auto umts_freq_correction = std::make_shared<frequency_correction_node>(*graph_, tbb::flow::serial, frequency_correction_body(graph_.get(), sc,
-				config.umts_layer_3_collection_, config.umts_layer_3_general_));
+			auto umts_freq_correction = std::make_shared<frequency_correction_node>(*graph_, tbb::flow::serial, frequency_correction_body(graph_.get(), sc, out,
+				config.umts_sweep_collection_, config.frequency_correction_settings_, config.umts_layer_3_general_));
 
 			auto collection_queue = std::make_shared<queue_node>(*graph_);
 			auto limiter_queue = std::make_shared<tbb::flow::queue_node<tbb::flow::continue_msg>>(*graph_);
@@ -94,6 +92,7 @@ void frequency_correction_graph::start(scanner_controller_interface *sc, const c
 			delegate_sink_async::instance().log_error("An unknown error has occurred.", UNKNOWN_ERROR);
 		}
 	}, sc, collection_info, config));
+	}, sc, out, collection_info, config));
 }
 
 void frequency_correction_graph::wait()

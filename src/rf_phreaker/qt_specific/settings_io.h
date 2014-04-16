@@ -21,6 +21,7 @@ static const std::string umts_decode_thresholds_group_key = "umts_decode_thresho
 static const std::string lte_decode_thresholds_group_key = "lte_decode_thresholds";
 static const std::string umts_sweep_general_group_key = "umts_sweep_general";
 static const std::string umts_layer_3_general_group_key = "umts_layer_3_general";
+static const std::string frequency_correction_group_key = "frequency_correction";
 // Value keys
 static const std::string scanner_output_key = "scanner_output";
 static const std::string gps_output_key = "gps_output";
@@ -42,6 +43,8 @@ static const std::string full_scan_interval_key = "full_scan_interval";
 static const std::string num_coherent_slots_key = "num_coherent_slots";
 static const std::string gps_collection_period_ms_key = "gps_collection_period";
 static const std::string num_items_in_flight_key = "num_items_in_flight";
+static const std::string frequency_correction_offset_start_key = "start_offset";
+static const std::string frequency_correction_offset_end_key = "end_offset";
 
 // Default Values
 static const bool settings_output_raw_packets_default = false;
@@ -59,6 +62,9 @@ static const int settings_umts_general_num_coherent_slots_default = 2;
 static const bool settings_output_default = false;
 static const int gps_collection_period_ms_default = 800;
 static const int num_items_in_flight_default = 0;
+static const int frequency_correction_offset_start_default = khz(-2);
+static const int frequency_correction_offset_end_default = khz(2);
+
 
 class settings_io
 {
@@ -79,6 +85,8 @@ public:
 
 	void read(umts_general_settings &settings, const std::string &group_key);
 
+	void read(frequency_correction_settings &settings, const std::string &group_key);
+
 	void write(const settings &settings);
 
 	void write(const output_settings &settings, const std::string &group_key);
@@ -88,6 +96,8 @@ public:
 	void write(const layer_3_settings &settings, const std::string &group_key);
 
 	void write(const umts_general_settings &settings, const std::string &group_key);
+
+	void write(const frequency_correction_settings &settings, const std::string &group_key);
 
 	void clear();
 
