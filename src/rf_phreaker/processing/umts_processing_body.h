@@ -29,12 +29,14 @@ public:
 		: analysis_(config.umts_config_)
 		, tracker_(config.layer_3_.max_update_threshold_)
 		, config_(config)
+		, current_collection_round_(-1)
 	{}
 	
 	umts_processing_body(const umts_processing_body &body)
 		: analysis_(body.config_.umts_config_)
 		, tracker_(body.tracker_.max_update_)
 		, config_(body.config_)
+		, current_collection_round_(body.current_collection_round_)
 	{}
 
 	//umts_processing_body(umts_processing_body &&body)
@@ -65,10 +67,10 @@ public:
 	umts_info operator()(umts_info info)
 	{
 		// If the collection round is 0 it means we need to start decoding from scratch.
-		if(info.meas_->collection_round() == 0) {
+		if(info.meas_->collection_round() == 0 && current_collection_round_ != 0) {
 			tracker_.clear();
 		}
-
+		current_collection_round_ = info.meas_->collection_round();
 
 		auto freq = info.meas_->frequency();
 		for(auto &data : info.processed_data_) {
@@ -103,6 +105,7 @@ private:
 	umts_analysis analysis_;
 	umts_layer_3_tracker tracker_;
 	umts_cell_search_settings config_;
+	int64_t current_collection_round_;
 };
 
 }}
