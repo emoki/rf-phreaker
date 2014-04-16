@@ -3,6 +3,7 @@
 #include "rf_phreaker/processing/node_defs.h"
 #include "rf_phreaker/processing/scanner_io.h"
 #include "rf_phreaker/common/common_types.h"
+#include "rf_phreaker/common/delegate_sink.h"
 #include "tbb/flow_graph.h"
 #include <algorithm>
 #include <atomic>

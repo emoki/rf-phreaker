@@ -13,6 +13,25 @@
 
 namespace rf_phreaker { namespace cappeen_api {
 
+inline int convert_message(int msg)
+{
+	beagle_api::ERRORCODES code;
+	switch(msg) {
+	case (int)UNKNOWN_ERROR:
+		code = beagle_api::UNKNOWN_ERROR;
+		break;
+	case (int)GENERAL_ERROR:
+		code = beagle_api::GENERAL_ERROR;
+		break;
+	case (int)STD_EXCEPTION_ERROR:
+		code = beagle_api::STD_EXCEPTION_ERROR;
+		break;
+	default:
+		code = static_cast<beagle_api::ERRORCODES>(msg);
+	}
+	return code;
+}
+
 class cappeen_delegate
 {
 public:
@@ -226,7 +245,7 @@ public:
 	void output_error_as_message(const rf_phreaker::rf_phreaker_error &err)
 	{
 		LOG_L(ERROR) << err.what();
-		output_message(err.what(), (int)err.error_code_);
+		output_message(err.what(), convert_message(err.error_code_));
 	}
 
 	void output_error_as_message(const std::string &s, int code)
@@ -248,7 +267,7 @@ public:
 				gps_graph_->cancel_and_wait();
 				change_beagle_state(beagle_api::BEAGLE_ERROR);
 			}
-			delegate_->available_error(beagle_id_, code, s.c_str(), s.size() + 1);
+			delegate_->available_error(beagle_id_, convert_message(code), s.c_str(), s.size() + 1);
 		}
 	}
 
@@ -256,7 +275,7 @@ public:
 	{
 		LOG_L(INFO) << s;
 		if(delegate_ != nullptr)
-			delegate_->available_error(beagle_id_, code, s.c_str(), s.size() + 1);
+			delegate_->available_message(beagle_id_, code, s.c_str(), s.size() + 1);
 	}
 
 	void change_beagle_state(beagle_api::BEAGLESTATE state)

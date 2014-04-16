@@ -1,5 +1,6 @@
 #include "rf_phreaker/umts_analysis/umts_analysis_impl.h"
 #include "rf_phreaker/umts_analysis/umts_utilities.h"
+#include "rf_phreaker/common/delegate_sink.h"
 
 namespace rf_phreaker {
 
@@ -55,7 +56,7 @@ int umts_analysis_impl::cell_search(const rf_phreaker::raw_signal &raw_signal, u
 			*rms = brute_force_->average_rms();
 
 	} catch(const std::exception &err) {
-		// Log error.
+		rf_phreaker::delegate_sink_async::instance().log_error(err.what(), GENERAL_ERROR);
 		std::cout << err.what() << std::endl;
 		status = -2;
 	}
@@ -88,7 +89,7 @@ int umts_analysis_impl::decode_layer_3(const rf_phreaker::raw_signal &raw_signal
 		status = decoder_->process(raw_signal.get_iq().get(), raw_signal.get_iq().length(), umts_meas.cpich_, umts_meas.sample_num_, umts_meas.layer_3_);
 	}
 	catch(const std::exception &err) {
-		// Log error.
+		rf_phreaker::delegate_sink_async::instance().log_error(err.what(), GENERAL_ERROR);
 		std::cout << err.what() << std::endl;
 		status = -2;
 	}

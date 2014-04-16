@@ -48,13 +48,13 @@ public:
 				graph_->wait_for_all();
 			}
 			catch(const rf_phreaker::rf_phreaker_error &err) {
-				delegate_sink_async::instance().log_error(err.what(), -49999);
+				delegate_sink_async::instance().log_error(err.what(), GENERAL_ERROR);
 			}
 			catch(const std::exception &err) {
-				delegate_sink_async::instance().log_error(err.what(), -49998);
+				delegate_sink_async::instance().log_error(err.what(), STD_EXCEPTION_ERROR);
 			}
 			catch(...) {
-				delegate_sink_async::instance().log_error("An unknown error has occurred.", -50000);
+				delegate_sink_async::instance().log_error("An unknown error has occurred.", UNKNOWN_ERROR);
 			}
 		}, sc, out, config));
 	}

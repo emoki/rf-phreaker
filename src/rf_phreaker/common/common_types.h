@@ -26,9 +26,12 @@ namespace rf_phreaker {
 		UNKOWN_SPECIFIER
 	};
 
-	enum messages
+	enum message_codes
 	{
 		FREQUENCY_CORRECTION_SUCCESSFUL,
+		GENERAL_ERROR,
+		STD_EXCEPTION_ERROR,
+		UNKNOWN_ERROR,
 		FREQUENCY_CORRECTION_FAILED
 	};
 

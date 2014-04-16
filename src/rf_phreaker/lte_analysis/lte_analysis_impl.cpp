@@ -1,4 +1,5 @@
 #include "rf_phreaker/lte_analysis/lte_analysis_impl.h"
+#include "rf_phreaker/common/delegate_sink.h"
 
 namespace rf_phreaker {
 
@@ -49,7 +50,7 @@ int lte_analysis_impl::cell_search(const rf_phreaker::raw_signal &raw_signal, lt
 		}
 	}
 	catch(const std::exception &err) {
-		// Log error.
+		rf_phreaker::delegate_sink_async::instance().log_error(err.what(), GENERAL_ERROR);
 		std::cout << err.what() << std::endl;
 		status = -1;
 	}
@@ -111,7 +112,7 @@ int lte_analysis_impl::decode_layer_3(const rf_phreaker::raw_signal &raw_signal,
 			assert(0 && "Error when determining LTE sampling rate.  We reach an invalid branch!");
 	}
 	catch(const std::exception &err) {
-		// Log error.
+		rf_phreaker::delegate_sink_async::instance().log_error(err.what(), GENERAL_ERROR);
 		std::cout << err.what() << std::endl;
 		status = -1;
 	}
