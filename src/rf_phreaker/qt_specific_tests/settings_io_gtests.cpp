@@ -14,7 +14,6 @@ TEST(QtSpecific, TestSettingsIO)
 
 	set_io.read(set);
 
-	EXPECT_EQ(settings_output_raw_packets_default, set.output_raw_packets_);
 	EXPECT_EQ(settings_log_level_default, set.log_level_);
 	EXPECT_EQ(gps_collection_period_ms_default, set.gps_collection_period_ms_);
 
@@ -112,7 +111,6 @@ TEST(QtSpecific, TestSettingsIO)
 	
 	settings set2;
 	set_io.read(set2);
-	EXPECT_EQ(set.output_raw_packets_, set2.output_raw_packets_);
 	EXPECT_EQ(set.log_level_, set2.log_level_);
 	EXPECT_EQ(set.gps_collection_period_ms_, set2.gps_collection_period_ms_);
 
@@ -179,7 +177,6 @@ TEST(QtSpecific, WriteDefaultSettings)
 	//settings_io set_io("rf_phreaker_graph_test", "cappeen");
 	settings_io set_io("cappeen_api.ini");
 
-	set.output_raw_packets_ = false;
 	set.log_level_ = 3;
 	set.gps_collection_period_ms_ = 800;
 	set.num_items_in_flight_ = 0;

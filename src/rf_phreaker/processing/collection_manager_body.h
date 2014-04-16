@@ -19,6 +19,12 @@ public:
 		, containers_(info)
 		, is_simultaneous_collection_(false)
 		, do_multiple_scans_(true)
+		, packet_output_settings_(p_output)
+		, umts_sweep_(0)
+		, umts_layer_3_(0)
+		, lte_sweep_(0)
+		, lte_layer_3_(0)
+
 		, processing_(processing)
 	{}
 
@@ -48,15 +54,19 @@ public:
 					meas->set_operating_band(ci.operating_band_);
 					switch(c.get_technology()) {
 					case UMTS_SWEEP:
+						if(packet_output_settings_.umts_sweep_) { output(meas.get(), "umts_sweep_", umts_sweep_++); }
 						std::get<UMTS_SWEEP_PORT>(out).try_put(meas);
 						break;
 					case UMTS_LAYER_3_DECODE:
+						if(packet_output_settings_.umts_layer_3_) { output(meas.get(), "umts_layer_3_", umts_layer_3_++); }
 						std::get<UMTS_LAYER3_PORT>(out).try_put(meas);
 						break;
 					case LTE_SWEEP:
+						if(packet_output_settings_.lte_sweep_) { output(meas.get(), "lte_sweep_", lte_sweep_++); }
 						std::get<LTE_SWEEP_PORT>(out).try_put(meas);
 						break;
 					case LTE_LAYER_3_DECODE:
+						if(packet_output_settings_.lte_layer_3_) { output(meas.get(), "lte_layer_3_", lte_layer_3_++); }
 						std::get<LTE_LAYER3_PORT>(out).try_put(meas);
 						break;
 					default:
@@ -79,6 +89,16 @@ public:
 	}
 
 private:
+	void output(scanner::measurement_info *meas, std::string name, int count)
+	{
+		if(timestamp.empty())
+			timestamp = std::to_string(std::chrono::system_clock::to_time_t(std::chrono::system_clock::now()));
+
+		std::ofstream file(name + timestamp + "_" + std::to_string(count) + ".bin");
+		if(file)
+			file << *meas;
+	}
+
 	scanner_io scanner_io_;
 
 	collection_info_containers containers_;
@@ -87,6 +107,13 @@ private:
 
 	bool do_multiple_scans_;
 
+	output_settings packet_output_settings_;
+	int umts_sweep_;
+	int umts_layer_3_;
+	int lte_sweep_;
+	int lte_layer_3_;
+
+	std::string timestamp;
 	std::atomic<bool> &processing_;
 };
 

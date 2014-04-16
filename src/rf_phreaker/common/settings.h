@@ -45,11 +45,11 @@ public:
 class settings
 {
 public:
-	bool output_raw_packets_;
 	int log_level_;
 	int gps_collection_period_ms_;
 	int num_items_in_flight_;
 
+	output_settings packet_output_;
 	int frequency_correction_range_start_;
 	int frequency_correction_range_end_;
 
