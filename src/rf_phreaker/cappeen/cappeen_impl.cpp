@@ -127,8 +127,12 @@ long cappeen_impl::clean_up()
 		std::lock_guard<std::recursive_mutex> lock(mutex_);
 
 		// Do more!
-		processing_graph_->cancel_and_wait();
-		gps_graph_->cancel_and_wait();
+		if(processing_graph_)
+			processing_graph_->cancel_and_wait();
+		
+		if(gps_graph_)
+			gps_graph_->cancel_and_wait();
+
 
 		delegate_.release();
 		scanner_.release();

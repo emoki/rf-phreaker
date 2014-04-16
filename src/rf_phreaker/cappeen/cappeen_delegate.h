@@ -263,8 +263,8 @@ public:
 				   || beagle_info_.state_ == beagle_api::BEAGLE_USBOPENED
 				   || beagle_info_.state_ == beagle_api::BEAGLE_READY
 				   || beagle_info_.state_ == beagle_api::BEAGLE_WARMINGUP) {
-				processing_graph_->cancel_and_wait();
-				gps_graph_->cancel_and_wait();
+				if(processing_graph_) processing_graph_->cancel_and_wait();
+				if(gps_graph_) gps_graph_->cancel_and_wait();
 				change_beagle_state(beagle_api::BEAGLE_ERROR);
 			}
 			delegate_->available_error(beagle_id_, convert_message(code), s.c_str(), s.size() + 1);
