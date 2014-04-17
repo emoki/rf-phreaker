@@ -10,12 +10,15 @@ using namespace rf_phreaker;
 TEST(UmtsAnalysisTests, TestGeneral)
 {
 	try {
-		const int num_iterations = 19;
-		std::string base_filename = "e:/werk/maharashtra/projects/rf_phreaker/rf_phreaker/test_files/blade_samples_umts_876.8_";
+		const int num_iterations = 1;
+		std::string base_filename = "../../../../rf_phreaker/test_files/";
 		//std::string base_filename = "e:/werk/maharashtra/projects/rf_phreaker/rf_phreaker/test_files/blade_samples_umts_";
 		//std::string base_filename = "e:/werk/maharashtra/projects/rf_phreaker/rf_phreaker/test_files/blade_samples_4875_";
 		//std::string base_filename = "e:/werk/maharashtra/projects/rf_phreaker/rf_phreaker/test_files/signal_";
-
+		
+		std::string prefix = "umts_sweep_1397750536_";
+		std::string suffix = ".bin";
+		//std::string suffix = ".txt";
 		umts_config config;
 		//config.sampling_rate(3840000);
 		//config.clock_rate(3840000);
@@ -36,7 +39,7 @@ TEST(UmtsAnalysisTests, TestGeneral)
 
 
 		for(int i = 0; i < num_iterations; ++i) {
-			std::ifstream file(base_filename + boost::lexical_cast<std::string>(i) + ".txt");
+			std::ifstream file(base_filename + prefix + boost::lexical_cast<std::string>(i) + suffix);
 			if(file) {
 				file >> info;
 
