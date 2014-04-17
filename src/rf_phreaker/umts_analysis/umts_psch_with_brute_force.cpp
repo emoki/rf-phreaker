@@ -9,9 +9,7 @@ namespace rf_phreaker {
 
 umts_psch_with_brute_force::umts_psch_with_brute_force(const umts_config &config, const /*cpich_table_container&*/Ipp32fc* resampled_cpich_table)
 : pause_(-1)
-, num_coherent_psch_slots_(2)
 , max_num_psch_peaks_(25)
-, max_num_candidates_(1000)
 , psch_confidence_threshold_(11)
 , cpich_confidence_threshold_(13)
 {
@@ -35,6 +33,7 @@ void umts_psch_with_brute_force::set_config(const umts_config &config)
 		benchmark_.open_benchmark(config.umts_brute_force_filename(), false);
 #endif
 	num_coherent_psch_slots_ = config.num_coherent_psch_slots();
+	max_num_candidates_ = config.max_num_candidates();
 	sample_rate_ = config.sampling_rate();
 	clock_rate_ = config.clock_rate();
 	over_sampling_rate_ = config.over_sampling_rate();
@@ -115,7 +114,7 @@ umts_measurements umts_psch_with_brute_force::process(const ipp_32fc_array &sign
 					possible_peak > psch_correlation_result.get_value(i - 1) &&
 					possible_peak > psch_correlation_result.get_value(i + 1) ))
 		{
-			// If there are these many peaks there is probably something wrong.
+			// If there are this many peaks there is probably something wrong.
 			if(++size > 100)
 				break;
 			psch_peaks.push_back(i);
