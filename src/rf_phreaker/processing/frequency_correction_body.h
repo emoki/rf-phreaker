@@ -54,7 +54,7 @@ public:
 		: graph_(graph)
 		, sc_(sc)
 		, io_(out)
-		, umts_settings_((int)s.sampling_rate_, (int)s.sampling_rate_, rf_phreaker::convert_to_samples(s.collection_time_, s.sampling_rate_), freq_corr_settings.general_settings_.num_coherent_slots_)
+		, umts_settings_((int)s.sampling_rate_, (int)s.sampling_rate_, rf_phreaker::convert_to_samples(s.collection_time_, s.sampling_rate_), freq_corr_settings.general_settings_.num_coherent_slots_, 1)
 		, analysis_(umts_settings_)
 		, frequency_correction_settings_(freq_corr_settings)
 		, layer_3_settings_(layer_3_settings)
