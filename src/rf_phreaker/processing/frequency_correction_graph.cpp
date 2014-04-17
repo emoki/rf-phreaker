@@ -91,7 +91,6 @@ void frequency_correction_graph::start(scanner_controller_interface *sc, data_ou
 		catch(...) {
 			delegate_sink_async::instance().log_error("An unknown error has occurred.", UNKNOWN_ERROR);
 		}
-	}, sc, collection_info, config));
 	}, sc, out, collection_info, config));
 }
 
