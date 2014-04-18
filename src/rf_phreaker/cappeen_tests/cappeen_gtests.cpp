@@ -14,7 +14,9 @@ public:
 	output() { error_occurred_ = false; new_hw_info_ = false; }
 
 	virtual void __stdcall available_beagle_info(long beagle_id, const beagle_info &info){
-		std::cout << info.beagle_serial_ << "\t" << info.state_ << "\n";
+		std::cout << info.beagle_serial_ << "\t" 
+			<< (info.device_speed_ == beagle_api::USB_SUPER_SPEED ? "USB_SUPER_SPEED" : "USB_HI_SPEED") 
+			<< "\t" << info.state_ << "\n";
 		new_hw_info_ = true;
 	}
 	virtual void __stdcall available_gps_info(long beagle_id, const gps_info &info){

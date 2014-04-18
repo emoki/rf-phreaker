@@ -46,6 +46,9 @@ TEST(UmtsAnalysisTests, TestGeneral)
 				config.sampling_rate((int)info.sampling_rate());
 				config.clock_rate((int)info.sampling_rate());
 				config.max_signal_length(info.get_iq().length());
+				config.max_num_candidates(1000);
+				config.num_coherent_psch_slots(14);
+
 				umts_analysis analysis(config);
 
 				umts_measurements umts_meas(100);
