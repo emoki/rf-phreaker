@@ -31,6 +31,13 @@ TEST(QtSpecific, TestSettingsIO)
 	EXPECT_EQ(settings_output_default, set.signal_slots_.lte_sweep_);
 	EXPECT_EQ(settings_output_default, set.signal_slots_.lte_layer_3_);
 
+	EXPECT_EQ(settings_output_default, set.packet_output_.scanner_);
+	EXPECT_EQ(settings_output_default, set.packet_output_.gps_);
+	EXPECT_EQ(settings_output_default, set.packet_output_.umts_sweep_);
+	EXPECT_EQ(settings_output_default, set.packet_output_.umts_layer_3_);
+	EXPECT_EQ(settings_output_default, set.packet_output_.lte_sweep_);
+	EXPECT_EQ(settings_output_default, set.packet_output_.lte_layer_3_);
+
 	EXPECT_EQ(settings_sampling_rate_default, set.umts_sweep_collection_.sampling_rate_);
 	EXPECT_EQ(settings_bandwidth_default, set.umts_sweep_collection_.bandwidth_);
 	EXPECT_EQ(settings_collection_time_default, set.umts_sweep_collection_.collection_time_);
@@ -87,6 +94,12 @@ TEST(QtSpecific, TestSettingsIO)
 	set.signal_slots_.umts_layer_3_ = true;
 	set.signal_slots_.lte_sweep_ = true;
 	set.signal_slots_.lte_layer_3_ = true;
+	set.packet_output_.scanner_ = true;
+	set.packet_output_.gps_ = false;
+	set.packet_output_.umts_sweep_ = true;
+	set.packet_output_.umts_layer_3_ = false;
+	set.packet_output_.lte_sweep_ = false;
+	set.packet_output_.lte_layer_3_ = true;
 	set.umts_sweep_collection_.sampling_rate_ = tmp++;
 	set.umts_sweep_collection_.bandwidth_ = tmp++;
 	set.umts_sweep_collection_.collection_time_ = tmp++;
