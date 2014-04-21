@@ -116,7 +116,15 @@ public:
 	void output_umts_layer_3(const std::vector<umts_data> &t)
 	{
 		std::vector<beagle_api::umts_sector_info> v(t.size());
+
+		// Determine total amount of inter_rat_bufs needed.
 		std::vector<beagle_api::gsm_neighbor_inter_rat> inter_rat_buf;
+		int total_inter_rat_bufs_needed = 0;
+		for(auto &umts: t) {
+			total_inter_rat_bufs_needed += umts.layer_3_.neighbor_inter_rat_group_.size();
+		}
+		inter_rat_buf.reserve(total_inter_rat_bufs_needed);
+
 		int i = 0;
 		for(auto &umts : t) {
 			v[i].band_ = convert_band_to_hw_band(umts.operating_band_);
@@ -197,7 +205,15 @@ public:
 	{
 		std::vector<beagle_api::lte_sector_info> v(t.size());
 		std::vector<beagle_api::lte_sib_1> sib1;
-		std::vector<beagle_api::plmn> plmns;
+		// Currently we only output one plmn per cell.  So a max of t.size() plmns.  Resize the plmns now so when pushing them back
+		// we don't invalidate previous pointers.
+		std::vector<beagle_api::plmn> plmns; 
+		int total_plmns_needed = 0;
+		for(auto &lte : t) {
+			total_plmns_needed += lte.layer_3_.is_cid_decoded() ? 1 : 0;
+		}
+		plmns.reserve(total_plmns_needed);
+
 		int i = 0;
 		for(auto &lte : t) {
 			v[i].antenna_ports_ = lte.num_antenna_ports_;
@@ -219,12 +235,17 @@ public:
 			v[i].system_frame_number_ = lte.frame_number_;
 			v[i].sib_1_.decoded_ = lte.layer_3_.is_cid_decoded();
 			if(v[i].sib_1_.decoded_) {
-				v[i].sib_1_.plmns_.num_elements_ = 1;
 				beagle_api::plmn p;
 				memcpy(p.mcc_, lte.layer_3_.mcc_.to_string(), lte.layer_3_.mcc_.num_characters());
+				p.mcc_[lte.layer_3_.mcc_.num_characters()] = 0;
 				memcpy(p.mnc_, lte.layer_3_.mnc_.to_string(), lte.layer_3_.mnc_.num_characters());
+				p.mnc_[lte.layer_3_.mnc_.num_characters()] = 0;
 				plmns.push_back(p);
-				v[i].sib_1_.plmns_.elements_ = &plmns[0];
+				v[i].sib_1_.plmns_.num_elements_ = 1;
+				v[i].sib_1_.plmns_.elements_ = &plmns.back();
+
+				v[i].sib_1_.tac_ = lte.layer_3_.lac_;
+				v[i].sib_1_.cid_ = lte.layer_3_.cid_;
 			}
 			else {
 				v[i].sib_1_.plmns_.num_elements_ = 0;

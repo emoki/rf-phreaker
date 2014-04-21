@@ -25,8 +25,6 @@ int lte_analysis_impl::cell_search(const rf_phreaker::raw_signal &raw_signal, lt
 			lte.clear();
 		}
 
-		// For some reason lte_cell_search fails if we try to process more than 3 half frames.
-		num_half_frames = 3;
 
 		if(raw_signal.sampling_rate() != cell_search_sampling_rate_) {
 			auto &filter = get_filter_and_set_resampled_length(raw_signal.sampling_rate(), cell_search_sampling_rate_,
@@ -35,10 +33,14 @@ int lte_analysis_impl::cell_search(const rf_phreaker::raw_signal &raw_signal, lt
 			filter.filter(raw_signal.get_iq().get(), resampled_signal_.get(), filter.num_iterations_required(resampled_length_));
 
 			std::lock_guard<std::mutex> lock(processing_mutex);
+			// For some reason lte_cell_search fails if we try to process more than 3 half frames.
+			num_half_frames = 3;
 			status = lte_cell_search(resampled_signal_.get(), resampled_length_, num_half_frames, lte_measurements_, tmp_num_meas);
 		}
 		else {
 			std::lock_guard<std::mutex> lock(processing_mutex);
+			// For some reason lte_cell_search fails if we try to process more than 3 half frames.
+			num_half_frames = 3;
 			status = lte_cell_search(raw_signal.get_iq().get(), raw_signal.get_iq().length(), num_half_frames, lte_measurements_, tmp_num_meas);
 		}
 
@@ -73,7 +75,8 @@ rf_phreaker::fir_filter& lte_analysis_impl::get_filter_and_set_resampled_length(
 	auto &filter = *it->second;
 
 	resampled_length_ = filter.num_output_samples_required(num_input_samples);
-	if(resampled_length_ > resampled_signal_.length())
+	// TODO - Make this more efficient?  Only resize if it is resampled_length is larger, but take note then we could not use resampled_signal_.length().
+	if(resampled_length_ != resampled_signal_.length())
 		resampled_signal_.reset(resampled_length_);
 
 	return filter;
@@ -84,8 +87,6 @@ int lte_analysis_impl::decode_layer_3(const rf_phreaker::raw_signal &raw_signal,
 	int status = 0;
 
 	try {
-		// For some reason lte_cell_search fails if we try to process more than 3 half frames.
-		num_half_frames = 3;
 
 		auto needed_sampling_rate = determine_sampling_rate(raw_signal, lte_meas);
 		if(needed_sampling_rate == 0) {
@@ -93,23 +94,24 @@ int lte_analysis_impl::decode_layer_3(const rf_phreaker::raw_signal &raw_signal,
 		}
 		else if(needed_sampling_rate == raw_signal.sampling_rate()) {
 			std::lock_guard<std::mutex> lock(processing_mutex);
-			status = lte_decode_data(raw_signal.get_iq().get(), raw_signal.get_iq().length(), num_half_frames, lte_measurements_);
+			status = lte_decode_data(raw_signal.get_iq().get(), raw_signal.get_iq().length(), num_half_frames, lte_meas);
 		}
-		else if(needed_sampling_rate < raw_signal.sampling_rate())
-		{
-			auto &filter = get_filter_and_set_resampled_length(raw_signal.sampling_rate(), needed_sampling_rate,
-															   rf_phreaker::convert_to_samples(milli_to_nano(5 * num_half_frames), raw_signal.sampling_rate()));
+		// Currently LTE will report the wrong bandwidth.  Because of this we never try resampling to a lower bandwidth.
+		//else if(needed_sampling_rate < raw_signal.sampling_rate())
+		//{
+		//	auto &filter = get_filter_and_set_resampled_length(raw_signal.sampling_rate(), needed_sampling_rate,
+		//													   rf_phreaker::convert_to_samples(milli_to_nano(5 * num_half_frames), raw_signal.sampling_rate()));
 
-			filter.filter(raw_signal.get_iq().get(), resampled_signal_.get(), filter.num_iterations_required(resampled_length_));
+		//	filter.filter(raw_signal.get_iq().get(), resampled_signal_.get(), filter.num_iterations_required(resampled_length_));
 
-			std::lock_guard<std::mutex> lock(processing_mutex);
-			status = lte_decode_data(resampled_signal_.get(), resampled_length_, num_half_frames, lte_meas);
-		}	
-		else if(needed_sampling_rate > raw_signal.sampling_rate()) {
+		//	std::lock_guard<std::mutex> lock(processing_mutex);
+		//	status = lte_decode_data(resampled_signal_.get(), resampled_length_, num_half_frames, lte_meas);
+		//}	
+		else/* if(needed_sampling_rate > raw_signal.sampling_rate()) */{
 			status = 0;
 		}
-		else
-			assert(0 && "Error when determining LTE sampling rate.  We reach an invalid branch!");
+		//else
+		//	assert(0 && "Error when determining LTE sampling rate.  We reach an invalid branch!");
 	}
 	catch(const std::exception &err) {
 		rf_phreaker::delegate_sink_async::instance().log_error(err.what(), GENERAL_ERROR);

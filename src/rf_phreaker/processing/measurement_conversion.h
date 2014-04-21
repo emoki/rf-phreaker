@@ -46,9 +46,9 @@ inline umts_data convert_to_umts_data(const scanner::measurement_info &info, con
 	return data;
 }
 
-inline void convert_to_lte_data(lte_data &data, const scanner::measurement_info &info, const lte_measurement &lte)
+inline void convert_to_lte_data(lte_data &data, const scanner::measurement_info &info, const lte_measurement &lte, double avg_rms)
 {
-	convert_to_basic_data(data, info, lte.AvgDigitalVoltage);
+	convert_to_basic_data(data, info, avg_rms);
 	data.cyclic_prefix_ = lte.CyclicPrefix;
 	data.frame_number_ = lte.frame_number;
 	data.layer_3_ = lte.layer_3_;
@@ -59,18 +59,19 @@ inline void convert_to_lte_data(lte_data &data, const scanner::measurement_info 
 	data.physical_cell_id_ = lte.RsRecord.ID;
 	data.psch_id_ = lte.PschRecord.ID;
 	data.psch_quality_ = 20 * log10(lte.PschRecord.NormCorr);
-	data.rsrp_ = lte.rsrp;
+	static scanner::calibration cali;
+	data.rsrp_ = cali.calculate_sl(lte.rsrp, info.gain());
+	data.rssi_ = cali.calculate_sl(lte.rssi, info.gain());
 	data.rsrq_ = lte.rsrq;
-	data.rssi_ = lte.rssi;
-	data.rs_quality_ = 20 * log10(lte.RsRecord.NormCorr);
 	data.ssch_id_ = lte.SschRecord.ID;
 	data.ssch_quality_ = 20 * log10(lte.SschRecord.NormCorr);
+	data.rs_quality_ = -9999;
 }
 
-inline lte_data convert_to_lte_data(const scanner::measurement_info &info, const lte_measurement &lte)
+inline lte_data convert_to_lte_data(const scanner::measurement_info &info, const lte_measurement &lte, double avg_rms)
 {
 	lte_data data;
-	convert_to_lte_data(data, info, lte);
+	convert_to_lte_data(data, info, lte, avg_rms);
 	return data;
 }
 

@@ -888,7 +888,7 @@ int calculateRSValues(const Ipp32fc *signal384, unsigned int cellID,
 	ippsZero_32f(ampt2, 6);
 
 	Ipp32fc DigitalDC;
-	Ipp32f rssi = 0, rsrp, rsrq;
+	Ipp32f rssi = 0, rsrp = 0, rsrq = 0;
 	Ipp64f L2Norm;
 
 	// Calculate over N Resource Blocks
@@ -964,7 +964,8 @@ int calculateRSValues(const Ipp32fc *signal384, unsigned int cellID,
 //	rssi /= (symbNum*slotNumToProcess);
 	ippsSum_32f(ampt2, 6, &rssi, ippAlgHintAccurate);
 	rssi /= (Ipp32f)(symbNum);
-	if ( rssi == 0 ) return -1;
+	if ( rssi == 0 ) 
+		return -1;
 
 	rsrp = ampt2[cellID%6] / (Ipp32f)NumRE;
 	rsrq = (Ipp32f)NumRB * rsrp / rssi;

@@ -31,6 +31,7 @@ public:
 		: config_(config)
 		, tracker_(config.layer_3_.max_update_threshold_)
 		, analysis_(config.lte_config_)
+		, current_collection_round_(-1)
 	{}
 
 	lte_info operator()(measurement_package info)
@@ -50,9 +51,10 @@ public:
 	lte_info operator()(lte_info info)
 	{
 		// If the collection round is 0 it means we need to start decoding from scratch.
-		if(info.meas_->collection_round() == 0) {
+		if(info.meas_->collection_round() == 0 && current_collection_round_ != 0) {
 			tracker_.clear();
 		}
+		current_collection_round_ = info.meas_->collection_round();
 
 		auto freq = info.meas_->frequency();
 
@@ -61,31 +63,9 @@ public:
 			if(status != 0)
 				throw lte_analysis_error("Error decoding lte layer 3.");
 
-			// Only allow processing of bandwidths that can be decoded by LTE dll, i.e. 5mhz.
-			bool valid_bw = false;
+
 			for(auto &data : info.processed_data_) {
-				if(data.Bandwidth == LteBandwidth_5MHZ && data.NumAntennaPorts != LteAntPorts_Unknown && data.AvgDigitalVoltage > 0.1) {
-					valid_bw = true;
-					break;
-				}
-			}
-
-			//bool valid_snapshot = false;
-			//for(auto &data : info.processed_data_) {
-			//	if(data.NumAntennaPorts != LteAntPorts_Unknown && data.AvgDigitalVoltage > 0.1 && info.meas_->sampling_rate() != khz(1920)) {
-			//		valid_snapshot = true;
-			//		break;
-			//	}
-			//}
-			//if(valid_snapshot) {
-			//	std::ofstream file(std::string("lte_signal_") + std::to_string(++count) + ".txt");
-			//	if(!file)
-			//		throw rf_phreaker_error("Unable to open debug file for LTE signal output.");
-			//	file << *info.meas_;
-			//}
-
-			if(valid_bw) {
-				for(auto &data : info.processed_data_) {
+				if(data.Bandwidth == LteBandwidth_5MHZ && data.NumAntennaPorts != LteAntPorts_Unknown && data.rsrp > .001) {
 					if((!tracker_.is_fully_decoded(freq, data) && (data.sync_quality > config_.layer_3_.decode_threshold_ || tracker_.in_history(freq, data)))) {
 						tracker_.update(freq, data);
 					}
@@ -121,6 +101,7 @@ private:
 	lte_processing_settings config_;
 	lte_layer_3_tracker tracker_;
 	lte_analysis analysis_;
+	int64_t current_collection_round_;
 };
 
 

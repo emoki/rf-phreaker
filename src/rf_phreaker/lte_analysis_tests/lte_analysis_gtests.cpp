@@ -11,40 +11,51 @@ using namespace rf_phreaker;
 TEST(LteAnalysisTests, TestGeneral)
 {
 	try {
-		const int num_iterations = 60;
-		//std::string base_filename = "../../../../rf_phreaker/test_files/blade_samples_lte_4875_";
-		std::string base_filename = "../../../../rf_phreaker/test_files/blade_samples_lte_739_";
-		//std::string base_filename = "../../../../rf_phreaker/test_files/blade_samples_4875_";
-		//std::string base_filename = "../../../../rf_phreaker/test_files/signal_lte_4875_";
+		const int end = 1000;
+		std::string base_filename = "../../../../rf_phreaker/test_files/";
+		//std::string prefix = "lte_layer_3_1398013472_";
+		//std::string prefix = "lte_layer_3_1398017723_";
+//		std::string prefix = "lte_layer_3_1398023767_";
+		//std::string prefix = "lte_layer_3_1398048822_";
+		std::string prefix = "lte_layer_3_1398066558_";
+		std::string suffix = ".bin";
+		//std::string suffix = ".txt";
 
-		lte_config config;
-		config.sampling_rate(khz(4875));
-		config.clock_rate(khz(4875));
-		config.max_signal_length(204750);
+
 		rf_phreaker::scanner::measurement_info info;
+		std::shared_ptr<lte_config> config;
+		std::shared_ptr<lte_analysis> analysis; 
 
-		lte_analysis analysis(config);
+		for(int i = 13; i <= end; ++i) {
+			std::ifstream file(base_filename + prefix + boost::lexical_cast<std::string>(i) + suffix);
+			
+			if(!file)
+				break;
 
-		for(int i = 5; i < num_iterations; ++i) {
-			std::ifstream file(base_filename + boost::lexical_cast<std::string>(i) + ".txt");
-			if(file) {
-				file >> info;
+			file >> info;
 
-				lte_measurements lte_meas;
+			if(!config.get()) {
+				config.reset(new lte_config);
+				config->sampling_rate((int)info.sampling_rate());
+				config->clock_rate((int)info.sampling_rate());
+				config->max_signal_length(info.get_iq().length());
+				analysis.reset(new lte_analysis(*config));
+
+			}
+			lte_measurements lte_meas;
 				
-				int status = analysis.cell_search(info, lte_meas, int(info.time_ns() / 1e6 / 5));
-				EXPECT_EQ(0, status);
+			int status = analysis->cell_search(info, lte_meas, int(info.time_ns() / 1e6 / 5));
+			EXPECT_EQ(0, status);
 
-				status = analysis.decode_layer_3(info, lte_meas, int(info.time_ns() / 1e6 / 5));
-				//EXPECT_EQ(0, status);
+			status = analysis->decode_layer_3(info, lte_meas, int(info.time_ns() / 1e6 / 5));
+			EXPECT_EQ(0, status);
 				
-				for(auto &lte : lte_meas) {
+			for(auto &lte : lte_meas) {
 
-					std::cout <<
-						i << "\t" <<
-						info.frequency() / 1e6 << "\t" <<
-						lte << "\n";
-				}
+				std::cout <<
+					i << "\t" <<
+					info.frequency() / 1e6 << "\t" <<
+					lte << "\n";
 			}
 		}
 	}

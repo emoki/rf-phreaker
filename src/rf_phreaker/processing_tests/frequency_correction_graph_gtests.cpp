@@ -7,7 +7,7 @@
 #include "rf_phreaker/qt_specific/settings_io.h"
 #include "stdafx.h"
 
-TEST(ProcessingGraph, TestGeneral)
+TEST(FrequencyCorrectionGraph, DISABLED_TestGeneral)
 {
 	using namespace rf_phreaker;
 	using namespace rf_phreaker::scanner;

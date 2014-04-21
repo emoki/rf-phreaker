@@ -7,7 +7,7 @@
 #include "rf_phreaker/qt_specific/settings_io.h"
 #include "stdafx.h"
 
-TEST(ProcessingGraph, DISABLEDTestGeneral)
+TEST(ProcessingGraph, TestGeneral)
 {
 	using namespace rf_phreaker;
 	using namespace rf_phreaker::scanner;
@@ -29,7 +29,7 @@ TEST(ProcessingGraph, DISABLEDTestGeneral)
 			blade.do_initial_scanner_config();
 
 			rf_phreaker::settings config;
-			rf_phreaker::settings_io io("rf_phreaker_graph_test", "cappeen");
+			rf_phreaker::settings_io io("cappeen_api.ini");
 			io.read(config);
 
 			initialize_collection_info_defaults(config);
@@ -47,9 +47,12 @@ TEST(ProcessingGraph, DISABLEDTestGeneral)
 				//umts_sweep.adjust(add_collection_info(umts_sweep_collection_info(i, UMTS_OPERATING_BAND_4)));
 				//umts_sweep.adjust(add_collection_info(umts_sweep_collection_info(i, UMTS_OPERATING_BAND_5)));
 			//umts_sweep.adjust(add_collection_info(umts_sweep_collection_info(876800000)));
-			lte_layer_3.adjust(add_collection_info(lte_layer_3_collection_info(khz(2147500), lte_bandwidth_10_mhz_sampling_rate, mhz(10), LTE_OPERATING_BAND_1)));
-			lte_layer_3.adjust(add_collection_info(lte_layer_3_collection_info(mhz(2140), lte_bandwidth_10_mhz_sampling_rate, mhz(10), LTE_OPERATING_BAND_1)));
-			lte_layer_3.adjust(add_collection_info(lte_layer_3_collection_info(mhz(2120), lte_bandwidth_20_mhz_sampling_rate, mhz(20), LTE_OPERATING_BAND_1)));
+			//lte_layer_3.adjust(add_collection_info(lte_layer_3_collection_info(2140000000, lte_bandwidth_1_4_mhz_sampling_rate, khz(1500), LTE_OPERATING_BAND_1)));
+			//lte_layer_3.adjust(add_collection_info(lte_layer_3_collection_info(2120000000, lte_bandwidth_1_4_mhz_sampling_rate, khz(1500), LTE_OPERATING_BAND_1)));
+			lte_layer_3.adjust(add_collection_info(lte_layer_3_collection_info(1967500000, lte_bandwidth_1_4_mhz_sampling_rate, khz(1500), LTE_OPERATING_BAND_2)));
+			//lte_layer_3.adjust(add_collection_info(lte_layer_3_collection_info(1947500000, lte_bandwidth_1_4_mhz_sampling_rate, khz(1500), LTE_OPERATING_BAND_2)));
+			//lte_layer_3.adjust(add_collection_info(lte_layer_3_collection_info(739000000, lte_bandwidth_1_4_mhz_sampling_rate, khz(1500), LTE_OPERATING_BAND_12)));
+			//lte_layer_3.adjust(add_collection_info(lte_layer_3_collection_info(879600000, lte_bandwidth_1_4_mhz_sampling_rate, khz(1500), LTE_OPERATING_BAND_5)));
 			//umts_layer_3.adjust(add_collection_info(umts_layer_3_collection_info(khz(2147500), UMTS_OPERATING_BAND_5)));
 			//umts_layer_3.adjust(add_collection_info(umts_layer_3_collection_info(khz(2147500), UMTS_OPERATING_BAND_5)));
 
