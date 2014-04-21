@@ -253,9 +253,8 @@ TEST_F(CollectionManagerTest, ShouldNotRemoveUsingDifferentParametersTest)
 }
 
 
-TEST(CollectionManagerBenchmark, Benchmark)
+TEST(CollectionManagerBenchmark, DISABLED_Benchmark)
 {
-	 std::cout << "disabled benchmark!";
 	//for(int j = 0; j < 100; ++j) {
 	//	tbb::flow::graph g;
 	//	collection_info_manager old_cp_manager(g);

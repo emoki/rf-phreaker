@@ -46,10 +46,14 @@ public:
 			std::cout << info[i].frequency_ << "\t" << info[i].rssi_ << "\t" << "umts" << "\n";
 	}
 	virtual void __stdcall available_lte_sector_info(long beagle_id, const lte_sector_info *info, long num_records){
-		for(int i = 0; i < num_records; ++i)
-			std::cout << info[i].carrier_freq_ << "\t" << info[i].carrier_sl_ << "\t" << info[i].physical_cell_id_ << "\t" << info[i].rsrp_ << "\t" << info[i].secondary_sync_quality_
-			<< "\t" << (info[i].sib_1_.decoded_ ? "true" : "false") 
-			<< "------------------------------------------------------------------------------------------------\n";
+		for(int i = 0; i < num_records; ++i) {
+			std::cout << info[i].carrier_freq_ << "\t" << info[i].carrier_sl_ << "\t" << info[i].physical_cell_id_ << "\t" << info[i].carrier_bandwidth_  << "\t" << info[i].secondary_sync_quality_
+				<< "------" << "\t" << info[i].rssi_ << "\t" << info[i].rsrp_ << "\t" << info[i].rsrq_ << "\t-----------"
+				<< "\t" << (info[i].sib_1_.decoded_ ? "true------------------------------------------------------------------------------------------------" : "false")
+				<< "\n";
+			if(info[i].sib_1_.decoded_)
+				std::cout << info[i].sib_1_.plmns_.elements_[0].mcc_ << "\t" << info[i].sib_1_.plmns_.elements_[0].mnc_ << "\t" << info[i].sib_1_.tac_ << "\t" << info[i].sib_1_.cid_ << "\n";
+		}
 	}
 
 	virtual void __stdcall available_lte_sweep_info(long beagle_id, const lte_sweep_info *info, long num_records)
@@ -104,9 +108,9 @@ TEST(Cappeen, TestMain)
 		collection_info info;
 		info.collection_filename_ = "test_file";
 		std::vector<TECHNOLOGIES_AND_BANDS> tech_bands;
-		tech_bands.push_back(WCDMA_BAND_850);
-		tech_bands.push_back(WCDMA_BAND_1900);
-		tech_bands.push_back(WCDMA_BAND_2100);
+		//tech_bands.push_back(WCDMA_BAND_850);
+		//tech_bands.push_back(WCDMA_BAND_1900);
+		//tech_bands.push_back(WCDMA_BAND_2100);
 		//tech_bands.push_back(WCDMA_BAND_900);
 		//tech_bands.push_back(WCDMA_BAND_1800);
 		//tech_bands.push_back(LTE_BAND_1);

@@ -6,7 +6,7 @@
 #include "rf_phreaker/qt_specific/settings_io.h"
 #include "stdafx.h"
 
-TEST(ProcessingGpsGraph, DISABLEDTestGeneral)
+TEST(ProcessingGpsGraph, DISABLED_TestGeneral)
 {
 	using namespace rf_phreaker;
 	using namespace rf_phreaker::scanner;
