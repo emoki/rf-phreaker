@@ -381,7 +381,7 @@ measurement_info blade_rf_controller::get_rf_data(frequency_type frequency, time
 		bandwidth, &blade_bandwidth));
 
 	int status = 0;
-	for(int i = 0; i < 5; ++i) {
+	for(int i = 0; i < 10; ++i) {
 		status = (bladerf_set_frequency(comm_blade_rf_->blade_rf(), BLADERF_MODULE_RX,
 			static_cast<uint32_t>(frequency)));
 		if(status == 0) break;
