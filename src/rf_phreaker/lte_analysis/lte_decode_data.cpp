@@ -44,6 +44,8 @@ static ipp_32fc_array signal_384;
 if(signal_384.length() < NumSamples)
 	signal_384.reset(NumSamples);
 
+ippsCopy_32fc(SignalSamples, signal_384.get(), NumSamples);
+
 unsigned int num_filter_output =0;
 unsigned int frameStartSampleIndex,subframeStartSampleIndex;
 unsigned int ii;
@@ -131,8 +133,9 @@ frameStartSampleIndex = LteData[ii].RsRecord.StartSampleNum;
 current_frame_number = LteData[ii].frame_number;
 
 
-while((frameStartSampleIndex + LteData[ii].frameNumSamples) < (6*LteData[ii].frameNumSamples) )
-
+// I think 6 corresponds to the number of half frames to process?  Switching to NumHalfFramesToProcess
+//while((frameStartSampleIndex + LteData[ii].frameNumSamples) < (6*LteData[ii].frameNumSamples) )
+while((frameStartSampleIndex + LteData[ii].frameNumSamples) < (NumHalfFramesToProcess / 2 * LteData[ii].frameNumSamples))
 		{
 		
 			memset(h_est,0,OFDM_SYMBOLS_PER_FRAME * NUM_FRAMES * FFT_SIZE * NUM_ANTENNA_MAX*8);

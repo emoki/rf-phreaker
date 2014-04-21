@@ -64,7 +64,7 @@ int lte_cell_search(const Ipp32fc* SignalSamples,
 	unsigned int frameStartSampleIndex,subframeStartSampleIndex;
 	CYCLICPREFIX cyclicPrefixMode[100]; 
 	CORRELATIONTYPE RSStrength, RSNorm;
-	unsigned char bTrue;
+	int bTrue;
 	unsigned int numPschPeaks = 0, temp = 0, num_cell_id = 0;
 	unsigned int ii,mib_decode_status;
 
@@ -149,14 +149,6 @@ int lte_cell_search(const Ipp32fc* SignalSamples,
 		LteData[ii].RsRecord.ID = sschCorrRecord[ii].ID;
 		LteData[ii].SschRecord.ID /= 3;
 
-		LteData[ii].CyclicPrefix = cyclicPrefixMode[ii];
-
-		LteData[ii].NumAntennaPorts = (pbchInfo + ii)->NumAntPorts;
-		LteData[ii].Bandwidth = (pbchInfo + ii)->MasterIB.Bandwidth;
-
-		LteData[ii].phich_duration = (pbchInfo + ii)->MasterIB.PHICHConfig.PhichDuration;
-		LteData[ii].phich_resources = (pbchInfo + ii)->MasterIB.PHICHConfig.PhichResource;
-
 		LteData[ii].sync_quality = 20 * log10((LteData[ii].PschRecord.NormCorr + LteData[ii].SschRecord.NormCorr) / 2);
 
 		if(mib_decode_status == 0)
@@ -164,6 +156,14 @@ int lte_cell_search(const Ipp32fc* SignalSamples,
 		 //ippsFree(signal_384);
 		 continue;
 		}
+
+		LteData[ii].CyclicPrefix = cyclicPrefixMode[ii];
+
+		LteData[ii].phich_duration = (pbchInfo + ii)->MasterIB.PHICHConfig.PhichDuration;
+		LteData[ii].phich_resources = (pbchInfo + ii)->MasterIB.PHICHConfig.PhichResource;
+
+		LteData[ii].NumAntennaPorts = (pbchInfo + ii)->NumAntPorts;
+		LteData[ii].Bandwidth = (pbchInfo + ii)->MasterIB.Bandwidth;
 
 	    switch(LteData[ii].Bandwidth)
 		{
@@ -204,6 +204,9 @@ int lte_cell_search(const Ipp32fc* SignalSamples,
 		delayTime2 = 0;
 		frameStartSampleIndex = (unsigned int)floor((sschCorrRecord[ii].StartSampleNum/SampleRate192 - delayTime2)*SampleRate)+1;
 
+		LteData[ii].RsRecord.NormCorr = 0;
+		LteData[ii].RsRecord.RMSCorr = 0;
+
 		bTrue = calculateRSValues(signal_384, sschCorrRecord[ii].ID, frameStartSampleIndex, cyclicPrefixMode[ii], &RSStrength, &RSNorm, &(LteData[ii].AvgDigitalVoltage));
 
 		//std::cout << "Lte Calculate RS Values Time elapsed: " << lte_diffclock(end,begin) << " ms\n";
@@ -213,6 +216,10 @@ int lte_cell_search(const Ipp32fc* SignalSamples,
 		LteData[ii].RsRecord.RMSCorr = RSStrength;//RSRP
 		LteData[ii].RsRecord.NormCorr = RSNorm; //RSRQ
 		LteData[ii].RsRecord.StartSampleNum = frameStartSampleIndex;
+
+		LteData[ii].rssi = LteData[ii].AvgDigitalVoltage; 
+		LteData[ii].rsrp = RSStrength;
+		LteData[ii].rsrq = RSNorm > .0001 ? 20 * log10(RSNorm) : -999;
 
 		LteData[ii].frame_number = (pbchInfo+ii)->MasterIB.systemFrameNum;			
         

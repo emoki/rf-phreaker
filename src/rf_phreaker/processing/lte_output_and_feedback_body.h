@@ -50,9 +50,11 @@ inline bandwidth_type determine_bandwidth(LteChannelBandwidth bw)
 
 LteChannelBandwidth look_for_valid_bandwidth(const lte_measurements &measurements)
 {
-	auto bw = LteBandwidth_1_4MHZ;
+	auto bw = LteBandwidth_Unknown;
 	for(auto &lte : measurements) {
-		if(lte.Bandwidth != LteBandwidth_Unknown) {
+		// Currently multiple bandwidths can be erroneously decoded for the same channel.  For now we take the largest bandwidth?
+		// Fix LTE decoding!
+		if(lte.Bandwidth != LteBandwidth_Unknown && lte.Bandwidth > bw) {
 			bw = lte.Bandwidth;
 			break;
 		}
@@ -72,7 +74,14 @@ public:
 		// Output basic tech.
 		io_->output_lte_sweep(convert_to_basic_data(*info.meas_, info.avg_rms_))/*.get()*/;
 
-		if(info.processed_data_.size()) {
+		bool valid_lte = false;
+		for(auto &lte : info.processed_data_) {
+			if(/*lte.Bandwidth != LteBandwidth_Unknown ||*/ lte.sync_quality > -8) {
+				valid_lte = true;
+				break;
+			}
+		}
+		if(valid_lte) {
 			auto bw = look_for_valid_bandwidth(info.processed_data_);
 
 			// Add the freq to the layer_3_decoder.
@@ -105,9 +114,9 @@ public:
 			std::vector<lte_data> lte;
 
 			// Until we get the LTE dll sorted out only output measurements with known bandwidths.
-			for(auto &dat : info.processed_data_) {
-				if(dat.NumAntennaPorts != LteAntPorts_Unknown && dat.AvgDigitalVoltage > 0.1) {
-					lte.push_back(convert_to_lte_data(*info.meas_, dat));
+			for(auto &data : info.processed_data_) {
+				if(data.NumAntennaPorts != LteAntPorts_Unknown  && data.rsrp > .001) {
+					lte.push_back(convert_to_lte_data(*info.meas_, data, info.avg_rms_));
 				}
 			}
 			if(lte.size()) {
@@ -115,18 +124,22 @@ public:
 
 				// Check to see if the sampling_rate is correct for the bandwidth.  If not, remove old collection_info and add new one with correct bandwidth and sampling_rate.
 				auto bw = look_for_valid_bandwidth(info.processed_data_);
-				auto sampling_rate = determine_sampling_rate(bw);
-				if(sampling_rate != info.meas_->sampling_rate()) {
-					add_remove_collection_info params;
-					params.tech_ = LTE_LAYER_3_DECODE;
 
-					params.remove_.push_back(lte_layer_3_collection_info(info.meas_->frequency(), info.meas_->sampling_rate(),
-						info.meas_->bandwidth(), info.meas_->get_operating_band()));
+				if(bw != LteBandwidth_Unknown) {
+					auto sampling_rate = determine_sampling_rate(bw);
+					// LTE bandwidth can be erroneously decoded.  For now we want to keep the largest bandwidth decoded...
+					if(sampling_rate /*!=*/> info.meas_->sampling_rate()) {
+						add_remove_collection_info params;
+						params.tech_ = LTE_LAYER_3_DECODE;
 
-					params.add_.push_back(lte_layer_3_collection_info(info.meas_->frequency(), sampling_rate, bw,
-						info.meas_->get_operating_band()));
+						params.remove_.push_back(lte_layer_3_collection_info(info.meas_->frequency(), info.meas_->sampling_rate(),
+							info.meas_->bandwidth(), info.meas_->get_operating_band()));
 
-					std::get<0>(out).try_put(params);
+						params.add_.push_back(lte_layer_3_collection_info(info.meas_->frequency(), sampling_rate, bw,
+							info.meas_->get_operating_band()));
+
+						std::get<0>(out).try_put(params);
+					}
 				}
 			}
 		}
