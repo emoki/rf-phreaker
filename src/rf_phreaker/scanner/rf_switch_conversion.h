@@ -29,10 +29,15 @@ public:
 	rf_switch_conversion(void)
 	{
 		//switches_.push_back(rf_switch(mhz(700), mhz(760), BOOST_BINARY(001 0100 001 0000 0000)));
-		switches_.push_back(rf_switch(mhz(921), mhz(960), BOOST_BINARY(001 1010 010 0000 0000)));
-		switches_.push_back(rf_switch(mhz(1805), mhz(1880), BOOST_BINARY(001 1111 010 0000 0000)));
-		switches_.push_back(rf_switch(mhz(2110), mhz(2170), BOOST_BINARY(001 0100 100 0000 0000)));
-		switches_.push_back(rf_switch(mhz(2600), mhz(2700), BOOST_BINARY(001 1110 100 0000 0000)));
+		//switches_.push_back(rf_switch(mhz(921), mhz(960), BOOST_BINARY(001 1010 010 0000 0000)));
+		//switches_.push_back(rf_switch(mhz(1805), mhz(1880), BOOST_BINARY(001 1111 010 0000 0000)));
+		//switches_.push_back(rf_switch(mhz(2110), mhz(2170), BOOST_BINARY(001 0100 100 0000 0000)));
+		//switches_.push_back(rf_switch(mhz(2600), mhz(2700), BOOST_BINARY(001 1110 100 0000 0000)));
+		switches_.push_back(rf_switch(mhz(700), mhz(760), BOOST_BINARY(100 0000 0000 00000 0010 100 000)));
+		switches_.push_back(rf_switch(mhz(921), mhz(960), BOOST_BINARY(100 0000 0000 00000 0101 010 000)));
+		switches_.push_back(rf_switch(mhz(1805), mhz(1880), BOOST_BINARY(100 0000 0000 00000 1111 010 000)));
+		switches_.push_back(rf_switch(mhz(2110), mhz(2170), BOOST_BINARY(100 0000 0000 00000 0010 001 000)));
+		switches_.push_back(rf_switch(mhz(2600), mhz(2700), BOOST_BINARY(100 0000 0000 00000 0111 001 000)));
 	}
 
 	~rf_switch_conversion(void) {}
@@ -40,7 +45,7 @@ public:
 	uint32_t convert_to_gpio(frequency_type freq, bandwidth_type bw, uint32_t current_gpio)
 	{
 		// Least significant byte is used by Nuand.  Remove everything else.
-		auto new_gpio = current_gpio & 0xFF;
+		auto new_gpio = 0;// current_gpio & 0xFF;
 
 		//auto upper_freq = freq + static_cast<frequency_type>(bw / 2.0);
 		//auto lower_freq = freq - static_cast<frequency_type>(bw / 2.0);
