@@ -408,11 +408,11 @@ processing::collection_info_containers cappeen_impl::create_collection_info_cont
 	//if(containers.empty()) {
 	//	containers.push_back(collection_info_container(LTE_LAYER_3_DECODE, false));
 	//	auto &con = containers.back();
-	//	con.adjust(add_collection_info(lte_layer_3_collection_info(2140000000, lte_bandwidth_1_4_mhz_sampling_rate, khz(1500), LTE_OPERATING_BAND_1)));
-	//	con.adjust(add_collection_info(lte_layer_3_collection_info(2120000000, lte_bandwidth_1_4_mhz_sampling_rate, khz(1500), LTE_OPERATING_BAND_1)));
-	//	con.adjust(add_collection_info(lte_layer_3_collection_info(1967500000, lte_bandwidth_1_4_mhz_sampling_rate, khz(1500), LTE_OPERATING_BAND_2)));
+	//	con.adjust(add_collection_info(lte_layer_3_collection_info(2140000000, lte_bandwidth_10_mhz_sampling_rate, khz(10000), LTE_OPERATING_BAND_1)));
+	//	con.adjust(add_collection_info(lte_layer_3_collection_info(739000000, lte_bandwidth_10_mhz_sampling_rate, khz(10000), LTE_OPERATING_BAND_12)));
+	//	con.adjust(add_collection_info(lte_layer_3_collection_info(2120000000, lte_bandwidth_20_mhz_sampling_rate, khz(20000), LTE_OPERATING_BAND_1)));
+	//	con.adjust(add_collection_info(lte_layer_3_collection_info(1967500000, lte_bandwidth_5_mhz_sampling_rate, khz(5000), LTE_OPERATING_BAND_2)));
 	//	con.adjust(add_collection_info(lte_layer_3_collection_info(1947500000, lte_bandwidth_1_4_mhz_sampling_rate, khz(1500), LTE_OPERATING_BAND_2)));
-	//	con.adjust(add_collection_info(lte_layer_3_collection_info(739000000, lte_bandwidth_1_4_mhz_sampling_rate, khz(1500), LTE_OPERATING_BAND_12)));
 	//	con.adjust(add_collection_info(lte_layer_3_collection_info(879600000, lte_bandwidth_1_4_mhz_sampling_rate, khz(1500), LTE_OPERATING_BAND_5)));
 	//}
 
