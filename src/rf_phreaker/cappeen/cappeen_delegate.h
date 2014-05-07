@@ -248,21 +248,19 @@ public:
 
 	void output_error_as_message(const std::exception &err)
 	{
-		LOG_L(ERROR) << err.what();
-		output_error(err.what(), beagle_api::STD_EXCEPTION_ERROR);
+		output_error_as_message(err.what(), beagle_api::STD_EXCEPTION_ERROR);
 	}
 
 	void output_error_as_message(const rf_phreaker::rf_phreaker_error &err)
 	{
-		LOG_L(ERROR) << err.what();
-		output_message(err.what(), convert_message(err.error_code_));
+		output_error_as_message(err.what(), err.error_code_);
 	}
 
 	void output_error_as_message(const std::string &s, int code)
 	{
 		LOG_L(ERROR) << s;
 		if(delegate_ != nullptr)
-			delegate_->available_error(beagle_id_, code, s.c_str(), s.size() + 1);
+			delegate_->available_message(beagle_id_, code, s.c_str(), s.size() + 1);
 	}
 
 	void output_error(const std::string &s, int code)

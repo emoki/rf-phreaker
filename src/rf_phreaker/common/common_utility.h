@@ -73,4 +73,13 @@ inline std::vector<std::string> tokenize(const std::string& input, const std::re
 	return std::vector<std::string>(first, last);
 }
 
+inline std::string split_file_name(const std::string& str)
+{
+	size_t found;
+	found = str.find_last_of("(/\\");
+	return str.substr(found + 1);
+}
+
+
+
 }

@@ -76,7 +76,7 @@ private:
 
 	void refresh_scanner_info();
 
-	int check_blade_status(int return_status);
+	int check_blade_status(int return_status, const std::string &file = "", int line = -1);
 
 	void check_blade_comm();
 

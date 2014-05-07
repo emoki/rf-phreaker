@@ -190,7 +190,7 @@ long cappeen_impl::list_available_units(char *list, unsigned int buf_size)
 			str += scanner->id() + ";";
 		}
 		if(buf_size < str.size() + 1)
-			throw rf_phreaker_error("Error while listing available units.  buf_size is not large enough.  buf_size should be at least "
+			throw cappeen_api_error("Error while listing available units.  buf_size is not large enough.  buf_size should be at least "
 			+ boost::lexical_cast<std::string>(str.size() + 1) + ".", BUFFER_TOO_SMALL);
 		else
 			memcpy(list, str.c_str(), str.size() + 1);
@@ -554,5 +554,5 @@ long cappeen_impl::input_new_license(const char *serial, uint32_t serial_buf_siz
 
 const char* cappeen_impl::api_version() const
 {
-	return "0.9.9";
+	return "0.9.10";
 }
