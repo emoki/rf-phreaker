@@ -123,6 +123,7 @@ int lteDecodePCFICH(Ipp32fc* inSignal,
 		            scramblingSeqPcfich);//Scrambling bits
 
 	/* Correlate Descrambled LLRs with CFI to determine the control symbol lenght - 5.3.4.1 TS36.212 */
+	LteData[cellNo].lteControlSysmbolLenght = 0;
     for (unsigned int cc=0;cc < 3; cc++)
 	{
 		correlation[cc] = 0;
