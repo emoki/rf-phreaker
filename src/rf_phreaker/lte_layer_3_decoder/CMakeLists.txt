@@ -19,6 +19,16 @@ set (lte_layer_3_decoder_SRCS
 	lte_layer_3_decoder.h
 	lte_sib_1_parser.cpp
 	lte_sib_1_parser.h
+	lte_sib_4_parser.cpp
+	lte_sib_4_parser.h
+	lte_sib_5_parser.cpp
+	lte_sib_5_parser.h
+	lte_sib_6_parser.cpp
+	lte_sib_6_parser.h
+	lte_sib_7_parser.cpp
+	lte_sib_7_parser.h
+	lte_sib_8_parser.cpp
+	lte_sib_8_parser.h
 	${rf_phreaker_SOURCE_DIR}/src/rf_phreaker/layer_3_decoder_common/asn1_config.h
 	${rf_phreaker_SOURCE_DIR}/src/rf_phreaker/layer_3_decoder_common/asn1_types.h
 	${rf_phreaker_SOURCE_DIR}/src/rf_phreaker/layer_3_decoder_common/bit_stream_container.cpp

@@ -235,7 +235,7 @@ inline std::ostream& operator<<( std::ostream &os, const LteNumResourceBlocks &t
 
 inline std::ostream& operator<<( std::ostream &os, const lte_measurement &t)
 {
-	os	<< t.PschRecord << lte_io_delimiter 
+	os << t.PschRecord << lte_io_delimiter
 		<< t.SschRecord << lte_io_delimiter
 		<< t.RsRecord << lte_io_delimiter
 		<< t.NumAntennaPorts << lte_io_delimiter
@@ -255,10 +255,34 @@ inline std::ostream& operator<<( std::ostream &os, const lte_measurement &t)
 		<< t.rsrp << lte_io_delimiter
 		<< t.rssi << lte_io_delimiter
 		<< t.rsrq << lte_io_delimiter
+		<< t.sync_quality << lte_io_delimiter
 		<< t.layer_3_.mcc_.to_string() << lte_io_delimiter
 		<< t.layer_3_.mnc_.to_string() << lte_io_delimiter
 		<< t.layer_3_.lac_ << lte_io_delimiter
-		<< t.layer_3_.cid_ << lte_io_delimiter;
+		<< t.layer_3_.cid_;
+
+	if(t.layer_3_.sib1_.decoded_) {
+		os << lte_io_delimiter << "sib1_decoded";
+
+		for(auto &plmn : t.layer_3_.sib1_.multiple_plmn_)
+			os << lte_io_delimiter << plmn.mcc_.to_string() << lte_io_spacer << plmn.mnc_;
+
+		for(auto &schedule : t.layer_3_.sib1_.scheduling_info_list_) {
+			os << lte_io_delimiter << schedule.periodicity_in_frames_ << "frames";
+			for(auto sib : schedule.sib_mapping_info_)
+				os << lte_io_spacer << (int)sib + 3;
+		}
+	}
+	if(t.layer_3_.sib4_.decoded_)
+		os << lte_io_delimiter << "sib4_decoded";
+	if(t.layer_3_.sib5_.decoded_)
+		os << lte_io_delimiter << "sib5_decoded";
+	if(t.layer_3_.sib6_.decoded_)
+		os << lte_io_delimiter << "sib6_decoded";
+	if(t.layer_3_.sib7_.decoded_)
+		os << lte_io_delimiter << "sib7_decoded";
+	if(t.layer_3_.sib8_.decoded_)
+		os << lte_io_delimiter << "sib8_decoded";
 
 	return os;
 }

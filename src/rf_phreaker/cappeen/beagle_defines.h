@@ -19,7 +19,7 @@ namespace beagle_api
 static const int8_t inter_rat_rssi_not_decoded = -1;
 
 typedef uint32_t beagle_id_type;
-typedef uint16_t channel_type;
+typedef int32_t channel_type;
 typedef uint16_t cpich_type;
 typedef int8_t rssi_type;
 
@@ -102,30 +102,64 @@ Used within GSM Inter Frequency RAT structure.  Helps determine band when UARFCN
 */
 enum BAND_INDICATOR
 {
-	dcs_1800_was_used = 0,
-	pcs_1900_was_used = 1,
+	DCS_1800_WAS_USED = 0,
+	PCS_1900_WAS_USED = 1,
 };
 
-/**
-Encapsulates inter frequency neighbor decoded from SIB 11/SIB 11bis.
-*/
-struct neighbor_inter
+enum LTE_SIB_TYPE
 {
-	// UARFCN
-	channel_type channel_;
-	// Scrambling code
-	cpich_type cpich_;
+	LTE_SIB_3,
+	LTE_SIB_4,
+	LTE_SIB_5,
+	LTE_SIB_6,
+	LTE_SIB_7,
+	LTE_SIB_8,
+	LTE_SIB_9,
+	LTE_SIB_10,
+	LTE_SIB_11,
+	LTE_SIB_12_V920,
+	LTE_SIB_13_V920,
+	LTE_SIB_14_V1130,
+	LTE_SIB_15_V1130,
+	LTE_SIB_16_V1130,
+	LTE_SPARE_2,
+	LTE_SPARE_1
 };
 
-/**
-Encapsulates inter RAT frequency neighbor.
-*/
-struct gsm_neighbor_inter_rat
+enum BAND_CLASS_CMDA_2000
 {
-	channel_type channel_;
-	char bsic_[3];
-	BAND_INDICATOR band_indicator_;
-	rssi_type rssi_;
+	BC0,
+	BC1,
+	BC2,
+	BC3,
+	BC4,
+	BC5,
+	BC6,
+	BC7,
+	BC8,
+	BC9,
+	BC10,
+	BC11,
+	BC12,
+	BC13,
+	BC14,
+	BC15,
+	BC16,
+	BC17,
+	BC18_V9A0,
+	BC19_V9A0,
+	BC20_V9A0,
+	BC21_V9A0,
+	SPARE10,
+	SPARE9,
+	SPARE8,
+	SPARE7,
+	SPARE6,
+	SPARE5,
+	SPARE4,
+	SPARE3,
+	SPARE2,
+	SPARE1
 };
 
 /**
@@ -165,7 +199,7 @@ struct technologies_and_band_group
 };
 
 /**
-Can represent GSM or UMTS channels.
+Can represent CDMA/GSM/UMTS/LTE channels.
 */
 struct channel_group
 {
@@ -176,29 +210,50 @@ struct channel_group
 /**
 Encapsulates intra frequency neighbor list decoded from SIB 11/SIB 11bis.
 */
-struct neighbor_intra_group
+struct umts_neighbor_intra_group
 {
 	uint32_t num_elements_;
 	cpich_type *elements_;
 };
 
 /**
+Encapsulates inter frequency neighbor decoded from SIB 11/SIB 11bis.
 */
-struct neighbor_inter_group
+struct umts_neighbor_inter
 {
-	uint32_t num_elements_;
-	neighbor_inter *elements_;
+	// UARFCN
+	channel_type channel_;
+	// Scrambling code
+	cpich_type cpich_;
 };
 
+/**
+*/
+struct umts_neighbor_inter_group
+{
+	uint32_t num_elements_;
+	umts_neighbor_inter *elements_;
+};
+
+/**
+Encapsulates inter RAT frequency neighbor.
+*/
+struct umts_neighbor_inter_rat_gsm
+{
+	channel_type channel_;
+	char bsic_[3];
+	BAND_INDICATOR band_indicator_;
+	rssi_type rssi_;
+};
 
 /**
 Encapsulates neighbor inter RAT frequency list decoded from SIB 11/SIB 11bis.
 Specified as gsm because we ignore any IS-2000 information.
 */
-struct gsm_neighbor_inter_rat_group
+struct umts_neighbor_inter_rat_gsm_group
 {
 	uint32_t num_elements_;
-	gsm_neighbor_inter_rat *elements_;
+	umts_neighbor_inter_rat_gsm *elements_;
 };
 
 /**
@@ -208,6 +263,18 @@ struct umts_sib_18
 {
 	bool decoded_;
 	plmn_group plmns_;
+};
+
+struct lte_scheduled_sib
+{
+	LTE_SIB_TYPE sib;
+	int32_t periodicity_in_frames_;
+};
+
+struct lte_scheduled_sib_group
+{
+	uint32_t num_elements_;
+	lte_scheduled_sib *elements_;
 };
 
 struct lte_sib_1
@@ -223,6 +290,115 @@ struct lte_sib_1
 
 	/// Cell ID
 	int32_t cid_;
+
+	lte_scheduled_sib_group scheduled_sibs_;
+};
+
+/**
+Is used to encode either a single or a range of lte physical cell identities. The range is encoded by
+using a  start value and by indicating the number of consecutive physical cell identities (including start ) in the range.
+*/
+struct lte_physical_cell_id_range
+{
+	int32_t start_;
+	int32_t range_;
+};
+
+struct lte_physical_cell_id_range_group
+{
+	uint32_t num_elements_;
+	lte_physical_cell_id_range *elements_;
+};
+
+struct lte_neighbor_cell
+{
+	int32_t physical_cell_id_;
+};
+
+struct lte_neighbor_cell_group
+{
+	uint32_t num_elements_;
+	lte_neighbor_cell *elements_;
+};
+
+struct lte_sib_4
+{
+	bool decoded_;
+	lte_neighbor_cell_group intra_freq_neighbor_cell_list_;
+	lte_physical_cell_id_range_group intra_freq_black_cell_list_;
+	lte_physical_cell_id_range csg_physical_cellid_range_;
+};
+
+struct lte_neighbor_inter
+{
+	channel_type downlink_arfcn_value_eutra_;
+	int32_t allowed_measurement_bandwidth_;
+	bool presence_antenna_port_1_;
+	lte_neighbor_cell_group inter_freq_neighbor_cell_list_;
+	lte_physical_cell_id_range_group inter_freq_black_cell_list_;
+};
+
+struct lte_neighbor_inter_group
+{
+	uint32_t num_elements_;
+	lte_neighbor_inter *elements_;
+};
+
+struct lte_sib_5
+{
+	bool decoded_;
+	lte_neighbor_inter_group inter_freq_carrier_info_list_;
+};
+
+struct lte_sib_6
+{
+	bool decoded_;
+	channel_group carrier_freq_list_utra_fdd_;
+	channel_group carrier_freq_list_utra_tdd_;
+};
+
+struct lte_neighbor_inter_rat_geran
+{
+	BAND_INDICATOR band_indicator_;
+	channel_group arfcns_;
+};
+
+struct lte_neighbor_inter_rat_geran_group
+{
+	uint32_t num_elements_;
+	lte_neighbor_inter_rat_geran *elements_;
+};
+
+struct lte_sib_7
+{
+	bool decoded_;
+	lte_neighbor_inter_rat_geran_group carrier_freqs_;
+};
+
+struct physical_cell_id_cdma_2000_group
+{
+	uint32_t num_elements_;
+	int32_t *elements_;
+};
+
+struct lte_neighbor_inter_rat_cdma_2000
+{
+	BAND_CLASS_CMDA_2000 band_;
+	channel_type arfcn_value_cmda_2000_;
+	physical_cell_id_cdma_2000_group physical_cell_ids_;
+};
+
+struct lte_neighbor_inter_rat_cdma_2000_group
+{
+	uint32_t num_elements_;
+	lte_neighbor_inter_rat_cdma_2000 *elements_;
+};
+
+struct lte_sib_8
+{
+	bool decoded_;
+	lte_neighbor_inter_rat_cdma_2000_group parameters_hrpd_;
+	lte_neighbor_inter_rat_cdma_2000_group parameters_1xrtt_;
 };
 
 /**
@@ -236,8 +412,6 @@ struct collection_info
 	/// Specifies the technologies and bands to sweep during collection.
 	technologies_and_band_group tech_and_bands_to_sweep_;
 };
-
-
 
 /** 
 The different states of the beagle.
@@ -458,13 +632,13 @@ struct umts_sector_info
 	bool mnc_three_digits_;
 
 	// Neighbor intra frequency list.  Decoded from SIB 11 or SIB 11bis.
-	neighbor_intra_group neighbor_intra_group_;
+	umts_neighbor_intra_group neighbor_intra_group_;
 
 	// Neighbor inter frequency list.  Decoded from SIB 11 or SIB 11bis.
-	neighbor_inter_group neighbor_inter_group_;
+	umts_neighbor_inter_group neighbor_inter_group_;
 
 	// Neighbor inter frequency RAT list.  Decoded from SIB 11 or SIB 11bis.
-	gsm_neighbor_inter_rat_group gsm_neighbor_inter_rat_group_;
+	umts_neighbor_inter_rat_gsm_group neighbor_inter_rat_gsm_group_;
 
 	// Contains the PLMN of the inter frequency list.
 	umts_sib_18 sib_18_group_;
@@ -478,7 +652,6 @@ struct umts_sweep_info
 	// Power within a 4 MHz bin centered around the frequency of the uarfcn_.
 	int32_t rssi_;
 };
-
 
 /**
 Encapsulates a LTE measurement.
@@ -541,6 +714,11 @@ struct lte_sector_info
 
 	/// System Information block 1.  Not always decoded.
 	lte_sib_1 sib_1_;
+	lte_sib_4 sib_4_;
+	lte_sib_5 sib_5_;
+	lte_sib_6 sib_6_;
+	lte_sib_7 sib_7_;
+	lte_sib_8 sib_8_;
 };
 
 struct lte_sweep_info
@@ -551,7 +729,6 @@ struct lte_sweep_info
 	// Power within a 1.92 MHz bin centered around the frequency of the EARFCN.
 	int32_t rssi_;
 };
-
 
 /**
 Callback interface must be a base class to the class which will access the beagle data during runtime.
@@ -616,8 +793,6 @@ public:
 	/// @param buf_size Size (in bytes) of str.
 	virtual void __stdcall available_message(long beagle_id, long possible_message_number, const char *str, long buf_size) = 0;
 };
-
-
 
 /**
 @enum ERRORCODES

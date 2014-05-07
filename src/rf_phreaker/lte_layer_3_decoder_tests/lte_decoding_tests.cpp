@@ -8,7 +8,8 @@ void lte_decoding_tests::run_automated_tests()
 {
 	lte_asn1_decoder decoder;
 
-	std::ifstream file("lte_bitstreams.txt");
+	std::string base_filename = "../../../../rf_phreaker/test_files/";
+	std::ifstream file(base_filename + "lte_bitstreams (2).txt");
 	//std::ifstream file("lte_non_working_bitstreams.txt");
 
 	BOOST_ASSERT(file);

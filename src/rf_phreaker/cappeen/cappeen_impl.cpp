@@ -5,6 +5,7 @@
 #include "rf_phreaker/common/exception_types.h"
 #include "rf_phreaker/processing/frequency_range_creation.h"
 #include "rf_phreaker/common/log.h"
+#include "tbb/task_scheduler_init.h"
 
 using namespace rf_phreaker;
 using namespace rf_phreaker::cappeen_api;
@@ -89,6 +90,9 @@ long cappeen_impl::initialize(beagle_api::beagle_delegate *del)
 		LOG_L(VERBOSE) << "Initializing cappeen_delegate.";
 		delegate_->initialize(data_output_.get(), processing_graph_.get(), gps_graph_.get());
 		//log_worker_->connect_sink(boost::bind(&cappeen_delegate::output_error, delegate_.get(), _1, _2));
+
+		//tbb::task_scheduler_init init;
+		//init.initialize(15);
 
 		LOG_L(INFO) << "Initialization complete.";
 		is_initialized_ = true;
@@ -222,12 +226,12 @@ long cappeen_impl::open_unit(const char *serial, unsigned int buf_size)
 		verify_init();
 
 		scanner_->open_scanner(serial).get();
+		
+		scanner_->do_initial_scanner_config().get();
 
 		auto hw = scanner_->get_scanner().get()->get_hardware();
 		delegate_->initialize_beagle_info(hw);
 		delegate_->change_beagle_state(BEAGLE_USBOPENED);
-
-		scanner_->do_initial_scanner_config().get();
 
 		gps_graph_->start(scanner_.get(), data_output_.get(), config_);
 		LOG_L(INFO) << "Opened unit " << serial << " successfully.";
@@ -401,6 +405,16 @@ processing::collection_info_containers cappeen_impl::create_collection_info_cont
 		}
 	}
 
+	//if(containers.empty()) {
+	//	containers.push_back(collection_info_container(LTE_LAYER_3_DECODE, false));
+	//	auto &con = containers.back();
+	//	con.adjust(add_collection_info(lte_layer_3_collection_info(2140000000, lte_bandwidth_1_4_mhz_sampling_rate, khz(1500), LTE_OPERATING_BAND_1)));
+	//	con.adjust(add_collection_info(lte_layer_3_collection_info(2120000000, lte_bandwidth_1_4_mhz_sampling_rate, khz(1500), LTE_OPERATING_BAND_1)));
+	//	con.adjust(add_collection_info(lte_layer_3_collection_info(1967500000, lte_bandwidth_1_4_mhz_sampling_rate, khz(1500), LTE_OPERATING_BAND_2)));
+	//	con.adjust(add_collection_info(lte_layer_3_collection_info(1947500000, lte_bandwidth_1_4_mhz_sampling_rate, khz(1500), LTE_OPERATING_BAND_2)));
+	//	con.adjust(add_collection_info(lte_layer_3_collection_info(739000000, lte_bandwidth_1_4_mhz_sampling_rate, khz(1500), LTE_OPERATING_BAND_12)));
+	//	con.adjust(add_collection_info(lte_layer_3_collection_info(879600000, lte_bandwidth_1_4_mhz_sampling_rate, khz(1500), LTE_OPERATING_BAND_5)));
+	//}
 
 	// Comply with beagle_api behavior.  Go thru and change any xxxx.5 freqs that are in the operating band 1 to operating band 4.
 	auto it = std::find_if(containers.begin(), containers.end(), [&](const collection_info_container &c) {
@@ -540,5 +554,5 @@ long cappeen_impl::input_new_license(const char *serial, uint32_t serial_buf_siz
 
 const char* cappeen_impl::api_version() const
 {
-	return "0.9.8";
+	return "0.9.9";
 }

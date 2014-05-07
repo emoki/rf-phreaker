@@ -36,6 +36,8 @@ public:
 	double sync_quality;
 	layer_3_information::lte_rrc_message_aggregate layer_3_;
 
+	lte_measurement() { clear(); }
+
 	lte_measurement& operator=(lte_measurement meas)
 	{
 		meas.swap(*this);
@@ -83,14 +85,27 @@ public:
 		RsRecord.NormCorr = 0;
 		RsRecord.RMSCorr = 0;
 		RsRecord.StartSampleNum = 0;
+		CyclicPrefix = Normal;
 		NumAntennaPorts = LteAntPorts_Unknown;
 		AvgDigitalVoltage = 0;
 		Bandwidth = LteBandwidth_Unknown;
+		fftSize = FFTSIZE_UNKNOWN;
+		frameNumSamples = FRAMENUMSAMPLES_FFT256;
+		cPSamplesSymbol0 = CP_SAMPLES_FFT256_SYMBOL_0;
+		cPSamplesSymbol1to6 = CP_SAMPLES_FFT256_SYMBOL_0;
+		numResouceBlocks = NUMRESOURCEBLOCKS_FFT256;
+		lteControlSysmbolLenght = 0;
+		phich_duration = 0;
+		phich_resources = 0;
+		fft_subcarrier_start_index = 0;
+		num_bits_dci_1A = 0;
 		frame_number = 0;
 		rsrp = 0;
 		rssi = 0;
 		rsrq = 0;
 		sync_quality = 0;
+		
+		
 		layer_3_.clear();
 	}
 };

@@ -16,6 +16,7 @@ set (cappeen_SRCS
 	cappeen_impl.cpp
 	cappeen_impl.h
 	operating_band_conversion.h
+	rf_phreaker_wrappers.h
 	${SRC_PLATFORM_SPECIFIC}/stdafx.cpp
 	${SRC_PLATFORM_SPECIFIC}/dllmain.cpp)
 

@@ -5,6 +5,7 @@
 #include <array>
 #include <thread>
 #include <atomic>
+#include <fstream>
 
 using namespace beagle_api;
 
@@ -30,10 +31,10 @@ public:
 				<< "\t" << info[i].mnc_
 				<< "\t" << info[i].lac_
 				<< "\t" << info[i].cell_id_;
-			if(info[i].neighbor_intra_group_.num_elements_ || info[i].neighbor_inter_group_.num_elements_ || info[i].gsm_neighbor_inter_rat_group_.num_elements_)
+			if(info[i].neighbor_intra_group_.num_elements_ || info[i].neighbor_inter_group_.num_elements_ || info[i].neighbor_inter_rat_gsm_group_.num_elements_)
 				std::cout << "\t" << info[i].neighbor_intra_group_.num_elements_
 				<< "\t" << info[i].neighbor_inter_group_.num_elements_
-				<< "\t" << info[i].gsm_neighbor_inter_rat_group_.num_elements_
+				<< "\t" << info[i].neighbor_inter_rat_gsm_group_.num_elements_
 				<< "------------------------------------------------------------------------------------------\n";
 			else
 				std::cout << "\n";
@@ -45,17 +46,137 @@ public:
 		for(int i = 0; i < num_records; ++i)
 			std::cout << info[i].frequency_ << "\t" << info[i].rssi_ << "\t" << "umts" << "\n";
 	}
-	virtual void __stdcall available_lte_sector_info(long beagle_id, const lte_sector_info *info, long num_records){
+	virtual void __stdcall available_lte_sector_info(long beagle_id, const lte_sector_info *info, long num_records)
+	{
+		static std::ofstream lte_output("lte_sector_info.txt");
 		for(int i = 0; i < num_records; ++i) {
-			std::cout << info[i].carrier_freq_ << "\t" << info[i].carrier_sl_ << "\t" << info[i].physical_cell_id_ << "\t" << info[i].carrier_bandwidth_  << "\t" << info[i].secondary_sync_quality_
-				<< "------" << "\t" << info[i].rssi_ << "\t" << info[i].rsrp_ << "\t" << info[i].rsrq_ << "\t-----------"
-				<< "\t" << (info[i].sib_1_.decoded_ ? "true------------------------------------------------------------------------------------------------" : "false")
-				<< "\n";
-			if(info[i].sib_1_.decoded_)
-				std::cout << info[i].sib_1_.plmns_.elements_[0].mcc_ << "\t" << info[i].sib_1_.plmns_.elements_[0].mnc_ << "\t" << info[i].sib_1_.tac_ << "\t" << info[i].sib_1_.cid_ << "\n";
+			std::string t;
+			t += std::to_string(info[i].collection_round_) + "\t";
+			t += std::to_string(info[i].carrier_freq_ / 1e6) + "\t";
+			t += std::to_string(info[i].carrier_bandwidth_ / 1e6) + "\t";
+			t += std::to_string(info[i].earfcn_) + "\t";
+			t += std::to_string(info[i].lte_operating_band_) + "\t";
+			t += std::to_string(info[i].antenna_ports_) + "\t";
+			t += std::to_string(info[i].system_frame_number_) + "\t";
+			t += std::to_string(info[i].physical_cell_id_) + "\t";
+			t += std::to_string(info[i].rssi_) + "\t";
+			t += std::to_string(info[i].rsrp_) + "\t";
+			t += std::to_string(info[i].rsrq_) + "\t";
+			t += std::to_string(info[i].cyclic_prefix_length_) + "\t";
+			t += std::to_string(info[i].primary_sync_id_) + "\t";
+			t += std::to_string(info[i].primary_sync_quality_) + "\t";
+			t += std::to_string(info[i].secondary_sync_id_) + "\t";
+			t += std::to_string(info[i].secondary_sync_quality_) + "\t";
+			if(info[i].sib_1_.decoded_) {
+				t += "sib1 | ";
+				t += std::to_string(info[i].sib_1_.tac_) + " | ";
+				t += std::to_string(info[i].sib_1_.cid_) + " | ";
+				for(int j = 0; j < info[i].sib_1_.plmns_.num_elements_; ++j) {
+					auto &k = info[i].sib_1_.plmns_.elements_;
+					t += "[" + std::string(k[j].mcc_) + " " + std::string(k[j].mnc_) + "] ";
+				}
+				t += " | ";
+				for(int j = 0; j < info[i].sib_1_.scheduled_sibs_.num_elements_; ++j) {
+					auto &k = info[i].sib_1_.scheduled_sibs_.elements_;
+					t += "[" + std::to_string(k[j].sib + 3) + " " + std::to_string(k[j].periodicity_in_frames_) + "f] ";
+				}
+			}
+			t += "\t";
+			if(info[i].sib_4_.decoded_) {
+				t += "sib4 | ";
+				t += std::to_string(info[i].sib_4_.csg_physical_cellid_range_.start_) + " " + std::to_string(info[i].sib_4_.csg_physical_cellid_range_.range_) + " | ";
+				t += "[";
+				for(int j = 0; j < info[i].sib_4_.intra_freq_neighbor_cell_list_.num_elements_; ++j) {
+					auto &k = info[i].sib_4_.intra_freq_neighbor_cell_list_.elements_;
+					t += std::to_string(k[j].physical_cell_id_) + " | ";
+				}
+				t += "] | [";
+				for(int j = 0; j < info[i].sib_4_.intra_freq_black_cell_list_.num_elements_; ++j) {
+					auto &k = info[i].sib_4_.intra_freq_black_cell_list_.elements_;
+					t += std::to_string(k[j].start_) + " " + std::to_string(k[j].range_) + " | ";
+				}
+				t += "]";
+			}
+			t += "\t";
+			if(info[i].sib_5_.decoded_) {
+				t += "sib5 | ";
+				for(int j = 0; j < info[i].sib_5_.inter_freq_carrier_info_list_.num_elements_; ++j) {
+					auto &k = info[i].sib_5_.inter_freq_carrier_info_list_.elements_;
+					t += std::to_string(k[j].downlink_arfcn_value_eutra_) + " | ";
+					t += std::to_string(k[j].allowed_measurement_bandwidth_) + " | ";
+					t += (k[j].presence_antenna_port_1_ ? "TRUE | " : "FALSE | ");
+					t += "[";
+					for(int jj = 0; jj < k[j].inter_freq_neighbor_cell_list_.num_elements_; ++jj) {
+						auto &kk = k[j].inter_freq_neighbor_cell_list_.elements_;
+						t += std::to_string(kk[jj].physical_cell_id_) + " ";
+					}
+					t += "] | [";
+					for(int jj = 0; jj < k[j].inter_freq_black_cell_list_.num_elements_; ++jj) {
+						auto &kk = k[j].inter_freq_black_cell_list_.elements_;
+						t += std::to_string(kk[jj].start_) + " " + std::to_string(kk[jj].range_) + " | ";
+					}
+					t += "] | ";
+				}
+			}
+			t += "\t";
+			if(info[i].sib_6_.decoded_) {
+				t += "sib6 | [";
+				for(int j = 0; j < info[i].sib_6_.carrier_freq_list_utra_fdd_.num_elements_; ++j) {
+					auto &k = info[i].sib_6_.carrier_freq_list_utra_fdd_.elements_;
+					t += std::to_string(k[j]) + " ";
+				}
+				t += "] | [";
+				for(int j = 0; j < info[i].sib_6_.carrier_freq_list_utra_tdd_.num_elements_; ++j) {
+					auto &k = info[i].sib_6_.carrier_freq_list_utra_tdd_.elements_;
+					t += std::to_string(k[j]) + " ";
+				}
+				t += "] ";
+			}
+			t += "\t";
+			if(info[i].sib_7_.decoded_) {
+				t += "sib7 | ";
+				for(int j = 0; j < info[i].sib_7_.carrier_freqs_.num_elements_; ++j) {
+					auto &k = info[i].sib_7_.carrier_freqs_.elements_;
+
+					t += std::to_string(k[j].band_indicator_) + " | [";
+
+					for(int jj = 0; jj < k[j].arfcns_.num_elements_; ++jj) {
+						auto &kk = k[j].arfcns_.elements_;
+						t += kk[jj] + " ";
+					}
+					t += "] | ";
+				}
+			}
+			t += "\t";
+			if(info[i].sib_8_.decoded_) {
+				t += "sib8 | ";
+				for(int j = 0; j < info[i].sib_8_.parameters_hrpd_.num_elements_; ++j) {
+					auto &k = info[i].sib_8_.parameters_hrpd_.elements_;
+					t += std::to_string(k[j].arfcn_value_cmda_2000_) + " | ";
+					t += std::to_string(k[j].band_) + " | [";
+					for(int jj = 0; jj < k[j].physical_cell_ids_.num_elements_; ++jj) {
+						auto &kk = k[j].physical_cell_ids_.elements_;
+						t += kk[jj] + " ";
+					}
+					t += "] | ";
+				}
+
+				for(int j = 0; j < info[i].sib_8_.parameters_1xrtt_.num_elements_; ++j) {
+					auto &k = info[i].sib_8_.parameters_1xrtt_.elements_;
+					t += std::to_string(k[j].arfcn_value_cmda_2000_) + " | ";
+					t += std::to_string(k[j].band_) + " | [";
+					for(int jj = 0; jj < k[j].physical_cell_ids_.num_elements_; ++jj) {
+						auto &kk = k[j].physical_cell_ids_.elements_;
+						t += kk[jj] + " ";
+					}
+					t += "] | ";
+				}
+			}
+
+			std::cout << t << std::endl;
+			lte_output << t << std::endl;
 		}
 	}
-
 	virtual void __stdcall available_lte_sweep_info(long beagle_id, const lte_sweep_info *info, long num_records)
 	{
 		for(int i = 0; i < num_records; ++i)

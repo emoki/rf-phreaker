@@ -17,13 +17,6 @@ typedef uint16_string bsic_type;
 typedef int16_t qrx_lev_min_type;
 typedef int16_t band_indicator_type;
 
-enum band_indicator
-{
-	dcs_1800_was_used = 0,
-	pcs_1900_was_used = 1,
-	unknown_band_was_used = -1
-};
-
 struct neighbor_inter
 {
 	neighbor_inter() 
