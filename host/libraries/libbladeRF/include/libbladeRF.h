@@ -17,7 +17,7 @@
  *
  * You should have received a copy of the GNU Lesser General Public
  * License along with this library; if not, write to the Free Software
- * Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301  USA
+ * Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301 USA
  */
 #ifndef BLADERF_H_
 #define BLADERF_H_
@@ -200,7 +200,8 @@ int CALL_CONV bladerf_open_with_devinfo(struct bladerf **device,
  *      - Device's serial number.
  *
  * @param[out]  device             Update with device handle on success
- * @param[in]   device_identifier  Device identifier, formatted as described above
+ * @param[in]   device_identifier  Device identifier, formatted as described
+ *                                 above
  *
  * @return 0 on success, or value from \ref RETCODES list on failure
  */
@@ -296,6 +297,20 @@ bool CALL_CONV bladerf_devinfo_matches(const struct bladerf_devinfo *a,
 API_EXPORT
 bool CALL_CONV bladerf_devstr_matches(const char *dev_str,
                                       struct bladerf_devinfo *info);
+
+/**
+ * Retrieve the backend string associated with the specified
+ * backend enumeration value.
+ *
+ * @warning Do not attempt to modify or free() the returned string.
+ *
+ * @return A string that can used to specify the `backend` portion of a device
+ *         identifier string. (See bladerf_open().)
+ */
+API_EXPORT
+const char * CALL_CONV bladerf_backend_str(bladerf_backend backend);
+
+
 /** @} (End of FN_DEVINFO) */
 
 
@@ -363,7 +378,7 @@ typedef enum {
     BLADERF_LB_FIRMWARE = 1,
 
     /**
-     * Basband loopback. TXLPF output is connected to the RXVGA2 input.
+     * Baseband loopback. TXLPF output is connected to the RXVGA2 input.
      */
     BLADERF_LB_BB_TXLPF_RXVGA2,
 
@@ -594,10 +609,11 @@ int CALL_CONV bladerf_set_sample_rate(struct bladerf *dev,
  *         or a value from \ref RETCODES list on other failures
  */
 API_EXPORT
-int CALL_CONV bladerf_set_rational_sample_rate(struct bladerf *dev,
-                                               bladerf_module module,
-                                               struct bladerf_rational_rate *rate,
-                                               struct bladerf_rational_rate *actual);
+int CALL_CONV bladerf_set_rational_sample_rate(
+                                        struct bladerf *dev,
+                                        bladerf_module module,
+                                        struct bladerf_rational_rate *rate,
+                                        struct bladerf_rational_rate *actual);
 
 /**
  * Configure the sampling of the LMS6002D to be either internal or
@@ -651,9 +667,10 @@ int CALL_CONV bladerf_get_sample_rate(struct bladerf *dev,
  * @return 0 on success, value from \ref RETCODES list upon failure
  */
 API_EXPORT
-int CALL_CONV bladerf_get_rational_sample_rate(struct bladerf *dev,
-                                               bladerf_module module,
-                                               struct bladerf_rational_rate *rate);
+int CALL_CONV bladerf_get_rational_sample_rate(
+                                        struct bladerf *dev,
+                                        bladerf_module module,
+                                        struct bladerf_rational_rate *rate);
 
 /**
  * Set the value of the specified configuration parameter
@@ -669,8 +686,8 @@ int CALL_CONV bladerf_get_rational_sample_rate(struct bladerf *dev,
  * @return 0 on success, value from \ref RETCODES list on failure
  */
 API_EXPORT
-int bladerf_set_correction(struct bladerf *dev, bladerf_module module,
-                           bladerf_correction corr, int16_t value);
+int CALL_CONV bladerf_set_correction(struct bladerf *dev, bladerf_module module,
+                                     bladerf_correction corr, int16_t value);
 
 /**
  * Obtain the current value of the specified configuration parameter
@@ -683,8 +700,8 @@ int bladerf_set_correction(struct bladerf *dev, bladerf_module module,
  * @return 0 on success, value from \ref RETCODES list on failure
  */
 API_EXPORT
-int bladerf_get_correction(struct bladerf *dev, bladerf_module module,
-                           bladerf_correction corr, int16_t *value);
+int CALL_CONV bladerf_get_correction(struct bladerf *dev, bladerf_module module,
+                                     bladerf_correction corr, int16_t *value);
 /**
  * Set the PA gain in dB
  *
@@ -1347,7 +1364,7 @@ int CALL_CONV bladerf_get_stream_timeout(struct bladerf *dev,
  *
  * The synchronous interface is built atop the asynchronous interface, and is
  * generally less complex and easier to work with.  It alleviates the need to
- * explicity spawn threads (it is done under the hood) and manually manage
+ * explicitly spawn threads (it is done under the hood) and manually manage
  * sample buffers.
  *
  * Under the hood, this interface spawns worker threads to handle an
@@ -1698,7 +1715,7 @@ bladerf_dev_speed CALL_CONV bladerf_device_speed(struct bladerf *dev);
  */
 
 /**
- * Flash firmware onto the device
+ * Write FX3 firmware to the bladeRF's SPI flash
  *
  * @note This will require a power cycle to take effect
  *
@@ -1712,7 +1729,8 @@ int CALL_CONV bladerf_flash_firmware(struct bladerf *dev,
                                      const char *firmware);
 
 /**
- * Load device's FPGA
+ * Load device's FPGA. Note that this FPGA configuration will be reset
+ * at the next power cycle.
  *
  * @param   dev         Device handle
  * @param   fpga        Full path to FPGA bitstream
@@ -1723,7 +1741,9 @@ API_EXPORT
 int CALL_CONV bladerf_load_fpga(struct bladerf *dev, const char *fpga);
 
 /**
- * Flash FPGA image onto the device
+ * Write the provided FPGA image to the bladeRF's SPI flash and enable FPGA
+ * loading from SPI flash at power on (also referred to within this project as
+ * FPGA "autoloading").
  *
  * @param   dev         Device handle
  * @param   fpga_image  Full path to FPGA file
@@ -1733,6 +1753,14 @@ int CALL_CONV bladerf_load_fpga(struct bladerf *dev, const char *fpga);
 API_EXPORT
 int CALL_CONV bladerf_flash_fpga(struct bladerf *dev,
                                  const char *fpga_image);
+
+/**
+ * Erase the FPGA region of SPI flash, effectively disabling FPGA autoloading
+ *
+ * @param   dev         Device handle
+ */
+API_EXPORT
+int CALL_CONV bladerf_erase_stored_fpga(struct bladerf *dev);
 
 /**
  * Reset the device, causing it to reload its firmware from flash
@@ -1756,7 +1784,7 @@ int CALL_CONV bladerf_device_reset(struct bladerf *dev);
 API_EXPORT
 int CALL_CONV bladerf_jump_to_bootloader(struct bladerf *dev);
 
-/* @} (End of FN_PROG) */
+/** @} (End of FN_PROG) */
 
 
 /**
@@ -1849,6 +1877,9 @@ typedef enum {
  * serialized version of this structure and its contents. When written to disk,
  * values are converted to big-endian byte order, for ease of reading in a hex
  * editor.
+ *
+ * When creating and using a bladerf_image of type BLADERF_IMAGE_TYPE_RAW,
+ * the address and length fields must be erase-block aligned.
  */
 struct bladerf_image {
 
@@ -1930,7 +1961,7 @@ struct bladerf_image {
  * a file.
  *
  * @return Pointer to allocated and initialized structure on success,
- *         NULL on memory allocation failure
+ *         NULL on memory allocation failure or invalid address/length.
  */
 API_EXPORT
 struct bladerf_image * CALL_CONV bladerf_alloc_image(bladerf_image_type type,
@@ -1949,8 +1980,9 @@ struct bladerf_image * CALL_CONV bladerf_alloc_image(bladerf_image_type type,
  *         NULL on memory allocation failure
  */
 API_EXPORT
-struct bladerf_image * CALL_CONV bladerf_alloc_cal_image(bladerf_fpga_size fpga_size,
-                                                         uint16_t vctcxo_trim);
+struct bladerf_image * CALL_CONV bladerf_alloc_cal_image(
+                                                bladerf_fpga_size fpga_size,
+                                                uint16_t vctcxo_trim);
 
 /**
  * Free a bladerf_image previously obtained via bladerf_alloc_image.
@@ -2135,7 +2167,7 @@ int CALL_CONV bladerf_lms_write(struct bladerf *dev,
 /**
  * Switch to use RX low band (300M - 1.5GHz)
  *
- * @note THis is set using bladerf_set_frequency().
+ * @note This is set using bladerf_set_frequency().
  */
 #define BLADERF_GPIO_RX_LB_ENABLE   (2 << 5)
 
@@ -2215,7 +2247,8 @@ int CALL_CONV bladerf_expansion_gpio_write(struct bladerf *dev, uint32_t val);
  * @return 0 on success, value from \ref RETCODES list on failure
  */
 API_EXPORT
-int CALL_CONV bladerf_expansion_gpio_dir_read(struct bladerf *dev, uint32_t *val);
+int CALL_CONV bladerf_expansion_gpio_dir_read(struct bladerf *dev,
+                                              uint32_t *val);
 
 /**
  * Write a expansion GPIO direction register. Callers should be sure to perform
@@ -2228,18 +2261,21 @@ int CALL_CONV bladerf_expansion_gpio_dir_read(struct bladerf *dev, uint32_t *val
  * @return 0 on success, value from \ref RETCODES list on failure
  */
 API_EXPORT
-int CALL_CONV bladerf_expansion_gpio_dir_write(struct bladerf *dev, uint32_t val);
+int CALL_CONV bladerf_expansion_gpio_dir_write(struct bladerf *dev,
+                                               uint32_t val);
 
 /**
+ * Retrieve the current timestamp counter value from the FPGA
  *
  * @param   dev         Device handle
- * @param   module      Module to perform streaming with
- * @param   val         Pointer to variable the data should be read into
+ * @param   mod         Module to perform streaming with
+ * @param   value       Pointer to variable the data should be read into
  *
  * @return 0 on success, value from \ref RETCODES list on failure
  */
 API_EXPORT
-int CALL_CONV bladerf_get_timestamp(struct bladerf *dev, bladerf_module mod, uint64_t *value);
+int CALL_CONV bladerf_get_timestamp(struct bladerf *dev, bladerf_module mod,
+                                    uint64_t *value);
 
 /**
  * Write value to VCTCXO DAC
@@ -2277,7 +2313,7 @@ API_EXPORT
 int CALL_CONV bladerf_calibrate_dc(struct bladerf *dev,
                                    bladerf_cal_module module);
 
-/* @} (End of LOW_LEVEL) */
+/** @} (End of LOW_LEVEL) */
 
 /**
  * @defgroup FN_FLASH  Low-level flash routines
@@ -2286,159 +2322,172 @@ int CALL_CONV bladerf_calibrate_dc(struct bladerf *dev,
  * Most users will find no reason to use these, as higher-level functions
  * perform flash accesses under the hood.
  *
- * Be sure to review the following page and the associated flash datasheet
- * before using these functions:
+ * These routines are not recommended for use other than testing, development,
+ * and significant customization of the bladeRF platform (which would require
+ * firmware and libbladeRF changes).
  *
+ * Use of these functions requires an understanding of the underlying SPI
+ * flash device, and the bladeRF's flash memory map. Be sure to review the
+ * following page and the associated flash datasheet before using these
+ * functions:
  *   https://github.com/nuand/bladeRF/wiki/FX3-Firmware#spi-flash-layout
  *
  * @bug These functions are not currently thread-safe. This will be addressed
  * in future revisions of the library. The caller is responsible for ensuring
  * these functions are called in a thread-safe manner.
  *
- *
  * @{
  */
-#define BLADERF_FLASH_PAGE_BITS   (8)  /**< 256bytes == 2^8  bytes */
-#define BLADERF_FLASH_SECTOR_BITS (16) /**< 64KiB    == 2^16 bytes */
-#define BLADERF_FLASH_SIZE_BITS   (22) /**< 32Mbit   == 2^22 bytes */
 
-/** Total size of bladeRF SPI flash */
-#define BLADERF_FLASH_TOTAL_SIZE  (1<<BLADERF_FLASH_SIZE_BITS)
+/** Total size of bladeRF SPI flash, in bytes */
+#define BLADERF_FLASH_TOTAL_SIZE  (4 * 1024 * 1024)
 
-/** SPI flash page size */
-#define BLADERF_FLASH_PAGE_SIZE   (1<<BLADERF_FLASH_PAGE_BITS)
+/** SPI flash page size, in bytes */
+#define BLADERF_FLASH_PAGE_SIZE   256
 
-/** SPI flash sector size */
-#define BLADERF_FLASH_SECTOR_SIZE (1<<BLADERF_FLASH_SECTOR_BITS)
-
-/** Size of the SPI flash, in bytes */
-#define BLADERF_FLASH_NUM_BYTES BLADERF_FLASH_TOTAL_SIZE
+/** SPI flash 64KiB erase block size, in bytes */
+#define BLADERF_FLASH_EB_SIZE     (64 * 1024)
 
 /** Size of the SPI flash, in pages */
 #define BLADERF_FLASH_NUM_PAGES \
     (BLADERF_FLASH_TOTAL_SIZE / BLADERF_FLASH_PAGE_SIZE)
 
-/** Size of the SPI flash, in sectors */
-#define BLADERF_FLASH_NUM_SECTORS \
-    (BLADERF_FLASH_TOTAL_SIZE / BLADERF_FLASH_SECTOR_SIZE)
+/** Size of the SPI flash, in 64KiB erase blocks */
+#define BLADERF_FLASH_NUM_EBS \
+    (BLADERF_FLASH_TOTAL_SIZE / BLADERF_FLASH_EB_SIZE)
 
-/** Address of firmware in flash */
+
+
+/** Convert byte addresses to units of flash pages */
+#define BLADERF_FLASH_TO_PAGES(bytes) ((bytes) / BLADERF_FLASH_PAGE_SIZE)
+
+/** Convert byte addresses to units of flash erase blocks */
+#define BLADERF_FLASH_TO_EB(bytes)    ((bytes) / BLADERF_FLASH_EB_SIZE)
+
+
+
+/** Byte address of FX3 firmware */
 #define BLADERF_FLASH_ADDR_FIRMWARE     0x00000000
 
-/** Length of firmware region in flash*/
-#define BLADERF_FLASH_LEN_FIRMWARE      0x00030000
+/** Flash page where FX3 firmware starts */
+#define BLADERF_FLASH_PAGE_FIRMWARE \
+            (BLADERF_FLASH_TO_PAGES(BLADERF_FLASH_ADDR_FIRMWARE))
 
-/** Address of calibration data in flash */
-#define BLADERF_FLASH_ADDR_CALIBRATION  0x00030000
+/** Flash erase block where FX3 firmware starts */
+#define BLADERF_FLASH_EB_FIRMWARE \
+            (BLADERF_FLASH_TO_EB(BLADERF_FLASH_ADDR_FIRMWARE))
 
-/** Length of calibration data region */
-#define BLADERF_FLASH_LEN_CALIBRATION   0x100
+/** Length of firmware region of flash, in bytes */
+#define BLADERF_FLASH_BYTE_LEN_FIRMWARE 0x00030000
 
-/** Address of FPGA metadata */
-#define BLADERF_FLASH_ADDR_FPGA_META    0x00040000
+/** Length of firmware region of flash, in pages */
+#define BLADERF_FLASH_PAGE_LEN_FIRMWARE \
+            (BLADERF_FLASH_TO_PAGES(BLADERF_FLASH_BYTE_LEN_FIRMWARE))
 
-/** Length of FPGA metadata */
-#define BLADERF_FLASH_LEN_FPGA_META     0x100
+/** Length of firmware region of flash, in erase blocks */
+#define BLADERF_FLASH_EB_LEN_FIRMWARE \
+            (BLADERF_FLASH_TO_EB(BLADERF_FLASH_BYTE_LEN_FIRMWARE))
 
-/** Address of FPGA bitstream for autoloading */
-#define BLADERF_FLASH_ADDR_FPGA         0x00040100
 
-/** Length of of FPGA bistream */
-#define BLADERF_FLASH_LEN_FPGA          0x003BFF00
+/** Byte address of calibration data region */
+#define BLADERF_FLASH_ADDR_CAL  0x00030000
+
+/** Flash page where calibration data starts */
+#define BLADERF_FLASH_PAGE_CAL  (BLADERF_FLASH_TO_PAGES(BLADERF_FLASH_ADDR_CAL))
+
+/** Flash erase block where calibration data starts */
+#define BLADERF_FLASH_EB_CAL    (BLADERF_FLASH_TO_EB(BLADERF_FLASH_ADDR_CAL))
+
+/** Length of calibration data, in bytes */
+#define BLADERF_FLASH_BYTE_LEN_CAL 0x100
+
+/** Length of calibration data, in pages */
+#define BLADERF_FLASH_PAGE_LEN_CAL \
+            (BLADERF_FLASH_TO_PAGES(FLASH_BYTE_LEN_CAL))
 
 /**
- * Erase sectors from FX3 flash device
+ * Length of calibration data, in erase blocks. This is a special case,
+ * as the entire remainder of the erase block is reserved for future calibration
+ * data use. When updating calibration data, the whole block will be erased,
+ * even though the current firmware only uses one page of it. */
+#define BLADERF_FLASH_EB_LEN_CAL 1
+
+
+/**
+ * Byte address of of the autoloaded FPGA and associated metadata.
+ * The first page is allocated for metadata, and the FPGA bitstream resides
+ * in the following pages.
+ */
+#define BLADERF_FLASH_ADDR_FPGA 0x00040000
+
+/** Flash page where FPGA metadata and bitstream start */
+#define BLADERF_FLASH_PAGE_FPGA \
+            (BLADERF_FLASH_TO_PAGES(BLADERF_FLASH_ADDR_FPGA))
+
+/** Flash erase block where FPGA metadata and bitstream start */
+#define BLADERF_FLASH_EB_FPGA \
+            (BLADERF_FLASH_TO_EB(BLADERF_FLASH_ADDR_FPGA))
+
+/** Length of entire FPGA region, including both metadata and bitstream. */
+#define BLADERF_FLASH_BYTE_LEN_FPGA 0x00370000
+
+/** Length of entire FPGA region, in units of erase blocks */
+#define BLADERF_FLASH_EB_LEN_FPGA \
+            (BLADERF_FLASH_TO_EB(BLADERF_FLASH_BYTE_LEN_FPGA))
+
+/**
+ * Erase regions of the bladeRF's SPI flash
  *
- * @note Unlike the bladerf_read_flash/bladerf_write_flash functions this
- *       function expects a BLADERF_FLASH_SECTOR_SIZE aligned address and
- *       length.
+ * This function operates in units of 64KiB erase blocks
+ *
+ * @param   dev             Device handle
+ * @param   erase_block     Erase block to start erasing at
+ * @param   count           Number of blocks to erase.
+ *
+ * @return 0 on success, or BLADERF_ERR_INVAL on an invalid `erase_block` or
+ *         `count` value, or a value from \ref RETCODES list on other failures
+ */
+API_EXPORT
+int CALL_CONV bladerf_erase_flash(struct bladerf *dev,
+                                  uint32_t erase_block, uint32_t count);
+
+/**
+ * Read data from the bladeRF's SPI flash
+ *
+ * This function operates in units of 256-byte pages.
  *
  * @param   dev     Device handle
- * @param   addr    Page aligned byte address of the first sector to erase
- * @param   len     Number of bytes to erase, must be a multiple of
- *                  BLADERF_FLASH_SECTOR_SIZE
+ * @param   buf     Buffer to read data into. Must be
+ *                  `count` * BLADERF_FLASH_PAGE_SIZE bytes or larger.
  *
- * @return Positive number of bytes erased on success, negative value from \ref
- *         RETCODES list on failure
+ * @param   page    Page to begin reading from
+ * @param   count   Number of pages to read
+ *
+ * @return 0 on success, or BLADERF_ERR_INVAL on an invalid `page` or
+ *         `count` value, or a value from \ref RETCODES list on other failures.
  */
 API_EXPORT
-int CALL_CONV bladerf_erase_flash(struct bladerf *dev, uint32_t addr,
-                                  uint32_t len);
+int CALL_CONV bladerf_read_flash(struct bladerf *dev, uint8_t *buf,
+                                 uint32_t page, uint32_t count);
 
 /**
- * Read bytes from FX3 flash device
- *
- * @note Unline the `bladerf_erase_flash' function this function expects a
- *       BLADERF_FLASH_PAGE_SIZE aligned address and length.
+ * Write data to the bladeRF's SPI flash device
  *
  * @param   dev   Device handle
- * @param   addr  Page aligned byte address of the first page to read
- * @param   buf   Buffer to read into, must be at least `len' bytes long
- * @param   len   Number of bytes to read, must be a multiple of
- *                BLADERF_FLASH_PAGE_SIZE
+ * @param   buf   Data to write to flash. Must be
+ *                `page` * BLADERF_FLASH_PAGE_SIZE bytes or larger.
  *
- * @return Positive number of bytes read on success, negative value from \ref
- *         RETCODES list on failure
+ * @param   page  Page to begin writing at
+ * @param   count
+ *
+ * @return 0 on success, or BLADERF_ERR_INVAL on an invalid `page` or
+ *         `count` value, or a value from \ref RETCODES list on other failures.
  */
 API_EXPORT
-int CALL_CONV bladerf_read_flash(struct bladerf *dev, uint32_t addr,
-                                 uint8_t *buf, uint32_t len);
+int CALL_CONV bladerf_write_flash(struct bladerf *dev, const uint8_t *buf,
+                                  uint32_t page, uint32_t count);
 
-/**
- * Read an unaligned region of flash memory
- *
- * @param   dev   Device handle
- * @param   addr  Unaligned byte address of first byte to read
- * @param   pbuf  Buffer to read into, must be at least `len' bytes long
- * @param   len   Number of bytes to write. (No alignment requirement)
- *
- * @return Positive number of bytes read on success, negative value from \ref
- *         RETCODES list on failure
- */
-API_EXPORT
-int CALL_CONV bladerf_read_flash_unaligned(struct bladerf *dev, uint32_t addr,
-                                           uint8_t *pbuf, uint32_t len);
-
-/**
- * Write bytes to FX3 flash device
- *
- * @note Unline the `bladerf_erase_flash' function this function expects a
- *       BLADERF_FLASH_PAGE_SIZE aligned address and length.
- *
- * @param   dev   Device handle
- * @param   addr  Page aligned byte address of the first page to write
- * @param   buf   Data to write to flash
- * @param   len   Number of bytes to write, must be a multiple of
- *                BLADERF_FLASH_PAGE_SIZE
- *
- * @return Positive number of bytes written on success, negative value from \ref
- *         RETCODES list on failure
- */
-API_EXPORT
-int CALL_CONV bladerf_write_flash(struct bladerf *dev, uint32_t addr,
-                                  uint8_t *buf, uint32_t len);
-
-/**
- * Program an unaligned region of flash memory (read/erase/write/verify).
- *
- * @note This function performs a full read/erase/write/verify cycle and the
- * aligned variants should be preferred whenever possible.
- *
- * @param   dev   Device handle
- * @param   addr  Unaligned byte address of destination
- * @param   buf   Data to write to flash
- * @param   len   Number of bytes to write. (No alignment requirement)
- *
- * @return Positive number of bytes written on success, negative value from \ref
- *         RETCODES list on failure
- */
-API_EXPORT
-int CALL_CONV bladerf_program_flash_unaligned(struct bladerf *dev,
-                                              uint32_t addr,
-                                              uint8_t *buf,
-                                              uint32_t len);
-
-/* @} (End of FN_FLASH) */
+/** @} (End of FN_FLASH) */
 
 
 #ifdef __cplusplus

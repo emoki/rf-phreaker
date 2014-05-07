@@ -32,7 +32,7 @@
 #include "si5338.h"
 #include "file_ops.h"
 #include "log.h"
-#include "backend.h"
+#include "backend/backend.h"
 #include "device_identifier.h"
 #include "version.h"       /* Generated at build time */
 #include "conversions.h"
@@ -69,73 +69,78 @@ void bladerf_free_device_list(struct bladerf_devinfo *devices)
     free(devices);
 }
 
-int bladerf_open_with_devinfo(struct bladerf **device,
+int bladerf_open_with_devinfo(struct bladerf **opened_device,
                                 struct bladerf_devinfo *devinfo)
 {
-    struct bladerf *opened_device;
+    struct bladerf *dev;
     int status;
 
-    *device = NULL;
-    status = backend_open(device, devinfo);
+    *opened_device = NULL;
 
-    if (!status) {
+    dev = (struct bladerf *)calloc(1, sizeof(struct bladerf));
+    if (dev == NULL) {
+        return BLADERF_ERR_MEM;
+    }
 
-        /* Catch bugs from backends returning status = 0, but a NULL device */
-        assert(*device);
-        opened_device = *device;
+    dev->fpga_version.describe = calloc(1, BLADERF_VERSION_STR_MAX + 1);
+    if (dev->fpga_version.describe == NULL) {
+        free(dev);
+        return BLADERF_ERR_MEM;
+    }
 
-        /* We got a device */
-        bladerf_set_error(&opened_device->error, ETYPE_LIBBLADERF, 0);
+    dev->fw_version.describe = calloc(1, BLADERF_VERSION_STR_MAX + 1);
+    if (dev->fw_version.describe == NULL) {
+        free((void*)dev->fpga_version.describe);
+        free(dev);
+        return BLADERF_ERR_MEM;
+    }
 
-        status = opened_device->fn->get_device_speed(opened_device,
-                                                     &opened_device->usb_speed);
+    status = backend_open(dev, devinfo);
+    if (status != 0) {
+        free((void*)dev->fw_version.describe);
+        free((void*)dev->fpga_version.describe);
+        free(dev);
+        return status;
+    }
 
-        if (status < 0 ||
-                (opened_device->usb_speed != BLADERF_DEVICE_SPEED_HIGH &&
-                 opened_device->usb_speed != BLADERF_DEVICE_SPEED_SUPER)) {
-            opened_device->fn->close((*device));
-            *device = NULL;
-        } else {
-            if (opened_device->legacy) {
-                /* Currently two modes of legacy:
-                 *  - ALT_SETTING
-                 *  - CONFIG_IF
-                 *
-                 * If either of these are set, we should tell the user to update
-                 */
-                printf("********************************************************************************\n");
-                printf("* ENTERING LEGACY MODE, PLEASE UPGRADE TO THE LATEST FIRMWARE BY RUNNING:\n");
-                printf("* wget http://nuand.com/fx3/latest.img ; bladeRF-cli -f latest.img\n");
-                printf("********************************************************************************\n");
-            }
+    status = dev->fn->get_device_speed(dev, &dev->usb_speed);
+    if (status < 0) {
+        log_debug("Failed to get device speed: %s\n",
+                  bladerf_strerror(status));
+        goto error;
+    }
 
-            if (!(opened_device->legacy & LEGACY_ALT_SETTING)) {
+    if (dev->usb_speed != BLADERF_DEVICE_SPEED_HIGH &&
+        dev->usb_speed != BLADERF_DEVICE_SPEED_SUPER) {
+        log_debug("Unsupported device speed: %d\n", dev->usb_speed);
+        goto error;
+    }
 
-                status = bladerf_get_and_cache_vctcxo_trim(opened_device);
-                if (status < 0) {
-                    log_warning( "Could not extract VCTCXO trim value\n" ) ;
-                }
+    /* VCTCXO trim and FPGA size are non-fatal indicators that we've
+     * trashed the calibration region of flash. If these were made fatal,
+     * we wouldn't be able to open the device to restore them. */
+    status = bladerf_get_and_cache_vctcxo_trim(dev);
+    if (status < 0) {
+        log_warning("Failed to get VCTCXO trim value: %s\n",
+                    bladerf_strerror(status));
+    }
 
-                status = bladerf_get_and_cache_fpga_size(opened_device);
-                if (status < 0) {
-                    log_warning( "Could not extract FPGA size\n" ) ;
-                }
+    status = bladerf_get_and_cache_fpga_size(dev);
+    if (status < 0) {
+        log_warning("Failed to get FPGA size %s\n",
+                    bladerf_strerror(status));
+    }
 
-                /* If any of these routines failed, the dev structure should
-                 * still have had it's fields dummied, so they're safe to
-                 * print here (i.e., not uninitialized) */
-                log_debug("%s: fw=v%s serial=%s trim=0x%.4x fpga_size=%d\n",
-                        __FUNCTION__, opened_device->fw_version.describe,
-                        opened_device->ident.serial, opened_device->dac_trim,
-                        opened_device->fpga_size);
-            }
+    status = bladerf_is_fpga_configured(dev);
+    if (status > 0) {
+        status = bladerf_init_device(dev);
+    }
 
-            /* All status in here is not fatal, so whatever */
-            status = 0 ;
-            if (bladerf_is_fpga_configured(opened_device)) {
-                bladerf_init_device(opened_device);
-            }
-        }
+error:
+    if (status < 0) {
+        bladerf_close(dev);
+    } else {
+        *opened_device = dev;
     }
 
     return status;
@@ -162,11 +167,18 @@ int bladerf_open(struct bladerf **device, const char *dev_id)
 void bladerf_close(struct bladerf *dev)
 {
     if (dev) {
+
 #ifdef ENABLE_LIBBLADERF_SYNC
         sync_deinit(dev->sync[BLADERF_MODULE_RX]);
         sync_deinit(dev->sync[BLADERF_MODULE_TX]);
 #endif
+
         dev->fn->close(dev);
+
+        free((void *)dev->fpga_version.describe);
+        free((void *)dev->fw_version.describe);
+
+        free(dev);
     }
 }
 
@@ -282,28 +294,28 @@ int bladerf_set_sampling(struct bladerf *dev, bladerf_sampling sampling)
         /* Turn on RXVGA2 */
         status = bladerf_lms_read( dev, 0x64, &val );
         if (status) {
-            log_warning( "Could not read LMS to disable RXVGA2\n" );
+            log_warning( "Could not read LMS to enable RXVGA2\n" );
             goto bladerf_set_sampling__done;
         }
 
         val |= (1<<1) ;
         status = bladerf_lms_write( dev, 0x64, val );
         if (status) {
-            log_warning( "Could not write LMS to disable RXVGA2\n" );
+            log_warning( "Could not write LMS to enable RXVGA2\n" );
             goto bladerf_set_sampling__done;
         }
     } else {
         /* Turn off RXVGA2 */
         status = bladerf_lms_read( dev, 0x64, &val );
         if (status) {
-            log_warning( "Could not read the LMS to enable RXVGA2\n" );
+            log_warning( "Could not read the LMS to disable RXVGA2\n" );
             goto bladerf_set_sampling__done;
         }
 
         val &= ~(1<<1) ;
         status = bladerf_lms_write( dev, 0x64, val );
         if (status) {
-            log_warning( "Could not write the LMS to enable RXVGA2\n" );
+            log_warning( "Could not write the LMS to disable RXVGA2\n" );
             goto bladerf_set_sampling__done;
         }
 
@@ -640,86 +652,23 @@ bladerf_dev_speed bladerf_device_speed(struct bladerf *dev)
 /*------------------------------------------------------------------------------
  * Device Programming
  *----------------------------------------------------------------------------*/
-int bladerf_flash_firmware(struct bladerf *dev, const char *firmware_file)
+
+int bladerf_erase_flash(struct bladerf *dev,
+                        uint32_t erase_block, uint32_t count)
 {
-    int status;
-    uint8_t *buf, *buf_padded;
-    size_t buf_size, buf_size_padded;
-
-    status = file_read_buffer(firmware_file, &buf, &buf_size);
-    if (!status) {
-        /* Sanity check firmware
-         *
-         * Quick and dirty check for any absurd sizes. This is arbitrarily
-         * chosen based upon the current FX3 image size.
-         *
-         * TODO This should be replaced with something that also looks for:
-         *  - Known header/footer on images?
-         *  - Checksum/hash?
-         */
-        if (!getenv("BLADERF_SKIP_FW_SIZE_CHECK") &&
-                (buf_size < (50 * 1024) || (buf_size > (1 * 1024 * 1024)))) {
-            log_info("Detected potentially invalid firmware file.\n");
-            log_info("Define BLADERF_SKIP_FW_SIZE_CHECK in your evironment "
-                       "to skip this check.\n");
-            status = BLADERF_ERR_INVAL;
-        } else {
-            /* Pad firmare data out to a flash sector size */
-            const size_t sector_size = BLADERF_FLASH_SECTOR_SIZE;
-            size_t buf_size_padding = sector_size - (buf_size % sector_size);
-
-            buf_size_padded = buf_size + buf_size_padding;
-            buf_padded = realloc(buf, buf_size_padded);
-            if (!buf_padded) {
-                status = BLADERF_ERR_MEM;
-            } else {
-                buf = buf_padded;
-                memset(buf + buf_size, 0xFF, buf_size_padded - buf_size);
-            }
-
-            if (!status) {
-                status = dev->fn->flash_firmware(dev, buf, buf_size_padded);
-            }
-            if (!status) {
-                if (dev->legacy & LEGACY_ALT_SETTING) {
-                    printf("DEVICE OPERATING IN LEGACY MODE, MANUAL RESET IS NECESSARY AFTER SUCCESSFUL UPGRADE\n");
-                }
-            }
-        }
-
-        free(buf);
-    }
-
-    return status;
+    return flash_erase(dev, erase_block, count);
 }
 
-int bladerf_erase_flash(struct bladerf *dev, uint32_t addr, uint32_t len)
+int bladerf_read_flash(struct bladerf *dev, uint8_t *buf,
+                       uint32_t page, uint32_t count)
 {
-    if (!dev->fn->erase_flash) {
-        return BLADERF_ERR_UNSUPPORTED;
-    }
-
-    return dev->fn->erase_flash(dev, addr, len);
+    return flash_read(dev, buf, page, count);
 }
 
-int bladerf_read_flash(struct bladerf *dev, uint32_t addr,
-                       uint8_t *buf, uint32_t len)
+int bladerf_write_flash(struct bladerf *dev, const uint8_t *buf,
+                        uint32_t page, uint32_t count)
 {
-    if (!dev->fn->read_flash) {
-        return BLADERF_ERR_UNSUPPORTED;
-    }
-
-    return dev->fn->read_flash(dev, addr, buf, len);
-}
-
-int bladerf_write_flash(struct bladerf *dev, uint32_t addr,
-                       uint8_t *buf, uint32_t len)
-{
-    if (!dev->fn->write_flash) {
-        return BLADERF_ERR_UNSUPPORTED;
-    }
-
-    return dev->fn->write_flash(dev, addr, buf, len);
+    return flash_write(dev, buf, page, count);
 }
 
 int bladerf_device_reset(struct bladerf *dev)
@@ -736,76 +685,63 @@ int bladerf_jump_to_bootloader(struct bladerf *dev)
     return dev->fn->jump_to_bootloader(dev);
 }
 
-int bladerf_flash_fpga(struct bladerf *dev, const char *fpga_file)
+static inline bool valid_fw_size(size_t len)
+{
+    /* Simple FW applications generally are significantly larger than this */
+    if (len < (50 * 1024)) {
+        return false;
+    } else if (len > BLADERF_FLASH_BYTE_LEN_FIRMWARE) {
+        return false;
+    } else {
+        return true;
+    }
+}
+
+int bladerf_flash_firmware(struct bladerf *dev, const char *firmware_file)
 {
     int status;
-    char fpga_len[10];
-    uint8_t *buf, *buf_padded, *ver;
-    size_t buf_size, buf_size_padded;
-    int hp_idx = 0;
+    uint8_t *buf;
+    size_t buf_size;
+    const char env_override[] = "BLADERF_SKIP_FW_SIZE_CHECK";
 
-    if (strcmp("X", fpga_file) == 0) {
-        printf("Disabling FPGA flash auto-load\n");
-        return (dev->fn->erase_flash(dev, flash_from_sectors(4), BLADERF_FLASH_SECTOR_SIZE) != BLADERF_FLASH_SECTOR_SIZE);
+    status = file_read_buffer(firmware_file, &buf, &buf_size);
+    if (status != 0) {
+        return status;
     }
 
-    status = file_read_buffer(fpga_file, &buf, &buf_size);
-    if (status == 0) {
-        if ((getenv("BLADERF_SKIP_FPGA_SIZE_CHECK") == 0)  &&
-                (buf_size < (1 * 1024 * 1024) || (buf_size > (5 * 1024 * 1024)))) {
-            log_info("Detected potentially invalid firmware file.\n");
-            log_info("Define BLADERF_SKIP_FPGA_SIZE_CHECK in your evironment "
-                       "to skip this check.\n");
-            status = BLADERF_ERR_INVAL;
-        } else {
-            const size_t page_size = BLADERF_FLASH_SECTOR_SIZE;
-            size_t buf_size_padding = page_size - (buf_size % page_size);
-
-            /* Pad firmare data out to a flash page size */
-            buf_size_padded = buf_size + buf_size_padding + page_size;
-            buf_padded = (uint8_t*)realloc(buf, buf_size_padded);
-            if (buf_padded == NULL) {
-                status = BLADERF_ERR_MEM;
-            } else {
-                buf = buf_padded;
-                memset(buf + buf_size, 0xFF, buf_size_padded - buf_size - BLADERF_FLASH_SECTOR_SIZE);
-                memmove(&buf[BLADERF_FLASH_PAGE_SIZE], buf, buf_size_padded - BLADERF_FLASH_SECTOR_SIZE);
-                snprintf(fpga_len, 9, "%d", (int)buf_size);
-                memset(buf, 0xff, BLADERF_FLASH_PAGE_SIZE);
-                encode_field((char *)buf, BLADERF_FLASH_PAGE_SIZE, &hp_idx, "LEN", fpga_len);
-
-                if (status == 0) {
-                    status = dev->fn->erase_flash(dev, flash_from_sectors(4), (uint32_t)buf_size_padded);
-                }
-
-                if (status >= 0) {
-                    status = dev->fn->write_flash(dev, flash_from_pages(1024), buf, (uint32_t)buf_size_padded);
-                }
-
-                ver = (uint8_t *)malloc(buf_size_padded);
-                if (!ver)
-                    status = BLADERF_ERR_MEM;
-
-                if (status >= 0) {
-                    status = dev->fn->read_flash(dev, flash_from_pages(1024), ver, (uint32_t)buf_size_padded);
-                }
-
-                if ((size_t)status == buf_size_padded) {
-                    status = memcmp(buf, ver, buf_size_padded);
-                }
-
-                free(ver);
-            }
-        }
-        free(buf);
+    /* Sanity check firmware length.
+     *
+     * TODO in the future, better sanity checks can be performed when
+     *      using the bladerf image format currently used to backup/restore
+     *      calibration data
+     */
+    if (!getenv(env_override) && !valid_fw_size(buf_size)) {
+        log_info("Detected potentially invalid firmware file.\n");
+        log_info("Define BLADERF_SKIP_FW_SIZE_CHECK in your evironment "
+                "to skip this check.\n");
+        status = BLADERF_ERR_INVAL;
+    } else {
+        status = flash_write_fx3_fw(dev, &buf, buf_size);
     }
 
+    free(buf);
     return status;
+}
+
+static inline bool valid_fpga_size(size_t len)
+{
+    if (len < (1 * 1024 * 1024)) {
+        return false;
+    } else if (len > BLADERF_FLASH_BYTE_LEN_FPGA) {
+        return false;
+    } else {
+        return true;
+    }
 }
 
 int bladerf_load_fpga(struct bladerf *dev, const char *fpga_file)
 {
-    uint8_t *buf;
+    uint8_t *buf = NULL;
     size_t  buf_size;
     int status;
 
@@ -814,19 +750,55 @@ int bladerf_load_fpga(struct bladerf *dev, const char *fpga_file)
      *  - Known header/footer on images?
      *  - Checksum/hash?
      */
-
     status = file_read_buffer(fpga_file, &buf, &buf_size);
-    if (!status) {
-        status = dev->fn->load_fpga(dev, buf, buf_size);
-        free(buf);
+    if (status != 0) {
+        goto error;
     }
 
-    if (!status) {
+    if (!valid_fpga_size(buf_size)) {
+        status = BLADERF_ERR_INVAL;
+        goto error;
+    }
+
+    status = dev->fn->load_fpga(dev, buf, buf_size);
+    if (status == 0) {
         status = bladerf_init_device(dev);
+    }
+
+error:
+    free(buf);
+    return status;
+}
+
+
+int bladerf_flash_fpga(struct bladerf *dev, const char *fpga_file)
+{
+    int status;
+    uint8_t *buf;
+    size_t buf_size;
+    const char env_override[] = "BLADERF_SKIP_FPGA_SIZE_CHECK";
+
+    status = file_read_buffer(fpga_file, &buf, &buf_size);
+    if (status == 0) {
+        if (!getenv(env_override) && !valid_fpga_size(buf_size)) {
+            log_info("Detected potentially invalid firmware file.\n");
+            log_info("Define BLADERF_SKIP_FPGA_SIZE_CHECK in your evironment "
+                       "to skip this check.\n");
+            status = BLADERF_ERR_INVAL;
+        } else {
+            status = flash_write_fpga_bitstream(dev, &buf, buf_size);
+            free(buf);
+        }
     }
 
     return status;
 }
+
+int bladerf_erase_stored_fpga(struct bladerf *dev)
+{
+    return flash_erase_fpga(dev);
+}
+
 
 /*------------------------------------------------------------------------------
  * Misc.
@@ -933,6 +905,11 @@ bool bladerf_devstr_matches(const char *dev_str,
     }
 
     return ret;
+}
+
+const char * bladerf_backend_str(bladerf_backend backend)
+{
+    return backend2str(backend);
 }
 
 /*------------------------------------------------------------------------------
