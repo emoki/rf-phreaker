@@ -27,20 +27,17 @@ int lte_analysis_impl::cell_search(const rf_phreaker::raw_signal &raw_signal, lt
 
 
 		if(raw_signal.sampling_rate() != cell_search_sampling_rate_) {
-			auto &filter = get_filter_and_set_resampled_length(raw_signal.sampling_rate(), cell_search_sampling_rate_,
-															   rf_phreaker::convert_to_samples(milli_to_nano(5 * num_half_frames), raw_signal.sampling_rate()));
+			auto num_samples_to_process = rf_phreaker::convert_to_samples(milli_to_nano(5 * num_half_frames), raw_signal.sampling_rate());
 
-			filter.filter(raw_signal.get_iq().get(), resampled_signal_.get(), filter.num_iterations_required(resampled_length_));
+			auto &filter = get_filter_and_set_resampled_length(raw_signal.sampling_rate(), cell_search_sampling_rate_, num_samples_to_process);
+
+			filter.filter(raw_signal.get_iq().get(), resampled_signal_.get(), filter.num_iterations_required(num_samples_to_process));
 
 			std::lock_guard<std::mutex> lock(processing_mutex);
-			// For some reason lte_cell_search fails if we try to process more than 3 half frames.
-			num_half_frames = 3;
 			status = lte_cell_search(resampled_signal_.get(), resampled_length_, num_half_frames, lte_measurements_, tmp_num_meas);
 		}
 		else {
 			std::lock_guard<std::mutex> lock(processing_mutex);
-			// For some reason lte_cell_search fails if we try to process more than 3 half frames.
-			num_half_frames = 3;
 			status = lte_cell_search(raw_signal.get_iq().get(), raw_signal.get_iq().length(), num_half_frames, lte_measurements_, tmp_num_meas);
 		}
 
@@ -102,7 +99,7 @@ int lte_analysis_impl::decode_layer_3(const rf_phreaker::raw_signal &raw_signal,
 		//	auto &filter = get_filter_and_set_resampled_length(raw_signal.sampling_rate(), needed_sampling_rate,
 		//													   rf_phreaker::convert_to_samples(milli_to_nano(5 * num_half_frames), raw_signal.sampling_rate()));
 
-		//	filter.filter(raw_signal.get_iq().get(), resampled_signal_.get(), filter.num_iterations_required(resampled_length_));
+		//	filter.filter(raw_signal.get_iq().get(), resampled_signal_.get(), filter.num_iterations_required(raw_signal.get_iq().length()));
 
 		//	std::lock_guard<std::mutex> lock(processing_mutex);
 		//	status = lte_decode_data(resampled_signal_.get(), resampled_length_, num_half_frames, lte_meas);
