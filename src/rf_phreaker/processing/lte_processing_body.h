@@ -38,7 +38,7 @@ public:
 	{
 		lte_measurements meas;
 
-		int status = analysis_.cell_search(*info, meas, calculate_num_half_frames(info->time_ns()));
+		int status = analysis_.cell_search(*info, meas, calculate_num_half_frames(info->time_ns() > milli_to_nano(30) ? milli_to_nano(30) : info->time_ns()));
 		if(status != 0)
 			throw lte_analysis_error("Error processing lte.");
 
@@ -63,12 +63,19 @@ public:
 		auto freq = info.meas_->frequency();
 
 		if(info.processed_data_.size()) {
+			
+			//// Reduce the time (num half frames) that we process if we are less than the minimum collection round.  This will
+			//// help speed up the process of removing the false detections.
+			//auto time_ns = info.meas_->time_ns();
+			//if(info.meas_->collection_round() < config_.layer_3_.minimum_collection_round_ && info.meas_->time_ns() > milli_to_nano(20))
+			//	time_ns =  milli_to_nano(20);
+
 			int status = analysis_.decode_layer_3(*info.meas_, info.processed_data_, calculate_num_half_frames(info.meas_->time_ns()));
 			if(status != 0)
 				throw lte_analysis_error("Error decoding lte layer 3.");
 
 			for(auto &data : info.processed_data_) {
-				if(is_valid_measurement(data)) {
+				if(is_valid_measurement(data) || tracker_.in_history(freq, data)) {
 					if((!tracker_.is_fully_decoded(freq, data) && (data.sync_quality > config_.layer_3_.decode_threshold_ || tracker_.in_history(freq, data)))) {
 						tracker_.update(freq, data);
 					}
