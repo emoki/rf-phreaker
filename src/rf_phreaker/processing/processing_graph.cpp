@@ -62,7 +62,7 @@ void processing_graph::start(scanner_controller_interface *sc, data_output_async
 				lte_processing_settings(config.lte_layer_3_collection_, config.lte_decode_layer_3_)));
 			auto lte_layer_3_decode = std::make_shared<lte_layer_3_decode_node>(*graph_, tbb::flow::serial, lte_processing_body(
 				lte_processing_settings(config.lte_layer_3_collection_, config.lte_decode_layer_3_)));
-			auto lte_layer_3_output_feedback = std::make_shared<lte_output_and_feedback_node>(*graph_, tbb::flow::serial, lte_layer_3_output_and_feedback_body(out));
+			auto lte_layer_3_output_feedback = std::make_shared<lte_output_and_feedback_node>(*graph_, tbb::flow::serial, lte_layer_3_output_and_feedback_body(out, config.lte_decode_layer_3_.minimum_collection_round_));
 
 			auto collection_queue = std::make_shared<queue_node>(*graph_);
 			auto limiter_queue = std::make_shared<tbb::flow::queue_node<tbb::flow::continue_msg>>(*graph_);
