@@ -173,6 +173,8 @@ int sync_worker_init(struct bladerf_sync *s)
     }
 
     s->worker->state = SYNC_WORKER_STATE_STARTUP;
+    s->worker->err_code = 0;
+
     s->worker->cb = s->stream_config.module == BLADERF_MODULE_RX ?
                         rx_callback : tx_callback;
 
@@ -338,12 +340,17 @@ int sync_worker_wait_for_state(struct sync_worker *w, sync_worker_state state,
     return status;
 }
 
-sync_worker_state sync_worker_get_state(struct sync_worker *w)
+sync_worker_state sync_worker_get_state(struct sync_worker *w,
+                                        int *err_code)
 {
     sync_worker_state ret;
 
     pthread_mutex_lock(&w->state_lock);
     ret = w->state;
+    if (err_code) {
+        *err_code = w->err_code;
+        w->err_code = 0;
+    }
     pthread_mutex_unlock(&w->state_lock);
 
     return ret;
@@ -361,6 +368,8 @@ static void set_state(struct sync_worker *w, sync_worker_state state)
 static sync_worker_state exec_idle_state(struct bladerf_sync *s)
 {
     sync_worker_state next_state = SYNC_WORKER_STATE_IDLE;
+    unsigned int requests;
+    unsigned int i;
 
     pthread_mutex_lock(&s->worker->request_lock);
 
@@ -371,15 +380,45 @@ static sync_worker_state exec_idle_state(struct bladerf_sync *s)
                           &s->worker->request_lock);
     }
 
-    if (s->worker->requests & SYNC_WORKER_STOP) {
+    requests = s->worker->requests;
+    s->worker->requests = 0;
+    pthread_mutex_unlock(&s->worker->request_lock);
+
+    if (requests & SYNC_WORKER_STOP) {
         log_verbose("%s worker: Got request to stop\n",
                 module2str(s->stream_config.module));
 
         next_state = SYNC_WORKER_STATE_SHUTTING_DOWN;
 
-    } else if (s->worker->requests & SYNC_WORKER_START) {
+    } else if (requests & SYNC_WORKER_START) {
         log_verbose("%s worker: Got request to start\n",
                 module2str(s->stream_config.module));
+        pthread_mutex_lock(&s->buf_mgmt.lock);
+
+        if (s->stream_config.module == BLADERF_MODULE_TX) {
+            /* If we've previously timed out on a stream, we'll likely have some
+            * stale buffers marked "in-flight" that have since been cancelled. */
+            for (i = 0; i < s->buf_mgmt.num_buffers; i++) {
+                if (s->buf_mgmt.status[i] == SYNC_BUFFER_IN_FLIGHT) {
+                    s->buf_mgmt.status[i] = SYNC_BUFFER_EMPTY;
+                }
+            }
+
+            pthread_cond_signal(&s->buf_mgmt.buf_ready);
+        } else {
+            assert(s->stream_config.module == BLADERF_MODULE_RX);
+            s->buf_mgmt.prod_i = s->stream_config.num_xfers;
+
+            for (i = 0; i < s->buf_mgmt.num_buffers; i++) {
+                if (i < s->stream_config.num_xfers) {
+                    s->buf_mgmt.status[i] = SYNC_BUFFER_IN_FLIGHT;
+                } else if (s->buf_mgmt.status[i] == SYNC_BUFFER_IN_FLIGHT) {
+                    s->buf_mgmt.status[i] = SYNC_BUFFER_EMPTY;
+                }
+            }
+        }
+
+        pthread_mutex_unlock(&s->buf_mgmt.lock);
 
         next_state = SYNC_WORKER_STATE_RUNNING;
     } else {
@@ -387,51 +426,31 @@ static sync_worker_state exec_idle_state(struct bladerf_sync *s)
                     s->worker->requests);
     }
 
-    s->worker->requests = 0;
-    pthread_mutex_unlock(&s->worker->request_lock);
-
     return next_state;
 }
 
 static void exec_running_state(struct bladerf_sync *s)
 {
     int status;
-    unsigned int i;
-
-    pthread_mutex_lock(&s->buf_mgmt.lock);
-
-    if (s->stream_config.module == BLADERF_MODULE_TX) {
-        /* If we've previously timed out on a stream, we'll likely have some
-         * stale buffers marked "in-flight" that have since been cancelled. */
-        for (i = 0; i < s->buf_mgmt.num_buffers; i++) {
-            if (s->buf_mgmt.status[i] == SYNC_BUFFER_IN_FLIGHT) {
-                s->buf_mgmt.status[i] = SYNC_BUFFER_EMPTY;
-            }
-        }
-
-        pthread_cond_signal(&s->buf_mgmt.buf_ready);
-    } else {
-        assert(s->stream_config.module == BLADERF_MODULE_RX);
-        s->buf_mgmt.prod_i = s->stream_config.num_xfers;
-
-        for (i = 0; i < s->buf_mgmt.num_buffers; i++) {
-            if (i < s->stream_config.num_xfers) {
-                s->buf_mgmt.status[i] = SYNC_BUFFER_IN_FLIGHT;
-            } else if (s->buf_mgmt.status[i] == SYNC_BUFFER_IN_FLIGHT) {
-                s->buf_mgmt.status[i] = SYNC_BUFFER_EMPTY;
-            }
-        }
-    }
-
-    pthread_mutex_unlock(&s->buf_mgmt.lock);
 
     status = bladerf_stream(s->worker->stream, s->stream_config.module);
 
     log_verbose("%s worker: stream ended with: %s\n",
                 MODULE_STR(s), bladerf_strerror(status));
 
-    /* Suppress warning if log_verbose is disabled */
-    (void)status;
+    /* Save off the result of running the stream so we can report what
+     * happened to the API caller */
+    pthread_mutex_lock(&s->worker->state_lock);
+    s->worker->err_code = status;
+    pthread_mutex_unlock(&s->worker->state_lock);
+
+    /* Wake the API-side if an error occurred, so that it can propagate
+     * the stream error code back to the API caller */
+    if (status != 0) {
+        pthread_mutex_lock(&s->buf_mgmt.lock);
+        pthread_cond_signal(&s->buf_mgmt.buf_ready);
+        pthread_mutex_unlock(&s->buf_mgmt.lock);
+    }
 }
 
 void *sync_worker_task(void *arg)
