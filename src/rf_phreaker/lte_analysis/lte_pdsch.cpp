@@ -338,7 +338,9 @@ int lte_pdsch_get_symbols (Ipp32fc* inSignal,
 						   unsigned int start_rb,
 						   unsigned int end_rb)
 {
-unsigned int fft_index[4096],temp;
+	// Changed the size of fft_index to match that of h_est_pdsch_temp
+	const int fft_index_size = 6144/*4096*/;
+	unsigned int fft_index[fft_index_size], temp;
 
 // TODO - ecs removed - if(sub_frame_index==5)
 	temp=0;
@@ -372,7 +374,7 @@ for(unsigned int symbol_idx = LteData[cell_no].lteControlSysmbolLenght;symbol_id
 
 
 
-pdsch_re_count =0;
+pdsch_re_count =0; // Should this be moved into the loop?
 for(unsigned int symbol_idx = LteData[cell_no].lteControlSysmbolLenght;symbol_idx<OFDM_SYMBOLS_PER_SUBFRAME;symbol_idx++)
 {
 	for(unsigned int kk = (start_rb*NUM_SUBCARRIER_PER_RESOURCE_BLOCK);kk<(end_rb+1)*NUM_SUBCARRIER_PER_RESOURCE_BLOCK;kk++)
@@ -387,7 +389,6 @@ for(unsigned int symbol_idx = LteData[cell_no].lteControlSysmbolLenght;symbol_id
 
 
 			lte_pdsch_re[pdsch_re_count] = lte_pdsch_fft_shifted[symbol_idx][fft_index[pdsch_re_count]];
-
 			for (unsigned int antNum =0 ; antNum < LteData[cell_no].NumAntennaPorts; antNum++)
 			{
 			  h_est_pdsch_temp[antNum][pdsch_re_count] = h_est[antNum * LteData[cell_no].fftSize * OFDM_SYMBOLS_PER_FRAME
@@ -397,11 +398,15 @@ for(unsigned int symbol_idx = LteData[cell_no].lteControlSysmbolLenght;symbol_id
 			}
 
 			pdsch_re_count++;
-
+			
 	  }
-
+	// Temporary bug fix: pdsch_re_count can overstep the fft_index.  Is pdsch_re_count supposed to be reset to 0 in the outer loop?
+	if(pdsch_re_count >= fft_index_size)
+		break;
 	}
-
+	// Temporary bug fix: pdsch_re_count can overstep the fft_index.  Is pdsch_re_count supposed to be reset to 0 in the outer loop?
+	if(pdsch_re_count >= fft_index_size)
+		break;
 }
 
 memset(h_est_pdsch,0,2048*4*2);
