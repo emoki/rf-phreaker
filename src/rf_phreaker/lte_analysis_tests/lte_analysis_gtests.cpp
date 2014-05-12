@@ -50,12 +50,18 @@ TEST(LteAnalysisTests, TestGeneral)
 			status = analysis->decode_layer_3(info, lte_meas, int(info.time_ns() / 1e6 / 5));
 			EXPECT_EQ(0, status);
 				
-			for(auto &lte : lte_meas) {
+			static std::ofstream output_file("lte_measurements.txt");
+			static bool write_header = true;
+			if(write_header) {
+				output_file << "file_num\tfreq\t";
+				output_lte_meas_debug_header(output_file);
+				write_header = false;
+			}
 
-				std::cout <<
-					i << "\t" <<
-					info.frequency() / 1e6 << "\t" <<
-					lte << "\n";
+
+			for(auto &lte : lte_meas) {
+				std::cout << i << "\t" << info.frequency() / 1e6 << "\t" << lte << "\n";
+				output_file << i << "\t" << info.frequency() / 1e6 << "\t" << lte << "\n";
 			}
 		}
 	}

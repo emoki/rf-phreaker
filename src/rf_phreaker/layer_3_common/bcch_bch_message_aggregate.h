@@ -89,17 +89,5 @@ public:
 	unique_sector_key_type unique_sector_key_; // Key used when recombining segments.
 };
 
-static std::string delimiter = "\t";
-static std::string spacer2 = " : ";
-static std::string spacer = " | ";
 
-inline std::ostream& operator << (std::ostream &os, const bcch_bch_message_aggregate &t)
-{
-	os << t.mcc_ << delimiter
-		<< t.mnc_ << delimiter
-		<< t.lac_ << delimiter
-		<< t.cid_;
-	return os;
 }
-
-};

@@ -1,11 +1,12 @@
 #pragma once
 
-#include "lte_common.h"
-
 #include <string>
 #include <fstream>
 #include <iostream>
 #include <iomanip>
+
+#include "lte_common.h"
+#include "rf_phreaker/layer_3_common/lte_rrc_message_aggregate_io.h"
 
 namespace rf_phreaker {
 
@@ -44,10 +45,13 @@ inline void output_lte_meas_debug_header(std::ostream &os)
 		<< "rsrp" << lte_io_delimiter
 		<< "rssi" << lte_io_delimiter
 		<< "rsrq" << lte_io_delimiter
-		<< "mcc" << lte_io_delimiter
-		<< "mnc" << lte_io_delimiter
-		<< "lac" << lte_io_delimiter
-		<< "cid";
+		<< "sync_quality" << lte_io_delimiter
+		<< "sib1" << lte_io_delimiter
+		<< "sib4" << lte_io_delimiter
+		<< "sib5" << lte_io_delimiter
+		<< "sib6" << lte_io_delimiter
+		<< "sib7" << lte_io_delimiter
+		<< "sib8" << "\n";
 }
 
 inline std::ostream& operator<<( std::ostream &os, const CORR_RECORD_TYPE &t)
@@ -256,33 +260,7 @@ inline std::ostream& operator<<( std::ostream &os, const lte_measurement &t)
 		<< t.rssi << lte_io_delimiter
 		<< t.rsrq << lte_io_delimiter
 		<< t.sync_quality << lte_io_delimiter
-		<< t.layer_3_.mcc_.to_string() << lte_io_delimiter
-		<< t.layer_3_.mnc_.to_string() << lte_io_delimiter
-		<< t.layer_3_.lac_ << lte_io_delimiter
-		<< t.layer_3_.cid_;
-
-	if(t.layer_3_.sib1_.decoded_) {
-		os << lte_io_delimiter << "sib1_decoded";
-
-		for(auto &plmn : t.layer_3_.sib1_.multiple_plmn_)
-			os << lte_io_delimiter << plmn.mcc_.to_string() << lte_io_spacer << plmn.mnc_;
-
-		for(auto &schedule : t.layer_3_.sib1_.scheduling_info_list_) {
-			os << lte_io_delimiter << schedule.periodicity_in_frames_ << "frames";
-			for(auto sib : schedule.sib_mapping_info_)
-				os << lte_io_spacer << (int)sib + 3;
-		}
-	}
-	if(t.layer_3_.sib4_.decoded_)
-		os << lte_io_delimiter << "sib4_decoded";
-	if(t.layer_3_.sib5_.decoded_)
-		os << lte_io_delimiter << "sib5_decoded";
-	if(t.layer_3_.sib6_.decoded_)
-		os << lte_io_delimiter << "sib6_decoded";
-	if(t.layer_3_.sib7_.decoded_)
-		os << lte_io_delimiter << "sib7_decoded";
-	if(t.layer_3_.sib8_.decoded_)
-		os << lte_io_delimiter << "sib8_decoded";
+		<< t.layer_3_;
 
 	return os;
 }

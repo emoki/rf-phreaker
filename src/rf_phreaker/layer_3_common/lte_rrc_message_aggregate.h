@@ -76,6 +76,7 @@ struct lte_sib4_type : public lte_sib_base
 		intra_freq_neighbor_cell_list_.clear();
 		intra_freq_black_cell_list_.clear();
 		csg_physical_cellid_range_.start_ = -1;
+		csg_physical_cellid_range_.range_ = -1;
 	}
 	void swap(lte_sib4_type &a) {
 		intra_freq_neighbor_cell_list_.swap(a.intra_freq_neighbor_cell_list_);

@@ -13,15 +13,18 @@ set (layer_3_common_VERSION_TWEAK 0)
 set (layer_3_common_SRCS 
 	bcch_bch_message_aggregate.cpp
 	bcch_bch_message_aggregate.h
+	bcch_bch_message_aggregate_io.h
 	gsm_layer_3_message_aggregate.cpp
 	gsm_layer_3_message_aggregate.h
 	lte_rrc_message_aggregate.cpp
 	lte_rrc_message_aggregate.h
+	lte_rrc_message_aggregate_io.h
 	pdu_element_types.h
 	uint16_string.cpp
 	uint16_string.h
 	umts_bcch_bch_message_aggregate.cpp
 	umts_bcch_bch_message_aggregate.h
+	umts_bcch_bch_message_aggregate_io.h
 	${SRC_PLATFORM_SPECIFIC}/stdafx.cpp)
 		
 add_library (layer_3_common STATIC ${layer_3_common_SRCS})
