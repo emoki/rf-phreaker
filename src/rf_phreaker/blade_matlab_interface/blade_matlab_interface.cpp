@@ -15,10 +15,12 @@ float calculate_sl(measurement_info &meas)
 	return (float)cali.calculate_sl(rms, meas.gain());
 }
 
-int start_logging()
+int start_logging(int log_level)
 {
 	try {
 		static init_log logger("blade_matlab_interface", "");
+		logger.log_worker_->changeLoggingLevel(log_level);
+
 		return 0;
 	}
 	catch(rf_phreaker::rf_phreaker_error &err) {

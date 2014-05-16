@@ -119,12 +119,18 @@ for(unsigned int ii = 0; ii <LteData.size(); ii++)
 			break;
 
 	}
-	if(LteData[ii].fftSize == FFTSIZE_UNKNOWN || LteData[ii].fftSize == FFTSIZE_128 || LteData[ii].fftSize == FFTSIZE_1024
+	if(LteData[ii].fftSize == FFTSIZE_UNKNOWN || LteData[ii].fftSize == FFTSIZE_128
 	   || LteData[ii].fftSize == FFTSIZE_1536 || LteData[ii].fftSize == FFTSIZE_2048)
-{
-	continue;
-}
+	{
+		continue;
+	}
 
+	if(!(LteData[ii].rsrp > .001 && (LteData[ii].rsrp <= DBL_MAX && LteData[ii].rsrp >= -DBL_MAX)
+		&& (LteData[ii].rsrq <= DBL_MAX && LteData[ii].rsrq >= -DBL_MAX)
+		&& LteData[ii].rssi > .001 && (LteData[ii].rssi <= DBL_MAX && LteData[ii].rssi >= -DBL_MAX)))
+	{
+		continue;
+	}
 
 //DisplayLTEData(LteData);
 

@@ -16,13 +16,32 @@ namespace lte_layer_3
 	enum lte_layer_3
 	{
 		SIB1,
-		SIB2,
-		SIB3,
 		SIB4,
 		SIB5,
 		SIB6,
-		NUM_LAYER_3 = 1
+		SIB7,
+		SIB8,
+		NUM_LAYER_3
 	};
+	inline layer_3_information::lte_sib_type convert(int a)
+	{
+		using namespace layer_3_information;
+		switch((lte_layer_3)a)
+		{
+		case SIB4:
+			return sib_4;
+		case SIB5:
+			return sib_5;
+		case SIB6:
+			return sib_6;
+		case SIB7:
+			return sib_7;
+		case SIB8:
+			return sib_8;
+		default:
+			return spare_1;
+		}
+	}
 };
 namespace umts_layer_3
 {
@@ -90,7 +109,7 @@ template<> template<> inline int all_layer_3_decoded<umts_layer_3::umts_layer_3>
 { return data.cpich_; }
 
 template<> template<> inline int all_layer_3_decoded<lte_layer_3::lte_layer_3>::create_unique_identifier<>(const lte_measurement &data) 
-{ return data.PschRecord.ID + data.SschRecord.ID * 3; }
+{ return data.RsRecord.ID; }
 
 template<> template<> inline void all_layer_3_decoded<umts_layer_3::umts_layer_3>::update(const umts_measurement &data)
 {
@@ -110,8 +129,34 @@ template<> template<> inline void all_layer_3_decoded<lte_layer_3::lte_layer_3>:
 {
 	++num_updated_;
 
-	if(data.layer_3_.is_cid_decoded())
+	if(data.layer_3_.sib1_.decoded_) {
 		all_layer_3_[lte_layer_3::SIB1] = true;
+		
+		// Temporary hack - certain sibs are optional but sib1 contains the schedule list so we will set all sibs that are not scheduled to true.
+		for(int i = 0; i < lte_layer_3::lte_layer_3::NUM_LAYER_3; ++i) {
+			bool found = false;
+			for(auto &schedule : data.layer_3_.sib1_.scheduling_info_list_) {
+				auto it = std::find(schedule.sib_mapping_info_.begin(), schedule.sib_mapping_info_.end(), lte_layer_3::convert(i));
+				if(it != schedule.sib_mapping_info_.end()) {
+					found = true;
+					break;
+				}
+			}
+			if(found == false)
+				all_layer_3_[i] = true;
+		}
+	}
+	if(data.layer_3_.sib4_.decoded_)
+		all_layer_3_[lte_layer_3::SIB4] = true;
+	if(data.layer_3_.sib5_.decoded_)
+		all_layer_3_[lte_layer_3::SIB5] = true;
+	if(data.layer_3_.sib6_.decoded_)
+		all_layer_3_[lte_layer_3::SIB6] = true;
+	if(data.layer_3_.sib7_.decoded_)
+		all_layer_3_[lte_layer_3::SIB7] = true;
+	if(data.layer_3_.sib8_.decoded_)
+		all_layer_3_[lte_layer_3::SIB8] = true;
+
 }
 
 

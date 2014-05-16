@@ -76,7 +76,11 @@ public:
 
 		bool valid_lte = false;
 		for(auto &lte : info.processed_data_) {
-			if(/*lte.Bandwidth != LteBandwidth_Unknown ||*/ lte.sync_quality > -8) {
+			if(/*lte.Bandwidth != LteBandwidth_Unknown ||*/ lte.sync_quality > -13) {
+			//if((lte.NumAntennaPorts != LteAntPorts_Unknown
+			//	&& lte.rsrp > .001 && (lte.rsrp <= DBL_MAX && lte.rsrp >= -DBL_MAX)
+			//	&& (lte.rsrq <= DBL_MAX && lte.rsrq >= -DBL_MAX)
+			//	&& lte.rssi > .001 && (lte.rssi <= DBL_MAX && lte.rssi >= -DBL_MAX)) || lte.sync_quality > -10) {
 				valid_lte = true;
 				break;
 			}
@@ -115,8 +119,18 @@ public:
 
 			// Until we get the LTE dll sorted out only output measurements with known bandwidths.
 			for(auto &data : info.processed_data_) {
-				if(data.NumAntennaPorts != LteAntPorts_Unknown  && data.rsrp > .001) {
-					lte.push_back(convert_to_lte_data(*info.meas_, data, info.avg_rms_));
+				if(data.NumAntennaPorts != LteAntPorts_Unknown  
+					&& data.rsrp > .001 && (data.rsrp <= DBL_MAX && data.rsrp >= -DBL_MAX)
+					&& (data.rsrq <= DBL_MAX && data.rsrq >= -DBL_MAX)
+					&& data.rssi > .001 && (data.rssi <= DBL_MAX && data.rssi >= -DBL_MAX)) {
+					
+					auto tmp = convert_to_lte_data(*info.meas_, data, info.avg_rms_);
+					auto is_valid = (tmp.rsrp_ <= DBL_MAX && tmp.rsrp_ >= -DBL_MAX)
+						&& (tmp.rsrq_ <= DBL_MAX && tmp.rsrq_ >= -DBL_MAX)
+						&& (tmp.rssi_ <= DBL_MAX && tmp.rssi_ >= -DBL_MAX);
+
+					if(is_valid)
+						lte.push_back(std::move(tmp));
 				}
 			}
 			if(lte.size()) {

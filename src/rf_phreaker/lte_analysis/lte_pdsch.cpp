@@ -172,7 +172,32 @@ clock_t begin_asn=clock();
 
 lte_asn1_decoder decoder;
 
-decoder.decode_bcch_bch_message(lte_pdsch_byte_seq, 512, 0, LteData[cell_no].layer_3_);
+layer_3_information::lte_rrc_message_aggregate tmp;
+decoder.decode_bcch_bch_message(lte_pdsch_byte_seq, 512, 0, tmp);
+
+// Only update sibs.
+if(!LteData[cell_no].layer_3_.sib1_.decoded_) {
+	LteData[cell_no].layer_3_.mcc_ = tmp.mcc_;
+	LteData[cell_no].layer_3_.mnc_ = tmp.mnc_;
+	LteData[cell_no].layer_3_.lac_ = tmp.lac_;
+	LteData[cell_no].layer_3_.cid_ = tmp.cid_;
+	LteData[cell_no].layer_3_.sib1_ = tmp.sib1_;
+}
+if(!LteData[cell_no].layer_3_.sib4_.decoded_) {
+	LteData[cell_no].layer_3_.sib4_ = tmp.sib4_;
+}
+if(!LteData[cell_no].layer_3_.sib5_.decoded_) {
+	LteData[cell_no].layer_3_.sib5_ = tmp.sib5_;
+}
+if(!LteData[cell_no].layer_3_.sib6_.decoded_) {
+	LteData[cell_no].layer_3_.sib6_ = tmp.sib6_;
+}
+if(!LteData[cell_no].layer_3_.sib7_.decoded_) {
+	LteData[cell_no].layer_3_.sib7_ = tmp.sib7_;
+}
+if(!LteData[cell_no].layer_3_.sib8_.decoded_) {
+	LteData[cell_no].layer_3_.sib8_ = tmp.sib8_;
+}
 
 clock_t end_asn =clock();
 //std::cout << "Lte ASN Time elapsed: " << lte_diffclock(end_asn,begin_asn) << " ms\n";

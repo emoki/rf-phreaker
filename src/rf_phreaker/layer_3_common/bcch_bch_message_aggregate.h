@@ -1,7 +1,8 @@
 #pragma once
 
-#include <stdint.h>
 #include "rf_phreaker/layer_3_common/uint16_string.h"
+#include <stdint.h>
+#include <vector>
 
 namespace layer_3_information
 {
@@ -16,6 +17,22 @@ typedef uint16_string mnc_type;
 typedef uint16_t lac_type;
 typedef uint32_t cid_type;
 typedef int64_t unique_sector_key_type;
+
+enum band_indicator
+{
+	dcs_1800_was_used = 0,
+	pcs_1900_was_used = 1,
+	unknown_band_was_used = -1
+};
+
+struct plmn
+{
+	mcc_type mcc_;
+	mnc_type mnc_;
+};
+
+typedef std::vector<plmn> multiple_plmn_type;
+
 
 class bcch_bch_message_aggregate
 {

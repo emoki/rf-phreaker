@@ -2,6 +2,7 @@
 
 #include "rf_phreaker/cappeen/beagle_defines.h"
 #include "rf_phreaker/cappeen/operating_band_conversion.h"
+#include "rf_phreaker/cappeen/rf_phreaker_wrappers.h"
 #include "rf_phreaker/common/measurements.h"
 #include "rf_phreaker/common/exception_types.h"
 #include "rf_phreaker/common/log.h"
@@ -10,6 +11,7 @@
 #include "rf_phreaker/processing/data_output_async.h"
 #include "rf_phreaker/processing/processing_graph.h"
 #include "rf_phreaker/processing/gps_graph.h"
+#include <set>
 
 namespace rf_phreaker { namespace cappeen_api {
 
@@ -118,7 +120,7 @@ public:
 		std::vector<beagle_api::umts_sector_info> v(t.size());
 
 		// Determine total amount of inter_rat_bufs needed.
-		std::vector<beagle_api::gsm_neighbor_inter_rat> inter_rat_buf;
+		std::vector<beagle_api::umts_neighbor_inter_rat_gsm> inter_rat_buf;
 		int total_inter_rat_bufs_needed = 0;
 		for(auto &umts: t) {
 			total_inter_rat_bufs_needed += umts.layer_3_.neighbor_inter_rat_group_.size();
@@ -147,43 +149,32 @@ public:
 			v[i].neighbor_intra_group_.elements_ = 0;
 			if(v[i].neighbor_intra_group_.num_elements_) {
 				v[i].neighbor_intra_group_.elements_ = (beagle_api::cpich_type*)&umts.layer_3_.neighbor_intra_group_[0];
-				//int j = 0;
-				//for(auto &intra : umts.layer_3_.neighbor_intra_group_) {
-				//	v[i].neighbor_intra_group_.elements_[j] = intra;
-				//	++j;
-				//}
 			}
 		
 
 			v[i].neighbor_inter_group_.num_elements_ = umts.layer_3_.neighbor_inter_group_.size();
 			v[i].neighbor_inter_group_.elements_ = 0;
 			if(v[i].neighbor_inter_group_.num_elements_) {
-				v[i].neighbor_inter_group_.elements_ = (beagle_api::neighbor_inter*)&umts.layer_3_.neighbor_inter_group_[0];
-				//int j = 0;
-				//for(auto &inter : umts.layer_3_.neighbor_inter_group_) {
-				//	v[i].neighbor_inter_group_.elements_[j].channel_ = inter.uarfcn_;
-				//	v[i].neighbor_inter_group_.elements_[j].cpich_ = inter.cpich_;
-				//	++j;
-				//}
+				v[i].neighbor_inter_group_.elements_ = (beagle_api::umts_neighbor_inter*)&umts.layer_3_.neighbor_inter_group_[0];
 			}
 			
 
-			v[i].gsm_neighbor_inter_rat_group_.num_elements_ = umts.layer_3_.neighbor_inter_rat_group_.size();
-			v[i].gsm_neighbor_inter_rat_group_.elements_ = 0;
-			if(v[i].gsm_neighbor_inter_rat_group_.num_elements_) {
+			v[i].neighbor_inter_rat_gsm_group_.num_elements_ = umts.layer_3_.neighbor_inter_rat_group_.size();
+			v[i].neighbor_inter_rat_gsm_group_.elements_ = 0;
+			if(v[i].neighbor_inter_rat_gsm_group_.num_elements_) {
 				int j = 0;
 				int offset = inter_rat_buf.size();
-				inter_rat_buf.resize(v[i].gsm_neighbor_inter_rat_group_.num_elements_ + offset);
+				inter_rat_buf.resize(v[i].neighbor_inter_rat_gsm_group_.num_elements_ + offset);
 				for(auto &inter_rat : umts.layer_3_.neighbor_inter_rat_group_) {
 
 					inter_rat_buf[offset + j].band_indicator_ =
-						inter_rat.band_indicator_ == layer_3_information::dcs_1800_was_used ? beagle_api::dcs_1800_was_used : beagle_api::pcs_1900_was_used;
+						inter_rat.band_indicator_ == layer_3_information::dcs_1800_was_used ? beagle_api::DCS_1800_WAS_USED : beagle_api::PCS_1900_WAS_USED;
 					inter_rat_buf[offset + j].channel_ = inter_rat.arfcn_;
 					inter_rat_buf[offset + j].rssi_ = (int8_t)inter_rat.qrx_lev_min_;
 					memcpy(inter_rat_buf[offset + j].bsic_, inter_rat.bsic_.to_string(), 3);
 					++j;
 				}
-				v[i].gsm_neighbor_inter_rat_group_.elements_ = &inter_rat_buf[offset];
+				v[i].neighbor_inter_rat_gsm_group_.elements_ = &inter_rat_buf[offset];
 			}
 
 			++i;
@@ -204,15 +195,12 @@ public:
 	void output_lte_layer_3(const std::vector<lte_data> &t)
 	{
 		std::vector<beagle_api::lte_sector_info> v(t.size());
-		std::vector<beagle_api::lte_sib_1> sib1;
-		// Currently we only output one plmn per cell.  So a max of t.size() plmns.  Resize the plmns now so when pushing them back
-		// we don't invalidate previous pointers.
-		std::vector<beagle_api::plmn> plmns; 
-		int total_plmns_needed = 0;
-		for(auto &lte : t) {
-			total_plmns_needed += lte.layer_3_.is_cid_decoded() ? 1 : 0;
-		}
-		plmns.reserve(total_plmns_needed);
+		std::vector<lte_sib1_wrapper> sib1; sib1.reserve(t.size());;
+		std::vector<lte_sib4_wrapper> sib4; sib4.reserve(t.size());;
+		std::vector<lte_sib5_wrapper> sib5; sib5.reserve(t.size());;
+		std::vector<lte_sib6_wrapper> sib6; sib6.reserve(t.size());;
+		std::vector<lte_sib7_wrapper> sib7; sib7.reserve(t.size());;
+		std::vector<lte_sib8_wrapper> sib8; sib8.reserve(t.size());;
 
 		int i = 0;
 		for(auto &lte : t) {
@@ -233,24 +221,24 @@ public:
 			v[i].secondary_sync_id_ = lte.ssch_id_;
 			v[i].secondary_sync_quality_ = lte.ssch_quality_;
 			v[i].system_frame_number_ = lte.frame_number_;
-			v[i].sib_1_.decoded_ = lte.layer_3_.is_cid_decoded();
-			if(v[i].sib_1_.decoded_) {
-				beagle_api::plmn p;
-				memcpy(p.mcc_, lte.layer_3_.mcc_.to_string(), lte.layer_3_.mcc_.num_characters());
-				p.mcc_[lte.layer_3_.mcc_.num_characters()] = 0;
-				memcpy(p.mnc_, lte.layer_3_.mnc_.to_string(), lte.layer_3_.mnc_.num_characters());
-				p.mnc_[lte.layer_3_.mnc_.num_characters()] = 0;
-				plmns.push_back(p);
-				v[i].sib_1_.plmns_.num_elements_ = 1;
-				v[i].sib_1_.plmns_.elements_ = &plmns.back();
 
-				v[i].sib_1_.tac_ = lte.layer_3_.lac_;
-				v[i].sib_1_.cid_ = lte.layer_3_.cid_;
-			}
-			else {
-				v[i].sib_1_.plmns_.num_elements_ = 0;
-				v[i].sib_1_.plmns_.elements_ = 0;
-			}
+			sib1.push_back(lte_sib1_wrapper(lte.layer_3_.sib1_));
+			v[i].sib_1_ = sib1.back().s_;
+
+			sib4.push_back(lte_sib4_wrapper(lte.layer_3_.sib4_));
+			v[i].sib_4_ = sib4.back().s_;
+
+			sib5.push_back(lte_sib5_wrapper(lte.layer_3_.sib5_));
+			v[i].sib_5_ = sib5.back().s_;
+
+			sib6.push_back(lte_sib6_wrapper(lte.layer_3_.sib6_));
+			v[i].sib_6_ = sib6.back().s_;
+
+			sib7.push_back(lte_sib7_wrapper(lte.layer_3_.sib7_));
+			v[i].sib_7_ = sib7.back().s_;
+
+			sib8.push_back(lte_sib8_wrapper(lte.layer_3_.sib8_));
+			v[i].sib_8_ = sib8.back().s_;
 
 			++i;
 		}
@@ -260,21 +248,19 @@ public:
 
 	void output_error_as_message(const std::exception &err)
 	{
-		LOG_L(ERROR) << err.what();
-		output_error(err.what(), beagle_api::STD_EXCEPTION_ERROR);
+		output_error_as_message(err.what(), beagle_api::STD_EXCEPTION_ERROR);
 	}
 
 	void output_error_as_message(const rf_phreaker::rf_phreaker_error &err)
 	{
-		LOG_L(ERROR) << err.what();
-		output_message(err.what(), convert_message(err.error_code_));
+		output_error_as_message(err.what(), err.error_code_);
 	}
 
 	void output_error_as_message(const std::string &s, int code)
 	{
 		LOG_L(ERROR) << s;
 		if(delegate_ != nullptr)
-			delegate_->available_error(beagle_id_, code, s.c_str(), s.size() + 1);
+			delegate_->available_message(beagle_id_, code, s.c_str(), s.size() + 1);
 	}
 
 	void output_error(const std::string &s, int code)

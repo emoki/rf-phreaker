@@ -19,6 +19,10 @@ class measurement_info : public rf_phreaker::raw_signal
 {
 public:
 	measurement_info()
+		:raw_signal(0, -1, -1, -1)
+		, gain_(lms::LNA_UNKNOWN, -1, -1)
+		, collection_round_(-1)
+		, operating_band_(OPERATING_BAND_UNKNOWN)
 	{}
 
 	measurement_info(int num_samples, rf_phreaker::frequency_type frequency, rf_phreaker::bandwidth_type bandwidth,
@@ -59,6 +63,8 @@ public:
 	}
 
 	const gain_type& gain() const { return gain_; }
+
+	void gain(const gain_type &gain) { gain_ = gain; }
 
 	int64_t collection_round() const { return collection_round_; }
 

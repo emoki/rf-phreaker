@@ -2,6 +2,11 @@
 
 #include "rf_phreaker/layer_3_decoder_common/per_decoder_interface.h"
 #include "rf_phreaker/lte_layer_3_decoder/lte_sib_1_parser.h"
+#include "rf_phreaker/lte_layer_3_decoder/lte_sib_4_parser.h"
+#include "rf_phreaker/lte_layer_3_decoder/lte_sib_5_parser.h"
+#include "rf_phreaker/lte_layer_3_decoder/lte_sib_6_parser.h"
+#include "rf_phreaker/lte_layer_3_decoder/lte_sib_7_parser.h"
+#include "rf_phreaker/lte_layer_3_decoder/lte_sib_8_parser.h"
 
 class lte_bcch_dl_sch_message : public per_decoder_interface
 {
@@ -13,5 +18,10 @@ public:
 
 private:
 	lte_sib_1_parser lte_sib_1_parser_;
+	lte_sib_4_parser lte_sib_4_parser_;
+	lte_sib_5_parser lte_sib_5_parser_;
+	lte_sib_6_parser lte_sib_6_parser_;
+	lte_sib_7_parser lte_sib_7_parser_;
+	lte_sib_8_parser lte_sib_8_parser_;
 };
 

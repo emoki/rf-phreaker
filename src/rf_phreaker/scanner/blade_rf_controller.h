@@ -70,9 +70,13 @@ public:
 	gain_type get_auto_gain(frequency_type freq, bandwidth_type bandwidth, time_type time_ns = 0, frequency_type sampling_rate = 0);
 
 private:
+	void enable_blade_rx();
+
+	void disable_blade_rx();
+
 	void refresh_scanner_info();
 
-	int check_blade_status(int return_status);
+	int check_blade_status(int return_status, const std::string &file = "", int line = -1);
 
 	void check_blade_comm();
 
@@ -87,6 +91,9 @@ private:
 	std::unique_ptr<comm_blade_rf> comm_blade_rf_;
 
 	std::shared_ptr<scanner_blade_rf> scanner_blade_rf_;
+
+	measurement_info parameter_cache_;
+	uint32_t gpio_cache_;
 };
 
 }}

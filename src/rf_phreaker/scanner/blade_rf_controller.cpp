@@ -34,7 +34,7 @@ int blade_rf_controller::num_available_scanners()
 
 	// We do not consider no blade devices connected to be an error here.
 	if(num_devices != BLADERF_ERR_NODEV)
-		check_blade_status(num_devices);
+		check_blade_status(num_devices, __FILE__, __LINE__);
 
 	return num_devices;
 }
@@ -48,7 +48,7 @@ std::vector<comm_info_ptr> blade_rf_controller::list_available_scanners()
 
 	// We do not consider no blade devices connected to be an error here.
 	if(num_devices != BLADERF_ERR_NODEV)
-		check_blade_status(num_devices);
+		check_blade_status(num_devices, __FILE__, __LINE__);
 
 	for(int i = 0; i < num_devices; i++) {
 		devices.push_back(comm_info_ptr(new comm_blade_rf(dev_info[i])));
@@ -61,17 +61,20 @@ std::vector<comm_info_ptr> blade_rf_controller::list_available_scanners()
 
 void blade_rf_controller::open_scanner(const scanner_id_type &id)
 {
+	parameter_cache_ = measurement_info();
+	gpio_cache_ = 0;
+
 	close_scanner();
 
 	std::string open_str = "libusb:serial=" + id;
 
 	bladerf *blade_rf;
 
-	check_blade_status(bladerf_open(&blade_rf, open_str.c_str()));
+	check_blade_status(bladerf_open(&blade_rf, open_str.c_str()), __FILE__, __LINE__);
 
 	bladerf_devinfo dev_info;
 
-	check_blade_status(bladerf_get_devinfo(blade_rf, &dev_info));
+	check_blade_status(bladerf_get_devinfo(blade_rf, &dev_info), __FILE__, __LINE__);
 
 	comm_blade_rf_.reset(new comm_blade_rf(dev_info, blade_rf));
 
@@ -88,12 +91,12 @@ void blade_rf_controller::refresh_scanner_info()
 
 	auto comm_blade = comm_blade_rf_->blade_rf();
 
-	check_blade_status(bladerf_get_devinfo(comm_blade, &blade.dev_info_));
+	check_blade_status(bladerf_get_devinfo(comm_blade, &blade.dev_info_), __FILE__, __LINE__);
 
-	blade.usb_speed_ = static_cast<bladerf_dev_speed>(check_blade_status(bladerf_device_speed(comm_blade_rf_->blade_rf())));
+	blade.usb_speed_ = static_cast<bladerf_dev_speed>(check_blade_status(bladerf_device_speed(comm_blade_rf_->blade_rf()), __FILE__, __LINE__));
 
 	// bladerf_stats is not currently supported.  FPGA needs to support behavior.
-	//check_blade_status(bladerf_stats(comm_blade, &blade.stats_));
+	//check_blade_status(bladerf_stats(comm_blade, &blade.stats_), __FILE__, __LINE__);
 	//blade.stats_.rx_overruns = 0;
 	//blade.stats_.rx_throughput = 0;
 	//blade.stats_.tx_throughput = 0;
@@ -101,13 +104,13 @@ void blade_rf_controller::refresh_scanner_info()
 
 	bladerf_version(&blade.blade_rf_version_);
 
-	check_blade_status(bladerf_fw_version(comm_blade, &blade.firmware_version_));
+	check_blade_status(bladerf_fw_version(comm_blade, &blade.firmware_version_), __FILE__, __LINE__);
 
-	check_blade_status(bladerf_fpga_version(comm_blade, &blade.fpga_version_));
+	check_blade_status(bladerf_fpga_version(comm_blade, &blade.fpga_version_), __FILE__, __LINE__);
 
-	check_blade_status(bladerf_get_vctcxo_trim(comm_blade, &blade.vctcxo_trim_value_));
+	blade.rx_timeout_ = 0;
 
-	check_blade_status(bladerf_get_transfer_timeout(comm_blade, BLADERF_MODULE_RX, &blade.rx_timeout_));
+	check_blade_status(bladerf_get_vctcxo_trim(comm_blade, &blade.vctcxo_trim_value_), __FILE__, __LINE__);
 
 	// TODO - Temporary measure until we add trim value date to calibration info.
 	time_t date = 0;
@@ -136,60 +139,105 @@ void blade_rf_controller::do_initial_scanner_config()
 {
 	check_blade_comm();
 
-	check_blade_status(bladerf_load_fpga(comm_blade_rf_->blade_rf(),
-		"fpga_load.rbf"));
+	std::string id = comm_blade_rf_->id();
 
-	check_blade_status(bladerf_enable_module(comm_blade_rf_->blade_rf(),
-		BLADERF_MODULE_RX,
-		true));
-	
+	// When errors opening and configuring occur they seem to be fixed
+	// by restarting the entire process hence if an error occurs anywhere 
+	// within the open/configure process we restart.
+	while(1) {
+		int retry = 0;
+		try {
+			check_blade_status(bladerf_load_fpga(comm_blade_rf_->blade_rf(),
+				"fpga_load.rbf"), __FILE__, __LINE__);
+
+			int status = 0;
+			for(int i = 0; i < 2; ++i) {
+				status = (bladerf_calibrate_dc(comm_blade_rf_->blade_rf(),
+					BLADERF_DC_CAL_LPF_TUNING));
+				if(status == 0) break;
+				LOG_L(DEBUG) << "Calibration attempt failed: LPF Tuning Module. Retrying...";
+			}
+			if(status)
+				throw blade_rf_error("Calibration failed: LPF Tuning Module.");
+
+			status = 0;
+			for(int i = 0; i < 2; ++i) {
+				status = check_blade_status(bladerf_calibrate_dc(comm_blade_rf_->blade_rf(),
+					BLADERF_DC_CAL_RX_LPF));
+				if(status == 0) break;
+				LOG_L(DEBUG) << "Calibration attempt failed: DC RX LPT Module. Retrying...";
+			}
+			if(status)
+				throw blade_rf_error("Calibration failed: DC RX LPT Module.");
+
+			status = 0;
+			for(int i = 0; i < 2; ++i) {
+				status = (bladerf_calibrate_dc(comm_blade_rf_->blade_rf(),
+					BLADERF_DC_CAL_RXVGA2));
+				if(status == 0) break;
+				LOG_L(DEBUG) << "Calibration attempt failed: DC RXVGA2 Module. Retrying...";
+			}
+			if(status)
+				throw blade_rf_error("Calibration failed: DC RXVGA2 Module.");
+
+			check_blade_status(bladerf_set_lpf_mode(comm_blade_rf_->blade_rf(), BLADERF_MODULE_RX,
+				BLADERF_LPF_NORMAL), __FILE__, __LINE__);
+
+			break;
+		}
+		catch(rf_phreaker_error &err) {
+			if(++retry > 3)
+				throw err;
+
+			LOG_L(DEBUG) << err.what() << "  Attempting to recover...";
+
+			close_scanner();
+			for(int i = 0; i < 3; ++i) {
+				std::this_thread::sleep_for(std::chrono::seconds(3));
+				open_scanner(id);
+				std::this_thread::sleep_for(std::chrono::seconds(1));
+				break;
+			}
+		}
+	}
+
 	check_blade_status(bladerf_enable_module(comm_blade_rf_->blade_rf(),
 		BLADERF_MODULE_TX,
-		false));
+		false), __FILE__, __LINE__);
 
-	int status = 0;
-	for(int i = 0; i < 5; ++i) {
-		status = (bladerf_calibrate_dc(comm_blade_rf_->blade_rf(),
-			BLADERF_DC_CAL_LPF_TUNING));
-		if(status == 0) break;
-		LOG_L(DEBUG) << "Calibration attempt failed: LPF Tuning Module. Retrying...";
-	}
-	if(status)
-		throw blade_rf_error("Calibration failed: LPF Tuning Module.");
+	check_blade_status(bladerf_expansion_gpio_dir_write(comm_blade_rf_->blade_rf(), 0xFFFFFFFF), __FILE__, __LINE__);
 
-	status = 0;
-	for(int i = 0; i < 5; ++i) {
-		status = check_blade_status(bladerf_calibrate_dc(comm_blade_rf_->blade_rf(),
-			BLADERF_DC_CAL_RX_LPF));
-		if(status == 0) break;
-		LOG_L(DEBUG) << "Calibration attempt failed: DC RX LPT Module. Retrying...";
-	}
-	if(status)
-		throw blade_rf_error("Calibration failed: DC RX LPT Module.");
+	enable_blade_rx();
 
-	status = 0;
-	for(int i = 0; i < 5; ++i) {
-		status = (bladerf_calibrate_dc(comm_blade_rf_->blade_rf(),
-			BLADERF_DC_CAL_RXVGA2));
-		if(status == 0) break;
-		LOG_L(DEBUG) << "Calibration attempt failed: DC RXVGA2 Module. Retrying...";
-	}
-	if(status)
-		throw blade_rf_error("Calibration failed: DC RXVGA2 Module.");
-
-	check_blade_status(bladerf_set_lpf_mode(comm_blade_rf_->blade_rf(), BLADERF_MODULE_RX,
-		BLADERF_LPF_NORMAL));
-
-	//check_blade_status(bladerf_set_sampling(comm_blade_rf_->blade_rf(),
-	//	bladerf_sampling::BLADERF_SAMPLING_INTERNAL));
-
-	//check_blade_status(bladerf_set_transfer_timeout(comm_blade_rf_->blade_rf(), BLADERF_MODULE_RX, 5000));
-
-	//bladerf_log_set_verbosity(BLADERF_LOG_LEVEL_VERBOSE);
+	//bladerf_log_set_verbosity(BLADERF_LOG_LEVEL_DEBUG);
 
 	// construction of licensing
 	// construction of calibration table
 }
+
+void blade_rf_controller::enable_blade_rx()
+{
+#ifdef _DEBUG
+	check_blade_status(bladerf_sync_config(comm_blade_rf_->blade_rf(), BLADERF_MODULE_RX, BLADERF_FORMAT_SC16_Q11,
+		32, 1024 * 16, 16, 2000), __FILE__, __LINE__);
+#else
+	check_blade_status(bladerf_sync_config(comm_blade_rf_->blade_rf(), BLADERF_MODULE_RX, BLADERF_FORMAT_SC16_Q11,
+		32, 1024 * 16, 16, 2000), __FILE__, __LINE__);
+#endif
+
+	check_blade_status(bladerf_enable_module(comm_blade_rf_->blade_rf(),
+		BLADERF_MODULE_RX,
+		true), __FILE__, __LINE__);
+}
+
+void blade_rf_controller::disable_blade_rx()
+{
+	check_blade_status(bladerf_enable_module(comm_blade_rf_->blade_rf(),
+		BLADERF_MODULE_RX,
+		false), __FILE__, __LINE__);
+}
+
+
 
 void blade_rf_controller::write_vctcxo_trim(frequency_type carrier_freq, frequency_type freq_shift)
 {
@@ -211,6 +259,8 @@ void blade_rf_controller::write_vctcxo_trim(uint16_t trim)
 {
 	check_blade_comm();
 
+//	disable_blade_rx();
+
 	auto image = bladerf_alloc_cal_image(BLADERF_FPGA_40KLE, trim);
 	if(image == nullptr)
 		throw blade_rf_error("Unable to create calibration image.");
@@ -218,8 +268,9 @@ void blade_rf_controller::write_vctcxo_trim(uint16_t trim)
 	LOG_L(DEBUG) << "Writing vctcxo trim value of " << trim << " to scanner " << comm_blade_rf_->id() << ".";
 
 	check_blade_status(bladerf_program_flash_unaligned(comm_blade_rf_->blade_rf(), image->address,
-		image->data, image->length));
+		image->data, image->length), __FILE__, __LINE__);
 
+//	enable_blade_rx();
 	// We must reopen device for it to become effective.
 
 	LOG_L(DEBUG) << "Reopening scanner to initialize with new vctcxo.";
@@ -241,7 +292,11 @@ void blade_rf_controller::update_vctcxo_trim(uint16_t trim)
 {
 	check_blade_comm();
 
-	check_blade_status(bladerf_dac_write(comm_blade_rf_->blade_rf(), trim));
+//	disable_blade_rx();
+
+	check_blade_status(bladerf_dac_write(comm_blade_rf_->blade_rf(), trim), __FILE__, __LINE__);
+
+//	enable_blade_rx();
 
 	scanner_blade_rf_->set_vctcxo_trim_value(trim);
 
@@ -252,35 +307,35 @@ void blade_rf_controller::read_vctcxo_trim(uint16_t &trim)
 {
 	check_blade_comm();
 
-	check_blade_status(bladerf_get_vctcxo_trim(comm_blade_rf_->blade_rf(), &trim));
+	check_blade_status(bladerf_get_vctcxo_trim(comm_blade_rf_->blade_rf(), &trim), __FILE__, __LINE__);
 }
 
 void blade_rf_controller::write_gpio(uint32_t value)
 {
 	check_blade_comm();
 
-	check_blade_status(bladerf_config_gpio_write(comm_blade_rf_->blade_rf(), value));
+	check_blade_status(bladerf_expansion_gpio_write(comm_blade_rf_->blade_rf(), value), __FILE__, __LINE__);
 }
 
 void blade_rf_controller::read_gpio(uint32_t &value)
 {
 	check_blade_comm();
 
-	check_blade_status(bladerf_config_gpio_read(comm_blade_rf_->blade_rf(), &value));
+	check_blade_status(bladerf_expansion_gpio_read(comm_blade_rf_->blade_rf(), &value), __FILE__, __LINE__);
 }
 
 void blade_rf_controller::set_lms_reg(uint8_t address, uint8_t value)
 {
 	check_blade_comm();
 
-	check_blade_status(bladerf_lms_write(comm_blade_rf_->blade_rf(), address, value));
+	check_blade_status(bladerf_lms_write(comm_blade_rf_->blade_rf(), address, value), __FILE__, __LINE__);
 }
 
 void blade_rf_controller::read_lms_reg(uint8_t address, uint8_t &value)
 {
 	check_blade_comm();
 
-	check_blade_status(bladerf_lms_read(comm_blade_rf_->blade_rf(), address, &value));
+	check_blade_status(bladerf_lms_read(comm_blade_rf_->blade_rf(), address, &value), __FILE__, __LINE__);
 }
 
 
@@ -315,7 +370,7 @@ gps blade_rf_controller::get_gps_data()
 
 	// Simiulate communicating to the hardware.
 	uint32_t val = 0;
-	//check_blade_status(bladerf_config_gpio_read(comm_blade_rf_->blade_rf(), &val));
+	//check_blade_status(bladerf_config_gpio_read(comm_blade_rf_->blade_rf(), &val), __FILE__, __LINE__);
 
 	return g;
 }
@@ -356,7 +411,17 @@ measurement_info blade_rf_controller::get_rf_data(frequency_type frequency, time
 
 	check_blade_comm();
 
-	//int throw_away_ns =milli_to_nano(10);
+	if(parameter_cache_.frequency() != frequency) {
+		int status = 0;
+		for(int i = 0; i < 10; ++i) {
+			status = (bladerf_set_frequency(comm_blade_rf_->blade_rf(), BLADERF_MODULE_RX,
+				static_cast<uint32_t>(frequency)));
+			if(status == 0) break;
+			LOG_L(DEBUG) << "Setting frequency (" << frequency / 1e6 << "mhz) failed. Retrying...";
+		}
+		if(status)
+			throw blade_rf_error(std::string("Error setting frequency.  ") + bladerf_strerror(status));
+	}
 
 	// Per Nyquist a signal must be sampled at a rate greater than twice it's maximum frequency component.  Thus
 	// once converted to baseband the highest pertinent frequency component will be 1/2 the bandwidth so our sampling 
@@ -364,36 +429,39 @@ measurement_info blade_rf_controller::get_rf_data(frequency_type frequency, time
 	if(sampling_rate == 0)
 		sampling_rate = static_cast<frequency_type>(bandwidth * 1.2);
 
-	check_blade_status(bladerf_set_lna_gain(comm_blade_rf_->blade_rf(), convert(gain.lna_gain_)));
-
-	check_blade_status(bladerf_set_rxvga1(comm_blade_rf_->blade_rf(), gain.rxvga1_));
-
-	check_blade_status(bladerf_set_rxvga2(comm_blade_rf_->blade_rf(), gain.rxvga2_));
-
+	if(parameter_cache_.gain().lna_gain_ != gain.lna_gain_) {
+		check_blade_status(bladerf_set_lna_gain(comm_blade_rf_->blade_rf(), convert(gain.lna_gain_)), __FILE__, __LINE__);
+	}
+	if(parameter_cache_.gain().rxvga1_ != gain.rxvga1_) {
+		check_blade_status(bladerf_set_rxvga1(comm_blade_rf_->blade_rf(), gain.rxvga1_), __FILE__, __LINE__);
+	}
+	if(parameter_cache_.gain().rxvga2_ != gain.rxvga2_) {
+		check_blade_status(bladerf_set_rxvga2(comm_blade_rf_->blade_rf(), gain.rxvga2_), __FILE__, __LINE__);
+	}
+	
 	unsigned int blade_sampling_rate = 0;
 	unsigned int blade_bandwidth = 0;
 
-	// TODO - We manually convert frequency_type to unsigned int.
-	check_blade_status(bladerf_set_sample_rate(comm_blade_rf_->blade_rf(), BLADERF_MODULE_RX,
-		static_cast<uint32_t>(sampling_rate), &blade_sampling_rate));
-
-	check_blade_status(bladerf_set_bandwidth(comm_blade_rf_->blade_rf(), BLADERF_MODULE_RX,
-		bandwidth, &blade_bandwidth));
-
-	int status = 0;
-	for(int i = 0; i < 10; ++i) {
-		status = (bladerf_set_frequency(comm_blade_rf_->blade_rf(), BLADERF_MODULE_RX,
-			static_cast<uint32_t>(frequency)));
-		if(status == 0) break;
-		LOG_L(DEBUG) << "Setting frequency (" << frequency / 1e6 << "mhz) failed. Retrying...";
+	if(parameter_cache_.sampling_rate() != sampling_rate) {
+		check_blade_status(bladerf_set_sample_rate(comm_blade_rf_->blade_rf(), BLADERF_MODULE_RX,
+			static_cast<uint32_t>(sampling_rate), &blade_sampling_rate), __FILE__, __LINE__);
 	}
-	if(status)
-		throw blade_rf_error(std::string("Error setting frequency.  ") + bladerf_strerror(status));
+	else
+		blade_sampling_rate = static_cast<uint32_t>(parameter_cache_.sampling_rate());
 
-	uint32_t gpio = 0;
-	check_blade_status(bladerf_config_gpio_read(comm_blade_rf_->blade_rf(), &gpio));
-	check_blade_status(bladerf_config_gpio_write(comm_blade_rf_->blade_rf(), 
-		rf_switch_conversion_.convert_to_gpio(frequency, bandwidth, gpio)));
+	if(parameter_cache_.bandwidth() != bandwidth) {
+		check_blade_status(bladerf_set_bandwidth(comm_blade_rf_->blade_rf(), BLADERF_MODULE_RX,
+			bandwidth, &blade_bandwidth), __FILE__, __LINE__);
+	}
+	else
+		blade_bandwidth = parameter_cache_.bandwidth();
+
+	uint32_t gpio = rf_switch_conversion_.convert_to_gpio(frequency, bandwidth, 0);
+	if(gpio_cache_ != gpio) {
+		check_blade_status(bladerf_expansion_gpio_write(comm_blade_rf_->blade_rf(),
+			rf_switch_conversion_.convert_to_gpio(frequency, bandwidth, gpio)), __FILE__, __LINE__);
+		gpio_cache_ = gpio;
+	}
 
 	// BladeRF only accepts data num_samples that are a multiple of 1024.
 	int throw_away_samples = 10240*2;
@@ -409,11 +477,34 @@ measurement_info blade_rf_controller::get_rf_data(frequency_type frequency, time
 
 	bladerf_metadata metadata;
 
-	check_blade_status(bladerf_rx(comm_blade_rf_->blade_rf(), BLADERF_FORMAT_SC16_Q11,
-		aligned_buffer, num_samples_to_transfer + throw_away_samples, &metadata));
+	int status = 0;
+	for(int i = 0; i < 10; ++i) {
+#ifdef _DEBUG
+		while(bladerf_wait_for_rx_idle(comm_blade_rf_->blade_rf())) {};
 
-	measurement_info data(num_samples, frequency, blade_bandwidth, blade_sampling_rate,
-		gain);
+		status = bladerf_sync_rx(comm_blade_rf_->blade_rf(), aligned_buffer,
+			num_samples_to_transfer + throw_away_samples, &metadata, 0);
+#else
+		int count = 0;
+		while(status = bladerf_wait_for_rx_idle(comm_blade_rf_->blade_rf())) {
+			LOG_L(VERBOSE) << "Error while waiting for bladerf sync rx idle.  Retrying...";
+			if(count++ > 10)
+				check_blade_status(status, __FILE__, __LINE__);
+		};
+		status = bladerf_sync_rx(comm_blade_rf_->blade_rf(), aligned_buffer,
+			num_samples_to_transfer + throw_away_samples, &metadata, 2000);
+#endif
+		if(status == 0) break;
+		LOG_L(DEBUG) << "Collecting " << num_samples_to_transfer + throw_away_samples << " samples failed. Status = " << status << ". Retrying...";
+		disable_blade_rx();
+		enable_blade_rx();
+	}
+	if(status)
+		throw blade_rf_error(std::string("Error collecting data samples.  ") + bladerf_strerror(status));
+	
+	parameter_cache_ = measurement_info(0, frequency, blade_bandwidth, blade_sampling_rate , gain);
+
+	measurement_info data(num_samples, frequency, blade_bandwidth, blade_sampling_rate, gain);
 
 	for(int i = throw_away_samples; i < (throw_away_samples + num_samples) * 2; ++i)
 		sign_extend_12_bits(reinterpret_cast<int16_t*>(aligned_buffer)[i]);
@@ -438,21 +529,21 @@ measurement_info blade_rf_controller::get_rf_data(int num_samples)
 	bladerf_lna_gain tmp_lna_gain;
 	gain_type gain;
 
-	check_blade_status(bladerf_get_lna_gain(comm_blade_rf_->blade_rf(), &tmp_lna_gain));
+	check_blade_status(bladerf_get_lna_gain(comm_blade_rf_->blade_rf(), &tmp_lna_gain), __FILE__, __LINE__);
 	gain.lna_gain_ = convert(tmp_lna_gain);
 
-	check_blade_status(bladerf_get_rxvga1(comm_blade_rf_->blade_rf(), &gain.rxvga1_));
+	check_blade_status(bladerf_get_rxvga1(comm_blade_rf_->blade_rf(), &gain.rxvga1_), __FILE__, __LINE__);
 
-	check_blade_status(bladerf_get_rxvga2(comm_blade_rf_->blade_rf(), &gain.rxvga2_));
+	check_blade_status(bladerf_get_rxvga2(comm_blade_rf_->blade_rf(), &gain.rxvga2_), __FILE__, __LINE__);
 
 	check_blade_status(bladerf_get_sample_rate(comm_blade_rf_->blade_rf(), BLADERF_MODULE_RX,
-		&blade_sampling_rate));
+		&blade_sampling_rate), __FILE__, __LINE__);
 
 	check_blade_status(bladerf_get_bandwidth(comm_blade_rf_->blade_rf(), BLADERF_MODULE_RX,
-		&blade_bandwidth));
+		&blade_bandwidth), __FILE__, __LINE__);
 
 	check_blade_status(bladerf_get_frequency(comm_blade_rf_->blade_rf(), BLADERF_MODULE_RX,
-			&frequency));
+		&frequency), __FILE__, __LINE__);
 
 	// BladeRF only accepts data num_samples that are a multiple of 1024.
 	num_samples += 1024 - num_samples % 1024;
@@ -464,8 +555,27 @@ measurement_info blade_rf_controller::get_rf_data(int num_samples)
 
 	bladerf_metadata metadata;
 
-	check_blade_status(bladerf_rx(comm_blade_rf_->blade_rf(), BLADERF_FORMAT_SC16_Q11,
-		aligned_buffer, num_samples, &metadata));
+	int status = 0;
+	for(int i = 0; i < 10; ++i) {
+#ifdef _DEBUG
+		while(bladerf_wait_for_rx_idle(comm_blade_rf_->blade_rf())) {};
+		status = bladerf_sync_rx(comm_blade_rf_->blade_rf(), aligned_buffer,
+			return_bytes, &metadata, 0);
+#else
+		int count = 0;
+		while(status = bladerf_wait_for_rx_idle(comm_blade_rf_->blade_rf())) {
+			LOG_L(VERBOSE) << "Error while waiting for bladerf sync rx idle.  Retrying...";
+			if(count++ > 10)
+				check_blade_status(status, __FILE__, __LINE__);
+		};
+		status = bladerf_sync_rx(comm_blade_rf_->blade_rf(), aligned_buffer,
+			return_bytes, &metadata, 2000);
+#endif
+		if(status == 0) break;
+		LOG_L(DEBUG) << "Collecting " << return_bytes << " samples failed. Retrying...";
+	}
+	if(status)
+		throw blade_rf_error(std::string("Error collecting data samples.  ") + bladerf_strerror(status));
 
 	measurement_info data(num_samples, frequency, blade_bandwidth, blade_sampling_rate,
 						  gain);
@@ -481,10 +591,11 @@ measurement_info blade_rf_controller::get_rf_data(int num_samples)
 	return data;
 }
 
-int blade_rf_controller::check_blade_status(int return_status)
+int blade_rf_controller::check_blade_status(int return_status, const std::string &file, int line)
 {
 	if(return_status < 0)
-		throw blade_rf_error(bladerf_strerror(return_status), return_status);
+		throw blade_rf_error("[" + split_file_name(file) + " L: " + std::to_string(line) + "] BladeRF error: " + bladerf_strerror(return_status)
+			+ ".", return_status);
 	return return_status;
 }
 
