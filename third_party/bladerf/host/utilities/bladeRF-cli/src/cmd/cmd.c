@@ -133,14 +133,14 @@ static const struct cmd cmd_table[] = {
     {
         FIELD_INIT(.names, cmd_names_erase),
         FIELD_INIT(.exec, cmd_erase),
-        FIELD_INIT(.desc, "Erase specified sectors of SPI flash"),
+        FIELD_INIT(.desc, "Erase specified erase blocks of SPI flash"),
         FIELD_INIT(.help,
             "erase <offset> <count>\n"
             "\n"
-            "Erase specified sectors of SPI flash\n"
+            "Erase specified erase blocks SPI flash\n"
             "\n"
-            "    <offset>       Starting sector to erase\n"
-            "    <count>        Number of sectors to erase\n"
+            "    <offset>       Erase block offset\n"
+            "    <count>        Number of erase blocks to erase\n"
         )
     },
     {
@@ -161,14 +161,14 @@ static const struct cmd cmd_table[] = {
             "                   fpga40  - Metadata and bitstream for a 40 kLE FPGA\n"
             "                   fpga115 - Metadata and bitstream for a 115 kLE FPGA\n"
             "\n"
-            "   <address>   Address of data to back up.\n"
-            "   <len>       Length of region to back up.\n"
+            "   <address>   Address of data to back up. Must be erase block-aligned.\n"
+            "   <len>       Length of region to back up. Must be erase block-aligned.\n"
             "\n"
             "Note: When an address and length are provided, the image type will default to \"raw\".\n"
             "\n"
             "Examples:\n"
             "  flash_backup cal.bin cal                 Back up the calibration data region.\n"
-            "  flash_backup cal_raw.bin 0x30000 0x100   Back up the calibration region as\n"
+            "  flash_backup cal_raw.bin 0x30000 0x10000 Back up the calibration region as\n"
             "                                           a raw data image.\n"
             ),
     },
