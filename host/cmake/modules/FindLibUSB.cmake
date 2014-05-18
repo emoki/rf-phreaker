@@ -128,16 +128,28 @@ if(LIBUSB_FOUND)
     check_library_exists("${usb_LIBRARY}" libusb_error_name "" LIBUSB_HAVE_ERROR_NAME)
     check_library_exists("${usb_LIBRARY}" libusb_get_device_speed "" LIBUSB_HAVE_GET_DEVICE_SPEED)
 
+	# check_library_exists doesn't seem to work with windows/libusb
+	set(LIBUSB_HAVE_ERROR_NAME 1)
+	set(LIBUSB_HAVE_GET_DEVICE_SPEED 1)
+	
     if(NOT LIBUSB_HAVE_ERROR_NAME OR NOT LIBUSB_HAVE_GET_DEVICE_SPEED)
         message(FATAL "The installed version of libusb does not have required functions: libusb_error_name() or libusb_get_device_speed()")
     endif()
 
     # Introduced in v1.0.10
     check_library_exists("${usb_LIBRARY}" libusb_get_version "" LIBUSB_HAVE_GET_VERSION)
+	
+	# check_library_exists doesn't seem to work with windows/libusb
+	set(LIBUSB_HAVE_GET_VERSION 1)
+
 
     # Introduced in 1.0.16
     check_library_exists("${usb_LIBRARY}" libusb_strerror "" LIBUSB_HAVE_STRERROR)
-    if (NOT LIBUSB_HAVE_STRERROR)
+ 	
+	# check_library_exists doesn't seem to work with windows/libusb
+	set(LIBUSB_HAVE_STRERROR 1)
+
+   if (NOT LIBUSB_HAVE_STRERROR)
         if(NOT LIBUSB_SUPPRESS_WARNINGS)
             message(WARNING "Detected libusb < 1.0.16. For best results, consider updating to a more recent libusb version.")
         endif(NOT LIBUSB_SUPPRESS_WARNINGS)
@@ -150,5 +162,8 @@ if(LIBUSB_FOUND)
     check_library_exists("${usb_LIBRARY}" libusb_handle_events_timeout "" LIBUSB_HAVE_HANDLE_EVENTS_TIMEOUT)
     check_library_exists("${usb_LIBRARY}" libusb_handle_events_timeout_completed "" LIBUSB_HAVE_HANDLE_EVENTS_TIMEOUT_COMPLETED)
 
+	# check_library_exists doesn't seem to work with windows/libusb
+	set(LIBUSB_HAVE_HANDLE_EVENTS_TIMEOUT 1)
+	set(LIBUSB_HAVE_HANDLE_EVENTS_TIMEOUT_COMPLETED 1)
 
 endif(LIBUSB_FOUND)
