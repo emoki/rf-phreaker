@@ -126,7 +126,6 @@ void blade_rf_controller::refresh_scanner_info()
 	}
 }
 
-
 void blade_rf_controller::close_scanner()
 {
 	if(comm_blade_rf_.get()) {
@@ -219,10 +218,10 @@ void blade_rf_controller::enable_blade_rx()
 {
 #ifdef _DEBUG
 	check_blade_status(bladerf_sync_config(comm_blade_rf_->blade_rf(), BLADERF_MODULE_RX, BLADERF_FORMAT_SC16_Q11,
-		32, 1024 * 16, 16, 2000), __FILE__, __LINE__);
+		5, 1024 * 4, 4, 0), __FILE__, __LINE__);
 #else
 	check_blade_status(bladerf_sync_config(comm_blade_rf_->blade_rf(), BLADERF_MODULE_RX, BLADERF_FORMAT_SC16_Q11,
-		32, 1024 * 16, 16, 2000), __FILE__, __LINE__);
+		5, 1024 * 4, 4, 2000), __FILE__, __LINE__);
 #endif
 
 	check_blade_status(bladerf_enable_module(comm_blade_rf_->blade_rf(),
@@ -236,8 +235,6 @@ void blade_rf_controller::disable_blade_rx()
 		BLADERF_MODULE_RX,
 		false), __FILE__, __LINE__);
 }
-
-
 
 void blade_rf_controller::write_vctcxo_trim(frequency_type carrier_freq, frequency_type freq_shift)
 {
@@ -259,7 +256,7 @@ void blade_rf_controller::write_vctcxo_trim(uint16_t trim)
 {
 	check_blade_comm();
 
-//	disable_blade_rx();
+	disable_blade_rx();
 
 	auto image = bladerf_alloc_cal_image(BLADERF_FPGA_40KLE, trim);
 	if(image == nullptr)
@@ -267,19 +264,17 @@ void blade_rf_controller::write_vctcxo_trim(uint16_t trim)
 
 	LOG_L(DEBUG) << "Writing vctcxo trim value of " << trim << " to scanner " << comm_blade_rf_->id() << ".";
 
-	check_blade_status(bladerf_program_flash_unaligned(comm_blade_rf_->blade_rf(), image->address,
-		image->data, image->length), __FILE__, __LINE__);
+	auto page = BLADERF_FLASH_TO_PAGES(image->address);
+	auto count = BLADERF_FLASH_TO_PAGES(image->length);
 
-//	enable_blade_rx();
-	// We must reopen device for it to become effective.
+	check_blade_status(bladerf_erase_flash(comm_blade_rf_->blade_rf(), BLADERF_FLASH_EB_CAL, BLADERF_FLASH_EB_LEN_CAL), __FILE__, __LINE__);
+	check_blade_status(bladerf_write_flash(comm_blade_rf_->blade_rf(), image->data, page, count), __FILE__, __LINE__);
 
-	LOG_L(DEBUG) << "Reopening scanner to initialize with new vctcxo.";
-	
-	try { get_rf_data(10000); }
-	catch(...) {}
+	bladerf_free_image(image);
 
-	open_scanner(comm_blade_rf_->id());
-	do_initial_scanner_config();
+	enable_blade_rx();
+
+	refresh_scanner_info();
 }
 
 void blade_rf_controller::update_vctcxo_trim(frequency_type carrier_freq, frequency_type freq_shift)
@@ -338,7 +333,6 @@ void blade_rf_controller::read_lms_reg(uint8_t address, uint8_t &value)
 	check_blade_status(bladerf_lms_read(comm_blade_rf_->blade_rf(), address, &value), __FILE__, __LINE__);
 }
 
-
 const rf_phreaker::scanner::scanner* blade_rf_controller::get_scanner()
 {
 	refresh_scanner_info();
@@ -390,9 +384,6 @@ gain_type blade_rf_controller::get_auto_gain(frequency_type freq, bandwidth_type
 
 	if(time_ns == 0)
 		time_ns = 5000000;
-
-	// Use lowest sampling rate because we only care about the Max ADC.
-	sampling_rate = mhz(32);
 
 	// If we have no history loop thru a couple times to zero in on the gain.
 	get_rf_data(freq, time_ns, bandwidth, gain_manager_.default_gain(), sampling_rate);
@@ -464,8 +455,9 @@ measurement_info blade_rf_controller::get_rf_data(frequency_type frequency, time
 	}
 
 	// BladeRF only accepts data num_samples that are a multiple of 1024.
-	int throw_away_samples = 10240*2;
-	throw_away_samples += 1024 - throw_away_samples % 1024;
+	// Using a config of 5 buffers, 4 xfers, and bufsize of 4096, throw_away_samples can 12*1024 for a 
+	// signal sampled at 1.92 mhz.
+	int throw_away_samples = 1024*12;
 
 	int num_samples = rf_phreaker::convert_to_samples(time_ns, blade_sampling_rate);
 	auto num_samples_to_transfer = num_samples + 1024 - num_samples % 1024;
@@ -480,21 +472,14 @@ measurement_info blade_rf_controller::get_rf_data(frequency_type frequency, time
 	int status = 0;
 	for(int i = 0; i < 10; ++i) {
 #ifdef _DEBUG
-		while(bladerf_wait_for_rx_idle(comm_blade_rf_->blade_rf())) {};
-
 		status = bladerf_sync_rx(comm_blade_rf_->blade_rf(), aligned_buffer,
-			num_samples_to_transfer + throw_away_samples, &metadata, 0);
+			num_samples_to_transfer + throw_away_samples, &metadata, 500);
 #else
-		int count = 0;
-		while(status = bladerf_wait_for_rx_idle(comm_blade_rf_->blade_rf())) {
-			LOG_L(VERBOSE) << "Error while waiting for bladerf sync rx idle.  Retrying...";
-			if(count++ > 10)
-				check_blade_status(status, __FILE__, __LINE__);
-		};
 		status = bladerf_sync_rx(comm_blade_rf_->blade_rf(), aligned_buffer,
-			num_samples_to_transfer + throw_away_samples, &metadata, 2000);
+			num_samples_to_transfer + throw_away_samples, &metadata, 500);
 #endif
-		if(status == 0) break;
+		if(status == 0) 
+			break;
 		LOG_L(DEBUG) << "Collecting " << num_samples_to_transfer + throw_away_samples << " samples failed. Status = " << status << ". Retrying...";
 		disable_blade_rx();
 		enable_blade_rx();
@@ -558,21 +543,17 @@ measurement_info blade_rf_controller::get_rf_data(int num_samples)
 	int status = 0;
 	for(int i = 0; i < 10; ++i) {
 #ifdef _DEBUG
-		while(bladerf_wait_for_rx_idle(comm_blade_rf_->blade_rf())) {};
 		status = bladerf_sync_rx(comm_blade_rf_->blade_rf(), aligned_buffer,
-			return_bytes, &metadata, 0);
+			return_bytes, &metadata, 500);
 #else
-		int count = 0;
-		while(status = bladerf_wait_for_rx_idle(comm_blade_rf_->blade_rf())) {
-			LOG_L(VERBOSE) << "Error while waiting for bladerf sync rx idle.  Retrying...";
-			if(count++ > 10)
-				check_blade_status(status, __FILE__, __LINE__);
-		};
 		status = bladerf_sync_rx(comm_blade_rf_->blade_rf(), aligned_buffer,
-			return_bytes, &metadata, 2000);
+			return_bytes, &metadata, 500);
 #endif
-		if(status == 0) break;
+		if(status == 0) 
+			break;
 		LOG_L(DEBUG) << "Collecting " << return_bytes << " samples failed. Retrying...";
+		disable_blade_rx();
+		enable_blade_rx();
 	}
 	if(status)
 		throw blade_rf_error(std::string("Error collecting data samples.  ") + bladerf_strerror(status));
