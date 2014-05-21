@@ -205,7 +205,7 @@ public:
 		int i = 0;
 		for(auto &lte : t) {
 			v[i].antenna_ports_ = lte.num_antenna_ports_;
-			v[i].carrier_bandwidth_ = lte.carrier_bandwidth_;
+			v[i].carrier_bandwidth_ = lte.dl_bandwidth_;
 			v[i].carrier_freq_ = static_cast<uint32_t>(lte.carrier_frequency_);
 			v[i].carrier_sl_ = lte.carrier_signal_level_;
 			v[i].collection_round_ = static_cast<uint32_t>(lte.collection_round_);

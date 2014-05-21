@@ -80,6 +80,7 @@ namespace rf_phreaker {
 		double rs_quality_;
 		int cyclic_prefix_;
 		int num_antenna_ports_;
+		int dl_bandwidth_;
 		int32_t frame_number_;
 		layer_3_information::lte_rrc_message_aggregate layer_3_;
 	};

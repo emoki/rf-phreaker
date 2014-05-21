@@ -1,5 +1,6 @@
 #pragma once
 
+#include "rf_phreaker/processing/processing_utility.h"
 #include "rf_phreaker/common/measurements.h"
 #include "rf_phreaker/common/channel_conversion.h"
 #include "rf_phreaker/scanner/measurement_info.h"
@@ -50,6 +51,7 @@ inline void convert_to_lte_data(lte_data &data, const scanner::measurement_info 
 {
 	convert_to_basic_data(data, info, avg_rms);
 	data.cyclic_prefix_ = lte.CyclicPrefix;
+	data.dl_bandwidth_ = convert_bandwidth(lte.Bandwidth);
 	data.frame_number_ = lte.frame_number;
 	data.layer_3_ = lte.layer_3_;
 	data.num_antenna_ports_ = lte.NumAntennaPorts;

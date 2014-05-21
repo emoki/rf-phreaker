@@ -34,6 +34,7 @@ set (processing_SRCS
 	switch_body.h
 	umts_output_and_feedback_body.h
 	umts_processing_body.h
+	processing_utility.h
 	${SRC_PLATFORM_SPECIFIC}/stdafx.cpp)
 
 add_definitions (/DTBB_PREVIEW_GRAPH_NODES)
