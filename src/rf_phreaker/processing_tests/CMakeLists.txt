@@ -14,6 +14,7 @@ set (processing_tests_SRCS
 	gps_graph_gtests.cpp
 	frequency_correction_graph_gtests.cpp
 	layer_3_tracker_gtests.cpp
+	lte_output_and_feedback_body_gtests.cpp
 	processing_tests.cpp
 	processing_graph_gtests.cpp
 	${SRC_PLATFORM_SPECIFIC}/stdafx.cpp)
