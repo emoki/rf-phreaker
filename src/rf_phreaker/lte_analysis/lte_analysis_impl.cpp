@@ -53,7 +53,7 @@ int lte_analysis_impl::cell_search(const rf_phreaker::raw_signal &raw_signal, lt
 
 		for(int i = 0; i < tmp_num_meas; ++i) {			
 			// If measurement is valid transfer to output.
-			if(lte_measurements_[i].SschRecord.NormCorr != 0) {
+			if(lte_measurements_[i].SschRecord.NormCorr > 0 && lte_measurements_[i].SschRecord.NormCorr < DBL_MAX) {
 				lte_meas.push_back(lte_measurements_[i]);
 			}
 		}

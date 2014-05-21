@@ -39,8 +39,9 @@ Ipp32fc hEst[OFDM_SYMBOLS_PER_FRAME * NUM_FRAMES * FFT_SIZE * NUM_ANTENNA_MAX];
 Ipp32f hNoiseVariance[256];
 
 
-LTEProc_CorrRecordType pschCorrRecord[100], sschCorrRecord[100];
-PBCHINFO pbchInfo[100];
+const int record_size = 100;
+LTEProc_CorrRecordType pschCorrRecord[record_size], sschCorrRecord[record_size];
+PBCHINFO pbchInfo[record_size];
 
 
 /*
@@ -56,6 +57,10 @@ int lte_cell_search(const Ipp32fc* SignalSamples,
 					unsigned int NumHalfFramesToProcess,
 					lte_measurements &LteData, int &tmp_num_meas)
 {
+	memset(pschCorrRecord, 0, sizeof(pschCorrRecord) * record_size);
+	memset(sschCorrRecord, 0, sizeof(sschCorrRecord) * record_size);
+	memset(pbchInfo, 0, sizeof(pbchInfo) * record_size);
+
 	unsigned int signalLength384, processSignalLength,current_frame_number;
 	double delayTime1, delayTime2;
 	Ipp32fc *signal192,*signal_384;
@@ -71,8 +76,10 @@ int lte_cell_search(const Ipp32fc* SignalSamples,
 	int status;
 	unsigned int sampling_factor = 1;	
 	double SampleRate;
+	NumHalfFramesToProcess -= 1;
 
-	signal_384 = ippsMalloc_32fc(2*signal_max_size);
+	signal_384 = ippsMalloc_32fc(signal_max_size*2);
+	ippsZero_32fc(signal_384, signal_max_size * 2);
 	signal192 = signal_384;
 	ippsCopy_32fc(SignalSamples, signal192, NumSamples);
 
@@ -106,8 +113,6 @@ int lte_cell_search(const Ipp32fc* SignalSamples,
 	//std::cout << "Lte SSS Time elapsed: " << lte_diffclock(end,begin) << " ms\n";
 
 	
-	NumHalfFramesToProcess = 6;
-
 	unsigned int uTmp1 = 140*NumHalfFramesToProcess/2*128; 
 	unsigned int uTmp2 = NumHalfFramesToProcess/2*10;
 		
