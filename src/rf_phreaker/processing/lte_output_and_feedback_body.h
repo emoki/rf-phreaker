@@ -16,7 +16,7 @@ class lte_sweep_output_and_feedback_body
 public:
 	lte_sweep_output_and_feedback_body(data_output_async *io)
 		: io_(io)
-		, confidence_threshold_(-11.5)
+		, confidence_threshold_(-10.5)
 		, current_collection_round_(-1)
 	{}
 
