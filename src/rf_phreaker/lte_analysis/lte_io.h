@@ -121,7 +121,7 @@ inline std::ostream& operator<<( std::ostream &os, const LteChannelBandwidth &t)
 		os << "3";
 		break;
 	case LteBandwidth_5MHZ:
-		os << "4";
+		os << "5";
 		break;
 	case LteBandwidth_10MHZ:
 		os << "10";
