@@ -1,5 +1,6 @@
 #include "rf_phreaker/lte_analysis/lte_analysis_impl.h"
 #include "rf_phreaker/common/delegate_sink.h"
+#include "boost/math/special_functions.hpp"
 
 namespace rf_phreaker {
 
@@ -35,11 +36,20 @@ int lte_analysis_impl::cell_search(const rf_phreaker::raw_signal &raw_signal, lt
 
 			std::lock_guard<std::mutex> lock(processing_mutex);
 			status = lte_cell_search(resampled_signal_.get(), resampled_length_, num_half_frames, lte_measurements_, tmp_num_meas);
+
+			// Convert frame start sample num.  At this point they are based on the 1.92mhz - we need to change it to the sampling rate of the 
+			// input signal.
+			for(int i = 0; i < tmp_num_meas; ++i) {
+				lte_measurements_[i].PschRecord.StartSampleNum = (int)boost::math::round((double)lte_measurements_[i].PschRecord.StartSampleNum / cell_search_sampling_rate_ * raw_signal.sampling_rate());
+				lte_measurements_[i].SschRecord.StartSampleNum = (int)boost::math::round((double)lte_measurements_[i].SschRecord.StartSampleNum / cell_search_sampling_rate_ * raw_signal.sampling_rate());
+				lte_measurements_[i].RsRecord.StartSampleNum = (int)boost::math::round((double)lte_measurements_[i].RsRecord.StartSampleNum / cell_search_sampling_rate_ * raw_signal.sampling_rate());
+			}
 		}
 		else {
 			std::lock_guard<std::mutex> lock(processing_mutex);
 			status = lte_cell_search(raw_signal.get_iq().get(), raw_signal.get_iq().length(), num_half_frames, lte_measurements_, tmp_num_meas);
 		}
+
 
 		for(int i = 0; i < tmp_num_meas; ++i) {			
 			// If measurement is valid transfer to output.

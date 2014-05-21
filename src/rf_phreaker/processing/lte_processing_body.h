@@ -121,11 +121,7 @@ public:
 
 	bool is_valid_measurement(lte_measurement &meas)
 	{
-		bool rsrp = meas.rsrp > .001 && (meas.rsrp <= DBL_MAX && meas.rsrp >= -DBL_MAX);
-		bool rsrq = meas.rsrq <= DBL_MAX && meas.rsrq >= -DBL_MAX;
-		bool rssi = meas.rssi > .001 && (meas.rssi <= DBL_MAX && meas.rssi >= -DBL_MAX);
-		return (meas.Bandwidth == LteBandwidth_5MHZ || meas.Bandwidth == LteBandwidth_10MHZ) && meas.NumAntennaPorts != LteAntPorts_Unknown
-			&& rsrp && rsrq && rssi;
+		return (meas.Bandwidth == LteBandwidth_5MHZ || meas.Bandwidth == LteBandwidth_10MHZ) && meas.NumAntennaPorts != LteAntPorts_Unknown;
 	}
 
 private:

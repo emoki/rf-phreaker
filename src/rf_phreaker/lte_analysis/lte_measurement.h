@@ -30,6 +30,9 @@ public:
 	unsigned int fft_subcarrier_start_index;
 	unsigned int num_bits_dci_1A;
 	unsigned int frame_number;
+	double estimated_rsrp;
+	double estimated_rssi;
+	double estimated_rsrq;
 	double rsrp;
 	double rssi;
 	double rsrq;
@@ -64,6 +67,9 @@ public:
 		std::swap(meas.fft_subcarrier_start_index, fft_subcarrier_start_index);
 		std::swap(meas.num_bits_dci_1A, num_bits_dci_1A);
 		std::swap(meas.frame_number, frame_number);
+		std::swap(meas.estimated_rsrp, estimated_rsrp);
+		std::swap(meas.estimated_rssi, estimated_rssi);
+		std::swap(meas.estimated_rsrq, estimated_rsrq);
 		std::swap(meas.rsrp, rsrp);
 		std::swap(meas.rssi, rssi);
 		std::swap(meas.rsrq, rsrq);
@@ -100,6 +106,9 @@ public:
 		fft_subcarrier_start_index = 0;
 		num_bits_dci_1A = 0;
 		frame_number = 0;
+		estimated_rsrp = 0;
+		estimated_rssi = 0;
+		estimated_rsrq = 0;
 		rsrp = 0;
 		rssi = 0;
 		rsrq = 0;

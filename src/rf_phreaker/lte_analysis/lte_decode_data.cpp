@@ -38,7 +38,7 @@ unsigned int signalLength384,signalLength768, processSignalLength,current_frame_
 double delayTime1, delayTime2;
 
 // TODO - Declaring the signal statically is OK for now because the processing functions are protected by a mutex 
-// so only thread will ever be in this function.  However once multhreading is implmented we should switch it to 
+// so only one thread will enter this function at a time.  However once multhreading is implmented we should switch it to 
 // a member variable.
 static ipp_32fc_array signal_384;
 if(signal_384.length() < NumSamples)
@@ -121,13 +121,6 @@ for(unsigned int ii = 0; ii <LteData.size(); ii++)
 	}
 	if(LteData[ii].fftSize == FFTSIZE_UNKNOWN || LteData[ii].fftSize == FFTSIZE_128
 	   || LteData[ii].fftSize == FFTSIZE_1536 || LteData[ii].fftSize == FFTSIZE_2048)
-	{
-		continue;
-	}
-
-	if(!(LteData[ii].rsrp > .001 && (LteData[ii].rsrp <= DBL_MAX && LteData[ii].rsrp >= -DBL_MAX)
-		&& (LteData[ii].rsrq <= DBL_MAX && LteData[ii].rsrq >= -DBL_MAX)
-		&& LteData[ii].rssi > .001 && (LteData[ii].rssi <= DBL_MAX && LteData[ii].rssi >= -DBL_MAX)))
 	{
 		continue;
 	}

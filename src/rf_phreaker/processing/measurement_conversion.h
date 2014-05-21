@@ -62,9 +62,9 @@ inline void convert_to_lte_data(lte_data &data, const scanner::measurement_info 
 	data.psch_id_ = lte.PschRecord.ID;
 	data.psch_quality_ = 20 * log10(lte.PschRecord.NormCorr);
 	static scanner::calibration cali;
-	data.rsrp_ = cali.calculate_sl(lte.rsrp, info.gain());
-	data.rssi_ = cali.calculate_sl(lte.rssi, info.gain());
-	data.rsrq_ = lte.rsrq;
+	data.rsrp_ = cali.calculate_sl(lte.estimated_rsrp, info.gain());
+	data.rssi_ = cali.calculate_sl(lte.estimated_rssi, info.gain());
+	data.rsrq_ = 20 * log10(lte.estimated_rsrq);
 	data.ssch_id_ = lte.SschRecord.ID;
 	data.ssch_quality_ = 20 * log10(lte.SschRecord.NormCorr);
 	data.rs_quality_ = -9999;

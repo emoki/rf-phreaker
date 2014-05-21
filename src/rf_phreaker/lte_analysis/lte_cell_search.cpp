@@ -3,7 +3,6 @@
 #include <math.h>
 #include <stdio.h>
 
-
 #include "lte_analysis.h"
 #include "lte_synchronization.h"
 
@@ -164,62 +163,21 @@ int lte_cell_search(const Ipp32fc* SignalSamples,
 
 		LteData[ii].NumAntennaPorts = (pbchInfo + ii)->NumAntPorts;
 		LteData[ii].Bandwidth = (pbchInfo + ii)->MasterIB.Bandwidth;
-
-	    switch(LteData[ii].Bandwidth)
-		{
-		 case LteBandwidth_1_4MHZ:
-			 SampleRate = 1.92e6;			
-			 break;
-
-		case LteBandwidth_3MHZ:
-			SampleRate = 3.84e6;			
-			break;
-
-		case LteBandwidth_5MHZ:
-			SampleRate = 7.68e6;			
-			break;
-
-		case LteBandwidth_10MHZ:
-			SampleRate = 15.36e6;			
-			break;
-
-		case LteBandwidth_15MHZ:
-			SampleRate = 23.04e6;
-			break;
-
-		case LteBandwidth_20MHZ:
-			SampleRate = 30.72e6;
-			break;
-
-		default:
-			SampleRate = 15.36e6;	
-			break;
-		
-		}
-
-		//if(LteData[ii].Bandwidth == LteBandwidth_Unknown) break;
-
-
 	
-		delayTime2 = 0;
-		frameStartSampleIndex = (unsigned int)floor((sschCorrRecord[ii].StartSampleNum/SampleRate192 - delayTime2)*SampleRate)+1;
-
 		LteData[ii].RsRecord.NormCorr = 0;
 		LteData[ii].RsRecord.RMSCorr = 0;
 
-		bTrue = calculateRSValues(signal_384, sschCorrRecord[ii].ID, frameStartSampleIndex, cyclicPrefixMode[ii], &RSStrength, &RSNorm, &(LteData[ii].AvgDigitalVoltage));
+		bTrue = calculateRSValues(signal_384, sschCorrRecord[ii].ID, sschCorrRecord[ii].StartSampleNum, cyclicPrefixMode[ii], &RSStrength, &RSNorm, &(LteData[ii].AvgDigitalVoltage));
 
 		//std::cout << "Lte Calculate RS Values Time elapsed: " << lte_diffclock(end,begin) << " ms\n";
 
-		sschCorrRecord[ii].StartSampleNum = frameStartSampleIndex;
-		pschCorrRecord[ii].StartSampleNum = (unsigned int)floor((pschCorrRecord[ii].StartSampleNum/SampleRate192 - delayTime2)*SampleRate)+1;
 		LteData[ii].RsRecord.RMSCorr = RSStrength;//RSRP
 		LteData[ii].RsRecord.NormCorr = RSNorm; //RSRQ
-		LteData[ii].RsRecord.StartSampleNum = frameStartSampleIndex;
+		LteData[ii].RsRecord.StartSampleNum = sschCorrRecord[ii].StartSampleNum;
 
-		LteData[ii].rssi = LteData[ii].AvgDigitalVoltage; 
-		LteData[ii].rsrp = RSStrength;
-		LteData[ii].rsrq = RSNorm > .0001 ? 20 * log10(RSNorm) : -999;
+		LteData[ii].estimated_rssi = LteData[ii].AvgDigitalVoltage; 
+		LteData[ii].estimated_rsrp = RSStrength;
+		LteData[ii].estimated_rsrq = RSNorm;
 
 		LteData[ii].frame_number = (pbchInfo+ii)->MasterIB.systemFrameNum;			
         
