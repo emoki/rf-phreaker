@@ -221,7 +221,7 @@ void blade_rf_controller::enable_blade_rx()
 		5, 1024 * 4, 4, 0), __FILE__, __LINE__);
 #else
 	check_blade_status(bladerf_sync_config(comm_blade_rf_->blade_rf(), BLADERF_MODULE_RX, BLADERF_FORMAT_SC16_Q11,
-		5, 1024 * 4, 4, 2000), __FILE__, __LINE__);
+		5, 1024 * 4, 4, 0), __FILE__, __LINE__);
 #endif
 
 	check_blade_status(bladerf_enable_module(comm_blade_rf_->blade_rf(),
