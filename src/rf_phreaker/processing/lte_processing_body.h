@@ -45,7 +45,7 @@ public:
 		double avg_rms = ipp_helper::calculate_average_rms(info->get_iq().get(), info->get_iq().length());
 
 		if(meas.size()) {
-			LOG_L(VERBOSE) << "LTE processing - Found " << meas.size() << " possible LTE measurments.  Frequency: " << info->frequency() / 1e6
+			LOG_L(VERBOSE) << "LTE processing - Found " << meas.size() << " possible LTE measurements.  Frequency: " << info->frequency() / 1e6
 				<< "mhz | Bandwidth: " << info->bandwidth() / 1e6 << "mhz | Sampling rate: " << info->sampling_rate() / 1e6 << "mhz.";
 		}
 
