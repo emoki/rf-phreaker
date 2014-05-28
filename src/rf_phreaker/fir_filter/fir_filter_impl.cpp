@@ -81,6 +81,11 @@ void fir_filter_impl::set_zero_delay(bool zeroDelay)
 
 int fir_filter_impl::set_taps(int length, double normFactor, double norm_cutoff_freq)
 {
+	if(length < 0) {
+		length = std::max(m_UpFactor, m_DownFactor) * 20;
+		if(length % 2 == 0)
+			length += 1;
+	}
 	if ( length < 5 ) throw std::invalid_argument("fir_filter_impl::SetTaps length < 5, not allowed when specifying cut-off frequency.");
 
 	// Rule of thumb for norm cutoff freq is 1 / max(up, down).  We mulitple by .5 because IPP specifies the cutoff freq 

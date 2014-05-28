@@ -76,6 +76,8 @@ public:
 
 	void output_binary(const std::string &filename = "ipp_array.txt") const;
 
+	void zero_out();
+
 private:
 	void allocate(int length);
 
@@ -242,6 +244,21 @@ template<typename DataType> DataType ipp_array<DataType>::get_value(int position
 template<typename DataType>	int ipp_array<DataType>::length() const
 {
 	return length_;
+}
+
+template<> inline void ipp_array<Ipp16sc>::zero_out()
+{
+	ipp_helper::check_status((ippsZero_16sc(array_, length_)));
+}
+
+template<> inline void ipp_array<Ipp32f>::zero_out()
+{
+	ipp_helper::check_status((ippsZero_32f(array_, length_)));
+}
+
+template<> inline void ipp_array<Ipp32fc>::zero_out()
+{
+	ipp_helper::check_status((ippsZero_32fc(array_, length_)));
 }
 
 template<typename DataType>	void ipp_array<DataType>::copy(const DataType *data, int data_length)
