@@ -229,39 +229,34 @@ TEST(Cappeen, TestMain)
 		collection_info info;
 		info.collection_filename_ = "test_file";
 		std::vector<TECHNOLOGIES_AND_BANDS> tech_bands;
-		//tech_bands.push_back(WCDMA_BAND_850);
-		//tech_bands.push_back(WCDMA_BAND_1900);
-		//tech_bands.push_back(WCDMA_BAND_2100);
+		tech_bands.push_back(WCDMA_BAND_850);
+		tech_bands.push_back(WCDMA_BAND_1900);
+		tech_bands.push_back(WCDMA_BAND_2100);
 		//tech_bands.push_back(WCDMA_BAND_900);
 		//tech_bands.push_back(WCDMA_BAND_1800);
-		//tech_bands.push_back(LTE_BAND_1);
-		//tech_bands.push_back(LTE_BAND_12);
-		//tech_bands.push_back(LTE_BAND_2);
-		//tech_bands.push_back(LTE_BAND_5);
+		tech_bands.push_back(LTE_BAND_12);
+		tech_bands.push_back(LTE_BAND_5);
+		tech_bands.push_back(LTE_BAND_2);
+		tech_bands.push_back(LTE_BAND_1);
 		info.tech_and_bands_to_sweep_.elements_ = &tech_bands[0];
 		info.tech_and_bands_to_sweep_.num_elements_ = tech_bands.size();
 
 		for(int i = 0; i < 5000000; ++i) {
+			out.new_hw_info_ = false;
+			out.error_occurred_ = false;
 			EXPECT_EQ(0, cappeen_open_unit(&serial[0], serial.size()));
 
-			std::this_thread::sleep_for(std::chrono::milliseconds(200));
-			out.new_hw_info_ = false;
-			std::vector<uint32_t> freqs; freqs.push_back(871600000); freqs.push_back(2142500000/*2132500000*/);  /*freqs.push_back(2132500000);*/ freqs.push_back(1977500000);
-			
-			
-			for(int i = 0; i < 10; i++) {
-				EXPECT_EQ(0, cappeen_start_frequency_correction_using_frequencies(&freqs[0], freqs.size()));
-				//EXPECT_EQ(0, cappeen_start_frequency_correction_using_sweep(info));
+			//std::cout << "Starting frequency correction.\n";
+			//std::vector<uint32_t> freqs; freqs.push_back(871600000); freqs.push_back(2142500000); freqs.push_back(1977500000);
+			//EXPECT_EQ(0, cappeen_start_frequency_correction_using_frequencies(&freqs[0], freqs.size()));
+			//EXPECT_EQ(0, cappeen_start_frequency_correction_using_sweep(info));
+			//for(int i = 0; i < 10000; ++i) {
+			//	std::this_thread::sleep_for(std::chrono::seconds(1));
+			//	if(out.error_occurred_ || out.new_hw_info_)
+			//		break;
+			//}
 
-				for(int i = 0; i < 10000; ++i) {
-					std::this_thread::sleep_for(std::chrono::seconds(1));
-					if(out.error_occurred_ || out.new_hw_info_)
-						break;
-				}
-
-				if(out.error_occurred_)
-					continue;
-			}
+			std::cout << "Starting collection.\n";
 			EXPECT_EQ(0, cappeen_start_collection(info));
 
 			for(int i = 0; i < 60*60; ++i) {
@@ -278,7 +273,6 @@ TEST(Cappeen, TestMain)
 				EXPECT_EQ(0, cappeen_close_unit(&serial[0], serial.size()));
 			}
 			else {
-				break;
 				do {
 					EXPECT_EQ(0, cappeen_list_available_units(&serials[0], serials.size()));
 					std::string serial(&serials[0]);
