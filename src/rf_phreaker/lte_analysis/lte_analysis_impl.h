@@ -41,7 +41,11 @@ public:
 private:
 	rf_phreaker::frequency_type determine_sampling_rate(const rf_phreaker::raw_signal &raw_signal, lte_measurements &lte_meas);
 
-	rf_phreaker::fir_filter& get_filter_and_set_resampled_length(rf_phreaker::frequency_type input_sampling_rate, rf_phreaker::frequency_type output_sampling_rate, int num_input_samples);
+	rf_phreaker::fir_filter& get_filter_and_set_resampled_length(rf_phreaker::frequency_type input_sampling_rate, rf_phreaker::frequency_type output_sampling_rate, int num_resampled_samples);
+
+	int calculate_required_num_samples_for_cell_search(int num_half_frames);
+
+	void clear_lte_measurements();
 
 	static const int num_measurements = 100;
 

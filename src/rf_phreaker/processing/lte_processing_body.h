@@ -38,7 +38,7 @@ public:
 	{
 		lte_measurements meas;
 
-		int status = analysis_.cell_search(*info, meas, calculate_num_half_frames(info->time_ns() > milli_to_nano(30) ? milli_to_nano(30) : info->time_ns()));
+		int status = analysis_.cell_search(*info, meas, calculate_num_half_frames(info->time_ns() > milli_to_nano(46) ? milli_to_nano(46) : info->time_ns()));
 		if(status != 0)
 			throw lte_analysis_error("Error processing lte.");
 
@@ -63,6 +63,7 @@ public:
 		auto freq = info.meas_->frequency();
 
 		if(info.processed_data_.size()) {
+			//output(info);
 			
 			//// Reduce the time (num half frames) that we process if we are less than the minimum collection round.  This will
 			//// help speed up the process of removing the false detections.
@@ -133,7 +134,7 @@ private:
 
 		LteChannelBandwidth bw = LteBandwidth_Unknown;
 		for(auto &data : info.processed_data_) {
-			if(data.Bandwidth != LteBandwidth_Unknown && data.NumAntennaPorts != LteAntPorts_Unknown && data.rsrp > .001) {
+			if(data.Bandwidth != LteBandwidth_Unknown && data.NumAntennaPorts != LteAntPorts_Unknown) {
 				if(data.Bandwidth > bw)
 					bw = data.Bandwidth;
 			}
