@@ -28,6 +28,34 @@
 #include <stdio.h>
 #include <libbladeRF.h>
 #include "host_config.h"
+#include "str_queue.h"
+
+/* Fatal errors */
+#define CLI_RETFATAL        (-1024)
+#define CLI_RET_MEM         (CLI_RETFATAL)      /**< Memory allocation failure */
+#define CLI_RET_UNKNOWN     (CLI_RETFATAL - 1)  /**< Unexpected failure */
+
+/* Non-fatal errors */
+#define CLI_RET_QUIT        (-1)    /**< Got request to quit */
+#define CLI_RET_NOCMD       (-2)    /**< Non-existant command */
+#define CLI_RET_MAX_ARGC    (-3)    /**< Maximum number of arguments reached */
+#define CLI_RET_INVPARAM    (-4)    /**< Invalid parameters passed */
+#define CLI_RET_LIBBLADERF  (-5)    /**< See cli_state for libladerf error */
+#define CLI_RET_NODEV       (-6)    /**< No device is currently opened */
+#define CLI_RET_NARGS       (-7)    /**< Invalid number of arguments provided */
+#define CLI_RET_NOFPGA      (-8)    /**< FPGA Not Programmed */
+#define CLI_RET_STATE       (-9)    /**< Operation invalid for current state */
+#define CLI_RET_FILEOP      (-10)   /**< File operation failed */
+#define CLI_RET_BUSY        (-11)   /**< Device is currently busy */
+#define CLI_RET_NOFILE      (-12)   /**< File not found */
+
+/** Command OK */
+#define CLI_RET_OK          0
+
+/** Other state changes */
+#define CLI_RET_CLEAR_TERM  1       /**< Clear the terminal */
+#define CLI_RET_RUN_SCRIPT  2       /**< Run a script */
+
 
 /**
  * Differentiates error code types
@@ -36,7 +64,7 @@ enum error_type {
     ETYPE_BUG = -1, /**< Invalid value that should never occur; we
                      *   don't have a better classification and the
                      *   condition should not have occurred. */
-    ETYPE_CLI,      /**< CMD_RET cli error code */
+    ETYPE_CLI,      /**< CLI_RET cli error code */
     ETYPE_BLADERF,  /**< libbladeRF error code */
     ETYPE_ERRNO,    /**< errno value */
 };
@@ -60,6 +88,8 @@ struct cli_state {
 
     int last_lib_error;             /**< Last libbladeRF error */
 
+    bool exec_from_cmdline;         /**< Exec commands from cmd line list */
+    struct str_queue *exec_list;    /**< List of commands from the cmd line */
     struct script *scripts;         /**< Open script files */
 
     struct rxtx_data *rx;           /**< Data for sample reception */
@@ -104,6 +134,21 @@ bool cli_device_is_streaming(struct cli_state *s);
 void cli_err(struct cli_state *s, const char *pfx, const char *format, ...);
 
 /**
+ * @return true if provided return code is fatal, false otherwise
+ */
+static inline bool cli_fatal(int status) { return status <= CLI_RETFATAL; }
+
+/**
+ * Print a brief description of the specified error codes
+ *
+ * @param   error       CLI_RET_* error
+ * @param   lib_error   BLADERF_ERR_* - only used if error is CLI_RET_LIBBLADERF
+ *
+ * @return A string represntation of the provided errors
+ */
+const char * cli_strerror(int error, int lib_error);
+
+/**
  * Intialize error info. Defaults to "no error"
  *
  */
@@ -146,16 +191,12 @@ char *to_path(FILE *f);
 /**
  * Open the file, expanding the path first, if possible.
  *
- * This is a wrapper around fopen() and interactive_expand_path()
+ * @param[in]   filename    Filename to expand and open
+ * @param[in]   mode        fopen() access mode string
+ * @param[out]  file        Opened file handle on success, NULL on failure
  *
- * @note The value of errno IS NOT guarenteed to be assoicated with fopen()
- *       failures when this function returns.
- *
- * @param   filename    Filename to expand and open
- * @param   mode        fopen() access mode string
- *
- * @return  File handle on success, NULL on failure.
+ * @return  0 on success, CMD_RET_* value on failure
  */
-FILE *expand_and_open(const char *filename, const char *mode);
+int expand_and_open(const char *filename, const char *mode, FILE **file);
 
 #endif

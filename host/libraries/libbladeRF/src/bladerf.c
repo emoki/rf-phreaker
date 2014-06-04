@@ -211,7 +211,15 @@ int bladerf_enable_module(struct bladerf *dev,
 int bladerf_set_loopback(struct bladerf *dev, bladerf_loopback l)
 {
     if (l == BLADERF_LB_FIRMWARE) {
-        return dev->fn->set_firmware_loopback(dev, true);
+        /* Firmware loopback was implemented in FW v1.7.0 */
+        if (version_less_than(&dev->fw_version, 1, 7, 0)) {
+            log_warning("Firmware v1.7.0 or later is required "
+                        "for firmware loopback\n");
+            return BLADERF_ERR_UNSUPPORTED;
+        } else {
+            return dev->fn->set_firmware_loopback(dev, true);
+        }
+
     } else {
         return lms_set_loopback_mode(dev, l);
     }
@@ -717,7 +725,7 @@ error:
 int bladerf_flash_fpga(struct bladerf *dev, const char *fpga_file)
 {
     int status;
-    uint8_t *buf;
+    uint8_t *buf = NULL;
     size_t buf_size;
     const char env_override[] = "BLADERF_SKIP_FPGA_SIZE_CHECK";
 
@@ -730,10 +738,10 @@ int bladerf_flash_fpga(struct bladerf *dev, const char *fpga_file)
             status = BLADERF_ERR_INVAL;
         } else {
             status = flash_write_fpga_bitstream(dev, &buf, buf_size);
-            free(buf);
         }
     }
 
+    free(buf);
     return status;
 }
 
@@ -770,6 +778,8 @@ const char * bladerf_strerror(int error)
             return "Misaligned flash access";
         case BLADERF_ERR_CHECKSUM:
             return "Invalid checksum";
+        case BLADERF_ERR_NO_FILE:
+            return "File not found";
         case 0:
             return "Success";
         default:

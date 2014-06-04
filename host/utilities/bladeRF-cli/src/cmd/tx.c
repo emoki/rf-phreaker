@@ -103,7 +103,7 @@ static void *tx_callback(struct bladerf *dev,
                             to_read, tx->file_mgmt.file);
 
         if (read_status != to_read && ferror(tx->file_mgmt.file)) {
-            set_last_error(&tx->last_error, ETYPE_CLI, CMD_RET_FILEOP);
+            set_last_error(&tx->last_error, ETYPE_CLI, CLI_RET_FILEOP);
             samples_int16 = NULL;
             goto tx_callback_out;
         }
@@ -161,7 +161,7 @@ tx_callback_out:
  *                 changed. (On success they'll be set to the binary file,
  *                 and on failure the csv will be closed.)
  *
- * return 0 on success, CMD_RET_* on failure
+ * return 0 on success, CLI_RET_* on failure
  */
 static int tx_csv_to_sc16q11(struct cli_state *s)
 {
@@ -181,22 +181,19 @@ static int tx_csv_to_sc16q11(struct cli_state *s)
 
     assert(tx->file_mgmt.path != NULL);
 
-    csv = expand_and_open(tx->file_mgmt.path, "r");
-    if (!csv) {
-        status = CMD_RET_FILEOP;
+    status = expand_and_open(tx->file_mgmt.path, "r", &csv);
+    if (status != 0) {
         goto tx_csv_to_sc16q11_out;
     }
 
-    status = 0;
     bin_name = strdup(TMP_FILE_NAME);
     if (!bin_name) {
-        status = CMD_RET_MEM;
+        status = CLI_RET_MEM;
         goto tx_csv_to_sc16q11_out;
     }
 
-    bin = expand_and_open(bin_name, "wb+");
-    if (!bin) {
-        status = CMD_RET_FILEOP;
+    status = expand_and_open(bin_name, "wb+", &bin);
+    if (status != 0) {
         goto tx_csv_to_sc16q11_out;
     }
 
@@ -220,7 +217,7 @@ static int tx_csv_to_sc16q11(struct cli_state *s)
                 tmp_iq[0] = tmp_int;
             } else {
                 cli_err(s, "tx", "Line %d: Encountered invalid I value", line);
-                status = CMD_RET_INVPARAM;
+                status = CLI_RET_INVPARAM;
                 break;
             }
 
@@ -242,13 +239,13 @@ static int tx_csv_to_sc16q11(struct cli_state *s)
                     tmp_iq[1] = tmp_int;
                 } else {
                     cli_err(s, "tx", "Line %d: encountered invalid Q value", line);
-                    status = CMD_RET_INVPARAM;
+                    status = CLI_RET_INVPARAM;
                     break;
                 }
 
             } else {
                 cli_err(s, "tx", "Error: Q value missing");
-                status = CMD_RET_INVPARAM;
+                status = CLI_RET_INVPARAM;
                 break;
             }
 
@@ -256,12 +253,12 @@ static int tx_csv_to_sc16q11(struct cli_state *s)
             token = strtok_r(NULL, delim, &saveptr);
             if (!token) {
                 if (fwrite(tmp_iq, sizeof(tmp_iq[0]), 2, bin) != 2) {
-                    status = CMD_RET_FILEOP;
+                    status = CLI_RET_FILEOP;
                     break;
                 }
             } else {
                 cli_err(s, "tx", "Line (%d): Encountered extra token(s)", line);
-                status = CMD_RET_INVPARAM;
+                status = CLI_RET_INVPARAM;
                 break;
             }
         }
@@ -269,19 +266,24 @@ static int tx_csv_to_sc16q11(struct cli_state *s)
         line++;
     }
 
-    if (status == 0 && feof(csv)) {
-        tx->file_mgmt.format = RXTX_FMT_BIN_SC16Q11;
-        free(tx->file_mgmt.path);
-        tx->file_mgmt.path = bin_name;
+    if (status == 0) {
+        if (feof(csv)) {
+            tx->file_mgmt.format = RXTX_FMT_BIN_SC16Q11;
+            free(tx->file_mgmt.path);
+            tx->file_mgmt.path = bin_name;
 
-        if (n_clamped != 0) {
-            printf("    Warning: %u values clamped within DAC SC16 Q11 range "
-                   "of [%d, %d].\n", n_clamped, SC16Q11_IQ_MIN, SC16Q11_IQ_MAX);
+            if (n_clamped != 0) {
+                printf("    Warning: %u values clamped within DAC SC16 Q11 "
+                       "range of [%d, %d].\n",
+                       n_clamped, SC16Q11_IQ_MIN, SC16Q11_IQ_MAX);
+            }
+        } else {
+            status = CLI_RET_FILEOP;
         }
     }
 
 tx_csv_to_sc16q11_out:
-    if (status < 0) {
+    if (status != 0) {
         free(bin_name);
     }
 
@@ -426,14 +428,8 @@ static int tx_cmd_start(struct cli_state *s)
         pthread_mutex_lock(&s->tx->file_mgmt.file_lock);
 
         assert(s->tx->file_mgmt.format == RXTX_FMT_BIN_SC16Q11);
-        s->tx->file_mgmt.file = expand_and_open(s->tx->file_mgmt.path, "rb");
-        if (!s->tx->file_mgmt.file) {
-            set_last_error(&s->tx->last_error, ETYPE_ERRNO, errno);
-            status = CMD_RET_FILEOP;
-        } else {
-            status = 0;
-        }
-
+        status = expand_and_open(s->tx->file_mgmt.path, "rb",
+                                 &s->tx->file_mgmt.file);
         pthread_mutex_unlock(&s->tx->file_mgmt.file_lock);
     }
 
@@ -451,7 +447,7 @@ static int tx_cmd_start(struct cli_state *s)
     if (status != 0) {
         s->last_lib_error = status;
         set_last_error(&s->rx->last_error, ETYPE_BLADERF, s->last_lib_error);
-        return CMD_RET_LIBBLADERF;
+        return CLI_RET_LIBBLADERF;
     }
 
     /* Request thread to start running */
@@ -462,7 +458,7 @@ static int tx_cmd_start(struct cli_state *s)
      * present in the tx task */
     if (status != 0) {
         cli_err(s, "tx", "TX did not start up in the alloted time\n");
-        status = CMD_RET_UNKNOWN;
+        status = CLI_RET_UNKNOWN;
     }
 
     return status;
@@ -534,7 +530,7 @@ static int tx_config(struct cli_state *s, int argc, char **argv)
                     pthread_mutex_unlock(&s->tx->param_lock);
                 } else {
                     cli_err(s, argv[0], RXTX_ERRMSG_VALUE(argv[1], val));
-                    return CMD_RET_INVPARAM;
+                    return CLI_RET_INVPARAM;
                 }
 
             } else if (!strcasecmp("delay", argv[i])) {
@@ -551,12 +547,12 @@ static int tx_config(struct cli_state *s, int argc, char **argv)
                     pthread_mutex_unlock(&s->tx->param_lock);
                 } else {
                     cli_err(s, argv[0], RXTX_ERRMSG_VALUE(argv[1], val));
-                    return CMD_RET_INVPARAM;
+                    return CLI_RET_INVPARAM;
                 }
 
             } else {
                 cli_err(s, argv[0], "Unrecognized config parameter: %s", argv[i]);
-                return CMD_RET_INVPARAM;
+                return CLI_RET_INVPARAM;
             }
         }
     }
@@ -583,7 +579,7 @@ int cmd_tx(struct cli_state *s, int argc, char **argv)
         status = rxtx_handle_wait(s, s->tx, argc, argv);
     } else {
         cli_err(s, argv[0], "Invalid command: \"%s\"", argv[1]);
-        status = CMD_RET_INVPARAM;
+        status = CLI_RET_INVPARAM;
     }
 
     return status;

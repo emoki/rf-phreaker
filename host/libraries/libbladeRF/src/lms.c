@@ -1480,7 +1480,7 @@ static inline int tune_vcocap(struct bladerf *dev, uint8_t base, uint8_t data)
     }
 
     start_i = stop_i = vcocap;
-    while (start_i > 0 && vtune == VCO_NORM) {
+    while (start_i > 0 && vtune != VCO_HIGH) {
         start_i -= 1;
 
         status = bladerf_lms_write(dev, base + 9, start_i | data);
@@ -1511,7 +1511,7 @@ static inline int tune_vcocap(struct bladerf *dev, uint8_t base, uint8_t data)
 
     vtune >>= 6;
 
-    while (stop_i < 64 && vtune == VCO_NORM) {
+    while (stop_i < 64 && vtune != VCO_LOW) {
         stop_i += 1;
 
         status = bladerf_lms_write(dev, base + 9, stop_i | data);
@@ -1832,7 +1832,6 @@ int lms_calibrate_dc(struct bladerf *dev, bladerf_cal_module module)
     }
 
     val = clockenables;
-    cal_clock = 0 ;
     switch (module) {
         case BLADERF_DC_CAL_LPF_TUNING:
             cal_clock = (1 << 5);  /* CLK_EN[5] - LPF CAL Clock */

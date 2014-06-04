@@ -20,10 +20,7 @@
 #include <stdio.h>
 #include <string.h>
 #include "cmd.h"
-
-/* FIXME Including interactive routines here is an indicator that this
-         design needs some refactoring? */
-#include "interactive.h"
+#include "input.h"
 
 static int load_fpga(struct cli_state *s, char *file)
 {
@@ -31,16 +28,16 @@ static int load_fpga(struct cli_state *s, char *file)
     int cmd_status = 0;
     int lib_status;
 
-    if ((expanded_path = interactive_expand_path(file)) == NULL) {
+    if ((expanded_path = input_expand_path(file)) == NULL) {
         cli_err(s, "Unable to expand FPGA file path: \"%s\"", file);
-        cmd_status = CMD_RET_INVPARAM;
+        cmd_status = CLI_RET_INVPARAM;
     } else {
         printf("Loading fpga from %s...\n", expanded_path);
         lib_status = bladerf_load_fpga(s->dev, expanded_path);
 
         if (lib_status < 0) {
             s->last_lib_error = lib_status;
-            cmd_status = CMD_RET_LIBBLADERF;
+            cmd_status = CLI_RET_LIBBLADERF;
         } else {
             printf("Done.\n");
         }
@@ -57,16 +54,16 @@ static int load_fx3(struct cli_state *s, char *file)
     int cmd_status = 0;
     int lib_status;
 
-    if ((expanded_path = interactive_expand_path(file)) == NULL) {
+    if ((expanded_path = input_expand_path(file)) == NULL) {
         cli_err(s, "Unable to expand firmware file path: \"%s\"", file);
-        cmd_status = CMD_RET_INVPARAM;
+        cmd_status = CLI_RET_INVPARAM;
     } else {
         printf("Flashing firmware from %s...\n", expanded_path);
         lib_status = bladerf_flash_firmware(s->dev, expanded_path);
 
         if (lib_status < 0) {
             s->last_lib_error = lib_status;
-            cmd_status = CMD_RET_LIBBLADERF;
+            cmd_status = CLI_RET_LIBBLADERF;
         } else {
             printf("Done. Cycle power on the device.\n");
         }
@@ -83,12 +80,12 @@ int cmd_load(struct cli_state *state, int argc, char **argv)
         load fpga <filename>
         load fx3 <filename>
     */
-    int rv = CMD_RET_OK ;
+    int rv = CLI_RET_OK ;
 
     if (!cli_device_is_opened(state)) {
-        return CMD_RET_NODEV;
+        return CLI_RET_NODEV;
     } else if (cli_device_is_streaming(state)) {
-        return CMD_RET_BUSY;
+        return CLI_RET_BUSY;
     }
 
     if ( argc == 3 ) {
@@ -99,10 +96,10 @@ int cmd_load(struct cli_state *state, int argc, char **argv)
         } else {
             cli_err(state, argv[0],
                     "\"%s\" is not a valid programming target\n", argv[1]) ;
-            rv = CMD_RET_INVPARAM;
+            rv = CLI_RET_INVPARAM;
         }
     } else {
-        rv = CMD_RET_NARGS;
+        rv = CLI_RET_NARGS;
     }
 
     return rv;
