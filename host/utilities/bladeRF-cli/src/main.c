@@ -26,16 +26,18 @@
 #include <pthread.h>
 #include <string.h>
 #include <libbladeRF.h>
-#include "interactive.h"
+#include "input/input.h"
+#include "str_queue.h"
 #include "script.h"
 #include "common.h"
 #include "cmd.h"
 #include "version.h"
 
 
-#define OPTSTR "L:d:f:l:s:ipv:h"
+#define OPTSTR "e:L:d:f:l:s:ipv:h"
 
 static const struct option longopts[] = {
+    { "exec",               required_argument,  0, 'e' },
     { "flash-fpga",         required_argument,  0, 'L' },
     { "device",             required_argument,  0, 'd' },
     { "flash-firmware",     required_argument,  0, 'f' },
@@ -93,19 +95,40 @@ static void init_rc_config(struct rc_config *rc)
     rc->script_file = NULL;
 }
 
+static void deinit_rc_config(struct rc_config *rc)
+{
+    free(rc->device);
+    free(rc->fw_file);
+    free(rc->flash_fpga_file);
+    free(rc->fpga_file);
+    free(rc->script_file);
+}
 
 /* Fetch runtime-configuration info
  *
  * Returns 0 on success, -1 on fatal error (and prints error msg to stderr)
  */
-int get_rc_config(int argc, char *argv[], struct rc_config *rc)
+int get_rc_config(int argc, char *argv[], struct rc_config *rc,
+                  struct str_queue *exec_list)
 {
     int optidx;
     int c = getopt_long(argc, argv, OPTSTR, longopts, &optidx);
 
     do {
         switch(c) {
+            case 'e':
+                if (str_queue_enq(exec_list, optarg) != 0) {
+                    return -1;
+                }
+                break;
+
             case 'f':
+                if (rc->fw_file != NULL) {
+                    fprintf(stderr, "Error: Firmware file specified more "
+                            "than once.\n");
+                    return -1;
+                }
+
                 rc->fw_file = strdup(optarg);
                 if (!rc->fw_file) {
                     perror("strdup");
@@ -114,6 +137,12 @@ int get_rc_config(int argc, char *argv[], struct rc_config *rc)
                 break;
 
             case 'L':
+                if (rc->flash_fpga_file != NULL) {
+                    fprintf(stderr, "Error: FPGA file specified more "
+                            "than once.\n");
+                    return -1;
+                }
+
                 rc->flash_fpga_file = strdup(optarg);
                 if (!rc->flash_fpga_file) {
                     perror("strdup");
@@ -122,6 +151,12 @@ int get_rc_config(int argc, char *argv[], struct rc_config *rc)
                 break;
 
             case 'l':
+                if (rc->fpga_file != NULL) {
+                    fprintf(stderr, "Error: FPGA file specified more "
+                            "than once.\n");
+                    return -1;
+                }
+
                 rc->fpga_file = strdup(optarg);
                 if (!rc->fpga_file) {
                     perror("strdup");
@@ -130,6 +165,12 @@ int get_rc_config(int argc, char *argv[], struct rc_config *rc)
                 break;
 
             case 'd':
+                if (rc->device != NULL) {
+                    fprintf(stderr, "Error: FPGA file specified more "
+                            "than once.\n");
+                    return -1;
+                }
+
                 rc->device = strdup(optarg);
                 if (!rc->device) {
                     perror("strdup");
@@ -138,6 +179,11 @@ int get_rc_config(int argc, char *argv[], struct rc_config *rc)
                 break;
 
             case 's':
+                if (rc->script_file != NULL) {
+                    fprintf(stderr, "Error: Script file already specified.\n");
+                    return -1;
+                }
+
                 rc->script_file = strdup(optarg);
                 if (!rc->script_file) {
                     perror("strdup");
@@ -210,6 +256,9 @@ void usage(const char *argv0)
     printf("                                   autoloading. Use -L X or --flash-fpga X to\n");
     printf("                                   disable FPGA autoloading.\n");
     printf("  -p, --probe                      Probe for devices, print results, then exit.\n");
+    printf("  -e, --exec <command>             Execute the specified interactive mode command.\n");
+    printf("                                   Multiple -e flags may be specified. The commands\n");
+    printf("                                   will be executed in the provided order.\n");
     printf("  -s, --script <file>              Run provided script.\n");
     printf("  -i, --interactive                Enter interactive mode.\n");
     printf("      --lib-version                Print libbladeRF version and exit.\n");
@@ -229,6 +278,13 @@ void usage(const char *argv0)
     printf("  If the -d parameter is not provided, the first available device\n");
     printf("  will be used for the provided command, or will be opened prior\n");
     printf("  to entering interactive mode.\n");
+    printf("\n");
+    printf("  Commands are executed in the following order:\n");
+    printf("    Command line options, -e <command>, script commands, interactive mode commands.\n");
+    printf("\n");
+    printf("  When running 'rx/tx start' from a script or via -e, ensure these commands\n");
+    printf("  are later followed by 'rx/tx wait [timeout]' to ensure the program will\n");
+    printf("  not attempt to exit before reception/transmission is complete.\n");
     printf("\n");
 }
 
@@ -337,6 +393,7 @@ int main(int argc, char *argv[])
     struct rc_config rc;
     struct cli_state *state;
     bool exit_immediately = false;
+    struct str_queue exec_list;
 
     /* If no actions are specified, just show the usage text and exit */
     if (argc == 1) {
@@ -344,9 +401,10 @@ int main(int argc, char *argv[])
         return 0;
     }
 
+    str_queue_init(&exec_list);
     init_rc_config(&rc);
 
-    if (get_rc_config(argc, argv, &rc)) {
+    if (get_rc_config(argc, argv, &rc, &exec_list)) {
         return 1;
     }
 
@@ -357,6 +415,7 @@ int main(int argc, char *argv[])
         return 1;
     }
 
+    state->exec_list = &exec_list;
     bladerf_log_set_verbosity(rc.verbosity);
 
     if (rc.show_help) {
@@ -404,31 +463,24 @@ int main(int argc, char *argv[])
         if (rc.script_file) {
             status = cli_open_script(&state->scripts, rc.script_file);
             if (status != 0) {
+                fprintf(stderr, "Failed to open script file \"%s\": %s\n",
+                        rc.script_file, strerror(-status));
                 goto main_issues;
             }
         }
 
-main_issues:
-        /* These items are no longer needed */
-        free(rc.device);
-        rc.device = NULL;
-
-        free(rc.fw_file);
-        rc.fw_file = NULL;
-
-        free(rc.fpga_file);
-        rc.fpga_file = NULL;
-
-        free(rc.script_file);
-        rc.script_file = NULL;
-
-        /* Drop into interactive mode or begin executing commands
-         * from a script. If we're not requested to do either, exit cleanly */
-        if (rc.interactive_mode || cli_script_loaded(state->scripts)) {
-            status = interactive(state, !rc.interactive_mode);
+        /* Drop into interactive mode or begin executing commands from a a
+         * command-line list or a script. If we're not requested to do either,
+         * exit cleanly */
+        if (!str_queue_empty(&exec_list) || rc.interactive_mode ||
+            cli_script_loaded(state->scripts)) {
+            status = input_loop(state, rc.interactive_mode);
         }
     }
 
+main_issues:
     cli_state_destroy(state);
+    str_queue_deinit(&exec_list);
+    deinit_rc_config(&rc);
     return status;
 }

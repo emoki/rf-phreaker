@@ -30,7 +30,7 @@
 #include "cmd.h"
 #include "cmd/rxtx.h"
 #include "script.h"
-#include "interactive.h"
+#include "input.h"
 
 /* There's currently only ever 1 active cli_state */
 static struct cli_state *cli_state;
@@ -47,9 +47,9 @@ static inline void ctrlc_handler_common(int signal)
         }
 
         if (!waiting) {
-            /* Let out interactive support know we got a ctrl-C if we weren't just
+            /* Let interactive support know we got a ctrl-C if we weren't just
              * waiting on an rx/tx wait command */
-            interactive_ctrlc();
+            input_ctrlc();
         }
     }
 }
@@ -180,7 +180,7 @@ void cli_err(struct cli_state *s, const char *pfx, const char *format, ...)
     memset(lbuf, 0, sizeof(lbuf));
 
     /* If we're in a script, we can provide line number info */
-    if (cli_script_loaded(s->scripts)) {
+    if (!s->exec_from_cmdline && cli_script_loaded(s->scripts)) {
         ret = snprintf(lbuf, sizeof(lbuf), " (%s:%d)",
                        cli_script_file_name(s->scripts),
                        cli_script_line(s->scripts));
@@ -211,6 +211,50 @@ void cli_err(struct cli_state *s, const char *pfx, const char *format, ...)
     }
 }
 
+const char * cli_strerror(int error, int lib_error)
+{
+    switch (error) {
+        case CLI_RET_MEM:
+            return "A fatal memory allocation error has occurred";
+
+        case CLI_RET_UNKNOWN:
+            return "A fatal unknown error has occurred";
+
+        case CLI_RET_MAX_ARGC:
+            return "Number of arguments exceeds allowed maximum";
+
+        case CLI_RET_LIBBLADERF:
+            return bladerf_strerror(lib_error);
+
+        case CLI_RET_NODEV:
+            return "No devices are currently opened";
+
+        case CLI_RET_NARGS:
+            return "Invalid number of arguments provided";
+
+        case CLI_RET_NOFPGA:
+            return "Command requires FPGA to be loaded";
+
+        case CLI_RET_STATE:
+            return "Operation invalid in current state";
+
+        case CLI_RET_FILEOP:
+            return "File operation failed";
+
+        case CLI_RET_BUSY:
+            return "Could not complete operation - device is currently busy";
+
+        case CLI_RET_NOFILE:
+            return "File not found";
+
+        /* Other commands shall print out helpful info from within their
+         * implementation */
+        default:
+            return NULL;
+    }
+}
+
+
 void cli_error_init(struct cli_error *e)
 {
     pthread_mutex_init(&e->lock, NULL);
@@ -234,17 +278,28 @@ void get_last_error(struct cli_error *e, enum error_type *type, int *error)
     pthread_mutex_unlock(&e->lock);
 }
 
-FILE *expand_and_open(const char *filename, const char *mode)
+int expand_and_open(const char *filename, const char *mode, FILE **file)
 {
+    int status;
     char *expanded_filename;
-    FILE *ret;
 
-    expanded_filename = interactive_expand_path(filename);
+    *file = NULL;
+    expanded_filename = input_expand_path(filename);
     if (expanded_filename == NULL) {
-        return NULL;
+        return CLI_RET_UNKNOWN; /* Shouldn't really ever happen */
     }
 
-    ret = fopen(expanded_filename, mode);
+    *file = fopen(expanded_filename, mode);
+    if (*file == NULL) {
+        if (errno == ENOENT) {
+            status = CLI_RET_NOFILE;
+        } else {
+            status = CLI_RET_FILEOP;
+        }
+    } else {
+        status = 0;
+    }
+
     free(expanded_filename);
-    return ret;
+    return status;
 }

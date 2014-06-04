@@ -1,7 +1,7 @@
 /**
- * @file interactive.h
+ * @file input.h
  *
- * @brief Functions to be provided by interactive mode implementatoins
+ * @brief Functions to be provided by input mode implementatoins
  *
  * This file is part of the bladeRF project
  *
@@ -21,40 +21,41 @@
  * with this program; if not, write to the Free Software Foundation, Inc.,
  * 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA.
  */
-#ifndef INTERACTIVE_H__
-#define INTERACTIVE_H__
+#ifndef INPUT_H_
+#define INPUT_H_
 
 #include <libbladeRF.h>
 #include "common.h"
-
-/* TODO - Alleviate dependecny upon cmd. Change CMD_RET_*  to CLI_RET_* */
-#include "cmd.h"
+#include "str_queue.h"
 
 /**
  * Interactive mode or script execution 'main loop'
  *
  * @param   s           CLI state
- * @param   script_only Exit after script completes
+ * @param   interactive Enter interactive mode after completing script or
+ *                      commands provided via the command line
+ * @param   exec_list   Commands to executue prior to scripts or interactive
+ *                      mode
  *
- * @return  0 on success, CMD_RET_* on failure
+ * @return  0 on success, CLI_RET_* on failure
  */
-int interactive(struct cli_state *s, bool script_only);
+int input_loop(struct cli_state *s, bool interactive);
 
 /**
- * Expand a file path using the interactive mode support backend
+ * Expand a file path using the input mode support backend
  *
  * @post Heap-allocated memory is used to return the expanded path. The caller
  *       is responsible for calling free().
  *
  * @return Expanded path on success, NULL on failure.
  */
-char * interactive_expand_path(const char *path);
+char * input_expand_path(const char *path);
 
 /**
- * Notify interactive support that we caught CTRL-C. This is neccessary if
+ * Notify input support that we caught CTRL-C. This is neccessary if
  * the underlying support doesn't catch signals, such as the simple fgets-based
  * implementation.
  */
-void interactive_ctrlc(void);
+void input_ctrlc(void);
 
 #endif  /* INTERACTICE_H__ */
