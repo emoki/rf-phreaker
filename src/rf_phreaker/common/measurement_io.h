@@ -22,7 +22,7 @@ inline std::ostream& operator<<(std::ostream &os, const hardware &t)
 	os << t.scanner_id_ << delimiter;
 
 	for(const auto &d : t.frequency_paths_)
-		os << d.start_freq_ << "-" << d.end_freq_ << delimiter;
+		os << d.low_freq_ << "-" << d.high_freq_ << delimiter;
 
 	switch(t.device_speed_)
 	{

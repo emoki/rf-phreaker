@@ -14,11 +14,9 @@ namespace rf_phreaker { namespace scanner {
 struct rf_switch
 {
 	rf_switch(frequency_type low_freq, frequency_type high_freq, int32_t setting)
-		: setting_(setting)
-	{
-		path_.start_freq_ = low_freq;
-		path_.end_freq_ = high_freq;
-	}
+		: path_(low_freq, high_freq)
+		, setting_(setting)
+	{}
 	frequency_path path_;
 	int32_t setting_;
 };
@@ -53,7 +51,7 @@ public:
 
 		rf_switch *rf_sw = nullptr;
 		for(auto &sw : switches_) {
-			if(freq <= sw.path_.end_freq_ && freq >= sw.path_.start_freq_) {
+			if(freq <= sw.path_.high_freq_ && freq >= sw.path_.low_freq_) {
 				rf_sw = &sw;
 				break;
 			}

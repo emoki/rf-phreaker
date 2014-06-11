@@ -10,8 +10,10 @@ namespace rf_phreaker {
 
 	struct frequency_path
 	{
-		frequency_type start_freq_;
-		frequency_type end_freq_;
+		frequency_path() : low_freq_(-1), high_freq_(-1) {}
+		frequency_path(frequency_type start, frequency_type end) : low_freq_(start), high_freq_(end) {}
+		frequency_type low_freq_;
+		frequency_type high_freq_;
 	};
 
 	enum device_speed 
