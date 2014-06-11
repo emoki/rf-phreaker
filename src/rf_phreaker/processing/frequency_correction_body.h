@@ -54,14 +54,14 @@ public:
 		: graph_(graph)
 		, sc_(sc)
 		, io_(out)
-		, umts_settings_((int)s.sampling_rate_, (int)s.sampling_rate_, rf_phreaker::convert_to_samples(s.collection_time_, s.sampling_rate_), freq_corr_settings.general_settings_.num_coherent_slots_, 1)
+		, umts_settings_((int)s.sampling_rate_, (int)s.sampling_rate_, rf_phreaker::convert_to_samples(s.collection_time_, s.sampling_rate_), freq_corr_settings.general_settings_.num_coherent_slots_)
 		, analysis_(umts_settings_)
 		, frequency_correction_settings_(freq_corr_settings)
 		, layer_3_settings_(layer_3_settings)
 		, shifter_((double)s.sampling_rate_)
 		, shift_sum_(0)
 		, num_shifts_(0)
-		, has_corrected_freq_error_(true)
+		, has_corrected_freq_error_(false)
 	{
 		if(frequency_correction_settings_.frequency_correction_range_start_ >= frequency_correction_settings_.frequency_correction_range_end_)
 			throw processing_error("Frequency correction range is invalid.  Please choose start value lower than the end value.");
@@ -83,7 +83,7 @@ public:
 
 	void operator()(measurement_package info, umts_output_and_feedback_node::output_ports_type &out)
 	{
-		if(info->collection_round() > 2 && num_shifts_ > 5 || (info->collection_round() > 8)) {
+		if(info->collection_round() > 2 && num_shifts_ > 15 || (info->collection_round() > 8)) {
 			graph_->root_task()->cancel_group_execution();
 			if(num_shifts_ > 0) {
 				sc_->write_vctcxo_trim(info->frequency(), (frequency_type)(shift_sum_ / (double)num_shifts_)).get();
