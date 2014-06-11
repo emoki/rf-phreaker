@@ -19,10 +19,11 @@
  */
 #include <errno.h>
 #include <string.h>
-#include "interactive.h"
-#include "interactive_impl.h"
+#include "input.h"
+#include "input_impl.h"
 #include "cmd.h"
 #include "script.h"
+#include "rel_assert.h"
 
 static void exit_script(struct cli_state *s)
 {
@@ -36,7 +37,7 @@ static void exit_script(struct cli_state *s)
         }
 
         if (!cli_script_loaded(s->scripts)) {
-            status = interactive_set_input(stdin);
+            status = input_set_input(stdin);
 
             /* At least attempt to report something... */
             if (status < 0) {
@@ -47,13 +48,13 @@ static void exit_script(struct cli_state *s)
     }
 }
 
-int interactive(struct cli_state *s, bool script_only)
+int input_loop(struct cli_state *s, bool interactive)
 {
     char *line;
     int status;
     const char *error;
 
-    status = interactive_init();
+    status = input_init();
     if (status < 0) {
         return status;
     }
@@ -61,50 +62,68 @@ int interactive(struct cli_state *s, bool script_only)
     status = 0;
 
     if (cli_script_loaded(s->scripts)) {
-        status = interactive_set_input(cli_script_file(s->scripts));
+        status = input_set_input(cli_script_file(s->scripts));
         if (status < 0) {
-            fprintf(stderr, "Failed to run script. Aborting!\n");
-            status = CMD_RET_QUIT;
+            fprintf(stderr, "Failed to load script. Aborting!\n");
+            status = CLI_RET_QUIT;
         }
     }
 
-    while (!cmd_fatal(status) && status != CMD_RET_QUIT) {
+    s->exec_from_cmdline = !str_queue_empty(s->exec_list);
 
-        /* TODO: Change the prompt based on which device is open */
-        line = interactive_get_line(CLI_DEFAULT_PROMPT);
+    while (!cli_fatal(status) && status != CLI_RET_QUIT) {
 
-        if (!line) {
+        if (s->exec_from_cmdline) {
+            line = str_queue_deq(s->exec_list);
+            assert(line != NULL);
+        } else {
+            line = input_get_line(CLI_DEFAULT_PROMPT);
+        }
+
+        if (!line && !s->exec_from_cmdline) {
             if (cli_script_loaded(s->scripts)) {
-                exit_script(s);
+
+                if (!s->exec_from_cmdline) {
+                    exit_script(s);
+                }
 
                 /* Exit if we were run with a script, but not asked
                  * to drop into interactive mode */
-                if (script_only)
-                    status = CMD_RET_QUIT;
-
+                if (!interactive) {
+                    status = CLI_RET_QUIT;
+                }
             } else {
-                /* Leaving interactivce mode */
+                /* Leaving interactive mode */
                 break;
             }
         } else {
             status = cmd_handle(s, line);
 
             if (status < 0) {
-                error = cmd_strerror(status, s->last_lib_error);
+                error = cli_strerror(status, s->last_lib_error);
                 if (error) {
                     cli_err(s, "Error", "%s", error);
                 }
 
-                /* Stop executing script if we're in one */
-                exit_script(s);
+                /* Stop executing script or command list */
+                if (s->exec_from_cmdline) {
+                    str_queue_clear(s->exec_list);
+                } else {
+                    exit_script(s);
+                }
+
+                /* Quit if we're not supposed to drop to a prompt */
+                if (!interactive) {
+                    status = CLI_RET_QUIT;
+                }
 
             } else if (status > 0){
                 switch (status) {
-                    case CMD_RET_CLEAR_TERM:
-                        interactive_clear_terminal();
+                    case CLI_RET_CLEAR_TERM:
+                        input_clear_terminal();
                         break;
-                    case CMD_RET_RUN_SCRIPT:
-                        status = interactive_set_input(
+                    case CLI_RET_RUN_SCRIPT:
+                        status = input_set_input(
                                     cli_script_file(s->scripts));
 
                         if (status < 0) {
@@ -117,10 +136,24 @@ int interactive(struct cli_state *s, bool script_only)
                 }
             }
         }
-        cli_script_bump_line_count(s->scripts);
+
+        if (s->exec_from_cmdline) {
+            free(line);
+            line = NULL;
+            s->exec_from_cmdline = !str_queue_empty(s->exec_list);
+
+            /* Nothing left to do here */
+            if (!interactive &&
+                !s->exec_from_cmdline && !cli_script_loaded(s->scripts)) {
+                status = CLI_RET_QUIT;
+            }
+
+        } else {
+            cli_script_bump_line_count(s->scripts);
+        }
     }
 
-    interactive_deinit();
+    input_deinit();
 
     return 0;
 }

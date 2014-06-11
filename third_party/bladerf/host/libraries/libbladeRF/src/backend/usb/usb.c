@@ -629,6 +629,7 @@ static inline int read_page(struct bladerf *dev, uint8_t read_operation,
         request = read_operation;
     } else {
         assert(!"Bug - invalid read_operation value");
+        return BLADERF_ERR_UNEXPECTED;
     }
 
     /* Retrieve data from the firmware page buffer */
@@ -1235,9 +1236,10 @@ static int usb_dac_write(struct bladerf *dev, uint16_t value)
     int status;
     struct uart_cmd cmd;
     int base;
-    int legacy_location;
 
-    legacy_location = (dev->fpga_version.major == 0 && dev->fpga_version.minor == 0 && dev->fpga_version.patch <= 3);
+    /* FPGA v0.0.4 introduced a change to the location of the DAC registers */
+    const bool legacy_location = version_less_than(&dev->fpga_version, 0, 0, 4);
+
     base = legacy_location ? 0 : 34;
 
     cmd.addr = base;
@@ -1264,8 +1266,14 @@ static int usb_xb_spi(struct bladerf *dev, uint32_t value)
 
 static int usb_set_firmware_loopback(struct bladerf *dev, bool enable) {
     int result;
-    int status = vendor_cmd_int_wvalue(dev, BLADE_USB_CMD_SET_LOOPBACK,
-                                       enable, &result);
+    int status;
+
+    status = vendor_cmd_int_wvalue(dev, BLADE_USB_CMD_SET_LOOPBACK,
+                                   enable, &result);
+    if (status != 0) {
+        return status;
+    }
+
 
     status = change_setting(dev, USB_IF_NULL);
     if (status == 0) {
