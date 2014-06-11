@@ -21,20 +21,34 @@ blade_rf_controller::blade_rf_controller(blade_rf_controller &&c)
 
 blade_rf_controller::~blade_rf_controller()
 {
-	if(comm_blade_rf_.get())
+	if(comm_blade_rf_.get()) {
 		bladerf_close(comm_blade_rf_->blade_rf());
+	}
 }
 
 int blade_rf_controller::num_available_scanners()
 {
-	std::vector<comm_info_ptr> devices;
 	bladerf_devinfo *dev_info = nullptr;
 
 	int num_devices = bladerf_get_device_list(&dev_info);
 
+	// Sometimes the API reports 0 devices connected even tho we have a scanner connected. 
+	// In which case we repeat the call.
+	if(num_devices == BLADERF_ERR_NODEV) {
+		for(int i = 0; i < 4; ++i) {
+			num_devices = bladerf_get_device_list(&dev_info);
+			if(num_devices > 0)
+				break;
+		}
+	}
+
 	// We do not consider no blade devices connected to be an error here.
-	if(num_devices != BLADERF_ERR_NODEV)
+	if(num_devices != BLADERF_ERR_NODEV && num_devices < 0) {
+		bladerf_free_device_list(dev_info);
 		check_blade_status(num_devices, __FILE__, __LINE__);
+	}
+
+	bladerf_free_device_list(dev_info);
 
 	return num_devices;
 }
@@ -46,9 +60,22 @@ std::vector<comm_info_ptr> blade_rf_controller::list_available_scanners()
 
 	int num_devices = bladerf_get_device_list(&dev_info);
 
+	// Sometimes the API reports 0 devices connected even tho we have a scanner connected. 
+	// In which case we repeat the call.
+	if(num_devices == BLADERF_ERR_NODEV) {
+		std::this_thread::sleep_for(std::chrono::milliseconds(50));
+		for(int i = 0; i < 4; ++i) {
+			num_devices = bladerf_get_device_list(&dev_info);
+			if(num_devices > 0)
+				break;
+		}
+	}
+
 	// We do not consider no blade devices connected to be an error here.
-	if(num_devices != BLADERF_ERR_NODEV)
+	if(num_devices != BLADERF_ERR_NODEV && num_devices < 0) {
+		bladerf_free_device_list(dev_info);
 		check_blade_status(num_devices, __FILE__, __LINE__);
+	}
 
 	for(int i = 0; i < num_devices; i++) {
 		devices.push_back(comm_info_ptr(new comm_blade_rf(dev_info[i])));
@@ -69,12 +96,23 @@ void blade_rf_controller::open_scanner(const scanner_id_type &id)
 	std::string open_str = "libusb:serial=" + id;
 
 	bladerf *blade_rf;
-
-	check_blade_status(bladerf_open(&blade_rf, open_str.c_str()), __FILE__, __LINE__);
-
 	bladerf_devinfo dev_info;
+	while(1) {
+		int retry = 0;
+		try {
+			check_blade_status(bladerf_open(&blade_rf, open_str.c_str()), __FILE__, __LINE__);
 
-	check_blade_status(bladerf_get_devinfo(blade_rf, &dev_info), __FILE__, __LINE__);
+			check_blade_status(bladerf_get_devinfo(blade_rf, &dev_info), __FILE__, __LINE__);
+	
+			break;
+		}
+		catch(rf_phreaker_error &err) {
+			if(++retry > 3)
+				throw err;
+			LOG_L(DEBUG) << err.what() << "  Attempting to reopen...";
+			std::this_thread::sleep_for(std::chrono::milliseconds(100));
+		}
+	}
 
 	comm_blade_rf_.reset(new comm_blade_rf(dev_info, blade_rf));
 
@@ -94,13 +132,6 @@ void blade_rf_controller::refresh_scanner_info()
 	check_blade_status(bladerf_get_devinfo(comm_blade, &blade.dev_info_), __FILE__, __LINE__);
 
 	blade.usb_speed_ = static_cast<bladerf_dev_speed>(check_blade_status(bladerf_device_speed(comm_blade_rf_->blade_rf()), __FILE__, __LINE__));
-
-	// bladerf_stats is not currently supported.  FPGA needs to support behavior.
-	//check_blade_status(bladerf_stats(comm_blade, &blade.stats_), __FILE__, __LINE__);
-	//blade.stats_.rx_overruns = 0;
-	//blade.stats_.rx_throughput = 0;
-	//blade.stats_.tx_throughput = 0;
-	//blade.stats_.tx_underruns = 0;
 
 	bladerf_version(&blade.blade_rf_version_);
 
@@ -296,11 +327,11 @@ void blade_rf_controller::update_vctcxo_trim(uint16_t trim)
 {
 	check_blade_comm();
 
-//	disable_blade_rx();
+	disable_blade_rx();
 
 	check_blade_status(bladerf_dac_write(comm_blade_rf_->blade_rf(), trim), __FILE__, __LINE__);
 
-//	enable_blade_rx();
+	enable_blade_rx();
 
 	scanner_blade_rf_->set_vctcxo_trim_value(trim);
 
@@ -380,7 +411,7 @@ gps blade_rf_controller::get_gps_data()
 
 measurement_info blade_rf_controller::get_rf_data_use_auto_gain(frequency_type frequency, time_type time_ns, bandwidth_type bandwidth, frequency_type sampling_rate)
 {
-	auto gain = get_auto_gain(frequency, bandwidth);
+	auto gain = get_auto_gain(frequency, bandwidth, 5000000, sampling_rate);
 
 	return get_rf_data(frequency, time_ns, bandwidth, gain, sampling_rate);
 }
@@ -493,10 +524,10 @@ measurement_info blade_rf_controller::get_rf_data(frequency_type frequency, time
 	for(int i = 0; i < 10; ++i) {
 #ifdef _DEBUG
 		status = bladerf_sync_rx(comm_blade_rf_->blade_rf(), aligned_buffer,
-			num_samples_to_transfer + throw_away_samples, &metadata, 500);
+			num_samples_to_transfer + throw_away_samples, &metadata, 1500);
 #else
 		status = bladerf_sync_rx(comm_blade_rf_->blade_rf(), aligned_buffer,
-			num_samples_to_transfer + throw_away_samples, &metadata, 500);
+			num_samples_to_transfer + throw_away_samples, &metadata, 1500);
 #endif
 		if(status == 0) 
 			break;
@@ -536,6 +567,8 @@ measurement_info blade_rf_controller::get_rf_data(int num_samples)
 	bladerf_lna_gain tmp_lna_gain;
 	gain_type gain;
 
+	check_blade_comm();
+
 	check_blade_status(bladerf_get_lna_gain(comm_blade_rf_->blade_rf(), &tmp_lna_gain), __FILE__, __LINE__);
 	gain.lna_gain_ = convert(tmp_lna_gain);
 
@@ -553,7 +586,7 @@ measurement_info blade_rf_controller::get_rf_data(int num_samples)
 		&frequency), __FILE__, __LINE__);
 
 	// BladeRF only accepts data num_samples that are a multiple of 1024.
-	num_samples += 1024 - num_samples % 1024;
+	num_samples = add_mod(num_samples, 1024);
 
 	const auto return_bytes = num_samples * 2 * sizeof(int16_t);
 
@@ -566,10 +599,10 @@ measurement_info blade_rf_controller::get_rf_data(int num_samples)
 	for(int i = 0; i < 10; ++i) {
 #ifdef _DEBUG
 		status = bladerf_sync_rx(comm_blade_rf_->blade_rf(), aligned_buffer,
-			return_bytes, &metadata, 500);
+			num_samples, &metadata, 0);
 #else
 		status = bladerf_sync_rx(comm_blade_rf_->blade_rf(), aligned_buffer,
-			return_bytes, &metadata, 500);
+			num_samples, &metadata, 2500);
 #endif
 		if(status == 0) 
 			break;
