@@ -6,6 +6,8 @@
 #include <thread>
 #include <atomic>
 #include <fstream>
+#include <iomanip>
+#include <ctime>
 
 using namespace beagle_api;
 
@@ -15,9 +17,42 @@ public:
 	output() { error_occurred_ = false; new_hw_info_ = false; }
 
 	virtual void __stdcall available_beagle_info(long beagle_id, const beagle_info &info){
-		std::cout << info.beagle_serial_ << "\t" 
-			<< (info.device_speed_ == beagle_api::USB_SUPER_SPEED ? "USB_SUPER_SPEED" : "USB_HI_SPEED") 
-			<< "\t" << info.state_ << "\n";
+		std::cout << "serial: " << info.beagle_serial_ << "\n";
+		char mbstr[100];
+		
+		auto t1 = localtime(&info.dds_clock_correction_calibration_date_);
+		std::strftime(mbstr, sizeof(mbstr), "%A %c", std::localtime(&info.dds_clock_correction_calibration_date_));
+		std::cout << "dds_clock_corr_date: " << mbstr << "\n"; //std::put_time(t1, "%Y-%m-%d %X") << "\n";
+		
+		auto t2 = localtime(&info.rf_calibration_date_);
+		std::strftime(mbstr, sizeof(mbstr), "%A %c", std::localtime(&info.rf_calibration_date_));
+		std::cout << "rf_calibration_date: " << mbstr << "\n"; //std::put_time(t2, "%Y-%m-%d %X") << "\n";
+		
+		std::cout << (info.device_speed_ == beagle_api::USB_SUPER_SPEED ? "USB_SUPER_SPEED" : "USB_HI_SPEED") << "\n";
+
+		switch(info.state_) {
+		case BEAGLESTATE::BEAGLE_USBCLOSED:
+			std::cout << "BEAGLE_USB_CLOSED" << "\n";
+			break;
+		case BEAGLESTATE::BEAGLE_USBOPENED:
+			std::cout << "BEAGLE_USB_OPENED" << "\n";
+			break;
+		case BEAGLESTATE::BEAGLE_ERROR:
+			std::cout << "BEAGLE_ERROR" << "\n";
+			break;
+		case BEAGLESTATE::BEAGLE_COLLECTING:
+			std::cout << "BEAGLE_COLLECTING" << "\n";
+			break;
+		case BEAGLESTATE::BEAGLE_READY:
+			std::cout << "BEAGLE_READY" << "\n";
+			break;
+		case BEAGLESTATE::BEAGLE_WARMINGUP:
+			std::cout << "BEAGLE_WARMING_UP" << "\n";
+			break;
+		default:
+			std::cout << "UNKNOWN_BEAGLE_STATE" << "\n";
+		}
+
 		new_hw_info_ = true;
 	}
 	virtual void __stdcall available_gps_info(long beagle_id, const gps_info &info){
@@ -71,12 +106,12 @@ public:
 				t += "sib1 | ";
 				t += std::to_string(info[i].sib_1_.tac_) + " | ";
 				t += std::to_string(info[i].sib_1_.cid_) + " | ";
-				for(int j = 0; j < info[i].sib_1_.plmns_.num_elements_; ++j) {
+				for(uint32_t j = 0; j < info[i].sib_1_.plmns_.num_elements_; ++j) {
 					auto &k = info[i].sib_1_.plmns_.elements_;
 					t += "[" + std::string(k[j].mcc_) + " " + std::string(k[j].mnc_) + "] ";
 				}
 				t += " | ";
-				for(int j = 0; j < info[i].sib_1_.scheduled_sibs_.num_elements_; ++j) {
+				for(uint32_t j = 0; j < info[i].sib_1_.scheduled_sibs_.num_elements_; ++j) {
 					auto &k = info[i].sib_1_.scheduled_sibs_.elements_;
 					t += "[" + std::to_string(k[j].sib + 3) + " " + std::to_string(k[j].periodicity_in_frames_) + "f] ";
 				}
@@ -86,12 +121,12 @@ public:
 				t += "sib4 | ";
 				t += std::to_string(info[i].sib_4_.csg_physical_cellid_range_.start_) + " " + std::to_string(info[i].sib_4_.csg_physical_cellid_range_.range_) + " | ";
 				t += "[";
-				for(int j = 0; j < info[i].sib_4_.intra_freq_neighbor_cell_list_.num_elements_; ++j) {
+				for(uint32_t j = 0; j < info[i].sib_4_.intra_freq_neighbor_cell_list_.num_elements_; ++j) {
 					auto &k = info[i].sib_4_.intra_freq_neighbor_cell_list_.elements_;
 					t += std::to_string(k[j].physical_cell_id_) + " | ";
 				}
 				t += "] | [";
-				for(int j = 0; j < info[i].sib_4_.intra_freq_black_cell_list_.num_elements_; ++j) {
+				for(uint32_t j = 0; j < info[i].sib_4_.intra_freq_black_cell_list_.num_elements_; ++j) {
 					auto &k = info[i].sib_4_.intra_freq_black_cell_list_.elements_;
 					t += std::to_string(k[j].start_) + " " + std::to_string(k[j].range_) + " | ";
 				}
@@ -100,18 +135,18 @@ public:
 			t += "\t";
 			if(info[i].sib_5_.decoded_) {
 				t += "sib5 | ";
-				for(int j = 0; j < info[i].sib_5_.inter_freq_carrier_info_list_.num_elements_; ++j) {
+				for(uint32_t j = 0; j < info[i].sib_5_.inter_freq_carrier_info_list_.num_elements_; ++j) {
 					auto &k = info[i].sib_5_.inter_freq_carrier_info_list_.elements_;
 					t += std::to_string(k[j].downlink_arfcn_value_eutra_) + " | ";
 					t += std::to_string(k[j].allowed_measurement_bandwidth_) + " | ";
 					t += (k[j].presence_antenna_port_1_ ? "TRUE | " : "FALSE | ");
 					t += "[";
-					for(int jj = 0; jj < k[j].inter_freq_neighbor_cell_list_.num_elements_; ++jj) {
+					for(uint32_t jj = 0; jj < k[j].inter_freq_neighbor_cell_list_.num_elements_; ++jj) {
 						auto &kk = k[j].inter_freq_neighbor_cell_list_.elements_;
 						t += std::to_string(kk[jj].physical_cell_id_) + " ";
 					}
 					t += "] | [";
-					for(int jj = 0; jj < k[j].inter_freq_black_cell_list_.num_elements_; ++jj) {
+					for(uint32_t jj = 0; jj < k[j].inter_freq_black_cell_list_.num_elements_; ++jj) {
 						auto &kk = k[j].inter_freq_black_cell_list_.elements_;
 						t += std::to_string(kk[jj].start_) + " " + std::to_string(kk[jj].range_) + " | ";
 					}
@@ -121,12 +156,12 @@ public:
 			t += "\t";
 			if(info[i].sib_6_.decoded_) {
 				t += "sib6 | [";
-				for(int j = 0; j < info[i].sib_6_.carrier_freq_list_utra_fdd_.num_elements_; ++j) {
+				for(uint32_t j = 0; j < info[i].sib_6_.carrier_freq_list_utra_fdd_.num_elements_; ++j) {
 					auto &k = info[i].sib_6_.carrier_freq_list_utra_fdd_.elements_;
 					t += std::to_string(k[j]) + " ";
 				}
 				t += "] | [";
-				for(int j = 0; j < info[i].sib_6_.carrier_freq_list_utra_tdd_.num_elements_; ++j) {
+				for(uint32_t j = 0; j < info[i].sib_6_.carrier_freq_list_utra_tdd_.num_elements_; ++j) {
 					auto &k = info[i].sib_6_.carrier_freq_list_utra_tdd_.elements_;
 					t += std::to_string(k[j]) + " ";
 				}
@@ -135,12 +170,12 @@ public:
 			t += "\t";
 			if(info[i].sib_7_.decoded_) {
 				t += "sib7 | ";
-				for(int j = 0; j < info[i].sib_7_.carrier_freqs_.num_elements_; ++j) {
+				for(uint32_t j = 0; j < info[i].sib_7_.carrier_freqs_.num_elements_; ++j) {
 					auto &k = info[i].sib_7_.carrier_freqs_.elements_;
 
 					t += std::to_string(k[j].band_indicator_) + " | [";
 
-					for(int jj = 0; jj < k[j].arfcns_.num_elements_; ++jj) {
+					for(uint32_t jj = 0; jj < k[j].arfcns_.num_elements_; ++jj) {
 						auto &kk = k[j].arfcns_.elements_;
 						t += kk[jj] + " ";
 					}
@@ -150,22 +185,22 @@ public:
 			t += "\t";
 			if(info[i].sib_8_.decoded_) {
 				t += "sib8 | ";
-				for(int j = 0; j < info[i].sib_8_.parameters_hrpd_.num_elements_; ++j) {
+				for(uint32_t j = 0; j < info[i].sib_8_.parameters_hrpd_.num_elements_; ++j) {
 					auto &k = info[i].sib_8_.parameters_hrpd_.elements_;
 					t += std::to_string(k[j].arfcn_value_cmda_2000_) + " | ";
 					t += std::to_string(k[j].band_) + " | [";
-					for(int jj = 0; jj < k[j].physical_cell_ids_.num_elements_; ++jj) {
+					for(uint32_t jj = 0; jj < k[j].physical_cell_ids_.num_elements_; ++jj) {
 						auto &kk = k[j].physical_cell_ids_.elements_;
 						t += kk[jj] + " ";
 					}
 					t += "] | ";
 				}
 
-				for(int j = 0; j < info[i].sib_8_.parameters_1xrtt_.num_elements_; ++j) {
+				for(uint32_t j = 0; j < info[i].sib_8_.parameters_1xrtt_.num_elements_; ++j) {
 					auto &k = info[i].sib_8_.parameters_1xrtt_.elements_;
 					t += std::to_string(k[j].arfcn_value_cmda_2000_) + " | ";
 					t += std::to_string(k[j].band_) + " | [";
-					for(int jj = 0; jj < k[j].physical_cell_ids_.num_elements_; ++jj) {
+					for(uint32_t jj = 0; jj < k[j].physical_cell_ids_.num_elements_; ++jj) {
 						auto &kk = k[j].physical_cell_ids_.elements_;
 						t += kk[jj] + " ";
 					}
