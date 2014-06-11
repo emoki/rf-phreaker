@@ -448,9 +448,9 @@ long cappeen_impl::start_frequency_correction(const beagle_api::collection_info 
 
 		auto collection_containers = create_collection_info_containers(collection);
 
-		std::remove_if(collection_containers.begin(), collection_containers.end(), [&](const processing::collection_info_container &c) {
+		collection_containers.erase(std::remove_if(collection_containers.begin(), collection_containers.end(), [&](const processing::collection_info_container &c) {
 			return c.tech_ == LTE_LAYER_3_DECODE || c.tech_ == LTE_SWEEP;
-		});
+		}), collection_containers.end());
 
 		if(collection_containers.empty())
 			throw cappeen_api_error("Please input at least one WCDMA band to start frequency correction.");
