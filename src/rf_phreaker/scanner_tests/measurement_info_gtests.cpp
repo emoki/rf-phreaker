@@ -8,7 +8,7 @@ TEST(RawSignal, TestMain)
 {
 	const int signal_size = 1000;
 	gain_type g(lms::LNA_MAX, 30, 10);
-	measurement_info test(signal_size, 1001, 1002, 1003, g, 1004);
+	measurement_info test(signal_size, 1001, 1002, 1003, g, 1, 2, 1004, "1234567891234567891234");
 	test.set_operating_band(rf_phreaker::UMTS_OPERATING_BAND_1);
 
 	for(int i = 0; i < signal_size; ++i) {
@@ -40,6 +40,9 @@ TEST(RawSignal, TestMain)
 		EXPECT_EQ(new_sig.gain().lna_gain_, lms::LNA_MAX);
 		EXPECT_EQ(new_sig.gain().rxvga1_, 30);
 		EXPECT_EQ(new_sig.gain().rxvga2_, 10);
+		EXPECT_EQ(new_sig.blade_adjustment(), 1);
+		EXPECT_EQ(new_sig.rf_board_adjustment(), 2);
 		EXPECT_EQ(new_sig.collection_round(), 1004);
+		EXPECT_EQ(new_sig.serial(), "1234567891234567891234");
 	}
 }

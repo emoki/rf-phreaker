@@ -13,6 +13,7 @@
 #include "rf_phreaker/scanner/lms_defines.h"
 #include "rf_phreaker/scanner/scanner_blade_rf.h"
 #include "rf_phreaker/scanner/gain_manager.h"
+#include "rf_phreaker/scanner/eeprom.h"
 
 namespace rf_phreaker { namespace scanner {
 
@@ -63,11 +64,24 @@ public:
 
 	measurement_info get_rf_data_use_auto_gain(frequency_type freq, time_type time_ns, bandwidth_type bandwidth, frequency_type sampling_rate = 0);
 
-	measurement_info get_rf_data(frequency_type freq, time_type time_ns, bandwidth_type bandwidth, const gain_type &gain, frequency_type sampling_rate = 0);
+	measurement_info get_rf_data(frequency_type freq, time_type time_ns, bandwidth_type bandwidth, const gain_type &gain, frequency_type sampling_rate = 0,
+		uint32_t switch_setting = 0, uint32_t switch_mask = 0);
 
 	measurement_info get_rf_data(int num_samples);
 
 	gain_type get_auto_gain(frequency_type freq, bandwidth_type bandwidth, time_type time_ns = 0, frequency_type sampling_rate = 0);
+
+	void initialize_eeprom();
+
+	eeprom_meta_data read_eeprom_meta_data();
+
+	void write_eeprom(const eeprom &ee);
+
+	eeprom read_eeprom();
+
+	void write_calibration(calibration &cal);
+
+	calibration read_calibration();
 
 private:
 	void enable_blade_rx();
@@ -86,14 +100,16 @@ private:
 
 	gain_manager gain_manager_;
 
-	rf_switch_conversion rf_switch_conversion_;
-
 	std::unique_ptr<comm_blade_rf> comm_blade_rf_;
 
 	std::shared_ptr<scanner_blade_rf> scanner_blade_rf_;
 
 	measurement_info parameter_cache_;
 	uint32_t gpio_cache_;
+
+	eeprom eeprom_;
+
+	int64_t collection_count_;
 };
 
 }}

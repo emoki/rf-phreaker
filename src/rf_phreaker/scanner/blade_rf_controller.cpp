@@ -206,12 +206,21 @@ void blade_rf_controller::do_initial_scanner_config()
 
 	check_blade_status(bladerf_expansion_gpio_dir_write(comm_blade_rf_->blade_rf(), 0xFFFFFFFF), __FILE__, __LINE__);
 
+	try {
+		auto meta_eeprom = read_eeprom_meta_data();
+		if(meta_eeprom.is_valid()) {
+			eeprom_ = read_eeprom();
+		}
+		else
+			throw rf_phreaker_error("EEPROM meta data is invalid.");
+	} 
+	catch(std::exception &err) {
+		LOG_L(INFO) << "Error reading EEPROM.  " << err.what();
+	}
 	enable_blade_rx();
 
 	//bladerf_log_set_verbosity(BLADERF_LOG_LEVEL_DEBUG);
 
-	// construction of licensing
-	// construction of calibration table
 }
 
 void blade_rf_controller::enable_blade_rx()
@@ -221,7 +230,7 @@ void blade_rf_controller::enable_blade_rx()
 		5, 1024 * 4, 4, 0), __FILE__, __LINE__);
 #else
 	check_blade_status(bladerf_sync_config(comm_blade_rf_->blade_rf(), BLADERF_MODULE_RX, BLADERF_FORMAT_SC16_Q11,
-		5, 1024 * 4, 4, 0), __FILE__, __LINE__);
+		5, 1024 * 4, 4, 2000), __FILE__, __LINE__);
 #endif
 
 	check_blade_status(bladerf_enable_module(comm_blade_rf_->blade_rf(),
@@ -393,7 +402,8 @@ gain_type blade_rf_controller::get_auto_gain(frequency_type freq, bandwidth_type
 	return gain_manager_.calculate_new_gain(freq, bandwidth);
 }
 
-measurement_info blade_rf_controller::get_rf_data(frequency_type frequency, time_type time_ns, bandwidth_type bandwidth, const gain_type &gain, frequency_type sampling_rate)
+measurement_info blade_rf_controller::get_rf_data(frequency_type frequency, time_type time_ns, bandwidth_type bandwidth, const gain_type &gain, frequency_type sampling_rate,
+	uint32_t switch_setting, uint32_t switch_mask)
 {
 	LOG_L(VERBOSE) << "Taking snapshot... " << "frequency: " << frequency / 1e6 << "mhz | time: "
 		<< time_ns / 1e6 << "ms | bandwidth: " << bandwidth / 1e6 
@@ -447,11 +457,21 @@ measurement_info blade_rf_controller::get_rf_data(frequency_type frequency, time
 	else
 		blade_bandwidth = parameter_cache_.bandwidth();
 
-	uint32_t gpio = rf_switch_conversion_.convert_to_gpio(frequency, bandwidth, 0);
-	if(gpio_cache_ != gpio) {
+	// For now we do not need to use the mask because we only use the expansion gpio pins
+	// for the switch settings. When the pins are used for other purposes we'll need to make
+	// sure we only set the pins necessary for the gpio.
+	if(switch_setting || switch_mask) {
 		check_blade_status(bladerf_expansion_gpio_write(comm_blade_rf_->blade_rf(),
-			rf_switch_conversion_.convert_to_gpio(frequency, bandwidth, gpio)), __FILE__, __LINE__);
-		gpio_cache_ = gpio;
+			switch_setting & switch_mask), __FILE__, __LINE__);
+	}
+	else {
+		auto auto_switch_setting = eeprom_.cal_.get_rf_switch(frequency);
+		uint32_t gpio = auto_switch_setting.switch_setting_ & auto_switch_setting.switch_mask_;
+		if(gpio_cache_ != gpio) {
+			check_blade_status(bladerf_expansion_gpio_write(comm_blade_rf_->blade_rf(),
+				gpio), __FILE__, __LINE__);
+			gpio_cache_ = gpio;
+		}
 	}
 
 	// BladeRF only accepts data num_samples that are a multiple of 1024.
@@ -460,7 +480,7 @@ measurement_info blade_rf_controller::get_rf_data(frequency_type frequency, time
 	int throw_away_samples = 1024*12;
 
 	int num_samples = rf_phreaker::convert_to_samples(time_ns, blade_sampling_rate);
-	auto num_samples_to_transfer = num_samples + 1024 - num_samples % 1024;
+	auto num_samples_to_transfer = add_mod(num_samples, 1024);
 
 	const auto return_bytes = (num_samples_to_transfer + throw_away_samples) * 2 * sizeof(int16_t);
 
@@ -489,7 +509,9 @@ measurement_info blade_rf_controller::get_rf_data(frequency_type frequency, time
 	
 	parameter_cache_ = measurement_info(0, frequency, blade_bandwidth, blade_sampling_rate , gain);
 
-	measurement_info data(num_samples, frequency, blade_bandwidth, blade_sampling_rate, gain);
+	measurement_info data(num_samples, frequency, blade_bandwidth, blade_sampling_rate, gain, 
+		eeprom_.cal_.get_nuand_adjustment(frequency), eeprom_.cal_.get_rf_board_adjustment(frequency), 
+		collection_count_++, eeprom_.cal_.nuand_serial_);
 
 	for(int i = throw_away_samples; i < (throw_away_samples + num_samples) * 2; ++i)
 		sign_extend_12_bits(reinterpret_cast<int16_t*>(aligned_buffer)[i]);
@@ -558,8 +580,9 @@ measurement_info blade_rf_controller::get_rf_data(int num_samples)
 	if(status)
 		throw blade_rf_error(std::string("Error collecting data samples.  ") + bladerf_strerror(status));
 
-	measurement_info data(num_samples, frequency, blade_bandwidth, blade_sampling_rate,
-						  gain);
+	measurement_info data(num_samples, frequency, blade_bandwidth, blade_sampling_rate, gain,
+		eeprom_.cal_.get_nuand_adjustment(frequency), eeprom_.cal_.get_rf_board_adjustment(frequency),
+		collection_count_++, eeprom_.cal_.nuand_serial_);
 
 	for(int i = 0; i < num_samples * 2; ++i)
 		sign_extend_12_bits(reinterpret_cast<int16_t*>(aligned_buffer)[i]);
@@ -585,5 +608,100 @@ void blade_rf_controller::check_blade_comm()
 	if(comm_blade_rf_.get() == nullptr)
 		throw rf_phreaker::comm_error("It does not appear there is a valid connection to the device.  Try opening the device.");
 }
+
+void blade_rf_controller::initialize_eeprom()
+{
+	check_blade_comm();
+	disable_blade_rx();
+	eeprom ee;
+	write_eeprom(ee);
+	enable_blade_rx();
+}
+
+eeprom_meta_data blade_rf_controller::read_eeprom_meta_data()
+{
+	check_blade_comm();
+
+	disable_blade_rx();
+
+	std::vector<uint8_t> md_bytes(eeprom_meta_data::absolute_total_byte_length(), 0);
+
+	check_blade_status(bladerf_read_flash(comm_blade_rf_->blade_rf(), &md_bytes[0],
+		eeprom_meta_data::absolute_page_address(), eeprom_meta_data::absolute_total_page_length()));
+
+	eeprom_meta_data md_eeprom;
+	md_eeprom.init(md_bytes);
+	
+	enable_blade_rx();
+	
+	return md_eeprom;
+}
+
+void blade_rf_controller::write_eeprom(const eeprom &ee)
+{
+	check_blade_comm();
+
+	disable_blade_rx();
+
+	auto new_eeprom_bytes = ee.serialize_to_bytes();
+
+	eeprom_meta_data meta_ee;
+	meta_ee.set_eeprom_byte_length_and_calculate_address(new_eeprom_bytes.size());
+	auto meta_bytes = meta_ee.serialize_to_bytes();
+
+	if(!meta_ee.is_valid())
+		throw rf_phreaker_error("Cannot write to the EEPROM.  EEPROM meta data is not valid.");
+
+	// Erase flash.
+	check_blade_status(bladerf_erase_flash(comm_blade_rf_->blade_rf(),
+		eeprom::absolute_erase_block_address(), eeprom::absolute_erase_block_length()));
+
+	// Perform writes.
+	check_blade_status(bladerf_write_flash(comm_blade_rf_->blade_rf(), &meta_bytes[0],
+		eeprom_meta_data::absolute_page_address(), eeprom_meta_data::absolute_total_page_length()));
+
+	check_blade_status(bladerf_write_flash(comm_blade_rf_->blade_rf(), &new_eeprom_bytes[0],
+		meta_ee.eeprom_page_address(), meta_ee.eeprom_page_length()));
+
+	enable_blade_rx();
+}
+
+eeprom blade_rf_controller::read_eeprom()
+{
+	check_blade_comm();
+
+	disable_blade_rx();
+
+	eeprom_meta_data meta_ee = read_eeprom_meta_data();
+
+	if(!meta_ee.is_valid())
+		throw rf_phreaker_error("Cannot read EEPROM.  EEPROM meta data is not valid.");
+
+	std::vector<uint8_t> bytes(eeprom::absolute_total_byte_length(), 0);
+
+	check_blade_status(bladerf_read_flash(comm_blade_rf_->blade_rf(), &bytes[0],
+		meta_ee.eeprom_page_address(), meta_ee.eeprom_page_length()));
+
+	eeprom ee;
+	ee.init(bytes);
+
+	enable_blade_rx();
+
+	return ee;
+}
+
+void blade_rf_controller::write_calibration(calibration & cal)
+{
+	eeprom ee = read_eeprom();
+	ee.cal_ = cal;
+	write_eeprom(ee);
+}
+
+calibration blade_rf_controller::read_calibration()
+{
+	eeprom ee = read_eeprom();
+	return ee.cal_;
+}
+
 
 }}

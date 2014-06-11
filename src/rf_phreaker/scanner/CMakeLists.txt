@@ -15,11 +15,14 @@ set (scanner_SRCS
 	blade_rf_controller.h
 	blade_rf_controller_async.h
 	byte_aligned_buffer.h
+	calibration.cpp
 	calibration.h
 	comm_blade_rf.h
 	comm_info.h
+	eeprom.h
 	gain.h
 	gain_manager.h
+	license.h
 	lms_defines.h
 	lms_utilities.h
 	measurement_info.h
@@ -33,6 +36,7 @@ set (scanner_SRCS
 	scanner_controller_interface.h
 	scanner_types.h
 	scanner_utility.h
+	signal_level_calculator.h
 	${SRC_PLATFORM_SPECIFIC}/stdafx.cpp)
 
 include_directories(${libbladeRF_SOURCE_DIR}/include)	

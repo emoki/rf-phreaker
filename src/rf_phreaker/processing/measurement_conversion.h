@@ -6,14 +6,13 @@
 #include "rf_phreaker/scanner/measurement_info.h"
 #include "rf_phreaker/umts_analysis/umts_measurement.h"
 #include "rf_phreaker/lte_analysis/lte_measurement.h"
-#include "rf_phreaker/scanner/calibration.h"
+#include "rf_phreaker/scanner/signal_level_calculator.h"
 
 namespace rf_phreaker { namespace processing {
 
 inline void convert_to_basic_data(basic_data &data, const scanner::measurement_info &info, double avg_rms)
 {
-	static scanner::calibration cali;
-	data.carrier_signal_level_ = cali.calculate_sl(avg_rms, info.gain());
+	data.carrier_signal_level_ = scanner::signal_level_calculator::calculate_sl(avg_rms, info);
 	data.carrier_bandwidth_ = info.bandwidth();
 	data.carrier_frequency_ = info.frequency();
 	data.collection_round_ = info.collection_round();
@@ -61,9 +60,8 @@ inline void convert_to_lte_data(lte_data &data, const scanner::measurement_info 
 	data.physical_cell_id_ = lte.RsRecord.ID;
 	data.psch_id_ = lte.PschRecord.ID;
 	data.psch_quality_ = 20 * log10(lte.PschRecord.NormCorr);
-	static scanner::calibration cali;
-	data.rsrp_ = cali.calculate_sl(lte.estimated_rsrp, info.gain());
-	data.rssi_ = cali.calculate_sl(lte.estimated_rssi, info.gain());
+	data.rsrp_ = scanner::signal_level_calculator::calculate_sl(lte.estimated_rsrp, info);
+	data.rssi_ = scanner::signal_level_calculator::calculate_sl(lte.estimated_rssi, info);
 	data.rsrq_ = 20 * log10(lte.estimated_rsrq);
 	data.ssch_id_ = lte.SschRecord.ID;
 	data.ssch_quality_ = 20 * log10(lte.SschRecord.NormCorr);

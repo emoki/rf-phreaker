@@ -67,6 +67,8 @@ inline time_type convert_to_time(int num_samples, frequency_type actual_sampling
 
 inline std::vector<std::string> tokenize(const std::string& input, const std::regex& pattern)
 {
+	if(input.empty())
+		return std::vector<std::string>();
 	// Passing -1 as the submatch index parameter performs splitting
 	std::sregex_token_iterator first(input.begin(), input.end(), pattern, -1);
 	std::sregex_token_iterator last;
@@ -78,6 +80,15 @@ inline std::string split_file_name(const std::string& str)
 	size_t found;
 	found = str.find_last_of("(/\\");
 	return str.substr(found + 1);
+}
+
+template<typename Type>
+typename Type add_mod(Type num, int mod)
+{
+	if(num % mod)
+		return num + (mod - (num % mod));
+	else
+		return num;
 }
 
 

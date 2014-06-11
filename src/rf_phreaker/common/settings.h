@@ -53,9 +53,11 @@ public:
 class settings
 {
 public:
+	// TODO - Change these to system settings, general settings or something.
 	int log_level_;
 	int gps_collection_period_ms_;
 	int num_items_in_flight_;
+	bool use_rf_board_adjustment_;
 
 	output_settings packet_output_;
 	output_settings standard_output_;

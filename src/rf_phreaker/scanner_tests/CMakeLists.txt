@@ -12,6 +12,8 @@ set (scanner_tests_VERSION_TWEAK 0)
 set (scanner_tests_SRCS 
 	blade_rf_controller_gtests.cpp
 	byte_aligned_buffer_gtests.cpp
+	calibration_gtests.cpp
+	eeprom_gtests.cpp
 	mock_scanner_comm.h
 	measurement_info_gtests.cpp
 	scanner_tests.cpp

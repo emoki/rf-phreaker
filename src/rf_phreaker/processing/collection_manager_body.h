@@ -14,13 +14,15 @@ namespace rf_phreaker { namespace processing {
 class collection_manager_body
 {
 public:
-	collection_manager_body(tbb::flow::graph *graph, rf_phreaker::scanner::scanner_controller_interface *sc, const collection_info_containers &info, const output_settings &p_output)
+	collection_manager_body(tbb::flow::graph *graph, rf_phreaker::scanner::scanner_controller_interface *sc, const collection_info_containers &info, 
+		const output_settings &p_output, const settings &s_settings)
 		: scanner_io_(sc)
 		, graph_(graph)
 		, containers_(info)
 		, is_simultaneous_collection_(false)
 		, do_multiple_scans_(true)
 		, packet_output_settings_(p_output)
+		, settings_(s_settings)
 		, umts_sweep_(0)
 		, umts_layer_3_(0)
 		, lte_sweep_(0)
@@ -50,8 +52,13 @@ public:
 					scanning_finished_for_all_containers = false;
 
 					auto meas = std::make_shared<scanner::measurement_info>(scanner_io_(ci));
+					
+					// Make necessary changes to the packet.
 					meas->collection_round(c.collection_round());
 					meas->set_operating_band(ci.operating_band_);
+					if(!settings_.use_rf_board_adjustment_)
+						meas->rf_board_adjustment(0);
+
 					switch(c.get_technology()) {
 					case UMTS_SWEEP:
 						if(packet_output_settings_.umts_sweep_) { output(meas.get(), "umts_sweep_", umts_sweep_++); }
@@ -116,6 +123,7 @@ protected:
 	bool do_multiple_scans_;
 
 	output_settings packet_output_settings_;
+	settings settings_;
 	int umts_sweep_;
 	int umts_layer_3_;
 	int lte_sweep_;
@@ -127,8 +135,9 @@ protected:
 class freq_correction_collection_manager_body : public collection_manager_body
 {
 public:
-	freq_correction_collection_manager_body(tbb::flow::graph *graph, rf_phreaker::scanner::scanner_controller_interface *sc, const collection_info_containers &info, const output_settings &p_output)
-	: collection_manager_body(graph, sc, info, p_output)
+	freq_correction_collection_manager_body(tbb::flow::graph *graph, rf_phreaker::scanner::scanner_controller_interface *sc, const collection_info_containers &info, 
+		const output_settings &p_output, const settings &s_settings)
+	: collection_manager_body(graph, sc, info, p_output, s_settings)
 	{
 		do_multiple_scans_ = false;
 	}

@@ -20,6 +20,7 @@ void settings_io::read(settings &settings)
 	settings.log_level_ = qsettings_->value(log_level_key.c_str(), settings_log_level_default).toInt();
 	settings.gps_collection_period_ms_ = qsettings_->value(gps_collection_period_ms_key.c_str(), gps_collection_period_ms_default).toInt();
 	settings.num_items_in_flight_ = qsettings_->value(num_items_in_flight_key.c_str(), num_items_in_flight_default).toInt();
+	settings.use_rf_board_adjustment_ = qsettings_->value(use_rf_board_adjustment_key.c_str(), use_rf_board_adjustment_default).toBool();
 
 	read(settings.standard_output_, standard_output_group_key);
 	read(settings.signal_slots_, signal_slot_output_group_key);
@@ -96,6 +97,7 @@ void settings_io::write(const settings &settings)
 	qsettings_->setValue(log_level_key.c_str(), settings.log_level_);
 	qsettings_->setValue(gps_collection_period_ms_key.c_str(), settings.gps_collection_period_ms_);
 	qsettings_->setValue(num_items_in_flight_key.c_str(), settings.num_items_in_flight_);
+	qsettings_->setValue(use_rf_board_adjustment_key.c_str(), settings.use_rf_board_adjustment_);
 
 	write(settings.standard_output_, standard_output_group_key);
 	write(settings.signal_slots_, signal_slot_output_group_key);

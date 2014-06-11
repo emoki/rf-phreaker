@@ -7,7 +7,7 @@
 
 namespace rf_phreaker { namespace scanner {
 
-typedef std::string scanner_id_type; // TODO - change back to uint64_t
+typedef std::string scanner_id_type; 
 
 typedef std::vector<char> buf_type;
 
@@ -16,9 +16,9 @@ typedef uint8_t lms_register_type;
 
 typedef uint8_t lms_value_type;
 
-
-
 typedef short sample_type;
+
+typedef int32_t band_identifier_type;
 
 struct iq_sample_type
 {
