@@ -38,7 +38,9 @@ void frequency_correction_graph::start(scanner_controller_interface *sc, data_ou
 			graph_ = (std::make_shared<tbb::flow::graph>());
 
 			start_node_ = std::make_shared<start_node>(*graph_, [=](add_remove_collection_info &info) { return true; }, false);
-			collection_manager_node_ = std::make_shared<collection_manager_node>(*graph_, tbb::flow::serial, freq_correction_collection_manager_body(graph_.get(), sc, collection_info, config.packet_output_));
+			collection_manager_node_ = std::make_shared<collection_manager_node>(*graph_, tbb::flow::serial, 
+				freq_correction_collection_manager_body(graph_.get(), sc, collection_info, config.packet_output_,
+				config));
 
 			// Only allow one item in flight - this allows us to change the trim value and have it affect all subsequent packets collected.
 			auto max_limit = 1;

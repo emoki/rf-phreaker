@@ -37,7 +37,8 @@ void processing_graph::start(scanner_controller_interface *sc, data_output_async
 			graph_ = (std::make_shared<tbb::flow::graph>());
 
 			start_node_ = std::make_shared<start_node>(*graph_, [=](add_remove_collection_info &info) { return true; }, false);
-			collection_manager_node_ = std::make_shared<collection_manager_node>(*graph_, tbb::flow::serial, collection_manager_body(graph_.get(), sc, collection_info, config.packet_output_));
+			collection_manager_node_ = std::make_shared<collection_manager_node>(*graph_, tbb::flow::serial, 
+				collection_manager_body(graph_.get(), sc, collection_info, config.packet_output_, config));
 
 			auto max_limit = tbb::task_scheduler_init::default_num_threads();
 			if(config.num_items_in_flight_)

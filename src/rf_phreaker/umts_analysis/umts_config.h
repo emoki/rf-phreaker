@@ -25,11 +25,12 @@ public:
 		, max_num_candidates_(1000)
 	{}
 
-	umts_config(int sampling_rate, int clock_rate, int max_signal_length, int num_coherent_psch_slots, int max_num_candidates_ = 1000)
+	umts_config(int sampling_rate, int clock_rate, int max_signal_length, int num_coherent_psch_slots, int max_num_candidates = 1000)
 		: sampling_rate_(sampling_rate)
 		, clock_rate_(clock_rate)
 		, max_signal_length_(max_signal_length)
 		, num_coherent_psch_slots_(num_coherent_psch_slots)
+		, max_num_candidates_(max_num_candidates)
 	{}
 
 	bool benchmark_umts_brute_force() const { return false; }
