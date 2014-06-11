@@ -41,7 +41,9 @@ extern "C" {
 		rx_gain_vga1 valid values: 5 <-> 30
 		rx_gain_vga2 values: 0 <-> 30
 	*/
-	int DLL_PUBLIC get_rf_data(__int64 frequency_hz, int bandwidth_hz, __int64 sampling_rate_hz, int lna_gain, int rx_gain_vga1, int rx_gain_vga2, float *iq_data, int num_samples, float *signal_level);
+	int DLL_PUBLIC get_rf_data(__int64 frequency_hz, int bandwidth_hz, __int64 sampling_rate_hz, int lna_gain, 
+		int rx_gain_vga1, int rx_gain_vga2, float *iq_data, int num_samples, float *signal_level,
+		unsigned int switch_setting, unsigned int switch_mask);
 
 	/*
 	Does not change any lms parameters.  Only transfers IQ data.
@@ -77,6 +79,35 @@ extern "C" {
 	/*
 	*/
 	int DLL_PUBLIC read_lms_reg(int address, int *value);
+
+	/*
+		NULL terminated filenames.  The operation performs a read-erase-write cycle which can take up 
+		to 1 or 2 minutes.  
+	*/
+	int DLL_PUBLIC write_calibration(const int8_t *nuand_calibration_filename, const int8_t *rf_board_calibration_filename, 
+		const int8_t *switch_setting_filename);
+
+	/*
+		Set to false when the blade device is not connected to the RF board.  
+		@note Default is true.
+	*/
+	int DLL_PUBLIC use_rf_board_adjustment_for_signal_level(bool use_adj);
+
+	/*
+		Returns the nuand adjustment.  Determines the proper RF path using switch settings portion of the calibration.
+	*/
+	int DLL_PUBLIC get_nuand_adjustment(__int64 frequency_hz, float *adj);
+
+	/*
+		Returns the RF board adjustment.  Determines the proper RF path using switch settings portion of the calibration.
+	*/
+	int DLL_PUBLIC get_rf_board_adjustment(__int64 frequency_hz, float *adj);
+	
+	/*
+		lna_gain is not currently used.  We assume that it is LNA_GAIN_MAX.
+	*/
+	int DLL_PUBLIC calculate_signal_level(__int64 frequency_hz, int lna_gain, int gain_rxvga1, int gain_rxvga2,
+		float digital_voltage, float *signal_level);
 
 	/* 
 		Return value of -999 represents description_size is not large enough to contain entire error message.

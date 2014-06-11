@@ -24,30 +24,39 @@ TEST(BladeMatlabInterface, TestMain)
 
 	std::string serial(devices);
 	serial = serial.substr(0, serial.find(';'));
-	int status = open_blade_device(serial.c_str());
+	EXPECT_EQ(0, open_blade_device(serial.c_str()));
 
+	EXPECT_EQ(0, close_blade_device());
+
+	int status = open_first_blade_device();
 	EXPECT_EQ(0, status);
-
 	if(status == 0) {
-
-		EXPECT_EQ(0, close_blade_device());
-
-		EXPECT_EQ(0, open_first_blade_device());
 
 		char device[buf_size];
 		int usb_speed;
 		EXPECT_EQ(0, get_connected_device_info((int8_t*)device, buf_size, &usb_speed));
 
+		//std::string base_filename = "../../../../rf_phreaker/test_files/calibration_files/";
+		//std::string nuand_filename = base_filename + "nuand_format_example.txt";
+		//std::string rf_board_filename = base_filename + "rf_board_format_example.txt";
+		//std::string rf_switch_filename = base_filename + "rf_switch_settings_format_example.txt";
+		//EXPECT_EQ(0, write_calibration((int8_t*)nuand_filename.c_str(), (int8_t*)rf_board_filename.c_str(), (int8_t*)rf_switch_filename.c_str()));
+
+		float sl = 0;
+		EXPECT_EQ(0, calculate_signal_level(mhz(886), 3, 30, 30, 600, &sl));
+
 		int num_samples = 100000;
 		ipp_32fc_array iq_data(num_samples);
-		float sl = 0;
 
-		for(int i = 0; i < 100; ++i) {
-			EXPECT_EQ(0, get_rf_data(mhz(886), mhz(5), khz(30720), 3, 30, 0, (float*)iq_data.get(), iq_data.length(), &sl));
+		for(int i = 0; i < 1; ++i) {
+			use_rf_board_adjustment_for_signal_level(false);
+			uint32_t s_setting = 5;
+			uint32_t s_mask = 10;
+			EXPECT_EQ(0, get_rf_data(mhz(886), mhz(5), khz(30720), 3, 30, 30, (float*)iq_data.get(), iq_data.length(), &sl, s_setting, s_mask));
 
 			EXPECT_EQ(0, only_get_rf_data((float*)iq_data.get(), iq_data.length(), &sl));
 
-			EXPECT_EQ(0, get_rf_data(mhz(900), mhz(5), khz(30720), 3, 30, 0, (float*)iq_data.get(), iq_data.length(), 0));
+			EXPECT_EQ(0, get_rf_data(mhz(900), mhz(5), khz(30720), 3, 30, 0, (float*)iq_data.get(), iq_data.length(), 0, 0, 0));
 
 			EXPECT_EQ(0, only_get_rf_data((float*)iq_data.get(), iq_data.length(), 0));
 		}
@@ -77,6 +86,6 @@ TEST(BladeMatlabInterface, TestMain)
 		EXPECT_EQ(0, get_last_error((int8_t*)error, buf_size));
 		EXPECT_EQ(0, get_last_error((int8_t*)error, buf_size));
 
+		EXPECT_EQ(0, close_blade_device());
 	}
-
 }
