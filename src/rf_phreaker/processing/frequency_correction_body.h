@@ -86,10 +86,10 @@ public:
 		if(info->collection_round() > 2 && num_shifts_ > 15 || (info->collection_round() > 8)) {
 			graph_->root_task()->cancel_group_execution();
 			if(num_shifts_ > 0) {
-				sc_->write_vctcxo_trim(info->frequency(), (frequency_type)(shift_sum_ / (double)num_shifts_)).get();
+				sc_->write_vctcxo_trim_and_update_calibration(info->frequency(), (frequency_type)(shift_sum_ / (double)num_shifts_)).get();
 
 				std::string message("Frequency correction successful.  Using frequency correction value of " +
-									std::to_string(sc_->get_scanner().get()->get_frequency_correction_value()) + ".");
+									std::to_string(sc_->get_scanner().get()->get_hardware().frequency_correction_calibration_date_) + ".");
 
 				delegate_sink_async::instance().log_message(message, FREQUENCY_CORRECTION_SUCCESSFUL);
 

@@ -63,8 +63,8 @@ std::vector<comm_info_ptr> blade_rf_controller::list_available_scanners()
 	// Sometimes the API reports 0 devices connected even tho we have a scanner connected. 
 	// In which case we repeat the call.
 	if(num_devices == BLADERF_ERR_NODEV) {
-		std::this_thread::sleep_for(std::chrono::milliseconds(50));
 		for(int i = 0; i < 4; ++i) {
+		std::this_thread::sleep_for(std::chrono::milliseconds(500));
 			num_devices = bladerf_get_device_list(&dev_info);
 			if(num_devices > 0)
 				break;
@@ -143,17 +143,29 @@ void blade_rf_controller::refresh_scanner_info()
 
 	check_blade_status(bladerf_get_vctcxo_trim(comm_blade, &blade.vctcxo_trim_value_), __FILE__, __LINE__);
 
-	// TODO - Temporary measure until we add trim value date to calibration info.
-	time_t date = 0;
-	uint16_t value = 0;
-	if(scanner_blade_rf_ && scanner_blade_rf_->serial() == blade.serial()) {
-		date = scanner_blade_rf_->get_frequency_correction_date();
-		value = scanner_blade_rf_->get_frequency_correction_value();
+	try {
+		auto meta_eeprom = read_eeprom_meta_data();
+		if(meta_eeprom.is_valid()) {
+			blade.eeprom_ = read_eeprom();
+
+			if(blade.eeprom_.cal_.nuand_freq_correction_value_ != blade.vctcxo_trim_value_) {
+				LOG_L(WARNING) << "The frequency correction value does not match the VCTCXO trim value.";
+			}
+		}
+		else
+			throw rf_phreaker_error("EEPROM meta data is invalid.");
 	}
-	scanner_blade_rf_ = std::make_shared<scanner_blade_rf>(blade);
-	if(date || value) {
-		scanner_blade_rf_->set_vctcxo_trim_date(date);
-		scanner_blade_rf_->set_vctcxo_trim_value(value);
+	catch(std::exception &err) {
+		LOG_L(INFO) << "Error reading EEPROM.  " << err.what();
+	}
+
+	if(!scanner_blade_rf_) {
+		scanner_blade_rf_ = std::make_shared<scanner_blade_rf_impl>(blade);
+		scanner_ = std::make_shared<scanner_blade_rf>(scanner_blade_rf_.get());
+	}
+	else {
+		*scanner_blade_rf_ = blade;
+		*scanner_ = scanner_blade_rf_.get();
 	}
 }
 
@@ -237,17 +249,6 @@ void blade_rf_controller::do_initial_scanner_config()
 
 	check_blade_status(bladerf_expansion_gpio_dir_write(comm_blade_rf_->blade_rf(), 0xFFFFFFFF), __FILE__, __LINE__);
 
-	try {
-		auto meta_eeprom = read_eeprom_meta_data();
-		if(meta_eeprom.is_valid()) {
-			eeprom_ = read_eeprom();
-		}
-		else
-			throw rf_phreaker_error("EEPROM meta data is invalid.");
-	} 
-	catch(std::exception &err) {
-		LOG_L(INFO) << "Error reading EEPROM.  " << err.what();
-	}
 	enable_blade_rx();
 
 	//bladerf_log_set_verbosity(BLADERF_LOG_LEVEL_DEBUG);
@@ -276,11 +277,13 @@ void blade_rf_controller::disable_blade_rx()
 		false), __FILE__, __LINE__);
 }
 
-void blade_rf_controller::write_vctcxo_trim(frequency_type carrier_freq, frequency_type freq_shift)
+void blade_rf_controller::write_vctcxo_trim_and_update_calibration(frequency_type carrier_freq, frequency_type freq_shift)
 {
 	auto trim = calculate_vctcxo_trim_value(carrier_freq, freq_shift);
 	update_vctcxo_trim(trim);
 	write_vctcxo_trim(trim);
+	update_frequency_correction_value_and_date_in_calibration(trim, std::chrono::system_clock::to_time_t(std::chrono::system_clock::now()));
+	refresh_scanner_info();
 }
 
 uint16_t blade_rf_controller::calculate_vctcxo_trim_value(frequency_type carrier_freq, frequency_type freq_shift)
@@ -313,8 +316,14 @@ void blade_rf_controller::write_vctcxo_trim(uint16_t trim)
 	bladerf_free_image(image);
 
 	enable_blade_rx();
+}
 
-	refresh_scanner_info();
+void blade_rf_controller::update_frequency_correction_value_and_date_in_calibration(uint16_t value, time_t date)
+{
+	auto eeprom = read_eeprom();
+	eeprom.cal_.nuand_freq_correction_value_ = value;
+	eeprom.cal_.nuand_freq_correction_date_ = date;
+	write_eeprom(eeprom);
 }
 
 void blade_rf_controller::update_vctcxo_trim(frequency_type carrier_freq, frequency_type freq_shift)
@@ -332,10 +341,6 @@ void blade_rf_controller::update_vctcxo_trim(uint16_t trim)
 	check_blade_status(bladerf_dac_write(comm_blade_rf_->blade_rf(), trim), __FILE__, __LINE__);
 
 	enable_blade_rx();
-
-	scanner_blade_rf_->set_vctcxo_trim_value(trim);
-
-	scanner_blade_rf_->set_vctcxo_trim_date(std::chrono::system_clock::to_time_t(std::chrono::system_clock::now()));
 }
 
 void blade_rf_controller::read_vctcxo_trim(uint16_t &trim)
@@ -375,16 +380,12 @@ void blade_rf_controller::read_lms_reg(uint8_t address, uint8_t &value)
 
 const rf_phreaker::scanner::scanner* blade_rf_controller::get_scanner()
 {
-	refresh_scanner_info();
-
-	return scanner_blade_rf_.get();
+	return get_scanner_blade_rf();
 }
 
 const scanner_blade_rf* blade_rf_controller::get_scanner_blade_rf()
 {
-	refresh_scanner_info();
-
-	return scanner_blade_rf_.get();
+	return scanner_.get();
 }
 
 gps blade_rf_controller::get_gps_data()
@@ -496,7 +497,7 @@ measurement_info blade_rf_controller::get_rf_data(frequency_type frequency, time
 			switch_setting & switch_mask), __FILE__, __LINE__);
 	}
 	else {
-		auto auto_switch_setting = eeprom_.cal_.get_rf_switch(frequency);
+		auto auto_switch_setting = scanner_blade_rf_->eeprom_.cal_.get_rf_switch(frequency);
 		uint32_t gpio = auto_switch_setting.switch_setting_ & auto_switch_setting.switch_mask_;
 		if(gpio_cache_ != gpio) {
 			check_blade_status(bladerf_expansion_gpio_write(comm_blade_rf_->blade_rf(),
@@ -541,8 +542,9 @@ measurement_info blade_rf_controller::get_rf_data(frequency_type frequency, time
 	parameter_cache_ = measurement_info(0, frequency, blade_bandwidth, blade_sampling_rate , gain);
 
 	measurement_info data(num_samples, frequency, blade_bandwidth, blade_sampling_rate, gain, 
-		eeprom_.cal_.get_nuand_adjustment(frequency), eeprom_.cal_.get_rf_board_adjustment(frequency), 
-		collection_count_++, eeprom_.cal_.nuand_serial_);
+		scanner_blade_rf_->eeprom_.cal_.get_nuand_adjustment(frequency),
+		scanner_blade_rf_->eeprom_.cal_.get_rf_board_adjustment(frequency),
+		collection_count_++, scanner_blade_rf_->eeprom_.cal_.nuand_serial_);
 
 	for(int i = throw_away_samples; i < (throw_away_samples + num_samples) * 2; ++i)
 		sign_extend_12_bits(reinterpret_cast<int16_t*>(aligned_buffer)[i]);
@@ -614,8 +616,9 @@ measurement_info blade_rf_controller::get_rf_data(int num_samples)
 		throw blade_rf_error(std::string("Error collecting data samples.  ") + bladerf_strerror(status));
 
 	measurement_info data(num_samples, frequency, blade_bandwidth, blade_sampling_rate, gain,
-		eeprom_.cal_.get_nuand_adjustment(frequency), eeprom_.cal_.get_rf_board_adjustment(frequency),
-		collection_count_++, eeprom_.cal_.nuand_serial_);
+		scanner_blade_rf_->eeprom_.cal_.get_nuand_adjustment(frequency),
+		scanner_blade_rf_->eeprom_.cal_.get_rf_board_adjustment(frequency),
+		collection_count_++, scanner_blade_rf_->eeprom_.cal_.nuand_serial_);
 
 	for(int i = 0; i < num_samples * 2; ++i)
 		sign_extend_12_bits(reinterpret_cast<int16_t*>(aligned_buffer)[i]);

@@ -41,7 +41,7 @@ public:
 	void config_scanner_for_collection(std::vector<frequency_type> &freqs);
 
 	void write_vctcxo_trim(uint16_t trim);
-	void write_vctcxo_trim(frequency_type carrier_freq, frequency_type freq_shift);
+	void write_vctcxo_trim_and_update_calibration(frequency_type carrier_freq, frequency_type freq_shift);
 	
 	void update_vctcxo_trim(frequency_type carrier_freq, frequency_type freq_shift);
 	void update_vctcxo_trim(uint16_t trim);
@@ -83,6 +83,8 @@ public:
 
 	calibration read_calibration();
 
+	void update_frequency_correction_value_and_date_in_calibration(uint16_t value, time_t date);
+
 private:
 	void enable_blade_rx();
 
@@ -102,12 +104,11 @@ private:
 
 	std::unique_ptr<comm_blade_rf> comm_blade_rf_;
 
-	std::shared_ptr<scanner_blade_rf> scanner_blade_rf_;
+	std::shared_ptr<scanner_blade_rf_impl> scanner_blade_rf_;
+	std::shared_ptr<scanner_blade_rf> scanner_;
 
 	measurement_info parameter_cache_;
 	uint32_t gpio_cache_;
-
-	eeprom eeprom_;
 
 	int64_t collection_count_;
 };

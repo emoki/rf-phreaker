@@ -155,7 +155,7 @@ public:
 	std::string nuand_serial_;
 	time_t nuand_calibration_date_;
 	uint32_t nuand_freq_correction_value_;
-	uint32_t nuand_freq_correction_date_;
+	time_t nuand_freq_correction_date_;
 
 	std::string rf_board_serial_;
 	time_t rf_board_calibration_date_;
