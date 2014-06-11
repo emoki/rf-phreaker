@@ -242,12 +242,19 @@ TEST(Cappeen, TestMain)
 		info.tech_and_bands_to_sweep_.num_elements_ = tech_bands.size();
 
 		for(int i = 0; i < 5000000; ++i) {
+			EXPECT_EQ(0, cappeen_open_unit(&serial[0], serial.size()));
+			std::this_thread::sleep_for(std::chrono::milliseconds(500));
 			out.new_hw_info_ = false;
 			out.error_occurred_ = false;
-			EXPECT_EQ(0, cappeen_open_unit(&serial[0], serial.size()));
 
 			//std::cout << "Starting frequency correction.\n";
-			//std::vector<uint32_t> freqs; freqs.push_back(871600000); freqs.push_back(2142500000); freqs.push_back(1977500000);
+			//std::vector<uint32_t> freqs; 
+			//freqs.push_back(871800000); 
+			//freqs.push_back(876800000); 
+			//freqs.push_back(1942500000);
+			//freqs.push_back(1937500000); 
+			//freqs.push_back(2147500000);
+			//freqs.push_back(2152500000);
 			//EXPECT_EQ(0, cappeen_start_frequency_correction_using_frequencies(&freqs[0], freqs.size()));
 			//EXPECT_EQ(0, cappeen_start_frequency_correction_using_sweep(info));
 			//for(int i = 0; i < 10000; ++i) {

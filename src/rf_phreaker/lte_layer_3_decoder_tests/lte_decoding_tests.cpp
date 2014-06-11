@@ -1,6 +1,7 @@
 #include "rf_phreaker/lte_layer_3_decoder_tests/lte_decoding_tests.h"
 #include "rf_phreaker/lte_layer_3_decoder/lte_layer_3_decoder.h"
 #include "rf_phreaker/layer_3_decoder_common/bit_stream_container.h"
+#include "rf_phreaker/layer_3_common/lte_rrc_message_aggregate_io.h"
 #include <fstream>
 #include <boost/assert.hpp>
 
@@ -31,11 +32,7 @@ void lte_decoding_tests::run_automated_tests()
 
 		decoder.decode_bcch_bch_message(bit_stream.bit_stream(), bit_stream.num_of_bytes(), bit_stream.unused_bits(), message);
 
-		std::cout << message.mcc_.to_string() << "\t"
-			<< message.mnc_.to_string() << "\t"
-			<< message.lac_ << "\t"
-			<< message.cid_ << "\t"
-			<< "\n";
+		std::cout << total_messages << "\t" << message << "\n";
 
 		++total_messages;
 		if(message.is_cid_decoded())
