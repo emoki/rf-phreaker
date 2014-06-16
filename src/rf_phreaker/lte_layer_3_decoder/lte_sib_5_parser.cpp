@@ -71,7 +71,8 @@ void lte_sib_5_parser::parse_data(const SystemInformationBlockType5_t &data, lte
 				inter_freq.inter_freq_black_cell_list_.push_back(range);
 			}
 		}
-	}
 
+		message.sib5_.inter_freq_carrier_info_list_.push_back(inter_freq);
+	}
 }
 
