@@ -34,7 +34,7 @@
 #undef	ADVANCE
 #define	ADVANCE(num_bytes)	do {		\
 		size_t num = num_bytes;		\
-		ptr = ((const char *)ptr) + num; \
+		ptr = ((const char *)ptr) + num;\
 		size -= num;			\
 		if(ctx->left >= 0)		\
 			ctx->left -= num;	\
@@ -463,10 +463,10 @@ CHOICE_outmost_tag(asn_TYPE_descriptor_t *td, const void *ptr, int tag_mode, ber
 
 		if(elm->flags & ATF_POINTER) {
 			memb_ptr = *(const void * const *)
-				((const char *)ptr + elm->memb_offset);
+					((const char *)ptr + elm->memb_offset);
 		} else {
 			memb_ptr = (const void *)
-				((const char *)ptr + elm->memb_offset);
+					((const char *)ptr + elm->memb_offset);
 		}
 
 		return asn_TYPE_outmost_tag(elm->type, memb_ptr,
@@ -535,7 +535,7 @@ CHOICE_constraint(asn_TYPE_descriptor_t *td, const void *sptr,
 #undef	XER_ADVANCE
 #define	XER_ADVANCE(num_bytes)	do {			\
 		size_t num = num_bytes;			\
-		buf_ptr = ((const char *)buf_ptr) + num; \
+		buf_ptr = (const void *)(((const char *)buf_ptr) + num); \
 		size -= num;				\
 		consumed_myself += num;			\
 	} while(0)

@@ -1,11 +1,11 @@
 #pragma once
 
-#include "rf_phreaker/layer_3_decoder_common/asn1_types.h"
 #include <iostream>
 #include <iomanip>
 #include <string>
 #include <sstream>
 #include <boost/scoped_array.hpp>
+#include "rf_phreaker/layer_3_decoder_common/asn1_types.h"
 
 class bit_stream_container;
 inline std::ostream& operator<<(std::ostream &os, const bit_stream_container &t);

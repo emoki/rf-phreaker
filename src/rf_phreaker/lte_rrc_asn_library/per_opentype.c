@@ -105,12 +105,16 @@ uper_open_type_get_simple(asn_codec_ctx_t *ctx, asn_TYPE_descriptor_t *td,
 
 	if(rv.code == RC_OK) {
 		/* Check padding validity */
+		//padding = spd.nbits - spd.nboff;
+  //              if ((padding < 8 ||
+		///* X.691#10.1.3 */
+		//(spd.nboff == 0 && spd.nbits == 8 && spd.buffer == buf)) &&
+  //                  per_get_few_bits(&spd, padding) == 0) {
+		// NOTE - Removed padding checks so decoding will not fail when padding is larger than 8 bits.
 		padding = spd.nbits - spd.nboff;
-                if ((padding < 8 ||
-		/* X.691#10.1.3 */
-		(spd.nboff == 0 && spd.nbits == 8 && spd.buffer == buf)) &&
-                    per_get_few_bits(&spd, padding) == 0) {
-			/* Everything is cool */
+		per_get_few_bits(&spd, padding);
+		{
+		/* Everything is cool */
 			FREEMEM(buf);
 			return rv;
 		}

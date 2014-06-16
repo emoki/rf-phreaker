@@ -5,10 +5,12 @@
 #ifndef	_BER_TLV_LENGTH_H_
 #define	_BER_TLV_LENGTH_H_
 
+#include <rf_phreaker/lte_rrc_asn_library/asn_system.h>
+
 #ifdef __cplusplus
 extern "C" {
 #endif
-#include "asn_system.h"
+
 typedef ssize_t ber_tlv_len_t;
 
 /*

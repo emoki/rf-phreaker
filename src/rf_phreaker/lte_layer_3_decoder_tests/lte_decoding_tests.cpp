@@ -10,7 +10,7 @@ void lte_decoding_tests::run_automated_tests()
 	lte_asn1_decoder decoder;
 
 	std::string base_filename = "../../../../rf_phreaker/test_files/";
-	std::ifstream file(base_filename + "lte_bitstreams (2).txt");
+	std::ifstream file(base_filename + "lte_bitstreams_sib6.txt");
 	//std::ifstream file("lte_non_working_bitstreams.txt");
 
 	BOOST_ASSERT(file);
@@ -32,13 +32,22 @@ void lte_decoding_tests::run_automated_tests()
 
 		decoder.decode_bcch_bch_message(bit_stream.bit_stream(), bit_stream.num_of_bytes(), bit_stream.unused_bits(), message);
 
-		std::cout << total_messages << "\t" << message << "\n";
-
+		
 		++total_messages;
 		if(message.is_cid_decoded())
 			++sib1_messages;
 		else
 			++other_messages;
+
+		static std::ofstream output_file("lte_decoded_sibs.txt");
+		static bool write_header = true;
+		if(write_header) {
+			output_file << "file_num\n";
+			write_header = false;
+		}
+		output_file << total_messages << "\t" << message << "\n";
+		std::cout << total_messages << "\t" << message << "\n";
+
 	}
 
 	std::cout << "\n\ntotal messages: " << total_messages
