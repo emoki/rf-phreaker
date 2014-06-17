@@ -43,8 +43,8 @@ static const std::string full_scan_interval_key = "full_scan_interval";
 static const std::string num_coherent_slots_key = "num_coherent_slots";
 static const std::string gps_collection_period_ms_key = "gps_collection_period";
 static const std::string num_items_in_flight_key = "num_items_in_flight";
-static const std::string frequency_correction_offset_start_key = "start_offset";
-static const std::string frequency_correction_offset_end_key = "end_offset";
+static const std::string initial_frequency_correction_offset_start_key = "start_offset";
+static const std::string initial_frequency_correction_offset_end_key = "end_offset";
 static const std::string use_rf_board_adjustment_key = "use_rf_board_adjustment";
 
 // Default Values
@@ -63,8 +63,8 @@ static const int settings_umts_general_num_coherent_slots_default = 2;
 static const bool settings_output_default = false;
 static const int gps_collection_period_ms_default = 800;
 static const int num_items_in_flight_default = 0;
-static const int frequency_correction_offset_start_default = khz(-2);
-static const int frequency_correction_offset_end_default = khz(2);
+static const int initial_frequency_correction_offset_start_default = khz(-3);
+static const int initial_frequency_correction_offset_end_default = khz(3);
 static const bool use_rf_board_adjustment_default = true;
 
 class settings_io

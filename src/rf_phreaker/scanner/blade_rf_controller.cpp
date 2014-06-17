@@ -8,6 +8,7 @@
 #include "rf_phreaker/scanner/scanner_blade_rf_impl.h"
 #include "libbladeRF.h"
 #include "boost/math/special_functions/round.hpp"
+#include "boost/date_time.hpp"
 
 namespace rf_phreaker { namespace scanner {
 
@@ -73,7 +74,8 @@ std::vector<comm_info_ptr> blade_rf_controller::list_available_scanners()
 
 	// We do not consider no blade devices connected to be an error here.
 	if(num_devices != BLADERF_ERR_NODEV && num_devices < 0) {
-		bladerf_free_device_list(dev_info);
+		if(dev_info)
+			bladerf_free_device_list(dev_info);
 		check_blade_status(num_devices, __FILE__, __LINE__);
 	}
 
@@ -118,7 +120,12 @@ void blade_rf_controller::open_scanner(const scanner_id_type &id)
 
 	refresh_scanner_info();
 
-	LOG_L(DEBUG) << "Opened scanner " << scanner_blade_rf_->serial() << ".  Device speed is " << to_string(scanner_blade_rf_->usb_speed()) << ". VCTCXO trim value is " << scanner_blade_rf_->vctcxo_trim() << ".";
+	LOG_L(DEBUG) << "Opened scanner " << scanner_blade_rf_->serial() << ".";
+	LOG_L(DEBUG) << "Device speed is " << to_string(scanner_blade_rf_->usb_speed()) << ".";
+	LOG_L(DEBUG) << "RF calibration performed on " << boost::posix_time::to_simple_string(boost::posix_time::from_time_t(scanner_blade_rf_->get_rf_calibration_date())) << ".";
+	LOG_L(DEBUG) << "VCTCXO trim value is " << scanner_blade_rf_->vctcxo_trim() << ".";
+	LOG_L(DEBUG) << "Frequency correction performed on " << boost::posix_time::to_simple_string(boost::posix_time::from_time_t(scanner_blade_rf_->get_frequency_correction_date())) << ".";
+	LOG_L(DEBUG) << "Frequency correction value is " << scanner_blade_rf_->get_frequency_correction_value() << ".";
 }
 
 void blade_rf_controller::refresh_scanner_info()
@@ -147,10 +154,6 @@ void blade_rf_controller::refresh_scanner_info()
 		auto meta_eeprom = read_eeprom_meta_data();
 		if(meta_eeprom.is_valid()) {
 			blade.eeprom_ = read_eeprom();
-
-			if(blade.eeprom_.cal_.nuand_freq_correction_value_ != blade.vctcxo_trim_value_) {
-				LOG_L(WARNING) << "The frequency correction value does not match the VCTCXO trim value.";
-			}
 		}
 		else
 			throw rf_phreaker_error("EEPROM meta data is invalid.");
@@ -249,6 +252,10 @@ void blade_rf_controller::do_initial_scanner_config()
 
 	check_blade_status(bladerf_expansion_gpio_dir_write(comm_blade_rf_->blade_rf(), 0xFFFFFFFF), __FILE__, __LINE__);
 
+	if(scanner_blade_rf_->eeprom_.cal_.nuand_freq_correction_value_ && scanner_blade_rf_->eeprom_.cal_.nuand_freq_correction_value_ != scanner_blade_rf_->vctcxo_trim_value_) {
+		update_vctcxo_trim(scanner_blade_rf_->eeprom_.cal_.nuand_freq_correction_value_);
+	}
+
 	enable_blade_rx();
 
 	//bladerf_log_set_verbosity(BLADERF_LOG_LEVEL_DEBUG);
@@ -289,9 +296,7 @@ void blade_rf_controller::write_vctcxo_trim_and_update_calibration(frequency_typ
 uint16_t blade_rf_controller::calculate_vctcxo_trim_value(frequency_type carrier_freq, frequency_type freq_shift)
 {
 	check_blade_comm();
-
-	auto adjust = boost::math::round(freq_shift / (carrier_freq / 38.4e6) * 74.5);
-
+	auto adjust = boost::math::round(freq_shift / ((carrier_freq / 38.4e6) * 0.011355));
 	return scanner_blade_rf_->vctcxo_trim() - (int16_t)adjust;
 }
 
@@ -339,6 +344,9 @@ void blade_rf_controller::update_vctcxo_trim(uint16_t trim)
 	disable_blade_rx();
 
 	check_blade_status(bladerf_dac_write(comm_blade_rf_->blade_rf(), trim), __FILE__, __LINE__);
+	
+	if(scanner_blade_rf_)
+		scanner_blade_rf_->vctcxo_trim_value_ = trim;
 
 	enable_blade_rx();
 }

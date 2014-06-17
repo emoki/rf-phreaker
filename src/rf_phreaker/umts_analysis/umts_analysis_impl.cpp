@@ -11,6 +11,7 @@ std::mutex umts_analysis_impl::mutex_;
 umts_analysis_impl::umts_analysis_impl(const umts_config &config)
 	: config_(config)
 {
+	brute_force_.reset(new umts_psch_with_brute_force(config_, brute_force_cpich_table_ptr()->cpich_table_ptr()));
 }
 
 umts_analysis_impl::~umts_analysis_impl()

@@ -84,8 +84,8 @@ void settings_io::read(umts_general_settings &settings, const std::string &group
 void settings_io::read(frequency_correction_settings &settings, const std::string &group_key)
 {
 	qsettings_->beginGroup(group_key.c_str());
-	settings.frequency_correction_range_start_ = qsettings_->value(frequency_correction_offset_start_key.c_str(), frequency_correction_offset_start_default).toDouble();
-	settings.frequency_correction_range_end_ = qsettings_->value(frequency_correction_offset_end_key.c_str(), frequency_correction_offset_end_default).toInt();
+	settings.initial_frequency_correction_range_start_ = qsettings_->value(initial_frequency_correction_offset_start_key.c_str(), initial_frequency_correction_offset_start_default).toDouble();
+	settings.initial_frequency_correction_range_end_ = qsettings_->value(initial_frequency_correction_offset_end_key.c_str(), initial_frequency_correction_offset_end_default).toInt();
 	qsettings_->endGroup();
 	read(settings.general_settings_, group_key);
 }
@@ -160,8 +160,8 @@ void settings_io::write(const umts_general_settings &settings, const std::string
 void settings_io::write(const frequency_correction_settings &settings, const std::string &group_key)
 {
 	qsettings_->beginGroup(group_key.c_str());
-	qsettings_->setValue(frequency_correction_offset_start_key.c_str(), settings.frequency_correction_range_start_);
-	qsettings_->setValue(frequency_correction_offset_end_key.c_str(), settings.frequency_correction_range_end_);
+	qsettings_->setValue(initial_frequency_correction_offset_start_key.c_str(), settings.initial_frequency_correction_range_start_);
+	qsettings_->setValue(initial_frequency_correction_offset_end_key.c_str(), settings.initial_frequency_correction_range_end_);
 	qsettings_->endGroup();
 	write(settings.general_settings_, group_key);
 }

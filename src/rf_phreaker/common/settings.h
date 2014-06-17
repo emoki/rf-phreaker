@@ -45,8 +45,11 @@ public:
 class frequency_correction_settings
 {
 public:
-	int frequency_correction_range_start_;
-	int frequency_correction_range_end_;
+	int initial_frequency_correction_range_start_;
+	int initial_frequency_correction_range_end_;
+	//int initial_increment_;
+	//int second_increment_;
+
 	umts_general_settings general_settings_;
 };
 
