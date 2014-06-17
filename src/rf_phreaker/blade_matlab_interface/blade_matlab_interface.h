@@ -61,6 +61,10 @@ extern "C" {
 	int DLL_PUBLIC read_vctcxo_trim(int *trim);
 
 	/*
+	*/
+	int DLL_PUBLIC write_frequency_correction_value(int trim);
+
+	/*
 		Read a configuration GPIO register
 	*/
 	int DLL_PUBLIC read_gpio(unsigned int *value);

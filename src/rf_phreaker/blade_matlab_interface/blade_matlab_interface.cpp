@@ -281,6 +281,25 @@ int read_vctcxo_trim(int *trim)
 	return matlab_interface_error_general;
 }
 
+int write_frequency_correction_value(int trim)
+{
+	try {
+		uint16_t tmp_trim = trim;
+		controller.update_vctcxo_trim(tmp_trim);
+		controller.write_vctcxo_trim(tmp_trim);
+		controller.update_frequency_correction_value_and_date_in_calibration(tmp_trim, 0);
+		return matlab_interface_no_error;
+	}
+	catch(rf_phreaker::rf_phreaker_error &err) {
+		last_error_ = err.what();
+		return (int)err.error_code_;
+	}
+	catch(std::exception &err) {
+		last_error_ = err.what();
+	}
+	return matlab_interface_error_general;
+}
+
 int read_gpio(unsigned int *value)
 {
 	try {
