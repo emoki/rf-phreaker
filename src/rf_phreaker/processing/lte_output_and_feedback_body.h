@@ -27,7 +27,7 @@ public:
 		}
 		current_collection_round_ = info.meas_->collection_round();
 
-		output_debug_info(info);
+		//output_debug_info(info);
 
 		// Output basic tech.
 		io_->output_lte_sweep(convert_to_basic_data(*info.meas_, info.avg_rms_))/*.get()*/;
@@ -135,7 +135,7 @@ public:
 		}
 		
 		if(!info.processed_data_.empty()) {
-			output_debug_info(info);
+			//output_debug_info(info);
 
 			std::vector<lte_data> lte;
 
