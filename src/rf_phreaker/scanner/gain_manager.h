@@ -1,5 +1,6 @@
 #pragma once
 
+#include <algorithm>
 #include "rf_phreaker/scanner/lms_defines.h"
 #include "rf_phreaker/scanner/gain.h"
 #include "rf_phreaker/scanner/measurement_info.h"
