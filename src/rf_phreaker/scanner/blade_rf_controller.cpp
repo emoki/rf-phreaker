@@ -65,7 +65,7 @@ std::vector<comm_info_ptr> blade_rf_controller::list_available_scanners()
 	// In which case we repeat the call.
 	if(num_devices == BLADERF_ERR_NODEV) {
 		for(int i = 0; i < 4; ++i) {
-		std::this_thread::sleep_for(std::chrono::milliseconds(500));
+			std::this_thread::sleep_for(std::chrono::milliseconds(500));
 			num_devices = bladerf_get_device_list(&dev_info);
 			if(num_devices > 0)
 				break;
@@ -99,8 +99,8 @@ void blade_rf_controller::open_scanner(const scanner_id_type &id)
 
 	bladerf *blade_rf;
 	bladerf_devinfo dev_info;
+	int retry = 0;
 	while(1) {
-		int retry = 0;
 		try {
 			check_blade_status(bladerf_open(&blade_rf, open_str.c_str()), __FILE__, __LINE__);
 
@@ -189,8 +189,8 @@ void blade_rf_controller::do_initial_scanner_config()
 	// When errors opening and configuring occur they seem to be fixed
 	// by restarting the entire process hence if an error occurs anywhere 
 	// within the open/configure process we restart.
+	int retry = 0;
 	while(1) {
-		int retry = 0;
 		try {
 			check_blade_status(bladerf_load_fpga(comm_blade_rf_->blade_rf(),
 				"fpga_load.rbf"), __FILE__, __LINE__);
@@ -231,7 +231,7 @@ void blade_rf_controller::do_initial_scanner_config()
 			break;
 		}
 		catch(rf_phreaker_error &err) {
-			if(++retry > 3)
+			if(++retry > 4)
 				throw err;
 
 			LOG_L(DEBUG) << err.what() << "  Attempting to recover...";
