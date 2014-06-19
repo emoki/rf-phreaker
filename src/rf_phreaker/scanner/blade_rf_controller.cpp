@@ -109,7 +109,7 @@ void blade_rf_controller::open_scanner(const scanner_id_type &id)
 			break;
 		}
 		catch(rf_phreaker_error &err) {
-			if(++retry > 3)
+			if(++retry > 8)
 				throw err;
 			LOG_L(DEBUG) << err.what() << "  Attempting to reopen...";
 			std::this_thread::sleep_for(std::chrono::milliseconds(100));
