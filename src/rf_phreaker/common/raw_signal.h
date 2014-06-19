@@ -69,7 +69,7 @@ public:
 
 	rf_phreaker::frequency_type frequency() const { return frequency_; }
 
-	int time_ns() const { return static_cast<int>(ipp_array_.length() / (double)sampling_rate_ * 1e9); }
+	time_type time_ns() const { return static_cast<time_type>(ipp_array_.length() / (double)sampling_rate_ * 1e9); }
 
 	void bandwidth(rf_phreaker::bandwidth_type b) { bandwidth_ = b; }
 
