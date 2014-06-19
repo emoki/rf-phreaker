@@ -249,7 +249,7 @@ int set_vctcxo_trim(int trim)
 {
 	try {
 		uint16_t tmp_trim = trim;
-		controller.write_vctcxo_trim(tmp_trim);
+		controller.update_vctcxo_trim(tmp_trim);
 		return matlab_interface_no_error;
 	}
 	catch(rf_phreaker::rf_phreaker_error &err) {
@@ -281,13 +281,13 @@ int read_vctcxo_trim(int *trim)
 	return matlab_interface_error_general;
 }
 
-int write_frequency_correction_value(int trim)
+int write_frequency_correction_value(int trim, int64_t seconds_since_1970)
 {
 	try {
 		uint16_t tmp_trim = trim;
 		controller.update_vctcxo_trim(tmp_trim);
 		controller.write_vctcxo_trim(tmp_trim);
-		controller.update_frequency_correction_value_and_date_in_calibration(tmp_trim, 0);
+		controller.update_frequency_correction_value_and_date_in_calibration(tmp_trim, seconds_since_1970);
 		return matlab_interface_no_error;
 	}
 	catch(rf_phreaker::rf_phreaker_error &err) {

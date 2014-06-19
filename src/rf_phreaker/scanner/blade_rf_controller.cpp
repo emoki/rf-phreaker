@@ -355,7 +355,10 @@ void blade_rf_controller::read_vctcxo_trim(uint16_t &trim)
 {
 	check_blade_comm();
 
-	check_blade_status(bladerf_get_vctcxo_trim(comm_blade_rf_->blade_rf(), &trim), __FILE__, __LINE__);
+	if(scanner_blade_rf_)
+		scanner_blade_rf_->vctcxo_trim_value_ = trim;
+	else
+		check_blade_status(bladerf_get_vctcxo_trim(comm_blade_rf_->blade_rf(), &trim), __FILE__, __LINE__);
 }
 
 void blade_rf_controller::write_gpio(uint32_t value)

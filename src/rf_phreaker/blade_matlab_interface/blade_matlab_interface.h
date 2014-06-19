@@ -62,7 +62,7 @@ extern "C" {
 
 	/*
 	*/
-	int DLL_PUBLIC write_frequency_correction_value(int trim);
+	int DLL_PUBLIC write_frequency_correction_value(int trim, int64_t seconds_since_1970);
 
 	/*
 		Read a configuration GPIO register
