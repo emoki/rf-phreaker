@@ -12,7 +12,7 @@ set (general_utility_VERSION_TWEAK 0)
 # Set the source files.
 set (general_utility_SRCS 
 	general_utility.cpp
-	load_calibration.h
+	calibration.h
 	${SRC_PLATFORM_SPECIFIC}/stdafx.cpp)
 
 add_definitions (/DTBB_PREVIEW_GRAPH_NODES)
