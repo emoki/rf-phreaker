@@ -104,7 +104,7 @@ void calibration::read_rf_board_calibration_file(const std::string &filename)
 	
 	int version = std::stoi(header_group[0]);
 	if(version >= 1) {
-		rf_board_serial_ = header_group[1];
+		rf_board_serial_ = trim_whitespace(header_group[1]);
 		rf_board_calibration_date_ = std::stoll(header_group[2]);
 	}
 
@@ -135,7 +135,7 @@ void calibration::read_nuand_calibration_file(const std::string &filename)
 
 	int version = std::stoi(header_group[0]);
 	if(version >= 1) {
-		nuand_serial_ = header_group[1];
+		nuand_serial_ = trim_whitespace(header_group[1]);
 		nuand_calibration_date_ = std::stoll(header_group[2]);
 	}
 

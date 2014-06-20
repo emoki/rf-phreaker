@@ -1,7 +1,8 @@
 #pragma once
 
-#include "rf_phreaker/common/common_types.h"
 #include <regex>
+#include <locale>
+#include "rf_phreaker/common/common_types.h"
 
 #define khz(x) (static_cast<rf_phreaker::frequency_type>(x)*1000)             /**< Convenience for kHz */
 #define mhz(x) (static_cast<rf_phreaker::frequency_type>(x)*1000000)          /**< Convenience for MHz */
@@ -80,6 +81,11 @@ inline std::string split_file_name(const std::string& str)
 	size_t found;
 	found = str.find_last_of("(/\\");
 	return str.substr(found + 1);
+}
+
+inline std::string& trim_whitespace(std::string &s) {
+	s.erase(std::remove_if(s.begin(), s.end(), [&](char ch) { return std::isspace<char>(ch, std::locale::classic()); }));
+	return s;
 }
 
 template<typename Type>

@@ -2,11 +2,12 @@
 
 #include <vector>
 #include <map>
-#include "rf_phreaker/scanner/gain.h"
-#include "rf_phreaker/common/measurements.h"
 #include "boost/serialization/access.hpp"
 #include "boost/serialization/vector.hpp"
 #include "boost/serialization/map.hpp"
+#include "rf_phreaker/scanner/gain.h"
+#include "rf_phreaker/common/measurements.h"
+#include "rf_phreaker/common/common_utility.h"
 
 namespace boost { namespace serialization {
 	template<class Archive>
@@ -179,6 +180,10 @@ private:
 		ar & nuand_adjustment_;
 		ar & rf_board_adjustments_;
 		ar & rf_switches_;
+
+		// Bug fix - We trim the serials because some of the older calibration files have a leading space.
+		nuand_serial_ = trim_whitespace(nuand_serial_);
+		rf_board_serial_ = trim_whitespace(rf_board_serial_);
 	}
 };
 
