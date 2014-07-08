@@ -316,20 +316,34 @@ public:
 		beagle_info_.dds_clock_correction_calibration_date_ = t.frequency_correction_calibration_date_;
 		beagle_info_.rf_calibration_date_ = t.rf_calibration_date_;
 
+		frequency_paths_ = t.frequency_paths_;
+		beagle_info_.available_bands_in_hardware_.num_elements_ = 0;
+		beagle_info_.available_bands_in_hardware_.elements_ = 0;
 		bands_.clear();
-		//for(auto &path : t.frequency_paths_) {
-		//}
-		bands_.push_back(beagle_api::BAND_700);
-		bands_.push_back(beagle_api::BAND_850);
-		bands_.push_back(beagle_api::BAND_900);
-		bands_.push_back(beagle_api::BAND_1800);
-		bands_.push_back(beagle_api::BAND_1900);
-		bands_.push_back(beagle_api::BAND_2100);
-		bands_.push_back(beagle_api::BAND_2600);
-		beagle_info_.available_bands_in_hardware_.num_elements_ = bands_.size();
-		beagle_info_.available_bands_in_hardware_.elements_ = &bands_[0];
+		// Frequency ranges are based off of a combination of cobham licenses.
+		if(is_within_freq_paths(mhz(729), mhz(803)))
+			bands_.push_back(beagle_api::BAND_700);
+		if(is_within_freq_paths(mhz(791), mhz(894)))
+			bands_.push_back(beagle_api::BAND_850);
+		if(is_within_freq_paths(mhz(921), mhz(960)))
+			bands_.push_back(beagle_api::BAND_900);
+		if(is_within_freq_paths(mhz(1710), mhz(1785)))
+			bands_.push_back(beagle_api::BAND_1700);
+		if(is_within_freq_paths(mhz(1805), mhz(1880)))
+			bands_.push_back(beagle_api::BAND_1800);
+		if(is_within_freq_paths(mhz(1930), mhz(1995)))
+			bands_.push_back(beagle_api::BAND_1900);
+		if(is_within_freq_paths(mhz(2100), mhz(2170)))
+			bands_.push_back(beagle_api::BAND_2100);
+		if(is_within_freq_paths(mhz(2300), mhz(2400)))
+			bands_.push_back(beagle_api::BAND_2300);
+		if(is_within_freq_paths(mhz(2620), mhz(2690)))
+			bands_.push_back(beagle_api::BAND_2600);
 
-		
+		if(bands_.size()) {
+			beagle_info_.available_bands_in_hardware_.num_elements_ = bands_.size();
+			beagle_info_.available_bands_in_hardware_.elements_ = &bands_[0];
+		}
 
 		valid_licenses_.clear();
 		//for(auto &license : t.valid_licenses_) {
@@ -386,7 +400,32 @@ public:
 		}
 	}
 
+	bool is_within_freq_paths(frequency_type start, frequency_type stop)
+	{
+		for(auto f = start; f <= stop; f += khz(100)) {
+			if(!is_within_freq_paths(f))
+				return false;
+		}
+		return true;
+	}
+
+	bool is_within_freq_paths(frequency_type f) 
+	{
+		bool found_freq = false;
+		for(auto path : frequency_paths_) {
+				// Increase range by a 1 mhz on each to account for when we jump from
+				// one path to the next.
+			if(f >= path.low_freq_ - mhz(1) && f <= path.high_freq_ + mhz(1)) {
+				found_freq = true;
+				break;
+			}
+		}
+		return found_freq;
+	}
+
 	beagle_api::BEAGLESTATE current_beagle_state() { return beagle_info_.state_; }
+
+	const std::vector<frequency_path>& frequency_paths() { return frequency_paths_; }
 
 private:
 	beagle_api::beagle_delegate *delegate_;
@@ -394,6 +433,8 @@ private:
 	beagle_api::beagle_info beagle_info_;
 
 	std::vector<beagle_api::BANDS> bands_;
+
+	std::vector<frequency_path> frequency_paths_;
 
 	std::vector<beagle_api::TECHNOLOGIES_AND_BANDS> valid_licenses_;
 

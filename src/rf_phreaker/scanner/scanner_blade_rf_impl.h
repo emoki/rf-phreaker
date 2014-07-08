@@ -58,7 +58,12 @@ public:
 		hw.scanner_id_ = serial();
 		hw.frequency_correction_calibration_date_ = get_frequency_correction_date();
 		hw.rf_calibration_date_ = eeprom_.cal_.rf_board_calibration_date_;
-		hw.frequency_paths_;
+		
+		for(auto rf_switch : eeprom_.cal_.rf_switches_) {
+			if(rf_switch.second.identifier_)
+				hw.frequency_paths_.push_back(rf_switch.second.path_);
+		}
+		
 		return hw;
 	}
 	time_t get_rf_calibration_date() const {

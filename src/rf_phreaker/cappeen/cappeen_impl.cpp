@@ -340,6 +340,7 @@ long cappeen_impl::start_collection(const beagle_api::collection_info &collectio
 		if(collection_containers.empty())
 			throw cappeen_api_error("beagle_api::collection_info is empty.", GENERAL_ERROR);
 
+		check_bands(collection_containers);
 
 		processing_graph_->start(scanner_.get(), data_output_.get(), collection_containers, config_);
 
@@ -429,6 +430,28 @@ processing::collection_info_containers cappeen_impl::create_collection_info_cont
 	}
 
 	return containers;
+}
+
+void cappeen_impl::check_bands(const processing::collection_info_containers &containers) {
+	bool invalid_bands = false;
+	std::set<TECHNOLOGIES_AND_BANDS> bad_band;
+
+	for(auto &container : containers) {
+		for(auto &info : container.collection_info_group_) {
+			if(!delegate_->is_within_freq_paths(info.freq_)) {
+				bad_band.insert(convert_band_to_tech_band(info.operating_band_));
+				invalid_bands = true;
+				break;
+			}
+		}
+	}
+	if(invalid_bands) {
+		std::string str("Unable to start collection.  Following tech/band(s) are not calibrated:");
+		for(auto &lic : bad_band)
+			str += " " + tech_band_to_string(lic) + ",";
+		str[str.find_last_of(",")] = '.';
+		throw cappeen_api_error(str, FREQNOTWITHINCALIBRATIONLIMITS);
+	}
 }
 
 long cappeen_impl::start_frequency_correction(const beagle_api::collection_info &collection)

@@ -2,6 +2,7 @@
 
 #include "rf_phreaker/cappeen/cappeen.h"
 #include "rf_phreaker/cappeen/beagle_defines.h"
+#include "rf_phreaker/cappeen/operating_band_conversion.h"
 #include <array>
 #include <thread>
 #include <atomic>
@@ -51,6 +52,11 @@ public:
 			break;
 		default:
 			std::cout << "UNKNOWN_BEAGLE_STATE" << "\n";
+		}
+
+		std::cout << "Available bands:\n";
+		for(uint32_t i = 0; i < info.available_bands_in_hardware_.num_elements_; ++i) {
+			std::cout << "\t" << rf_phreaker::cappeen_api::hw_band_to_string(info.available_bands_in_hardware_.elements_[i]) << "\n";
 		}
 
 		new_hw_info_ = true;
