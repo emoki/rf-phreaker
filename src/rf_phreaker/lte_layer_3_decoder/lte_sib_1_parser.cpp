@@ -21,6 +21,11 @@ void lte_sib_1_parser::parse_data(const SystemInformationBlockType1_t &data, lte
 	auto &plmn_list = data.cellAccessRelatedInfo.plmn_IdentityList.list;
 	for(int i = 0; i < plmn_list.count; ++i) {
 		//plmn_list.array[i]->cellReservedForOperatorUse - Perhaps not pertinent for our purposes.
+
+		// In the case of a malformed bit stream the mcc and perhaps other items can be NULL.  If it null
+		if(plmn_list.array[i]->plmn_Identity.mcc == nullptr)
+			continue;
+
 		plmn p;
 		p.mcc_ = create_mcc_type(plmn_list.array[i]->plmn_Identity.mcc->list.array, plmn_list.array[i]->plmn_Identity.mcc->list.count);
 		p.mnc_ = create_mnc_type(plmn_list.array[i]->plmn_Identity.mnc.list.array, plmn_list.array[i]->plmn_Identity.mnc.list.count);
