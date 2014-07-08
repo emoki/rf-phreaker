@@ -145,8 +145,8 @@ for(unsigned int regs=0;regs<num_reg_pdcch;regs++)
  //num_reg_pdcch = 144;
 	/* Descrambling */
 nSlotNum =   2*subFrameIndex;
-c_init = (nSlotNum/2) *(1<<9) + LteData[cell_no].RsRecord.ID; //6.7.1 TS36.211
-	
+c_init = (nSlotNum/2) *(1<<9) + LteData[cell_no].RsRecord.ID; //6.8.2 TS36.211
+
 generate_PN_seq(scrambling_seq_pdcch, //PDCCH Scambling Sequence
 		        c_init, //c_init
 			    num_reg_pdcch* NUM_RE_PER_REG * 2); 
