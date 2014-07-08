@@ -109,8 +109,8 @@ public:
 	void output_umts_sweep(const basic_data &t)
 	{
 		beagle_api::umts_sweep_info a;
-		a.frequency_ = (uint32_t)t.carrier_frequency_;
-		a.rssi_ = (int32_t)t.carrier_signal_level_;
+		a.frequency_ = t.carrier_frequency_;
+		a.rssi_ = t.carrier_signal_level_;
 
 		delegate_->available_umts_sweep_info(beagle_id_, &a, 1);
 	}
@@ -130,7 +130,7 @@ public:
 		int i = 0;
 		for(auto &umts : t) {
 			v[i].band_ = convert_band_to_hw_band(umts.operating_band_);
-			v[i].carrier_freq_ = umts.carrier_frequency_ / 1e6;
+			v[i].carrier_freq_ = umts.carrier_frequency_;
 			v[i].carrier_sl_ = umts.carrier_signal_level_;
 			v[i].collection_round_ = (uint32_t)umts.collection_round_;
 			v[i].cpich_ = umts.cpich_;
@@ -186,8 +186,8 @@ public:
 	void output_lte_sweep(const basic_data &t)
 	{
 		beagle_api::lte_sweep_info a;
-		a.frequency_ = (uint32_t)t.carrier_frequency_;
-		a.rssi_ = (int32_t)t.carrier_signal_level_;
+		a.frequency_ = t.carrier_frequency_;
+		a.rssi_ = t.carrier_signal_level_;
 
 		delegate_->available_lte_sweep_info(beagle_id_, &a, 1);
 	}
@@ -206,7 +206,7 @@ public:
 		for(auto &lte : t) {
 			v[i].antenna_ports_ = lte.num_antenna_ports_;
 			v[i].carrier_bandwidth_ = lte.dl_bandwidth_;
-			v[i].carrier_freq_ = static_cast<uint32_t>(lte.carrier_frequency_);
+			v[i].carrier_freq_ = lte.carrier_frequency_;
 			v[i].carrier_sl_ = lte.carrier_signal_level_;
 			v[i].collection_round_ = static_cast<uint32_t>(lte.collection_round_);
 			v[i].cyclic_prefix_length_ = lte.cyclic_prefix_;

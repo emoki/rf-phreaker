@@ -103,30 +103,37 @@ Starts data collection.
 Returns status in form of a long\n
 0 if operation completed successfully\n
 For further info please see ERRORCODES.
-@remarks
-Before starting collection BEAGLESTATE should be BEAGLE_READY.  Collecting with a state of BEAGLE_WARMINGUP will result inaccurate data.
 */
 CAPPEEN_API long cappeen_start_collection(const beagle_api::collection_info &collection);
 
 /**
-Starts the frequency correction process.  The WCDMA bands specified will be scanned for valid WCDMA cells.  Using the WCDMA cells found, the API will adjust
+Starts the frequency correction process.  
+@remarks
+The WCDMA bands specified will be scanned for valid WCDMA cells.  Using the WCDMA cells found, the API will adjust
 VCTCXO trim to minimize any frequency error within the hardware.  If successful the API will output an updated beagle_info with the new correction value
-and date.  If unable to find valid UMTS cells after the sweeping the bands correction frequency process fails.  Currently this is not treated as an error 
-and the user is alerted via a message.
+and date.  If unable to find valid UMTS cells after sweeping the bands, correction frequency process fails and is signified by the output of the error,
+FREQUENCY_CORRECTION_FAILED.
+
+Due to time considerations, when sweeping a band we cannot account for large frequency errors.  If frequency correction fails after sweeping the band(s), if possible try 
+a lower band, where the frequency error has a lesser effect, or specify the actual WCDMA frequencies for frequency correction.
 */
 CAPPEEN_API long cappeen_start_frequency_correction_using_sweep(const beagle_api::collection_info &collection);
 
 /**
-Starts the frequency correction process.  Using the WCDMA channels specified, the API will adjust VCTCXO trim to minimize any frequency error within the hardware.  
+Starts the frequency correction process.  
+@remarks
+Using the WCDMA channels specified, the API will adjust VCTCXO trim to minimize any frequency error within the hardware.  
 If successful the API will output an updated beagle_info with the new correction value and date.  If unable to find valid UMTS cells in the frequencies specified 
-the frequency process fails.  Currently this is not treated as an error and the user is alerted via a message.
+the frequency process fails and is signified by the output of the error, FREQUENCY_CORRECTION_FAILED. 
+
+Because we are most likely only dwelling on several frequencies, we can account for a larger frequency error and are more likely to see weaker cells.
 */
 CAPPEEN_API long cappeen_start_frequency_correction_using_frequencies(uint32_t *wcdma_frequencies, int num_channels);
 
 /**
 Inputs new license.
 @param serial Specifies which unit will have it's license updated.
-@param buf_size Size (in bytes) of the serial.  
+@param serial_buf_size Size (in bytes) of the serial.  
 @param new_license_filename Specifies the license filename to be used when updating the unit.
 @param license_buf_size Size (in bytes) of the new_license_filename.
 @return

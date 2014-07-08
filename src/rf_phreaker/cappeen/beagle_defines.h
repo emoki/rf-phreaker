@@ -18,6 +18,7 @@ namespace beagle_api
 // therefore -1 can be used to represent Qrxlevmin not decoded.
 static const int8_t inter_rat_rssi_not_decoded = -1;
 
+typedef int64_t frequency_type;
 typedef uint32_t beagle_id_type;
 typedef int32_t channel_type;
 typedef uint16_t cpich_type;
@@ -85,15 +86,15 @@ Represents all possible bands installed in the scanner.
 */
 enum BANDS
 { 
-	BAND_700, // [695 - 821* MHZ]  *With LTE_BAND_5 support
-	BAND_850, // [869 - 894 MHZ]
+	BAND_700, // [729 - 803 MHZ]  
+	BAND_850, // [791 - 894 MHZ]
 	BAND_900, // [921 - 960 MHZ]
 	BAND_1700, // [1710 - 1785 MHZ]
 	BAND_1800, // [1805 - 1880 MHZ]
-	BAND_1900, // [1930 - 1990 MHZ]
-	BAND_2100, // [2110 - 2170 MHZ]
-	BAND_2300, // Not currently applicable.
-	BAND_2600, // Not currently applicable.
+	BAND_1900, // [1930 - 1995 MHZ]
+	BAND_2100, // [2100 - 2170 MHZ]
+	BAND_2300, // [2300 - 2400 MHZ]
+	BAND_2600, // [2620 - 2690 MHZ].
 	MAX_NUM_BANDS
 };
 
@@ -434,9 +435,11 @@ enum BEAGLESTATE
 
 enum DEVICESPEED
 {
-	UNKOWN_SPEED,
-	USB_HI_SPEED,
-	USB_SUPER_SPEED
+	UNKOWN_SPEED, /// We were unable to determine the speed of the device.
+	
+	USB_HI_SPEED, /// The device is USB 2.0.  
+	
+	USB_SUPER_SPEED /// The device is USB 3.0.
 };
 
 /**
@@ -451,8 +454,8 @@ struct beagle_info
 	/// Current state of the beagle unit.
 	BEAGLESTATE state_;
 
-	/// String of 128 characters representating the Serial.  For example: "Beagle0045".
-	char beagle_serial_[128];
+	/// A five digit or 32 hex character string plus NULL representing the serial.
+	char beagle_serial_[33];
 
 	/// List of the valid licenses installed on the beagle unit.  
 	technologies_and_band_group valid_licenses_;
@@ -460,11 +463,11 @@ struct beagle_info
 	/// List of the bands installed on the hardware.
 	band_group available_bands_in_hardware_;
 
-	/// Seconds since 1970 - resolution is to the day.  Refers to the last time the beagle unit was calibrated to measure signal
+	/// Seconds since 1970.  Refers to the last time the beagle unit was calibrated to measure signal
 	/// level properly.
 	int64_t rf_calibration_date_;
 
-	/// Seconds since 1970 - resolution is to the day.  Refers to the last time we calculated a DDS clock correction.  This value is used
+	/// Seconds since 1970.  Refers to the last time we calculated a DDS clock correction.  This value is used
 	/// when the beagle unit has not had initial GPS lock and is collecting data.  For ideal processing it is good to keep this number 
 	/// under 1 month.
 	int64_t dds_clock_correction_calibration_date_;
@@ -549,10 +552,10 @@ struct gsm_sector_info
 	/// Specifies a complete set of measurments.
 	uint32_t collection_round_;
 	
-	/// BCCH Channel of GSM Record.  Always valid.
-	int bcch_;
+	/// Broadcast control channel.  Always valid.
+	channel_type bcch_;
 
-	/// Decoded BSIC of GSM Record.  0x99 if not successfully decoded.
+	/// Base station identity code.  0x99 if not successfully decoded.
 	uint8_t bsic_;
 
 	/// Decoded Mobile Country Code.  0xFFFF if not successfully decoded.
@@ -564,16 +567,16 @@ struct gsm_sector_info
 	/// Decoded Location Area Code.  0xFFFF if not successfully decoded.
 	uint16_t  lac_;
 
-	/// Decoded Cellular Identity.  0xFFFF if not successfully decoded.
+	/// Decoded Cellular Identity.  0xFFFFFFFF if not successfully decoded.
 	uint32_t cell_id_;
 
-	/// Signal level of GSM Record.  Always valid.
+	/// Signal level in dBm.  Always valid.
 	double sl_;
 
-	/// Carrier to Interference ratio.  Always valid.
+	/// Carrier to Interference ratio in dB.  Always valid.
 	double ctoi_;
 
-	/// band
+	//// Corresponds to the hardware band the info was measured on.
 	BANDS band_;
 
 	// True if mcc was decoded with three digits.  Allows for leading zero.
@@ -592,13 +595,13 @@ struct umts_sector_info
 	/// Specifies a complete set of measurments.
 	uint32_t collection_round_;
 
-	/// Carrier Freqency.  Always valid.
-	double carrier_freq_;
+	/// Carrier frequency in Hz.  Always valid.
+	frequency_type carrier_freq_;
 
 	/// Signal level of Carrier.  Always valid.
 	double carrier_sl_;
 
-	/// UMTS Channel.  Always valid.
+	/// UMTS channel.  Always valid.
 	uint16_t  uarfcn_;
 
 	/// Decoded Mobile Country Code.  0xFFFF if not successfully decoded.
@@ -610,16 +613,16 @@ struct umts_sector_info
 	/// Decoded Location Area Code.  0xFFFF if not successfully decoded.
 	uint16_t  lac_;
 
-	/// Decoded Cellular Identity.  0xFFFF if not successfully decoded.
+	/// Decoded Cellular Identity.  0xFFFFFFFF if not successfully decoded.
 	uint32_t cell_id_;
 
-	/// CPICH.  Always valid. 0 - 511.
+	/// Common pilot channel.  Always valid. 
 	uint16_t  cpich_;
 
-	/// CPICH Ec/Io.  Always valid.
+	/// Received energy per chip to the interference level in dB.  Always valid.
 	double ecio_;
 
-	/// Received Signal Code Power.  Represents the signal level coming from a specific sector.
+	/// Received Signal Code Power in dBm.  Represents the signal level coming from a specific sector.
 	double rscp_;  
 
 	//// Corresponds to the hardware band the info was measured on.
@@ -640,17 +643,17 @@ struct umts_sector_info
 	// Neighbor inter frequency RAT list.  Decoded from SIB 11 or SIB 11bis.
 	umts_neighbor_inter_rat_gsm_group neighbor_inter_rat_gsm_group_;
 
-	// Contains the PLMN of the inter frequency list.
+	// Contains the PLMN of the inter frequency list.  Currently not decoded.
 	umts_sib_18 sib_18_group_;
 };
 
 struct umts_sweep_info
 {
-	// Frequency
-	uint32_t frequency_;
+	// Frequency in Hz
+	frequency_type frequency_;
 
 	// Power within a 4 MHz bin centered around the frequency of the uarfcn_.
-	int32_t rssi_;
+	double rssi_;
 };
 
 /**
@@ -661,16 +664,17 @@ struct lte_sector_info
 	/// Specifies a complete set of measurments.
 	uint32_t collection_round_;
 
-	/// Carrier Freqency.  
-	uint32_t carrier_freq_;
+	/// Carrier frequency in Hz.  
+	frequency_type carrier_freq_;
 
-	/// Power within a 1.92 MHz bin centered around the frequency of the EARFCN.
+	/// Total power within the bandwidth of the LTE channel.  When channel bandwidth is not decoded, the bandwidth is specified via 
+	/// the configuration file.
 	double carrier_sl_;
 
 	/// LTE channel number. 
 	uint16_t earfcn_;
 
-	/// Corresponds to the LTE band.
+	/// Corresponds to the LTE operating band.
 	TECHNOLOGIES_AND_BANDS lte_operating_band_;
 
 	/// Physical cell ID.  Equal to 3 * Physical layer cell identity group + physical layer identity.
@@ -701,7 +705,7 @@ struct lte_sector_info
 	double secondary_sync_quality_;
 
 	/// Full bandwidth of the LTE channel.
-	int32_t carrier_bandwidth_;
+	frequency_type carrier_bandwidth_;
 
 	/// Number of antenna ports used by LTE cell.
 	int8_t antenna_ports_;
@@ -712,7 +716,7 @@ struct lte_sector_info
 	/// System frame number.
 	int32_t system_frame_number_;
 
-	/// System Information block 1.  Not always decoded.
+	// TODO - Description.
 	lte_sib_1 sib_1_;
 	lte_sib_4 sib_4_;
 	lte_sib_5 sib_5_;
@@ -723,23 +727,23 @@ struct lte_sector_info
 
 struct lte_sweep_info
 {
-	// Center frequency.
-	uint32_t frequency_;
+	// Center frequency in Hz.
+	frequency_type frequency_;
 
-	// Power within a 1.92 MHz bin centered around the frequency of the EARFCN.
-	int32_t rssi_;
+	// Power within a bin size (based on the configuration file) that is centered around the frequency of the EARFCN.  
+	double rssi_;
 };
 
 /**
 Callback interface must be a base class to the class which will access the beagle data during runtime.
-The derived class should not block the the calling thread as this will slow or possibly stop beagle collection.
+The derived class should not block the calling thread as this will slow or possibly stop beagle collection.
 */
 class beagle_delegate
 {
 public:
 	virtual __stdcall ~beagle_delegate() {};
 
-	/// Called by Beagle when there is a change in Beagle's  state.
+	/// Called by Beagle when there is a change in Beagle's state.
 	/// @param beagle_id A unique ID which corresponds to the Beagle unit.
 	/// @param info See BeagleInfo.
 	virtual void __stdcall available_beagle_info(long beagle_id, const beagle_info &info) = 0;
@@ -763,20 +767,20 @@ public:
 	
 	/// Called by Beagle when there is new UMTS sweep data. 
 	/// @param beagle_id A unique ID which corresponds to the Beagle unit.
-	/// @param info Array of umts_sector_info.
+	/// @param info Array of umts_sweep_info.
 	/// @param num_records Number of umts_sweep_info structs within the info array.
 	virtual void __stdcall available_umts_sweep_info(long beagle_id, const umts_sweep_info *info, long num_records) = 0;
 	
 	/// Called by Beagle when there is new LTE data. 
 	/// @param beagle_id A unique ID which corresponds to the Beagle unit.
-	/// @param info Array of umts_sector_info.
-	/// @param num_records Number of umts_sector_info structs within the info array.
+	/// @param info Array of lte_sector_info.
+	/// @param num_records Number of lte_sector_info structs within the info array.
 	virtual void __stdcall available_lte_sector_info(long beagle_id, const lte_sector_info *info, long num_records) = 0;
 	
 	/// Called by Beagle when there is new LTE sweep data. 
 	/// @param beagle_id A unique ID which corresponds to the Beagle unit.
-	/// @param info Array of umts_sector_info.
-	/// @param num_records Number of umts_sweep_info structs within the info array.
+	/// @param info Array of lte_sweep_info.
+	/// @param num_records Number of lte_sweep_info structs within the info array.
 	virtual void __stdcall available_lte_sweep_info(long beagle_id, const lte_sweep_info *info, long num_records) = 0;
 	
 	/// Called by Beagle when an error or warning has occurred.  
@@ -799,7 +803,7 @@ public:
 Lists the different errors that can occur.
 @remark
 Errors -1 thru -44 are reserved for QUICKUSB.  For more information please refer to the Quick USB documentation. @n 
-Errors -1 thru -100 are fatal errors i.e. stop collection.
+Some errrors will cause data collection and/or GPS collection to stop.  This can be noted by observing the beagle_info::state_.
 */
 enum ERRORCODES
 {
@@ -891,7 +895,8 @@ enum ERRORCODES
 
 	CRITICAL_SECTION_ERROR = -10000,
 
-	BUFFER_TOO_SMALL
+	BUFFER_TOO_SMALL,
+	FREQUENCY_CORRECTION_FAILED
 
 };
 
