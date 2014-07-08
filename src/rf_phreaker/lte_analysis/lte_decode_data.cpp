@@ -42,7 +42,7 @@ double delayTime1, delayTime2;
 // a member variable.
 static ipp_32fc_array signal_384;
 if(signal_384.length() < NumSamples)
-	signal_384.reset(NumSamples);
+	signal_384.reset(NumSamples + FRAMENUMSAMPLES_FFT1024 * 2);
 
 ippsCopy_32fc(SignalSamples, signal_384.get(), NumSamples);
 
@@ -130,7 +130,6 @@ for(unsigned int ii = 0; ii <LteData.size(); ii++)
 frameStartSampleIndex = LteData[ii].RsRecord.StartSampleNum;
 
 current_frame_number = LteData[ii].frame_number;
-
 
 // I think 6 corresponds to the number of half frames to process?  Switching to NumHalfFramesToProcess
 //while((frameStartSampleIndex + LteData[ii].frameNumSamples) < (6*LteData[ii].frameNumSamples) )

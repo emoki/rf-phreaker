@@ -74,8 +74,8 @@ int lte_cell_search(const Ipp32fc* SignalSamples,
 	unsigned int sampling_factor = 1;	
 	double SampleRate;
 
-	signal_384 = ippsMalloc_32fc(NumSamples);
-	ippsZero_32fc(signal_384, NumSamples);
+	signal_384 = ippsMalloc_32fc(NumSamples + 19200 * 2);
+	ippsZero_32fc(signal_384, NumSamples + 19200 * 2);
 	signal192 = signal_384;
 	ippsCopy_32fc(SignalSamples, signal192, NumSamples);
 
