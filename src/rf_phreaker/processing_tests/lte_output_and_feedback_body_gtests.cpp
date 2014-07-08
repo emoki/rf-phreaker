@@ -4,9 +4,9 @@
 #include "rf_phreaker/processing/lte_output_and_feedback_body.h"
 #include "rf_phreaker/processing/data_output_async.h"
 
-	using namespace rf_phreaker;
-	using namespace rf_phreaker::scanner;
-	using namespace rf_phreaker::processing;
+using namespace rf_phreaker;
+using namespace rf_phreaker::scanner;
+using namespace rf_phreaker::processing;
 
 class LteOutputAndFeedbackBodyTest : public ::testing::Test
 {
