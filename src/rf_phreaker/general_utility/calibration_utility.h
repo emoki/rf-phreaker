@@ -110,18 +110,25 @@ public:
 
 			controller.open_scanner(serial);
 
-			if(!controller.read_eeprom_meta_data().is_valid()) {
-				std::cout << "\nInitializing EEPROM.\n";
-				controller.initialize_eeprom();
-			}
-			else {
-				// If the EEPROM is valid then we use the freq correction value and date. 
-				auto tmp_cal = controller.read_calibration();
-				if(tmp_cal.nuand_freq_correction_value_ > 0 && tmp_cal.nuand_freq_correction_date_ > 0) {
-					cal.nuand_freq_correction_value_ = tmp_cal.nuand_freq_correction_value_;
-					cal.nuand_freq_correction_date_ = tmp_cal.nuand_freq_correction_date_;
+			try{
+				auto meta_data = controller.read_eeprom_meta_data();
+				if(!meta_data.is_valid()) {
+					std::cout << "\nInitializing EEPROM.\n";
+					controller.initialize_eeprom();
 				}
 			}
+			catch(const std::exception &err) {
+				std::cout << "\nError while reading EEPROM meta data: " << err.what() << "\nInitializing EEPROM.\n" ;
+				controller.initialize_eeprom();
+			}
+
+			// If the EEPROM is valid then we use the freq correction value and date. 
+			auto tmp_cal = controller.read_calibration();
+			if(tmp_cal.nuand_freq_correction_value_ > 0 && tmp_cal.nuand_freq_correction_date_ > 0) {
+				cal.nuand_freq_correction_value_ = tmp_cal.nuand_freq_correction_value_;
+				cal.nuand_freq_correction_date_ = tmp_cal.nuand_freq_correction_date_;
+			}
+
 			std::cout << "\nWriting calibration to EEPROM.\n";
 			controller.write_calibration(cal);
 
