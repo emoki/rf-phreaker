@@ -28,6 +28,9 @@ inline int convert_message(int msg)
 	case (int)STD_EXCEPTION_ERROR:
 		code = beagle_api::STD_EXCEPTION_ERROR;
 		break;
+	case (int)FREQUENCY_CORRECTION_FAILED:
+		code = beagle_api::FREQUENCY_CORRECTION_FAILED;
+		break;
 	default:
 		code = static_cast<beagle_api::ERRORCODES>(msg);
 	}
@@ -271,9 +274,16 @@ public:
 				   || beagle_info_.state_ == beagle_api::BEAGLE_USBOPENED
 				   || beagle_info_.state_ == beagle_api::BEAGLE_READY
 				   || beagle_info_.state_ == beagle_api::BEAGLE_WARMINGUP) {
-				if(processing_graph_) processing_graph_->cancel_and_wait();
-				if(gps_graph_) gps_graph_->cancel_and_wait();
-				change_beagle_state(beagle_api::BEAGLE_ERROR);
+				switch(code) {
+				case GENERAL_ERROR:
+				case STD_EXCEPTION_ERROR:
+				case UNKNOWN_ERROR:
+					if(processing_graph_) processing_graph_->cancel_and_wait();
+					if(gps_graph_) gps_graph_->cancel_and_wait();
+					change_beagle_state(beagle_api::BEAGLE_ERROR);
+				default:
+					;
+				}
 			}
 			delegate_->available_error(beagle_id_, convert_message(code), s.c_str(), s.size() + 1);
 		}

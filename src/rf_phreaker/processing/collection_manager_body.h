@@ -145,7 +145,7 @@ public:
 protected:
 	void finished_scanning() 
 	{
-		delegate_sink_async::instance().log_message("Frequency correction failed.", FREQUENCY_CORRECTION_FAILED);
+		delegate_sink_async::instance().log_error("Frequency correction failed.", FREQUENCY_CORRECTION_FAILED);
 		graph_->root_task()->cancel_group_execution();
 	}
 };

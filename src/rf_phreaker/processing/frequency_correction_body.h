@@ -107,7 +107,7 @@ public:
 				io_->output(sc_->get_scanner().get()->get_hardware());
 			}
 			else {
-				delegate_sink_async::instance().log_message("Frequency correction failed.", FREQUENCY_CORRECTION_FAILED);
+				delegate_sink_async::instance().log_error("Frequency correction failed.", FREQUENCY_CORRECTION_FAILED);
 			}
 
 			return;
