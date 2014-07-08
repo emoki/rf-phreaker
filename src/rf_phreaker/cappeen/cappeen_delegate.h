@@ -3,6 +3,7 @@
 #include "rf_phreaker/cappeen/beagle_defines.h"
 #include "rf_phreaker/cappeen/operating_band_conversion.h"
 #include "rf_phreaker/cappeen/rf_phreaker_wrappers.h"
+#include "rf_phreaker/cappeen/cappeen_license.h"
 #include "rf_phreaker/common/measurements.h"
 #include "rf_phreaker/common/exception_types.h"
 #include "rf_phreaker/common/log.h"
@@ -345,47 +346,33 @@ public:
 			beagle_info_.available_bands_in_hardware_.elements_ = &bands_[0];
 		}
 
+		beagle_info_.valid_licenses_.num_elements_ = 0;
+		beagle_info_.valid_licenses_.elements_ = 0;
 		valid_licenses_.clear();
-		//for(auto &license : t.valid_licenses_) {
-		//}
-		valid_licenses_.push_back(beagle_api::WCDMA_BAND_850);
-		valid_licenses_.push_back(beagle_api::WCDMA_BAND_900);
-		valid_licenses_.push_back(beagle_api::WCDMA_BAND_1800);
-		valid_licenses_.push_back(beagle_api::WCDMA_BAND_1900);
-		valid_licenses_.push_back(beagle_api::WCDMA_BAND_2100);
-		
-		valid_licenses_.push_back(beagle_api::LTE_BAND_12);
-		valid_licenses_.push_back(beagle_api::LTE_BAND_13);
-		valid_licenses_.push_back(beagle_api::LTE_BAND_14);
-		valid_licenses_.push_back(beagle_api::LTE_BAND_17);
-		valid_licenses_.push_back(beagle_api::LTE_BAND_28);
-		valid_licenses_.push_back(beagle_api::LTE_BAND_29);
-
-		valid_licenses_.push_back(beagle_api::LTE_BAND_5);
-		valid_licenses_.push_back(beagle_api::LTE_BAND_6);
-		valid_licenses_.push_back(beagle_api::LTE_BAND_18);
-		valid_licenses_.push_back(beagle_api::LTE_BAND_19);
-		valid_licenses_.push_back(beagle_api::LTE_BAND_20);
-		valid_licenses_.push_back(beagle_api::LTE_BAND_26);
-		valid_licenses_.push_back(beagle_api::LTE_BAND_27);
-
-		valid_licenses_.push_back(beagle_api::LTE_BAND_8);
-
-		valid_licenses_.push_back(beagle_api::LTE_BAND_3);
-		valid_licenses_.push_back(beagle_api::LTE_BAND_9);
-
-		valid_licenses_.push_back(beagle_api::LTE_BAND_2);
-		valid_licenses_.push_back(beagle_api::LTE_BAND_25);
-
-		valid_licenses_.push_back(beagle_api::LTE_BAND_1);
-		valid_licenses_.push_back(beagle_api::LTE_BAND_4);
-		valid_licenses_.push_back(beagle_api::LTE_BAND_10);
-		valid_licenses_.push_back(beagle_api::LTE_BAND_23);
-
-		valid_licenses_.push_back(beagle_api::LTE_BAND_7);
-
-		beagle_info_.valid_licenses_.num_elements_ = valid_licenses_.size();
-		beagle_info_.valid_licenses_.elements_ = &valid_licenses_[0];
+		if(t.license_data_.version_ <= 0) {
+			LOG_L(WARNING) << "License is not initialized.";
+		}
+		else {
+			try {
+				std::unique_ptr<cappeen_license> license(new cappeen_license_version_3(cell_analysis_license));
+				license->initialize_license(t.license_data_, t.scanner_id_);
+				if(!license->corrupt_license()) {
+					for(int i = 0; i < beagle_api::MAX_TECHNOLOGIES_AND_BANDS; ++i) {
+						auto lic = static_cast<beagle_api::TECHNOLOGIES_AND_BANDS>(i);
+						if(license->valid_licenses().find(lic) != license->valid_licenses().end())
+							valid_licenses_.push_back(lic);
+					}
+				}
+			}
+			catch(const rf_phreaker_error &err) {
+				output_message(err.what(), 0);
+				valid_licenses_.clear();
+			}
+			if(valid_licenses_.size()) {
+				beagle_info_.valid_licenses_.num_elements_ = valid_licenses_.size();
+				beagle_info_.valid_licenses_.elements_ = &valid_licenses_[0];
+			}
+		}
 
 		switch(t.device_speed_) {
 		case rf_phreaker::device_speed::USB_HI_SPEED:
@@ -424,6 +411,8 @@ public:
 	}
 
 	beagle_api::BEAGLESTATE current_beagle_state() { return beagle_info_.state_; }
+
+	const std::vector<beagle_api::TECHNOLOGIES_AND_BANDS>& valid_licenses() { return valid_licenses_; }
 
 	const std::vector<frequency_path>& frequency_paths() { return frequency_paths_; }
 

@@ -40,6 +40,8 @@ private:
 	
 	rf_phreaker::processing::collection_info_containers create_collection_info_containers(const beagle_api::collection_info &collection);
 
+	void check_licenses(const beagle_api::collection_info &collection);
+
 	void check_bands(const rf_phreaker::processing::collection_info_containers &containers);
 
 	bool is_initialized_;

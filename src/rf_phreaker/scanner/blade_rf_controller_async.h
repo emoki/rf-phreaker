@@ -34,16 +34,17 @@ public:
 		});
 	}
 
-	virtual std::future<void> do_initial_scanner_config()
-	{
+	virtual std::future<void> do_initial_scanner_config() {
 		return controller_([=](blade_rf_controller &c) {
 			c.do_initial_scanner_config();
 		});
 	}
 
-
-	//virtual void config_scanner_for_collection(std::vector<rf_phreaker::frequency_type> &freqs) = 0;
-
+	virtual std::future<void> refresh_scanner_info() {
+		return controller_([=](blade_rf_controller &c) {
+			c.refresh_scanner_info();
+		});
+	}
 
 	virtual std::future<const scanner*> get_scanner()
 	{
@@ -80,6 +81,12 @@ public:
 		});
 	}
 
+	virtual std::future<void> write_license(const license &license)
+	{
+		return controller_([=](blade_rf_controller &c) {
+			return c.write_license(license);
+		});
+	}
 
 private:
 	rf_phreaker::concurrent<blade_rf_controller> controller_;

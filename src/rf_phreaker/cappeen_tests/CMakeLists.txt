@@ -11,7 +11,10 @@ set (cappeen_tests_VERSION_TWEAK 0)
 
 set (cappeen_tests_SRCS 
 	cappeen_gtests.cpp
+	cappeen_license_gtests.cpp
 	rf_phreaker_wrappers_gtests.cpp
+	../cappeen/cappeen_license.cpp
+	../cappeen/cappeen_license.h
 	cappeen_tests.cpp
 	${SRC_PLATFORM_SPECIFIC}/stdafx.cpp)
 

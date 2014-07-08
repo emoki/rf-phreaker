@@ -64,6 +64,7 @@ public:
 				hw.frequency_paths_.push_back(rf_switch.second.path_);
 		}
 		
+		hw.license_data_ = eeprom_.license_;
 		return hw;
 	}
 	time_t get_rf_calibration_date() const {

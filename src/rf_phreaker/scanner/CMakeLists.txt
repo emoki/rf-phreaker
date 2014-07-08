@@ -22,7 +22,6 @@ set (scanner_SRCS
 	eeprom.h
 	gain.h
 	gain_manager.h
-	license.h
 	lms_defines.h
 	lms_utilities.h
 	measurement_info.h

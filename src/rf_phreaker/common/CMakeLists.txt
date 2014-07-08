@@ -28,6 +28,7 @@ set (common_SRCS
 	frequency_shifter.h
 	ipp_array.h
 	ipp_helper.h
+	license.h
 	log.h
 	measurements.h
 	measurement_io.h

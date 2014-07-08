@@ -98,11 +98,13 @@ include_directories ("${PROJECT_SOURCE_DIR}/third_party/gmock/include")
 include_directories ("${PROJECT_SOURCE_DIR}/third_party/gtest/include")
 include_directories (${IPP_INCLUDE_DIRS})
 include_directories (${TBB_INCLUDE_DIRS})
+include_directories ("${PROJECT_SOURCE_DIR}/third_party/hash_utility")
 
 add_subdirectory (third_party/gmock)
 #add_subdirectory (third_party/gtest) #gtest is automatically added by gmock
 add_subdirectory (third_party/g2log/g2log)
 add_subdirectory (third_party/bladerf/host)
+add_subdirectory (third_party/hash_utility)
 add_subdirectory (src/rf_phreaker/common)
 add_subdirectory (src/rf_phreaker/common_tests)
 add_subdirectory (src/rf_phreaker/fir_filter)

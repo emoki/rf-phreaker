@@ -1,10 +1,11 @@
 #pragma once
 
-#include "rf_phreaker/common/common_types.h"
-#include "rf_phreaker/layer_3_common/umts_bcch_bch_message_aggregate.h"
-#include "rf_phreaker/layer_3_common/lte_rrc_message_aggregate.h"
 #include <stdint.h>
 #include <vector>
+#include "rf_phreaker/common/common_types.h"
+#include "rf_phreaker/common/license.h"
+#include "rf_phreaker/layer_3_common/umts_bcch_bch_message_aggregate.h"
+#include "rf_phreaker/layer_3_common/lte_rrc_message_aggregate.h"
 
 namespace rf_phreaker {
 
@@ -26,10 +27,11 @@ namespace rf_phreaker {
 	struct hardware 
 	{
 		scanner_serial_type scanner_id_;
-		std::vector<frequency_path> frequency_paths_;
 		device_speed device_speed_;
 		int64_t frequency_correction_calibration_date_;
 		int64_t rf_calibration_date_;
+		std::vector<frequency_path> frequency_paths_;
+		license license_data_;
 	};
 
 	struct gps

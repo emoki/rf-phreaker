@@ -757,5 +757,12 @@ calibration blade_rf_controller::read_calibration()
 	return ee.cal_;
 }
 
+void blade_rf_controller::write_license(const license &lic)
+{
+	eeprom ee = read_eeprom();
+	ee.license_ = lic;
+	write_eeprom(ee);
+}
+
 
 }}

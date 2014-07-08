@@ -38,7 +38,7 @@ public:
 
 	void do_initial_scanner_config();
 
-	void config_scanner_for_collection(std::vector<frequency_type> &freqs);
+	void refresh_scanner_info();
 
 	void write_vctcxo_trim(uint16_t trim);
 	void write_vctcxo_trim_and_update_calibration(frequency_type carrier_freq, frequency_type freq_shift);
@@ -85,14 +85,14 @@ public:
 
 	void update_frequency_correction_value_and_date_in_calibration(uint16_t value, time_t date);
 
+	void write_license(const license &license);
+
 private:
 	void enable_blade_rx();
 
 	void disable_blade_rx();
 
-	void refresh_scanner_info();
-
-	int check_blade_status(int return_status, const std::string &file = "", int line = -1);
+	static int check_blade_status(int return_status, const std::string &file = "", int line = -1);
 
 	void check_blade_comm();
 

@@ -3,9 +3,9 @@
 #include <boost/serialization/access.hpp>
 #include <boost/archive/text_oarchive.hpp>
 #include <boost/archive/text_iarchive.hpp>
-#include "rf_phreaker/scanner/license.h"
 #include "rf_phreaker/scanner/calibration.h"
 #include "rf_phreaker/common/common_utility.h"
+#include "rf_phreaker/common/license.h"
 
 namespace rf_phreaker { namespace scanner {
 

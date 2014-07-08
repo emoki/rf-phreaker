@@ -24,13 +24,15 @@ public:
 
 	virtual std::future<void> do_initial_scanner_config() = 0;
 
-	//virtual void config_scanner_for_collection(std::vector<rf_phreaker::frequency_type> &freqs) = 0;
+	virtual std::future<void> refresh_scanner_info() = 0;
 
 	virtual std::future<const scanner*> get_scanner() = 0;
 
 	virtual std::future<void> write_vctcxo_trim_and_update_calibration(frequency_type carrier_freq, frequency_type freq_shift) = 0;
 
 	virtual std::future<void> update_vctcxo_trim(frequency_type carrier_freq, frequency_type freq_shift) = 0;
+
+	virtual std::future<void> write_license(const license &license) = 0;
 
 	virtual std::future<rf_phreaker::gps> get_gps_data() = 0;
 

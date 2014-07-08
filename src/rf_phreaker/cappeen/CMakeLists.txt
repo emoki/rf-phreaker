@@ -15,6 +15,8 @@ set (cappeen_SRCS
 	cappeen_delegate.h
 	cappeen_impl.cpp
 	cappeen_impl.h
+	cappeen_license.cpp
+	cappeen_license.h
 	operating_band_conversion.h
 	rf_phreaker_wrappers.h
 	${SRC_PLATFORM_SPECIFIC}/stdafx.cpp
@@ -27,3 +29,4 @@ add_library (cappeen SHARED ${cappeen_SRCS})
 
 target_link_libraries (cappeen processing)
 target_link_libraries (cappeen qt_specific)
+target_link_libraries (cappeen hash_utility)

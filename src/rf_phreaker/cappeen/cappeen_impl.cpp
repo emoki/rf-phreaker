@@ -168,7 +168,6 @@ long cappeen_impl::clean_up()
 	return status;
 }
 
-
 long cappeen_impl::list_available_units(char *list, unsigned int buf_size)
 {
 	long status = 0;
@@ -331,6 +330,8 @@ long cappeen_impl::start_collection(const beagle_api::collection_info &collectio
 		if(frequency_correction_graph_)
 			frequency_correction_graph_->cancel_and_wait();
 
+		check_licenses(collection);
+
 		// Initialize packet sizes.
 		read_settings();
 		processing::initialize_collection_info_defaults(config_);
@@ -454,6 +455,27 @@ void cappeen_impl::check_bands(const processing::collection_info_containers &con
 	}
 }
 
+void cappeen_impl::check_licenses(const beagle_api::collection_info &collection) {
+	bool invalid_license = false;
+	std::vector<TECHNOLOGIES_AND_BANDS> bad_licenses;
+
+	auto valid_licenses = delegate_->valid_licenses();
+	auto tbs = collection.tech_and_bands_to_sweep_.elements_;
+	for(uint32_t i = 0; i < collection.tech_and_bands_to_sweep_.num_elements_; ++i) {
+		if(std::find(valid_licenses.begin(), valid_licenses.end(), tbs[i]) == valid_licenses.end()) {
+			bad_licenses.push_back(tbs[i]);
+			invalid_license = true;
+		}
+	}
+	if(invalid_license) {
+		std::string str("Unable to start collection.  No license for the following tech/band(s):");
+		for(auto &lic : bad_licenses)
+			str += " " + tech_band_to_string(lic) + ",";
+		str[str.find_last_of(",")] = '.';
+		throw cappeen_api_error(str, FREQNOTLICENSED);
+	}
+}
+
 long cappeen_impl::start_frequency_correction(const beagle_api::collection_info &collection)
 {
 	long status = 0;
@@ -558,7 +580,37 @@ long cappeen_impl::input_new_license(const char *serial, uint32_t serial_buf_siz
 	try {
 		LOG_L(INFO) << "Updating new license...";
 		std::lock_guard<std::recursive_mutex> lock(mutex_);
-		throw std::exception("Updating the license is not currently supported.");
+
+		auto state = delegate_->current_beagle_state();
+		if(state == BEAGLE_USBCLOSED) {
+			LOG_L(INFO) << "Unit not open.  Attempting to open unit before updating license...";
+			open_unit(serial, serial_buf_size);
+			state = delegate_->current_beagle_state();
+		}
+
+		if(state != BEAGLE_WARMINGUP && state != BEAGLE_READY && state != BEAGLE_USBOPENED)
+			throw cappeen_api_error("Cannot update license.  Wrong beagle state.", WRONGBEAGLESTATE);
+
+		if(frequency_correction_graph_)
+			frequency_correction_graph_->cancel_and_wait();
+
+		std::string filename(new_license_filename, license_buf_size);
+
+		// Read license.
+		cappeen_license_version_3 license(cell_analysis_license);
+		auto raw_license = license.create_new_license_from_file(filename);
+
+		// Verify license is not corrupt.
+		license.initialize_license(raw_license, serial);
+		if(license.corrupt_license())
+			throw cappeen_api_error("License read from file appears corrupt.", CORRUPTLICENSE);
+
+		scanner_->write_license(raw_license).get();
+
+		scanner_->refresh_scanner_info().get();
+		auto hw = scanner_->get_scanner().get()->get_hardware();
+		delegate_->initialize_beagle_info(hw);
+
 		LOG_L(INFO) << "Updated license successfully.";
 	}
 	catch(const rf_phreaker::rf_phreaker_error &err) {
