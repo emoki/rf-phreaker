@@ -66,14 +66,11 @@ TEST(UmtsAnalysisTests, TestGeneral)
 					std::cout <<
 						i << "\t" <<
 						info.frequency() / 1e6 << "\t" <<
-						umts_meas[j].cpich_ << "\t" <<
-						umts_meas[j].ecio_ << "\t" <<
-						umts_meas[j].rms_signal_ << "\t" <<
-						umts_meas[j].sample_num_ << "\t" <<
-						umts_meas[j].layer_3_.mcc_.to_string() << "\t" <<
-						umts_meas[j].layer_3_.mnc_.to_string() << "\t" <<
-						umts_meas[j].layer_3_.lac_ << "\t" <<
-						umts_meas[j].layer_3_.cid_ << "\n";
+						umts_meas[j] << "\n";
+					out <<
+						i << "\t" <<
+						info.frequency() / 1e6 << "\t" <<
+						umts_meas[j] << "\n";
 				}
 			}
 		}
@@ -119,19 +116,21 @@ TEST(UmtsAnalysisTests, TestMultithreaded)
 
 		std::vector<std::thread> threads;
 
-		auto p_it = packets.begin();
-		for(auto &analysis : analyzers) {
-			threads.push_back(std::thread([&](umts_analysis &anl, rf_phreaker::scanner::measurement_info &info) {
-				for(int i = 0; i < num_iterations; ++i) {
-					umts_measurements umts_meas(100);
-					int num_meas = umts_meas.size();
-					int status = anl.cell_search(info, &umts_meas.at(0), num_meas, /*14952*//*8000*/-25, umts_scan_type::full_scan_type);
-					EXPECT_EQ(0, status);
-				}
-			}, analysis, *p_it++));
+		if(packets.size()) {
+			auto p_it = packets.begin();
+			for(auto &analysis : analyzers) {
+				threads.push_back(std::thread([&](umts_analysis &anl, rf_phreaker::scanner::measurement_info &info) {
+					for(int i = 0; i < num_iterations; ++i) {
+						umts_measurements umts_meas(100);
+						int num_meas = umts_meas.size();
+						int status = anl.cell_search(info, &umts_meas.at(0), num_meas, /*14952*//*8000*/-25, umts_scan_type::full_scan_type);
+						EXPECT_EQ(0, status);
+					}
+				}, analysis, *p_it++));
+			}
+			for(auto &thread : threads)
+				thread.join();
 		}
-		for(auto &thread : threads)
-			thread.join();
 	}
 	catch(const std::exception &err) {
 		std::cout << "umts_analysis_gtests exception:  " << err.what() << std::endl;
