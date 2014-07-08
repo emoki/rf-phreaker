@@ -32,6 +32,7 @@
 #include <stdint.h>
 #include "rf_phreaker/lte_layer_3_decoder/lte_layer_3_decoder.h"
 #include "rf_phreaker/layer_3_common/lte_rrc_message_aggregate.h"
+#include "rf_phreaker/lte_analysis/lte_io.h"
 
 namespace rf_phreaker {
 
@@ -58,7 +59,6 @@ extern HANDLE  hConsole;
 * Return Value:
 **********************************************************************************************************
 */
-
 
 int lte_pdsch_decode(Ipp32fc* inSignal,
 	                Ipp32fc* h_est,
@@ -119,9 +119,6 @@ stDiversityDet(lte_pdsch_demod_llr,
 	        LteData[cell_no].NumAntennaPorts, // Number of Antennas 
 	        modulation_type,//MQPSK,//Modulation Type == QPSK
 	        h_noise_var);
-
-// TODO - ecs removed - if(sub_frame_index==5)
-	temp=0;
 
 //Soft desrambling
 c_init = (n_rnti)*(1<<14) + q*(1<<13) + ((sub_frame_index)<<9) + LteData[cell_no].RsRecord.ID;
@@ -204,12 +201,25 @@ clock_t end_asn =clock();
 
 //std::cout<<"\n Decoded PDSCH \n";
 
+	//static std::ofstream file("debug_lte_layer_3_bitstream.txt");
+	//static bool write_header = true;
+	//if(write_header) {
+	//	write_header = false;
+	//	file << "sub_frame_index\tsubframe_start_sample_index\t";
+	//	output_lte_meas_debug_header(file);
+	//}
+	//file << sub_frame_index << "\t" << subframe_start_sample_index << "\t" << LteData[cell_no] << "\t";
+	//for(uint32_t i = 0, end = 512; i < end; ++i)
+	//	file << std::hex << std::setw(2) << std::setfill('0') << (int)lte_pdsch_byte_seq[i] << " ";
+	//file << std::dec << "\t" << tmp << std::endl;
 } 
 
 }
 
 return LTE_SUCCESS;
 }
+
+
 
 /*
 *********************************************************************************************************
@@ -341,9 +351,6 @@ int lte_pdsch_get_symbols (Ipp32fc* inSignal,
 	// Changed the size of fft_index to match that of h_est_pdsch_temp
 	const int fft_index_size = 6144/*4096*/;
 	unsigned int fft_index[fft_index_size], temp;
-
-// TODO - ecs removed - if(sub_frame_index==5)
-	temp=0;
 
 for(unsigned int symbol_idx = LteData[cell_no].lteControlSysmbolLenght;symbol_idx<OFDM_SYMBOLS_PER_SUBFRAME;symbol_idx++)
 {
