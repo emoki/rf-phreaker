@@ -58,7 +58,7 @@ find_package (Boost 1.54.0 COMPONENTS system filesystem thread date_time timer c
 # Set QT
 cmake_policy(SET CMP0020 NEW) # This should also be specified in any project that uses QT.
 set (CMAKE_INCLUDE_CURRENT_DIR ON)
-set (qt_INSTALL_PATH "c:/bin/qt/5.2.0/msvc2012" CACHE STRING "Path to QT.")
+set (qt_INSTALL_PATH "c:/bin/qt/5.3/msvc2012_opengl" CACHE STRING "Path to QT.")
 set (CMAKE_PREFIX_PATH ${qt_INSTALL_PATH} ${CMAKE_PREFIX_PATH})
 find_package (Qt5Core)
 # Figure out the best way to copy qt dlls
