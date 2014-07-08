@@ -338,7 +338,8 @@ long cappeen_impl::start_collection(const beagle_api::collection_info &collectio
 		auto collection_containers = create_collection_info_containers(collection);
 
 		if(collection_containers.empty())
-			throw cappeen_api_error("beagle_api::collection_info is not valid.");
+			throw cappeen_api_error("beagle_api::collection_info is empty.", GENERAL_ERROR);
+
 
 		processing_graph_->start(scanner_.get(), data_output_.get(), collection_containers, config_);
 
@@ -453,7 +454,7 @@ long cappeen_impl::start_frequency_correction(const beagle_api::collection_info 
 		}), collection_containers.end());
 
 		if(collection_containers.empty())
-			throw cappeen_api_error("Please input at least one WCDMA band to start frequency correction.");
+			throw cappeen_api_error("Please input at least one WCDMA band to start frequency correction.", GENERAL_ERROR);
 
 		frequency_correction_graph_->start(scanner_.get(), data_output_.get(), collection_containers, config_);
 
@@ -503,7 +504,7 @@ long cappeen_impl::start_frequency_correction(uint32_t *wcdma_frequencies, int n
 			containers[0].adjust(add_collection_info(umts_layer_3_collection_info(wcdma_frequencies[i])));
 
 		if(num_channels <= 0)
-			throw cappeen_api_error("Please input at least one WCDMA frequency to start frequency correction.");
+			throw cappeen_api_error("Please input at least one WCDMA frequency to start frequency correction.", GENERAL_ERROR);
 
 		frequency_correction_graph_->start(scanner_.get(), data_output_.get(), containers, config_);
 

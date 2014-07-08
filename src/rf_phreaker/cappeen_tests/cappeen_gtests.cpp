@@ -219,12 +219,12 @@ public:
 	}
 	virtual void __stdcall available_error(long beagle_id, long error, const char *str, long buf_size) 
 	{ 
-		std::cout << str << "\n"; 
+		std::cout << "----------ERROR-------------  CODE: " << error << "  STR: "<< str << "\n"; 
 		error_occurred_ = true; 
 	}
 	virtual void __stdcall available_message(long beagle_id, long possible_message_number, const char *str, long buf_size) 
 	{ 
-		std::cout << str << "\n";
+		std::cout << "----------MESSAGE-------------  CODE: " << possible_message_number << "  STR : " << str << "\n";
 	}
 
 	std::atomic_bool error_occurred_;

@@ -32,7 +32,9 @@ namespace rf_phreaker {
 		GENERAL_ERROR,
 		STD_EXCEPTION_ERROR,
 		UNKNOWN_ERROR,
-		FREQUENCY_CORRECTION_FAILED
+		FREQUENCY_CORRECTION_FAILED,
+		EEPROM_ERROR,
+		CALIBRATION_ERROR
 	};
 
 	// See bottom for more on operating bands.

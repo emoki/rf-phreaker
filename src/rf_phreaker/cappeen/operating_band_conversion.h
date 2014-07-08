@@ -153,7 +153,7 @@ static rf_phreaker::operating_band convert_band(beagle_api::TECHNOLOGIES_AND_BAN
 		b = rf_phreaker::LTE_OPERATING_BAND_44;
 		break;
 	default:
-		throw rf_phreaker::cappeen_api_error("Unknown technology_and_band type.");
+		throw rf_phreaker::cappeen_api_error("Unknown technology_and_band type.", GENERAL_ERROR);
 	}
 	return b;
 }
@@ -302,7 +302,7 @@ static beagle_api::TECHNOLOGIES_AND_BANDS convert_band_to_tech_band(rf_phreaker:
 		b = LTE_BAND_44;
 		break;
 	default:
-		throw rf_phreaker::cappeen_api_error("Unknown technology_and_band type.");
+		throw rf_phreaker::cappeen_api_error("Unknown technology_and_band type.", GENERAL_ERROR);
 	}
 	return b;
 }
@@ -451,7 +451,7 @@ static beagle_api::BANDS convert_band_to_hw_band(rf_phreaker::operating_band ban
 		//	b = rf_phreaker::LTE_OPERATING_BAND_44;
 		//	break;
 	default:
-		throw rf_phreaker::cappeen_api_error("Unknown technology_and_band type.");
+		throw rf_phreaker::cappeen_api_error("Unknown technology_and_band type.", GENERAL_ERROR);
 	}
 	return b;
 }

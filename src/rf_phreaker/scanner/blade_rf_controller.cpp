@@ -158,8 +158,15 @@ void blade_rf_controller::refresh_scanner_info()
 		else
 			throw rf_phreaker_error("EEPROM meta data is invalid.");
 	}
+	catch(rf_phreaker_error &err) {
+		LOG_L(ERROR) << "Error reading EEPROM.  " << err.what();
+		g_delegate_sink.log_error(std::string("Error reading EEPROM.  ") + err.what(), err.error_code_);
+
+	}
 	catch(std::exception &err) {
-		LOG_L(INFO) << "Error reading EEPROM.  " << err.what();
+		LOG_L(ERROR) << "Error reading EEPROM.  " << err.what();
+		g_delegate_sink.log_error(std::string("Error reading EEPROM.  ") + err.what(), EEPROM_ERROR);
+
 	}
 
 	if(!scanner_blade_rf_) {
@@ -697,7 +704,7 @@ void blade_rf_controller::write_eeprom(const eeprom &ee)
 	auto meta_bytes = meta_ee.serialize_to_bytes();
 
 	if(!meta_ee.is_valid())
-		throw rf_phreaker_error("Cannot write to the EEPROM.  EEPROM meta data is not valid.");
+		throw rf_phreaker_error("Cannot write to the EEPROM.  EEPROM meta data is not valid.", EEPROM_ERROR);
 
 	// Erase flash.
 	check_blade_status(bladerf_erase_flash(comm_blade_rf_->blade_rf(),
@@ -722,7 +729,7 @@ eeprom blade_rf_controller::read_eeprom()
 	eeprom_meta_data meta_ee = read_eeprom_meta_data();
 
 	if(!meta_ee.is_valid())
-		throw rf_phreaker_error("Cannot read EEPROM.  EEPROM meta data is not valid.");
+		throw rf_phreaker_error("Cannot read EEPROM.  EEPROM meta data is not valid.", EEPROM_ERROR);
 
 	std::vector<uint8_t> bytes(eeprom::absolute_total_byte_length(), 0);
 

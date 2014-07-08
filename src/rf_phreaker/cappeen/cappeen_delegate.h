@@ -31,6 +31,12 @@ inline int convert_message(int msg)
 	case (int)FREQUENCY_CORRECTION_FAILED:
 		code = beagle_api::FREQUENCY_CORRECTION_FAILED;
 		break;
+	case (int)EEPROM_ERROR:
+		code = beagle_api::GENERAL_ERROR;
+		break;
+	case (int)CALIBRATION_ERROR:
+		code = beagle_api::CALIBRATIONERROR;
+		break;
 	default:
 		code = static_cast<beagle_api::ERRORCODES>(msg);
 	}
