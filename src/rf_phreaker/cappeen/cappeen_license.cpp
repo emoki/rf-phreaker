@@ -158,8 +158,10 @@ uint32_t cappeen_license::serial_to_hwid(const rf_phreaker::scanner::scanner_id_
 		throw cappeen_api_error("The following serial (" + serial + ") is not valid.  "
 			"It should be a 32-character hex string.", GENERAL_ERROR);
 
+	std::string serial_16_char(serial.substr(16, 16));
+
 	SHA256 sha;
-	auto hash = sha(serial);
+	auto hash = sha(serial_16_char);
 
 	uint32_t hw_id = 0;
 	char t1[9];

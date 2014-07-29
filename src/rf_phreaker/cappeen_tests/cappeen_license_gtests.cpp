@@ -10,7 +10,7 @@ TEST(CappeenLicense, TestMain) {
 
 	{
 		std::shared_ptr<cappeen_license> v3 = std::make_shared<cappeen_license_version_3>(cell_analysis_license);
-		auto scanner_license = v3->create_new_license_from_file("NST_77ecda454d25738ee419f6fd676170d5.lic");
+		auto scanner_license = v3->create_new_license_from_file("NST_e419f6fd676170d5.lic");
 		v3->initialize_license(scanner_license, "77ecda454d25738ee419f6fd676170d5");
 		auto v3_band_licenses = v3->valid_licenses();
 		auto v3_software_licenses = v3->software_licenses();
@@ -35,12 +35,10 @@ TEST(CappeenLicense, TestMain) {
 	std::set<software_license> software_licenses;
 	software_licenses.insert(network_coverage_license);
 	software_licenses.insert(cell_analysis_license);
-	
-	// v1 previously generated "10017_v1_us.lic"
 
 	auto raw_license_v2 = cappeen_license_version_2::generate_license(cappeen_license::serial_to_hwid("0123456789abcdef0123456789abcdef"), band_licenses);
 	{
-		std::ofstream f("test_license_v2");
+		std::ofstream f("test_license_v2", std::ios::binary);
 		if(!f)
 			GTEST_FATAL_FAILURE_("Failed to create v2 test license file.");
 		f.write((char*)&raw_license_v2[0], raw_license_v2.size());
@@ -48,7 +46,7 @@ TEST(CappeenLicense, TestMain) {
 
 	auto raw_license_v3 = cappeen_license_version_3::generate_license(cappeen_license::serial_to_hwid("0123456789abcdef0123456789abcdef"), band_licenses, software_licenses);
 	{
-		std::ofstream f("test_license_v3");
+		std::ofstream f("test_license_v3", std::ios::binary);
 		if(!f)
 			GTEST_FATAL_FAILURE_("Failed to create v3 test license file.");
 		f.write((char*)&raw_license_v3[0], raw_license_v3.size());
