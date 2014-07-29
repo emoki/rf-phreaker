@@ -81,7 +81,7 @@ namespace rf_phreaker {
 		double psch_quality_;
 		int32_t ssch_id_;
 		double ssch_quality_;
-		double rs_quality_;
+		double sync_quality_;
 		int cyclic_prefix_;
 		int num_antenna_ports_;
 		int dl_bandwidth_;

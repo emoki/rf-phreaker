@@ -149,7 +149,7 @@ int lte_cell_search(const Ipp32fc* SignalSamples,
 		LteData[ii].RsRecord.ID = sschCorrRecord[ii].ID;
 		LteData[ii].SschRecord.ID /= 3;
 
-		LteData[ii].sync_quality = 20 * log10((LteData[ii].PschRecord.NormCorr + LteData[ii].SschRecord.NormCorr) / 2);
+		LteData[ii].sync_quality = (LteData[ii].PschRecord.NormCorr + LteData[ii].SschRecord.NormCorr) / 2;
 
 		LteData[ii].CyclicPrefix = cyclicPrefixMode[ii];
 

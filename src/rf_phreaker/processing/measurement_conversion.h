@@ -65,7 +65,7 @@ inline void convert_to_lte_data(lte_data &data, const scanner::measurement_info 
 	data.rsrq_ = 20 * log10(lte.estimated_rsrq);
 	data.ssch_id_ = lte.SschRecord.ID;
 	data.ssch_quality_ = 20 * log10(lte.SschRecord.NormCorr);
-	data.rs_quality_ = -9999;
+	data.sync_quality_ = 20 * log10(lte.sync_quality);
 }
 
 inline lte_data convert_to_lte_data(const scanner::measurement_info &info, const lte_measurement &lte, double avg_rms)
