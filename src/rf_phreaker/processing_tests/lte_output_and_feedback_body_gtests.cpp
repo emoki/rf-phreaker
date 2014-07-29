@@ -14,7 +14,8 @@ protected:
 	LteOutputAndFeedbackBodyTest()
 		: body_(&io_)
 	{
-		io_.set_standard_output(true).wait();
+		output_settings settings = {true, true, true, true, true};
+		io_.set_standard_output(settings).wait();
 		reset_lte_meas();
 	}
 	

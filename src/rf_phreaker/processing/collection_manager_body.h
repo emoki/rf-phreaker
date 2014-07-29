@@ -3,6 +3,7 @@
 #include "rf_phreaker/processing/node_defs.h"
 #include "rf_phreaker/processing/scanner_io.h"
 #include "rf_phreaker/common/common_types.h"
+#include "rf_phreaker/common/common_utility.h"
 #include "rf_phreaker/common/delegate_sink.h"
 #include "tbb/flow_graph.h"
 #include <algorithm>
@@ -103,7 +104,7 @@ protected:
 	void output(scanner::measurement_info *meas, std::string name, int count)
 	{
 		if(timestamp.empty())
-			timestamp = std::to_string(std::chrono::system_clock::to_time_t(std::chrono::system_clock::now()));
+			timestamp = timestamp_string();
 
 		std::ofstream file(name + timestamp + "_" + std::to_string(count) + ".bin");
 		if(file)

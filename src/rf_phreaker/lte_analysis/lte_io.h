@@ -14,7 +14,7 @@ namespace rf_phreaker {
 static std::string lte_io_delimiter = "\t";
 static std::string lte_io_spacer = " | ";
 
-inline void output_lte_meas_debug_header(std::ostream &os)
+inline std::ostream& output_lte_meas_debug_header(std::ostream &os)
 {
 	os	<< "psch_id" << lte_io_delimiter
 		<< "psch_norm_corr" << lte_io_delimiter
@@ -54,7 +54,8 @@ inline void output_lte_meas_debug_header(std::ostream &os)
 		<< "sib5" << lte_io_delimiter
 		<< "sib6" << lte_io_delimiter
 		<< "sib7" << lte_io_delimiter
-		<< "sib8" << "\n";
+		<< "sib8";
+	return os;
 }
 
 inline std::ostream& operator<<( std::ostream &os, const CORR_RECORD_TYPE &t)

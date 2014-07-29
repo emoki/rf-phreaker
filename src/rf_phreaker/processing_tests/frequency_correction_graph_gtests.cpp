@@ -58,7 +58,9 @@ TEST(FrequencyCorrectionGraph, DISABLED_TestGeneral)
 			//umts_layer_3.adjust(add_collection_info(umts_layer_3_collection_info(khz(2147500), UMTS_OPERATING_BAND_5)));
 
 			data_output_async output;
-			output.set_standard_output(true);
+			output.set_standard_output(config.standard_output_).get();
+			output.set_file_output(config.file_output_).get();
+			output.set_signal_output(config.signal_slots_).get();
 
 			frequency_correction_graph graph;
 			graph.start(&blade, &output, containers, config);

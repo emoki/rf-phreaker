@@ -72,12 +72,12 @@ public:
 private:
 	void output_debug_info(const lte_info &info)
 	{
-		static std::ofstream file("debug_lte_sweep.txt");
+		static std::ofstream file("debug_lte_sweep_" + std::to_string(std::chrono::system_clock::to_time_t(std::chrono::system_clock::now())) + ".txt");
 		static bool write_header = true;
 		if(write_header) {
 			write_header = false;
-			file << "freq" << "\t" << "cr" << "\t";
-			output_lte_meas_debug_header(file);
+			file << "freq\tcollection_round\t";
+			output_lte_meas_debug_header(file) << "\n";
 		}
 		for(auto &lte : info.processed_data_)
 			file << info.meas_->frequency() << "\t" << info.meas_->collection_round() << "\t" << lte << std::endl;
@@ -178,12 +178,12 @@ public:
 private:
 	void output_debug_info(const lte_info &info)
 	{
-		static std::ofstream file("debug_lte_layer_3.txt");
+		static std::ofstream file("debug_lte_layer_3" + std::to_string(std::chrono::system_clock::to_time_t(std::chrono::system_clock::now())) + ".txt");
 		static bool write_header = true;
 		if(write_header) {
 			write_header = false;
-			file << "freq" << "\t" << "cr" << "\t";
-			output_lte_meas_debug_header(file);
+			file << "freq\tcollection_round\t";
+			output_lte_meas_debug_header(file) << "\n";
 		}
 		for(auto &lte : info.processed_data_)
 			file << info.meas_->frequency() << "\t" << info.meas_->collection_round() << "\t" << lte << std::endl;

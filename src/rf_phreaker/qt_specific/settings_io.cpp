@@ -25,6 +25,7 @@ void settings_io::read(settings &settings)
 	read(settings.standard_output_, standard_output_group_key);
 	read(settings.signal_slots_, signal_slot_output_group_key);
 	read(settings.packet_output_, packet_output_group_key);
+	read(settings.file_output_, file_output_group_key);
 
 	read(settings.umts_sweep_collection_, umts_sweep_collection_group_key);
 	read(settings.umts_layer_3_collection_, umts_layer_3_collection_group_key);
@@ -102,6 +103,7 @@ void settings_io::write(const settings &settings)
 	write(settings.standard_output_, standard_output_group_key);
 	write(settings.signal_slots_, signal_slot_output_group_key);
 	write(settings.packet_output_, packet_output_group_key);
+	write(settings.file_output_, file_output_group_key);
 
 	write(settings.umts_sweep_collection_, umts_sweep_collection_group_key);
 	write(settings.umts_layer_3_collection_, umts_layer_3_collection_group_key);

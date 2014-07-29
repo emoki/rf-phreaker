@@ -16,6 +16,14 @@ static std::string spacer = " | ";
 static std::string spacer2 = " : ";
 static std::string spacer3 = " ";
 
+inline std::ostream& header(std::ostream &os, const bcch_bch_message_aggregate &t) {
+	os << "mcc" << main_delim
+		<< "mnc" << main_delim
+		<< "lac" << main_delim
+		<< "cid";
+	return os;
+}
+
 inline std::ostream& operator << (std::ostream &os, const bcch_bch_message_aggregate &t)
 {
 	os << t.mcc_ << main_delim

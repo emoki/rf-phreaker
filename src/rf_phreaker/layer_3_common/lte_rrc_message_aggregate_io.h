@@ -10,6 +10,15 @@
 namespace layer_3_information
 {
 
+inline std::ostream& header(std::ostream &os, const lte_sib_base &t);
+inline std::ostream& header(std::ostream &os, const lte_sib1_type &t);
+//inline std::ostream& header(std::ostream &os, const lte_sib3_type &t);
+inline std::ostream& header(std::ostream &os, const lte_sib4_type &t);
+inline std::ostream& header(std::ostream &os, const lte_sib5_type &t);
+inline std::ostream& header(std::ostream &os, const lte_sib6_type &t);
+inline std::ostream& header(std::ostream &os, const lte_sib7_type &t);
+inline std::ostream& header(std::ostream &os, const lte_sib8_type &t);
+
 inline std::ostream& operator<<(std::ostream &os, const lte_sib_base &t);
 inline std::ostream& operator<<(std::ostream &os, const lte_sib_type &t);
 inline std::ostream& operator<<(std::ostream &os, const scheduling_info &t);
@@ -31,6 +40,11 @@ inline std::ostream& operator<<(std::ostream &os, const cell_reselection_paramet
 inline std::ostream& operator<<(std::ostream &os, const lte_sib8_type &t);
 inline std::ostream& operator<<(std::ostream &os, const lte_rrc_message_aggregate &t);
 inline std::ostream& operator<<(std::ostream &os, const lte_rrc_message_aggregate &t);
+
+inline std::ostream& header(std::ostream &os, const lte_sib_base &t) {
+	os << "is_decoded";
+	return os;
+}
 
 inline std::ostream& operator<<(std::ostream &os, const lte_sib_base &t)
 {
@@ -109,6 +123,15 @@ inline std::ostream& operator<<(std::ostream &os, const std::vector<scheduling_i
 	return os;
 }
 
+inline std::ostream& header(std::ostream &os, const lte_sib1_type &t) {
+	header(os, (lte_sib_base&)t) << spacer
+		<< "tracking_area_code" << spacer
+		<< "cell_id" << spacer
+		<< "multiple_plmn" << spacer
+		<< "scheduling_info";
+	return os;
+}
+
 inline std::ostream& operator<<(std::ostream &os, const lte_sib1_type &t)
 {
 	os << "sib1 " << static_cast<const lte_sib_base&>(t) << spacer
@@ -145,6 +168,14 @@ inline std::ostream& operator<<(std::ostream &os, const std::vector<neighbor_cel
 	return os;
 }
 
+inline std::ostream& header(std::ostream &os, const lte_sib4_type &t) {
+	header(os, (lte_sib_base&)t) << spacer
+		<< "csg_phys_cellid_range" << spacer
+		<< "intra_freq_neighbor_cell_list" << spacer
+		<< "intra_freq_black_cell_list";
+		return os;
+}
+
 inline std::ostream& operator<<(std::ostream &os, const lte_sib4_type &t)
 {
 	os << "sib4 " << static_cast<const lte_sib_base&>(t) << spacer
@@ -173,6 +204,12 @@ inline std::ostream& operator<<(std::ostream &os, const std::vector<inter_freq_c
 	return os;
 }
 
+inline std::ostream& header(std::ostream &os, const lte_sib5_type &t) {
+	header(os, (lte_sib_base&)t) << spacer
+		<< "inter_freq_carrier_info_list";
+		return os;
+}
+
 inline std::ostream& operator<<(std::ostream &os, const lte_sib5_type &t)
 {
 	os << "sib5 " << static_cast<const lte_sib_base&>(t) << spacer
@@ -191,6 +228,13 @@ inline std::ostream& operator<<(std::ostream &os, const std::vector<carrier_freq
 	for(auto &i : t)
 		os << i << spacer3;
 	return os;
+}
+
+inline std::ostream& header(std::ostream &os, const lte_sib6_type &t) {
+	header(os, (lte_sib_base&)t) << spacer
+		<< "carrier_freq_list_utra_fdd" << spacer
+		<< "carrier_freq_list_utra_tdd";
+		return os;
 }
 
 inline std::ostream& operator<<(std::ostream &os, const lte_sib6_type &t)
@@ -224,6 +268,12 @@ inline std::ostream& operator<<(std::ostream &os, const std::vector<carrier_freq
 	return os;
 }
 
+inline std::ostream& header(std::ostream &os, const lte_sib7_type &t) {
+	header(os, (lte_sib_base&)t) << spacer
+		<< "carrier_freqs_info_list_geran";
+		return os;
+}
+
 inline std::ostream& operator<<(std::ostream &os, const lte_sib7_type &t)
 {
 	os << "sib7 " << static_cast<const lte_sib_base&>(t) << spacer
@@ -239,6 +289,7 @@ inline std::ostream& operator<<(std::ostream &os, const neighbor_cells_per_band_
 	os << end_delim;
 	return os;
 }
+
 inline std::ostream& operator<<(std::ostream &os, const std::vector<neighbor_cells_per_band_class_cdma_2000> &t)
 {
 	for(auto &i : t)
@@ -371,11 +422,28 @@ inline std::ostream& operator<<(std::ostream &os, const cell_reselection_paramet
 	return os;
 }
 
+inline std::ostream& header(std::ostream &os, const lte_sib8_type &t) {
+	header(os, (lte_sib_base&)t) << spacer
+		<< "parameters_hrpd" << spacer
+		<< "parameters_1xrtt";
+		return os;
+}
+
 inline std::ostream& operator<<(std::ostream &os, const lte_sib8_type &t)
 {
 	os << "sib8 " << static_cast<const lte_sib_base&>(t) << spacer
 		<< t.parameters_hrpd_ << spacer
 		<< t.parameters_1xrtt_;
+	return os;
+}
+
+inline std::ostream& header(std::ostream &os, const lte_rrc_message_aggregate &t) {
+	header(os, t.sib1_) << main_delim;
+	header(os, t.sib4_) << main_delim;
+	header(os, t.sib5_) << main_delim;
+	header(os, t.sib6_) << main_delim;
+	header(os, t.sib7_) << main_delim;
+	header(os, t.sib8_);
 	return os;
 }
 

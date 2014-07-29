@@ -13,6 +13,7 @@ namespace rf_phreaker
 static const std::string standard_output_group_key = "standard_output";
 static const std::string signal_slot_output_group_key = "signal_slot_output";
 static const std::string packet_output_group_key = "packet_output";
+static const std::string file_output_group_key = "file_output";
 static const std::string umts_sweep_collection_group_key = "umts_sweep_collection";
 static const std::string umts_layer_3_collection_group_key = "umts_layer_3_collection";
 static const std::string lte_sweep_collection_group_key = "lte_sweep_collection";

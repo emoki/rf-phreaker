@@ -10,6 +10,15 @@
 namespace layer_3_information 
 {
 
+inline std::ostream& header(std::ostream &os, const umts_bcch_bch_message_aggregate &t) {
+	header(os, bcch_bch_message_aggregate()) << main_delim
+		<< "system_frame_number" << main_delim
+		<< "neighbor_intra" << main_delim
+		<< "neighbor_inter" << main_delim
+		<< "neighbor_inter_rat";
+	return os;
+}
+
 inline std::ostream& operator<<(std::ostream &os, const umts_bcch_bch_message_aggregate &t)
 {
 	os << static_cast<const bcch_bch_message_aggregate&>(t) << main_delim
@@ -33,10 +42,16 @@ inline std::ostream& operator<<(std::ostream &os, const umts_bcch_bch_message_ag
 
 	size = t.neighbor_inter_rat_group_.size();
 	for(const auto &rat : t.neighbor_inter_rat_group_) {
-		if(--size)
-			os << rat.arfcn_ << spacer2 << rat.band_indicator_ << spacer2 << rat.bsic_ << spacer2 << rat.qrx_lev_min_ << spacer;
-		else
-			os << rat.arfcn_ << spacer2 << rat.band_indicator_ << spacer2 << rat.bsic_ << spacer2 << rat.qrx_lev_min_ << main_delim;
+		if(--size) {
+			os << rat.arfcn_ << spacer2 << (rat.band_indicator_ == layer_3_information::dcs_1800_was_used ? "DCS_1800" :
+				(rat.band_indicator_ == layer_3_information::pcs_1900_was_used ? "PCS_1900" : "UNKNOWN"))
+				<< spacer2 << rat.bsic_ << spacer2 << rat.qrx_lev_min_ << spacer;
+		}
+		else {
+			os << rat.arfcn_ << spacer2 << (rat.band_indicator_ == layer_3_information::dcs_1800_was_used ? "DCS_1800" :
+				(rat.band_indicator_ == layer_3_information::pcs_1900_was_used ? "PCS_1900" : "UNKNOWN"))
+				<< spacer2 << rat.bsic_ << spacer2 << rat.qrx_lev_min_ << main_delim;
+		}
 	}
 
 	return os;

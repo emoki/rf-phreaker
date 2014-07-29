@@ -33,7 +33,10 @@ TEST(ProcessingGpsGraph, DISABLED_TestGeneral)
 
 
 			data_output_async output;
-			output.set_standard_output(true).get();
+			output.set_standard_output(config.standard_output_).get();
+			output.set_file_output(config.file_output_).get();
+			output.set_signal_output(config.signal_slots_).get();
+
 			gps_graph graph;
 
 			graph.start(&blade, &output, config);

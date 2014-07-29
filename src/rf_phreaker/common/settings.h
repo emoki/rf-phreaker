@@ -64,6 +64,7 @@ public:
 
 	output_settings packet_output_;
 	output_settings standard_output_;
+	output_settings file_output_;
 	output_settings signal_slots_;
 
 	collection_settings umts_sweep_collection_;
