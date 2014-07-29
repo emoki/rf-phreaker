@@ -88,7 +88,7 @@ public:
 			tmp.insert(info[i].carrier_freq_);
 		}
 	}
-	std::set<double> tmp;
+	std::set<frequency_type> tmp;
 	virtual void __stdcall available_umts_sweep_info(long beagle_id, const umts_sweep_info *info, long num_records){
 		for(int i = 0; i < num_records; ++i)
 			std::cout << info[i].frequency_ << "\t" << info[i].rssi_ << "\t" << "umts" << "\n";
@@ -276,12 +276,14 @@ TEST(Cappeen, TestMain)
 		collection_info info;
 		info.collection_filename_ = "test_file";
 		std::vector<TECHNOLOGIES_AND_BANDS> tech_bands;
+		info.tech_and_bands_to_sweep_.elements_ = 0;
+		info.tech_and_bands_to_sweep_.num_elements_ = 0;;
 		tech_bands.push_back(WCDMA_BAND_850);
 		tech_bands.push_back(WCDMA_BAND_1900);
 		tech_bands.push_back(WCDMA_BAND_2100);
 		//tech_bands.push_back(WCDMA_BAND_900);
 		//tech_bands.push_back(WCDMA_BAND_1800);
-		tech_bands.push_back(LTE_BAND_12);
+		//tech_bands.push_back(LTE_BAND_12);
 		tech_bands.push_back(LTE_BAND_5);
 		tech_bands.push_back(LTE_BAND_2);
 		tech_bands.push_back(LTE_BAND_1);
@@ -343,7 +345,7 @@ TEST(Cappeen, TestMain)
 	//system("pause");
 }
 
-TEST(Cappeen, FreqNotInCalibration) {
+TEST(Cappeen, DISABLED_FreqNotInCalibration) {
 	using namespace rf_phreaker::cappeen_api;
 	output out;
 	EXPECT_EQ(0, cappeen_initialize(&out));
@@ -387,7 +389,7 @@ TEST(Cappeen, FreqNotInCalibration) {
 	}
 }
 
-TEST(Cappeen, GeneralLicenseUpdate1) {
+TEST(Cappeen, DISABLED_GeneralLicenseUpdate1) {
 	using namespace rf_phreaker::cappeen_api;
 	output out;
 	EXPECT_EQ(0, cappeen_initialize(&out));
@@ -461,7 +463,7 @@ TEST(Cappeen, GeneralLicenseUpdate1) {
 	}
 }
 
-TEST(Cappeen, GeneralLicenseUpdate2) {
+TEST(Cappeen, DISABLED_GeneralLicenseUpdate2) {
 	using namespace rf_phreaker::cappeen_api;
 	output out;
 	EXPECT_EQ(0, cappeen_initialize(&out));
@@ -509,7 +511,7 @@ TEST(Cappeen, GeneralLicenseUpdate2) {
 	}
 }
 
-TEST(Cappeen, LicenseNetworkScanner) {
+TEST(Cappeen, DISABLED_LicenseNetworkScanner) {
 	using namespace rf_phreaker::cappeen_api;
 	output out;
 	EXPECT_EQ(0, cappeen_initialize(&out));
@@ -558,7 +560,7 @@ TEST(Cappeen, LicenseNetworkScanner) {
 	}
 }
 
-TEST(Cappeen, LicenseCellAnalysisEverything) {
+TEST(Cappeen, DISABLED_LicenseCellAnalysisEverything) {
 	using namespace rf_phreaker::cappeen_api;
 	output out;
 	EXPECT_EQ(0, cappeen_initialize(&out));
@@ -630,41 +632,7 @@ TEST(Cappeen, LicenseCellAnalysisEverything) {
 	}
 }
 
-TEST(Cappeen, NoCleanup)
-{
-	//system("pause");
-
-	std::cout << cappeen_api_version() << std::endl;
-
-	output out;
-	EXPECT_EQ(0, cappeen_initialize(&out));
-
-	std::array<char, 1024 * 10> serials;
-	EXPECT_EQ(0, cappeen_list_available_units(&serials[0], serials.size()));
-
-	std::string serial(&serials[0]);
-	serial = serial.substr(0, serial.find_first_of(';'));
-
-	if(!serial.empty()) {
-
-		collection_info info;
-		info.collection_filename_ = "test_file";
-		std::vector<TECHNOLOGIES_AND_BANDS> tech_bands;
-		tech_bands.push_back(LTE_BAND_1);
-		info.tech_and_bands_to_sweep_.elements_ = &tech_bands[0];
-		info.tech_and_bands_to_sweep_.num_elements_ = tech_bands.size();
-
-		EXPECT_EQ(0, cappeen_open_unit(&serial[0], serial.size()));
-		EXPECT_EQ(0, cappeen_start_collection(info));
-
-		std::this_thread::sleep_for(std::chrono::seconds(10));
-
-		EXPECT_EQ(0, cappeen_stop_collection());
-		EXPECT_EQ(0, cappeen_close_unit(&serial[0], serial.size()));
-	}
-}
-
-TEST(Cappeen, NoCleanupNoClose)
+TEST(Cappeen, NoClose)
 {
 	//system("pause");
 
@@ -695,9 +663,10 @@ TEST(Cappeen, NoCleanupNoClose)
 
 		EXPECT_EQ(0, cappeen_stop_collection());
 	}
+	EXPECT_EQ(0, cappeen_clean_up());
 }
 
-TEST(Cappeen, NoCleanupNoCloseNoStop)
+TEST(Cappeen, NoCloseNoStop)
 {
 	std::cout << cappeen_api_version() << std::endl;
 
@@ -722,6 +691,7 @@ TEST(Cappeen, NoCleanupNoCloseNoStop)
 		EXPECT_EQ(0, cappeen_open_unit(&serial[0], serial.size()));
 		EXPECT_EQ(0, cappeen_start_collection(info));
 
-		std::this_thread::sleep_for(std::chrono::seconds(1));
+		//std::this_thread::sleep_for(std::chrono::seconds(1));
 	}
+	EXPECT_EQ(0, cappeen_clean_up());
 }
