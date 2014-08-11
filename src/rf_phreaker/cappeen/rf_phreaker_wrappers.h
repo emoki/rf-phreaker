@@ -48,22 +48,42 @@ public:
 	std::vector<beagle_api::lte_scheduled_sib> scheduled_sibs_;
 };
 
-class lte_sib4_wrapper
-{
+class lte_sib3_wrapper {
+public:
+	lte_sib3_wrapper() {};
+	lte_sib3_wrapper(lte_sib3_wrapper &&s)
+		: s_(std::move(s.s_))
+		{}
+	lte_sib3_wrapper(const layer_3_information::lte_sib3_type &s) {
+		s_.decoded_ = s.decoded_;
+		s_.cell_reselection_serving_freq_info_.cell_reselection_priority_ = s.cell_reselection_serving_freq_info_.cell_reselection_priority_;
+		s_.cell_reselection_serving_freq_info_.s_non_intra_search_ = s.cell_reselection_serving_freq_info_.s_non_intra_search_.reselection_threshold();
+		s_.cell_reselection_serving_freq_info_.threshold_serving_low_ = s.cell_reselection_serving_freq_info_.threshold_serving_low_.reselection_threshold();
+		s_.intra_freq_cell_reselection_info_.s_intra_search_ = s.intra_freq_cell_reselection_info_.s_intra_search_.reselection_threshold();
+		s_.s_intra_search_v920_.reselection_threshold_p_ = s.s_intra_search_v920_.p_.reselection_threshold();
+		s_.s_intra_search_v920_.reselection_threshold_q_ = s.s_intra_search_v920_.q_;
+		s_.s_non_intra_search_v920_.reselection_threshold_p_ = s.s_non_intra_search_v920_.p_.reselection_threshold();
+		s_.s_non_intra_search_v920_.reselection_threshold_q_ = s.s_non_intra_search_v920_.q_;
+		s_.threshold_serving_low_q_ = s.threshold_serving_low_q_;
+	}
+
+	beagle_api::lte_sib_3 s_;
+};
+
+class lte_sib4_wrapper {
 public:
 	lte_sib4_wrapper() {};
 	lte_sib4_wrapper(lte_sib4_wrapper &&s)
 		: s_(std::move(s.s_))
 		, intra_cells_(std::move(s.intra_cells_))
-		, intra_blacks_(std::move(s.intra_blacks_))
-	{}
-	lte_sib4_wrapper(const layer_3_information::lte_sib4_type &s)
-	{
+		, intra_blacks_(std::move(s.intra_blacks_)) {}
+	lte_sib4_wrapper(const layer_3_information::lte_sib4_type &s) {
 		s_.decoded_ = s.decoded_;
 
 		for(auto &i : s.intra_freq_neighbor_cell_list_) {
 			beagle_api::lte_neighbor_cell t;
 			t.physical_cell_id_ = i.physical_cell_id_;
+			t.q_offset_cell_ = i.q_offset_cell_;
 			intra_cells_.push_back(t);
 		}
 		s_.intra_freq_neighbor_cell_list_.num_elements_ = intra_cells_.size();
@@ -106,12 +126,20 @@ public:
 			t.downlink_arfcn_value_eutra_ = i.downlink_arfcn_value_eutra_;
 			t.allowed_measurement_bandwidth_ = i.allowed_measurement_bandwidth_;
 			t.presence_antenna_port_1_ = i.presence_antenna_port_1_;
-			
+			t.q_rx_lev_min_ = i.q_rx_lev_min_;
+			t.q_offset_freq_ = i.q_offset_freq_;
+			t.q_offset_cell_ = i.q_offset_cell_;
+			t.threshold_x_high_ = i.threshold_x_high_.reselection_threshold();
+			t.threshold_x_low_ = i.threshold_x_low_.reselection_threshold();
+			t.threshold_x_high_q_r9_ = i.threshold_x_high_q_r9_;
+			t.threshold_x_low_q_r9_ = i.threshold_x_low_q_r9_;
+			t.cell_reselection_freq_ = i.cell_reselection_priority_;
 			inter_cells_.push_back(std::vector<beagle_api::lte_neighbor_cell>());
 			auto &cells = inter_cells_.back();
 			for(auto &j : i.inter_freq_neighbor_cell_list_) {
 				beagle_api::lte_neighbor_cell t;
 				t.physical_cell_id_ = j.physical_cell_id_;
+				t.q_offset_cell_ = j.q_offset_cell_;
 				cells.push_back(t);
 			}
 			t.inter_freq_neighbor_cell_list_.num_elements_ = cells.size();
@@ -156,16 +184,26 @@ public:
 		s_.decoded_ = s.decoded_;
 
 		for(auto &i : s.carrier_freq_list_utra_fdd_) {
-			beagle_api::channel_type t;
-			t = i.arfcn_value_utra_;
+			beagle_api::carrier_freq_utra t;
+			t.arfcn_value_utra_ = i.arfcn_value_utra_;
+			t.cell_reselection_priority_ = i.cell_reselection_priority_;
+			t.threshold_x_high_ = i.threshold_x_high_.reselection_threshold();
+			t.threshold_x_high_q_r9_ = i.threshold_x_high_q_r9_;
+			t.threshold_x_low_ = i.threshold_x_low_.reselection_threshold();
+			t.threshold_x_low_q_r9_ = i.threshold_x_low_q_r9_;
 			fdd_.push_back(t);
 		}
 		s_.carrier_freq_list_utra_fdd_.num_elements_ = fdd_.size();
 		s_.carrier_freq_list_utra_fdd_.elements_ = fdd_.size() ? &fdd_[0] : 0;
 
 		for(auto &i : s.carrier_freq_list_utra_tdd_) {
-			beagle_api::channel_type t;
-			t = i.arfcn_value_utra_;
+			beagle_api::carrier_freq_utra t;
+			t.arfcn_value_utra_ = i.arfcn_value_utra_;
+			t.cell_reselection_priority_ = i.cell_reselection_priority_;
+			t.threshold_x_high_ = i.threshold_x_high_.reselection_threshold();
+			t.threshold_x_high_q_r9_ = i.threshold_x_high_q_r9_;
+			t.threshold_x_low_ = i.threshold_x_low_.reselection_threshold();
+			t.threshold_x_low_q_r9_ = i.threshold_x_low_q_r9_;
 			tdd_.push_back(t);
 		}
 		s_.carrier_freq_list_utra_tdd_.num_elements_ = tdd_.size();
@@ -173,8 +211,8 @@ public:
 	}
 
 	beagle_api::lte_sib_6 s_;
-	std::vector<beagle_api::channel_type> fdd_;
-	std::vector<beagle_api::channel_type> tdd_;
+	std::vector<beagle_api::carrier_freq_utra> fdd_;
+	std::vector<beagle_api::carrier_freq_utra> tdd_;
 };
 
 class lte_sib7_wrapper
@@ -193,6 +231,9 @@ public:
 		for(auto &i : s.carrier_freqs_info_list_geran_) {
 			beagle_api::lte_neighbor_inter_rat_geran t;
 			t.band_indicator_ = i.carrier_freqs_.band_indicator_ == layer_3_information::dcs_1800_was_used ? beagle_api::DCS_1800_WAS_USED : beagle_api::PCS_1900_WAS_USED;
+			t.common_info_.cell_reselection_priority_ = i.common_info_.cell_reselection_priority_;
+			t.common_info_.threshold_x_high_ = i.common_info_.threshold_x_high_.reselection_threshold();
+			t.common_info_.threshold_x_low_ = i.common_info_.threshold_x_low_.reselection_threshold();
 
 			channels_.push_back(std::vector<beagle_api::channel_type>());
 			auto &tmp_channels = channels_.back();
@@ -245,6 +286,7 @@ public:
 				t.physical_cell_ids_.num_elements_ = tmp_channels.size();
 				t.physical_cell_ids_.elements_ = tmp_channels.size() ? &tmp_channels[0] : 0;
 			}
+			hrpd_.push_back(t);
 		}
 		s_.parameters_hrpd_.num_elements_ = hrpd_.size();
 		s_.parameters_hrpd_.elements_ = hrpd_.size() ? &hrpd_[0] : 0;
@@ -265,6 +307,7 @@ public:
 				t.physical_cell_ids_.num_elements_ = tmp_channels.size();
 				t.physical_cell_ids_.elements_ = tmp_channels.size() ? &tmp_channels[0] : 0;
 			}
+			xrtt_.push_back(t);
 		}
 		s_.parameters_1xrtt_.num_elements_ = xrtt_.size();
 		s_.parameters_1xrtt_.elements_ = xrtt_.size() ? &xrtt_[0] : 0;

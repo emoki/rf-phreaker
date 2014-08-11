@@ -55,6 +55,12 @@ void lte_sib_7_parser::parse_data(const SystemInformationBlockType7_t &data, lte
 				;
 			}
 
+			geran_info.common_info_.cell_reselection_priority_ = info_list.array[i]->commonInfo.cellReselectionPriority == nullptr ?
+				*info_list.array[i]->commonInfo.cellReselectionPriority : -1;
+
+			geran_info.common_info_.threshold_x_high_ = info_list.array[i]->commonInfo.threshX_High;
+			geran_info.common_info_.threshold_x_low_ = info_list.array[i]->commonInfo.threshX_Low;
+
 			message.sib7_.carrier_freqs_info_list_geran_.push_back(geran_info);
 		}
 	}

@@ -12,7 +12,7 @@ namespace layer_3_information
 
 inline std::ostream& header(std::ostream &os, const lte_sib_base &t);
 inline std::ostream& header(std::ostream &os, const lte_sib1_type &t);
-//inline std::ostream& header(std::ostream &os, const lte_sib3_type &t);
+inline std::ostream& header(std::ostream &os, const lte_sib3_type &t);
 inline std::ostream& header(std::ostream &os, const lte_sib4_type &t);
 inline std::ostream& header(std::ostream &os, const lte_sib5_type &t);
 inline std::ostream& header(std::ostream &os, const lte_sib6_type &t);
@@ -23,6 +23,11 @@ inline std::ostream& operator<<(std::ostream &os, const lte_sib_base &t);
 inline std::ostream& operator<<(std::ostream &os, const lte_sib_type &t);
 inline std::ostream& operator<<(std::ostream &os, const scheduling_info &t);
 inline std::ostream& operator<<(std::ostream &os, const lte_sib1_type &t);
+inline std::ostream& operator<<(std::ostream &os, const reselection_threshold_type &t);
+inline std::ostream& operator<<(std::ostream &os, const cell_reselection_serving_freq_info &t);
+inline std::ostream& operator<<(std::ostream &os, const intra_freq_cell_reselection_info &t);
+inline std::ostream& operator<<(std::ostream &os, const s_search_v920 &t);
+inline std::ostream& operator<<(std::ostream &os, const lte_sib3_type &t);
 inline std::ostream& operator<<(std::ostream &os, const physical_cellid_range &t);
 inline std::ostream& operator<<(std::ostream &os, const neighbor_cell &t);
 inline std::ostream& operator<<(std::ostream &os, const lte_sib4_type &t);
@@ -46,14 +51,12 @@ inline std::ostream& header(std::ostream &os, const lte_sib_base &t) {
 	return os;
 }
 
-inline std::ostream& operator<<(std::ostream &os, const lte_sib_base &t)
-{
+inline std::ostream& operator<<(std::ostream &os, const lte_sib_base &t) {
 	os << begin_delim << (t.decoded_ ? "decoded" : "NOT decoded") << end_delim;
 	return os;
 }
 
-inline std::ostream& operator<<(std::ostream &os, const lte_sib_type &t)
-{
+inline std::ostream& operator<<(std::ostream &os, const lte_sib_type &t) {
 	switch(t) {
 	case sib_3:
 		os << "sib_3";
@@ -102,24 +105,22 @@ inline std::ostream& operator<<(std::ostream &os, const lte_sib_type &t)
 		break;
 	case spare_1:
 		os << "spare_1";
-	break;
+		break;
 	default:
 		os << "unknown";
 	}
 	return os;
 }
 
-inline std::ostream& operator<<(std::ostream &os, const scheduling_info &t)
-{
+inline std::ostream& operator<<(std::ostream &os, const scheduling_info &t) {
 	for(auto &i : t.sib_mapping_info_)
 		os << begin_delim << i << spacer3 << t.periodicity_in_frames_ << "f" << end_delim << spacer3;
 	return os;
 }
 
-inline std::ostream& operator<<(std::ostream &os, const std::vector<scheduling_info> &t)
-{
+inline std::ostream& operator<<(std::ostream &os, const std::vector<scheduling_info> &t) {
 	for(auto &i : t)
-		os <<  i << spacer3;
+		os << i << spacer3;
 	return os;
 }
 
@@ -132,8 +133,7 @@ inline std::ostream& header(std::ostream &os, const lte_sib1_type &t) {
 	return os;
 }
 
-inline std::ostream& operator<<(std::ostream &os, const lte_sib1_type &t)
-{
+inline std::ostream& operator<<(std::ostream &os, const lte_sib1_type &t) {
 	os << "sib1 " << static_cast<const lte_sib_base&>(t) << spacer
 		<< t.tracking_area_code_ << spacer
 		<< t.cell_id_ << spacer
@@ -142,27 +142,64 @@ inline std::ostream& operator<<(std::ostream &os, const lte_sib1_type &t)
 	return os;
 }
 
-inline std::ostream& operator<<(std::ostream &os, const physical_cellid_range &t)
-{
+inline std::ostream& operator<<(std::ostream &os, const reselection_threshold_type &t) {
+	return os << t.reselection_threshold();
+}
+
+inline std::ostream& operator<<(std::ostream &os, const cell_reselection_serving_freq_info &t) {
+	os << t.s_non_intra_search_ << spacer2
+		<< t.threshold_serving_low_ << spacer2
+		<< t.cell_reselection_priority_;
+	return os;
+}
+
+inline std::ostream& operator<<(std::ostream &os, const intra_freq_cell_reselection_info &t) {
+	os << t.s_intra_search_;
+	return os;
+}
+
+inline std::ostream& operator<<(std::ostream &os, const s_search_v920 &t) {
+	os << t.p_ << spacer2
+		<< t.q_;
+	return os;
+}
+
+inline std::ostream& header(std::ostream &os, const lte_sib3_type &t) {
+	header(os, (lte_sib_base&)t) << spacer
+		<< "cell_reselection_serving_freq_info[s_non_intra_search thres_serving_low cell_reselect_priority" << spacer
+		<< "intra_freq_cell_reselection_info[s_intra_search]" << spacer
+		<< "s_intra_search_v920[reselect_thres_p reselect_thres_q]" << spacer
+		<< "s_non_intra_search_v920[reselect_thres_p reselect_thres_q]" << spacer
+		<< "threshold_serving_low_q";
+	return os;
+}
+
+inline std::ostream& operator<<(std::ostream &os, const lte_sib3_type &t) {
+	os << t.cell_reselection_serving_freq_info_ << spacer
+		<< t.intra_freq_cell_reselection_info_ << spacer
+		<< t.s_intra_search_v920_ << spacer
+		<< t.s_non_intra_search_v920_ << spacer
+		<< t.threshold_serving_low_q_;
+	return os;
+}
+
+inline std::ostream& operator<<(std::ostream &os, const physical_cellid_range &t) {
 	os << t.start_ << spacer3 << t.range_;
 	return os;
 }
 
-inline std::ostream& operator<<(std::ostream &os, const std::vector<physical_cellid_range> &t)
-{
+inline std::ostream& operator<<(std::ostream &os, const std::vector<physical_cellid_range> &t) {
 	for(auto &i : t)
 		os << begin_delim << i << end_delim << spacer2;
 	return os;
 }
 
-inline std::ostream& operator<<(std::ostream &os, const neighbor_cell &t)
-{
+inline std::ostream& operator<<(std::ostream &os, const neighbor_cell &t) {
 	os << t.physical_cell_id_ << spacer3 << t.q_offset_cell_;
 	return os;
 }
 
-inline std::ostream& operator<<(std::ostream &os, const std::vector<neighbor_cell> &t)
-{
+inline std::ostream& operator<<(std::ostream &os, const std::vector<neighbor_cell> &t) {
 	for(auto &i : t)
 		os << begin_delim << i << end_delim << spacer2;
 	return os;
@@ -170,14 +207,13 @@ inline std::ostream& operator<<(std::ostream &os, const std::vector<neighbor_cel
 
 inline std::ostream& header(std::ostream &os, const lte_sib4_type &t) {
 	header(os, (lte_sib_base&)t) << spacer
-		<< "csg_phys_cellid_range" << spacer
-		<< "intra_freq_neighbor_cell_list" << spacer
-		<< "intra_freq_black_cell_list";
-		return os;
+		<< "csg_phys_cellid_range[phys_cid q_offset_cell]" << spacer
+		<< "intra_freq_neighbor_cell_list[start range]" << spacer
+		<< "intra_freq_black_cell_list[phys_cid q_offset_cell]";
+	return os;
 }
 
-inline std::ostream& operator<<(std::ostream &os, const lte_sib4_type &t)
-{
+inline std::ostream& operator<<(std::ostream &os, const lte_sib4_type &t) {
 	os << "sib4 " << static_cast<const lte_sib_base&>(t) << spacer
 		<< t.csg_physical_cellid_range_ << spacer
 		<< t.intra_freq_neighbor_cell_list_ << spacer
@@ -185,20 +221,24 @@ inline std::ostream& operator<<(std::ostream &os, const lte_sib4_type &t)
 	return os;
 }
 
-inline std::ostream& operator<<(std::ostream &os, const inter_freq_carrier_freq_info &t)
-{
-	os << t.downlink_arfcn_value_eutra_ << spacer3
-		<< t.allowed_measurement_bandwidth_ << spacer3
-		<< (t.presence_antenna_port_1_ ? "ant port1 detected" : "no ant port1") << spacer3
-		<< t.q_offset_cell_ << spacer3
-		<< t.q_rx_lev_min_ << spacer3
-		<< t.inter_freq_neighbor_cell_list_ << spacer3
+inline std::ostream& operator<<(std::ostream &os, const inter_freq_carrier_freq_info &t) {
+	os << t.downlink_arfcn_value_eutra_ << spacer2
+		<< t.q_rx_lev_min_ << spacer2
+		<< t.q_offset_freq_ << spacer2
+		<< t.q_offset_cell_ << spacer2
+		<< t.allowed_measurement_bandwidth_ << spacer2
+		<< (t.presence_antenna_port_1_ ? "ant port1 detected" : "no ant port1") << spacer2
+		<< t.threshold_x_high_ << spacer2
+		<< t.threshold_x_low_ << spacer2
+		<< t.threshold_x_high_q_r9_ << spacer2
+		<< t.threshold_x_low_q_r9_ << spacer2
+		<< t.cell_reselection_priority_ << spacer2
+		<< t.inter_freq_neighbor_cell_list_ << spacer2
 		<< t.inter_freq_black_cell_list_;
 	return os;
 }
 
-inline std::ostream& operator<<(std::ostream &os, const std::vector<inter_freq_carrier_freq_info> &t)
-{
+inline std::ostream& operator<<(std::ostream &os, const std::vector<inter_freq_carrier_freq_info> &t) {
 	for(auto &i : t)
 		os << begin_delim << i << end_delim << spacer2;
 	return os;
@@ -206,25 +246,29 @@ inline std::ostream& operator<<(std::ostream &os, const std::vector<inter_freq_c
 
 inline std::ostream& header(std::ostream &os, const lte_sib5_type &t) {
 	header(os, (lte_sib_base&)t) << spacer
-		<< "inter_freq_carrier_info_list";
-		return os;
+		<< "inter_freq_carrier_info_list [dl_eutra q_rx_lev_min q_offset_freq q_offset_cell meas_bw ant_1_present thres_x_high "
+		"thres_x_low thres_x_high_q_r9 thres_x_low_q_r9 cell_reselect_priority "
+		"inter_freq_neighbor_list[start range] inter_freq_black_list[phys_cid q_offset_cell]]";
+	return os;
 }
 
-inline std::ostream& operator<<(std::ostream &os, const lte_sib5_type &t)
-{
+inline std::ostream& operator<<(std::ostream &os, const lte_sib5_type &t) {
 	os << "sib5 " << static_cast<const lte_sib_base&>(t) << spacer
 		<< t.inter_freq_carrier_info_list_;
 	return os;
 }
 
-inline std::ostream& operator<<(std::ostream &os, const carrier_freq_utra &t)
-{
-	os << t.arfcn_value_utra_;
+inline std::ostream& operator<<(std::ostream &os, const carrier_freq_utra &t) {
+	os << t.arfcn_value_utra_ << spacer2
+		<< t.threshold_x_high_ << spacer2
+		<< t.threshold_x_low_ << spacer2
+		<< t.threshold_x_high_q_r9_ << spacer2
+		<< t.threshold_x_low_q_r9_ << spacer2
+		<< t.cell_reselection_priority_;
 	return os;
 }
 
-inline std::ostream& operator<<(std::ostream &os, const std::vector<carrier_freq_utra> &t)
-{
+inline std::ostream& operator<<(std::ostream &os, const std::vector<carrier_freq_utra> &t) {
 	for(auto &i : t)
 		os << i << spacer3;
 	return os;
@@ -232,21 +276,19 @@ inline std::ostream& operator<<(std::ostream &os, const std::vector<carrier_freq
 
 inline std::ostream& header(std::ostream &os, const lte_sib6_type &t) {
 	header(os, (lte_sib_base&)t) << spacer
-		<< "carrier_freq_list_utra_fdd" << spacer
-		<< "carrier_freq_list_utra_tdd";
-		return os;
+		<< "carrier_freq_list_utra_fdd[arfcn_utra thres_x_high thres_x_low thres_x_high_q_r9 thres_x_low_q_r9 cell_reselect]" << spacer
+		<< "carrier_freq_list_utra_tdd[arfcn_utra thres_x_high thres_x_low thres_x_high_q_r9 thres_x_low_q_r9 cell_reselect]";
+	return os;
 }
 
-inline std::ostream& operator<<(std::ostream &os, const lte_sib6_type &t)
-{
+inline std::ostream& operator<<(std::ostream &os, const lte_sib6_type &t) {
 	os << "sib6 " << static_cast<const lte_sib_base&>(t) << spacer
 		<< begin_delim << t.carrier_freq_list_utra_fdd_ << end_delim << spacer
 		<< begin_delim << t.carrier_freq_list_utra_tdd_ << end_delim;
 	return os;
 }
 
-inline std::ostream& operator<<(std::ostream &os, const carrier_freqs_geran &t)
-{
+inline std::ostream& operator<<(std::ostream &os, const carrier_freqs_geran &t) {
 	os << (t.band_indicator_ == dcs_1800_was_used ? "dcs_1800_was_used" : "pcs_1900_was_used") << spacer3
 		<< t.starting_arfcn_ << spacer3 << begin_delim;
 	for(auto &i : t.following_arfcns_)
@@ -255,34 +297,39 @@ inline std::ostream& operator<<(std::ostream &os, const carrier_freqs_geran &t)
 	return os;
 }
 
-inline std::ostream& operator<<(std::ostream &os, const carrier_freqs_info_geran &t)
-{
+inline std::ostream& operator<<(std::ostream &os, const carrier_freqs_info_geran &t) {
 	os << t.carrier_freqs_;
 	return os;
 }
 
-inline std::ostream& operator<<(std::ostream &os, const std::vector<carrier_freqs_info_geran> &t)
-{
+inline std::ostream& operator<<(std::ostream &os, const geran_common_info &t) {
+	os << t.threshold_x_high_ << spacer3
+		<< t.threshold_x_low_ << spacer3
+		<< t.cell_reselection_priority_;
+	return os;
+}
+
+inline std::ostream& operator<<(std::ostream &os, const std::vector<carrier_freqs_info_geran> &t) {
 	for(auto &i : t)
-		os << i.carrier_freqs_ << spacer2;
+		os << i.carrier_freqs_ << spacer2
+		<< i.common_info_;
 	return os;
 }
 
 inline std::ostream& header(std::ostream &os, const lte_sib7_type &t) {
 	header(os, (lte_sib_base&)t) << spacer
-		<< "carrier_freqs_info_list_geran";
-		return os;
+		<< "carrier_freqs_info_list_geran[carrier_freqs_geran[band_indicator start_arfcn following_arfcns]] "
+		"common_info[thres_x_high thres_x_low cell_reselect_priority]]";
+	return os;
 }
 
-inline std::ostream& operator<<(std::ostream &os, const lte_sib7_type &t)
-{
+inline std::ostream& operator<<(std::ostream &os, const lte_sib7_type &t) {
 	os << "sib7 " << static_cast<const lte_sib_base&>(t) << spacer
 		<< t.carrier_freqs_info_list_geran_;
 	return os;
 }
 
-inline std::ostream& operator<<(std::ostream &os, const neighbor_cells_per_band_class_cdma_2000 &t)
-{
+inline std::ostream& operator<<(std::ostream &os, const neighbor_cells_per_band_class_cdma_2000 &t) {
 	os << t.arfcn_value_cmda_2000_ << spacer3 << begin_delim;
 	for(auto &i : t.physical_cell_ids_)
 		os << i << spacer3;
@@ -290,15 +337,13 @@ inline std::ostream& operator<<(std::ostream &os, const neighbor_cells_per_band_
 	return os;
 }
 
-inline std::ostream& operator<<(std::ostream &os, const std::vector<neighbor_cells_per_band_class_cdma_2000> &t)
-{
+inline std::ostream& operator<<(std::ostream &os, const std::vector<neighbor_cells_per_band_class_cdma_2000> &t) {
 	for(auto &i : t)
 		os << i << spacer3;
 	return os;
 }
 
-inline std::ostream& operator<<(std::ostream &os, const band_class_cmda_2000 &t)
-{
+inline std::ostream& operator<<(std::ostream &os, const band_class_cmda_2000 &t) {
 	switch(t) {
 	case bc0:
 		os << "bc0";
@@ -402,22 +447,19 @@ inline std::ostream& operator<<(std::ostream &os, const band_class_cmda_2000 &t)
 	return os;
 }
 
-inline std::ostream& operator<<(std::ostream &os, const neighbor_cell_cdma_2000 &t)
-{
+inline std::ostream& operator<<(std::ostream &os, const neighbor_cell_cdma_2000 &t) {
 	os << t.band_ << spacer3
 		<< begin_delim << t.neighbor_cells_per_freq_list_ << end_delim;
 	return os;
 }
 
-inline std::ostream& operator<<(std::ostream &os, const std::vector<neighbor_cell_cdma_2000> &t)
-{
-	for(auto &i  : t)
+inline std::ostream& operator<<(std::ostream &os, const std::vector<neighbor_cell_cdma_2000> &t) {
+	for(auto &i : t)
 		os << i << spacer2;
 	return os;
 }
 
-inline std::ostream& operator<<(std::ostream &os, const cell_reselection_parameters_cmda_2000 &t)
-{
+inline std::ostream& operator<<(std::ostream &os, const cell_reselection_parameters_cmda_2000 &t) {
 	os << t.neighbor_cell_list_;
 	return os;
 }
@@ -426,11 +468,10 @@ inline std::ostream& header(std::ostream &os, const lte_sib8_type &t) {
 	header(os, (lte_sib_base&)t) << spacer
 		<< "parameters_hrpd" << spacer
 		<< "parameters_1xrtt";
-		return os;
+	return os;
 }
 
-inline std::ostream& operator<<(std::ostream &os, const lte_sib8_type &t)
-{
+inline std::ostream& operator<<(std::ostream &os, const lte_sib8_type &t) {
 	os << "sib8 " << static_cast<const lte_sib_base&>(t) << spacer
 		<< t.parameters_hrpd_ << spacer
 		<< t.parameters_1xrtt_;
@@ -447,8 +488,7 @@ inline std::ostream& header(std::ostream &os, const lte_rrc_message_aggregate &t
 	return os;
 }
 
-inline std::ostream& operator<<(std::ostream &os, const lte_rrc_message_aggregate &t)
-{
+inline std::ostream& operator<<(std::ostream &os, const lte_rrc_message_aggregate &t) {
 	os << t.sib1_ << main_delim
 		<< t.sib4_ << main_delim
 		<< t.sib5_ << main_delim

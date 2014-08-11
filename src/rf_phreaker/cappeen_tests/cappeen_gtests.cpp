@@ -170,12 +170,12 @@ public:
 				t += "sib6 | [";
 				for(uint32_t j = 0; j < info[i].sib_6_.carrier_freq_list_utra_fdd_.num_elements_; ++j) {
 					auto &k = info[i].sib_6_.carrier_freq_list_utra_fdd_.elements_;
-					t += std::to_string(k[j]) + " ";
+					t += std::to_string(k[j].arfcn_value_utra_) + " ";
 				}
 				t += "] | [";
 				for(uint32_t j = 0; j < info[i].sib_6_.carrier_freq_list_utra_tdd_.num_elements_; ++j) {
 					auto &k = info[i].sib_6_.carrier_freq_list_utra_tdd_.elements_;
-					t += std::to_string(k[j]) + " ";
+					t += std::to_string(k[j].arfcn_value_utra_) + " ";
 				}
 				t += "] ";
 			}
@@ -256,7 +256,7 @@ class bad_output : public beagle_delegate
 	virtual void __stdcall available_message(long beagle_id, long possible_message_number, const char *str, long buf_size) { std::cout << str << "\n"; }
 };
 
-TEST(Cappeen, TestMain)
+TEST(Cappeen, DISABLED_TestMain)
 {
 	//system("pause");
 
@@ -632,7 +632,7 @@ TEST(Cappeen, DISABLED_LicenseCellAnalysisEverything) {
 	}
 }
 
-TEST(Cappeen, NoClose)
+TEST(Cappeen, DISABLED_NoClose)
 {
 	//system("pause");
 
@@ -666,7 +666,7 @@ TEST(Cappeen, NoClose)
 	EXPECT_EQ(0, cappeen_clean_up());
 }
 
-TEST(Cappeen, NoCloseNoStop)
+TEST(Cappeen, DISABLED_NoCloseNoStop)
 {
 	std::cout << cappeen_api_version() << std::endl;
 

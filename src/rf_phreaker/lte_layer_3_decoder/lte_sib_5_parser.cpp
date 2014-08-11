@@ -52,6 +52,20 @@ void lte_sib_5_parser::parse_data(const SystemInformationBlockType5_t &data, lte
 		
 		inter_freq.presence_antenna_port_1_ = inter_list.array[i]->presenceAntennaPort1 != 0;
 
+		inter_freq.cell_reselection_priority_ = inter_list.array[i]->cellReselectionPriority != nullptr ? *inter_list.array[i]->cellReselectionPriority : -1;
+		inter_freq.threshold_x_high_ = inter_list.array[i]->threshX_High;
+		inter_freq.threshold_x_low_ = inter_list.array[i]->threshX_Low;
+		inter_freq.q_offset_freq_ = inter_list.array[i]->q_OffsetFreq != nullptr ? *inter_list.array[i]->q_OffsetFreq : 0; // defaults to 0dB
+
+		if(inter_list.array[i]->threshX_Q_r9) {
+			inter_freq.threshold_x_high_q_r9_ = inter_list.array[i]->threshX_Q_r9->threshX_HighQ_r9;
+			inter_freq.threshold_x_low_q_r9_ = inter_list.array[i]->threshX_Q_r9->threshX_LowQ_r9;
+		}
+		else {
+			inter_freq.threshold_x_high_q_r9_ = -1;
+			inter_freq.threshold_x_low_q_r9_ = -1;
+		}
+	
 		if(inter_list.array[i]->interFreqNeighCellList) {
 			auto inter_cell = inter_list.array[i]->interFreqNeighCellList->list;
 			for(int i = 0; i < inter_cell.count; ++i) {

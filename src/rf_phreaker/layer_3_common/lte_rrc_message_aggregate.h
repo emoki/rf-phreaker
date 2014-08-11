@@ -6,16 +6,14 @@
 namespace layer_3_information
 {
 
-class lte_sib_base 
-{
+struct lte_sib_base {
 public:
 	lte_sib_base() : decoded_(false) {}
 	virtual void clear() = 0;
 	bool decoded_;
 };
 
-enum lte_sib_type
-{
+enum lte_sib_type {
 	sib_3,
 	sib_4,
 	sib_5,
@@ -33,15 +31,12 @@ enum lte_sib_type
 	spare_2,
 	spare_1
 };
-struct scheduling_info
-{
+struct scheduling_info {
 	int periodicity_in_frames_;
 	std::vector<lte_sib_type> sib_mapping_info_;
 };
-struct lte_sib1_type : public lte_sib_base
-{
-	void clear()
-	{
+struct lte_sib1_type : public lte_sib_base {
+	void clear() {
 		multiple_plmn_.clear();
 		tracking_area_code_ = -1;
 		cell_id_ = -1;
@@ -58,21 +53,73 @@ struct lte_sib1_type : public lte_sib_base
 	std::vector<scheduling_info> scheduling_info_list_;
 };
 
+// s_non_intra_search_ - Rx level threshold for cell reselection. Value is IE value * 2 {dB]
+struct reselection_threshold_type {
+	reselection_threshold_type() : reselection_threshold_(-1) {}
+	reselection_threshold_type(int t) : reselection_threshold_(2 * t) {}
+	reselection_threshold_type& operator=(const reselection_threshold_type &t) {
+		reselection_threshold_ = t.reselection_threshold_;
+		return *this;
+	}
+	reselection_threshold_type& operator=(int t) {
+		reselection_threshold_ = t * 2;
+		return *this;
+	}
+	void clear() { reselection_threshold_ = -1; }
+	int reselection_threshold() const { return reselection_threshold_; }
+private:
+	int32_t reselection_threshold_;
+};
+typedef int reselection_threshold_q_type;
+struct cell_reselection_serving_freq_info {
+	reselection_threshold_type s_non_intra_search_; // reselection_threshold
+	reselection_threshold_type threshold_serving_low_; // reselection_threshold
+	int cell_reselection_priority_;
+};
+struct intra_freq_cell_reselection_info {
+	reselection_threshold_type s_intra_search_; // reselection_threshold
+};
+struct s_search_v920 {
+	reselection_threshold_type p_; // reselection_threshold
+	reselection_threshold_q_type q_; // reselection_threshold_q
+};
+struct lte_sib3_type : public lte_sib_base {
+	void clear() {
+		cell_reselection_serving_freq_info_.s_non_intra_search_.clear();
+		cell_reselection_serving_freq_info_.threshold_serving_low_.clear();
+		cell_reselection_serving_freq_info_.cell_reselection_priority_ = -1;
+		intra_freq_cell_reselection_info_.s_intra_search_.clear();
+		s_intra_search_v920_.p_.clear();
+		s_intra_search_v920_.q_ = -1;
+		s_non_intra_search_v920_.p_.clear();
+		s_non_intra_search_v920_.q_ = -1;
+		threshold_serving_low_q_ = -1;
+	}
+	void swap(lte_sib3_type &a) {
+		std::swap(cell_reselection_serving_freq_info_, a.cell_reselection_serving_freq_info_);
+		std::swap(intra_freq_cell_reselection_info_, a.intra_freq_cell_reselection_info_);
+		std::swap(s_intra_search_v920_, a.s_intra_search_v920_);
+		std::swap(s_non_intra_search_v920_, a.s_non_intra_search_v920_);
+		std::swap(threshold_serving_low_q_, a.threshold_serving_low_q_);
+	}
+	cell_reselection_serving_freq_info cell_reselection_serving_freq_info_;
+	intra_freq_cell_reselection_info intra_freq_cell_reselection_info_;
+	s_search_v920 s_intra_search_v920_;
+	s_search_v920 s_non_intra_search_v920_;
+	reselection_threshold_q_type threshold_serving_low_q_; // reselection_threshold_q
+};
 
-struct physical_cellid_range
-{
+
+struct physical_cellid_range {
 	int32_t start_;
 	int32_t range_;
 };
-struct neighbor_cell 
-{
+struct neighbor_cell {
 	int32_t physical_cell_id_;
 	int32_t q_offset_cell_;
 };
-struct lte_sib4_type : public lte_sib_base
-{
-	void clear()
-	{
+struct lte_sib4_type : public lte_sib_base {
+	void clear() {
 		intra_freq_neighbor_cell_list_.clear();
 		intra_freq_black_cell_list_.clear();
 		csg_physical_cellid_range_.start_ = -1;
@@ -89,20 +136,23 @@ struct lte_sib4_type : public lte_sib_base
 };
 
 
-struct inter_freq_carrier_freq_info
-{
+struct inter_freq_carrier_freq_info {
 	int32_t downlink_arfcn_value_eutra_;
 	int q_rx_lev_min_;
+	int32_t q_offset_freq_;
 	int32_t q_offset_cell_;
 	int allowed_measurement_bandwidth_;
 	bool presence_antenna_port_1_;
+	reselection_threshold_type threshold_x_high_;
+	reselection_threshold_type threshold_x_low_;
+	reselection_threshold_q_type threshold_x_high_q_r9_;
+	reselection_threshold_q_type threshold_x_low_q_r9_;
+	int cell_reselection_priority_;
 	std::vector<neighbor_cell> inter_freq_neighbor_cell_list_;
 	std::vector<physical_cellid_range> inter_freq_black_cell_list_;
 };
-struct lte_sib5_type : public lte_sib_base
-{
-	void clear()
-	{
+struct lte_sib5_type : public lte_sib_base {
+	void clear() {
 		inter_freq_carrier_info_list_.clear();
 	}
 	void swap(lte_sib5_type &a) {
@@ -115,17 +165,19 @@ struct lte_sib5_type : public lte_sib_base
 };
 
 
-struct carrier_freq_utra
-{
+struct carrier_freq_utra {
 	int arfcn_value_utra_;
+	reselection_threshold_type threshold_x_low_;
+	reselection_threshold_type threshold_x_high_;
+	reselection_threshold_q_type threshold_x_low_q_r9_;
+	reselection_threshold_q_type threshold_x_high_q_r9_;
+	int cell_reselection_priority_;
 	//int q_rx_lev_min_;
 	//int p_max_utra_;
 	//int q_qual_min_;
 };
-struct lte_sib6_type : public lte_sib_base
-{
-	void clear()
-	{
+struct lte_sib6_type : public lte_sib_base {
+	void clear() {
 		carrier_freq_list_utra_fdd_.clear();
 		carrier_freq_list_utra_tdd_.clear();
 	}
@@ -138,21 +190,22 @@ struct lte_sib6_type : public lte_sib_base
 };
 
 
-struct carrier_freqs_geran 
-{
+struct carrier_freqs_geran {
 	int starting_arfcn_;
 	band_indicator band_indicator_;
 	std::vector<int32_t> following_arfcns_;
 };
-struct carrier_freqs_info_geran
-{
-	carrier_freqs_geran carrier_freqs_;
-	// skip common_info.
+struct geran_common_info {
+	int cell_reselection_priority_;
+	reselection_threshold_type threshold_x_high_;
+	reselection_threshold_type threshold_x_low_;
 };
-struct lte_sib7_type : public lte_sib_base
-{
-	void clear()
-	{
+struct carrier_freqs_info_geran {
+	carrier_freqs_geran carrier_freqs_;
+	geran_common_info common_info_;
+};
+struct lte_sib7_type : public lte_sib_base {
+	void clear() {
 		carrier_freqs_info_list_geran_.clear();
 	}
 	void swap(lte_sib7_type &a) {
@@ -162,13 +215,11 @@ struct lte_sib7_type : public lte_sib_base
 };
 
 
-struct neighbor_cells_per_band_class_cdma_2000
-{
+struct neighbor_cells_per_band_class_cdma_2000 {
 	int arfcn_value_cmda_2000_;
 	std::vector<int32_t> physical_cell_ids_;
 };
-enum band_class_cmda_2000
-{
+enum band_class_cmda_2000 {
 	bc0,
 	bc1,
 	bc2,
@@ -202,18 +253,15 @@ enum band_class_cmda_2000
 	spare2,
 	spare1
 };
-struct neighbor_cell_cdma_2000
-{
+struct neighbor_cell_cdma_2000 {
 	band_class_cmda_2000 band_;
 	std::vector<neighbor_cells_per_band_class_cdma_2000> neighbor_cells_per_freq_list_;
 };
-struct cell_reselection_parameters_cmda_2000
-{
+struct cell_reselection_parameters_cmda_2000 {
 	std::vector<neighbor_cell_cdma_2000> neighbor_cell_list_;
 };
-struct lte_sib8_type : public lte_sib_base
-{
-	void clear() { 
+struct lte_sib8_type : public lte_sib_base {
+	void clear() {
 		parameters_hrpd_.neighbor_cell_list_.clear();
 		parameters_1xrtt_.neighbor_cell_list_.clear();
 	}
@@ -225,14 +273,13 @@ struct lte_sib8_type : public lte_sib_base
 	cell_reselection_parameters_cmda_2000 parameters_1xrtt_;
 };
 
-class lte_rrc_message_aggregate : public bcch_bch_message_aggregate
-{
+class lte_rrc_message_aggregate : public bcch_bch_message_aggregate {
 public:
 	lte_rrc_message_aggregate();
-	void clear()
-	{
+	void clear() {
 		bcch_bch_message_aggregate::clear();
 		sib1_.clear();
+		sib3_.clear();
 		sib4_.clear();
 		sib5_.clear();
 		sib6_.clear();
@@ -240,10 +287,10 @@ public:
 		sib8_.clear();
 	}
 
-	void swap(lte_rrc_message_aggregate &a)
-	{
+	void swap(lte_rrc_message_aggregate &a) {
 		bcch_bch_message_aggregate::swap(a);
 		sib1_.swap(a.sib1_);
+		sib3_.swap(a.sib3_);
 		sib4_.swap(a.sib4_);
 		sib5_.swap(a.sib5_);
 		sib6_.swap(a.sib6_);
@@ -252,6 +299,7 @@ public:
 	}
 
 	lte_sib1_type sib1_;
+	lte_sib3_type sib3_;
 	lte_sib4_type sib4_;
 	lte_sib5_type sib5_;
 	lte_sib6_type sib6_;
