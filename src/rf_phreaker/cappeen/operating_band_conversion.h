@@ -163,6 +163,18 @@ static std::string tech_band_to_string(beagle_api::TECHNOLOGIES_AND_BANDS band) 
 	std::string s;
 
 	switch(band) {
+	case GSM_BAND_850:
+		s = "GSM_BAND_850";
+		break;
+	case GSM_BAND_900:
+		s = "GSM_BAND_900";
+		break;
+	case GSM_BAND_1800:
+		s = "GSM_BAND_1800";
+		break;
+	case GSM_BAND_1900:
+		s = "GSM_BAND_1900";
+		break;
 	case WCDMA_BAND_850:
 		s = "WCDMA_BAND_850";
 		break;
