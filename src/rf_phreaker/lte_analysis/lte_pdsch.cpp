@@ -180,6 +180,9 @@ if(!LteData[cell_no].layer_3_.sib1_.decoded_) {
 	LteData[cell_no].layer_3_.cid_ = tmp.cid_;
 	LteData[cell_no].layer_3_.sib1_ = tmp.sib1_;
 }
+if(!LteData[cell_no].layer_3_.sib3_.decoded_) {
+	LteData[cell_no].layer_3_.sib3_ = tmp.sib3_;
+}
 if(!LteData[cell_no].layer_3_.sib4_.decoded_) {
 	LteData[cell_no].layer_3_.sib4_ = tmp.sib4_;
 }
