@@ -51,6 +51,13 @@ public:
 		return *this;
 	}
 
+	bool operator == (const raw_signal &a) {
+		return bandwidth_ == a.bandwidth() &&
+			sampling_rate_ == a.sampling_rate() &&
+			frequency_ == a.frequency() &&
+			ipp_array_ == a.get_iq();
+	}
+
 	void swap(raw_signal &other)
 	{
 		ipp_array_.swap(other.ipp_array_);

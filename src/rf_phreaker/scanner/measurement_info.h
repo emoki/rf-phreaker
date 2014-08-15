@@ -59,11 +59,20 @@ public:
 		, serial_(std::move(other.serial_))
 	{}
 
-	measurement_info& operator =(measurement_info other)
-	{
+	measurement_info& operator =(measurement_info other) {
 		measurement_info tmp(other);
 		tmp.swap(*this);
 		return *this;
+	}
+
+	bool operator ==(const measurement_info &a) {
+		return gain_ == a.gain() &&
+			collection_round_ == a.collection_round() &&
+			operating_band_ == a.operating_band_ &&
+			abs(blade_adjustment_ - a.blade_adjustment()) < 0.0000001 &&
+			abs(rf_board_adjustment_ == a.blade_adjustment()) < 0.0000001 &&
+			serial_ == a.serial() &&
+			raw_signal::operator==(a);
 	}
 
 	void swap(measurement_info &other)
@@ -87,7 +96,7 @@ public:
 	void blade_adjustment(double adj) { blade_adjustment_ = adj; }
 	double rf_board_adjustment() const { return rf_board_adjustment_; }
 	void rf_board_adjustment(double adj) { rf_board_adjustment_ = adj; }
-	std::string serial() { return serial_; }
+	std::string serial() const{ return serial_; }
 	void serial(std::string serial) { serial_ = serial; }
 
 	friend inline std::ostream& operator<<(std::ostream &os, const rf_phreaker::scanner::measurement_info &t);
