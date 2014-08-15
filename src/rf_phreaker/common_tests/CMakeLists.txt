@@ -11,6 +11,7 @@ set (common_tests_VERSION_TWEAK 0)
 
 set (common_tests_SRCS 
 	common_tests.cpp
+	common_serialization_gtests.cpp
 	test_operating_band_range_specifier.cpp
 	channel_conversion_gtests.cpp
 	raw_signal_gtests.cpp

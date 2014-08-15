@@ -5,6 +5,8 @@
 #include "rf_phreaker/common/common_types.h"
 #include "rf_phreaker/common/common_utility.h"
 #include "rf_phreaker/common/delegate_sink.h"
+#include "rf_phreaker/scanner/measurement_info_serialization.h"
+#include "boost/archive/binary_oarchive.hpp"
 #include "tbb/flow_graph.h"
 #include <algorithm>
 #include <atomic>
@@ -106,9 +108,13 @@ protected:
 		if(timestamp.empty())
 			timestamp = timestamp_string();
 
-		std::ofstream file(name + timestamp + "_" + std::to_string(count) + ".bin");
-		if(file)
-			file << *meas;
+		//std::ofstream file(name + timestamp + "_" + std::to_string(count) + ".bin", std::ios::binary);
+		//file << *meas;
+		std::ofstream file(name + timestamp + "_" + std::to_string(count) + ".bin", std::ios::binary);
+		if(file) {
+			boost::archive::binary_oarchive oa(file);
+			oa & *static_cast<raw_signal*>(meas);
+		}
 	}
 
 	virtual void finished_scanning() { throw processing_error("Finished scanning not supported."); }

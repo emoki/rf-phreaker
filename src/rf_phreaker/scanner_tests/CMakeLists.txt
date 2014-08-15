@@ -16,6 +16,7 @@ set (scanner_tests_SRCS
 	eeprom_gtests.cpp
 	mock_scanner_comm.h
 	measurement_info_gtests.cpp
+	measurement_info_serialization_gtests.cpp
 	scanner_tests.cpp
 	${SRC_PLATFORM_SPECIFIC}/stdafx.cpp)
 

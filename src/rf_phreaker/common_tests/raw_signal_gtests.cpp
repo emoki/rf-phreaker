@@ -36,6 +36,20 @@ TEST(RawSignal, TestMain)
 		EXPECT_EQ(new_sig.bandwidth(), 1002);
 		EXPECT_EQ(new_sig.sampling_rate(), 1003);
 	}
+	std::string filename1("test_raw_signal.bin", std::ios::binary);
+	{
+		std::ofstream out(filename1);
+		ASSERT_TRUE(out.good());
+		out << test;
+	}
+	{
+		std::ifstream in(filename1);
+		ASSERT_TRUE(in.good());
+		raw_signal new_sig;
+		in >> new_sig;
+		EXPECT_TRUE(test == new_sig);
+	}
+
 }
 
 TEST(RawSignal, WithMeasurementInfo)

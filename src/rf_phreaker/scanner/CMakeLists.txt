@@ -25,6 +25,7 @@ set (scanner_SRCS
 	lms_defines.h
 	lms_utilities.h
 	measurement_info.h
+	measurement_info_serialization.h
     rf_switch_conversion.h
 	sampling_rate_conversion.cpp
 	sampling_rate_conversion.h

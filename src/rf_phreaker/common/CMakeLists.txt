@@ -14,6 +14,7 @@ set (common_SRCS
 	active_object.h
 	benchmark.h
 	channel_conversion.h
+	common_serialization.h
 	common_types.h
 	common_utility.h
 	concurrent.h

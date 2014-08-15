@@ -4,7 +4,7 @@
 
 using namespace rf_phreaker::scanner;
 
-TEST(RawSignal, TestMain)
+TEST(MeasurementInfo, TestMain)
 {
 	const int signal_size = 1000;
 	gain_type g(lms::LNA_MAX, 30, 10);
