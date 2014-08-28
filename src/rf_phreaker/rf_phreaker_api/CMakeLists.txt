@@ -10,7 +10,6 @@ set (rf_phreaker_api_VERSION_TWEAK 0)
 # Set the source files.
 set (rf_phreaker_api_SRCS 
 	rf_phreaker_api.h
-	measurements.h
 	measurement_io.h
 	${SRC_PLATFORM_SPECIFIC}/stdafx.cpp
 	${SRC_PLATFORM_SPECIFIC}/dllmain.cpp)
