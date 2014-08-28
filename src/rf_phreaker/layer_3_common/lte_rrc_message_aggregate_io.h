@@ -480,6 +480,7 @@ inline std::ostream& operator<<(std::ostream &os, const lte_sib8_type &t) {
 
 inline std::ostream& header(std::ostream &os, const lte_rrc_message_aggregate &t) {
 	header(os, t.sib1_) << main_delim;
+	header(os, t.sib3_) << main_delim;
 	header(os, t.sib4_) << main_delim;
 	header(os, t.sib5_) << main_delim;
 	header(os, t.sib6_) << main_delim;
@@ -490,6 +491,7 @@ inline std::ostream& header(std::ostream &os, const lte_rrc_message_aggregate &t
 
 inline std::ostream& operator<<(std::ostream &os, const lte_rrc_message_aggregate &t) {
 	os << t.sib1_ << main_delim
+		<< t.sib3_ << main_delim
 		<< t.sib4_ << main_delim
 		<< t.sib5_ << main_delim
 		<< t.sib6_ << main_delim
