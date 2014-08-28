@@ -12,7 +12,7 @@ namespace rf_phreaker { namespace processing {
 
 inline void convert_to_basic_data(basic_data &data, const scanner::measurement_info &info, double avg_rms)
 {
-	data.scanner_id_ = info.serial();
+	data.serial_ = info.serial();
 	data.carrier_signal_level_ = scanner::signal_level_calculator::calculate_sl(avg_rms, info);
 	data.carrier_bandwidth_ = info.bandwidth();
 	data.carrier_frequency_ = info.frequency();
