@@ -98,7 +98,8 @@ inline std::ostream& operator<<(std::ostream &os, const gps &t){
 }
 
 inline std::ostream& header(std::ostream &os, const basic_data &t) {
-	os << "collection_round" << delimiter
+	os << "scanner_serial" << delimiter
+		<< "collection_round" << delimiter
 		<< "carrier_freq" << delimiter
 		<< "carrier_bandwidth" << delimiter
 		<< "carrier_signal_level" << delimiter
@@ -108,7 +109,8 @@ inline std::ostream& header(std::ostream &os, const basic_data &t) {
 }
 
 inline std::ostream& operator<<(std::ostream &os, const basic_data &t) {
-	os << t.collection_round_ << delimiter
+	os << t.serial_ << delimiter
+		<< t.collection_round_ << delimiter
 		<< t.carrier_frequency_ << delimiter
 		<< t.carrier_bandwidth_ << delimiter
 		<< t.carrier_signal_level_ << delimiter

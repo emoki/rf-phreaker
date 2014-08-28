@@ -50,12 +50,12 @@ namespace rf_phreaker {
 
 	struct basic_data
 	{
-		//scanner_serial_type scanner_id_;
+		scanner_serial_type serial_;
 		int64_t collection_round_;
 		frequency_type carrier_frequency_;
 		bandwidth_type carrier_bandwidth_;
 		double carrier_signal_level_;
-		int64_t time_;
+		time_type time_;
 		int32_t status_flags_;
 	};
 
