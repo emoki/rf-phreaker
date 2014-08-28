@@ -374,14 +374,14 @@ public:
 			}
 		}
 
-		switch(t.device_speed_) {
-		case rf_phreaker::device_speed::USB_HI_SPEED:
+		switch(t.device_communication_) {
+		case rf_phreaker::device_communication::USB_HI_SPEED:
 			beagle_info_.device_speed_ = beagle_api::USB_HI_SPEED;
 			break;
-		case rf_phreaker::device_speed::USB_SUPER_SPEED:
+		case rf_phreaker::device_communication::USB_SUPER_SPEED:
 			beagle_info_.device_speed_ = beagle_api::USB_SUPER_SPEED;
 			break;
-		case rf_phreaker::device_speed::UNKNOWN_SPEED:
+		case rf_phreaker::device_communication::UNKNOWN_SPEED:
 		default:
 			beagle_info_.device_speed_ = beagle_api::UNKOWN_SPEED;
 		}

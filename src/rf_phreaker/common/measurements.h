@@ -17,7 +17,7 @@ namespace rf_phreaker {
 		frequency_type high_freq_;
 	};
 
-	enum device_speed 
+	enum device_communication
 	{
 		USB_HI_SPEED,
 		USB_SUPER_SPEED,
@@ -27,7 +27,7 @@ namespace rf_phreaker {
 	struct hardware 
 	{
 		scanner_serial_type scanner_id_;
-		device_speed device_speed_;
+		device_communication device_communication_;
 		int64_t frequency_correction_calibration_date_;
 		int64_t rf_calibration_date_;
 		std::vector<frequency_path> frequency_paths_;

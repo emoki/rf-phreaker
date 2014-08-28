@@ -46,14 +46,14 @@ public:
 		rf_phreaker::hardware hw;
 		switch(usb_speed_) {
 		case BLADERF_DEVICE_SPEED_HIGH:
-			hw.device_speed_ = USB_HI_SPEED;
+			hw.device_communication_ = USB_HI_SPEED;
 			break;
 		case BLADERF_DEVICE_SPEED_SUPER:
-			hw.device_speed_ = USB_SUPER_SPEED;
+			hw.device_communication_ = USB_SUPER_SPEED;
 			break;
 		case BLADERF_DEVICE_SPEED_UNKNOWN:
 		default:
-			hw.device_speed_ = UNKNOWN_SPEED;
+			hw.device_communication_ = UNKNOWN_SPEED;
 		}
 		hw.scanner_id_ = serial();
 		hw.frequency_correction_calibration_date_ = get_frequency_correction_date();

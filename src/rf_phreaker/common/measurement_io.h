@@ -29,7 +29,7 @@ inline std::string file_base(const lte_data &) { return "lte_"; }
 inline std::ostream& header(std::ostream &os, const hardware &t) {
 	os << "scanner_serial" << delimiter
 		<< "freq_paths(low-high)" << delimiter
-		<< "device_speed" << delimiter
+		<< "device_communication" << delimiter
 		<< "rf_calibration_date" << delimiter
 		<< "freq_correction_date" << delimiter
 		<< "license";
@@ -43,7 +43,7 @@ inline std::ostream& operator<<(std::ostream &os, const hardware &t)
 	for(const auto &d : t.frequency_paths_)
 		os << d.low_freq_ << "-" << d.high_freq_ << spacer;
 
-	switch(t.device_speed_)
+	switch(t.device_communication_)
 	{
 	case USB_HI_SPEED:
 		os << "USB_HI_SPEED" << delimiter;
