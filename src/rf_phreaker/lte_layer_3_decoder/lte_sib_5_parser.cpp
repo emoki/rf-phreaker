@@ -25,8 +25,6 @@ void lte_sib_5_parser::parse_data(const SystemInformationBlockType5_t &data, lte
 
 		inter_freq.q_rx_lev_min_ = inter_list.array[i]->q_RxLevMin;
 
-		inter_freq.q_offset_cell_ = inter_list.array[i]->q_OffsetFreq ? *inter_list.array[i]->q_OffsetFreq : 0;
-
 		switch(inter_list.array[i]->allowedMeasBandwidth) {
 		case AllowedMeasBandwidth_mbw6:
 			inter_freq.allowed_measurement_bandwidth_ = 6;

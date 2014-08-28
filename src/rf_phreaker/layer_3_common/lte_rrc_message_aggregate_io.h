@@ -226,7 +226,6 @@ inline std::ostream& operator<<(std::ostream &os, const inter_freq_carrier_freq_
 	os << t.downlink_arfcn_value_eutra_ << spacer2
 		<< t.q_rx_lev_min_ << spacer2
 		<< t.q_offset_freq_ << spacer2
-		<< t.q_offset_cell_ << spacer2
 		<< t.allowed_measurement_bandwidth_ << spacer2
 		<< (t.presence_antenna_port_1_ ? "ant port1 detected" : "no ant port1") << spacer2
 		<< t.threshold_x_high_ << spacer2
@@ -247,7 +246,7 @@ inline std::ostream& operator<<(std::ostream &os, const std::vector<inter_freq_c
 
 inline std::ostream& header(std::ostream &os, const lte_sib5_type &t) {
 	header(os, (lte_sib_base&)t) << spacer
-		<< "inter_freq_carrier_info_list [dl_eutra q_rx_lev_min q_offset_freq q_offset_cell meas_bw ant_1_present thres_x_high "
+		<< "inter_freq_carrier_info_list [dl_eutra q_rx_lev_min q_offset_freq meas_bw ant_1_present thres_x_high "
 		"thres_x_low thres_x_high_q_r9 thres_x_low_q_r9 cell_reselect_priority "
 		"inter_freq_neighbor_list[start range] inter_freq_black_list[phys_cid q_offset_cell]]";
 	return os;

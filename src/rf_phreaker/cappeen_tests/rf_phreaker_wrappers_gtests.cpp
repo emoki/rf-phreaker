@@ -137,7 +137,6 @@ TEST(RfPhreakerWrappers, Sib5) {
 	tmp.cell_reselection_priority_ = var++;
 	tmp.downlink_arfcn_value_eutra_ = var++;
 	tmp.presence_antenna_port_1_ = true;
-	tmp.q_offset_cell_ = var++;
 	tmp.q_offset_freq_ = var++;
 	tmp.q_rx_lev_min_ = var++;
 	tmp.threshold_x_high_ = var++;
@@ -169,13 +168,11 @@ TEST(RfPhreakerWrappers, Sib5) {
 		test.s_.inter_freq_carrier_info_list_.elements_[0].allowed_measurement_bandwidth_);
 
 	EXPECT_EQ(sib.inter_freq_carrier_info_list_[0].cell_reselection_priority_,
-		test.s_.inter_freq_carrier_info_list_.elements_[0].cell_reselection_freq_);
+		test.s_.inter_freq_carrier_info_list_.elements_[0].cell_reselection_priority_);
 	EXPECT_EQ(sib.inter_freq_carrier_info_list_[0].downlink_arfcn_value_eutra_,
 		test.s_.inter_freq_carrier_info_list_.elements_[0].downlink_arfcn_value_eutra_);
 	EXPECT_EQ(sib.inter_freq_carrier_info_list_[0].presence_antenna_port_1_,
 		test.s_.inter_freq_carrier_info_list_.elements_[0].presence_antenna_port_1_);
-	EXPECT_EQ(sib.inter_freq_carrier_info_list_[0].q_offset_cell_,
-		test.s_.inter_freq_carrier_info_list_.elements_[0].q_offset_cell_);
 	EXPECT_EQ(sib.inter_freq_carrier_info_list_[0].q_offset_freq_,
 		test.s_.inter_freq_carrier_info_list_.elements_[0].q_offset_freq_);
 	EXPECT_EQ(sib.inter_freq_carrier_info_list_[0].q_rx_lev_min_,

@@ -128,12 +128,11 @@ public:
 			t.presence_antenna_port_1_ = i.presence_antenna_port_1_;
 			t.q_rx_lev_min_ = i.q_rx_lev_min_;
 			t.q_offset_freq_ = i.q_offset_freq_;
-			t.q_offset_cell_ = i.q_offset_cell_;
 			t.threshold_x_high_ = i.threshold_x_high_.reselection_threshold();
 			t.threshold_x_low_ = i.threshold_x_low_.reselection_threshold();
 			t.threshold_x_high_q_r9_ = i.threshold_x_high_q_r9_;
 			t.threshold_x_low_q_r9_ = i.threshold_x_low_q_r9_;
-			t.cell_reselection_freq_ = i.cell_reselection_priority_;
+			t.cell_reselection_priority_ = i.cell_reselection_priority_;
 			inter_cells_.push_back(std::vector<beagle_api::lte_neighbor_cell>());
 			auto &cells = inter_cells_.back();
 			for(auto &j : i.inter_freq_neighbor_cell_list_) {

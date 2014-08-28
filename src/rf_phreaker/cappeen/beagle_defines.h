@@ -338,12 +338,11 @@ namespace beagle_api
 		bool presence_antenna_port_1_;
 		int32_t q_rx_lev_min_;
 		int32_t q_offset_freq_;
-		int32_t q_offset_cell_;
 		int32_t threshold_x_high_;
 		int32_t threshold_x_low_;
 		int32_t threshold_x_high_q_r9_;
 		int32_t threshold_x_low_q_r9_;
-		int32_t cell_reselection_freq_;
+		int32_t cell_reselection_priority_;
 		lte_neighbor_cell_group inter_freq_neighbor_cell_list_;
 		lte_physical_cell_id_range_group inter_freq_black_cell_list_;
 	};

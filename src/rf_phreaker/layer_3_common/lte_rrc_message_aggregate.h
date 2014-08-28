@@ -140,7 +140,6 @@ struct inter_freq_carrier_freq_info {
 	int32_t downlink_arfcn_value_eutra_;
 	int q_rx_lev_min_;
 	int32_t q_offset_freq_;
-	int32_t q_offset_cell_;
 	int allowed_measurement_bandwidth_;
 	bool presence_antenna_port_1_;
 	reselection_threshold_type threshold_x_high_;
