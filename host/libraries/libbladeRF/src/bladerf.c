@@ -1490,7 +1490,7 @@ int bladerf_xb_uart_baud_write(struct bladerf *dev, uint16_t val)
  * XB UART has data flag, true when data is available to read.
  *----------------------------------------------------------------------------*/
 
-int bladerf_xb_uart_hasdata(struct bladerf *dev, uint8_t* val)
+int bladerf_xb_uart_hasdata(struct bladerf *dev, uint32_t* val)
 {
 	int status;
     MUTEX_LOCK(&dev->ctrl_lock);

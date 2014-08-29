@@ -1277,22 +1277,18 @@ static int usb_xb_uart_write(struct bladerf *dev, uint8_t value)
 {
     return gpio_write(dev, 52, value);
 }
-static int usb_xb_uart_read(struct bladerf *dev, uint8_t *value)
+static int usb_xb_uart_read(struct bladerf *dev, uint32_t *value)
 {
-	uint32_t tmp = 0;
-	int sts = gpio_read(dev, 52, &tmp);
-	*value = (uint8_t)(tmp & 0xff);
+	int sts = gpio_read(dev, 52, value);
 	return sts;
 }
 static int usb_xb_uart_baud(struct bladerf *dev, uint16_t value)
 {
     return gpio_write(dev, 56, value);
 }
-static int usb_xb_uart_hasdata(struct bladerf *dev, uint8_t* value)
+static int usb_xb_uart_hasdata(struct bladerf *dev, uint32_t* value)
 {
-	uint32_t tmp = 0;
-	int sts = gpio_read(dev, 60, &tmp);
-	*value = (uint8_t)(tmp & 0xff);
+	int sts = gpio_read(dev, 60, value);
 	return sts;
 }
 

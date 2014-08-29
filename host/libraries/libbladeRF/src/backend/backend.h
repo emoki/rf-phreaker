@@ -115,7 +115,7 @@ struct backend_fns {
     int (*xb_uart_write)(struct bladerf *dev, uint8_t value);
     int (*xb_uart_read)(struct bladerf *dev, uint32_t *value);
     int (*xb_uart_baud_write)(struct bladerf *dev, uint16_t value);
-    int (*xb_uart_hasdata)(struct bladerf *dev, uint8_t* value);
+    int (*xb_uart_hasdata)(struct bladerf *dev, uint32_t* value);
 
 
     /* Configure firmware loopback */

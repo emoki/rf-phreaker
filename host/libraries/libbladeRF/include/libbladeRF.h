@@ -2559,7 +2559,7 @@ int CALL_CONV bladerf_xb_uart_baud_write(struct bladerf *dev, uint16_t val);
  * @return 0 on success, value from \ref RETCODES list on failure
  */
 API_EXPORT
-int CALL_CONV bladerf_xb_uart_hasdata(struct bladerf *dev, uint8_t* val);
+int CALL_CONV bladerf_xb_uart_hasdata(struct bladerf *dev, uint32_t* val);
 
 
 /**
