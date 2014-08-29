@@ -58,7 +58,15 @@ architecture hosted_bladerf of bladerf is
         correction_tx_phase_gain_export : out std_logic_vector(31 downto 0);
         time_tamer_synchronize          : out std_logic;
         time_tamer_time_tx              : in  std_logic_vector(63 downto 0);
-        time_tamer_time_rx              : in  std_logic_vector(63 downto 0)
+        time_tamer_time_rx              : in  std_logic_vector(63 downto 0);
+		  
+		  xb_spi_gps_MISO		:	in		std_logic := 'X';
+		  xb_spi_gps_MOSI		:	out	std_logic;
+		  xb_spi_gps_SCLK		:	out	std_logic;
+		  xb_spi_gps_SS_n		:	out	std_logic;
+		  
+		  xb_uart_gps_rxd		:	in		std_logic ;
+		  xb_uart_gps_txd		:	out	std_logic 
       );
     end component nios_system;
 
@@ -227,6 +235,15 @@ architecture hosted_bladerf of bladerf is
     signal nios_sdio : std_logic;
     signal nios_sclk : std_logic;
     signal nios_ss_n : std_logic_vector(1 downto 0);
+	 
+	 --custom extra spi on xb -- 3.2mhz, 01 mode
+	 signal nios_xb_spi_miso : std_logic;
+	 signal nios_xb_spi_mosi : std_logic;
+	 signal nios_xb_spi_clk : std_logic;
+	 signal nios_xb_spi_cs : std_logic;
+	 
+	 signal nios_xb_uart_rxd : std_logic;
+	 signal nios_xb_uart_txd : std_logic;
 
     signal xb_mode  : std_logic_vector(1 downto 0);
 
@@ -742,6 +759,8 @@ begin
 
     nios_uart_txd <= fx3_uart_txd when sys_rst_sync = '0' else '1' ;
     fx3_uart_rxd <= nios_uart_rxd when sys_rst_sync = '0' else 'Z' ;
+	 
+	 
 
     -- NIOS control system for si5338, vctcxo trim and lms control
     U_nios_system : nios_system
@@ -756,6 +775,15 @@ begin
         spi_MOSI            => lms_sdio,
         spi_SCLK            => lms_sclk,
         spi_SS_n            => lms_sen,
+		  
+		  xb_spi_gps_MISO		=> nios_xb_spi_miso,
+		  xb_spi_gps_MOSI		=> nios_xb_spi_mosi,
+		  xb_spi_gps_SCLK		=> nios_xb_spi_clk,
+		  xb_spi_gps_SS_n		=> nios_xb_spi_cs,
+		  
+		  xb_uart_gps_rxd		=> nios_xb_uart_rxd,
+		  xb_uart_gps_txd		=> nios_xb_uart_txd,
+		  
         uart_rxd            => nios_uart_txd,
         uart_txd            => nios_uart_rxd,
         gpio_export         => nios_gpio,
@@ -781,8 +809,8 @@ begin
         begin
             if (xb_gpio_dir(i) = '1') then
                 nios_xb_gpio_in(i) <= nios_xb_gpio_out(i);
-                if (xb_mode = "10" and i + 1 = 2) then
-                    exp_gpio(i+1) <= nios_ss_n(1);
+                if (i + 1 = 2) then
+                    exp_gpio(i+1) <= '0';
                 elsif (i + 1 /= 1) then
                     exp_gpio(i+1) <= nios_xb_gpio_out(i);
                 end if;
@@ -807,6 +835,7 @@ begin
             dac_csx <= nios_ss_n(0);
             nios_sdo <= dac_sdo;
             dac_sdi <= nios_sdio;
+				
             -- missing 30-32
         elsif( xb_mode = "10" ) then
             xb_gpio_dir <= nios_xb_gpio_dir(31 downto 0);
@@ -883,9 +912,14 @@ begin
     -- CTS and the SPI CSx are tied to the same signal.  When we are in reset, allow for SPI accesses
     fx3_uart_cts            <= '1' when sys_rst_sync = '0' else 'Z'  ;
 
-    exp_spi_clock           <= nios_sclk when ( nios_ss_n(1 downto 0) = "01" ) else '0' ;
-    exp_spi_mosi            <= nios_sdio when ( nios_ss_n(1 downto 0) = "01" ) else '0' ;
+    exp_spi_clock           <= nios_xb_spi_clk;		--nios_sclk when ( nios_ss_n(1 downto 0) = "01" ) else '0' ;
+    exp_spi_mosi            <= nios_xb_spi_mosi;	--nios_sdio when ( nios_ss_n(1 downto 0) = "01" ) else '0' ;
+    exp_spi_cs <= nios_xb_spi_cs;
+    nios_xb_spi_miso        <= exp_spi_miso;	
     --exp_gpio                <= (others =>'Z') ;
+	 
+	 exp_uart_tx				<= nios_xb_uart_txd;
+	 nios_xb_uart_rxd			<= exp_uart_rx;
 
     mini_exp1               <= 'Z';
     mini_exp2               <= 'Z';

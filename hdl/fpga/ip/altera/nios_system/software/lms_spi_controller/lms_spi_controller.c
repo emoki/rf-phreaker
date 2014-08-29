@@ -35,6 +35,8 @@
 
 #include "sys/alt_dev.h"
 
+#include "uartfifo.h"
+
 #define LMS_READ            0
 #define LMS_WRITE           (1<<7)
 #define LMS_VERBOSE         1
@@ -75,12 +77,18 @@
 #define DEFAULT_CORRECTION ( (DEFAULT_PHASE_CORRECTION << PHASE_OFFSET)|  (DEFAULT_GAIN_CORRECTION << GAIN_OFFSET))
 
 
+
+void xb_gps_uart_write( uint8_t val ) ;
+uint8_t xb_gps_uart_read(  );
+
+
+
 void si5338_complete_transfer( uint8_t check_rxack ) {
     if( (IORD_8DIRECT(I2C, OC_I2C_CMD_STATUS)&OC_I2C_TIP) == 0 ) {
         while( (IORD_8DIRECT(I2C, OC_I2C_CMD_STATUS)&OC_I2C_TIP) == 0 ) { } ;
     }
     while( IORD_8DIRECT(I2C, OC_I2C_CMD_STATUS)&OC_I2C_TIP ) { } ;
-    while( check_rxack && IORD_8DIRECT(I2C, OC_I2C_CMD_STATUS)&OC_I2C_RXACK ) { } ;
+    while(  check_rxack && (IORD_8DIRECT(I2C, OC_I2C_CMD_STATUS) & OC_I2C_RXACK)   ) { } ;
 }
 
 void si5338_read( uint8_t addr, uint8_t *data ) {
@@ -127,14 +135,19 @@ void si5338_write( uint8_t addr, uint8_t data ) {
 // Trim DAC write
 void dac_write( uint16_t val ) {
 //    alt_printf( "DAC Writing: %x\n", val ) ;
-    uint8_t data[3] ;
+    uint8_t data[3]; //cmd, data1, data2
+
+    //DAC_SWB
     data[0] = 0x28, data[1] = 0, data[2] = 0 ;
     alt_avalon_spi_command( SPI_1_BASE, 0, 3, data, 0, 0, 0 ) ;
+
+    //DAC_WR (ADR: 0)
     data[0] = 0x08, data[1] = (val>>8)&0xff, data[2] = val&0xff  ;
     alt_avalon_spi_command( SPI_1_BASE, 0, 3, data, 0, 0, 0) ;
     return ;
 }
 
+/*
 // Transverter write
 void adf4351_write( uint32_t val ) {
     union {
@@ -156,6 +169,88 @@ void adf4351_write( uint32_t val ) {
     alt_avalon_spi_command( SPI_1_BASE, 1, 4, &sval.val, 0, 0, 0 ) ;
     return ;
 }
+*/
+
+
+
+/*  // reference
+ * int alt_avalon_spi_command(    // returns: success code
+ *		alt_u32 base,
+ *		alt_u32 slave,
+ * 	    alt_u32 write_length,     const alt_u8 * 	write_data,
+ * 	   	alt_u32 read_length, 	  alt_u8 * 			read_data,
+ * 	   	alt_u32 flags
+ * 	   	);
+ */
+
+
+// XB_SPI_WRITE
+static uint8_t spi_last_response = 0;
+static uint8_t spi_last_valid = 0;
+void xb_gps_spi_write( uint8_t val ) {
+
+
+    alt_u32 slave_select = 0;		//is the index on the SS_n... 0 = first index
+
+
+	alt_avalon_spi_command( SPI_2_BASE, slave_select, 1, &val, 1, &spi_last_response, 0) ;	//merge = keep cs low
+	//alt_avalon_spi_command( SPI_2_BASE, slave_select, 1, &val, 0, 0, ALT_AVALON_SPI_COMMAND_MERGE) ;	//merge = keep cs low
+	//alt_avalon_spi_command( SPI_2_BASE, slave_select, 0, 0, 1, &spi_last_response, 0) ;	//merge = keep cs low
+	//spi_last_response = 0x77;
+	spi_last_valid = 1;
+}
+// XB_SPI_READ
+//
+uint8_t xb_gps_spi_read(  ) {
+	alt_u32 slave_select = 0;
+    uint8_t reply = 0;
+    uint8_t dummy = 0;
+
+    if(spi_last_valid){
+    	uint8_t tmp = spi_last_response;
+    	spi_last_response = 0;
+    	spi_last_valid = 0;
+    	return tmp;
+    }
+
+	alt_avalon_spi_command( SPI_2_BASE, slave_select, 1, &dummy, 1, &reply, 0) ;
+	return reply;
+}
+
+// 4000 will hold about 8 nmea sentences, or about 2 sec of activity on gps
+#define XB_UART_FIFO_BUFFER_SIZE 4000
+uartfifo uf = {0,0,0,0};
+//collects the xb uart rx, when the library doesn't check the read data very often.
+void monitor_xb_uart(){
+	//quick read if data available, else skip
+	uint8_t data = 0;
+	if( (IORD_ALTERA_AVALON_UART_STATUS(UART_1_BASE) & ALTERA_AVALON_UART_STATUS_RRDY_MSK) ){
+		data = IORD_ALTERA_AVALON_UART_RXDATA(UART_1_BASE) ;
+		uartfifo_enqueue(&uf, data);
+	}
+}
+
+
+void xb_gps_uart_baud( uint32_t baud ) {
+	 uint16_t div = (uint16_t)(ALT_CPU_FREQ / baud + 0.5);
+     IOWR_ALTERA_AVALON_UART_DIVISOR(UART_1_BASE, div);
+}
+
+uint8_t xb_gps_uart_read(  ) {
+
+	return uartfifo_dequeue(&uf);
+}
+
+void xb_gps_uart_write( uint8_t val ) {
+
+	  while (!(IORD_ALTERA_AVALON_UART_STATUS(UART_1_BASE) & ALTERA_AVALON_UART_STATUS_TRDY_MSK));
+	  IOWR_ALTERA_AVALON_UART_TXDATA(UART_1_BASE,  val );
+}
+uint32_t xb_gps_uart_hasdata(  ) {
+	return uartfifo_size(&uf);
+	//return !uartfifo_empty(&uf);
+}
+
 
 // SPI Read
 void lms_spi_read( uint8_t address, uint8_t *val )
@@ -165,8 +260,8 @@ void lms_spi_read( uint8_t address, uint8_t *val )
     {
 //        alt_printf( "Invalid read address: %x\n", address ) ;
     } else {
-        alt_avalon_spi_command( SPI_0_BASE, 0, 1, &address, 0, 0, ALT_AVALON_SPI_COMMAND_MERGE ) ;
-        rv = alt_avalon_spi_command( SPI_0_BASE, 0, 0, 0, 1, val, 0 ) ;
+    	alt_avalon_spi_command( SPI_0_BASE, 0, 1, &address, 0, 0, ALT_AVALON_SPI_COMMAND_MERGE ) ;
+    	rv = alt_avalon_spi_command( SPI_0_BASE, 0, 0, 0, 1, val, 0 ) ;
         if( rv != 1 )
         {
 //            alt_putstr( "SPI data read did not work :(\n") ;
@@ -196,9 +291,14 @@ void lms_spi_write( uint8_t address, uint8_t val )
     return ;
 }
 
+
+
+
+
 // Entry point
 int main()
 {
+
   struct uart_pkt {
       unsigned char magic;
 #define UART_PKT_MAGIC          'N'
@@ -218,8 +318,8 @@ int main()
 
 #define UART_PKT_MODE_DIR_MASK   0xC0
 #define UART_PKT_MODE_DIR_SHIFT  6
-#define UART_PKT_MODE_DIR_READ   (2<<UART_PKT_MODE_DIR_SHIFT)
-#define UART_PKT_MODE_DIR_WRITE  (1<<UART_PKT_MODE_DIR_SHIFT)
+#define UART_PKT_MODE_DIR_READ   (2<<UART_PKT_MODE_DIR_SHIFT)		//read is 8 bit 1
+#define UART_PKT_MODE_DIR_WRITE  (1<<UART_PKT_MODE_DIR_SHIFT)		//write is 7 bit 1
   };
 
   struct uart_cmd {
@@ -231,12 +331,19 @@ int main()
   IOWR_16DIRECT(I2C, OC_I2C_PRESCALER, 39 ) ;
   IOWR_8DIRECT(I2C, OC_I2C_CTRL, OC_I2C_ENABLE ) ;
 
-  // Set the UART divisor to 14 to get 4000000bps UART (baud rate = clock/(divisor + 1))
+  // Set the UART divisor to 19 to get 4000000bps UART (baud rate = clock/(divisor + 1))
   IOWR_ALTERA_AVALON_UART_DIVISOR(UART_0_BASE, 19) ;
 
   // Set the IQ Correction parameters to 0
   IOWR_ALTERA_AVALON_PIO_DATA(IQ_CORR_RX_PHASE_GAIN_BASE, DEFAULT_CORRECTION);
   IOWR_ALTERA_AVALON_PIO_DATA(IQ_CORR_TX_PHASE_GAIN_BASE, DEFAULT_CORRECTION);
+
+  //could use dynamic memory too if enabled
+  uint8_t uart_buffer[XB_UART_FIFO_BUFFER_SIZE];
+  uf.capacity = sizeof(uart_buffer);
+  uf.first = 0;
+  uf.last = 0;
+  uf.base = &uart_buffer;
 
   /* Event loop never exits. */
   {
@@ -255,9 +362,15 @@ int main()
       uint32_t tmpvar = 0;
       uint32_t iovar = 0;
 
+      uint32_t uart_hasdata_cached = 0;
+
+
       state = LOOKING_FOR_MAGIC;
       while(1)
       {
+
+    	  monitor_xb_uart();
+
           // Check if anything is in the FSK UART
           if( IORD_ALTERA_AVALON_UART_STATUS(UART_0_BASE) & ALTERA_AVALON_UART_STATUS_RRDY_MSK )
           {
@@ -267,6 +380,8 @@ int main()
 
               val = IORD_ALTERA_AVALON_UART_RXDATA(UART_0_BASE) ;
 
+
+              // when a "magic is found, a specific behavior - parsing the following data as uart commands - ensues until set back to LOOKING
               switch (state) {
               case LOOKING_FOR_MAGIC:
                   if (val == UART_PKT_MAGIC)
@@ -274,12 +389,12 @@ int main()
                   break;
               case READING_MODE:
                   mode = val;
-                  if ((mode & UART_PKT_MODE_CNT_MASK) > 7) {
+                  if ((mode & UART_PKT_MODE_CNT_MASK) > 7) {		//clamps command count to 7
                       mode &= ~UART_PKT_MODE_CNT_MASK;
                       mode |= 7;
                   }
                   i = 0;
-                  cnt = (mode & UART_PKT_MODE_CNT_MASK) * sizeof(struct uart_cmd);
+                  cnt = (mode & UART_PKT_MODE_CNT_MASK) * sizeof(struct uart_cmd);			//gets number of bytes given number commands
                   state = READING_CMDS;
                   break;
               case READING_CMDS:
@@ -293,6 +408,7 @@ int main()
               }
 
               void write_uart(unsigned char val) {
+            	  // spin while not transmit ready
                   while (!(IORD_ALTERA_AVALON_UART_STATUS(UART_0_BASE) & ALTERA_AVALON_UART_STATUS_TRDY_MSK));
                   IOWR_ALTERA_AVALON_UART_TXDATA(UART_0_BASE,  val);
               }
@@ -348,26 +464,36 @@ int main()
                           GDEV_IQ_CORR_TX_PHASE,
                           GDEV_FPGA_VERSION,
                           GDEV_TIME_TIMER,
-                          GDEV_VCTXCO,
                           GDEV_XB_LO,
+                          GDEV_VCTXCO,
                           GDEV_EXPANSION,
                           GDEV_EXPANSION_DIR,
+                          GDEV_XB_GPS_SPI,
+                          GDEV_XB_GPS_UART,
+                          GDEV_XB_GPS_UART_BAUD,
+                          GDEV_XB_GPS_UART_HASDATA
                       } gdev;
                       int start, len;
                   } gdev_lut[] = {
-                          {GDEV_GPIO,           0, 4},
+                          {GDEV_GPIO,           0, 4},		//config gpio
                           {GDEV_IQ_CORR_RX_GAIN,    4, 2},
                           {GDEV_IQ_CORR_RX_PHASE,   6, 2},
                           {GDEV_IQ_CORR_TX_GAIN,    8, 2},
                           {GDEV_IQ_CORR_TX_PHASE,  10, 2},
                           {GDEV_FPGA_VERSION,  12, 4},
-                          {GDEV_TIME_TIMER,    16, 16},
+                          {GDEV_TIME_TIMER,    16, 16},		//referring to "time tamer"
                           {GDEV_VCTXCO,        34, 2},
                           {GDEV_XB_LO,         36, 4},
-                          {GDEV_EXPANSION,     40, 4},
+                          {GDEV_EXPANSION,     40, 4},		//expansion gpio
                           {GDEV_EXPANSION_DIR, 44, 4},
+                          {GDEV_XB_GPS_SPI,    48, 4},
+                          {GDEV_XB_GPS_UART,   52, 4},
+                          {GDEV_XB_GPS_UART_BAUD,   56, 4},
+                          {GDEV_XB_GPS_UART_HASDATA,60, 4}
                   };
 #define ARRAY_SZ(x) (sizeof(x)/sizeof(x[0]))
+
+                  	  	  //compress all data bytes into a tmpvar according to address offset
 #define COLLECT_BYTES(x)       tmpvar &= ~ ( 0xff << ( 8 * cmd_ptr->addr));   \
                               tmpvar |= cmd_ptr->data << (8 * cmd_ptr->addr); \
                               if (lastByte) { x; tmpvar = 0; } \
@@ -385,22 +511,46 @@ int main()
                     for (i = 0; i < cnt; i++) {
                         device = GDEV_UNKNOWN;
                         lastByte = 0;
+                        // trying to match cmd addr with lut index...
                         for (lut = 0; lut < ARRAY_SZ(gdev_lut); lut++) {
                             if (gdev_lut[lut].start <= cmd_ptr->addr && (gdev_lut[lut].start + gdev_lut[lut].len) > cmd_ptr->addr) {
-                                cmd_ptr->addr -= gdev_lut[lut].start;
+                                cmd_ptr->addr -= gdev_lut[lut].start;	// turn address into offset
                                 device = gdev_lut[lut].gdev;
-                                lastByte = cmd_ptr->addr == (gdev_lut[lut].len - 1);
+                                lastByte = cmd_ptr->addr == (gdev_lut[lut].len - 1);	//is it the last byte in the word
                                 break;
                             }
                         }
 
                         if (isRead) {
-                            if (device == GDEV_FPGA_VERSION)
+                            if (device == GDEV_FPGA_VERSION){
                                 cmd_ptr->data = (FPGA_VERSION >> (cmd_ptr->addr * 8));
-                            else if (device == GDEV_TIME_TIMER)
+                            }
+                            else if (device == GDEV_TIME_TIMER){
                                 cmd_ptr->data = IORD_8DIRECT(TIME_TAMER, cmd_ptr->addr);
-                            else if (device == GDEV_GPIO)
+                            }
+                            else if (device == GDEV_GPIO){
                                 cmd_ptr->data = (IORD_ALTERA_AVALON_PIO_DATA(PIO_0_BASE)) >> (cmd_ptr->addr * 8);
+                            }
+                            else if (device == GDEV_XB_GPS_SPI){
+
+                            	if(cmd_ptr->addr == 0)
+								{
+                            		cmd_ptr->data = xb_gps_spi_read( );
+								}
+                            }
+                            else if (device == GDEV_XB_GPS_UART){
+                            	//cmd bytes come in low first
+                            		cmd_ptr->data = xb_gps_uart_read( );
+                            }
+                            else if (device == GDEV_XB_GPS_UART_HASDATA){
+
+                            	// data comes in/out as low bytes first
+                            	if(cmd_ptr->addr == 0)
+								{
+                            		uart_hasdata_cached = xb_gps_uart_hasdata( );
+								}
+                            	cmd_ptr->data = (uart_hasdata_cached >> (cmd_ptr->addr * 8)) & 0xff;
+                            }
                             else if (device == GDEV_EXPANSION)
                                 cmd_ptr->data = (IORD_ALTERA_AVALON_PIO_DATA(PIO_1_BASE)) >> (cmd_ptr->addr * 8);
                             else if (device == GDEV_EXPANSION_DIR)
@@ -421,7 +571,20 @@ int main()
                             } else if (device == GDEV_VCTXCO) {
                                 COLLECT_BYTES(dac_write(tmpvar));
                             } else if (device == GDEV_XB_LO) {
-                                COLLECT_BYTES(adf4351_write(tmpvar));
+                                //COLLECT_BYTES(adf4351_write(tmpvar));
+                            	//disabled, conflicts with spi_2.
+                            } else if (device == GDEV_XB_GPS_SPI) {
+                            	if(cmd_ptr->addr == 0)
+								{
+                            		xb_gps_spi_write(cmd_ptr->data);
+								}
+                            } else if (device == GDEV_XB_GPS_UART) {
+                            	if(cmd_ptr->addr == 0)
+								{
+									xb_gps_uart_write(cmd_ptr->data);
+								}
+                            } else if (device == GDEV_XB_GPS_UART_BAUD) {
+                            	COLLECT_BYTES( xb_gps_uart_baud( tmpvar) );
                             } else if (device == GDEV_EXPANSION) {
                                 COLLECT_BYTES(IOWR_ALTERA_AVALON_PIO_DATA(PIO_1_BASE, tmpvar));
                             } else if (device == GDEV_EXPANSION_DIR) {
@@ -441,15 +604,18 @@ int main()
                         }
 
                         cmd_ptr++;
-                     }
-                  }
+                     } // end for
+                  } // end if : GPIO
 
+                  // after all execution, write back edited buffer data
                   cmd_ptr = (struct uart_cmd *)buf;
                   for (i = 0; i < cnt; i++) {
                       write_uart(cmd_ptr->addr);
                       write_uart(cmd_ptr->data);
                       cmd_ptr++;
                   }
+
+                  // fill any unused space with 0xff
                   for (i = 2 + cnt * sizeof(struct uart_cmd); (i % 16); i++) {
                       write_uart(0xff);
                   }
@@ -460,5 +626,9 @@ int main()
       }
   }
 
+  uartfifo_delete(&uf);
+
+
   return 0;
 }
+
