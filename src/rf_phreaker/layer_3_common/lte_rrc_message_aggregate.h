@@ -54,15 +54,16 @@ struct lte_sib1_type : public lte_sib_base {
 };
 
 // s_non_intra_search_ - Rx level threshold for cell reselection. Value is IE value * 2 {dB]
+// Remove the '* 2'.  Let the user do this on their side.
 struct reselection_threshold_type {
 	reselection_threshold_type() : reselection_threshold_(-1) {}
-	reselection_threshold_type(int t) : reselection_threshold_(2 * t) {}
+	reselection_threshold_type(int t) : reselection_threshold_(/*2 * */t) {}
 	reselection_threshold_type& operator=(const reselection_threshold_type &t) {
 		reselection_threshold_ = t.reselection_threshold_;
 		return *this;
 	}
 	reselection_threshold_type& operator=(int t) {
-		reselection_threshold_ = t * 2;
+		reselection_threshold_ = t/* * 2*/;
 		return *this;
 	}
 	void clear() { reselection_threshold_ = -1; }
