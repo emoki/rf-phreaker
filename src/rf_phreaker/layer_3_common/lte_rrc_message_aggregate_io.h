@@ -175,7 +175,7 @@ inline std::ostream& header(std::ostream &os, const lte_sib3_type &t) {
 }
 
 inline std::ostream& operator<<(std::ostream &os, const lte_sib3_type &t) {
-	os << "sib3 " << static_cast<const lte_sib_base&>(t) 
+	os << "sib3 " << static_cast<const lte_sib_base&>(t) << spacer
 		<< t.cell_reselection_serving_freq_info_ << spacer
 		<< t.intra_freq_cell_reselection_info_ << spacer
 		<< t.s_intra_search_v920_ << spacer

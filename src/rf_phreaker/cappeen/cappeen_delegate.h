@@ -206,6 +206,7 @@ public:
 	{
 		std::vector<beagle_api::lte_sector_info> v(t.size());
 		std::vector<lte_sib1_wrapper> sib1; sib1.reserve(t.size());;
+		std::vector<lte_sib3_wrapper> sib3; sib3.reserve(t.size());;
 		std::vector<lte_sib4_wrapper> sib4; sib4.reserve(t.size());;
 		std::vector<lte_sib5_wrapper> sib5; sib5.reserve(t.size());;
 		std::vector<lte_sib6_wrapper> sib6; sib6.reserve(t.size());;
@@ -234,6 +235,9 @@ public:
 
 			sib1.push_back(lte_sib1_wrapper(lte.layer_3_.sib1_));
 			v[i].sib_1_ = sib1.back().s_;
+
+			sib3.push_back(lte_sib3_wrapper(lte.layer_3_.sib3_));
+			v[i].sib_3_ = sib3.back().s_;
 
 			sib4.push_back(lte_sib4_wrapper(lte.layer_3_.sib4_));
 			v[i].sib_4_ = sib4.back().s_;

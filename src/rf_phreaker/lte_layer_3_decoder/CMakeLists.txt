@@ -19,6 +19,8 @@ set (lte_layer_3_decoder_SRCS
 	lte_layer_3_decoder.h
 	lte_sib_1_parser.cpp
 	lte_sib_1_parser.h
+	lte_sib_3_parser.cpp
+	lte_sib_3_parser.h
 	lte_sib_4_parser.cpp
 	lte_sib_4_parser.h
 	lte_sib_5_parser.cpp

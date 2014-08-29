@@ -729,6 +729,7 @@ namespace beagle_api
 
 		// TODO - Description.
 		lte_sib_1 sib_1_;
+		lte_sib_3 sib_3_;
 		lte_sib_4 sib_4_;
 		lte_sib_5 sib_5_;
 		lte_sib_6 sib_6_;

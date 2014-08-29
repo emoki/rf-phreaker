@@ -46,6 +46,7 @@ void lte_bcch_dl_sch_message::parse_data(lte_rrc_message_aggregate &message)
 							case SystemInformation_r8_IEs__sib_TypeAndInfo__Member_PR_sib2:
 								break;
 							case SystemInformation_r8_IEs__sib_TypeAndInfo__Member_PR_sib3:
+								lte_sib_3_parser_.parse_data(sib_list.array[i]->choice.sib3, message);
 								break;
 							case SystemInformation_r8_IEs__sib_TypeAndInfo__Member_PR_sib4:
 								lte_sib_4_parser_.parse_data(sib_list.array[i]->choice.sib4, message);

@@ -129,6 +129,13 @@ public:
 				}
 			}
 			t += "\t";
+			if(info[i].sib_3_.decoded_) {
+				t += "sib3 | ";
+				t += std::to_string(info[i].sib_3_.cell_reselection_serving_freq_info_.cell_reselection_priority_) + " " 
+					+ std::to_string(info[i].sib_3_.cell_reselection_serving_freq_info_.s_non_intra_search_) + " "
+					+ std::to_string(info[i].sib_3_.cell_reselection_serving_freq_info_.threshold_serving_low_ );
+			}
+			t += "\t";
 			if(info[i].sib_4_.decoded_) {
 				t += "sib4 | ";
 				t += std::to_string(info[i].sib_4_.csg_physical_cellid_range_.start_) + " " + std::to_string(info[i].sib_4_.csg_physical_cellid_range_.range_) + " | ";
@@ -256,7 +263,7 @@ class bad_output : public beagle_delegate
 	virtual void __stdcall available_message(long beagle_id, long possible_message_number, const char *str, long buf_size) { std::cout << str << "\n"; }
 };
 
-TEST(Cappeen, DISABLED_TestMain)
+TEST(Cappeen, TestMain)
 {
 	//system("pause");
 
