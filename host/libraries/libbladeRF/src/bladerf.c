@@ -1415,19 +1415,92 @@ int bladerf_dac_write(struct bladerf *dev, uint16_t val)
 
 
 /*------------------------------------------------------------------------------
- * XB SPI register write
+ * XB SPI register write/read
  *----------------------------------------------------------------------------*/
+
 
 int bladerf_xb_spi_write(struct bladerf *dev, uint32_t val)
 {
-    int status;
+	int status;
     MUTEX_LOCK(&dev->ctrl_lock);
 
-    status = XB_SPI_WRITE(dev, val);
+    status = dev->fn->xb_spi_write(dev,val);
 
     MUTEX_UNLOCK(&dev->ctrl_lock);
     return status;
 }
+
+int bladerf_xb_spi_read(struct bladerf *dev, uint32_t* val)
+{
+	int status;
+    MUTEX_LOCK(&dev->ctrl_lock);
+
+    status = dev->fn->xb_spi_read(dev,val);
+
+    MUTEX_UNLOCK(&dev->ctrl_lock);
+    return status;
+}
+
+/*------------------------------------------------------------------------------
+ * XB UART read
+ *----------------------------------------------------------------------------*/
+
+int bladerf_xb_uart_read(struct bladerf *dev, uint32_t *val)
+{
+	int status;
+    MUTEX_LOCK(&dev->ctrl_lock);
+
+    status = dev->fn->xb_uart_read(dev,val);
+
+    MUTEX_UNLOCK(&dev->ctrl_lock);
+    return status;
+}
+
+/*------------------------------------------------------------------------------
+ * XB UART write
+ *----------------------------------------------------------------------------*/
+
+int bladerf_xb_uart_write(struct bladerf *dev, uint8_t val)
+{
+	int status;
+    MUTEX_LOCK(&dev->ctrl_lock);
+
+    status = dev->fn->xb_uart_write(dev,val);
+
+    MUTEX_UNLOCK(&dev->ctrl_lock);
+    return status;
+}
+
+/*------------------------------------------------------------------------------
+ * XB UART baud write
+ *----------------------------------------------------------------------------*/
+
+int bladerf_xb_uart_baud_write(struct bladerf *dev, uint16_t val)
+{
+	int status;
+    MUTEX_LOCK(&dev->ctrl_lock);
+
+    status = dev->fn->xb_uart_baud_write(dev,val);
+
+    MUTEX_UNLOCK(&dev->ctrl_lock);
+    return status;
+}
+
+/*------------------------------------------------------------------------------
+ * XB UART has data flag, true when data is available to read.
+ *----------------------------------------------------------------------------*/
+
+int bladerf_xb_uart_hasdata(struct bladerf *dev, uint8_t* val)
+{
+	int status;
+    MUTEX_LOCK(&dev->ctrl_lock);
+
+    status = dev->fn->xb_uart_hasdata(dev,val);
+
+    MUTEX_UNLOCK(&dev->ctrl_lock);
+    return status;
+}
+
 
 /*------------------------------------------------------------------------------
  * DC Calibration routines

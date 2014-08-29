@@ -2490,6 +2490,18 @@ int CALL_CONV bladerf_dac_write(struct bladerf *dev, uint16_t val);
 
 
 /**
+ * Write value to secondary XB SPI, gets response
+ *
+ * @param   dev         Device handle
+ * @param   val         Data to write to XB SPI
+ * @param 	resp		Data in response
+ *
+ * @return 0 on success, value from \ref RETCODES list on failure
+ */
+API_EXPORT
+int CALL_CONV bladerf_xb_spi_read(struct bladerf *dev, uint32_t* val);
+
+/**
  * Write value to secondary XB SPI
  *
  * @param   dev         Device handle
@@ -2499,6 +2511,55 @@ int CALL_CONV bladerf_dac_write(struct bladerf *dev, uint16_t val);
  */
 API_EXPORT
 int CALL_CONV bladerf_xb_spi_write(struct bladerf *dev, uint32_t val);
+
+
+
+/**
+ * Read value from expansion UART
+ *
+ * @param   dev         Device handle
+ * @param   val         Data to read from XB uart rx
+ *
+ * @return 0 on success, value from \ref RETCODES list on failure
+ */
+API_EXPORT
+int CALL_CONV bladerf_xb_uart_read(struct bladerf *dev, uint32_t *val);
+
+
+/**
+ * Write value to expansion UART
+ *
+ * @param   dev         Device handle
+ * @param   val         Data to write to XB uart tx
+ *
+ * @return 0 on success, value from \ref RETCODES list on failure
+ */
+API_EXPORT
+int CALL_CONV bladerf_xb_uart_write(struct bladerf *dev, uint8_t val);
+
+
+/**
+ * Write value to expansion UART baud rate register
+ *
+ * @param   dev         Device handle
+ * @param   val         Data to write to XB uart baud
+ *
+ * @return 0 on success, value from \ref RETCODES list on failure
+ */
+
+API_EXPORT
+int CALL_CONV bladerf_xb_uart_baud_write(struct bladerf *dev, uint16_t val);
+
+/**
+ * Flag stating if data is available in rx buffer to read. true=data
+ *
+ * @param   dev         Device handle
+ * @param   val         Data available
+ *
+ * @return 0 on success, value from \ref RETCODES list on failure
+ */
+API_EXPORT
+int CALL_CONV bladerf_xb_uart_hasdata(struct bladerf *dev, uint8_t* val);
 
 
 /**

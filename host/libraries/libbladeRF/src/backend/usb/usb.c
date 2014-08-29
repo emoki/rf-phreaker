@@ -68,6 +68,14 @@ static int access_peripheral(struct bladerf *dev, uint8_t peripheral,
 
     assert(len <= ((sizeof(buf) - 2) / 2));
 
+    // 0: magic (special number to wake device)
+    // 1: MODE, check lms_spi_controller.c:main() for spec { -- 1:7-6 (dir), 1:5-4 (io_device), 1:3-0 (length_bytes 0-15)] -- }
+    // / 2: cmd addr (NIOS device code)
+    // | 3: cmd data
+    // |_> Repeat  ...
+
+    // buffer can hold 7 cmds = 7 bytes data
+
     /* Populate the buffer for transfer */
     buf[0] = UART_PKT_MAGIC;
     buf[1] = pkt_mode_dir | peripheral | (uint8_t)len;
@@ -77,12 +85,15 @@ static int access_peripheral(struct bladerf *dev, uint8_t peripheral,
         buf[i * 2 + 3] = cmd[i].data;
     }
 
+    // Both IO operations performed for a single read or single write... is that necessary??
+    // Possible 100% speed improvement
+
     /* Send the command */
     status = usb->fn->bulk_transfer(driver, PERIPHERAL_EP_OUT,
                                      buf, sizeof(buf),
                                      PERIPHERAL_TIMEOUT_MS);
     if (status != 0) {
-        log_debug("Failed to write perperial access command: %s\n",
+        log_debug("Failed to write perpherial access command: %s\n",
                   bladerf_strerror(status));
         return status;
     }
@@ -110,6 +121,7 @@ static inline int gpio_read(struct bladerf *dev, uint8_t addr, uint32_t *data)
 
     *data = 0;
 
+    // low to high bit chunks
     for (i = 0; i < sizeof(*data); i++) {
         assert((addr + i) <= UINT8_MAX);
         cmd.addr = (uint8_t)(addr + i);
@@ -134,11 +146,14 @@ static inline int gpio_write(struct bladerf *dev, uint8_t addr, uint32_t data)
     size_t i;
     struct uart_cmd cmd;
 
+    //sends low to high bit chunks
     for (i = 0; i < sizeof(data); i++) {
         assert((addr + i) <= UINT8_MAX);
-        cmd.addr = (uint8_t)(addr + i);
+        cmd.addr = (uint8_t)(addr + i);				//the NIOS address
         cmd.data = (data >> (i * 8)) & 0xff;
 
+
+        //sends each byte over UART pkt
         status = access_peripheral(dev, UART_PKT_DEV_GPIO,
                                    USB_DIR_HOST_TO_DEVICE, &cmd, 1);
 
@@ -1241,9 +1256,44 @@ static int usb_dac_write(struct bladerf *dev, uint16_t value)
     return status;
 }
 
-static int usb_xb_spi(struct bladerf *dev, uint32_t value)
+static int usb_xb_spi_write(struct bladerf *dev, uint32_t value)
 {
-    return gpio_write(dev, 36, value);
+	//targets adf
+    //return gpio_write(dev, 36, value);
+
+    return gpio_write(dev, 48, value);
+}
+
+//loads the last chached miso response
+static int usb_xb_spi_read(struct bladerf *dev, uint32_t *value)
+{
+	uint32_t rd;
+	int sts = gpio_read(dev, 48, &rd);
+	*value = rd;
+	return sts;
+}
+
+static int usb_xb_uart_write(struct bladerf *dev, uint8_t value)
+{
+    return gpio_write(dev, 52, value);
+}
+static int usb_xb_uart_read(struct bladerf *dev, uint8_t *value)
+{
+	uint32_t tmp = 0;
+	int sts = gpio_read(dev, 52, &tmp);
+	*value = (uint8_t)(tmp & 0xff);
+	return sts;
+}
+static int usb_xb_uart_baud(struct bladerf *dev, uint16_t value)
+{
+    return gpio_write(dev, 56, value);
+}
+static int usb_xb_uart_hasdata(struct bladerf *dev, uint8_t* value)
+{
+	uint32_t tmp = 0;
+	int sts = gpio_read(dev, 60, &tmp);
+	*value = (uint8_t)(tmp & 0xff);
+	return sts;
 }
 
 static int usb_set_firmware_loopback(struct bladerf *dev, bool enable) {
@@ -1388,7 +1438,13 @@ const struct backend_fns backend_fns_usb = {
 
     FIELD_INIT(.dac_write, usb_dac_write),
 
-    FIELD_INIT(.xb_spi, usb_xb_spi),
+    FIELD_INIT(.xb_spi_write, usb_xb_spi_write),
+    FIELD_INIT(.xb_spi_read, usb_xb_spi_read),
+
+    FIELD_INIT(.xb_uart_read, usb_xb_uart_read),
+    FIELD_INIT(.xb_uart_write, usb_xb_uart_write),
+    FIELD_INIT(.xb_uart_baud_write, usb_xb_uart_baud),
+    FIELD_INIT(.xb_uart_hasdata, usb_xb_uart_hasdata),
 
     FIELD_INIT(.set_firmware_loopback, usb_set_firmware_loopback),
     FIELD_INIT(.get_firmware_loopback, usb_get_firmware_loopback),

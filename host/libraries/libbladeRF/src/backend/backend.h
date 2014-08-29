@@ -108,7 +108,15 @@ struct backend_fns {
     int (*dac_write)(struct bladerf *dev, uint16_t value);
 
     /* Expansion board SPI */
-    int (*xb_spi)(struct bladerf *dev, uint32_t value);
+    int (*xb_spi_write)(struct bladerf *dev, uint32_t value);
+    int (*xb_spi_read)(struct bladerf *dev, uint32_t *value);
+
+    /* Expansion board UART */
+    int (*xb_uart_write)(struct bladerf *dev, uint8_t value);
+    int (*xb_uart_read)(struct bladerf *dev, uint32_t *value);
+    int (*xb_uart_baud_write)(struct bladerf *dev, uint16_t value);
+    int (*xb_uart_hasdata)(struct bladerf *dev, uint8_t* value);
+
 
     /* Configure firmware loopback */
     int (*set_firmware_loopback)(struct bladerf *dev, bool enable);
