@@ -13,7 +13,9 @@
 namespace rf_phreaker { namespace scanner {
 
 blade_rf_controller::blade_rf_controller(comm_type)
-{}
+{
+	bladerf_log_set_verbosity(BLADERF_LOG_LEVEL_INFO);
+}
 
 blade_rf_controller::blade_rf_controller(blade_rf_controller &&c)
 : comm_blade_rf_(std::move(c.comm_blade_rf_))
@@ -264,8 +266,6 @@ void blade_rf_controller::do_initial_scanner_config()
 	}
 
 	enable_blade_rx();
-
-	//bladerf_log_set_verbosity(BLADERF_LOG_LEVEL_DEBUG);
 
 }
 
