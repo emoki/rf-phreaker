@@ -39,5 +39,6 @@ typedef specific_error<11> lte_analysis_error;
 typedef specific_error<12> processing_error;
 typedef specific_error<13> matlab_interface_error;
 typedef specific_error<14> cappeen_api_error;
+typedef specific_error<15> gps_comm_error;
 
 }

@@ -140,4 +140,6 @@ add_subdirectory (src/rf_phreaker/cappeen)
 add_subdirectory (src/rf_phreaker/cappeen_tests)
 add_subdirectory (src/rf_phreaker/rf_phreaker_api)
 add_subdirectory (src/rf_phreaker/general_utility)
+add_subdirectory (src/rf_phreaker/gps_comm)
+add_subdirectory (src/rf_phreaker/gps_comm_tests)
 
