@@ -259,6 +259,7 @@ void blade_rf_controller::do_initial_scanner_config()
 		BLADERF_MODULE_TX,
 		false), __FILE__, __LINE__);
 
+	// TODO - Change this so that we only alter switch settings.
 	check_blade_status(bladerf_expansion_gpio_dir_write(comm_blade_rf_->blade_rf(), 0xFFFFFFFF), __FILE__, __LINE__);
 
 	if(scanner_blade_rf_->eeprom_.cal_.nuand_freq_correction_value_ && scanner_blade_rf_->eeprom_.cal_.nuand_freq_correction_value_ != scanner_blade_rf_->vctcxo_trim_value_) {
@@ -267,6 +268,9 @@ void blade_rf_controller::do_initial_scanner_config()
 
 	enable_blade_rx();
 
+	gps_comm_.reset(new gps_comm::gps_comm());
+	gps_comm_->init(comm_blade_rf_->blade_rf());
+	gps_comm_->set_to_uart_comm();
 }
 
 void blade_rf_controller::enable_blade_rx()
@@ -410,22 +414,19 @@ gps blade_rf_controller::get_gps_data()
 {
 	check_blade_comm();
 	
-	gps g;
-	g.scanner_id_ = scanner_blade_rf_->serial();
-	g.lock_ = false;
-	g.coordinated_universal_time_ = 0;
-	g.visible_satellites_ = 0;
-	g.tracking_satellites_ = 0;
-	g.latitude_ = 0;
-	g.longitude_ = 0;
-	g.speed_ = 0;
-	g.raw_status_ = 0;
+	//gps g;
+	//g.scanner_id_ = scanner_blade_rf_->serial();
+	//g.lock_ = false;
+	//g.coordinated_universal_time_ = 0;
+	//g.visible_satellites_ = 0;
+	//g.tracking_satellites_ = 0;
+	//g.latitude_ = 0;
+	//g.longitude_ = 0;
+	//g.speed_ = 0;
+	//g.raw_status_ = 0;
+	//return g;
 
-	// Simiulate communicating to the hardware.
-	uint32_t val = 0;
-	//check_blade_status(bladerf_config_gpio_read(comm_blade_rf_->blade_rf(), &val), __FILE__, __LINE__);
-
-	return g;
+	return gps_comm_->get_latest_gps();
 }
 
 measurement_info blade_rf_controller::get_rf_data_use_auto_gain(frequency_type frequency, time_type time_ns, bandwidth_type bandwidth, frequency_type sampling_rate)

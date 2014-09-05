@@ -5,6 +5,7 @@
 #include "rf_phreaker/common/concurrent.h"
 #include "rf_phreaker/common/measurements.h"
 #include "rf_phreaker/common/common_utility.h"
+#include "rf_phreaker/scanner/comm_info.h"
 #include "rf_phreaker/scanner/scanner_comm.h"
 #include "rf_phreaker/scanner/measurement_info.h"
 #include "rf_phreaker/scanner/byte_aligned_buffer.h"
@@ -14,6 +15,7 @@
 #include "rf_phreaker/scanner/scanner_blade_rf.h"
 #include "rf_phreaker/scanner/gain_manager.h"
 #include "rf_phreaker/scanner/eeprom.h"
+#include "rf_phreaker/gps_comm/gps_comm.h"
 
 namespace rf_phreaker { namespace scanner {
 
@@ -111,6 +113,8 @@ private:
 	uint32_t gpio_cache_;
 
 	int64_t collection_count_;
+
+	std::unique_ptr<gps_comm::gps_comm> gps_comm_;
 };
 
 }}

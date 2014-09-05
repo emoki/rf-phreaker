@@ -24,9 +24,18 @@ rf_switch_setting calibration::get_rf_switch(frequency_type freq) const
 	auto it = rf_switches_.lower_bound(freq);
 	if(it == rf_switches_.end())
 		return rf_switch_setting();
-	else
-		return it->second;
+	else { 
+		//return it->second;
 
+		// Temp fix.  FPGA versions after v004 have switched the gpio positions again.  Now we bitshift everything to the left by one.
+		// So for versions > v004 the GPIO bladerf functionality matches the GPIO pins on the expansion header, meaning the first 
+		// GPIO XB pin is bit 0 when dealing with bladerf_expansion_gpio_write/read.
+		// TODO - Change the calibration to handle both versions.
+		auto tmp = it->second;
+		tmp.switch_mask_ = tmp.switch_mask_ << 1;
+		tmp.switch_setting_ = tmp.switch_setting_ << 1;
+		return tmp;
+	}
 }
 
 double calibration::get_rf_board_adjustment(frequency_type freq) const 

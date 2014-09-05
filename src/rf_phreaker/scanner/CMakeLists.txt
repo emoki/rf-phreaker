@@ -48,6 +48,7 @@ endif ()
 add_library (scanner STATIC ${scanner_SRCS})
 
 target_link_libraries (scanner common)
+target_link_libraries (scanner gps_comm)
 target_link_libraries (scanner libbladerf_shared)
 target_link_libraries (scanner ipp_custom)
 target_link_libraries (scanner ${TBB_LIBRARY})
