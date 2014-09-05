@@ -254,19 +254,19 @@ RP_LIBEXPORT(rp_status) rp_disconnect_device(rp_device *device);
 
 RP_LIBEXPORT(rp_status) rp_is_device_open(rp_device *device);
 
-RP_LIBEXPORT(rp_status) rp_get_device_info(rp_device *device);
+RP_LIBEXPORT(rp_status) rp_get_device_info(rp_device *device, rp_device_info *device_info);
 
-RP_LIBEXPORT(rp_status) rp_add_collection_frequency(rp_technology data, rp_frequency_type freq, rp_operating_band band);
+RP_LIBEXPORT(rp_status) rp_add_collection_frequency(rp_device *device, rp_technology data, rp_frequency_type freq, rp_operating_band band);
 
-RP_LIBEXPORT(rp_status) rp_add_collection_channel(rp_technology data, rp_channel_type channel);
+RP_LIBEXPORT(rp_status) rp_add_collection_channel(rp_device *device, rp_technology data, rp_channel_type channel);
 
-RP_LIBEXPORT(rp_status) rp_remove_collection_frequency(rp_technology data, rp_frequency_type freq, rp_operating_band band);
+RP_LIBEXPORT(rp_status) rp_remove_collection_frequency(rp_device *device, rp_technology data, rp_frequency_type freq, rp_operating_band band);
 
-RP_LIBEXPORT(rp_status) rp_remove_collection_channel(rp_technology data, rp_channel_type channel);
+RP_LIBEXPORT(rp_status) rp_remove_collection_channel(rp_device *device, rp_technology data, rp_channel_type channel);
 
-RP_LIBEXPORT(rp_status) rp_add_sweep_operating_band(rp_operating_band band);
+RP_LIBEXPORT(rp_status) rp_add_sweep_operating_band(rp_device *device, rp_operating_band band);
 
-RP_LIBEXPORT(rp_status) rp_remove_sweep_operating_band(rp_operating_band band);
+RP_LIBEXPORT(rp_status) rp_remove_sweep_operating_band(rp_device *device, rp_operating_band band);
 
 RP_LIBEXPORT(rp_status) rp_get_gps_data(rp_device *device, rp_gps gps);
 
