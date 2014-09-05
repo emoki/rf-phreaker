@@ -10,6 +10,7 @@ set (cappeen_tests_VERSION_PATCH 0)
 set (cappeen_tests_VERSION_TWEAK 0)
 
 set (cappeen_tests_SRCS 
+	beagle_delegate_output.h
 	cappeen_gtests.cpp
 	cappeen_license_gtests.cpp
 	rf_phreaker_wrappers_gtests.cpp
