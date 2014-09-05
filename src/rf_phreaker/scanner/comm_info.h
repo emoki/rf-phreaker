@@ -1,6 +1,6 @@
 #pragma once
 
-#include "rf_phreaker/scanner/scanner_types.h"
+#include "rf_phreaker/common/common_types.h"
 
 #include <string>
 #include <memory>
@@ -23,13 +23,13 @@ typedef ::std::shared_ptr<comm_info> comm_info_ptr;
 class comm_info
 {
 public:
-	comm_info(/*scanner_id_type id, const std::string &description, bool is_open*/)
+	comm_info(/*scanner_serial_type id, const std::string &description, bool is_open*/)
 		//: id_(id)
 		//, description_(description)
 		//, is_open_(is_open)
 	{}
 
-	virtual scanner_id_type id() const = 0;//{ return id_; } 
+	virtual scanner_serial_type id() const = 0;//{ return id_; } 
 
 	virtual std::string description() const = 0; //{ return description_; }
 
@@ -37,7 +37,7 @@ public:
 
 	virtual comm_type type() const = 0;
 //private:
-//	scanner_id_type id_;
+//	scanner_serial_type id_;
 //	std::string description_;
 //	bool is_open_;
 //

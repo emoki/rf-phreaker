@@ -20,7 +20,7 @@ public:
 		});
 	}
 
-	virtual std::future<void> open_scanner(const scanner_id_type &id)
+	virtual std::future<void> open_scanner(const scanner_serial_type &id)
 	{
 		return controller_([&](blade_rf_controller &c) {
 			c.open_scanner(id);

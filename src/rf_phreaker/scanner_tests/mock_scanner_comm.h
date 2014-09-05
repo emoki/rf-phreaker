@@ -10,7 +10,7 @@ class mock_scanner_comm : public rf_phreaker::scanner::scanner_comm
 public:
 	MOCK_METHOD0(list_scanners, std::vector<rf_phreaker::scanner::comm_info_ptr>());
 
-	MOCK_METHOD1(open_scanner, bool(const rf_phreaker::scanner::scanner_id_type &id));
+	MOCK_METHOD1(open_scanner, bool(const rf_phreaker::scanner::scanner_serial_type &id));
 
 	MOCK_METHOD0(close_scanner, bool());
 
@@ -30,7 +30,7 @@ public:
 
 	MOCK_CONST_METHOD0(connected_scanner_description, std::string());
 
-	MOCK_CONST_METHOD0(connected_scanner_id, rf_phreaker::scanner::scanner_id_type());
+	MOCK_CONST_METHOD0(connected_scanner_id, rf_phreaker::scanner::scanner_serial_type());
 
 };
 

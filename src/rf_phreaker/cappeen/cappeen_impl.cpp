@@ -77,7 +77,7 @@ long cappeen_impl::initialize(beagle_api::beagle_delegate *del)
 		LOG_L(VERBOSE) << "Constructing cappeen_delegate.";
 		delegate_.reset(new cappeen_delegate(del));
 		LOG_L(VERBOSE) << "Constructing blade_rf_controller_async.";
-		scanner_.reset(new scanner::blade_rf_controller_async(scanner::USB_BLADE_RF));
+		scanner_.reset(new scanner::blade_rf_controller_async(rf_phreaker::scanner::USB_BLADE_RF));
 		LOG_L(VERBOSE) << "Constructing data_output_async.";
 		data_output_.reset(new processing::data_output_async());
 		LOG_L(VERBOSE) << "Constructing processing_graph.";

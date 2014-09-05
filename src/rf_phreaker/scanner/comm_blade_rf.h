@@ -25,7 +25,7 @@ namespace rf_phreaker {
 				memcpy(&device_info_, &blade, sizeof(bladerf_devinfo));
 			}
 
-			virtual scanner_id_type id() const
+			virtual scanner_serial_type id() const
 			{
 				return device_info_.serial;
 			}

@@ -38,7 +38,7 @@ public:
 		}
 	}
 
-	static void load_calibrations(const std::vector<rf_phreaker::scanner::scanner_id_type> &list) {
+	static void load_calibrations(const std::vector<rf_phreaker::scanner_serial_type> &list) {
 		using namespace rf_phreaker::scanner;
 
 
@@ -47,7 +47,7 @@ public:
 			for(auto serial : list)
 				std::cout << "   " << serial << "\n";
 
-			std::vector<comm_info_ptr> scanners;
+			std::vector<rf_phreaker::scanner::comm_info_ptr> scanners;
 			{
 				blade_rf_controller controller;
 				scanners = controller.list_available_scanners();
@@ -59,7 +59,7 @@ public:
 
 			bool found_serial = false;
 			for(auto serial : list) {
-				auto scanner = std::find_if(scanners.begin(), scanners.end(), [&](comm_info_ptr &comm) {
+				auto scanner = std::find_if(scanners.begin(), scanners.end(), [&](rf_phreaker::scanner::comm_info_ptr &comm) {
 					return comm->id() == serial;
 				});
 
@@ -87,7 +87,7 @@ public:
 
 	}
 
-	static void load_calibration(const rf_phreaker::scanner::scanner_id_type &serial, const std::string &cali_filename) {
+	static void load_calibration(const rf_phreaker::scanner_serial_type &serial, const std::string &cali_filename) {
 		using namespace rf_phreaker::scanner;
 
 		try {
@@ -99,7 +99,7 @@ public:
 
 			auto scanners = controller.list_available_scanners();
 
-			auto scanner = std::find_if(scanners.begin(), scanners.end(), [&](comm_info_ptr &comm) {
+			auto scanner = std::find_if(scanners.begin(), scanners.end(), [&](rf_phreaker::scanner::comm_info_ptr &comm) {
 				return comm->id() == serial;
 			});
 

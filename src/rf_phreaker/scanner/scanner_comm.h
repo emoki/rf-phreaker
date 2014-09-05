@@ -1,11 +1,11 @@
 #pragma once
 
+#include <vector>
+#include <memory>
+
 #include "rf_phreaker/scanner/packet_container.h"
 #include "rf_phreaker/scanner/packet.h"
 #include "rf_phreaker/scanner/comm_info.h"
-
-#include <vector>
-#include <memory>
 
 
 namespace rf_phreaker { namespace scanner {
@@ -20,7 +20,7 @@ public:
 
 	virtual std::vector<comm_info_ptr> list_scanners() = 0;
 
-	virtual bool open_scanner(const scanner_id_type &id) = 0;
+	virtual bool open_scanner(const scanner_serial_type &id) = 0;
 
 	virtual bool close_scanner() = 0;
 
@@ -40,7 +40,7 @@ public:
 
 	virtual std::string connected_scanner_description() const = 0;
 
-	virtual scanner_id_type connected_scanner_id() const = 0;
+	virtual scanner_serial_type connected_scanner_id() const = 0;
 
 protected:
 

@@ -7,8 +7,6 @@
 
 namespace rf_phreaker { namespace scanner {
 
-typedef std::string scanner_id_type; 
-
 typedef std::vector<char> buf_type;
 
 // Keep unsigned due to bitwise operations.

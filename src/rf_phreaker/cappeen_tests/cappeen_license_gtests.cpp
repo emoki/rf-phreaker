@@ -6,7 +6,6 @@
 TEST(CappeenLicense, TestMain) {
 	using namespace beagle_api;
 	using namespace rf_phreaker::cappeen_api;
-	using namespace rf_phreaker::scanner;
 
 	{
 		std::shared_ptr<cappeen_license> v3 = std::make_shared<cappeen_license_version_3>(cell_analysis_license);

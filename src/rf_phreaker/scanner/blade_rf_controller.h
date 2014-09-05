@@ -32,7 +32,7 @@ public:
 
 	std::vector<comm_info_ptr> list_available_scanners();
 
-	void open_scanner(const scanner_id_type &id);
+	void open_scanner(const scanner_serial_type &id);
 
 	void close_scanner();
 

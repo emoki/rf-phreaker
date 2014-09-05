@@ -88,7 +88,7 @@ std::vector<comm_info_ptr> blade_rf_controller::list_available_scanners()
 	return devices;
 }
 
-void blade_rf_controller::open_scanner(const scanner_id_type &id)
+void blade_rf_controller::open_scanner(const scanner_serial_type &id)
 {
 	parameter_cache_ = measurement_info();
 	gpio_cache_ = 0;

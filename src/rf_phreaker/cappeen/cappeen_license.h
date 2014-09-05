@@ -3,7 +3,7 @@
 #include <map>
 #include <vector>
 #include "rf_phreaker/cappeen/beagle_defines.h"
-#include "rf_phreaker/scanner/scanner_types.h"
+#include "rf_phreaker/common/common_types.h"
 #include "rf_phreaker/common/license.h"
 #include "rf_phreaker/common/exception_types.h"
 
@@ -131,7 +131,7 @@ public:
 
 	~cappeen_license();
 
-	void initialize_license(const license &license, const rf_phreaker::scanner::scanner_id_type &serial);
+	void initialize_license(const license &license, const rf_phreaker::scanner_serial_type &serial);
 
 	bool corrupt_license() { return encryption_.is_corrupt(); }
 
@@ -141,7 +141,7 @@ public:
 
 	static license create_new_license_from_file(const std::string &filename);
 
-	static uint32_t serial_to_hwid(const rf_phreaker::scanner::scanner_id_type &serial);
+	static uint32_t serial_to_hwid(const rf_phreaker::scanner_serial_type &serial);
 
 protected:
 	void validate_licenses();
@@ -162,7 +162,7 @@ protected:
 
 	license license_;
 
-	rf_phreaker::scanner::scanner_id_type serial_;
+	rf_phreaker::scanner_serial_type serial_;
 };
 
 class cappeen_license_version_1 : public cappeen_license

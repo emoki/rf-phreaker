@@ -100,7 +100,7 @@ cappeen_license::cappeen_license(software_license license)
 
 cappeen_license::~cappeen_license() {}
 
-void cappeen_license::initialize_license(const license &license, const rf_phreaker::scanner::scanner_id_type &serial) {
+void cappeen_license::initialize_license(const license &license, const rf_phreaker::scanner_serial_type &serial) {
 	encryption_.clear_corruption();
 
 	license_ = license;
@@ -153,7 +153,7 @@ void cappeen_license::validate_licenses() {
 	}
 }
 
-uint32_t cappeen_license::serial_to_hwid(const rf_phreaker::scanner::scanner_id_type &serial) {
+uint32_t cappeen_license::serial_to_hwid(const rf_phreaker::scanner_serial_type &serial) {
 	if(serial.size() != 32)
 		throw cappeen_api_error("The following serial (" + serial + ") is not valid.  "
 			"It should be a 32-character hex string.", GENERAL_ERROR);
