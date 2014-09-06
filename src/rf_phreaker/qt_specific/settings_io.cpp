@@ -5,18 +5,14 @@
 using namespace rf_phreaker;
 
 settings_io::settings_io(const std::string &application_name, const std::string &organization)
-: qsettings_(new QSettings(QSettings::IniFormat, QSettings::UserScope, organization.c_str(), application_name.c_str()))
-{}
+	: qsettings_(new QSettings(QSettings::IniFormat, QSettings::UserScope, organization.c_str(), application_name.c_str())) {}
 
 settings_io::settings_io(const std::string &filename)
-: qsettings_(new QSettings(filename.c_str(), QSettings::IniFormat))
-{}
+	: qsettings_(new QSettings(filename.c_str(), QSettings::IniFormat)) {}
 
-settings_io::~settings_io()
-{}
+settings_io::~settings_io() {}
 
-void settings_io::read(settings &settings)
-{
+void settings_io::read(settings &settings) {
 	settings.log_level_ = qsettings_->value(log_level_key.c_str(), settings_log_level_default).toInt();
 	settings.gps_collection_period_ms_ = qsettings_->value(gps_collection_period_ms_key.c_str(), gps_collection_period_ms_default).toInt();
 	settings.num_items_in_flight_ = qsettings_->value(num_items_in_flight_key.c_str(), num_items_in_flight_default).toInt();
@@ -39,10 +35,11 @@ void settings_io::read(settings &settings)
 	read(settings.umts_layer_3_general_, umts_layer_3_general_group_key);
 
 	read(settings.frequency_correction_settings_, frequency_correction_group_key);
+
+	read(settings.blade_settings_);
 }
 
-void settings_io::read(output_settings &settings, const std::string &group_key)
-{
+void settings_io::read(output_settings &settings, const std::string &group_key) {
 	qsettings_->beginGroup(group_key.c_str());
 	settings.scanner_ = qsettings_->value(scanner_output_key.c_str(), settings_output_default).toBool();
 	settings.gps_ = qsettings_->value(scanner_output_key.c_str(), settings_output_default).toBool();
@@ -54,8 +51,7 @@ void settings_io::read(output_settings &settings, const std::string &group_key)
 
 }
 
-void settings_io::read(collection_settings &settings, const std::string &group_key)
-{
+void settings_io::read(collection_settings &settings, const std::string &group_key) {
 	qsettings_->beginGroup(group_key.c_str());
 	settings.sampling_rate_ = qsettings_->value(sampling_rate_key.c_str(), settings_sampling_rate_default).toLongLong();
 	settings.bandwidth_ = qsettings_->value(bandwidth_key.c_str(), settings_bandwidth_default).toLongLong();
@@ -63,8 +59,7 @@ void settings_io::read(collection_settings &settings, const std::string &group_k
 	qsettings_->endGroup();
 }
 
-void settings_io::read(layer_3_settings &settings, const std::string &group_key)
-{
+void settings_io::read(layer_3_settings &settings, const std::string &group_key) {
 	qsettings_->beginGroup(group_key.c_str());
 	settings.max_update_threshold_ = qsettings_->value(max_update_threshold_key.c_str(), settings_layer_3_max_update_threshold_default).toInt();
 	settings.minimum_collection_round_ = qsettings_->value(min_collection_round_key.c_str(), settings_layer_3_min_collection_round_default).toInt();
@@ -73,8 +68,7 @@ void settings_io::read(layer_3_settings &settings, const std::string &group_key)
 	qsettings_->endGroup();
 }
 
-void settings_io::read(umts_general_settings &settings, const std::string &group_key)
-{
+void settings_io::read(umts_general_settings &settings, const std::string &group_key) {
 	qsettings_->beginGroup(group_key.c_str());
 	settings.sensitivity_ = qsettings_->value(sensitivity_key.c_str(), settings_umts_general_sensitivity_default).toDouble();
 	settings.full_scan_interval_ = qsettings_->value(full_scan_interval_key.c_str(), settings_umts_general_full_scan_interval_default).toInt();
@@ -82,8 +76,7 @@ void settings_io::read(umts_general_settings &settings, const std::string &group
 	qsettings_->endGroup();
 }
 
-void settings_io::read(frequency_correction_settings &settings, const std::string &group_key)
-{
+void settings_io::read(frequency_correction_settings &settings, const std::string &group_key) {
 	qsettings_->beginGroup(group_key.c_str());
 	settings.initial_frequency_correction_range_start_ = qsettings_->value(initial_frequency_correction_offset_start_key.c_str(), initial_frequency_correction_offset_start_default).toDouble();
 	settings.initial_frequency_correction_range_end_ = qsettings_->value(initial_frequency_correction_offset_end_key.c_str(), initial_frequency_correction_offset_end_default).toInt();
@@ -91,10 +84,17 @@ void settings_io::read(frequency_correction_settings &settings, const std::strin
 	read(settings.general_settings_, group_key);
 }
 
+void settings_io::read(blade_settings &settings) {
+	settings.log_level_ = qsettings_->value(blade_log_level_key.c_str(), blade_log_level_default).toInt();
+	settings.rx_sync_num_buffers_ = qsettings_->value(blade_rx_sync_num_buffers_key.c_str(), blade_rx_sync_num_buffers_default).toInt();
+	settings.rx_sync_buffer_size_ = qsettings_->value(blade_rx_sync_buffer_size_key.c_str(), blade_rx_sync_buffer_size_default).toInt();
+	settings.rx_sync_num_transfers_ = qsettings_->value(blade_rx_sync_num_transfers_key.c_str(), blade_rx_sync_num_transfers_default).toInt();
+	settings.rx_sync_timeout_ = qsettings_->value(blade_rx_sync_timeout_key.c_str(), blade_rx_sync_timeout_default).toInt();
+}
 
 
-void settings_io::write(const settings &settings)
-{
+
+void settings_io::write(const settings &settings) {
 	qsettings_->setValue(log_level_key.c_str(), settings.log_level_);
 	qsettings_->setValue(gps_collection_period_ms_key.c_str(), settings.gps_collection_period_ms_);
 	qsettings_->setValue(num_items_in_flight_key.c_str(), settings.num_items_in_flight_);
@@ -117,10 +117,11 @@ void settings_io::write(const settings &settings)
 	write(settings.umts_layer_3_general_, umts_layer_3_general_group_key);
 
 	write(settings.frequency_correction_settings_, frequency_correction_group_key);
+
+	write(settings.blade_settings_);
 }
 
-void settings_io::write(const output_settings &settings, const std::string &group_key)
-{
+void settings_io::write(const output_settings &settings, const std::string &group_key) {
 	qsettings_->beginGroup(group_key.c_str());
 	qsettings_->setValue(scanner_output_key.c_str(), settings.scanner_);
 	qsettings_->setValue(gps_output_key.c_str(), settings.gps_);
@@ -131,8 +132,7 @@ void settings_io::write(const output_settings &settings, const std::string &grou
 	qsettings_->endGroup();
 }
 
-void settings_io::write(const collection_settings &settings, const std::string &group_key)
-{
+void settings_io::write(const collection_settings &settings, const std::string &group_key) {
 	qsettings_->beginGroup(group_key.c_str());
 	qsettings_->setValue(sampling_rate_key.c_str(), settings.sampling_rate_);
 	qsettings_->setValue(bandwidth_key.c_str(), settings.bandwidth_);
@@ -140,8 +140,7 @@ void settings_io::write(const collection_settings &settings, const std::string &
 	qsettings_->endGroup();
 }
 
-void settings_io::write(const layer_3_settings &settings, const std::string &group_key)
-{
+void settings_io::write(const layer_3_settings &settings, const std::string &group_key) {
 	qsettings_->beginGroup(group_key.c_str());
 	qsettings_->setValue(max_update_threshold_key.c_str(), settings.max_update_threshold_);
 	qsettings_->setValue(min_collection_round_key.c_str(), settings.minimum_collection_round_);
@@ -150,8 +149,7 @@ void settings_io::write(const layer_3_settings &settings, const std::string &gro
 	qsettings_->endGroup();
 }
 
-void settings_io::write(const umts_general_settings &settings, const std::string &group_key)
-{
+void settings_io::write(const umts_general_settings &settings, const std::string &group_key) {
 	qsettings_->beginGroup(group_key.c_str());
 	qsettings_->setValue(sensitivity_key.c_str(), settings.sensitivity_);
 	qsettings_->setValue(full_scan_interval_key.c_str(), settings.full_scan_interval_);
@@ -159,8 +157,7 @@ void settings_io::write(const umts_general_settings &settings, const std::string
 	qsettings_->endGroup();
 }
 
-void settings_io::write(const frequency_correction_settings &settings, const std::string &group_key)
-{
+void settings_io::write(const frequency_correction_settings &settings, const std::string &group_key) {
 	qsettings_->beginGroup(group_key.c_str());
 	qsettings_->setValue(initial_frequency_correction_offset_start_key.c_str(), settings.initial_frequency_correction_range_start_);
 	qsettings_->setValue(initial_frequency_correction_offset_end_key.c_str(), settings.initial_frequency_correction_range_end_);
@@ -168,9 +165,16 @@ void settings_io::write(const frequency_correction_settings &settings, const std
 	write(settings.general_settings_, group_key);
 }
 
-void settings_io::clear()
-{ 
-	qsettings_->clear(); 
+void settings_io::write(const blade_settings &settings) {
+	qsettings_->setValue(blade_log_level_key.c_str(), settings.log_level_);
+	qsettings_->setValue(blade_rx_sync_num_buffers_key.c_str(), settings.rx_sync_num_buffers_);
+	qsettings_->setValue(blade_rx_sync_buffer_size_key.c_str(), settings.rx_sync_buffer_size_);
+	qsettings_->setValue(blade_rx_sync_num_transfers_key.c_str(), settings.rx_sync_num_transfers_);
+	qsettings_->setValue(blade_rx_sync_timeout_key.c_str(), settings.rx_sync_timeout_);
+}
+
+void settings_io::clear() {
+	qsettings_->clear();
 }
 
 

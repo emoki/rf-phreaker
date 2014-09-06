@@ -6,8 +6,7 @@
 namespace rf_phreaker
 {
 
-class output_settings
-{
+class output_settings {
 public:
 	bool scanner_;
 	bool gps_;
@@ -17,16 +16,14 @@ public:
 	bool lte_layer_3_;
 };
 
-class collection_settings
-{
+class collection_settings {
 public:
 	frequency_type sampling_rate_;
 	bandwidth_type bandwidth_;
 	time_type collection_time_;
 };
 
-class layer_3_settings 
-{
+class layer_3_settings {
 public:
 	int32_t max_update_threshold_;
 	int32_t minimum_collection_round_;
@@ -42,8 +39,7 @@ public:
 	int32_t num_coherent_slots_;
 };
 
-class frequency_correction_settings
-{
+class frequency_correction_settings {
 public:
 	int initial_frequency_correction_range_start_;
 	int initial_frequency_correction_range_end_;
@@ -53,14 +49,24 @@ public:
 	umts_general_settings general_settings_;
 };
 
-class settings
-{
+class blade_settings {
+public:
+	int log_level_;
+	int rx_sync_num_buffers_;
+	int rx_sync_buffer_size_;
+	int rx_sync_num_transfers_;
+	int rx_sync_timeout_;
+};
+
+class settings {
 public:
 	// TODO - Change these to system settings, general settings or something.
 	int log_level_;
 	int gps_collection_period_ms_;
 	int num_items_in_flight_;
 	bool use_rf_board_adjustment_;
+
+	blade_settings blade_settings_;
 
 	output_settings packet_output_;
 	output_settings standard_output_;

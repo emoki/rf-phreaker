@@ -23,6 +23,7 @@ static const std::string lte_decode_thresholds_group_key = "lte_decode_threshold
 static const std::string umts_sweep_general_group_key = "umts_sweep_general";
 static const std::string umts_layer_3_general_group_key = "umts_layer_3_general";
 static const std::string frequency_correction_group_key = "frequency_correction";
+
 // Value keys
 static const std::string scanner_output_key = "scanner_output";
 static const std::string gps_output_key = "gps_output";
@@ -47,6 +48,11 @@ static const std::string num_items_in_flight_key = "num_items_in_flight";
 static const std::string initial_frequency_correction_offset_start_key = "start_offset";
 static const std::string initial_frequency_correction_offset_end_key = "end_offset";
 static const std::string use_rf_board_adjustment_key = "use_rf_board_adjustment";
+static const std::string blade_log_level_key = "blade_log_level";
+static const std::string blade_rx_sync_num_buffers_key = "blade_rx_sync_num_buffers";
+static const std::string blade_rx_sync_buffer_size_key = "blade_rx_sync_buffer_size";
+static const std::string blade_rx_sync_num_transfers_key = "blade_rx_sync_num_transfers";
+static const std::string blade_rx_sync_timeout_key = "blade_rx_sync_num_timeout";
 
 // Default Values
 static const bool settings_output_raw_packets_default = false;
@@ -67,9 +73,14 @@ static const int num_items_in_flight_default = 0;
 static const int initial_frequency_correction_offset_start_default = khz(-3);
 static const int initial_frequency_correction_offset_end_default = khz(3);
 static const bool use_rf_board_adjustment_default = true;
+static const int blade_log_level_default = 2;
+static const int blade_rx_sync_num_buffers_default = 5;
+static const int blade_rx_sync_buffer_size_default = 1024 * 4;
+static const int blade_rx_sync_num_transfers_default = 4;
+static const int blade_rx_sync_timeout_default = 2000;
 
-class settings_io
-{
+
+class settings_io {
 public:
 	settings_io(const std::string &application_name, const std::string &organization);
 
@@ -89,6 +100,8 @@ public:
 
 	void read(frequency_correction_settings &settings, const std::string &group_key);
 
+	void read(blade_settings &settings);
+
 	void write(const settings &settings);
 
 	void write(const output_settings &settings, const std::string &group_key);
@@ -101,6 +114,8 @@ public:
 
 	void write(const frequency_correction_settings &settings, const std::string &group_key);
 
+	void write(const blade_settings &settings);
+
 	void clear();
 
 
@@ -109,4 +124,4 @@ private:
 };
 
 
-} 
+}
