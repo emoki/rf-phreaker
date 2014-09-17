@@ -12,7 +12,7 @@
 using namespace rf_phreaker;
 using namespace rf_phreaker::scanner;
 
-TEST(BladeControllerTest, DISABLED_TestBladeControllerGeneral)
+TEST(BladeControllerTest, TestBladeControllerGeneral)
 {
 	try {
 		blade_rf_controller blade;
@@ -207,6 +207,42 @@ TEST(BladeControllerTest, DISABLED_TestBladeControllerAsync)
 			//	std::ofstream file(name.c_str());
 			//	file << data.get();
 			//}
+		}
+	}
+	catch(const std::exception &err) {
+		std::cout << err.what() << std::endl;
+		EXPECT_TRUE(0) << "Error while testing with the bladeRF.  Error = " << err.what();
+	}
+}
+
+TEST(BladeControllerTest, DISABLED_TestBladeControllerReadLimeReg) {
+	try {
+		blade_rf_controller blade;
+
+		// We ask twice because the first time we don't recieve a valid serial.  An error occurs inside libusb...
+		auto scanner_list = blade.list_available_scanners();
+		if(scanner_list.size() && (*scanner_list.begin())->id() == "")
+			scanner_list = blade.list_available_scanners();
+
+		if(scanner_list.size()) {
+			auto scanner_id = (*scanner_list.begin())->id();
+
+			blade.open_scanner(scanner_id);
+
+			blade.do_initial_scanner_config();
+
+			{
+				for(int j = 0; j < 20; ++j) {
+					rf_phreaker::benchmark b("blade_read_reg_test.txt", true);
+					b.start_timer();
+					uint8_t tmp = 0;
+					int end = j * 50 + 1;
+					for(int i = 1; i < end; ++i)
+						blade.read_lms_reg(0x1a, tmp);
+					b.stop_timer();
+					b.output_total_time_elapsed(std::to_string(end) + " bytes");
+				}
+			}
 		}
 	}
 	catch(const std::exception &err) {

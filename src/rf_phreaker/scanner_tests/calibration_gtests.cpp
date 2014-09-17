@@ -79,7 +79,7 @@ TEST(CalibrationTest, GeneralTest)
 	EXPECT_DOUBLE_EQ(cal1.get_rf_board_adjustment(mhz(216)), 30.3);
 }
 
-TEST(CalibrationTest, MatlabReadTest)
+TEST(CalibrationTest, DISABLED_MatlabReadTest)
 {
 	std::string base_filename = "../../../../rf_phreaker/test_files/calibration_files/";
 	std::string nuand_filename = base_filename + "nuand_format_example.txt";
