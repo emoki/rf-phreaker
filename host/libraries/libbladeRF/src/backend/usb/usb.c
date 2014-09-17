@@ -1437,8 +1437,8 @@ const struct backend_fns backend_fns_usb = {
     FIELD_INIT(.xb_spi_write, usb_xb_spi_write),
     FIELD_INIT(.xb_spi_read, usb_xb_spi_read),
 
-    FIELD_INIT(.xb_uart_read, usb_xb_uart_read),
     FIELD_INIT(.xb_uart_write, usb_xb_uart_write),
+    FIELD_INIT(.xb_uart_read, usb_xb_uart_read),
     FIELD_INIT(.xb_uart_baud_write, usb_xb_uart_baud),
     FIELD_INIT(.xb_uart_hasdata, usb_xb_uart_hasdata),
 
