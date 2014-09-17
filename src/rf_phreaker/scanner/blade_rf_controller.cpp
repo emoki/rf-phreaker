@@ -270,9 +270,9 @@ void blade_rf_controller::do_initial_scanner_config(const scanner_settings &sett
 
 	enable_blade_rx();
 
-	gps_comm_.reset(new gps_comm::gps_comm());
-	gps_comm_->init(comm_blade_rf_->blade_rf());
-	gps_comm_->set_to_uart_comm();
+	//gps_comm_.reset(new gps_comm::gps_comm());
+	//gps_comm_->init(comm_blade_rf_->blade_rf());
+	//gps_comm_->set_to_uart_comm();
 }
 
 void blade_rf_controller::enable_blade_rx()
@@ -422,19 +422,19 @@ gps blade_rf_controller::get_gps_data()
 {
 	check_blade_comm();
 	
-	//gps g;
-	//g.scanner_id_ = scanner_blade_rf_->serial();
-	//g.lock_ = false;
-	//g.coordinated_universal_time_ = 0;
-	//g.visible_satellites_ = 0;
-	//g.tracking_satellites_ = 0;
-	//g.latitude_ = 0;
-	//g.longitude_ = 0;
-	//g.speed_ = 0;
-	//g.raw_status_ = 0;
-	//return g;
+	gps g;
+	g.scanner_id_ = scanner_blade_rf_->serial();
+	g.lock_ = false;
+	g.coordinated_universal_time_ = 0;
+	g.visible_satellites_ = 0;
+	g.tracking_satellites_ = 0;
+	g.latitude_ = 0;
+	g.longitude_ = 0;
+	g.speed_ = 0;
+	g.raw_status_ = 0;
+	return g;
 
-	return gps_comm_->get_latest_gps();
+	//return gps_comm_->get_latest_gps();
 }
 
 measurement_info blade_rf_controller::get_rf_data_use_auto_gain(frequency_type frequency, time_type time_ns, bandwidth_type bandwidth, frequency_type sampling_rate)
