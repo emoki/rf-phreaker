@@ -6,6 +6,31 @@
 namespace rf_phreaker
 {
 
+// Default Values
+static const bool settings_output_raw_packets_default = false;
+static const int settings_log_level_default = 3;
+static const frequency_type settings_sampling_rate_default = 4875000;
+static const frequency_type settings_bandwidth_default = 5000000;
+static const time_type settings_collection_time_default = (32000000);
+static const int settings_layer_3_max_update_threshold_default = 150;
+static const int settings_layer_3_min_collection_round_default = 5;
+static const int settings_layer_3_decode_threshold_default = -13;
+static const int settings_layer_3_min_decode_threshold_default = -21;
+static const int settings_umts_general_sensitivity_default = -23;
+static const int settings_umts_general_full_scan_interval_default = 1;
+static const int settings_umts_general_num_coherent_slots_default = 2;
+static const bool settings_output_default = false;
+static const int gps_collection_period_ms_default = 800;
+static const int num_items_in_flight_default = 0;
+static const int initial_frequency_correction_offset_start_default = (-3000);
+static const int initial_frequency_correction_offset_end_default = (3000);
+static const bool use_rf_board_adjustment_default = true;
+static const int blade_log_level_default = 2;
+static const int blade_rx_sync_num_buffers_default = 5;
+static const int blade_rx_sync_buffer_size_default = 1024 * 4;
+static const int blade_rx_sync_num_transfers_default = 4;
+static const int blade_rx_sync_timeout_default = 2000;
+
 class output_settings {
 public:
 	bool scanner_;
@@ -49,8 +74,15 @@ public:
 	umts_general_settings general_settings_;
 };
 
-class blade_settings {
+class scanner_settings {};
+class blade_settings : public scanner_settings {
 public:
+	blade_settings()
+		: log_level_(blade_log_level_default)
+		, rx_sync_num_buffers_(blade_rx_sync_num_buffers_default)
+		, rx_sync_buffer_size_(blade_rx_sync_buffer_size_default)
+		, rx_sync_num_transfers_(blade_rx_sync_num_transfers_default)
+		, rx_sync_timeout_(blade_rx_sync_timeout_default) {}
 	int log_level_;
 	int rx_sync_num_buffers_;
 	int rx_sync_buffer_size_;

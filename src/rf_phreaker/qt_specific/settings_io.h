@@ -23,6 +23,7 @@ static const std::string lte_decode_thresholds_group_key = "lte_decode_threshold
 static const std::string umts_sweep_general_group_key = "umts_sweep_general";
 static const std::string umts_layer_3_general_group_key = "umts_layer_3_general";
 static const std::string frequency_correction_group_key = "frequency_correction";
+static const std::string nuand_group_key = "nuand";
 
 // Value keys
 static const std::string scanner_output_key = "scanner_output";
@@ -48,37 +49,11 @@ static const std::string num_items_in_flight_key = "num_items_in_flight";
 static const std::string initial_frequency_correction_offset_start_key = "start_offset";
 static const std::string initial_frequency_correction_offset_end_key = "end_offset";
 static const std::string use_rf_board_adjustment_key = "use_rf_board_adjustment";
-static const std::string blade_log_level_key = "blade_log_level";
-static const std::string blade_rx_sync_num_buffers_key = "blade_rx_sync_num_buffers";
-static const std::string blade_rx_sync_buffer_size_key = "blade_rx_sync_buffer_size";
-static const std::string blade_rx_sync_num_transfers_key = "blade_rx_sync_num_transfers";
-static const std::string blade_rx_sync_timeout_key = "blade_rx_sync_num_timeout";
-
-// Default Values
-static const bool settings_output_raw_packets_default = false;
-static const int settings_log_level_default = 3;
-static const frequency_type settings_sampling_rate_default = 4875000;
-static const frequency_type settings_bandwidth_default = 5000000;
-static const time_type settings_collection_time_default = milli_to_nano(32);
-static const int settings_layer_3_max_update_threshold_default = 150;
-static const int settings_layer_3_min_collection_round_default = 5;
-static const int settings_layer_3_decode_threshold_default = -13;
-static const int settings_layer_3_min_decode_threshold_default = -21;
-static const int settings_umts_general_sensitivity_default = -23;
-static const int settings_umts_general_full_scan_interval_default = 1;
-static const int settings_umts_general_num_coherent_slots_default = 2;
-static const bool settings_output_default = false;
-static const int gps_collection_period_ms_default = 800;
-static const int num_items_in_flight_default = 0;
-static const int initial_frequency_correction_offset_start_default = khz(-3);
-static const int initial_frequency_correction_offset_end_default = khz(3);
-static const bool use_rf_board_adjustment_default = true;
-static const int blade_log_level_default = 2;
-static const int blade_rx_sync_num_buffers_default = 5;
-static const int blade_rx_sync_buffer_size_default = 1024 * 4;
-static const int blade_rx_sync_num_transfers_default = 4;
-static const int blade_rx_sync_timeout_default = 2000;
-
+static const std::string blade_log_level_key = "log_level";
+static const std::string blade_rx_sync_num_buffers_key = "rx_sync_num_buffers";
+static const std::string blade_rx_sync_buffer_size_key = "rx_sync_buffer_size";
+static const std::string blade_rx_sync_num_transfers_key = "rx_sync_num_transfers";
+static const std::string blade_rx_sync_timeout_key = "rx_sync_num_timeout";
 
 class settings_io {
 public:

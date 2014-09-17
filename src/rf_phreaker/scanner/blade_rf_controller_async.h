@@ -34,9 +34,9 @@ public:
 		});
 	}
 
-	virtual std::future<void> do_initial_scanner_config() {
-		return controller_([=](blade_rf_controller &c) {
-			c.do_initial_scanner_config();
+	virtual std::future<void> do_initial_scanner_config(const scanner_settings &settings = blade_settings()) {
+		return controller_([&](blade_rf_controller &c) {
+			c.do_initial_scanner_config(settings);
 		});
 	}
 
@@ -85,6 +85,12 @@ public:
 	{
 		return controller_([=](blade_rf_controller &c) {
 			return c.write_license(license);
+		});
+	}
+
+	virtual std::future<void> set_log_level(int level) {
+		return controller_([=](blade_rf_controller &c) {
+			return c.set_log_level(level);
 		});
 	}
 

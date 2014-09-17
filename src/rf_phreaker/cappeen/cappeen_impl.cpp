@@ -95,6 +95,8 @@ long cappeen_impl::initialize(beagle_api::beagle_delegate *del)
 		data_output_->set_standard_output(config_.standard_output_);
 		data_output_->set_signal_output(config_.signal_slots_);
 
+		scanner_->set_log_level(config_.blade_settings_.log_level_);
+
 		//tbb::task_scheduler_init init;
 		//init.initialize(15);
 
@@ -233,7 +235,7 @@ long cappeen_impl::open_unit(const char *serial, unsigned int buf_size)
 
 		scanner_->open_scanner(serial).get();
 		
-		scanner_->do_initial_scanner_config().get();
+		scanner_->do_initial_scanner_config(config_.blade_settings_).get();
 
 		auto hw = scanner_->get_scanner().get()->get_hardware();
 		delegate_->initialize_beagle_info(hw);

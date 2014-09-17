@@ -189,11 +189,13 @@ void blade_rf_controller::close_scanner()
 	}
 }
 
-void blade_rf_controller::do_initial_scanner_config()
+void blade_rf_controller::do_initial_scanner_config(const scanner_settings &settings)
 {
 	check_blade_comm();
 
 	std::string id = comm_blade_rf_->id();
+
+	blade_settings_ = reinterpret_cast<const blade_settings&>(settings);
 
 	// When errors opening and configuring occur they seem to be fixed
 	// by restarting the entire process hence if an error occurs anywhere 
@@ -275,12 +277,18 @@ void blade_rf_controller::do_initial_scanner_config()
 
 void blade_rf_controller::enable_blade_rx()
 {
+	if(blade_settings_.rx_sync_buffer_size_ % 1024 != 0) {
+		blade_settings_.rx_sync_buffer_size_ = add_mod(blade_settings_.rx_sync_buffer_size_, 1024);
+		LOG_L(WARNING) << "The nuand rx sync buffer size is not a multiple of 1024.  Adjusting value to " << blade_settings_.rx_sync_buffer_size_ << ".";
+	}
 #ifdef _DEBUG
 	check_blade_status(bladerf_sync_config(comm_blade_rf_->blade_rf(), BLADERF_MODULE_RX, BLADERF_FORMAT_SC16_Q11,
-		5, 1024 * 4, 4, 0), __FILE__, __LINE__);
+		blade_settings_.rx_sync_num_buffers_, blade_settings_.rx_sync_buffer_size_, blade_settings_.rx_sync_num_transfers_, 
+		blade_settings_.rx_sync_timeout_), __FILE__, __LINE__);
 #else
 	check_blade_status(bladerf_sync_config(comm_blade_rf_->blade_rf(), BLADERF_MODULE_RX, BLADERF_FORMAT_SC16_Q11,
-		5, 1024 * 4, 4, 2000), __FILE__, __LINE__);
+		blade_settings_.rx_sync_num_buffers_, blade_settings_.rx_sync_buffer_size_, blade_settings_.rx_sync_num_transfers_,
+		blade_settings_.rx_sync_timeout_), __FILE__, __LINE__);
 #endif
 
 	check_blade_status(bladerf_enable_module(comm_blade_rf_->blade_rf(),
@@ -526,9 +534,9 @@ measurement_info blade_rf_controller::get_rf_data(frequency_type frequency, time
 	}
 
 	// BladeRF only accepts data num_samples that are a multiple of 1024.
-	// Using a config of 5 buffers, 4 xfers, and bufsize of 4096, throw_away_samples can 12*1024 for a 
-	// signal sampled at 1.92 mhz.
-	int throw_away_samples = 1024*12;
+	// Because the blade rx sync parameters are configurable we want to make sure we 
+	// clear out every buffer.
+	int throw_away_samples = blade_settings_.rx_sync_buffer_size_ * blade_settings_.rx_sync_num_buffers_;
 
 	int num_samples = rf_phreaker::convert_to_samples(time_ns, blade_sampling_rate);
 	auto num_samples_to_transfer = add_mod(num_samples, 1024);
@@ -763,6 +771,35 @@ void blade_rf_controller::write_license(const license &lic)
 	eeprom ee = read_eeprom();
 	ee.license_ = lic;
 	write_eeprom(ee);
+}
+
+
+void blade_rf_controller::set_log_level(int level) {
+	switch(level) {
+	case 0:
+		bladerf_log_set_verbosity(BLADERF_LOG_LEVEL_VERBOSE);
+		break;
+	case 1:
+		bladerf_log_set_verbosity(BLADERF_LOG_LEVEL_DEBUG);
+		break;
+	case 2:
+		bladerf_log_set_verbosity(BLADERF_LOG_LEVEL_INFO);
+		break;
+	case 3:
+		bladerf_log_set_verbosity(BLADERF_LOG_LEVEL_WARNING);
+		break;
+	case 4:
+		bladerf_log_set_verbosity(BLADERF_LOG_LEVEL_ERROR);
+		break;
+	case 5:
+		bladerf_log_set_verbosity(BLADERF_LOG_LEVEL_CRITICAL);
+		break;
+	case 6:
+		bladerf_log_set_verbosity(BLADERF_LOG_LEVEL_SILENT);
+		break;
+	default:
+		bladerf_log_set_verbosity(BLADERF_LOG_LEVEL_INFO);
+	}
 }
 
 

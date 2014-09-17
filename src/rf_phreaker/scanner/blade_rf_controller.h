@@ -5,6 +5,7 @@
 #include "rf_phreaker/common/concurrent.h"
 #include "rf_phreaker/common/measurements.h"
 #include "rf_phreaker/common/common_utility.h"
+#include "rf_phreaker/common/settings.h"
 #include "rf_phreaker/scanner/comm_info.h"
 #include "rf_phreaker/scanner/scanner_comm.h"
 #include "rf_phreaker/scanner/measurement_info.h"
@@ -38,7 +39,7 @@ public:
 
 	void close_scanner();
 
-	void do_initial_scanner_config();
+	void do_initial_scanner_config(const scanner_settings &settings = blade_settings());
 
 	void refresh_scanner_info();
 
@@ -89,6 +90,8 @@ public:
 
 	void write_license(const license &license);
 
+	void set_log_level(int level);
+
 private:
 	void enable_blade_rx();
 
@@ -115,6 +118,8 @@ private:
 	int64_t collection_count_;
 
 	std::unique_ptr<gps_comm::gps_comm> gps_comm_;
+
+	blade_settings blade_settings_;
 };
 
 }}

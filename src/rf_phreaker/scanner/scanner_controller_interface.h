@@ -2,6 +2,7 @@
 
 #include "rf_phreaker/common/common_types.h"
 #include "rf_phreaker/common/measurements.h"
+#include "rf_phreaker/common/settings.h"
 #include "rf_phreaker/scanner/scanner_comm.h"
 #include "rf_phreaker/scanner/scanner.h"
 #include "rf_phreaker/scanner/measurement_info.h"
@@ -22,7 +23,7 @@ public:
 
 	virtual std::future<void> close_scanner() = 0;
 
-	virtual std::future<void> do_initial_scanner_config() = 0;
+	virtual std::future<void> do_initial_scanner_config(const scanner_settings &settings) = 0;
 
 	virtual std::future<void> refresh_scanner_info() = 0;
 
