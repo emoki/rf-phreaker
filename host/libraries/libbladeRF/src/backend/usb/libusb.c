@@ -772,8 +772,13 @@ static int submit_transfer(struct bladerf_stream *stream, void *buffer)
     const unsigned char ep =
         stream->module == BLADERF_MODULE_TX ? SAMPLE_EP_OUT : SAMPLE_EP_IN;
 
-    assert(stream_data->transfer_status[stream_data->i] == TRANSFER_AVAIL);
-    transfer = stream_data->transfers[stream_data->i];
+	// Instead of asserting we return LIBUSB_ERROR_OTHER.  This allows us to 
+	// reinitialize sync_rx and continue transferring data.
+	if(stream_data->transfer_status[stream_data->i] != TRANSFER_AVAIL)
+		return error_conv(-99);
+	//assert(stream_data->transfer_status[stream_data->i] == TRANSFER_AVAIL);
+	
+	transfer = stream_data->transfers[stream_data->i];
 
     switch (stream->format) {
         case BLADERF_FORMAT_SC16_Q11:
