@@ -42,8 +42,8 @@ extern "C" {
 		rx_gain_vga2 values: 0 <-> 30
 	*/
 	int DLL_PUBLIC get_rf_data(__int64 frequency_hz, int bandwidth_hz, __int64 sampling_rate_hz, int lna_gain, 
-		int rx_gain_vga1, int rx_gain_vga2, float *iq_data, int num_samples, float *signal_level,
-		unsigned int switch_setting, unsigned int switch_mask);
+		int rx_gain_vga1, int rx_gain_vga2, float *iq_data, int num_samples, float *signal_level = 0,
+		uint32_t switch_setting = 0, uint32_t switch_mask = 0);
 
 	/*
 	Does not change any lms parameters.  Only transfers IQ data.
@@ -62,7 +62,7 @@ extern "C" {
 
 	/*
 	*/
-	int DLL_PUBLIC write_frequency_correction_value(int trim, int64_t seconds_since_1970);
+	int DLL_PUBLIC write_frequency_correction_value(int trim, __int64 seconds_since_1970);
 
 	/*
 		Read a configuration GPIO register
