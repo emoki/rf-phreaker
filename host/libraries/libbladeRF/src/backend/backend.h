@@ -117,6 +117,9 @@ struct backend_fns {
     int (*xb_uart_baud_write)(struct bladerf *dev, uint16_t value);
     int (*xb_uart_hasdata)(struct bladerf *dev, uint32_t* value);
 
+	/* Faster IO */
+	int (*xb_express_read)(struct bladerf* dev, uint8_t custom_addr, uint8_t* data, uint32_t* count);
+
 
     /* Configure firmware loopback */
     int (*set_firmware_loopback)(struct bladerf *dev, bool enable);

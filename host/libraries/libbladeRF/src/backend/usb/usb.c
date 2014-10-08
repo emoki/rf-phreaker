@@ -70,7 +70,7 @@ static int access_peripheral(struct bladerf *dev, uint8_t peripheral,
 
     // 0: magic (special number to wake device)
     // 1: MODE, check lms_spi_controller.c:main() for spec { -- 1:7-6 (dir), 1:5-4 (io_device), 1:3-0 (length_bytes 0-15)] -- }
-    // / 2: cmd addr (NIOS device code)
+    // / 2: cmd addr (byte offset)
     // | 3: cmd data
     // |_> Repeat  ...
 
@@ -85,9 +85,7 @@ static int access_peripheral(struct bladerf *dev, uint8_t peripheral,
         buf[i * 2 + 3] = cmd[i].data;
     }
 
-    // Both IO operations performed for a single read or single write... is that necessary??
-    // Possible 100% speed improvement
-
+	
     /* Send the command */
     status = usb->fn->bulk_transfer(driver, PERIPHERAL_EP_OUT,
                                      buf, sizeof(buf),
@@ -121,7 +119,7 @@ static inline int gpio_read(struct bladerf *dev, uint8_t addr, uint32_t *data)
 
     *data = 0;
 
-    // low to high bit chunks
+    // low to high byte chunks
     for (i = 0; i < sizeof(*data); i++) {
         assert((addr + i) <= UINT8_MAX);
         cmd.addr = (uint8_t)(addr + i);
@@ -1256,6 +1254,91 @@ static int usb_dac_write(struct bladerf *dev, uint16_t value)
     return status;
 }
 
+//
+static int usb_xb_express_access_peripheral(struct bladerf *dev, uint8_t peripheral,
+			usb_direction dir, uint8_t * data,
+			size_t* count)
+{
+		void *driver;
+	struct bladerf_usb *usb = usb_backend(dev, &driver);
+
+	int status;
+	size_t i;
+	#define buffsize 16
+	uint8_t buf[buffsize] = { 0 };
+	uint8_t pkt_mode_read = (dir == USB_DIR_HOST_TO_DEVICE) ? 0 : 1;		//0:write, 1:read
+
+	assert(*count <= ((sizeof(buf) - 2) ));
+
+	// 0: magic (special number to wake device)
+	// 1: MODE, dir(1-hostread) | device 
+	// / 2: cmd data
+	// | 3: cmd data
+	// |_> Repeat  ...
+	// buffer can hold 14 bytes data
+
+	/* Populate the buffer for transfer */
+	buf[0] = 'X'; // UART_PKT_MAGIC;
+	buf[1] = ((pkt_mode_read & 1)<<7) | (peripheral & 0x7f);
+
+	for (i = 0; i < *count; i++) {
+		buf[i + 2] = data[i] = 'A';
+	}
+
+
+	/* Send the command */
+	status = usb->fn->bulk_transfer(driver, PERIPHERAL_EP_OUT,
+		buf, sizeof(buf),
+		PERIPHERAL_TIMEOUT_MS);
+	if (status != 0) {
+		log_debug("Failed to write perpherial access command: %s\n",
+			bladerf_strerror(status));
+		return status;
+	}
+	
+	/* Read back the ACK. The command data is only used for a read operation,
+	* and is thrown away otherwise */
+	status = usb->fn->bulk_transfer(driver, PERIPHERAL_EP_IN,
+		buf, sizeof(buf),
+		PERIPHERAL_TIMEOUT_MS);
+
+	if (pkt_mode_read && status == 0) {
+		*count = buf[0];
+		if (*count > 14){
+			*count = 14;
+		}
+		for (i = 2; i < buffsize; i++) {
+			data[i-2] = buf[i-2];
+		}
+	}
+
+	//sprintf(data, "-0-0-: %c", b1);
+	return status;
+}
+
+//reads up to 14 bytes
+static int usb_xb_express_read(struct bladerf* dev, uint8_t custom_addr, uint8_t* data, uint32_t* count){
+	int status;
+	size_t i;
+	#define buffsize 16
+	#define datasize 16-2
+	
+	*count = datasize;
+
+	// low to high byte chunks
+	for (i = 0; i < datasize; i++) {
+		data[i] = 0;
+	}
+
+	status = usb_xb_express_access_peripheral(dev, custom_addr,
+		USB_DIR_DEVICE_TO_HOST, data, count);
+
+	return status;
+}
+static int usb_xb_express_write(struct bladerf* dev, int custom_addr, uint8_t* data, int count){
+	return 0;
+}
+
 static int usb_xb_spi_write(struct bladerf *dev, uint32_t value)
 {
 	//targets adf
@@ -1441,6 +1524,8 @@ const struct backend_fns backend_fns_usb = {
     FIELD_INIT(.xb_uart_read, usb_xb_uart_read),
     FIELD_INIT(.xb_uart_baud_write, usb_xb_uart_baud),
     FIELD_INIT(.xb_uart_hasdata, usb_xb_uart_hasdata),
+
+	FIELD_INIT(.xb_express_read, usb_xb_express_read),
 
     FIELD_INIT(.set_firmware_loopback, usb_set_firmware_loopback),
     FIELD_INIT(.get_firmware_loopback, usb_get_firmware_loopback),

@@ -2561,6 +2561,19 @@ int CALL_CONV bladerf_xb_uart_baud_write(struct bladerf *dev, uint16_t val);
 API_EXPORT
 int CALL_CONV bladerf_xb_uart_hasdata(struct bladerf *dev, uint32_t* val);
 
+/**
+* Flag stating if data is available in rx buffer to read. true=data
+*
+* @param    dev          Device handle
+* @param    custom_addr	 custom hardware ID that express state machine uses [0:uart_1, 1:spi_2]
+* @param	data		 buffer to place read bytes [must be 14 bytes long]
+* @param	count		 contains the number of bytes in the buffer from 0 that are new/read
+*
+* @return 0 on success, value from \ref RETCODES list on failure
+*/
+API_EXPORT
+int CALL_CONV bladerf_xb_express_read(struct bladerf* dev, uint8_t custom_addr, uint8_t* data, uint32_t* count);
+
 
 /**
  * Perform DC calibration

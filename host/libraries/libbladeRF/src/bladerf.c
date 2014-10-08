@@ -1501,6 +1501,21 @@ int bladerf_xb_uart_hasdata(struct bladerf *dev, uint32_t* val)
     return status;
 }
 
+/*------------------------------------------------------------------------------
+* XB Faster IO
+*----------------------------------------------------------------------------*/
+
+int bladerf_xb_express_read(struct bladerf* dev, uint8_t custom_addr, uint8_t* data, uint32_t* count)
+{
+	int status;
+	MUTEX_LOCK(&dev->ctrl_lock);
+
+	status = dev->fn->xb_express_read(dev, custom_addr, data, count);
+
+	MUTEX_UNLOCK(&dev->ctrl_lock);
+	return status;
+}
+
 
 /*------------------------------------------------------------------------------
  * DC Calibration routines

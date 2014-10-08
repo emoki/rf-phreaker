@@ -124,6 +124,22 @@
          type = "int";
       }
    }
+   element uart_0.s1
+   {
+      datum baseAddress
+      {
+         value = "69824";
+         type = "String";
+      }
+   }
+   element uart_1.s1
+   {
+      datum baseAddress
+      {
+         value = "69696";
+         type = "String";
+      }
+   }
    element iq_corr_rx_phase_gain.s1
    {
       datum baseAddress
@@ -137,6 +153,22 @@
       datum baseAddress
       {
          value = "69920";
+         type = "String";
+      }
+   }
+   element onchip_memory2_0.s1
+   {
+      datum baseAddress
+      {
+         value = "32768";
+         type = "String";
+      }
+   }
+   element pio_0.s1
+   {
+      datum baseAddress
+      {
+         value = "69760";
          type = "String";
       }
    }
@@ -164,38 +196,6 @@
          type = "String";
       }
    }
-   element uart_0.s1
-   {
-      datum baseAddress
-      {
-         value = "69824";
-         type = "String";
-      }
-   }
-   element onchip_memory2_0.s1
-   {
-      datum baseAddress
-      {
-         value = "32768";
-         type = "String";
-      }
-   }
-   element pio_0.s1
-   {
-      datum baseAddress
-      {
-         value = "69760";
-         type = "String";
-      }
-   }
-   element uart_1.s1
-   {
-      datum baseAddress
-      {
-         value = "69696";
-         type = "String";
-      }
-   }
    element spi_0
    {
       datum _sortIndex
@@ -220,19 +220,19 @@
          type = "int";
       }
    }
-   element spi_0.spi_control_port
-   {
-      datum baseAddress
-      {
-         value = "69856";
-         type = "String";
-      }
-   }
    element spi_2.spi_control_port
    {
       datum baseAddress
       {
          value = "69728";
+         type = "String";
+      }
+   }
+   element spi_0.spi_control_port
+   {
+      datum baseAddress
+      {
+         value = "69856";
          type = "String";
       }
    }

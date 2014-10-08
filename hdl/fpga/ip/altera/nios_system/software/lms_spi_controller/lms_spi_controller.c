@@ -29,13 +29,17 @@
 #include "priv/alt_file.h"
 #include <stdint.h>
 #include <stdio.h>
+#include <stdlib.h>
 #include <string.h>
 #include <unistd.h>
 #include <fcntl.h>
 
 #include "sys/alt_dev.h"
+#include "sys/alt_irq.h"
 
-#include "uartfifo.h"
+#include "fifo.h"
+//#include "uart_packet_router.h"
+//#include "uart_state_machine.h"
 
 #define LMS_READ            0
 #define LMS_WRITE           (1<<7)
@@ -80,6 +84,7 @@
 
 void xb_gps_uart_write( uint8_t val ) ;
 uint8_t xb_gps_uart_read(  );
+void debug(const char* s);
 
 
 
@@ -193,10 +198,7 @@ void xb_gps_spi_write( uint8_t val ) {
     alt_u32 slave_select = 0;		//is the index on the SS_n... 0 = first index
 
 
-	alt_avalon_spi_command( SPI_2_BASE, slave_select, 1, &val, 1, &spi_last_response, 0) ;	//merge = keep cs low
-	//alt_avalon_spi_command( SPI_2_BASE, slave_select, 1, &val, 0, 0, ALT_AVALON_SPI_COMMAND_MERGE) ;	//merge = keep cs low
-	//alt_avalon_spi_command( SPI_2_BASE, slave_select, 0, 0, 1, &spi_last_response, 0) ;	//merge = keep cs low
-	//spi_last_response = 0x77;
+	alt_avalon_spi_command( SPI_2_BASE, slave_select, 1, &val, 1, &spi_last_response, 0) ;
 	spi_last_valid = 1;
 }
 // XB_SPI_READ
@@ -217,28 +219,48 @@ uint8_t xb_gps_spi_read(  ) {
 	return reply;
 }
 
-// 4000 will hold about 8 nmea sentences, or about 2 sec of activity on gps
-#define XB_UART_FIFO_BUFFER_SIZE 4000
-uartfifo uf = {0,0,0,0};
-//collects the xb uart rx, when the library doesn't check the read data very often.
-void monitor_xb_uart(){
-	//quick read if data available, else skip
-	uint8_t data = 0;
-	if( (IORD_ALTERA_AVALON_UART_STATUS(UART_1_BASE) & ALTERA_AVALON_UART_STATUS_RRDY_MSK) ){
-		data = IORD_ALTERA_AVALON_UART_RXDATA(UART_1_BASE) ;
-		uartfifo_enqueue(&uf, data);
-	}
+// 1024 will hold about 5 nmea sentences, or about 2 sec of activity on gps
+// must be power of 2 for speed improvment
+#define XB_UART_FIFO_BUFFER_SIZE (1<<10) //1024
+static fifo uf = {0};
+
+void monitor_xb_uart(void* context);
+void create_xb_uart_interrupt(){
+
+	alt_ic_isr_register(UART_1_IRQ_INTERRUPT_CONTROLLER_ID,
+			UART_1_IRQ,
+			&monitor_xb_uart,
+			0,
+			0);
+
+	// enable read interrupt, disable others
+	uint8_t ctl = IORD_ALTERA_AVALON_UART_CONTROL(UART_1_BASE);
+	IOWR_ALTERA_AVALON_UART_CONTROL(UART_1_BASE, ctl | (1 << ALTERA_AVALON_UART_CONTROL_RRDY_OFST) );
 }
 
+//collects the xb uart rx, when the library doesn't check the read data very often.
+void monitor_xb_uart(void* context){
+	//quick read if data available, else skip
+	uint8_t data = 0;
+	if( IORD_ALTERA_AVALON_UART_STATUS(UART_1_BASE) & ALTERA_AVALON_UART_STATUS_RRDY_MSK ){
+		data = IORD_ALTERA_AVALON_UART_RXDATA(UART_1_BASE) ;
+		fifo_enqueue(&uf, data);
+	}
+
+
+	//service interrupt flag
+	//uint8_t sts = IORD_ALTERA_AVALON_UART_STATUS(UART_1_BASE);
+	//IOWR_ALTERA_AVALON_UART_STATUS(  UART_1_BASE, 0  );
+}
 
 void xb_gps_uart_baud( uint32_t baud ) {
-	 uint16_t div = (uint16_t)(ALT_CPU_FREQ / baud + 0.5);
+	 uint16_t div = (uint16_t)((float)ALT_CPU_FREQ / (float)baud + 0.5);
      IOWR_ALTERA_AVALON_UART_DIVISOR(UART_1_BASE, div);
 }
 
-uint8_t xb_gps_uart_read(  ) {
 
-	return uartfifo_dequeue(&uf);
+uint8_t xb_gps_uart_read(  ) {
+	return fifo_dequeue(&uf);
 }
 
 void xb_gps_uart_write( uint8_t val ) {
@@ -247,12 +269,14 @@ void xb_gps_uart_write( uint8_t val ) {
 	  IOWR_ALTERA_AVALON_UART_TXDATA(UART_1_BASE,  val );
 }
 uint32_t xb_gps_uart_hasdata(  ) {
-	return uartfifo_size(&uf);
-	//return !uartfifo_empty(&uf);
+	//return 1;
+	uint32_t s = fifo_size(&uf);
+	//alt_printf( "sz: %d\n", s ) ;
+	return s;
 }
 
 
-// SPI Read
+// LMS SPI Read
 void lms_spi_read( uint8_t address, uint8_t *val )
 {
     uint8_t rv ;
@@ -274,7 +298,7 @@ void lms_spi_read( uint8_t address, uint8_t *val )
     return ;
 }
 
-// SPI Write
+// LMS SPI Write
 void lms_spi_write( uint8_t address, uint8_t val )
 {
     if( LMS_VERBOSE )
@@ -292,20 +316,15 @@ void lms_spi_write( uint8_t address, uint8_t val )
 }
 
 
+void init_uart_FSM(){
 
+};
+void init_xpress_uart(){
 
+};
 
-// Entry point
-int main()
-{
-
-  struct uart_pkt {
-      unsigned char magic;
 #define UART_PKT_MAGIC          'N'
-
-      //  | 7 | 6 | 5 | 4 | 3 | 2 | 1 | 0 |
-      //  |  dir  |  dev  |     cnt       |
-      unsigned char mode;
+#define UART_EXPRESS_PKT_MAGIC 'X'
 #define UART_PKT_MODE_CNT_MASK   0xF
 #define UART_PKT_MODE_CNT_SHIFT  0
 
@@ -320,30 +339,85 @@ int main()
 #define UART_PKT_MODE_DIR_SHIFT  6
 #define UART_PKT_MODE_DIR_READ   (2<<UART_PKT_MODE_DIR_SHIFT)		//read is 8 bit 1
 #define UART_PKT_MODE_DIR_WRITE  (1<<UART_PKT_MODE_DIR_SHIFT)		//write is 7 bit 1
-  };
 
-  struct uart_cmd {
-      unsigned char addr;
-      unsigned char data;
-  };
+struct uart_pkt {
+  unsigned char magic;
 
-  // Set the prescaler for 400kHz with an 80MHz clock (prescaer = clock / (5*desired) - 1)
-  IOWR_16DIRECT(I2C, OC_I2C_PRESCALER, 39 ) ;
-  IOWR_8DIRECT(I2C, OC_I2C_CTRL, OC_I2C_ENABLE ) ;
+  //  | 7 | 6 | 5 | 4 | 3 | 2 | 1 | 0 |
+  //  |  dir  |  dev  |     cnt       |
+  unsigned char mode;
+};
 
-  // Set the UART divisor to 19 to get 4000000bps UART (baud rate = clock/(divisor + 1))
-  IOWR_ALTERA_AVALON_UART_DIVISOR(UART_0_BASE, 19) ;
+struct uart_cmd {
+  unsigned char addr;
+  unsigned char data;
+};
 
-  // Set the IQ Correction parameters to 0
-  IOWR_ALTERA_AVALON_PIO_DATA(IQ_CORR_RX_PHASE_GAIN_BASE, DEFAULT_CORRECTION);
-  IOWR_ALTERA_AVALON_PIO_DATA(IQ_CORR_TX_PHASE_GAIN_BASE, DEFAULT_CORRECTION);
 
-  //could use dynamic memory too if enabled
+//writes chars
+void debugs(const char* s){
+
+	int k = 0;
+	while(s[k] != 0){
+		xb_gps_uart_write(s[k]);
+		k++;
+	}
+}
+// writes line
+void debug(const char* s){
+	debugs("DBG: ");
+	debugs(s);
+	debugs("\r\n");
+}
+
+
+
+
+
+
+
+
+void init_NIOS(){
+	  // Set the prescaler for 400kHz with an 80MHz clock (prescaler = clock / (5*desired) - 1)
+	  IOWR_16DIRECT(I2C, OC_I2C_PRESCALER, 39 ) ;
+	  IOWR_8DIRECT(I2C, OC_I2C_CTRL, OC_I2C_ENABLE ) ;
+
+	  // Set the UART divisor to 19 to get 4000000bps UART (baud rate = clock/(divisor + 1))
+	  IOWR_ALTERA_AVALON_UART_DIVISOR(UART_0_BASE, 19) ;
+
+	  // Set the IQ Correction parameters to 0
+	  IOWR_ALTERA_AVALON_PIO_DATA(IQ_CORR_RX_PHASE_GAIN_BASE, DEFAULT_CORRECTION);
+	  IOWR_ALTERA_AVALON_PIO_DATA(IQ_CORR_TX_PHASE_GAIN_BASE, DEFAULT_CORRECTION);
+
+}
+
+// Entry point
+int main()
+{
+	  //debug("\r\n[NIOS POWER ON]");
+
+
+  // initialize circular buffer
+  // could use dynamic memory too if enabled
   uint8_t uart_buffer[XB_UART_FIFO_BUFFER_SIZE];
-  uf.capacity = sizeof(uart_buffer);
-  uf.first = 0;
-  uf.last = 0;
-  uf.base = &uart_buffer;
+  uf = fifo_new(uart_buffer, sizeof(uart_buffer));
+
+
+
+
+  char* msg = "<< NIOS OK >>\r\n";
+  int jj = 0;
+  while(msg[jj++] != 0){
+	  fifo_enqueue(&uf,msg[jj-1]);
+  }
+
+  //debug("[NIOS Init...]");
+
+
+  //setup xb uart intrrupt handler, so no data is skipped
+  //create_xb_uart_interrupt();
+
+  init_NIOS();
 
   /* Event loop never exits. */
   {
@@ -369,7 +443,7 @@ int main()
       while(1)
       {
 
-    	  monitor_xb_uart();
+		  monitor_xb_uart(0);
 
           // Check if anything is in the FSK UART
           if( IORD_ALTERA_AVALON_UART_STATUS(UART_0_BASE) & ALTERA_AVALON_UART_STATUS_RRDY_MSK )
@@ -486,7 +560,7 @@ int main()
                           {GDEV_XB_LO,         36, 4},
                           {GDEV_EXPANSION,     40, 4},		//expansion gpio
                           {GDEV_EXPANSION_DIR, 44, 4},
-                          {GDEV_XB_GPS_SPI,    48, 4},
+                          {GDEV_XB_GPS_SPI,    48, 4},		//Custom devices
                           {GDEV_XB_GPS_UART,   52, 4},
                           {GDEV_XB_GPS_UART_BAUD,   56, 4},
                           {GDEV_XB_GPS_UART_HASDATA,60, 4}
@@ -626,7 +700,6 @@ int main()
       }
   }
 
-  uartfifo_delete(&uf);
 
 
   return 0;
