@@ -23,9 +23,12 @@ set_instance_assignment -name IO_STANDARD "1.8 V" -to exp_gpio[4]
 set_instance_assignment -name IO_STANDARD "1.8 V" -to exp_gpio[3]
 set_instance_assignment -name IO_STANDARD "1.8 V" -to exp_gpio[2]
 set_instance_assignment -name IO_STANDARD "1.8 V" -to exp_present
+set_instance_assignment -name IO_STANDARD "1.8 V" -to exp_spi_cs
 set_instance_assignment -name IO_STANDARD "1.8 V" -to exp_spi_clock
 set_instance_assignment -name IO_STANDARD "1.8 V" -to exp_spi_miso
 set_instance_assignment -name IO_STANDARD "1.8 V" -to exp_spi_mosi
+set_instance_assignment -name IO_STANDARD "1.8 V" -to exp_uart_tx
+set_instance_assignment -name IO_STANDARD "1.8 V" -to exp_uart_rx
 set_instance_assignment -name IO_STANDARD "1.8 V" -to fx3_ctl[12]
 set_instance_assignment -name IO_STANDARD "1.8 V" -to fx3_ctl[11]
 set_instance_assignment -name IO_STANDARD "1.8 V" -to fx3_ctl[10]
@@ -146,6 +149,10 @@ set_instance_assignment -name IO_STANDARD "1.8 V" -to lms_rx_v[1]
 set_instance_assignment -name IO_STANDARD "1.8 V" -to lms_tx_v[2]
 set_instance_assignment -name IO_STANDARD "1.8 V" -to lms_tx_v[1]
 
+
+
+
+
 # Location Assignments
 set_location_assignment PIN_A11 -to c4_clock
 set_location_assignment PIN_B10 -to dac_csx
@@ -237,9 +244,9 @@ set_location_assignment PIN_AB19 -to lms_rx_v[2]
 set_location_assignment PIN_AB20 -to lms_rx_v[1]
 set_location_assignment PIN_J22 -to lms_tx_iq_select
 set_location_assignment PIN_F11 -to exp_spi_mosi
-set_location_assignment PIN_D13 -to exp_gpio[2]
-set_location_assignment PIN_E13 -to exp_gpio[3]
-set_location_assignment PIN_E14 -to exp_gpio[4]
+set_location_assignment EDGE_BOTTOM -to exp_gpio[2]
+set_location_assignment EDGE_BOTTOM -to exp_gpio[3]
+set_location_assignment EDGE_BOTTOM -to exp_gpio[4]
 set_location_assignment PIN_E15 -to exp_gpio[5]
 set_location_assignment PIN_E16 -to exp_gpio[6]
 set_location_assignment PIN_D17 -to exp_gpio[7]
@@ -255,8 +262,12 @@ set_location_assignment PIN_A13 -to exp_gpio[16]
 set_location_assignment PIN_C13 -to exp_present
 set_location_assignment PIN_G1 -to fx3_pclk
 set_location_assignment PIN_AA15 -to lms_sclk
-set_location_assignment PIN_B13 -to exp_spi_miso
+set_location_assignment PIN_D13 -to exp_spi_cs
+set_location_assignment PIN_F11 -to exp_spi_miso
+set_location_assignment PIN_B13 -to exp_spi_mosi
 set_location_assignment PIN_E11 -to exp_spi_clock
+set_location_assignment PIN_E13 -to exp_uart_rx
+set_location_assignment PIN_E14 -to exp_uart_tx
 set_location_assignment PIN_AA7 -to led[1]
 set_location_assignment PIN_AB7 -to led[2]
 set_location_assignment PIN_AA21 -to lms_tx_v[1]

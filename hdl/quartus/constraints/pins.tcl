@@ -45,6 +45,9 @@ set_instance_assignment -name IO_STANDARD "1.8 V" -to exp_present
 set_instance_assignment -name IO_STANDARD "1.8 V" -to exp_spi_clock
 set_instance_assignment -name IO_STANDARD "1.8 V" -to exp_spi_miso
 set_instance_assignment -name IO_STANDARD "1.8 V" -to exp_spi_mosi
+set_instance_assignment -name IO_STANDARD "1.8 V" -to exp_spi_cs
+set_instance_assignment -name IO_STANDARD "1.8 V" -to exp_uart_tx
+set_instance_assignment -name IO_STANDARD "1.8 V" -to exp_uart_rx
 set_instance_assignment -name IO_STANDARD "1.8 V" -to fx3_ctl[12]
 set_instance_assignment -name IO_STANDARD "1.8 V" -to fx3_ctl[11]
 set_instance_assignment -name IO_STANDARD "1.8 V" -to fx3_ctl[10]
@@ -156,6 +159,9 @@ set_instance_assignment -name CURRENT_STRENGTH_NEW 4MA -to exp_present
 set_instance_assignment -name CURRENT_STRENGTH_NEW 4MA -to exp_spi_clock
 set_instance_assignment -name CURRENT_STRENGTH_NEW 4MA -to exp_spi_miso
 set_instance_assignment -name CURRENT_STRENGTH_NEW 4MA -to exp_spi_mosi
+set_instance_assignment -name CURRENT_STRENGTH_NEW 4MA -to exp_spi_cs
+set_instance_assignment -name CURRENT_STRENGTH_NEW 4MA -to exp_uart_tx
+set_instance_assignment -name CURRENT_STRENGTH_NEW 4MA -to exp_uart_rx
 set_instance_assignment -name CURRENT_STRENGTH_NEW 4MA -to fx3_ctl[12]
 set_instance_assignment -name CURRENT_STRENGTH_NEW 4MA -to fx3_ctl[11]
 set_instance_assignment -name CURRENT_STRENGTH_NEW 4MA -to fx3_ctl[10]
@@ -324,3 +330,4 @@ set_location_assignment PIN_L22 -to lms_tx_data[3]
 set_location_assignment PIN_N21 -to lms_tx_data[2]
 set_location_assignment PIN_K22 -to lms_tx_data[1]
 set_location_assignment PIN_M21 -to lms_tx_data[0]
+
