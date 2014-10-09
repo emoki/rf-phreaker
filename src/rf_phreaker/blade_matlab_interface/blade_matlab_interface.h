@@ -24,9 +24,9 @@ extern "C" {
 	*/
 	int DLL_PUBLIC list_blade_devices(int8_t *device_list, int list_size);
 
-	int DLL_PUBLIC open_blade_device(const char *serial);
-
 	int DLL_PUBLIC open_first_blade_device();
+
+	int DLL_PUBLIC open_blade_device(const char *serial);
 
 	int DLL_PUBLIC close_blade_device();
 
@@ -42,8 +42,8 @@ extern "C" {
 		rx_gain_vga2 values: 0 <-> 30
 	*/
 	int DLL_PUBLIC get_rf_data(__int64 frequency_hz, int bandwidth_hz, __int64 sampling_rate_hz, int lna_gain, 
-		int rx_gain_vga1, int rx_gain_vga2, float *iq_data, int num_samples, float *signal_level = 0,
-		uint32_t switch_setting = 0, uint32_t switch_mask = 0);
+		int rx_gain_vga1, int rx_gain_vga2, float *iq_data, int num_samples, float *signal_level,
+		unsigned int switch_setting, unsigned int switch_mask);
 
 	/*
 	Does not change any lms parameters.  Only transfers IQ data.
