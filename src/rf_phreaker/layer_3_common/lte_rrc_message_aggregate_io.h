@@ -129,7 +129,8 @@ inline std::ostream& header(std::ostream &os, const lte_sib1_type &t) {
 		<< "tracking_area_code" << spacer
 		<< "cell_id" << spacer
 		<< "multiple_plmn" << spacer
-		<< "scheduling_info";
+		<< "scheduling_info" << spacer
+		<< "si_window_length";
 	return os;
 }
 
@@ -138,7 +139,8 @@ inline std::ostream& operator<<(std::ostream &os, const lte_sib1_type &t) {
 		<< t.tracking_area_code_ << spacer
 		<< t.cell_id_ << spacer
 		<< t.multiple_plmn_ << spacer
-		<< t.scheduling_info_list_;
+		<< t.scheduling_info_list_ << spacer
+		<< t.si_window_length_ms_;
 	return os;
 }
 

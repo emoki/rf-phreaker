@@ -51,6 +51,7 @@ struct lte_sib1_type : public lte_sib_base {
 	int tracking_area_code_;
 	int cell_id_;
 	std::vector<scheduling_info> scheduling_info_list_;
+	int si_window_length_ms_;
 };
 
 // s_non_intra_search_ - Rx level threshold for cell reselection. Value is IE value * 2 {dB]

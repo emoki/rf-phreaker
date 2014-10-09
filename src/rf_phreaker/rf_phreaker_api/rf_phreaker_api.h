@@ -40,10 +40,10 @@ extern "C" {
 
 #define RF_PHREAKER_API_VERSION 1
 
-typedef struct rp_device;
+/*typedef*/ struct rp_device;
 
-const int SERIAL_LENGTH = 33;
-typedef char rp_serial_type[SERIAL_LENGTH]; // Includes NULL terminator.
+const int RP_SERIAL_LENGTH = 33;
+typedef char rp_serial_type[RP_SERIAL_LENGTH]; // Includes NULL terminator.
 
 typedef int64_t rp_frequency_type;
 
@@ -54,7 +54,10 @@ typedef int32_t rp_bandwidth_type;
 typedef int64_t rp_time_type;
 
 typedef enum rp_status {
-	RP_STATUS_OK = 0
+	RP_STATUS_OK = 0,
+	RP_STATUS_NOT_INITIALIZED,
+	RP_STATUS_GENERIC_ERROR,
+	RP_STATUS_UNKNOWN_ERROR
 } rp_status;
 
 typedef enum rp_technology {
@@ -197,6 +200,13 @@ typedef struct rp_base {
 	int32_t status_flags_;
 } rp_base;
 
+typedef struct rp_gsm {
+	rp_base *base_;
+	rp_channel_type bcch_;
+	int32_t bsic_;
+	// TODO - expose layer 3
+} rp_gsm;
+
 typedef struct rp_umts {
 	rp_base *base_;
 	rp_channel_type uarfcn_;
@@ -227,6 +237,16 @@ typedef struct rp_lte {
 	// TODO - expose layer 3
 } rp_lte;
 
+typedef struct rp_sweep {
+	rp_base *base_;
+	int32_t num_gsm_;
+	rp_gsm *gsm_;
+	int32_t num_umts_;
+	rp_umts *umts_;
+	int32_t num_lte_;
+	rp_lte lte_;
+} rp_sweep;
+
 typedef enum rp_sample_format {
 	LITTLE_ENDIAN_FLOAT_REAL_IMAGINARY
 } rp_sample_format;
@@ -239,10 +259,25 @@ typedef struct rp_raw_data {
 	void *samples_; //
 } rp_raw_data;
 
+typedef struct rp_callbacks {
 
-RP_LIBEXPORT(const char*) rp_error_message(rp_status status);
+	void (RP_CALLCONV *rp_message_update)(const rp_status *status);
 
-RP_LIBEXPORT(rp_status) rp_initialize();
+	void (RP_CALLCONV *rp_device_info_update)(const rp_device_info *info);
+
+	void (RP_CALLCONV *rp_gps_update)(const rp_gps *gps);
+
+	void (RP_CALLCONV *rp_gsm_update)(const rp_gsm *gsm, int num_gsm);
+
+	void (RP_CALLCONV *rp_umts_update)(const rp_umts *umts, int num_umts);
+
+	void (RP_CALLCONV *rp_lte_update)(const rp_lte *lte, int num_lte);
+
+	void (RP_CALLCONV *rp_sweep_update)(const rp_sweep *sweep, int num_sweep);
+
+} rp_callbacks;
+
+RP_LIBEXPORT(rp_status) rp_initialize(rp_callbacks *callbacks);
 
 RP_LIBEXPORT(rp_status) rp_clean_up();
 
@@ -270,11 +305,13 @@ RP_LIBEXPORT(rp_status) rp_remove_sweep_operating_band(rp_device *device, rp_ope
 
 RP_LIBEXPORT(rp_status) rp_get_gps_data(rp_device *device, rp_gps gps);
 
-RP_LIBEXPORT(rp_status) rp_get_iq_data_using_auto_gain(rp_device *device, rp_frequency_type frequency, rp_time_type time_ns, rp_bandwidth_type bandwidth, rp_frequency_type sampling_rate, const rp_gain_type &gain);
+RP_LIBEXPORT(rp_status) rp_get_iq_data_using_auto_gain(rp_device *device, rp_frequency_type frequency, rp_time_type time_ns, rp_bandwidth_type bandwidth, rp_frequency_type sampling_rate, int32_t gain_db);
 
 RP_LIBEXPORT(rp_status) rp_get_iq_data(rp_device *device, rp_frequency_type frequency, rp_time_type time_ns, rp_bandwidth_type bandwidth, rp_frequency_type sampling_rate);
 
 RP_LIBEXPORT(rp_status) rp_update_license(rp_device *device, const char *filename);
+
+RP_LIBEXPORT(const char*) rp_status_message(rp_status status);
 
 RP_LIBEXPORT(const char*) rp_build_version();
 

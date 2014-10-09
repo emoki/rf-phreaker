@@ -80,6 +80,8 @@ void lte_sib_1_parser::parse_data(const SystemInformationBlockType1_t &data, lte
 		
 		message.sib1_.scheduling_info_list_.push_back(info);
 	}
+	
+	message.sib1_.si_window_length_ms_ = convert_si_window_length(data.si_WindowLength);
 }
 	
 lte_sib_type lte_sib_1_parser::convert(SIB_Type_t sib)
@@ -134,4 +136,32 @@ lte_sib_type lte_sib_1_parser::convert(SIB_Type_t sib)
 	default:
 		return (spare_1);
 	}
+}
+
+int lte_sib_1_parser::convert_si_window_length(long window_length) {
+	long length = 0;
+	switch(window_length) {
+	case SystemInformationBlockType1__si_WindowLength_ms1:
+		length = 1;
+		break;
+	case SystemInformationBlockType1__si_WindowLength_ms2:
+		length = 2;
+		break;
+	case SystemInformationBlockType1__si_WindowLength_ms5:
+		length = 5;
+		break;
+	case SystemInformationBlockType1__si_WindowLength_ms10:
+		length = 10;
+		break;
+	case SystemInformationBlockType1__si_WindowLength_ms15:
+		length = 15;
+		break;
+	case SystemInformationBlockType1__si_WindowLength_ms20:
+		length = 20;
+		break;
+	case SystemInformationBlockType1__si_WindowLength_ms40:
+		length = 40;
+		break;
+	}
+	return length;
 }
