@@ -12,5 +12,6 @@ public:
 	void parse_data(const SystemInformationBlockType1_t &data, layer_3_information::lte_rrc_message_aggregate &message);
 private:
 	layer_3_information::lte_sib_type convert(SIB_Type_t sib);
+	int convert_si_window_length(long window_length);
 };
 
