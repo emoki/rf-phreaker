@@ -519,7 +519,7 @@ measurement_info blade_rf_controller::get_rf_data(frequency_type frequency, time
 	// For now we do not need to use the mask because we only use the expansion gpio pins
 	// for the switch settings. When the pins are used for other purposes we'll need to make
 	// sure we only set the pins necessary for the gpio.
-	if(switch_setting || switch_mask) {
+	if(switch_mask) {
 		check_blade_status(bladerf_expansion_gpio_write(comm_blade_rf_->blade_rf(),
 			switch_setting & switch_mask), __FILE__, __LINE__);
 	}
