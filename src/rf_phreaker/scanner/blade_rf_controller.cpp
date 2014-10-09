@@ -13,6 +13,7 @@
 namespace rf_phreaker { namespace scanner {
 
 blade_rf_controller::blade_rf_controller(comm_type)
+	: collection_count_(0)
 {
 	bladerf_log_set_verbosity(BLADERF_LOG_LEVEL_INFO);
 }
@@ -20,6 +21,7 @@ blade_rf_controller::blade_rf_controller(comm_type)
 blade_rf_controller::blade_rf_controller(blade_rf_controller &&c)
 : comm_blade_rf_(std::move(c.comm_blade_rf_))
 , scanner_blade_rf_(std::move(c.scanner_blade_rf_))
+, collection_count_(std::move(c.collection_count_))
 {}
 
 blade_rf_controller::~blade_rf_controller()
