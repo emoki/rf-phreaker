@@ -64,4 +64,53 @@ typedef specific_error<cappeen_api_error_type> cappeen_api_error;
 typedef specific_error<gps_comm_error_type> gps_comm_error;
 typedef specific_error<rf_phreaker_api_error_type> rf_phreaker_api_error;
 
+
+//switch(err.error_type_) {
+//case comm_error_type:
+//	break;
+//case scanner_init_error_type:
+//	s = "scanner initialization error";
+//	break;
+//case hardware_error_type:
+//	s = "hardware error";
+//	break;
+//case misc_error_type:
+//	s = "miscellaneous error";
+//	break;
+//case file_error_type:
+//	s = "file error";
+//	break;
+//case blade_rf_error_type:
+//	s = "blade rf error";
+//	break;
+//case ipp_error_type:
+//	s = "ipp error";
+//	break;
+//case filter_error_type:
+//	s = "filter error";
+//	break;
+//case gsm_analysis_error_type:
+//	s = "gsm analysis error";
+//	break;
+//case umts_analysis_error_type:
+//	s = "umts analysis error";
+//	break;
+//case lte_analysis_error_type:
+//	s = "lte analysis error";
+//	break;
+//case processing_error_type:
+//	s = "processing error";
+//	break;
+//case matlab_interface_error_type:
+//	s = "matlab interface error";
+//	break;
+//case cappeen_api_error_type:
+//	s = "cappeen api error";
+//	break;
+//case gps_comm_error_type:
+//	s = "gps communciation error";
+//	break;
+//case rf_phreaker_api_error_type:
+//	s = "rf phreaker api error";
+//	break;
 }

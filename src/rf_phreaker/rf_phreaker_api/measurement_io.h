@@ -4,7 +4,6 @@
 #include <string>
 #include <iomanip>
 
-namespace rf_phreaker_api
-{
+namespace rf_phreaker { namespace api {
 
-}
+}}
