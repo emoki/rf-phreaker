@@ -1,9 +1,9 @@
 #include "stdafx.h"
 #include <boost/program_options.hpp>
 #include "rf_phreaker/general_utility/calibration_utility.h"
+#include "rf_phreaker/general_utility/sync_rx_benchmark_utility.h"
 
-
-int main(int argc, char* argv[]) {
+int handle_calibration(int argc, char* argv[]) {
 	namespace po = boost::program_options;
 
 	try {
@@ -32,28 +32,6 @@ int main(int argc, char* argv[]) {
 		vm.notify();
 
 		calibration_utility::load_calibrations(serials);
-
-
-		//auto tmp1 = calibration_utility::read_calibration_from_file("13cadd7137a3ef4d18dcfcc179667998_cali.bin");
-		//auto tmp2 = calibration_utility::read_calibration_from_file("47d54d57db30c9169c98c53e30c08d9a_cali.bin");
-		//auto tmp3 = calibration_utility::read_calibration_from_file("d01d12c0dc5c71c8a081e0c25f27b6fd_cali.bin");
-		//auto tmp4 = calibration_utility::read_calibration_from_file("d7db1c90fd06a5a6d950615ea7fa6164_cali.bin");
-		//auto tmp5 = calibration_utility::read_calibration_from_file("77ecda454d25738ee419f6fd676170d5_cali.bin");
-
-
-		//std::string base = "../../../../rf_phreaker/test_files/calibration_files/";
-
-		//calibration_utility::read_calibration_and_output(base + "Nuand_Board_13cadd7137a3ef4d18dcfcc179667998_140605.txt", base + "RF_Board_13cadd7137a3ef4d18dcfcc179667998_140605.txt",
-		//	base + "RF_Switch_13cadd7137a3ef4d18dcfcc179667998_140605.txt");
-
-		//calibration_utility::read_calibration_and_output(base + "Nuand_Board_47d54d57db30c9169c98c53e30c08d9a_140605.txt", base + "RF_Board_47d54d57db30c9169c98c53e30c08d9a_140605.txt",
-		//	base + "RF_Switch_47d54d57db30c9169c98c53e30c08d9a_140605.txt");
-
-		//calibration_utility::read_calibration_and_output(base + "Nuand_Board_d01d12c0dc5c71c8a081e0c25f27b6fd_140605.txt", base + "RF_Board_d01d12c0dc5c71c8a081e0c25f27b6fd_140605.txt",
-		//	base + "RF_Switch_d01d12c0dc5c71c8a081e0c25f27b6fd_140605.txt");
-
-		//calibration_utility::read_calibration_and_output(base + "Nuand_Board_d7db1c90fd06a5a6d950615ea7fa6164_140605.txt", base + "RF_Board_d7db1c90fd06a5a6d950615ea7fa6164_140605.txt",
-		//	base + "RF_Switch_d7db1c90fd06a5a6d950615ea7fa6164_140605.txt");
 	}
 	catch(std::exception &err) {
 		std::cout << "Error: " << err.what() << std::endl;
@@ -61,8 +39,117 @@ int main(int argc, char* argv[]) {
 	catch(...) {
 		std::cout << "Unknown error has occurred." << std::endl;
 	}
-	
+
 	std::cout << std::endl;
+
 	return 0;
+}
+
+int handle_sync_rx_benchmark(int argc, char* argv[]) {
+	namespace po = boost::program_options;
+	using namespace rf_phreaker;
+	try {
+		// Option variables.
+		benchmark_settings settings;
+		std::vector<frequency_type> default_sampling_rates;
+		default_sampling_rates.push_back(khz(1920));
+		default_sampling_rates.push_back(khz(3840));
+		default_sampling_rates.push_back(khz(4875));
+		default_sampling_rates.push_back(khz(7680));
+		default_sampling_rates.push_back(khz(15360));
+		default_sampling_rates.push_back(khz(23040));
+		default_sampling_rates.push_back(khz(30720));
+
+		po::options_description desc("Allowed options");
+
+		desc.add_options()
+			("help,h", "Produce help message.")
+			("start_buffer_size", po::value<int>(&settings.start_buffer_size_)->default_value(2 * 1024), "Buffer size to start benchmark")
+			("start_num_buffer", po::value<int>(&settings.start_num_buffer_)->default_value(2), "Number of buffers to start benchmark")
+			("start_num_transfer", po::value<int>(&settings.start_num_transfer_)->default_value(1), "Number of transfers to start benchmark")
+			("max_num_transfers,x", po::value<int>(&settings.max_num_transfers_)->default_value(16), "Maximum number of transfers to use.\n")
+			("max_buffer_size,b", po::value<int>(&settings.max_buffer_size_)->default_value(16384), "Maximum buffer size to use.")
+			("max_num_buffers,n", po::value<int>(&settings.max_num_buffers_)->default_value(17), "Maximum number of buffers to use")
+			("buffer_size_increment", po::value<int>(&settings.buffer_size_increment_)->default_value(2 * 1024), "Buffer size increment")
+			("num_buffer_increment", po::value<int>(&settings.num_buffer_increment_)->default_value(2), "Number of buffers increment")
+			("num_transfer_increment", po::value<int>(&settings.num_transfer_increment_)->default_value(2), "Number of transfers increment")
+			("filename,f", po::value<std::string>(&settings.filename_)->default_value("sync_rx_benchmark.txt"), "Output filename")
+			("sampling_rates,s", po::value<std::vector<frequency_type>>(&settings.sampling_rates_)->multitoken(),
+			"Sampling rates hz to use")
+			("start_freq", po::value<frequency_type>(&settings.freq_start_)->default_value(mhz(1930)), "Frequency hz to start benchmark")
+			("end_freq", po::value<frequency_type>(&settings.freq_end_)->default_value(mhz(1990)), "Frequency hz to end benchmark")
+			("freq_increment", po::value<frequency_type>(&settings.freq_increment_)->default_value(mhz(1)), "Frequency hz increment")
+			("packet_length,p", po::value<time_type>(&settings.packet_length_)->default_value(60), "Collection packet length in ms")
+			("bandwidth,w", po::value<bandwidth_type>(&settings.bandwidth_)->default_value(mhz(2)), "Bandwidth hz");
+
+		// Read command line.
+		po::variables_map vm;
+		po::store(po::parse_command_line(argc, argv, desc), vm);
+		if(vm.count("help")) {
+			std::cout << desc << std::endl;
+			return 1;
+		}
+		vm.notify();
+
+		if(settings.sampling_rates_.empty())
+			settings.sampling_rates_ = default_sampling_rates;
+		for(auto rate : settings.sampling_rates_) {
+			if(rate < khz(1920) || rate > khz(30720))
+				throw std::runtime_error("sampling_rates must be between 1.92mhz and 30.72mhz");
+		}
+
+		if(settings.start_buffer_size_ % 1024 != 0)
+			throw std::runtime_error("start_buffer_size must be a multiple of 1024.");
+		if(settings.start_num_transfer_ <= 0)
+			throw std::runtime_error("start_num_transfer must be positive.");
+		if(settings.start_num_buffer_ <= 0)
+			throw std::runtime_error("start_num_buffer must be positive.");
+		if(settings.max_buffer_size_ % 1024 != 0)
+			throw std::runtime_error("max_buffer_size must be a multiple of 1024.");
+		if(settings.max_num_buffers_ < 2 || settings.max_num_buffers_ > 64)
+			throw std::runtime_error("max_num_buffers must be 2 <= x <= 64.");
+		if(settings.max_num_transfers_ < 1 || settings.max_num_transfers_ > 63)
+			throw std::runtime_error("max_num_transfers be 1 <= x <= 63.");
+		if(settings.max_num_transfers_ >= settings.max_num_buffers_)
+			throw std::runtime_error("max_num_transfers must be less than max_num_buffers.");
+		if(settings.buffer_size_increment_ % 1024 != 0)
+			throw std::runtime_error("buffer_size_increment must be a multiple of 1024.");
+		if(settings.num_transfer_increment_ <= 0)
+			throw std::runtime_error("num_transfer_increment must be positive.");
+		if(settings.num_buffer_increment_ <= 0)
+			throw std::runtime_error("num_buffer_increment must be positive.");
+		if(settings.freq_increment_ < 0)
+			throw std::runtime_error("freq_increment must be greater than 0.");
+		if(settings.freq_start_ < mhz(500) || settings.freq_start_ > mhz(2600))
+			throw std::runtime_error("start_freq must be 500mhz <= x <= 2600mhz.");
+		if(settings.freq_end_ < mhz(500) || settings.freq_end_ > mhz(2600))
+			throw std::runtime_error("end_freq must be 500mhz <= x <= 2600mhz.");
+		if(settings.freq_start_ >= settings.freq_end_)
+			throw std::runtime_error("start_freq must be less than end_freq.");
+		if(settings.bandwidth_ < mhz(1) || settings.bandwidth_ > mhz(20))
+			throw std::runtime_error("bandwidth must be 1mhz <= x <= 20mhz.");
+		if(settings.packet_length_ < 5 || settings.packet_length_ > 130)
+			throw std::runtime_error("time must be 5ms <= x <= 130ms.");
+
+		settings.packet_length_ = milli_to_nano(settings.packet_length_);
+
+		sync_rx_benchmark_utility::benchmark(settings);
+	}
+	catch(std::exception &err) {
+		std::cout << "Error: " << err.what() << std::endl;
+	}
+	catch(...) {
+		std::cout << "Unknown error has occurred." << std::endl;
+	}
+
+	std::cout << std::endl;
+
+	return 0;
+}
+
+int main(int argc, char* argv[]) {
+	//-c 77ecda454d25738ee419f6fd676170d5 13cadd7137a3ef4d18dcfcc179667998 47d54d57db30c9169c98c53e30c08d9a d01d12c0dc5c71c8a081e0c25f27b6fd d7db1c90fd06a5a6d950615ea7fa6164
+	//return handle_calibration(argc, argv);
+	return handle_sync_rx_benchmark(argc, argv);
 }
 

@@ -55,6 +55,10 @@ public:
 
 	void read_gpio(uint32_t &value);
 
+	void write_config_gpio(uint32_t value);
+
+	void read_config_gpio(uint32_t &value);
+
 	void set_lms_reg(uint8_t reg, uint8_t value);
 
 	void read_lms_reg(uint8_t reg, uint8_t &value);
@@ -91,6 +95,10 @@ public:
 	void write_license(const license &license);
 
 	void set_log_level(int level);
+
+	const ipp_16sc_aligned_buffer& get_internal_iq_buffer() { return aligned_buffer_; }
+
+	void set_blade_sync_rx_settings(const blade_settings &settings);
 
 private:
 	void enable_blade_rx();

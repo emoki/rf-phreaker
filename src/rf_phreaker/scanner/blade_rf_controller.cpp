@@ -380,18 +380,28 @@ void blade_rf_controller::read_vctcxo_trim(uint16_t &trim)
 		check_blade_status(bladerf_get_vctcxo_trim(comm_blade_rf_->blade_rf(), &trim), __FILE__, __LINE__);
 }
 
-void blade_rf_controller::write_gpio(uint32_t value)
-{
+void blade_rf_controller::write_gpio(uint32_t value) {
 	check_blade_comm();
 
 	check_blade_status(bladerf_expansion_gpio_write(comm_blade_rf_->blade_rf(), value), __FILE__, __LINE__);
 }
 
-void blade_rf_controller::read_gpio(uint32_t &value)
-{
+void blade_rf_controller::read_gpio(uint32_t &value) {
 	check_blade_comm();
 
 	check_blade_status(bladerf_expansion_gpio_read(comm_blade_rf_->blade_rf(), &value), __FILE__, __LINE__);
+}
+
+void blade_rf_controller::write_config_gpio(uint32_t value) {
+	check_blade_comm();
+
+	check_blade_status(bladerf_config_gpio_write(comm_blade_rf_->blade_rf(), value), __FILE__, __LINE__);
+}
+
+void blade_rf_controller::read_config_gpio(uint32_t &value) {
+	check_blade_comm();
+
+	check_blade_status(bladerf_config_gpio_read(comm_blade_rf_->blade_rf(), &value), __FILE__, __LINE__);
 }
 
 void blade_rf_controller::set_lms_reg(uint8_t address, uint8_t value)
@@ -773,7 +783,6 @@ void blade_rf_controller::write_license(const license &lic)
 	write_eeprom(ee);
 }
 
-
 void blade_rf_controller::set_log_level(int level) {
 	switch(level) {
 	case 0:
@@ -800,6 +809,12 @@ void blade_rf_controller::set_log_level(int level) {
 	default:
 		bladerf_log_set_verbosity(BLADERF_LOG_LEVEL_INFO);
 	}
+}
+
+void blade_rf_controller::set_blade_sync_rx_settings(const blade_settings &settings) {
+	blade_settings_ = settings;
+
+	enable_blade_rx();
 }
 
 
