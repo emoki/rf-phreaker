@@ -22,6 +22,7 @@
 #include "sys/alt_stdio.h"
 #include "system.h"
 #include "altera_avalon_spi.h"
+#include "altera_avalon_spi_regs.h"
 #include "altera_avalon_uart_regs.h"
 #include "altera_avalon_jtag_uart_regs.h"
 #include "altera_avalon_pio_regs.h"
@@ -189,33 +190,24 @@ void adf4351_write( uint32_t val ) {
  */
 
 
-// XB_SPI_WRITE
-static uint8_t spi_last_response = 0;
-static uint8_t spi_last_valid = 0;
-void xb_gps_spi_write( uint8_t val ) {
-
-
-    alt_u32 slave_select = 0;		//is the index on the SS_n... 0 = first index
-
-
-	alt_avalon_spi_command( SPI_2_BASE, slave_select, 1, &val, 1, &spi_last_response, 0) ;
-	spi_last_valid = 1;
-}
 // XB_SPI_READ
-//
-uint8_t xb_gps_spi_read(  ) {
+uint8_t xb_gps_spi( uint8_t write ) {
 	alt_u32 slave_select = 0;
     uint8_t reply = 0;
-    uint8_t dummy = 0;
 
-    if(spi_last_valid){
-    	uint8_t tmp = spi_last_response;
-    	spi_last_response = 0;
-    	spi_last_valid = 0;
-    	return tmp;
+    // If sending out A,B,C
+    // gps uses full duplex mode... while writing out B, gps will be responding to A.
+    // Unfortunately, spi_command discards miso data while it writes out data... thanks Altera.
+    // It records a response, after all data has been written to mosi.
+    // That misses half of the data, so we use this instead.
+    if(write == 0){
+        alt_avalon_spi_command( SPI_2_BASE, slave_select, 0, 0, 1, &reply, 0 );
+    }
+    else {
+    	alt_avalon_spi_command( SPI_2_BASE, slave_select, 1, &write, 0, 0, 0 );
     }
 
-	alt_avalon_spi_command( SPI_2_BASE, slave_select, 1, &dummy, 1, &reply, 0) ;
+
 	return reply;
 }
 
@@ -238,12 +230,19 @@ void create_xb_uart_interrupt(){
 	IOWR_ALTERA_AVALON_UART_CONTROL(UART_1_BASE, ctl | (1 << ALTERA_AVALON_UART_CONTROL_RRDY_OFST) );
 }
 
+//char gbuf[100] = {0};
+//int gbuf_i = 0;
 //collects the xb uart rx, when the library doesn't check the read data very often.
 void monitor_xb_uart(void* context){
 	//quick read if data available, else skip
 	uint8_t data = 0;
 	if( IORD_ALTERA_AVALON_UART_STATUS(UART_1_BASE) & ALTERA_AVALON_UART_STATUS_RRDY_MSK ){
 		data = IORD_ALTERA_AVALON_UART_RXDATA(UART_1_BASE) ;
+		//gbuf[gbuf_i++] = data;
+		//if(gbuf_i == 100){
+		//	gbuf_i = 0;
+		//}
+		//*gbuf = gbuf_i % 30;
 		fifo_enqueue(&uf, data);
 	}
 
@@ -312,7 +311,7 @@ void lms_spi_write( uint8_t address, uint8_t val )
         uint8_t data[2] = { address |= LMS_WRITE, val } ;
         alt_avalon_spi_command( SPI_0_BASE, 0, 2, data, 0, 0, 0 ) ;
     }
-    return ;
+    return;
 }
 
 
@@ -356,6 +355,8 @@ struct uart_cmd {
 
 //writes chars
 void debugs(const char* s){
+	return;
+	// ----- SKIPPED ON RELEASE ------
 
 	int k = 0;
 	while(s[k] != 0){
@@ -365,6 +366,9 @@ void debugs(const char* s){
 }
 // writes line
 void debug(const char* s){
+	return;
+	// ----- SKIPPED ON RELEASE ------
+
 	debugs("DBG: ");
 	debugs(s);
 	debugs("\r\n");
@@ -394,7 +398,7 @@ void init_NIOS(){
 // Entry point
 int main()
 {
-	  //debug("\r\n[NIOS POWER ON]");
+  debug("\r\n[NIOS POWER ON]");
 
 
   // initialize circular buffer
@@ -411,7 +415,7 @@ int main()
 	  fifo_enqueue(&uf,msg[jj-1]);
   }
 
-  //debug("[NIOS Init...]");
+
 
 
   //setup xb uart intrrupt handler, so no data is skipped
@@ -443,7 +447,7 @@ int main()
       while(1)
       {
 
-		  monitor_xb_uart(0);
+		  //monitor_xb_uart(0);
 
           // Check if anything is in the FSK UART
           if( IORD_ALTERA_AVALON_UART_STATUS(UART_0_BASE) & ALTERA_AVALON_UART_STATUS_RRDY_MSK )
@@ -606,11 +610,9 @@ int main()
                                 cmd_ptr->data = (IORD_ALTERA_AVALON_PIO_DATA(PIO_0_BASE)) >> (cmd_ptr->addr * 8);
                             }
                             else if (device == GDEV_XB_GPS_SPI){
-
-                            	if(cmd_ptr->addr == 0)
-								{
-                            		cmd_ptr->data = xb_gps_spi_read( );
-								}
+                            	//sends data to gps, then reads response
+                            	// round trip ~ 10us  (5Mhz clock)
+                            	cmd_ptr->data = xb_gps_spi( cmd_ptr->data );
                             }
                             else if (device == GDEV_XB_GPS_UART){
                             	//cmd bytes come in low first
@@ -647,12 +649,8 @@ int main()
                             } else if (device == GDEV_XB_LO) {
                                 //COLLECT_BYTES(adf4351_write(tmpvar));
                             	//disabled, conflicts with spi_2.
-                            } else if (device == GDEV_XB_GPS_SPI) {
-                            	if(cmd_ptr->addr == 0)
-								{
-                            		xb_gps_spi_write(cmd_ptr->data);
-								}
                             } else if (device == GDEV_XB_GPS_UART) {
+                            	// Only first byte has data
                             	if(cmd_ptr->addr == 0)
 								{
 									xb_gps_uart_write(cmd_ptr->data);
