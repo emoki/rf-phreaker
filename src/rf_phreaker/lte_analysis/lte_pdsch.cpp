@@ -37,16 +37,28 @@
 namespace rf_phreaker {
 
 unsigned int lte_subframe_map[OFDM_SYMBOLS_PER_SUBFRAME][MAX_FFT_SIZE];
-unsigned int scrambling_seq_pdsch[6144],turbo_decoded_bits[6144];
 Ipp32fc lte_pdsch_fft[OFDM_SYMBOLS_PER_SUBFRAME][MAX_FFT_SIZE],lte_pdsch_fft_shifted[OFDM_SYMBOLS_PER_SUBFRAME][MAX_FFT_SIZE];
-Ipp32fc h_est_pdsch[6144];
-Ipp32fc h_est_pdsch_temp[NUM_ANTENNA_MAX][6144];
-Ipp32fc lte_pdsch_re[6144];
-Ipp32f lte_pdsch_demod_llr[6144],descrambled_pdcch_llr[6144],deinterleaved_llr[6144];
 unsigned char lte_pdsch_byte_seq[512];
+//#define MAX_SUBCARRIER_MODULATION_SIZE MAX_SUBCARRIERS * MAX_MODULATION_ORDER * MAX_MODULATION_SIZE
+#define MAX_SUBCARRIER_MODULATION_SIZE 6144
+std::vector<unsigned int> scrambling_seq_pdsch_buf(MAX_SUBCARRIER_MODULATION_SIZE);
+std::vector<unsigned int> turbo_decoded_bits_buf(MAX_SUBCARRIER_MODULATION_SIZE);
+ipp_32fc_array h_est_pdsch_buf(MAX_SUBCARRIER_MODULATION_SIZE);
+ipp_32fc_array h_est_pdsch_temp_buf(NUM_ANTENNA_MAX * MAX_SUBCARRIER_MODULATION_SIZE);
+ipp_32fc_array lte_pdsch_re_buf(MAX_SUBCARRIER_MODULATION_SIZE);
+ipp_32f_array lte_pdsch_demod_llr_buf(MAX_SUBCARRIER_MODULATION_SIZE);
+ipp_32f_array descrambled_pdcch_llr_buf(MAX_SUBCARRIER_MODULATION_SIZE);
+ipp_32f_array deinterleaved_llr_buf(MAX_SUBCARRIER_MODULATION_SIZE);
 
+unsigned int *scrambling_seq_pdsch = &scrambling_seq_pdsch_buf[0];
+unsigned int *turbo_decoded_bits = &turbo_decoded_bits_buf[0];
+Ipp32fc *h_est_pdsch = h_est_pdsch_buf.get();
+Ipp32fc *h_est_pdsch_temp = h_est_pdsch_temp_buf.get();
+Ipp32fc *lte_pdsch_re = lte_pdsch_re_buf.get();
+Ipp32f *lte_pdsch_demod_llr = lte_pdsch_demod_llr_buf.get();
+Ipp32f *descrambled_pdcch_llr = descrambled_pdcch_llr_buf.get();
+Ipp32f *deinterleaved_llr = deinterleaved_llr_buf.get();
 
-//layer_3_information::lte_rrc_message_aggregate message;
 extern HANDLE  hConsole;
 
 
@@ -79,8 +91,9 @@ unsigned char modulation_order;
 int c_init;
 unsigned int n_rnti= 0xFFFF,q=0,temp,lte_pdsch_crc;
 
+h_noise_var[0] = h_noise_var[1] = 10000.0;
 //h_noise_var[0] = h_noise_var[1] = 169800.0;
-h_noise_var[0] = h_noise_var[1] = 2.2149e5;
+//h_noise_var[0] = h_noise_var[1] = 2.2149e5;
 //lte_pdsch_get_subframe_map
 lte_pdsch_get_subframe_map(LteData,cell_no,sub_frame_index);
 
@@ -352,7 +365,7 @@ int lte_pdsch_get_symbols (Ipp32fc* inSignal,
 						   unsigned int end_rb)
 {
 	// Changed the size of fft_index to match that of h_est_pdsch_temp
-	const int fft_index_size = 6144/*4096*/;
+	const int fft_index_size = 6144/*MAX_SUBCARRIERS * OFDM_SYMBOLS_PER_SUBFRAME*//*4096*/;
 	unsigned int fft_index[fft_index_size], temp;
 
 for(unsigned int symbol_idx = LteData[cell_no].lteControlSysmbolLenght;symbol_idx<OFDM_SYMBOLS_PER_SUBFRAME;symbol_idx++)
@@ -401,7 +414,7 @@ for(unsigned int symbol_idx = LteData[cell_no].lteControlSysmbolLenght;symbol_id
 			lte_pdsch_re[pdsch_re_count] = lte_pdsch_fft_shifted[symbol_idx][fft_index[pdsch_re_count]];
 			for (unsigned int antNum =0 ; antNum < LteData[cell_no].NumAntennaPorts; antNum++)
 			{
-			  h_est_pdsch_temp[antNum][pdsch_re_count] = h_est[antNum * LteData[cell_no].fftSize * OFDM_SYMBOLS_PER_FRAME
+				h_est_pdsch_temp[antNum * MAX_SUBCARRIER_MODULATION_SIZE + pdsch_re_count] = h_est[antNum * LteData[cell_no].fftSize * OFDM_SYMBOLS_PER_FRAME
 													          + sub_frame_index * OFDM_SYMBOLS_PER_SUBFRAME *LteData[cell_no].fftSize
 													          + symbol_idx * LteData[cell_no].fftSize
 												    	      + fft_index[pdsch_re_count]];
@@ -419,13 +432,14 @@ for(unsigned int symbol_idx = LteData[cell_no].lteControlSysmbolLenght;symbol_id
 		break;
 }
 
-memset(h_est_pdsch,0,2048*4*2);
+h_est_pdsch_buf.zero_out();
+//memset(h_est_pdsch,0,2048*4*2);
 
 for (unsigned int antNum =0 ; antNum < LteData[cell_no].NumAntennaPorts; antNum++)
 {
 	for(unsigned int kk=0;kk<pdsch_re_count;kk++)
 	{
-         h_est_pdsch[antNum*pdsch_re_count+kk]=h_est_pdsch_temp[antNum][kk];
+		h_est_pdsch[antNum*pdsch_re_count + kk] = h_est_pdsch_temp[antNum * MAX_SUBCARRIER_MODULATION_SIZE + kk];
 	}
 }
 

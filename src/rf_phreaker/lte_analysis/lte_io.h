@@ -50,6 +50,7 @@ inline std::ostream& output_lte_meas_debug_header(std::ostream &os)
 		<< "rsrq" << lte_io_delimiter
 		<< "sync_quality" << lte_io_delimiter
 		<< "sib1" << lte_io_delimiter
+		<< "sib3" << lte_io_delimiter
 		<< "sib4" << lte_io_delimiter
 		<< "sib5" << lte_io_delimiter
 		<< "sib6" << lte_io_delimiter
@@ -185,6 +186,11 @@ inline std::ostream& operator<<( std::ostream &os, const LteFrameNumSamples &t)
 	case FRAMENUMSAMPLES_FFT1024:
 		os << "153600";
 		break;
+	case FRAMENUMSAMPLES_FFT1536:
+		os << "230400";
+		break;
+	case FRAMENUMSAMPLES_FFT2048:
+		os << "307200";
 	default:
 		os << "default unknown";
 	};
@@ -214,6 +220,18 @@ inline std::ostream& operator<<( std::ostream &os, const LteCyclicPrefixSamples 
 	case CP_SAMPLES_FFT1024_SYMBOL_1TO6:
 		os << "72";
 		break;
+	case CP_SAMPLES_FFT1536_SYMBOL_0:
+		os << "120";
+		break;
+	case CP_SAMPLES_FFT1536_SYMBOL_1TO6:
+		os << "108";
+		break;
+	case CP_SAMPLES_FFT2048_SYMBOL_0:
+		os << "160";
+		break;
+	case CP_SAMPLES_FFT2048_SYMBOL_1TO6:
+		os << "144";
+		break;
 	default:
 		os << "default unknown";
 	};
@@ -233,6 +251,12 @@ inline std::ostream& operator<<( std::ostream &os, const LteNumResourceBlocks &t
 		break;
 	case NUMRESOURCEBLOCKS_FFT1024:
 		os << "50";
+		break;
+	case NUMRESOURCEBLOCKS_FFT1536:
+		os << "75";
+		break;
+	case NUMRESOURCEBLOCKS_FFT2048:
+		os << "100";
 		break;
 	default:
 		os << "default unknown";

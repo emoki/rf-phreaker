@@ -12,6 +12,9 @@
 
 namespace rf_phreaker {
 
+static const double sqrt_10 = 3.1622776601683793319988935444327;
+static const double sqrt_42 = 6.480740698407860230965967436088;
+
 void generate_cell_RS(Ipp32fc *cell_RS, unsigned int *OFDM_SymbNos, unsigned int *pSymbNum, 
 	Ipp16u *frquencyIdx, unsigned int slotNo, unsigned int cellID, CYCLICPREFIX cyclicPrefixMode, 
 	unsigned int N_RB_DL, unsigned int N_RB_max_DL, unsigned int antPort)
@@ -216,6 +219,11 @@ void myfft(Ipp32fc *pSeq_F, const Ipp32fc *pSeq_T, int len)
 			Init_FFT_1024(TRUE);
 			FFT_1024(pSeq_T, pSeq_F);
 			Init_FFT_1024(FALSE);
+			break;
+		case 2048:
+			Init_FFT_2048(TRUE);
+			FFT_2048(pSeq_T, pSeq_F);
+			Init_FFT_2048(FALSE);
 			break;
 		default: 
 			printf("Not supported FFT length");
@@ -477,20 +485,119 @@ void LTE_modulate(Ipp32fc* outSignal, unsigned int* inSymb, unsigned int len,
 		}
 		case MQPSK:
 		{
-			Ipp32fc constellation[4] = {{0.707f,0.707f}, {0.707f,-0.707f},
-				{-0.707f,0.707f}, {-0.707f,-0.707f}};
-			for(unsigned int ii=0;ii<len;ii++)
+			Ipp32fc constellation[4] = {{0.707f, 0.707f}, {0.707f, -0.707f},
+				{-0.707f, 0.707f}, {-0.707f, -0.707f}};
+			for(unsigned int ii = 0; ii<len; ii++)
 			{
 				outSignal[ii] = constellation[inSymb[ii]];
 			}
 			break;
 		}
 		case M16QAM:
-			printf("16QAM. Add it later\n"); // TODO::
+		{
+			Ipp32fc constellation[16] = {
+					{1 / sqrt_10, 1 / sqrt_10},
+					{1 / sqrt_10, 3 / sqrt_10},
+					{3 / sqrt_10, 1 / sqrt_10},
+					{3 / sqrt_10, 3 / sqrt_10},
+					{1 / sqrt_10, -1 / sqrt_10},
+					{1 / sqrt_10, -3 / sqrt_10},
+					{3 / sqrt_10, -1 / sqrt_10},
+					{3 / sqrt_10, -3 / sqrt_10},
+					{-1 / sqrt_10, 1 / sqrt_10},
+					{-1 / sqrt_10, 3 / sqrt_10},
+					{-3 / sqrt_10, 1 / sqrt_10},
+					{-3 / sqrt_10, 3 / sqrt_10},
+					{-1 / sqrt_10, -1 / sqrt_10},
+					{-1 / sqrt_10, -3 / sqrt_10},
+					{-3 / sqrt_10, -1 / sqrt_10},
+					{-3 / sqrt_10, -3 / sqrt_10}};
+			for(unsigned int ii = 0; ii < len; ii++) {
+				outSignal[ii] = constellation[inSymb[ii]];
+			}
 			break;
+		}
 		case M64QAM:
-			printf("64QAM. Add it later\n"); // TODO::
+		{
+			Ipp32fc constellation[64] = {
+					{3 / sqrt_42, 3 / sqrt_42},
+					{3 / sqrt_42, 1 / sqrt_42},
+					{1 / sqrt_42, 3 / sqrt_42},
+					{1 / sqrt_42, 1 / sqrt_42},
+					{3 / sqrt_42, 5 / sqrt_42},
+					{3 / sqrt_42, 7 / sqrt_42},
+					{1 / sqrt_42, 5 / sqrt_42},
+					{1 / sqrt_42, 7 / sqrt_42},
+
+					{5 / sqrt_42, 3 / sqrt_42},
+					{5 / sqrt_42, 1 / sqrt_42},
+					{7 / sqrt_42, 3 / sqrt_42},
+					{7 / sqrt_42, 1 / sqrt_42},
+					{5 / sqrt_42, 5 / sqrt_42},
+					{5 / sqrt_42, 7 / sqrt_42},
+					{7 / sqrt_42, 5 / sqrt_42},
+					{7 / sqrt_42, 7 / sqrt_42},
+
+					{3 / sqrt_42, -3 / sqrt_42},
+					{3 / sqrt_42, -1 / sqrt_42},
+					{1 / sqrt_42, -3 / sqrt_42},
+					{1 / sqrt_42, -1 / sqrt_42},
+					{3 / sqrt_42, -5 / sqrt_42},
+					{3 / sqrt_42, -7 / sqrt_42},
+					{1 / sqrt_42, -5 / sqrt_42},
+					{1 / sqrt_42, -7 / sqrt_42},
+
+					{5 / sqrt_42, -3 / sqrt_42},
+					{5 / sqrt_42, -1 / sqrt_42},
+					{7 / sqrt_42, -3 / sqrt_42},
+					{7 / sqrt_42, -1 / sqrt_42},
+					{5 / sqrt_42, -5 / sqrt_42},
+					{5 / sqrt_42, -7 / sqrt_42},
+					{7 / sqrt_42, -5 / sqrt_42},
+					{7 / sqrt_42, -7 / sqrt_42},
+
+					{-3 / sqrt_42, 3 / sqrt_42},
+					{-3 / sqrt_42, 1 / sqrt_42},
+					{-1 / sqrt_42, 3 / sqrt_42},
+					{-1 / sqrt_42, 1 / sqrt_42},
+					{-3 / sqrt_42, 5 / sqrt_42},
+					{-3 / sqrt_42, 7 / sqrt_42},
+					{-1 / sqrt_42, 5 / sqrt_42},
+					{-1 / sqrt_42, 7 / sqrt_42},
+
+					{-5 / sqrt_42, 3 / sqrt_42},
+					{-5 / sqrt_42, 1 / sqrt_42},
+					{-7 / sqrt_42, 3 / sqrt_42},
+					{-7 / sqrt_42, 1 / sqrt_42},
+					{-5 / sqrt_42, 5 / sqrt_42},
+					{-5 / sqrt_42, 7 / sqrt_42},
+					{-7 / sqrt_42, 5 / sqrt_42},
+					{-7 / sqrt_42, 7 / sqrt_42},
+
+					{-3 / sqrt_42, -3 / sqrt_42},
+					{-3 / sqrt_42, -1 / sqrt_42},
+					{-1 / sqrt_42, -3 / sqrt_42},
+					{-1 / sqrt_42, -1 / sqrt_42},
+					{-3 / sqrt_42, -5 / sqrt_42},
+					{-3 / sqrt_42, -7 / sqrt_42},
+					{-1 / sqrt_42, -5 / sqrt_42},
+					{-1 / sqrt_42, -7 / sqrt_42},
+
+					{-5 / sqrt_42, -3 / sqrt_42},
+					{-5 / sqrt_42, -1 / sqrt_42},
+					{-7 / sqrt_42, -3 / sqrt_42},
+					{-7 / sqrt_42, -1 / sqrt_42},
+					{-5 / sqrt_42, -5 / sqrt_42},
+					{-5 / sqrt_42, -7 / sqrt_42},
+					{-7 / sqrt_42, -5 / sqrt_42},
+					{-7 / sqrt_42, -7 / sqrt_42},
+
+			};
+			for(unsigned int ii = 0; ii < len; ii++) {
+				outSignal[ii] = constellation[inSymb[ii]];
+			}
 			break;
+		}
 		default:
 			printf("unsupported modulation\n");
 			break;

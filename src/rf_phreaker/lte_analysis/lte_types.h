@@ -19,7 +19,7 @@ namespace rf_phreaker {
 #define	NUM_SUBFRAMES_PER_FRAME		 10     
 #define NUM_ANTENNA_MAX				 4
 #define NUM_FRAMES					 1
-#define FFT_SIZE                     2048
+
 #define MAX_FFT_SIZE                 2048
 #define MAX_CONTROL_SYMBOL_LENGHT    4
 
@@ -32,8 +32,13 @@ namespace rf_phreaker {
 #define OFDM_SYMBOLS_PER_FRAME  OFDM_SYMBOLS_PER_SLOT * NUM_SLOTS_PER_SUBFRAME * NUM_SUBFRAMES_PER_FRAME
 #define OFDM_SYMBOLS_PER_SUBFRAME OFDM_SYMBOLS_PER_SLOT * NUM_SLOTS_PER_SUBFRAME
 
+// double check this value
+#define MAX_SUBCARRIERS NUM_SUBCARRIER_PER_RESOURCE_BLOCK * NUMRESOURCEBLOCKS_FFT2048
+#define MAX_MODULATION_ORDER 6
+#define MAX_MODULATION_SIZE 64
+
 static const rf_phreaker::frequency_type lte_bandwidth_1_4_mhz_sampling_rate = khz(1920);
-static const rf_phreaker::frequency_type lte_bandwidth_3_mhz_sampling_rate = khz(3840); 
+static const rf_phreaker::frequency_type lte_bandwidth_3_mhz_sampling_rate = khz(3840);
 static const rf_phreaker::frequency_type lte_bandwidth_5_mhz_sampling_rate = khz(7680);
 static const rf_phreaker::frequency_type lte_bandwidth_10_mhz_sampling_rate = khz(15360);
 static const rf_phreaker::frequency_type lte_bandwidth_15_mhz_sampling_rate = khz(23040);
@@ -125,6 +130,8 @@ enum LteFrameNumSamples
 	FRAMENUMSAMPLES_FFT256 = 38400,
 	FRAMENUMSAMPLES_FFT512 = 76800,
 	FRAMENUMSAMPLES_FFT1024 = 153600,
+	FRAMENUMSAMPLES_FFT1536 = 230400,
+	FRAMENUMSAMPLES_FFT2048 = 307200,
 };
 
 enum LteCyclicPrefixSamples
@@ -135,6 +142,10 @@ enum LteCyclicPrefixSamples
 	CP_SAMPLES_FFT512_SYMBOL_1TO6 = 36,
 	CP_SAMPLES_FFT1024_SYMBOL_0 = 80,
 	CP_SAMPLES_FFT1024_SYMBOL_1TO6 = 72,
+	CP_SAMPLES_FFT1536_SYMBOL_0 = 120,
+	CP_SAMPLES_FFT1536_SYMBOL_1TO6 = 108,
+	CP_SAMPLES_FFT2048_SYMBOL_0 = 160,
+	CP_SAMPLES_FFT2048_SYMBOL_1TO6 = 144,
 
 };
 
@@ -143,6 +154,8 @@ enum LteNumResourceBlocks
 	NUMRESOURCEBLOCKS_FFT256 = 15,
 	NUMRESOURCEBLOCKS_FFT512 = 25,
 	NUMRESOURCEBLOCKS_FFT1024 = 50,
+	NUMRESOURCEBLOCKS_FFT1536 = 75,
+	NUMRESOURCEBLOCKS_FFT2048 = 100,
 };
 
 enum CYCLICPREFIX
@@ -155,6 +168,8 @@ enum lte_num_bits_dci_1a
 	NUM_BITS_DCI_1A_3MHZ = 38,
 	NUM_BITS_DCI_1A_5MHZ = 41,
 	NUM_BITS_DCI_1A_10MHZ = 43,
+	NUM_BITS_DCI_1A_15MHZ = 43,
+	NUM_BITS_DCI_1A_20MHZ = 44,
 
 };
 

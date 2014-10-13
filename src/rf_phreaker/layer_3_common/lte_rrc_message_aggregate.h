@@ -41,6 +41,7 @@ struct lte_sib1_type : public lte_sib_base {
 		tracking_area_code_ = -1;
 		cell_id_ = -1;
 		scheduling_info_list_.clear();
+		si_window_length_ms_ = -1;
 	}
 	void swap(lte_sib1_type &a) {
 		multiple_plmn_.swap(a.multiple_plmn_);

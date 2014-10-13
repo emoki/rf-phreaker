@@ -34,7 +34,7 @@ const unsigned int SamplesPerSlot384 = 3840;
 const int signal_max_size = 655345;
 
 /* Static Allocation of  memory for Channel Estimates per frame for all the antennas */	
-Ipp32fc hEst[OFDM_SYMBOLS_PER_FRAME * NUM_FRAMES * FFT_SIZE * NUM_ANTENNA_MAX];
+Ipp32fc hEst[OFDM_SYMBOLS_PER_FRAME * NUM_FRAMES * MAX_FFT_SIZE * NUM_ANTENNA_MAX];
 
 Ipp32f hNoiseVariance[256];
 

@@ -3,7 +3,7 @@
 #include <memory>
 #include "rf_phreaker/cappeen/cappeen_license.h"
 
-TEST(CappeenLicense, TestMain) {
+TEST(CappeenLicense, DISABLED_TestMain) {
 	using namespace beagle_api;
 	using namespace rf_phreaker::cappeen_api;
 

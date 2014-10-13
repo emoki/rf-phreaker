@@ -4,9 +4,12 @@ EXPORTS
 	ippsMalloc_32fc
 	ippsMalloc_32f
 	ippsMalloc_64f
+	ippsMalloc_32u
 	ippsFree
 	ippsZero_32fc
 	ippsZero_32f
+	ippsZero_16s
+	ippsZero_16sc
 	ippsMul_32fc
 	ippsSubC_32fc_I
 	ippsSqrt_32f_I

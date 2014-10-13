@@ -19,8 +19,28 @@
 
 namespace rf_phreaker {
 
-Ipp32f adjusted_input[6144],adjusted_input_1[6144],sequence_intrvd_0[6144],sequence_intrvd_1[6144],sequence_intrvd_2[6144];
-Ipp32f output_sequence_0[6144],output_sequence_1[6144],output_sequence_2[6144];
+#define MAX_TRANSPORT_BLOCK_SIZE 75376
+//#define MAX_NUM_BITS_GENERATED 24 + 4 + MAX_TRANSPORT_BLOCK_SIZE
+#define MAX_NUM_BITS_GENERATED 6144
+ipp_32f_array adjusted_input_buf(MAX_NUM_BITS_GENERATED);
+ipp_32f_array adjusted_input_1_buf(MAX_NUM_BITS_GENERATED);
+ipp_32f_array sequence_intrvd_0_buf(MAX_NUM_BITS_GENERATED);
+ipp_32f_array sequence_intrvd_1_buf(MAX_NUM_BITS_GENERATED);
+ipp_32f_array sequence_intrvd_2_buf(MAX_NUM_BITS_GENERATED);
+ipp_32f_array output_sequence_0_buf(MAX_NUM_BITS_GENERATED);
+ipp_32f_array output_sequence_1_buf(MAX_NUM_BITS_GENERATED);
+ipp_32f_array output_sequence_2_buf(MAX_NUM_BITS_GENERATED);
+
+Ipp32f *adjusted_input = adjusted_input_buf.get();
+Ipp32f *adjusted_input_1 = adjusted_input_1_buf.get();
+Ipp32f *sequence_intrvd_0 = sequence_intrvd_0_buf.get();
+Ipp32f *sequence_intrvd_1 = sequence_intrvd_1_buf.get();
+Ipp32f *sequence_intrvd_2 = sequence_intrvd_2_buf.get();
+Ipp32f *output_sequence_0 = output_sequence_0_buf.get();
+Ipp32f *output_sequence_1 = output_sequence_1_buf.get();
+Ipp32f *output_sequence_2 = output_sequence_2_buf.get();
+//Ipp32f adjusted_input[6144], adjusted_input_1[6144], sequence_intrvd_0[6144], sequence_intrvd_1[6144], sequence_intrvd_2[6144];
+//Ipp32f output_sequence_0[6144], output_sequence_1[6144], output_sequence_2[6144];
 Ipp32f sequence_0_matrix[128][32], sequence_1_matrix[128][32];
 
 unsigned int p[32] = {0, 16, 8, 24, 4, 20, 12, 28, 2, 18, 10, 26, 6, 22, 14, 30,
@@ -46,8 +66,9 @@ k_0 = r_subblock*(2*rv_idx*((3*c_subblock)/8 )+2);
 num_null_elements_subblock = (r_subblock * c_subblock) - (num_bits_generated);
 
 //Scalar addition of channel equalized repeated bits
-memset(adjusted_input,0,6144);
-if(input_sequence_len > 3*num_bits_generated)
+//memset(adjusted_input, 0, 6144);
+adjusted_input_buf.zero_out();
+if(input_sequence_len > 3 * num_bits_generated)
 {
 
 	for(unsigned int ii=0;ii<((input_sequence_len/(3*num_bits_generated))+1);ii++)

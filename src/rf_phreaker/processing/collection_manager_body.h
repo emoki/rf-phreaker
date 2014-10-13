@@ -113,7 +113,8 @@ protected:
 		std::ofstream file(name + timestamp + "_" + std::to_string(count) + ".bin", std::ios::binary);
 		if(file) {
 			boost::archive::binary_oarchive oa(file);
-			oa & *static_cast<raw_signal*>(meas);
+			oa & *meas;
+			//oa & *static_cast<raw_signal*>(meas);
 		}
 	}
 

@@ -20,7 +20,7 @@
 namespace rf_phreaker {
 
 /* Static Allocation of  memory for Channel Estimates per frame for all the antennas */	
-Ipp32fc h_est[OFDM_SYMBOLS_PER_FRAME * NUM_FRAMES * FFT_SIZE * NUM_ANTENNA_MAX];
+Ipp32fc h_est[OFDM_SYMBOLS_PER_FRAME * NUM_FRAMES * MAX_FFT_SIZE * NUM_ANTENNA_MAX];
 
 // TODO - signal_max_size should be dynamic.
 static int signal_max_size = 655345;
@@ -104,13 +104,25 @@ for(unsigned int ii = 0; ii <LteData.size(); ii++)
 		case LteBandwidth_15MHZ:
 			SampleRate = 23.04e6;
 			LteData[ii].fftSize = FFTSIZE_1536;
-			LteData[ii].frameNumSamples = FRAMENUMSAMPLES_FFT512;
+			LteData[ii].frameNumSamples = FRAMENUMSAMPLES_FFT1536;
+			LteData[ii].cPSamplesSymbol0 = CP_SAMPLES_FFT1536_SYMBOL_0;
+			LteData[ii].cPSamplesSymbol1to6 = CP_SAMPLES_FFT1536_SYMBOL_1TO6;
+			LteData[ii].numResouceBlocks = NUMRESOURCEBLOCKS_FFT1536;
+			LteData[ii].fft_subcarrier_start_index = ((LteData[ii].fftSize)
+				- (LteData[ii].numResouceBlocks *NUM_SUBCARRIER_PER_RESOURCE_BLOCK)) / 2;
+			LteData[ii].num_bits_dci_1A = NUM_BITS_DCI_1A_15MHZ;
 			break;
 
 		case LteBandwidth_20MHZ:
 			SampleRate = 30.72e6;
 			LteData[ii].fftSize = FFTSIZE_2048;
-			LteData[ii].frameNumSamples = FRAMENUMSAMPLES_FFT512;
+			LteData[ii].frameNumSamples = FRAMENUMSAMPLES_FFT2048;
+			LteData[ii].cPSamplesSymbol0 = CP_SAMPLES_FFT2048_SYMBOL_0;
+			LteData[ii].cPSamplesSymbol1to6 = CP_SAMPLES_FFT2048_SYMBOL_1TO6;
+			LteData[ii].numResouceBlocks = NUMRESOURCEBLOCKS_FFT2048;
+			LteData[ii].fft_subcarrier_start_index = ((LteData[ii].fftSize)
+				- (LteData[ii].numResouceBlocks *NUM_SUBCARRIER_PER_RESOURCE_BLOCK)) / 2;
+			LteData[ii].num_bits_dci_1A = NUM_BITS_DCI_1A_20MHZ;
 			break;
 
 		default:
@@ -119,11 +131,11 @@ for(unsigned int ii = 0; ii <LteData.size(); ii++)
 			break;
 
 	}
-	if(LteData[ii].fftSize == FFTSIZE_UNKNOWN || LteData[ii].fftSize == FFTSIZE_128
-	   || LteData[ii].fftSize == FFTSIZE_1536 || LteData[ii].fftSize == FFTSIZE_2048)
+	if(LteData[ii].fftSize == FFTSIZE_UNKNOWN || LteData[ii].fftSize == FFTSIZE_128)
 	{
-		continue;
+	continue;
 	}
+
 
 //DisplayLTEData(LteData);
 
@@ -136,7 +148,7 @@ current_frame_number = LteData[ii].frame_number;
 while((frameStartSampleIndex + LteData[ii].frameNumSamples) < (NumHalfFramesToProcess / 2 * LteData[ii].frameNumSamples))
 		{
 		
-			memset(h_est,0,OFDM_SYMBOLS_PER_FRAME * NUM_FRAMES * FFT_SIZE * NUM_ANTENNA_MAX*8);
+			memset(h_est,0,OFDM_SYMBOLS_PER_FRAME * NUM_FRAMES * MAX_FFT_SIZE * NUM_ANTENNA_MAX*8);
 			/* Channel Estimation per Frame per Antenna */
 			for(unsigned int antNum=0;antNum<LteData[ii].NumAntennaPorts;antNum++)
 			{
@@ -177,12 +189,7 @@ while((frameStartSampleIndex + LteData[ii].frameNumSamples) < (NumHalfFramesToPr
 
 				 /* Decode LTE Physical Downlink Control Channel (PDCCH) */
 
-				if(current_frame_number == 792 && subFrameIndex ==1)
-				{
-					int xx;
-					xx=0;
-				}
-
+				
                  lte_decode_pdcch(signal_384.get(),//signal768,
 	                              h_est,
 	                              hNoiseVariance,	

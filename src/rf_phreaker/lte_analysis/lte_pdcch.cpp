@@ -24,6 +24,9 @@ namespace rf_phreaker {
 //lte_info_dci_format_1a pdcch_info_dci_format_1a[6];
 lte_info_dci_format dci_format_info;
 
+ipp_32f_array pdcch_llr_buf(4096 * 100);
+ipp_32f_array descrambled_pdcch_llr_buf2(4096 * 100);
+ipp_32u_array scrambling_seq_pdcch_buf(4096 * 10);
 
 
 	
@@ -45,24 +48,29 @@ int lte_decode_pdcch(Ipp32fc* inSignal,
 					unsigned int subframeStartSampleIndex)
 
 {	
-	Ipp32fc fft_output[3][2048],fft_output_shifted[3][2048];	// Static Allocation for Maximum size FFT 
+	Ipp32fc fft_output[3][4096],fft_output_shifted[3][4096];	// Static Allocation for Maximum size FFT 
 	Ipp32fc h_est_pdcch[ NUM_RE_PER_REG * NUM_ANTENNA_MAX];
 	Ipp32fc lte_pdcch_reg_symbols[NUM_RE_PER_REG];		
-	Ipp32f pdcch_llr[4096];
+	//Ipp32f pdcch_llr[4096];
 	st_pdcch_regs pdcch_regs[1024]; // PDCCH Resource Element Groups
 	
-	Ipp32f descrambled_pdcch_llr[4096]; //PDCCH LLRs
+	//Ipp32f descrambled_pdcch_llr[4096]; //PDCCH LLRs
 
 	Ipp32u re_index_kk =0 , re_index_ll = 0,num_reg_pdcch = 0;	
-	Ipp32u pdcch_regs_interleaved_shifted_index[1024],scrambling_seq_pdcch[4096];
+	Ipp32u pdcch_regs_interleaved_shifted_index[1024]/*,scrambling_seq_pdcch[4096]*/;
 	
 	
 	Ipp32u temp;//Number of REGS for PDCCH
 	Ipp32u c_init,nSlotNum=0;
 	
 	
-	
-	
+	//// debug allocation
+	Ipp32f *pdcch_llr = pdcch_llr_buf.get();
+	Ipp32f *descrambled_pdcch_llr = descrambled_pdcch_llr_buf2.get();
+	Ipp32u *scrambling_seq_pdcch = scrambling_seq_pdcch_buf.get();
+	////
+
+
 	dci_format_info.num_dci_format_1a = 0;
 	dci_format_info.current_idx_dci_format_1a = 0;
 
@@ -70,13 +78,13 @@ int lte_decode_pdcch(Ipp32fc* inSignal,
 	dci_format_info.current_idx_dci_format_1c = 0;
 
 	//h_noise_var[0] = h_noise_var[1] = 169800.0;
-	h_noise_var[0] = h_noise_var[1] = 10000.0;
+	h_noise_var[0] = h_noise_var[1] = 10000.0/4;
 
 	// TODO - ecs removed - if(subFrameIndex==5)
 	temp=0;
 
 	//FFT Operation
-   for(unsigned int control_symbol_idx=0;control_symbol_idx< LteData[cell_no].lteControlSysmbolLenght;control_symbol_idx++)
+	for (unsigned int control_symbol_idx = 0; control_symbol_idx< LteData[cell_no].lteControlSysmbolLenght; control_symbol_idx++)
    {
 	   if(control_symbol_idx>0)
 	   {
@@ -145,8 +153,8 @@ for(unsigned int regs=0;regs<num_reg_pdcch;regs++)
  //num_reg_pdcch = 144;
 	/* Descrambling */
 nSlotNum =   2*subFrameIndex;
-c_init = (nSlotNum/2) *(1<<9) + LteData[cell_no].RsRecord.ID; //6.8.2 TS36.211
-
+c_init = (nSlotNum/2) *(1<<9) + LteData[cell_no].RsRecord.ID; //6.7.1 TS36.211
+	
 generate_PN_seq(scrambling_seq_pdcch, //PDCCH Scambling Sequence
 		        c_init, //c_init
 			    num_reg_pdcch* NUM_RE_PER_REG * 2); 
@@ -178,7 +186,7 @@ int lte_get_freq_indices_pdcch( lte_measurements &LteData,
 					            unsigned int cell_no,
 								st_pdcch_regs *pdcch_regs,
 								Ipp32u &num_reg_pdcch,
-								Ipp32fc (*fft_output_shifted)[MAX_FFT_SIZE])
+								Ipp32fc (*fft_output_shifted)[4096])
 								 	
 {
 
@@ -402,31 +410,40 @@ int lte_regs_mapping_pdcch(lte_measurements &LteData,
 						   Ipp8u(*reference_signal)[MAX_CONTROL_SYMBOL_LENGHT],						 
 						   st_pdcch_regs *pdcch_regs,
 						   Ipp32u &num_reg_pdcch,
-						   Ipp32fc (*fft_output_shifted)[MAX_FFT_SIZE])
+						   Ipp32fc (*fft_output_shifted)[4096])
 {
 Ipp32u reg_re_count=0,ref_signal_re_count = 0;
+
+
+//LteData[cell_no].rssi = 0;
+//LteData[cell_no].rsrp = 0;
+
 
 for(unsigned int kk=0;kk<LteData[cell_no].numResouceBlocks * NUM_SUBCARRIER_PER_RESOURCE_BLOCK;kk++)
 {	
 	for(unsigned int ll=0;ll<LteData[cell_no].lteControlSysmbolLenght;ll++)
 	{
-		if(ll==0)
+#if 0
+		if (ll == 0)
 		{
 		 
-		   LteData[cell_no].rssi = (fft_output_shifted[ll][kk].re * fft_output_shifted[ll][kk].re)
+			LteData[cell_no].rssi = (fft_output_shifted[ll][kk].re * fft_output_shifted[ll][kk].re)
 			                                  + (fft_output_shifted[ll][kk].im * fft_output_shifted[ll][kk].im);
 
-		 if(reference_signal[kk][ll]== 1 )
-		 {
-		 
-		 LteData[cell_no].rsrp = (fft_output_shifted[ll][kk].re * fft_output_shifted[ll][kk].re)
-			                                  + (fft_output_shifted[ll][kk].im * fft_output_shifted[ll][kk].im);
-		 ref_signal_re_count++;
+			 if ((kk - LteData[cell_no].fft_subcarrier_start_index) >= 0 )
+			 {
+				 if (reference_signal[kk - LteData[cell_no].fft_subcarrier_start_index][ll] == 1)
+				 {
+					 LteData[cell_no].rsrp = (fft_output_shifted[ll][kk].re * fft_output_shifted[ll][kk].re)
+						 + (fft_output_shifted[ll][kk].im * fft_output_shifted[ll][kk].im);
+					 ref_signal_re_count++;
+				 }
 
-		 }
+			 }
 		
 		
 		}
+#endif
 		
 		if(regs_flag[kk][ll]==1)
 		{
@@ -457,8 +474,9 @@ for(unsigned int kk=0;kk<LteData[cell_no].numResouceBlocks * NUM_SUBCARRIER_PER_
 
 //PDCCH Quadruplets Interleaving
 
- LteData[cell_no].rsrp = LteData[cell_no].rsrp / ref_signal_re_count;
- LteData[cell_no].rsrq =  LteData[cell_no].numResouceBlocks * LteData[cell_no].rsrp / LteData[cell_no].rssi;
+//LteData[cell_no].rsrp = (LteData[cell_no].rsrp) / (ref_signal_re_count);
+
+ //LteData[cell_no].rsrq =  10 * log10(LteData[cell_no].numResouceBlocks * LteData[cell_no].rsrp / LteData[cell_no].rssi);
 
 return LTE_SUCCESS;
 }
@@ -661,7 +679,7 @@ Ipp8u c_cc_subblock = 32;
 Ipp32u r_cc_subblock; //Number of rows
 Ipp32u n_null,k_w,in_lenght;
 Ipp32u interleave_matrix[128][32];//allocating a static interleaver matrix with rows ==128, column ==32
-Ipp32u k_pi,column_idx,row_idx,idx=0,w_k[1024],e[1024],j=0,k=0,temp;
+Ipp32u k_pi,column_idx,row_idx,idx=0,w_k[2048],e[2048],j=0,k=0,temp;
 Ipp8u permutation_column[32] = {1, 17, 9, 25, 5, 21, 13, 29, 3, 19, 11, 27, 7, 23, //5.1.4.2.1 TS36.212
                                 15, 31, 0, 16, 8, 24, 4, 20, 12, 28, 2, 18, 10, 26,
 							    6, 22, 14, 30};

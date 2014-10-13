@@ -38,7 +38,7 @@ public:
 	{
 		lte_measurements meas;
 
-		int status = analysis_.cell_search(*info, meas, calculate_num_half_frames(info->time_ns() > milli_to_nano(46) ? milli_to_nano(46) : info->time_ns()));
+		int status = analysis_.cell_search(*info, meas, calculate_num_half_frames(info->time_ns() > milli_to_nano(50) ? milli_to_nano(50) : info->time_ns()));
 		if(status != 0)
 			throw lte_analysis_error("Error processing lte.");
 

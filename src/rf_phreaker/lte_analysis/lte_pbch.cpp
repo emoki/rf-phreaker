@@ -256,7 +256,7 @@ void getPBCH(PBCHINFO* pbchInfo, unsigned int* bitSeq, unsigned int SFN0,
 		SFN = (SFN<<1)+bitSeq[ii];
 	}
 
-	pbchInfo->MasterIB.systemFrameNum = (SFN<<2)+SFN0-frameNo;
+	pbchInfo->MasterIB.systemFrameNum = (SFN<<2)+SFN0;
 
 	pbchInfo->NumAntPorts = (LteNumAntennaPorts)antNum;
 	

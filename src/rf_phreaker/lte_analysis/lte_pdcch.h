@@ -111,7 +111,7 @@ int lte_get_freq_indices_pdcch( lte_measurements &LteData,
 					            unsigned int cell_no,
 								st_pdcch_regs *pdcch_regs,
 								Ipp32u &num_reg_pdcch,
-								Ipp32fc (*fft_output_shifted)[MAX_FFT_SIZE]);
+								Ipp32fc (*fft_output_shifted)[4096]);
 
 int lte_regs_mapping_phich(lte_measurements &LteData,	                       
                            Ipp8u (*regs_flag)[MAX_CONTROL_SYMBOL_LENGHT],
@@ -123,7 +123,7 @@ int lte_regs_mapping_pdcch(lte_measurements &LteData,
 						   Ipp8u(*reference_signal)[MAX_CONTROL_SYMBOL_LENGHT],						 
 						   st_pdcch_regs *pdcch_regs,
 						   Ipp32u &num_reg_pdcch,
-						   Ipp32fc (*fft_output_shifted)[MAX_FFT_SIZE]);
+						   Ipp32fc (*fft_output_shifted)[4096]);
 
 
 int lte_pdcch_interleave_shift(lte_measurements &LteData,

@@ -1030,6 +1030,10 @@ void LteChannelEst(Ipp32fc* H, Ipp32f* pVar, Ipp32fc* inSignal,
 	unsigned int antPort, unsigned int framesToProcess, unsigned int DLBW)
 {
 	unsigned int FFTSize, useSubCarriers;
+	unsigned int RBNumTx; //RB number transmitted  
+	unsigned int RBNumRx; //RB number received by LTE receiver. 
+	//Since the BW of LTE scanner is not equal to acutal BW of LTE signal
+	//RBNumRx<=RBNumTx
 	
 	switch(DLBW)
 	{
@@ -1056,6 +1060,8 @@ void LteChannelEst(Ipp32fc* H, Ipp32f* pVar, Ipp32fc* inSignal,
 	    case LteBandwidth_20MHZ:
 	        FFTSize = 2048;
 	        useSubCarriers = 1200;
+			RBNumRx = 100;//Raj
+			FFTSize = 2048;//Raj
 			break;
 		default:
 			printf("Unsupport bandwidth\n");
@@ -1064,10 +1070,7 @@ void LteChannelEst(Ipp32fc* H, Ipp32f* pVar, Ipp32fc* inSignal,
 
 	}
 
-	unsigned int RBNumTx = useSubCarriers/12; //RB number transmitted  
-	unsigned int RBNumRx; //RB number received by LTE receiver. 
-						  //Since the BW of LTE scanner is not equal to acutal BW of LTE signal
-						  //RBNumRx<=RBNumTx
+	RBNumTx = useSubCarriers/12; //RB number transmitted  
 	
 	
 	// For 4.875MHz receiver

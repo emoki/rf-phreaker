@@ -1,9 +1,14 @@
 #include "gtest/gtest.h"
 #include "rf_phreaker/lte_analysis/lte_analysis.h"
 #include "rf_phreaker/lte_analysis/lte_io.h"
-#include "rf_phreaker/scanner/measurement_info.h"
+#include "rf_phreaker/common/raw_signal.h"
+#include "rf_phreaker/common/common_serialization.h"
 #include "rf_phreaker/common/common_utility.h"
+#include "rf_phreaker/scanner/measurement_info.h"
+#include "rf_phreaker/scanner/measurement_info_serialization.h"
 #include <boost/lexical_cast.hpp>
+#include "boost/archive/binary_iarchive.hpp"
+#include "boost/archive/binary_oarchive.hpp"
 #include <iostream>
 
 using namespace rf_phreaker;
@@ -11,52 +16,69 @@ using namespace rf_phreaker;
 TEST(LteAnalysisTests, TestGeneral)
 {
 	try {
-		const int end = 1000;
-		std::string base_filename = "../../../../rf_phreaker/test_files/";
-		std::string prefix = "lte_layer_3_1398066558_";
+		const int num_iterations = 10000;
+
+		// We can import measurements using a file handle directly (ascii io) or using boost::serialization. boost serialization allows 
+		// more flexibility and when in binary mode, it is faster and smaller size.
+		bool use_boost_archive = true;
+
+		// We are using a relative path to load the test files.  It follows the convention of a out-of-source build using cmake.  
+		// The build directory is located on the same level as the git root directory.  The git root directory's name is lte_phreaker
+		// and the test_files are located within test_files. So the directory struct would look like:
+		// ./cmake_build_directory			(cmake build directory)
+		// ./lte_phreaker					(git root directory)
+		// ./lte_phreaker/test_files		(directory containing test data)
+		std::string folder_path = "../../../../rf_phreaker/test_files/for_rajesh/";
+
+		std::string prefix = "lte_10mhz_sib6_1412915486_";
 		std::string suffix = ".bin";
 		//std::string suffix = ".txt";
 
 
+		lte_config config;
+ 		//rf_phreaker::raw_signal info;
 		rf_phreaker::scanner::measurement_info info;
-		std::shared_ptr<lte_config> config;
-		std::shared_ptr<lte_analysis> analysis; 
 
-		for(int i = 13; i <= end; ++i) {
-			std::ifstream file(base_filename + prefix + boost::lexical_cast<std::string>(i) + suffix);
-			
-			if(!file)
-				break;
 
-			file >> info;
+		lte_analysis analysis(config);
 
-			if(!config.get()) {
-				config.reset(new lte_config);
-				config->sampling_rate((int)info.sampling_rate());
-				config->clock_rate((int)info.sampling_rate());
-				config->max_signal_length(info.get_iq().length());
-				analysis.reset(new lte_analysis(*config));
+		for(int i = 5; i < num_iterations; ++i) {
+			std::string full_path_and_filename = folder_path + prefix + boost::lexical_cast<std::string>(i)+suffix;
 
-			}
-			lte_measurements lte_meas;
+			std::ifstream file(full_path_and_filename, use_boost_archive ? std::ios_base::binary : std::ios_base::in);
+
+			if(file) {
+				if(use_boost_archive) {
+					boost::archive::binary_iarchive ia(file);
+					ia & info;
+				}
+				else
+					file >> info;
+
+				//std::ofstream t(folder_path + "old_format_" + prefix + boost::lexical_cast<std::string>(i)+suffix);
+				//t << info;
+				//continue;
+
+				lte_measurements lte_meas;
 				
-			int status = analysis->cell_search(info, lte_meas, int(info.time_ns() / 1e6 / 5));
-			EXPECT_EQ(0, status);
+				int status = analysis.cell_search(info, lte_meas, 10/*int(info.time_ns() / 1e6 / 5)*/);
+				EXPECT_EQ(0, status);
 
-			status = analysis->decode_layer_3(info, lte_meas, int(info.time_ns() / 1e6 / 5));
-			EXPECT_EQ(0, status);
+				status = analysis.decode_layer_3(info, lte_meas, int(info.time_ns() / 1e6 / 5));
+				EXPECT_EQ(0, status);
 				
-			static std::ofstream output_file("lte_measurements.txt");
-			static bool write_header = true;
-			if(write_header) {
-				output_file << "file_num\tfreq\t" << output_lte_meas_debug_header(output_file) << "\n";
-				write_header = false;
-			}
+				static std::ofstream output_file("lte_measurements.txt");
+				static bool write_header = true;
+				if(write_header) {
+					output_file << "file_num\tfreq\t";
+					output_lte_meas_debug_header(output_file) << "\n";
+					write_header = false;
+				}
 
-
-			for(auto &lte : lte_meas) {
-				std::cout << i << "\t" << info.frequency() / 1e6 << "\t" << lte << "\n";
-				output_file << i << "\t" << info.frequency() / 1e6 << "\t" << lte << "\n";
+				for(auto &lte : lte_meas) {
+					std::cout << i << "\t" << info.frequency() / 1e6 << "\t" << lte << "\n";
+					output_file << i << "\t" << info.frequency() / 1e6 << "\t" << lte << "\n";
+				}
 			}
 		}
 	}

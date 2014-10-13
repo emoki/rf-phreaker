@@ -4,6 +4,10 @@
 
 namespace rf_phreaker {
 
+int Init_FFT_2048(int init);
+int FFT_2048(const Ipp32fc *Src, Ipp32fc *Dst);
+int InverseFFT_2048(const Ipp32fc *Src, Ipp32fc *Dst);
+
 int Init_FFT_1024(int init );
 int FFT_1024( const Ipp32fc *Src, Ipp32fc *Dst );
 int InverseFFT_1024( const Ipp32fc *Src, Ipp32fc *Dst );

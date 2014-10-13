@@ -22,15 +22,15 @@ TEST(ProcessingGraph, TestGeneral)
 			scanner_list = blade.list_available_scanners().get();
 
 		if(scanner_list.size()) {
+			rf_phreaker::settings config;
+			rf_phreaker::settings_io io("cappeen_api.ini");
+			io.read(config);
+
 			auto scanner_id = (*scanner_list.begin())->id();
 
 			blade.open_scanner(scanner_id);
 
-			blade.do_initial_scanner_config();
-
-			rf_phreaker::settings config;
-			rf_phreaker::settings_io io("cappeen_api.ini");
-			io.read(config);
+			blade.do_initial_scanner_config(config.blade_settings_);
 
 			initialize_collection_info_defaults(config);
 
@@ -47,9 +47,10 @@ TEST(ProcessingGraph, TestGeneral)
 				//umts_sweep.adjust(add_collection_info(umts_sweep_collection_info(i, UMTS_OPERATING_BAND_4)));
 				//umts_sweep.adjust(add_collection_info(umts_sweep_collection_info(i, UMTS_OPERATING_BAND_5)));
 			//umts_sweep.adjust(add_collection_info(umts_sweep_collection_info(876800000)));
-			//lte_layer_3.adjust(add_collection_info(lte_layer_3_collection_info(2140000000, lte_bandwidth_1_4_mhz_sampling_rate, khz(1500), LTE_OPERATING_BAND_1)));
-			//lte_layer_3.adjust(add_collection_info(lte_layer_3_collection_info(2120000000, lte_bandwidth_1_4_mhz_sampling_rate, khz(1500), LTE_OPERATING_BAND_1)));
-			lte_layer_3.adjust(add_collection_info(lte_layer_3_collection_info(1967500000, lte_bandwidth_1_4_mhz_sampling_rate, khz(1500), LTE_OPERATING_BAND_2)));
+			lte_layer_3.adjust(add_collection_info(lte_layer_3_collection_info(2140000000, lte_bandwidth_1_4_mhz_sampling_rate, khz(1500), LTE_OPERATING_BAND_1)));
+			lte_layer_3.adjust(add_collection_info(lte_layer_3_collection_info(2120000000, lte_bandwidth_1_4_mhz_sampling_rate, khz(1500), LTE_OPERATING_BAND_1)));
+			lte_layer_3.adjust(add_collection_info(lte_layer_3_collection_info(1935000000, lte_bandwidth_1_4_mhz_sampling_rate, khz(1500), LTE_OPERATING_BAND_2)));
+			//lte_layer_3.adjust(add_collection_info(lte_layer_3_collection_info(1967500000, lte_bandwidth_1_4_mhz_sampling_rate, khz(1500), LTE_OPERATING_BAND_2)));
 			//lte_layer_3.adjust(add_collection_info(lte_layer_3_collection_info(1947500000, lte_bandwidth_1_4_mhz_sampling_rate, khz(1500), LTE_OPERATING_BAND_2)));
 			//lte_layer_3.adjust(add_collection_info(lte_layer_3_collection_info(739000000, lte_bandwidth_1_4_mhz_sampling_rate, khz(1500), LTE_OPERATING_BAND_12)));
 			//lte_layer_3.adjust(add_collection_info(lte_layer_3_collection_info(879600000, lte_bandwidth_1_4_mhz_sampling_rate, khz(1500), LTE_OPERATING_BAND_5)));
@@ -67,7 +68,7 @@ TEST(ProcessingGraph, TestGeneral)
 
 			//graph.wait();
 
-			std::this_thread::sleep_for(std::chrono::minutes(45));
+			std::this_thread::sleep_for(std::chrono::hours(45));
 			//std::this_thread::sleep_for(std::chrono::seconds(45));
 
 			graph.cancel_and_wait();

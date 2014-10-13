@@ -18,6 +18,7 @@ class ipp_array;
 typedef ipp_array<Ipp32fc> ipp_32fc_array;
 typedef ipp_array<Ipp32f> ipp_32f_array;
 typedef ipp_array<Ipp16sc> ipp_16sc_array;
+typedef ipp_array<Ipp32u> ipp_32u_array;
 
 
 inline std::ostream& operator <<(std::ostream &os, const Ipp32fc &t);
@@ -202,11 +203,16 @@ template<typename DataType> inline void ipp_array<DataType>::allocate(int length
 	allocate_(length);
 }
 
-template<> inline void ipp_array<Ipp16sc>::allocate_(int length)
-{
+template<> inline void ipp_array<Ipp16sc>::allocate_(int length) {
 	array_ = ippsMalloc_16sc(length);
 	if(array_ == 0)
 		throw std::runtime_error("Unable to construct Ipp16s ipp_array.\n");
+}
+
+template<> inline void ipp_array<Ipp32u>::allocate_(int length) {
+	array_ = ippsMalloc_32u(length);
+	if(array_ == 0)
+		throw std::runtime_error("Unable to construct Ipp32u ipp_array.\n");
 }
 
 template<> inline void ipp_array<Ipp32fc>::allocate_(int length)
@@ -230,8 +236,7 @@ template<> inline void ipp_array<Ipp32f>::allocate_(int length)
 		throw std::runtime_error("Unable to construct Ipp32f ipp_array.\n");
 }
 
-template<> inline void ipp_array<Ipp16sc>::set_array_values(Ipp16sc value)
-{
+template<> inline void ipp_array<Ipp16sc>::set_array_values(Ipp16sc value) {
 	ipp_helper::check_status(ippsSet_16sc(value, array_, length_));
 }
 

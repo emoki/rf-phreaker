@@ -41,7 +41,7 @@ int lteDecodePCFICH(Ipp32fc* inSignal,
 
 {
 
-	Ipp32fc fftOutput[2048],fftOutputShifted[2048]; // Static Allocation for Maximum size FFT 
+	Ipp32fc fftOutput[4096],fftOutputShifted[4096]; // Static Allocation for Maximum size FFT 
 	Ipp32f detLLR[32]; //32 Bits of PCFICH
 	Ipp32f deScrambledLLRPcfich[32];
 	unsigned int ltePCFICHFreqIndices[16];
