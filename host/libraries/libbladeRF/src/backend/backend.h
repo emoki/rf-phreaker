@@ -107,9 +107,11 @@ struct backend_fns {
     /* VCTCXO accessor */
     int (*dac_write)(struct bladerf *dev, uint16_t value);
 
-    /* Expansion board SPI */
-    int (*xb_spi_write)(struct bladerf *dev, uint32_t value);
-    int (*xb_spi_read)(struct bladerf *dev, uint32_t *value);
+	/* NUAND Expansion board SPI */
+	int(*xb_spi)(struct bladerf *dev, uint32_t send);
+
+    /* D.P. Expansion board SPI */
+	int(*xb_gps_spi)(struct bladerf *dev, uint32_t send, uint32_t *receive);
 
     /* Expansion board UART */
     int (*xb_uart_write)(struct bladerf *dev, uint8_t value);

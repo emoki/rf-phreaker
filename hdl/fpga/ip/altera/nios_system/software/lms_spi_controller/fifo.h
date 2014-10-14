@@ -95,7 +95,7 @@ void fifo_delete(fifo* us){
 
 
 
-/*
+/*  -- rename to main() and run on ideone.com C99 strict
 void fifo_test(){
 	fifo f = fifo_new(malloc(10), 10);
 	int i;

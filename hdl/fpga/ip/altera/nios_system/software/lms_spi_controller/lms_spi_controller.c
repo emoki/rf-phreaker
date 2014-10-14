@@ -153,7 +153,7 @@ void dac_write( uint16_t val ) {
     return ;
 }
 
-/*
+
 // Transverter write
 void adf4351_write( uint32_t val ) {
     union {
@@ -172,10 +172,10 @@ void adf4351_write( uint32_t val ) {
     sval.byte[1] = sval.byte[2];
     sval.byte[2] = t;
 
-    alt_avalon_spi_command( SPI_1_BASE, 1, 4, &sval.val, 0, 0, 0 ) ;
+    alt_avalon_spi_command( SPI_1_BASE, 1, 4, &(sval.val), 0, 0, 0 ) ;
     return ;
 }
-*/
+
 
 
 
@@ -211,7 +211,7 @@ uint8_t xb_gps_spi( uint8_t write ) {
 	return reply;
 }
 
-// 1024 will hold about 5 nmea sentences, or about 2 sec of activity on gps
+// 1024 will hold about 5-8 nmea sentences, or about 2 sec of activity on gps
 // must be power of 2 for speed improvment
 #define XB_UART_FIFO_BUFFER_SIZE (1<<10) //1024
 static fifo uf = {0};
@@ -230,19 +230,14 @@ void create_xb_uart_interrupt(){
 	IOWR_ALTERA_AVALON_UART_CONTROL(UART_1_BASE, ctl | (1 << ALTERA_AVALON_UART_CONTROL_RRDY_OFST) );
 }
 
-//char gbuf[100] = {0};
-//int gbuf_i = 0;
+
 //collects the xb uart rx, when the library doesn't check the read data very often.
 void monitor_xb_uart(void* context){
 	//quick read if data available, else skip
 	uint8_t data = 0;
 	if( IORD_ALTERA_AVALON_UART_STATUS(UART_1_BASE) & ALTERA_AVALON_UART_STATUS_RRDY_MSK ){
 		data = IORD_ALTERA_AVALON_UART_RXDATA(UART_1_BASE) ;
-		//gbuf[gbuf_i++] = data;
-		//if(gbuf_i == 100){
-		//	gbuf_i = 0;
-		//}
-		//*gbuf = gbuf_i % 30;
+
 		fifo_enqueue(&uf, data);
 	}
 
@@ -393,6 +388,9 @@ void init_NIOS(){
 	  IOWR_ALTERA_AVALON_PIO_DATA(IQ_CORR_RX_PHASE_GAIN_BASE, DEFAULT_CORRECTION);
 	  IOWR_ALTERA_AVALON_PIO_DATA(IQ_CORR_TX_PHASE_GAIN_BASE, DEFAULT_CORRECTION);
 
+	  //disable all UART_1 interrupts...
+	  IOWR_ALTERA_AVALON_UART_CONTROL(UART_1_BASE, 0);
+
 }
 
 // Entry point
@@ -408,13 +406,13 @@ int main()
 
 
 
-
+/*
   char* msg = "<< NIOS OK >>\r\n";
   int jj = 0;
   while(msg[jj++] != 0){
 	  fifo_enqueue(&uf,msg[jj-1]);
   }
-
+*/
 
 
 
@@ -446,7 +444,7 @@ int main()
       state = LOOKING_FOR_MAGIC;
       while(1)
       {
-
+    	  // comment out for the SPI build
 		  //monitor_xb_uart(0);
 
           // Check if anything is in the FSK UART
@@ -647,8 +645,7 @@ int main()
                             } else if (device == GDEV_VCTXCO) {
                                 COLLECT_BYTES(dac_write(tmpvar));
                             } else if (device == GDEV_XB_LO) {
-                                //COLLECT_BYTES(adf4351_write(tmpvar));
-                            	//disabled, conflicts with spi_2.
+                                COLLECT_BYTES(adf4351_write(tmpvar));
                             } else if (device == GDEV_XB_GPS_UART) {
                             	// Only first byte has data
                             	if(cmd_ptr->addr == 0)

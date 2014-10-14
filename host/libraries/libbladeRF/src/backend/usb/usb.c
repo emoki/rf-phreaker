@@ -87,9 +87,10 @@ static int access_peripheral(struct bladerf *dev, uint8_t peripheral,
 
 	
     /* Send the command */
-    status = usb->fn->bulk_transfer(driver, PERIPHERAL_EP_OUT,
-                                     buf, sizeof(buf),
-                                     PERIPHERAL_TIMEOUT_MS);
+	status = usb->fn->bulk_transfer(driver, PERIPHERAL_EP_OUT,
+		buf, sizeof(buf),
+		PERIPHERAL_TIMEOUT_MS);
+
     if (status != 0) {
         log_debug("Failed to write perpherial access command: %s\n",
                   bladerf_strerror(status));
@@ -98,9 +99,9 @@ static int access_peripheral(struct bladerf *dev, uint8_t peripheral,
 
     /* Read back the ACK. The command data is only used for a read operation,
      * and is thrown away otherwise */
-    status = usb->fn->bulk_transfer(driver, PERIPHERAL_EP_IN,
-                                    buf, sizeof(buf),
-                                    PERIPHERAL_TIMEOUT_MS);
+	status = usb->fn->bulk_transfer(driver, PERIPHERAL_EP_IN,
+		buf, sizeof(buf),
+		PERIPHERAL_TIMEOUT_MS);
 
     if (dir == UART_PKT_MODE_DIR_READ && status == 0) {
         for (i = 0; i < len; i++) {
@@ -1339,22 +1340,45 @@ static int usb_xb_express_write(struct bladerf* dev, int custom_addr, uint8_t* d
 	return 0;
 }
 
-static int usb_xb_spi_write(struct bladerf *dev, uint32_t value)
+static int usb_xb_spi(struct bladerf *dev, uint32_t value)
 {
-	//targets adf
-    //return gpio_write(dev, 36, value);
-
-    return gpio_write(dev, 48, value);
+	return gpio_write(dev, 36, value);
 }
 
-//loads the last chached miso response
-static int usb_xb_spi_read(struct bladerf *dev, uint32_t *value)
+static int usb_xb_gps_spi(struct bladerf *dev, uint32_t send, uint32_t* receive )
 {
-	uint32_t rd;
-	int sts = gpio_read(dev, 48, &rd);
-	*value = rd;
-	return sts;
+	// Had to add this modefied version of gpio_read because normal gpio_read() will not 
+	// let you initialize the data first sent to the device.
+
+
+	int status;
+	size_t i;
+	struct uart_cmd cmd;
+
+	uint32_t addr = 48;
+
+	// low to high byte chunks
+	for (i = 0; i < sizeof(send); i++) {
+		assert((addr + i) <= UINT8_MAX);
+		cmd.addr = (uint8_t)(addr + i);
+		cmd.data = (send >> (8*i)) & 0xff;   // send initialized data - to the 'send' bytes
+
+		status = access_peripheral(dev, UART_PKT_DEV_GPIO,
+			USB_DIR_DEVICE_TO_HOST, &cmd, 1);
+
+		if (status < 0) {
+			return status;
+		}
+
+		if (receive != NULL){
+			*receive |= (cmd.data << (i * 8));
+		}
+		
+	}
+
+	return status;
 }
+
 
 static int usb_xb_uart_write(struct bladerf *dev, uint8_t value)
 {
@@ -1517,8 +1541,8 @@ const struct backend_fns backend_fns_usb = {
 
     FIELD_INIT(.dac_write, usb_dac_write),
 
-    FIELD_INIT(.xb_spi_write, usb_xb_spi_write),
-    FIELD_INIT(.xb_spi_read, usb_xb_spi_read),
+	FIELD_INIT(.xb_spi, usb_xb_spi),
+    FIELD_INIT(.xb_gps_spi, usb_xb_gps_spi),
 
     FIELD_INIT(.xb_uart_write, usb_xb_uart_write),
     FIELD_INIT(.xb_uart_read, usb_xb_uart_read),

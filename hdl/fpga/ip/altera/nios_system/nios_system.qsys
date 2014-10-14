@@ -124,27 +124,11 @@
          type = "int";
       }
    }
-   element iq_corr_tx_phase_gain.s1
+   element uart_0.s1
    {
       datum baseAddress
       {
-         value = "69920";
-         type = "String";
-      }
-   }
-   element pio_2.s1
-   {
-      datum baseAddress
-      {
-         value = "69888";
-         type = "String";
-      }
-   }
-   element uart_1.s1
-   {
-      datum baseAddress
-      {
-         value = "69696";
+         value = "69824";
          type = "String";
       }
    }
@@ -156,19 +140,11 @@
          type = "String";
       }
    }
-   element pio_1.s1
+   element iq_corr_tx_phase_gain.s1
    {
       datum baseAddress
       {
-         value = "69904";
-         type = "String";
-      }
-   }
-   element onchip_memory2_0.s1
-   {
-      datum baseAddress
-      {
-         value = "32768";
+         value = "69920";
          type = "String";
       }
    }
@@ -180,11 +156,27 @@
          type = "String";
       }
    }
-   element uart_0.s1
+   element pio_2.s1
    {
       datum baseAddress
       {
-         value = "69824";
+         value = "69888";
+         type = "String";
+      }
+   }
+   element onchip_memory2_0.s1
+   {
+      datum baseAddress
+      {
+         value = "32768";
+         type = "String";
+      }
+   }
+   element pio_1.s1
+   {
+      datum baseAddress
+      {
+         value = "69904";
          type = "String";
       }
    }
@@ -193,6 +185,14 @@
       datum baseAddress
       {
          value = "69760";
+         type = "String";
+      }
+   }
+   element uart_1.s1
+   {
+      datum baseAddress
+      {
+         value = "69696";
          type = "String";
       }
    }
@@ -228,19 +228,19 @@
          type = "String";
       }
    }
-   element spi_1.spi_control_port
-   {
-      datum baseAddress
-      {
-         value = "69792";
-         type = "String";
-      }
-   }
    element spi_2.spi_control_port
    {
       datum baseAddress
       {
          value = "69728";
+         type = "String";
+      }
+   }
+   element spi_1.spi_control_port
+   {
+      datum baseAddress
+      {
+         value = "69792";
          type = "String";
       }
    }
@@ -685,7 +685,7 @@
   <parameter name="masterSPI" value="true" />
   <parameter name="numberOfSlaves" value="1" />
   <parameter name="syncRegDepth" value="2" />
-  <parameter name="targetClockRate" value="5000000" />
+  <parameter name="targetClockRate" value="6700000" />
   <parameter name="targetSlaveSelectToSClkDelay" value="0.0" />
   <parameter name="avalonSpec" value="2.0" />
   <parameter name="inputClockRate" value="80000000" />

@@ -1413,29 +1413,33 @@ int bladerf_dac_write(struct bladerf *dev, uint16_t val)
     return status;
 }
 
+/*------------------------------------------------------------------------------
+* NUAND XB SPI register write/read
+*----------------------------------------------------------------------------*/
+
+
+int bladerf_xb_spi_write(struct bladerf *dev, uint32_t send)
+{
+	int status;
+	MUTEX_LOCK(&dev->ctrl_lock);
+
+	status = XB_SPI_WRITE(dev, send);
+
+	MUTEX_UNLOCK(&dev->ctrl_lock);
+	return status;
+}
 
 /*------------------------------------------------------------------------------
- * XB SPI register write/read
+ * DP XB SPI register write/read
  *----------------------------------------------------------------------------*/
 
 
-int bladerf_xb_spi_write(struct bladerf *dev, uint32_t val)
+int bladerf_xb_gps_spi(struct bladerf *dev, uint32_t send, uint32_t *receive)
 {
 	int status;
     MUTEX_LOCK(&dev->ctrl_lock);
 
-    status = dev->fn->xb_spi_write(dev,val);
-
-    MUTEX_UNLOCK(&dev->ctrl_lock);
-    return status;
-}
-
-int bladerf_xb_spi_read(struct bladerf *dev, uint32_t* val)
-{
-	int status;
-    MUTEX_LOCK(&dev->ctrl_lock);
-
-    status = dev->fn->xb_spi_read(dev,val);
+    status = dev->fn->xb_gps_spi(dev, send, receive);
 
     MUTEX_UNLOCK(&dev->ctrl_lock);
     return status;

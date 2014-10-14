@@ -2490,7 +2490,20 @@ int CALL_CONV bladerf_dac_write(struct bladerf *dev, uint16_t val);
 
 
 /**
- * Write value to secondary XB SPI, gets response
+* Write value to NUAND xb200 SPI chip
+*
+* @param   dev         Device handle
+* @param   val         Data to write to XB SPI
+* @param 	resp		Data in response
+*
+* @return 0 on success, value from \ref RETCODES list on failure
+*/
+API_EXPORT
+int CALL_CONV bladerf_xb_spi_write(struct bladerf *dev, uint32_t send);
+
+
+/**
+ * Write value to D.P. XB GPS SPI interface, gets response
  *
  * @param   dev         Device handle
  * @param   val         Data to write to XB SPI
@@ -2499,19 +2512,7 @@ int CALL_CONV bladerf_dac_write(struct bladerf *dev, uint16_t val);
  * @return 0 on success, value from \ref RETCODES list on failure
  */
 API_EXPORT
-int CALL_CONV bladerf_xb_spi_read(struct bladerf *dev, uint32_t* val);
-
-/**
- * Write value to secondary XB SPI
- *
- * @param   dev         Device handle
- * @param   val         Data to write to XB SPI
- *
- * @return 0 on success, value from \ref RETCODES list on failure
- */
-API_EXPORT
-int CALL_CONV bladerf_xb_spi_write(struct bladerf *dev, uint32_t val);
-
+int CALL_CONV bladerf_xb_gps_spi(struct bladerf *dev, uint32_t send, uint32_t *receive);
 
 
 /**
