@@ -528,22 +528,24 @@ measurement_info blade_rf_controller::get_rf_data(frequency_type frequency, time
 	else
 		blade_bandwidth = parameter_cache_.bandwidth();
 
-	// For now we do not need to use the mask because we only use the expansion gpio pins
-	// for the switch settings. When the pins are used for other purposes we'll need to make
-	// sure we only set the pins necessary for the gpio.
+
+	uint32_t gpio = 0;
 	if(switch_mask) {
+		gpio = switch_setting & switch_mask;
 		check_blade_status(bladerf_expansion_gpio_write(comm_blade_rf_->blade_rf(),
 			switch_setting & switch_mask), __FILE__, __LINE__);
+		LOG_L(VERBOSE) << "Manually setting xb gpio to " << gpio;
 	}
 	else {
 		auto auto_switch_setting = scanner_blade_rf_->eeprom_.cal_.get_rf_switch(frequency);
-		uint32_t gpio = auto_switch_setting.switch_setting_ & auto_switch_setting.switch_mask_;
+		gpio = auto_switch_setting.switch_setting_ & auto_switch_setting.switch_mask_;
 		if(gpio_cache_ != gpio) {
 			check_blade_status(bladerf_expansion_gpio_write(comm_blade_rf_->blade_rf(),
 				gpio), __FILE__, __LINE__);
-			gpio_cache_ = gpio;
+			LOG_L(VERBOSE) << "Automatically setting xb gpio to " << gpio;
 		}
 	}
+	gpio_cache_ = gpio;
 
 	// BladeRF only accepts data num_samples that are a multiple of 1024.
 	// Because the blade rx sync parameters are configurable we want to make sure we 
