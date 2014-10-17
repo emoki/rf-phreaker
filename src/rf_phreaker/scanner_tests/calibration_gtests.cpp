@@ -8,31 +8,39 @@
 using namespace rf_phreaker;
 using namespace rf_phreaker::scanner;
 
+class cali_holder {
+public:
+	cali_holder() {
+		cal_.nuand_serial_ = "123";
+		cal_.nuand_calibration_date_ = 123;
+		cal_.nuand_freq_correction_value_ = 456;
+		cal_.nuand_freq_correction_date_ = 789;
+		cal_.rf_board_serial_ = "456";
+		cal_.rf_board_calibration_date_ = 0123;
+		cal_.nuand_adjustment_.path_.low_freq_ = mhz(200);
+		cal_.nuand_adjustment_.path_.high_freq_ = mhz(230);
+		cal_.nuand_adjustment_.spacing_ = mhz(10);
+		cal_.nuand_adjustment_.rf_adjustments_.push_back(10.1);
+		cal_.nuand_adjustment_.rf_adjustments_.push_back(20.2);
+		cal_.nuand_adjustment_.rf_adjustments_.push_back(30.3);
+		rf_path_adjustment adj;
+		adj.identifier_ = 1;
+		adj.adj_ = cal_.nuand_adjustment_;
+		cal_.rf_board_adjustments_.insert(std::make_pair(adj.identifier_, adj));
+		adj.identifier_ = 2;
+		adj.adj_.path_.low_freq_ = mhz(300);
+		adj.adj_.path_.high_freq_ = mhz(330);
+		cal_.rf_board_adjustments_.insert(std::make_pair(adj.identifier_, adj));
+		cal_.rf_switches_.insert(std::make_pair(mhz(230), rf_switch_setting(1, mhz(200), mhz(230), 0x12345, 0x000FF)));
+		cal_.rf_switches_.insert(std::make_pair(mhz(330), rf_switch_setting(2, mhz(300), mhz(330), 0x67890, 0xF00FF)));
+	}
+	calibration cal_;
+};
+
 TEST(CalibrationTest, GeneralTest)
 {
-	calibration cal1;
-	cal1.nuand_serial_ = "123";
-	cal1.nuand_calibration_date_ = 123;
-	cal1.nuand_freq_correction_value_ = 456;
-	cal1.nuand_freq_correction_date_ = 789;
-	cal1.rf_board_serial_ = "456";
-	cal1.rf_board_calibration_date_ = 0123;
-	cal1.nuand_adjustment_.path_.low_freq_ = mhz(200);
-	cal1.nuand_adjustment_.path_.high_freq_ = mhz(230);
-	cal1.nuand_adjustment_.spacing_ = mhz(10);
-	cal1.nuand_adjustment_.rf_adjustments_.push_back(10.1);
-	cal1.nuand_adjustment_.rf_adjustments_.push_back(20.2);
-	cal1.nuand_adjustment_.rf_adjustments_.push_back(30.3);
-	rf_path_adjustment adj;
-	adj.identifier_ = 1;
-	adj.adj_ = cal1.nuand_adjustment_;
-	cal1.rf_board_adjustments_.insert(std::make_pair(adj.identifier_, adj));
-	adj.identifier_ = 2;
-	adj.adj_.path_.low_freq_ = mhz(300);
-	adj.adj_.path_.high_freq_ = mhz(330);
-	cal1.rf_board_adjustments_.insert(std::make_pair(adj.identifier_, adj));
-	cal1.rf_switches_.insert(std::make_pair(mhz(230), rf_switch_setting(1, mhz(200), mhz(230), 0x12345, 0x000FF)));
-	cal1.rf_switches_.insert(std::make_pair(mhz(330), rf_switch_setting(2, mhz(300), mhz(330), 0x67890, 0x000FF)));
+	cali_holder cal_holder;
+	calibration &cal1 = cal_holder.cal_;
 
 	{
 		std::ofstream f("test_cali.txt");
@@ -79,7 +87,7 @@ TEST(CalibrationTest, GeneralTest)
 	EXPECT_DOUBLE_EQ(cal1.get_rf_board_adjustment(mhz(216)), 30.3);
 }
 
-TEST(CalibrationTest, DISABLED_MatlabReadTest)
+TEST(CalibrationTest, MatlabReadTest)
 {
 	std::string base_filename = "../../../../rf_phreaker/test_files/calibration_files/";
 	std::string nuand_filename = base_filename + "nuand_format_example.txt";
@@ -98,4 +106,29 @@ TEST(CalibrationTest, DISABLED_MatlabReadTest)
 		oa & cal;
 	}
 
+	calibration cal2;
+	{
+		std::ifstream f("test_cali.txt");
+		boost::archive::text_iarchive ia(f);
+		ia & cal2;
+	}
+
+}
+
+TEST(CalibrationTest, TestVersions) {
+	cali_holder cal_holder;
+	calibration &cal_v0 = cal_holder.cal_;
+
+	calibration cal;
+	{
+		std::string base_filename = "../../../../rf_phreaker/test_files/calibration_files/";
+		std::ifstream f(base_filename + "test_cali_v0.txt");
+		boost::archive::text_iarchive ia(f);
+		ia & cal;
+	}
+	EXPECT_EQ(cal.rf_switches_.size(), cal_v0.rf_switches_.size());
+	for(auto sw : cal.rf_switches_) {
+		EXPECT_EQ(sw.second.switch_mask_, cal_v0.rf_switches_[sw.first].switch_mask_ << 1);
+		EXPECT_EQ(sw.second.switch_setting_, cal_v0.rf_switches_[sw.first].switch_setting_ << 1);
+	}
 }

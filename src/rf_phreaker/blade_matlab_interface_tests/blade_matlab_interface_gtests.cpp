@@ -50,8 +50,8 @@ TEST(BladeMatlabInterface, TestMain)
 
 		for(int i = 0; i < 1; ++i) {
 			use_rf_board_adjustment_for_signal_level(false);
-			uint32_t s_setting = 5;
-			uint32_t s_mask = 10;
+			uint32_t s_setting = 0xdead;
+			uint32_t s_mask = 0xffff;
 			EXPECT_EQ(0, get_rf_data(mhz(886), mhz(5), khz(30720), 3, 30, 30, (float*)iq_data.get(), iq_data.length(), &sl, s_setting, s_mask));
 
 			EXPECT_EQ(0, only_get_rf_data((float*)iq_data.get(), iq_data.length(), &sl));

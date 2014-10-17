@@ -5,6 +5,7 @@
 #include "boost/serialization/access.hpp"
 #include "boost/serialization/vector.hpp"
 #include "boost/serialization/map.hpp"
+#include "boost/serialization/version.hpp"
 #include "rf_phreaker/scanner/gain.h"
 #include "rf_phreaker/common/measurements.h"
 #include "rf_phreaker/common/common_utility.h"
@@ -184,9 +185,19 @@ private:
 		// Bug fix - We trim the serials because some of the older calibration files have a leading space.
 		nuand_serial_ = trim_whitespace(nuand_serial_);
 		rf_board_serial_ = trim_whitespace(rf_board_serial_);
+
+		// Calibration version 0 was done on a older FPGA (< v005) where the gpio pinouts did not match what we were setting in the API.
+		// For example, if I set pin 1 in the bladeRF API pin 2 would be set on the xb connnector.  That means all calibrations done
+		// using the old FPGA we now have to shift left by one so that it will match up.
+		if(version < 1) {
+			for(auto &sw : rf_switches_) {
+				sw.second.switch_mask_ = sw.second.switch_mask_ << 1;
+				sw.second.switch_setting_ = sw.second.switch_setting_ << 1;
+			}
+		}
 	}
 };
 
-
 }}
 
+BOOST_CLASS_VERSION(rf_phreaker::scanner::calibration, 1)
