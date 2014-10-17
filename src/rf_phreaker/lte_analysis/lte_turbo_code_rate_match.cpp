@@ -20,8 +20,8 @@
 namespace rf_phreaker {
 
 #define MAX_TRANSPORT_BLOCK_SIZE 75376
-//#define MAX_NUM_BITS_GENERATED 24 + 4 + MAX_TRANSPORT_BLOCK_SIZE
-#define MAX_NUM_BITS_GENERATED 6144
+#define MAX_NUM_BITS_GENERATED 24 + 4 + MAX_TRANSPORT_BLOCK_SIZE
+//#define MAX_NUM_BITS_GENERATED 6144
 ipp_32f_array adjusted_input_buf(MAX_NUM_BITS_GENERATED);
 ipp_32f_array adjusted_input_1_buf(MAX_NUM_BITS_GENERATED);
 ipp_32f_array sequence_intrvd_0_buf(MAX_NUM_BITS_GENERATED);

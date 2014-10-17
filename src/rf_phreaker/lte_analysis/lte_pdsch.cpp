@@ -39,8 +39,8 @@ namespace rf_phreaker {
 unsigned int lte_subframe_map[OFDM_SYMBOLS_PER_SUBFRAME][MAX_FFT_SIZE];
 Ipp32fc lte_pdsch_fft[OFDM_SYMBOLS_PER_SUBFRAME][MAX_FFT_SIZE],lte_pdsch_fft_shifted[OFDM_SYMBOLS_PER_SUBFRAME][MAX_FFT_SIZE];
 unsigned char lte_pdsch_byte_seq[512];
-//#define MAX_SUBCARRIER_MODULATION_SIZE MAX_SUBCARRIERS * MAX_MODULATION_ORDER * MAX_MODULATION_SIZE
-#define MAX_SUBCARRIER_MODULATION_SIZE 6144
+#define MAX_SUBCARRIER_MODULATION_SIZE MAX_SUBCARRIERS * MAX_MODULATION_ORDER * MAX_MODULATION_SIZE
+//#define MAX_SUBCARRIER_MODULATION_SIZE 6144
 std::vector<unsigned int> scrambling_seq_pdsch_buf(MAX_SUBCARRIER_MODULATION_SIZE);
 std::vector<unsigned int> turbo_decoded_bits_buf(MAX_SUBCARRIER_MODULATION_SIZE);
 ipp_32fc_array h_est_pdsch_buf(MAX_SUBCARRIER_MODULATION_SIZE);
