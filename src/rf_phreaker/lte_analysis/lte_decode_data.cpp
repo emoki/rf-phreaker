@@ -34,7 +34,7 @@ int lte_decode_data(const Ipp32fc* SignalSamples,
 					unsigned int NumHalfFramesToProcess,
 					lte_measurements &LteData)
 {
-unsigned int signalLength384,signalLength768, processSignalLength,current_frame_number = 0;
+unsigned int signalLength384, signalLength768, processSignalLength;
 double delayTime1, delayTime2;
 
 // TODO - Declaring the signal statically is OK for now because the processing functions are protected by a mutex 
@@ -141,7 +141,11 @@ for(unsigned int ii = 0; ii <LteData.size(); ii++)
 
 frameStartSampleIndex = LteData[ii].RsRecord.StartSampleNum;
 
-current_frame_number = LteData[ii].frame_number;
+	// For debug purposes.
+	auto current_frame_number = LteData[ii].frame_number;
+	auto &current_physical_cell_id = LteData[ii].RsRecord.ID;
+	auto &current_layer_3 = LteData[ii].layer_3_;
+	auto current_dci_format = dci_format_info;
 
 // I think 6 corresponds to the number of half frames to process?  Switching to NumHalfFramesToProcess
 //while((frameStartSampleIndex + LteData[ii].frameNumSamples) < (6*LteData[ii].frameNumSamples) )
@@ -200,6 +204,12 @@ while((frameStartSampleIndex + LteData[ii].frameNumSamples) < (NumHalfFramesToPr
 
 				 					
 		       // std::cout << "LteDecodePDCCH Time elapsed: " << lte_diffclock(end,begin) << " ms\n";
+
+				 // For debug..
+				 current_physical_cell_id;
+				 current_layer_3;
+				 current_dci_format;
+				 current_frame_number;
 
 				 /* Decode LTE Physical Downlink Control Channel (PDCCH) -End*/
 

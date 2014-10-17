@@ -122,7 +122,8 @@ public:
 
 	bool is_valid_measurement(lte_measurement &meas)
 	{
-		return (meas.Bandwidth == LteBandwidth_5MHZ || meas.Bandwidth == LteBandwidth_10MHZ) && meas.NumAntennaPorts != LteAntPorts_Unknown;
+		return meas.Bandwidth == LteBandwidth_Unknown || meas.Bandwidth == LteBandwidth_1_4MHZ || 
+			meas.Bandwidth == LteBandwidth_3MHZ || meas.NumAntennaPorts != LteAntPorts_Unknown;
 	}
 
 private:
