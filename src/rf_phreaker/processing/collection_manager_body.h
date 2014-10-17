@@ -108,13 +108,12 @@ protected:
 		if(timestamp.empty())
 			timestamp = timestamp_string();
 
-		//std::ofstream file(name + timestamp + "_" + std::to_string(count) + ".bin", std::ios::binary);
-		//file << *meas;
 		std::ofstream file(name + timestamp + "_" + std::to_string(count) + ".bin", std::ios::binary);
 		if(file) {
 			boost::archive::binary_oarchive oa(file);
 			oa & *meas;
 			//oa & *static_cast<raw_signal*>(meas);
+			//file << *meas;
 		}
 	}
 
