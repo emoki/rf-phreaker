@@ -191,6 +191,7 @@ inline std::ostream& operator<<( std::ostream &os, const LteFrameNumSamples &t)
 		break;
 	case FRAMENUMSAMPLES_FFT2048:
 		os << "307200";
+		break;
 	default:
 		os << "default unknown";
 	};
