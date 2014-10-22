@@ -1,5 +1,5 @@
 
-; Copyright 2005-2013 Intel Corporation.  All Rights Reserved.
+; Copyright 2005-2014 Intel Corporation.  All Rights Reserved.
 ;
 ; The source code contained or described herein and all documents related
 ; to the source code ("Material") are owned by Intel Corporation or its
@@ -24,7 +24,7 @@ EXPORTS
 
 
 
-; Copyright 2005-2013 Intel Corporation.  All Rights Reserved.
+; Copyright 2005-2014 Intel Corporation.  All Rights Reserved.
 ;
 ; The source code contained or described herein and all documents related
 ; to the source code ("Material") are owned by Intel Corporation or its
@@ -188,6 +188,56 @@ EXPORTS
 
 
 
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
     
     
     
@@ -197,6 +247,23 @@ EXPORTS
     
     
     
+    
+    
+    
+    
+
+
+
+
+
+
+
+
+
+
+
+
+
 
 
 
@@ -225,22 +292,6 @@ EXPORTS
 
 
     
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
 
 
 
@@ -319,6 +370,10 @@ EXPORTS
 
 
 
+
+
+
+
     
     
         
@@ -372,8 +427,6 @@ EXPORTS
     
 
 
-    
-    
 
 
 
@@ -382,19 +435,8 @@ EXPORTS
     
 
 
-
-
-
-
-
-
-
-
-
-
     
-
-
+    
 
 
 
@@ -420,7 +462,7 @@ EXPORTS
 
 
 
-
+    
 
 
 
@@ -432,9 +474,6 @@ EXPORTS
 
 
 
-
-
-
     
 
 
@@ -457,6 +496,15 @@ EXPORTS
 
 
 
+
+
+
+
+
+
+
+
+    
 
 
 
@@ -558,16 +606,6 @@ EXPORTS
 
 
 
-    
-
-
-
-
-
-
-
-
-
 
 
 
@@ -583,6 +621,41 @@ EXPORTS
 
 
 
+
+    
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+    
+
+
+
+
+
+
+
+    
+    
     
 
 
@@ -592,8 +665,15 @@ EXPORTS
 
 
 
+
+
+
+
     
     
+
+
+
 
 
 
@@ -678,6 +758,7 @@ __TBB_machine_is_in_transaction
 ?is_group_execution_cancelled@task_group_context@tbb@@QBE_NXZ
 ?cancel_group_execution@task_group_context@tbb@@QAE_NXZ
 ?reset@task_group_context@tbb@@QAEXXZ
+?capture_fp_settings@task_group_context@tbb@@QAEXXZ
 ?init@task_group_context@tbb@@IAEXXZ
 ?register_pending_exception@task_group_context@tbb@@QAEXXZ
 ??1task_group_context@tbb@@QAE@XZ
@@ -787,15 +868,13 @@ TBB_runtime_interface_version
 ?internal_try_acquire_writer@spin_rw_mutex_v3@tbb@@AAE_NXZ
 
 
-
-
-
-
-
-
-
-
-
+?internal_construct@x86_rtm_rw_mutex@internal@interface8@tbb@@AAEXXZ 
+?internal_release@x86_rtm_rw_mutex@internal@interface8@tbb@@AAEXAAVscoped_lock@1234@@Z 
+?internal_acquire_writer@x86_rtm_rw_mutex@internal@interface8@tbb@@AAEXAAVscoped_lock@1234@_N@Z 
+?internal_acquire_reader@x86_rtm_rw_mutex@internal@interface8@tbb@@AAEXAAVscoped_lock@1234@_N@Z 
+?internal_upgrade@x86_rtm_rw_mutex@internal@interface8@tbb@@AAE_NAAVscoped_lock@1234@@Z 
+?internal_downgrade@x86_rtm_rw_mutex@internal@interface8@tbb@@AAE_NAAVscoped_lock@1234@@Z 
+?internal_try_acquire_writer@x86_rtm_rw_mutex@internal@interface8@tbb@@AAE_NAAVscoped_lock@1234@@Z 
 
 
 ?internal_construct@spin_mutex@tbb@@QAEXXZ
@@ -857,13 +936,16 @@ TBB_runtime_interface_version
 ?internal_pop_if_present@concurrent_queue_base_v3@internal@tbb@@IAE_NPAX@Z
 ?internal_abort@concurrent_queue_base_v3@internal@tbb@@IAEXXZ
 ?internal_push@concurrent_queue_base_v3@internal@tbb@@IAEXPBX@Z
+?internal_push_move@concurrent_queue_base_v8@internal@tbb@@IAEXPBX@Z
 ?internal_push_if_not_full@concurrent_queue_base_v3@internal@tbb@@IAE_NPBX@Z
+?internal_push_move_if_not_full@concurrent_queue_base_v8@internal@tbb@@IAE_NPBX@Z
 ?internal_size@concurrent_queue_base_v3@internal@tbb@@IBEHXZ
 ?internal_empty@concurrent_queue_base_v3@internal@tbb@@IBE_NXZ
 ?internal_set_capacity@concurrent_queue_base_v3@internal@tbb@@IAEXHI@Z
 ?internal_finish_clear@concurrent_queue_base_v3@internal@tbb@@IAEXXZ
 ?internal_throw_exception@concurrent_queue_base_v3@internal@tbb@@IBEXXZ
 ?assign@concurrent_queue_base_v3@internal@tbb@@IAEXABV123@@Z
+?move_content@concurrent_queue_base_v8@internal@tbb@@IAEXAAV123@@Z
 
 
 
