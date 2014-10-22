@@ -43,7 +43,8 @@ TEST(UmtsAnalysisTests, TestGeneral)
 				static std::ofstream out("umts_measurements.txt");
 				static bool write_header = true;
 				if(write_header) {
-					out << "file_num\tfreq\t" << output_umts_meas_debug_header(out) << "\n";
+					out << "file_num\tfreq\t";
+					output_umts_meas_debug_header(out) << "\n";
 					write_header = false;
 				}
 

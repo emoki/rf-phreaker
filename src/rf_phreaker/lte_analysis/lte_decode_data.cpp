@@ -1,6 +1,6 @@
 #include <stdlib.h>
 #include <memory.h>
-#include <math.h>
+#include <cmath>
 #include <stdio.h>
 
 #include "rf_phreaker/common/ipp_array.h"

@@ -2,7 +2,7 @@
 #include "rf_phreaker/umts_analysis/umts_types.h"
 #include "rf_phreaker/common/exception_types.h"
 #include <boost/lexical_cast.hpp>
-#include <math.h>
+#include <cmath>
 #include <ippvm.h>
 #include <iostream>
 #include <fstream>

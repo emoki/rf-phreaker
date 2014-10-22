@@ -2,7 +2,7 @@
 
 #include "stdafx.h"
 #include <stdint.h>
-#include <math.h>
+#include <cmath>
 #include <boost/assert.hpp>
 #include "rf_phreaker/common/config_file.h"
 

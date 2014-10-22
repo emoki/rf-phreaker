@@ -2,7 +2,8 @@
 #include "rf_phreaker/ipp_custom/ipp.h"
 #include "rf_phreaker/common/exception_types.h"
 #include <boost/math/common_factor.hpp>
-#include <math.h>
+#include <cmath>
+#include <algorithm>
 
 using namespace rf_phreaker;
 

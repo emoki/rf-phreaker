@@ -10,7 +10,7 @@
 #include <stdlib.h>
 #include <stdio.h>
 #include <memory.h>
-#include <math.h>
+#include <cmath>
 
 #include "lte_common.h"
 #include "lte_analysis.h"

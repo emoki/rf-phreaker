@@ -2,17 +2,16 @@
 
 #include <stdint.h>
 #include <vector>
-#include <boost/assert.hpp>
 #include <cmath>
-#include "rf_phreaker/layer_3_decoder_common/asn1_types.h"
-#include "rf_phreaker/layer_3_decoder_common/bit_stream_container.h"
-#include "rf_phreaker/layer_3_decoder_common/asn1_config.h"
 #include <fstream>
 #include <iomanip>
-
+#include <boost/assert.hpp>
+#include "rf_phreaker/layer_3_decoder_common/bit_stream_container.h"
+#include "rf_phreaker/layer_3_decoder_common/asn1_config.h"
 #include "rf_phreaker/umts_rrc_asn_library/SegCount.h"
 #include "rf_phreaker/umts_rrc_asn_library/SegmentIndex.h"
 #include "rf_phreaker/umts_rrc_asn_library/Digit.h"
+#include "rf_phreaker/layer_3_decoder_common/asn1_types.h"
 
 typedef SegCount_t segment_count_type;
 typedef SegmentIndex_t segment_index_type;

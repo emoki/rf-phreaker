@@ -1,3 +1,5 @@
+#include "rf_phreaker/umts_rrc_asn_library/BCCH-BCH-Message.h"
+#include "rf_phreaker/umts_rrc_asn_library/SIB-Type.h"
 #include "rf_phreaker/umts_layer_3_decoder/umts_bcch_bch_message.h"
 #include "rf_phreaker/umts_layer_3_decoder/umts_mib_container.h"
 #include "rf_phreaker/umts_layer_3_decoder/umts_sib_1_container.h"
@@ -7,8 +9,6 @@
 #include "rf_phreaker/umts_layer_3_decoder/umts_sib_11_bis_container.h"
 #include "rf_phreaker/umts_layer_3_decoder/umts_sib_11_and_11_bis_container.h"
 #include "rf_phreaker/umts_layer_3_decoder/umts_sib_18_container.h"
-#include "rf_phreaker/umts_rrc_asn_library/BCCH-BCH-Message.h"
-#include "rf_phreaker/umts_rrc_asn_library/SIB-Type.h"
 
 using namespace layer_3_information;
 

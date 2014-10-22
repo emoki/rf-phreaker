@@ -1,5 +1,10 @@
 #pragma once
 
+#include <string>
+#include <fstream>
+#include <iostream>
+#include <iomanip>
+
 #include "rf_phreaker/umts_analysis/umts_measurement.h"
 #include "rf_phreaker/layer_3_common/umts_bcch_bch_message_aggregate_io.h"
 

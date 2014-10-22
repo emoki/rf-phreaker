@@ -97,7 +97,7 @@ REAL__dump(double d, int canonical, asn_app_consume_bytes_f *cb, void *app_key) 
 			buflen = specialRealValue[SRV__PLUS_INFINITY].length;
 		}
 		return (cb(buf, buflen, app_key) < 0) ? -1 : buflen;
-	} else if(ilogb(d) <= -INT_MAX) {
+	} else if(ilogb___(d) <= -INT_MAX) {
 		if(copysign(1.0, d) < 0.0) {
 			buf = "-0";
 			buflen = 2;
@@ -537,11 +537,11 @@ asn_double2REAL(REAL_t *st, double dbl_value) {
 	}
 
 	/*
-	 * ilogb(+-0) returns -INT_MAX or INT_MIN (platform-dependent)
-	 * ilogb(+-inf) returns INT_MAX, logb(+-inf) returns +inf
-	 * ilogb(NaN) returns INT_MIN or INT_MAX (platform-dependent)
+	 * ilogb___(+-0) returns -INT_MAX or INT_MIN (platform-dependent)
+	 * ilogb___(+-inf) returns INT_MAX, logb(+-inf) returns +inf
+	 * ilogb___(NaN) returns INT_MIN or INT_MAX (platform-dependent)
 	 */
-	expval = ilogb(dbl_value);
+	expval = ilogb___(dbl_value);
 	if(expval <= -INT_MAX	/* Also catches +-0 and maybe isnan() */
 	|| expval == INT_MAX	/* catches isfin() and maybe isnan() */
 	) {

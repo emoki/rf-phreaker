@@ -1,7 +1,7 @@
-#include "rf_phreaker/umts_layer_3_decoder/segmented_sib_container.h"
-#include <boost/assert.hpp>
 #include <fstream>
 #include <iomanip>
+#include <boost/assert.hpp>
+#include "rf_phreaker/umts_layer_3_decoder/segmented_sib_container.h"
 
 
 segmented_sib_container::segmented_sib_container(void)

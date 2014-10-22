@@ -1,9 +1,9 @@
 #include "rf_phreaker/umts_layer_3_decoder/umts_mib_container.h"
 #include "rf_phreaker/umts_rrc_asn_library/MasterInformationBlock.h"
 #include "rf_phreaker/umts_rrc_asn_library/PLMN-Type.h"
-#include "rf_phreaker/layer_3_decoder_common/decode_support_functions.h"
 #include "rf_phreaker/umts_rrc_asn_library/SIB-TypeExt.h"
 #include "rf_phreaker/umts_rrc_asn_library/SIBSb-TypeAndTag.h"
+#include "rf_phreaker/layer_3_decoder_common/decode_support_functions.h"
 
 using namespace layer_3_information;
 

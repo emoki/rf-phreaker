@@ -1,7 +1,7 @@
 #pragma once
 
-#include "rf_phreaker/umts_layer_3_decoder/umts_system_information_container.h"
 #include "rf_phreaker/umts_rrc_asn_library/MasterInformationBlock.h"
+#include "rf_phreaker/umts_layer_3_decoder/umts_system_information_container.h"
 
 class umts_mib_container : public umts_system_information_container
 {

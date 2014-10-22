@@ -1,6 +1,6 @@
 #include <stdlib.h>
 #include <memory.h>
-#include <math.h>
+#include <cmath>
 #include <stdio.h>
 
 #include "lte_analysis.h"

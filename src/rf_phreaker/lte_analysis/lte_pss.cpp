@@ -1,6 +1,6 @@
 #include "lte_pss.h"
 #include "lte_fft.h"
-#include <math.h>
+#include <cmath>
 
 namespace rf_phreaker {
 

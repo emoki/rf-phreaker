@@ -1,8 +1,8 @@
 #pragma once
 
 #include <vector>
-#include <boost/shared_ptr.hpp>
 #include <stdint.h>
+#include <boost/shared_ptr.hpp>
 #include "asn_application.h"
 #include "per_decoder.h"
 #include "rf_phreaker/layer_3_decoder_common/pdu_element.h"

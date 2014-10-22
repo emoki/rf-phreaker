@@ -1,8 +1,8 @@
 #pragma once
 
 #include <stdint.h>
-#include "rf_phreaker/layer_3_decoder_common/asn1_types.h"
 #include <boost/assert.hpp>
+#include "rf_phreaker/layer_3_decoder_common/asn1_types.h"
 
 static int digit_placement[5] = { 1, 10, 100, 1000, 10000 };
 
