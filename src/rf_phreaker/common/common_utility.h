@@ -102,6 +102,11 @@ inline std::string timestamp_string() {
 	return std::to_string(std::chrono::system_clock::to_time_t(std::chrono::system_clock::now()));
 }
 
+inline std::string static_timestamp_string() {
+	static std::string static_timestamp = std::to_string(std::chrono::system_clock::to_time_t(std::chrono::system_clock::now()));
+	return static_timestamp;
+}
+
 inline std::string to_string(const operating_band &b) {
 	std::string s;
 	switch(b) {

@@ -109,7 +109,7 @@ public:
 		, lte_layer_3_output_(std::make_shared<d_output<lte_data, lte_signal_type>>())
 		, umts_sweep_output_(std::make_shared<d_output<basic_data, basic_signal_type>>())
 		, lte_sweep_output_(std::make_shared<d_output<basic_data, basic_signal_type>>()) {
-		auto time = timestamp_string();
+		auto time = static_timestamp_string();
 		hardware_output_->set_filename("scanner_" + time + ".txt");
 		gps_output_->set_filename("gps_" + time + ".txt");
 		umts_layer_3_output_->set_filename("umts_layer_3_" + time + ".txt");
@@ -125,7 +125,7 @@ public:
 		, lte_layer_3_output_(out.lte_layer_3_output_)
 		, umts_sweep_output_(out.umts_sweep_output_)
 		, lte_sweep_output_(out.lte_sweep_output_) {
-		auto time = timestamp_string();
+		auto time = static_timestamp_string();
 		hardware_output_->set_filename("scanner_" + time + ".txt");
 		gps_output_->set_filename("gps_" + time + ".txt");
 		umts_layer_3_output_->set_filename("umts_layer_3_" + time + ".txt");

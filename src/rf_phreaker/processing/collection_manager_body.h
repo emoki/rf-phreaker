@@ -106,7 +106,7 @@ protected:
 	void output(scanner::measurement_info *meas, std::string name, int count)
 	{
 		if(timestamp.empty())
-			timestamp = timestamp_string();
+			timestamp = static_timestamp_string();
 
 		std::ofstream file(name + timestamp + "_" + std::to_string(count) + ".bin", std::ios::binary);
 		if(file) {
