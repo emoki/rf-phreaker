@@ -42,7 +42,7 @@ void settings_io::read(settings &settings) {
 void settings_io::read(output_settings &settings, const std::string &group_key) {
 	qsettings_->beginGroup(group_key.c_str());
 	settings.scanner_ = qsettings_->value(scanner_output_key.c_str(), settings_output_default).toBool();
-	settings.gps_ = qsettings_->value(scanner_output_key.c_str(), settings_output_default).toBool();
+	settings.gps_ = qsettings_->value(gps_output_key.c_str(), settings_output_default).toBool();
 	settings.umts_sweep_ = qsettings_->value(umts_sweep_output_key.c_str(), settings_output_default).toBool();
 	settings.umts_layer_3_ = qsettings_->value(umts_layer_3_output_key.c_str(), settings_output_default).toBool();
 	settings.lte_sweep_ = qsettings_->value(lte_sweep_output_key.c_str(), settings_output_default).toBool();
