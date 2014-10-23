@@ -32,7 +32,7 @@ set (CMAKE_ARCHIVE_OUTPUT_DIRECTORY ${PROJECT_SOURCE_DIR}/output)
 
 # Find TBB.
 if (MSVC)
-	set (TBB_DEFAULT_INSTALL_DIR "${rf_phreaker_SOURCE_DIR}/third_party/tbb-win" CACHE PATH "Folder contains TBB")
+	set (TBB_DEFAULT_INSTALL_DIR "${rf_phreaker_SOURCE_DIR}/third_party/tbb_win" CACHE PATH "Folder contains TBB")
 else ()
 	set (TBB_DEFAULT_INSTALL_DIR "${rf_phreaker_SOURCE_DIR}/third_party/tbb-linux" CACHE PATH "Folder contains TBB")
 endif ()
