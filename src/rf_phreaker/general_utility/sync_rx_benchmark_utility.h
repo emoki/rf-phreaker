@@ -30,9 +30,9 @@ public:
 
 		rf_phreaker::blade_settings blade_config;
 		blade_config.log_level_ = 2;
-		blade_config.rx_sync_buffer_size_ = 2048;
-		blade_config.rx_sync_num_buffers_ = 2;
-		blade_config.rx_sync_num_transfers_ = 1;
+		blade_config.rx_sync_buffer_size_ = settings.start_buffer_size_;
+		blade_config.rx_sync_num_buffers_ = settings.start_num_buffer_;
+		blade_config.rx_sync_num_transfers_ = settings.start_num_transfer_;
 		blade_config.rx_sync_timeout_ = 5000;
 
 		blade_rf_controller scanner;
