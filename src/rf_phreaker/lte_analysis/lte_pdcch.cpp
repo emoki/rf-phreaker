@@ -872,23 +872,25 @@ dci_format_info.pdcch_info_dci_format_1a[index_dci_1a].tbs_index = dci_format_in
 dci_format_info.pdcch_info_dci_format_1a[index_dci_1a].tbs_size = 
 	     transport_block_size_table[dci_format_info.pdcch_info_dci_format_1a[index_dci_1a].tbs_index][ dci_format_info.pdcch_info_dci_format_1a[index_dci_1a].n_1a_prb - 1];
 
-switch(dci_format_info.pdcch_info_dci_format_1a[index_dci_1a].modulation_order)
-{
-	case(lte_modulation_qpsk):
-							  dci_format_info.pdcch_info_dci_format_1a[index_dci_1a].lte_moduation_type = MQPSK;
-							  break;
-	case(lte_modulation_16_qam):
-							  dci_format_info.pdcch_info_dci_format_1a[index_dci_1a].lte_moduation_type = M16QAM;
-							  break;
-
-	case(lte_modulation_64_qam):
-							   dci_format_info.pdcch_info_dci_format_1a[index_dci_1a].lte_moduation_type = M64QAM;
-							   break;
-
-	default:
-		return LTE_ERROR_PDCCH_MODULATION_ORDER;
-
-};
+// We assume that format 1A is using SI-RNTI.  Therefore it always has a modulation type of MQPSK.
+dci_format_info.pdcch_info_dci_format_1a[index_dci_1a].lte_moduation_type = MQPSK;
+//switch(dci_format_info.pdcch_info_dci_format_1a[index_dci_1a].modulation_order)
+//{
+//	case(lte_modulation_qpsk):
+//							  dci_format_info.pdcch_info_dci_format_1a[index_dci_1a].lte_moduation_type = MQPSK;
+//							  break;
+//	case(lte_modulation_16_qam):
+//							  dci_format_info.pdcch_info_dci_format_1a[index_dci_1a].lte_moduation_type = M16QAM;
+//							  break;
+//
+//	case(lte_modulation_64_qam):
+//							   dci_format_info.pdcch_info_dci_format_1a[index_dci_1a].lte_moduation_type = M64QAM;
+//							   break;
+//
+//	default:
+//		return LTE_ERROR_PDCCH_MODULATION_ORDER;
+//
+//};
 
 temp =0;
 
