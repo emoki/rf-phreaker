@@ -54,7 +54,15 @@ public:
 
 			scanner.do_initial_scanner_config(blade_config);
 
+			scanner.set_log_level(blade_config.log_level_);
+
 			std::cout << "Starting benchmark." << std::endl;
+
+			// GPIO must also be set just before collecting inside blade_rf_controller.
+			uint32_t gpio;
+			scanner.read_config_gpio(gpio);
+			gpio |= 0x200;
+			scanner.write_config_gpio(gpio);
 			
 			run_benchmark(settings, scanner, blade_config);
 		}
@@ -86,12 +94,6 @@ public:
 
 		scanner.set_blade_sync_rx_settings(config);
 
-		// GPIO must also be set just before collecting inside blade_rf_controller.
-		uint32_t gpio;
-		scanner.read_config_gpio(gpio);
-		gpio |= 0x200;
-		scanner.write_config_gpio(gpio);
-
 		auto throw_away = config.rx_sync_buffer_size_*config.rx_sync_num_buffers_;
 		int samples_collected = 0;
 
@@ -102,6 +104,7 @@ public:
 			int errors = 0;
 			for(frequency_type f = s.freq_start_; f <= s.freq_end_; f += s.freq_increment_) {
 				try {
+
 					auto start_time = std::chrono::high_resolution_clock::now();
 					auto signal = scanner.get_rf_data(f, s.packet_length_, s.bandwidth_, gain, sampling_rate);
 					auto time_elapsed = std::chrono::duration_cast<std::chrono::milliseconds>(std::chrono::high_resolution_clock::now() - start_time);
@@ -141,16 +144,17 @@ public:
 		auto first = *iq;
 		for(int i = 1; i < num_samples; ++i) {
 			auto next = *(iq + i);
-			if(next - first != 1 && first < next) {
+			if(next - first != 1 && (first != UINT32_MAX)) {
 				++drops.num_drop_locations_;
 				drops.total_dropped_samples_ += next - first;
 			}
 			first = next;
 		}
 		if(0) {
-			auto *iq = (const uint32_t*)(buf.get_aligned_array());
-			std::ofstream f("debug_packet.txt");
-			for(int i = 0; i < num_samples + throw_away; ++i) {
+			static int num = 0;
+			auto *iq = (const uint32_t*)(buf.get_aligned_array() + throw_away);
+			std::ofstream f("debug_packet_" + std::to_string(num++) + ".txt");
+			for(int i = 0; i < num_samples; ++i) {
 				f << *(iq + i) << "\n";
 			}
 		}

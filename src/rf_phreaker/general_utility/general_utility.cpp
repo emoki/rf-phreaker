@@ -64,15 +64,18 @@ int handle_sync_rx_benchmark(int argc, char* argv[]) {
 
 		desc.add_options()
 			("help,h", "Produce help message.")
-			("start_buffer_size", po::value<int>(&settings.start_buffer_size_)->default_value(2 * 1024), "Buffer size to start benchmark")
-			("start_num_buffer", po::value<int>(&settings.start_num_buffer_)->default_value(2), "Number of buffers to start benchmark")
-			("start_num_transfer", po::value<int>(&settings.start_num_transfer_)->default_value(1), "Number of transfers to start benchmark")
-			("max_num_transfers,x", po::value<int>(&settings.max_num_transfers_)->default_value(16), "Maximum number of transfers to use.\n")
-			("max_buffer_size,b", po::value<int>(&settings.max_buffer_size_)->default_value(16384), "Maximum buffer size to use.")
-			("max_num_buffers,n", po::value<int>(&settings.max_num_buffers_)->default_value(17), "Maximum number of buffers to use")
+			("start_buffer_size", po::value<int>(&settings.start_buffer_size_)->default_value(20 * 1024), "Buffer size to start benchmark")
+			("start_num_buffer", po::value<int>(&settings.start_num_buffer_)->default_value(248), "Number of buffers to start benchmark")
+			("start_num_transfer", po::value<int>(&settings.start_num_transfer_)->default_value(64), "Number of transfers to start benchmark")
+
+			("max_buffer_size,b", po::value<int>(&settings.max_buffer_size_)->default_value(1024 * 64), "Maximum buffer size to use.")
+			("max_num_buffers,n", po::value<int>(&settings.max_num_buffers_)->default_value(1024), "Maximum number of buffers to use")
+			("max_num_transfers,x", po::value<int>(&settings.max_num_transfers_)->default_value(1023), "Maximum number of transfers to use.\n")
+
 			("buffer_size_increment", po::value<int>(&settings.buffer_size_increment_)->default_value(2 * 1024), "Buffer size increment")
-			("num_buffer_increment", po::value<int>(&settings.num_buffer_increment_)->default_value(2), "Number of buffers increment")
-			("num_transfer_increment", po::value<int>(&settings.num_transfer_increment_)->default_value(2), "Number of transfers increment")
+			("num_buffer_increment", po::value<int>(&settings.num_buffer_increment_)->default_value(4), "Number of buffers increment")
+			("num_transfer_increment", po::value<int>(&settings.num_transfer_increment_)->default_value(4), "Number of transfers increment")
+
 			("filename,f", po::value<std::string>(&settings.filename_)->default_value("sync_rx_benchmark.txt"), "Output filename")
 			("sampling_rates,s", po::value<std::vector<frequency_type>>(&settings.sampling_rates_)->multitoken(),
 			"Sampling rates hz to use")
@@ -104,20 +107,23 @@ int handle_sync_rx_benchmark(int argc, char* argv[]) {
 			throw std::runtime_error("start_num_transfer must be positive.");
 		if(settings.start_num_buffer_ <= 0)
 			throw std::runtime_error("start_num_buffer must be positive.");
+
 		if(settings.max_buffer_size_ % 1024 != 0)
 			throw std::runtime_error("max_buffer_size must be a multiple of 1024.");
-		if(settings.max_num_buffers_ < 2 || settings.max_num_buffers_ > 64)
+		if(settings.max_num_buffers_ < 2 || settings.max_num_buffers_ > 1024)
 			throw std::runtime_error("max_num_buffers must be 2 <= x <= 64.");
-		if(settings.max_num_transfers_ < 1 || settings.max_num_transfers_ > 63)
+		if(settings.max_num_transfers_ < 1 || settings.max_num_transfers_ > 1023)
 			throw std::runtime_error("max_num_transfers be 1 <= x <= 63.");
 		if(settings.max_num_transfers_ >= settings.max_num_buffers_)
 			throw std::runtime_error("max_num_transfers must be less than max_num_buffers.");
+
 		if(settings.buffer_size_increment_ % 1024 != 0)
 			throw std::runtime_error("buffer_size_increment must be a multiple of 1024.");
 		if(settings.num_transfer_increment_ <= 0)
 			throw std::runtime_error("num_transfer_increment must be positive.");
 		if(settings.num_buffer_increment_ <= 0)
 			throw std::runtime_error("num_buffer_increment must be positive.");
+
 		if(settings.freq_increment_ < 0)
 			throw std::runtime_error("freq_increment must be greater than 0.");
 		if(settings.freq_start_ < mhz(500) || settings.freq_start_ > mhz(2600))
