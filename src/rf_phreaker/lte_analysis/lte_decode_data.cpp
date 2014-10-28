@@ -173,7 +173,7 @@ while((frameStartSampleIndex + LteData[ii].frameNumSamples) < (NumHalfFramesToPr
 
 
 			/* Process Subframes*/
-			 for (unsigned int subFrameIndex =0 ; subFrameIndex < NUM_SUBFRAMES_PER_FRAME;++subFrameIndex)
+			 for (unsigned int subFrameIndex = 0 ; subFrameIndex < NUM_SUBFRAMES_PER_FRAME;++subFrameIndex)
 			 {
 			      subframeStartSampleIndex = frameStartSampleIndex + subFrameIndex * LteData[ii].frameNumSamples/ NUM_SUBFRAMES_PER_FRAME;
 				

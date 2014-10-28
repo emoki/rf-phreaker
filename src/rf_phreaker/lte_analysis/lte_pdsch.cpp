@@ -83,7 +83,18 @@ int lte_pdsch_decode(Ipp32fc* inSignal,
 					unsigned int dci_type,
 					unsigned int dci_index)
 {
+	memset(lte_subframe_map, 0 , OFDM_SYMBOLS_PER_SUBFRAME * MAX_FFT_SIZE * sizeof(unsigned int));
+	memset(lte_pdsch_fft, 0, OFDM_SYMBOLS_PER_SUBFRAME * MAX_FFT_SIZE * sizeof(Ipp32fc));
+	memset(lte_pdsch_fft_shifted, 0, OFDM_SYMBOLS_PER_SUBFRAME * MAX_FFT_SIZE * sizeof(Ipp32fc));
 	memset(&lte_pdsch_byte_seq, 0, 512);
+	memset(&scrambling_seq_pdsch_buf[0], 0, MAX_SUBCARRIER_MODULATION_SIZE * sizeof(unsigned int));
+	memset(&turbo_decoded_bits_buf[0], 0, MAX_SUBCARRIER_MODULATION_SIZE * sizeof(unsigned int));
+	h_est_pdsch_buf.zero_out();
+	h_est_pdsch_temp_buf.zero_out();
+	lte_pdsch_re_buf.zero_out();
+	lte_pdsch_demod_llr_buf.zero_out();
+	descrambled_pdcch_llr_buf.zero_out();
+	deinterleaved_llr_buf.zero_out();
 
 unsigned int pdsch_re_count,start_rb_index,end_rb_index,transport_block_size,redundancy_version;
 LTEMODULATION modulation_type;
@@ -171,10 +182,6 @@ bit2byte(lte_pdsch_byte_seq, turbo_decoded_bits, transport_block_size + LTE_PDSC
 
 lte_crc_24(&lte_pdsch_crc,lte_pdsch_byte_seq ,(transport_block_size + LTE_PDSCH_CRC_LEN)/8);
 
-
-
-
-// TODO - ecs removed - if(lte_pdsch_crc == 0 && sub_frame_index == 5 )
 if(lte_pdsch_crc == 0)
 {
 

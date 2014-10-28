@@ -51,24 +51,20 @@ int lte_decode_pdcch(Ipp32fc* inSignal,
 	Ipp32fc fft_output[3][4096],fft_output_shifted[3][4096];	// Static Allocation for Maximum size FFT 
 	Ipp32fc h_est_pdcch[ NUM_RE_PER_REG * NUM_ANTENNA_MAX];
 	Ipp32fc lte_pdcch_reg_symbols[NUM_RE_PER_REG];		
-	//Ipp32f pdcch_llr[4096];
 	st_pdcch_regs pdcch_regs[1024]; // PDCCH Resource Element Groups
 	
-	//Ipp32f descrambled_pdcch_llr[4096]; //PDCCH LLRs
-
 	Ipp32u re_index_kk =0 , re_index_ll = 0,num_reg_pdcch = 0;	
 	Ipp32u pdcch_regs_interleaved_shifted_index[1024]/*,scrambling_seq_pdcch[4096]*/;
 	
-	
 	Ipp32u temp;//Number of REGS for PDCCH
 	Ipp32u c_init,nSlotNum=0;
-	
-	
-	//// debug allocation
+		
+	pdcch_llr_buf.zero_out();
+	descrambled_pdcch_llr_buf2.zero_out();
+	scrambling_seq_pdcch_buf.zero_out();
 	Ipp32f *pdcch_llr = pdcch_llr_buf.get();
 	Ipp32f *descrambled_pdcch_llr = descrambled_pdcch_llr_buf2.get();
 	Ipp32u *scrambling_seq_pdcch = scrambling_seq_pdcch_buf.get();
-	////
 
 
 	dci_format_info.num_dci_format_1a = 0;
@@ -164,8 +160,6 @@ softDeSrambling(descrambled_pdcch_llr,// Output Descrambled LLR Data
 		        pdcch_llr,//Input LLR data
 		        num_reg_pdcch* NUM_RE_PER_REG * 2,//lenght of the sequence
 		        scrambling_seq_pdcch);//Scrambling bits
-
-
 
 //Lte common search space blind decoding
 lte_pdcch_common_search_space_decode(LteData,cell_no,descrambled_pdcch_llr,num_reg_pdcch);	

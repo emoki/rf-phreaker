@@ -76,8 +76,8 @@ TEST(LteAnalysisTests, TestGeneral)
 				}
 
 				for(auto &lte : lte_meas) {
-					std::cout << i << "\t" << info.frequency() / 1e6 << "\t" << lte << "\n";
-					output_file << i << "\t" << info.frequency() / 1e6 << "\t" << lte << "\n";
+					std::cout << i << "\t" << info.frequency() / 1e6 << "\t" << lte << std::endl;
+					output_file << i << "\t" << info.frequency() / 1e6 << "\t" << lte << std::endl;
 				}
 			}
 		}
