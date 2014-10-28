@@ -110,9 +110,9 @@ int handle_sync_rx_benchmark(int argc, char* argv[]) {
 
 		if(settings.max_buffer_size_ % 1024 != 0)
 			throw std::runtime_error("max_buffer_size must be a multiple of 1024.");
-		if(settings.max_num_buffers_ < 2 || settings.max_num_buffers_ > 1024)
+		if(settings.max_num_buffers_ < 2 || settings.max_num_buffers_ > 4 * 1024)
 			throw std::runtime_error("max_num_buffers must be 2 <= x <= 64.");
-		if(settings.max_num_transfers_ < 1 || settings.max_num_transfers_ > 1023)
+		if(settings.max_num_transfers_ < 1 || settings.max_num_transfers_ > 4 * 1024 - 1)
 			throw std::runtime_error("max_num_transfers be 1 <= x <= 63.");
 		if(settings.max_num_transfers_ >= settings.max_num_buffers_)
 			throw std::runtime_error("max_num_transfers must be less than max_num_buffers.");
@@ -155,7 +155,9 @@ int handle_sync_rx_benchmark(int argc, char* argv[]) {
 
 int main(int argc, char* argv[]) {
 	//-c 77ecda454d25738ee419f6fd676170d5 13cadd7137a3ef4d18dcfcc179667998 47d54d57db30c9169c98c53e30c08d9a d01d12c0dc5c71c8a081e0c25f27b6fd d7db1c90fd06a5a6d950615ea7fa6164
-	//return handle_calibration(argc, argv);
-	return handle_sync_rx_benchmark(argc, argv);
+	//int status = handle_calibration(argc, argv);
+	int status = handle_sync_rx_benchmark(argc, argv);
+	system("pause");
+	return status;
 }
 

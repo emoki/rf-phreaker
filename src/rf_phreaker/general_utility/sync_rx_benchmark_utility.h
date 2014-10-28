@@ -94,6 +94,8 @@ public:
 
 		scanner.set_blade_sync_rx_settings(config);
 
+		//std::cout << "Buf size: " << config.rx_sync_buffer_size_ << ". Num bufs: " << config.rx_sync_num_buffers_ << ". Num xfers: " << config.rx_sync_num_transfers_ << ".";
+
 		auto throw_away = config.rx_sync_buffer_size_*config.rx_sync_num_buffers_;
 		int samples_collected = 0;
 
@@ -104,7 +106,7 @@ public:
 			int errors = 0;
 			for(frequency_type f = s.freq_start_; f <= s.freq_end_; f += s.freq_increment_) {
 				try {
-
+					//std::cout << "Freq: " << f / 1e6 << "\n";
 					auto start_time = std::chrono::high_resolution_clock::now();
 					auto signal = scanner.get_rf_data(f, s.packet_length_, s.bandwidth_, gain, sampling_rate);
 					auto time_elapsed = std::chrono::duration_cast<std::chrono::milliseconds>(std::chrono::high_resolution_clock::now() - start_time);
@@ -145,6 +147,8 @@ public:
 		for(int i = 1; i < num_samples; ++i) {
 			auto next = *(iq + i);
 			if(next - first != 1 && (first != UINT32_MAX)) {
+				//std::cout << "drop location: " << i << "\n";
+				//std::cout << first << "\t" << next << "\n";
 				++drops.num_drop_locations_;
 				drops.total_dropped_samples_ += next - first;
 			}
@@ -152,7 +156,7 @@ public:
 		}
 		if(0) {
 			static int num = 0;
-			auto *iq = (const uint32_t*)(buf.get_aligned_array() + throw_away);
+			auto *iq = (const uint16_t*)(buf.get_aligned_array());
 			std::ofstream f("debug_packet_" + std::to_string(num++) + ".txt");
 			for(int i = 0; i < num_samples; ++i) {
 				f << *(iq + i) << "\n";
