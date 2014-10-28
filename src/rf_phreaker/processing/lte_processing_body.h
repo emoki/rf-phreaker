@@ -140,35 +140,55 @@ private:
 					bw = data.Bandwidth;
 			}
 		}
-
+		bool use_boost_archive = true;
 		if(info.meas_->bandwidth() == mhz(5) || info.meas_->bandwidth() == mhz(10) || info.meas_->bandwidth() == mhz(15) || info.meas_->bandwidth() == mhz(20)) {
 			switch(bw) {
 			case LteBandwidth_5MHZ:
 			{
 				static int c_5 = 0;
-				std::ofstream file("lte_5mhz_" + timestamp + "_" + std::to_string(c_5++) + ".bin");
-				file << *info.meas_;
+				std::ofstream file("lte_5mhz_" + timestamp + "_" + std::to_string(c_5++) + ".bin", use_boost_archive ? std::ios::binary : std::ios::out);
+				if(use_boost_archive) {
+					boost::archive::binary_oarchive a(file); 
+					a & *info.meas_;
+				}
+				else
+					file << *info.meas_;
 			}
 				break;
 			case LteBandwidth_10MHZ:
 			{
 				static int c_10 = 0;
-				std::ofstream file("lte_10mhz_" + timestamp + "_" + std::to_string(c_10++) + ".bin");
-				file << *info.meas_;
+				std::ofstream file("lte_10mhz_" + timestamp + "_" + std::to_string(c_10++) + ".bin", use_boost_archive ? std::ios::binary : std::ios::out);
+				if(use_boost_archive) {
+					boost::archive::binary_oarchive a(file);
+					a & *info.meas_;
+				}
+				else
+					file << *info.meas_;
 			}
 				break;
 			case LteBandwidth_15MHZ:
 			{
 				static int c_15 = 0;
-				std::ofstream file("lte_15mhz_" + timestamp + "_" + std::to_string(c_15++) + ".bin");
-				file << *info.meas_;
+				std::ofstream file("lte_15mhz_" + timestamp + "_" + std::to_string(c_15++) + ".bin", use_boost_archive ? std::ios::binary : std::ios::out);
+				if(use_boost_archive) {
+					boost::archive::binary_oarchive a(file);
+					a & *info.meas_;
+				}
+				else
+					file << *info.meas_;
 			}
 				break;
 			case LteBandwidth_20MHZ:
 			{
 				static int c_20 = 0;
-				std::ofstream file("lte_20mhz_" + timestamp + "_" + std::to_string(c_20++) + ".bin");
-				file << *info.meas_;
+				std::ofstream file("lte_20mhz_" + timestamp + "_" + std::to_string(c_20++) + ".bin", use_boost_archive ? std::ios::binary : std::ios::out);
+				if(use_boost_archive) {
+					boost::archive::binary_oarchive a(file);
+					a & *info.meas_;
+				}
+				else
+					file << *info.meas_;
 			}
 				break;
 			default:
