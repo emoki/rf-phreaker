@@ -29,8 +29,7 @@ template<typename DataType> inline std::ostream& operator <<(std::ostream &os, c
 template<typename DataType> inline std::istream& operator >>(std::istream &is, ipp_array<DataType> &t);
 
 template<typename DataType>
-class ipp_array
-{
+class ipp_array {
 public:
 	ipp_array(int length = 0);
 
@@ -98,8 +97,7 @@ private:
 template<typename DataType> ipp_array<DataType>::ipp_array(int length)
 	: length_(0)
 	, array_(0)
-	, shallow_copy_(/*true*/false)
-{
+	, shallow_copy_(/*true*/false) {
 	if(length)
 		reset(length);
 }
@@ -107,8 +105,7 @@ template<typename DataType> ipp_array<DataType>::ipp_array(int length)
 template<typename DataType> ipp_array<DataType>::ipp_array(const DataType *data, int length)
 	: length_(0)
 	, array_(0)
-	, shallow_copy_(/*true*/false)
-{
+	, shallow_copy_(/*true*/false) {
 	reset(length);
 	copy(data, length);
 }
@@ -116,8 +113,7 @@ template<typename DataType> ipp_array<DataType>::ipp_array(const DataType *data,
 template<typename DataType> ipp_array<DataType>::ipp_array(const ipp_array& other)
 	: length_(0)
 	, array_(0)
-	, shallow_copy_(/*true*/other.shallow_copy_)
-{
+	, shallow_copy_(/*true*/other.shallow_copy_) {
 	if(other.shallow_copy_) {
 		array_ = other.array_;
 		length_ = other.length_;
@@ -131,19 +127,16 @@ template<typename DataType> ipp_array<DataType>::ipp_array(const ipp_array& othe
 template<typename DataType> ipp_array<DataType>::ipp_array(ipp_array&& other)
 	: length_(0)
 	, array_(0)
-	, shallow_copy_(false)
-{
+	, shallow_copy_(false) {
 	swap(other);
 }
 
-template<typename DataType> ipp_array<DataType>::~ipp_array()
-{
+template<typename DataType> ipp_array<DataType>::~ipp_array() {
 	if(!shallow_copy_)
 		deallocate();
 }
 
-template<typename DataType>	ipp_array<DataType>& ipp_array<DataType>::operator = (ipp_array other)
-{
+template<typename DataType>	ipp_array<DataType>& ipp_array<DataType>::operator = (ipp_array other) {
 	other.swap(*this);
 	return *this;
 }
@@ -172,21 +165,18 @@ template<>	inline bool ipp_array<Ipp32fc>::operator == (const ipp_array &a) {
 	return true;
 }
 
-template<typename DataType> void ipp_array<DataType>::swap(ipp_array &other)
-{
+template<typename DataType> void ipp_array<DataType>::swap(ipp_array &other) {
 	std::swap(other.length_, length_);
 	std::swap(other.array_, array_);
 	std::swap(other.shallow_copy_, shallow_copy_);
 }
 
-template<typename DataType> inline void ipp_array<DataType>::deallocate()
-{
+template<typename DataType> inline void ipp_array<DataType>::deallocate() {
 	ippFree(array_);
 	array_ = 0;
 }
 
-template<typename DataType> void ipp_array<DataType>::reset(int length)
-{
+template<typename DataType> void ipp_array<DataType>::reset(int length) {
 	assert(length >= 0);
 
 	if(length_ != length) {
@@ -197,8 +187,7 @@ template<typename DataType> void ipp_array<DataType>::reset(int length)
 	}
 }
 
-template<typename DataType> inline void ipp_array<DataType>::allocate(int length)
-{
+template<typename DataType> inline void ipp_array<DataType>::allocate(int length) {
 	shallow_copy_ = false;
 	allocate_(length);
 }
@@ -215,22 +204,19 @@ template<> inline void ipp_array<Ipp32u>::allocate_(int length) {
 		throw std::runtime_error("Unable to construct Ipp32u ipp_array.\n");
 }
 
-template<> inline void ipp_array<Ipp32fc>::allocate_(int length)
-{
+template<> inline void ipp_array<Ipp32fc>::allocate_(int length) {
 	array_ = ippsMalloc_32fc(length);
 	if(array_ == 0)
 		throw std::runtime_error("Unable to construct Ipp32fc ipp_array.\n");
 }
 
-template<> inline void ipp_array<Ipp8u>::allocate_(int length)
-{
+template<> inline void ipp_array<Ipp8u>::allocate_(int length) {
 	array_ = ippsMalloc_8u(length);
 	if(array_ == 0)
 		throw std::runtime_error("Unable to construct Ipp8u ipp_array.\n");
 }
 
-template<> inline void ipp_array<Ipp32f>::allocate_(int length)
-{
+template<> inline void ipp_array<Ipp32f>::allocate_(int length) {
 	array_ = ippsMalloc_32f(length);
 	if(array_ == 0)
 		throw std::runtime_error("Unable to construct Ipp32f ipp_array.\n");
@@ -240,60 +226,54 @@ template<> inline void ipp_array<Ipp16sc>::set_array_values(Ipp16sc value) {
 	ipp_helper::check_status(ippsSet_16sc(value, array_, length_));
 }
 
-template<> inline void ipp_array<Ipp32fc>::set_array_values(Ipp32fc value)
-{
+template<> inline void ipp_array<Ipp32fc>::set_array_values(Ipp32fc value) {
 	ipp_helper::check_status(ippsSet_32fc(value, array_, length_));
 }
 
-template<> inline void ipp_array<Ipp32f>::set_array_values(Ipp32f value)
-{
+template<> inline void ipp_array<Ipp32f>::set_array_values(Ipp32f value) {
 	ipp_helper::check_status(ippsSet_32f(value, array_, length_));
 }
 
-template<typename DataType> DataType * ipp_array<DataType>::get(int position)
-{
+template<typename DataType> DataType * ipp_array<DataType>::get(int position) {
 	assert(position >= 0 && position < length_);
 
 	return &array_[position];
 }
 
-template<typename DataType> const DataType * ipp_array<DataType>::get(int position) const
-{
+template<typename DataType> const DataType * ipp_array<DataType>::get(int position) const {
 	assert(position >= 0 && position < length_);
 
 	return &array_[position];
 }
 
-template<typename DataType> DataType ipp_array<DataType>::get_value(int position) const
-{
+template<typename DataType> DataType ipp_array<DataType>::get_value(int position) const {
 	assert(position >= 0 && position < length_);
 
 	return array_[position];
 }
 
 
-template<typename DataType>	int ipp_array<DataType>::length() const
-{
+template<typename DataType>	int ipp_array<DataType>::length() const {
 	return length_;
 }
 
-template<> inline void ipp_array<Ipp16sc>::zero_out()
-{
+template<> inline void ipp_array<Ipp16sc>::zero_out() {
 	ipp_helper::check_status((ippsZero_16sc(array_, length_)));
 }
 
-template<> inline void ipp_array<Ipp32f>::zero_out()
-{
+template<> inline void ipp_array<Ipp32f>::zero_out() {
 	ipp_helper::check_status((ippsZero_32f(array_, length_)));
 }
 
-template<> inline void ipp_array<Ipp32fc>::zero_out()
-{
+template<> inline void ipp_array<Ipp32fc>::zero_out() {
 	ipp_helper::check_status((ippsZero_32fc(array_, length_)));
 }
 
-template<typename DataType>	void ipp_array<DataType>::copy(const DataType *data, int data_length)
-{
+template<> inline void ipp_array<Ipp32u>::zero_out() {
+	memset(array_, 0, length_ * sizeof(Ipp32u));
+}
+
+template<typename DataType>	void ipp_array<DataType>::copy(const DataType *data, int data_length) {
 	assert(data_length >= 0);
 
 	if(data_length > length_)
@@ -303,8 +283,7 @@ template<typename DataType>	void ipp_array<DataType>::copy(const DataType *data,
 }
 
 template<typename DataType> template<typename Class>
-void ipp_array<DataType>::copy_at(const Class *data, int data_length, int offset)
-{
+void ipp_array<DataType>::copy_at(const Class *data, int data_length, int offset) {
 	assert(data_length >= 0);
 
 	if(std::is_same<DataType, Class>::value == false)
@@ -317,8 +296,7 @@ void ipp_array<DataType>::copy_at(const Class *data, int data_length, int offset
 }
 
 template<> template<>
-inline void ipp_array<Ipp32fc>::copy_at(const Ipp32f *data, int data_length, int offset)
-{
+inline void ipp_array<Ipp32fc>::copy_at(const Ipp32f *data, int data_length, int offset) {
 	assert(data_length >= 0);
 
 	if(data_length + offset > length_)
@@ -330,8 +308,7 @@ inline void ipp_array<Ipp32fc>::copy_at(const Ipp32f *data, int data_length, int
 	}
 }
 
-template<typename DataType>	const ipp_array<DataType> ipp_array<DataType>::create_shallow_copy(int offset) const
-{
+template<typename DataType>	const ipp_array<DataType> ipp_array<DataType>::create_shallow_copy(int offset) const {
 	assert(offset < length_);
 
 	ipp_array<DataType> data;
@@ -345,8 +322,7 @@ template<typename DataType>	const ipp_array<DataType> ipp_array<DataType>::creat
 	return data;
 };
 
-template<typename DataType> void ipp_array<DataType>::output_text(const std::string &filename) const
-{
+template<typename DataType> void ipp_array<DataType>::output_text(const std::string &filename) const {
 	std::ofstream file(filename);
 	if(file.is_open()) {
 		for(int i = 0; i < length_; ++i)
@@ -356,8 +332,7 @@ template<typename DataType> void ipp_array<DataType>::output_text(const std::str
 		throw std::runtime_error("Unable to open file for ipp_array output text.");
 }
 
-template<typename DataType> void ipp_array<DataType>::output_binary(const std::string &filename) const
-{
+template<typename DataType> void ipp_array<DataType>::output_binary(const std::string &filename) const {
 	std::ofstream file(filename, std::ios::binary);
 	if(file.is_open())
 		file.write(reinterpret_cast<const char*>(array_), length() * sizeof(data_type_));
@@ -366,27 +341,23 @@ template<typename DataType> void ipp_array<DataType>::output_binary(const std::s
 }
 
 
-inline std::ostream& operator <<(std::ostream &os, const Ipp32fc &t)
-{
+inline std::ostream& operator <<(std::ostream &os, const Ipp32fc &t) {
 	os << t.re << "\t" << t.im;
 	return os;
 }
 
-inline std::istream& operator >>(std::istream &is, Ipp32fc &t)
-{
+inline std::istream& operator >>(std::istream &is, Ipp32fc &t) {
 	is >> t.re;
 	is >> t.im;
 	return is;
 }
 
-inline std::ostream& operator <<(std::ostream &os, const Ipp16sc &t)
-{
+inline std::ostream& operator <<(std::ostream &os, const Ipp16sc &t) {
 	os << t.re << "\t" << t.im;
 	return os;
 }
 
-inline std::istream& operator >>(std::istream &is, Ipp16sc &t)
-{
+inline std::istream& operator >>(std::istream &is, Ipp16sc &t) {
 	is >> t.re;
 	is >> t.im;
 	return is;
@@ -394,8 +365,7 @@ inline std::istream& operator >>(std::istream &is, Ipp16sc &t)
 
 
 template<typename DataType>
-inline std::ostream& operator <<(std::ostream &os, const ipp_array<DataType> &t)
-{
+inline std::ostream& operator <<(std::ostream &os, const ipp_array<DataType> &t) {
 	auto length = t.length();
 	os << length << "\n";
 	for(int i = 0; i < length; ++i)
@@ -404,8 +374,7 @@ inline std::ostream& operator <<(std::ostream &os, const ipp_array<DataType> &t)
 }
 
 template<typename DataType>
-inline std::istream& operator >>(std::istream &is, ipp_array<DataType> &t)
-{
+inline std::istream& operator >>(std::istream &is, ipp_array<DataType> &t) {
 	int length = 0;
 	is >> length;
 	t.reset(length);
