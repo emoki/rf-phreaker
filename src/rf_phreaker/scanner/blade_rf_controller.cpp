@@ -274,7 +274,6 @@ void blade_rf_controller::do_initial_scanner_config(const scanner_settings &sett
 
 	//gps_comm_.reset(new gps_comm::gps_comm());
 	//gps_comm_->init(comm_blade_rf_->blade_rf());
-	//gps_comm_->set_to_uart_comm();
 }
 
 void blade_rf_controller::enable_blade_rx()
@@ -570,13 +569,8 @@ measurement_info blade_rf_controller::get_rf_data(frequency_type frequency, time
 
 	int status = 0;
 	for(int i = 0; i < 10; ++i) {
-#ifdef _DEBUG
 		status = bladerf_sync_rx(comm_blade_rf_->blade_rf(), aligned_buffer,
-			num_samples_to_transfer + throw_away_samples, &metadata, 1500);
-#else
-		status = bladerf_sync_rx(comm_blade_rf_->blade_rf(), aligned_buffer,
-			num_samples_to_transfer + throw_away_samples, &metadata, 1500);
-#endif
+			num_samples_to_transfer + throw_away_samples, &metadata, 2500);
 		if(status == 0) 
 			break;
 		LOG_L(DEBUG) << "Collecting " << num_samples_to_transfer + throw_away_samples << " samples failed. Status = " << status << ". Retrying...";
@@ -585,16 +579,13 @@ measurement_info blade_rf_controller::get_rf_data(frequency_type frequency, time
 	}
 	if(status)
 		throw blade_rf_error(std::string("Error collecting data samples.  ") + bladerf_strerror(status));
-	
+
 	parameter_cache_ = measurement_info(0, frequency, blade_bandwidth, blade_sampling_rate , gain);
 
 	measurement_info data(num_samples, frequency, blade_bandwidth, blade_sampling_rate, gain, 
 		scanner_blade_rf_->eeprom_.cal_.get_nuand_adjustment(frequency),
 		scanner_blade_rf_->eeprom_.cal_.get_rf_board_adjustment(frequency),
 		collection_count_++, scanner_blade_rf_->eeprom_.cal_.nuand_serial_);
-
-	for(int i = throw_away_samples; i < (throw_away_samples + num_samples) * 2; ++i)
-		sign_extend_12_bits(reinterpret_cast<int16_t*>(aligned_buffer)[i]);
 
 	const auto beginning_of_iq = (Ipp16s*)&(*aligned_buffer_.get_aligned_array()) + (throw_away_samples * 2);
 
@@ -695,10 +686,8 @@ void blade_rf_controller::check_blade_comm()
 void blade_rf_controller::initialize_eeprom()
 {
 	check_blade_comm();
-	disable_blade_rx();
 	eeprom ee;
 	write_eeprom(ee);
-	enable_blade_rx();
 }
 
 eeprom_meta_data blade_rf_controller::read_eeprom_meta_data()
@@ -714,8 +703,6 @@ eeprom_meta_data blade_rf_controller::read_eeprom_meta_data()
 
 	eeprom_meta_data md_eeprom;
 	md_eeprom.init(md_bytes);
-	
-	enable_blade_rx();
 	
 	return md_eeprom;
 }
@@ -745,8 +732,6 @@ void blade_rf_controller::write_eeprom(const eeprom &ee)
 
 	check_blade_status(bladerf_write_flash(comm_blade_rf_->blade_rf(), &new_eeprom_bytes[0],
 		meta_ee.eeprom_page_address(), meta_ee.eeprom_page_length()));
-
-	enable_blade_rx();
 }
 
 eeprom blade_rf_controller::read_eeprom()
@@ -767,8 +752,6 @@ eeprom blade_rf_controller::read_eeprom()
 
 	eeprom ee;
 	ee.init(bytes);
-
-	enable_blade_rx();
 
 	return ee;
 }
