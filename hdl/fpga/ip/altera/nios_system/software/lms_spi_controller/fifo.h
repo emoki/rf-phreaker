@@ -42,13 +42,9 @@ uint32_t fifo_size(fifo* uf){
 	return uf->count;
 };
 void 	fifo_enqueue(fifo* us, uint8_t b){
-	if(us->base == 0){
-		return;
-	}
-
 
 	if(us->count == us->capacity){
-		// full, increase first
+		// full, increase and shift first
 		us->count--;
 		us->first++;
 	}

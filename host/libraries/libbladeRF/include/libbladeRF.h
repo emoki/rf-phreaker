@@ -2512,7 +2512,7 @@ int CALL_CONV bladerf_xb_spi_write(struct bladerf *dev, uint32_t send);
  * @return 0 on success, value from \ref RETCODES list on failure
  */
 API_EXPORT
-int CALL_CONV bladerf_xb_gps_spi(struct bladerf *dev, uint32_t send, uint32_t *receive);
+int CALL_CONV bladerf_xb_gps_spi(struct bladerf *dev, uint8_t send, uint8_t *receive);
 
 
 /**

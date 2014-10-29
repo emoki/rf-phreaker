@@ -263,6 +263,7 @@ void xb_gps_uart_write( uint8_t val ) {
 	  IOWR_ALTERA_AVALON_UART_TXDATA(UART_1_BASE,  val );
 }
 uint32_t xb_gps_uart_hasdata(  ) {
+
 	//return 1;
 	uint32_t s = fifo_size(&uf);
 	//alt_printf( "sz: %d\n", s ) ;
@@ -382,15 +383,62 @@ void init_NIOS(){
 	  IOWR_8DIRECT(I2C, OC_I2C_CTRL, OC_I2C_ENABLE ) ;
 
 	  // Set the UART divisor to 19 to get 4000000bps UART (baud rate = clock/(divisor + 1))
-	  IOWR_ALTERA_AVALON_UART_DIVISOR(UART_0_BASE, 19) ;
+	  //IOWR_ALTERA_AVALON_UART_DIVISOR(UART_0_BASE, 19) ;
+	  //IOWR_ALTERA_AVALON_UART_DIVISOR(UART_0_BASE, 79) ;   // 1M = 80M/1M - 1   (clk src 80mhz, baud = 1M)
+	  IOWR_ALTERA_AVALON_UART_DIVISOR(UART_0_BASE, 159) ;   // 500k = 80M/500k - 1   (clk src 80mhz, baud = 500k)
 
 	  // Set the IQ Correction parameters to 0
 	  IOWR_ALTERA_AVALON_PIO_DATA(IQ_CORR_RX_PHASE_GAIN_BASE, DEFAULT_CORRECTION);
 	  IOWR_ALTERA_AVALON_PIO_DATA(IQ_CORR_TX_PHASE_GAIN_BASE, DEFAULT_CORRECTION);
 
-	  //disable all UART_1 interrupts...
-	  IOWR_ALTERA_AVALON_UART_CONTROL(UART_1_BASE, 0);
+}
 
+
+const struct {
+  enum {
+	  GDEV_UNKNOWN,
+	  GDEV_GPIO,
+	  GDEV_IQ_CORR_RX_GAIN,
+	  GDEV_IQ_CORR_RX_PHASE,
+	  GDEV_IQ_CORR_TX_GAIN,
+	  GDEV_IQ_CORR_TX_PHASE,
+	  GDEV_FPGA_VERSION,
+	  GDEV_TIME_TIMER,
+	  GDEV_XB_LO,
+	  GDEV_VCTXCO,
+	  GDEV_EXPANSION,
+	  GDEV_EXPANSION_DIR,
+	  GDEV_XB_GPS_SPI,
+	  GDEV_XB_GPS_UART,
+	  GDEV_XB_GPS_UART_BAUD,
+	  GDEV_XB_GPS_UART_HASDATA
+  } gdev;
+
+  int start, len;
+} gdev_lut[] = {
+	  {GDEV_GPIO,           0, 4},		//config gpio
+	  {GDEV_IQ_CORR_RX_GAIN,    4, 2},
+	  {GDEV_IQ_CORR_RX_PHASE,   6, 2},
+	  {GDEV_IQ_CORR_TX_GAIN,    8, 2},
+	  {GDEV_IQ_CORR_TX_PHASE,  10, 2},
+	  {GDEV_FPGA_VERSION,  12, 4},
+	  {GDEV_TIME_TIMER,    16, 16},		//referring to "time tamer"
+	  {GDEV_VCTXCO,        34, 2},
+	  {GDEV_XB_LO,         36, 4},
+	  {GDEV_EXPANSION,     40, 4},		//expansion gpio
+	  {GDEV_EXPANSION_DIR, 44, 4},
+	  {GDEV_XB_GPS_SPI,    48, 4},		//Custom devices
+	  {GDEV_XB_GPS_UART,   52, 4},
+	  {GDEV_XB_GPS_UART_BAUD,   56, 4},
+	  {GDEV_XB_GPS_UART_HASDATA,60, 4}
+};
+
+
+void write_uart(unsigned char val) {
+  // spin while not transmit ready
+  while (!(IORD_ALTERA_AVALON_UART_STATUS(UART_0_BASE) & ALTERA_AVALON_UART_STATUS_TRDY_MSK))
+  {}
+  IOWR_ALTERA_AVALON_UART_TXDATA(UART_0_BASE,  val);
 }
 
 // Entry point
@@ -401,10 +449,14 @@ int main()
 
   // initialize circular buffer
   // could use dynamic memory too if enabled
-  uint8_t uart_buffer[XB_UART_FIFO_BUFFER_SIZE];
+  uint8_t uart_buffer[XB_UART_FIFO_BUFFER_SIZE] = {0};
   uf = fifo_new(uart_buffer, sizeof(uart_buffer));
-
-
+  //{
+//	  int k = 0;
+//	  while(k++ < XB_UART_FIFO_BUFFER_SIZE){
+//		  uart_buffer[k-1] = 0;
+//	  }
+//  }
 
 /*
   char* msg = "<< NIOS OK >>\r\n";
@@ -414,7 +466,7 @@ int main()
   }
 */
 
-
+int write_num = 0;
 
   //setup xb uart intrrupt handler, so no data is skipped
   //create_xb_uart_interrupt();
@@ -433,7 +485,7 @@ int main()
 
       unsigned short i, cnt;
       unsigned char mode;
-      unsigned char buf[14];
+      unsigned char buf[14] = {0};
       struct uart_cmd *cmd_ptr;
       uint32_t tmpvar = 0;
       uint32_t iovar = 0;
@@ -445,7 +497,7 @@ int main()
       while(1)
       {
     	  // comment out for the SPI build
-		  //monitor_xb_uart(0);
+		  monitor_xb_uart(0);
 
           // Check if anything is in the FSK UART
           if( IORD_ALTERA_AVALON_UART_STATUS(UART_0_BASE) & ALTERA_AVALON_UART_STATUS_RRDY_MSK )
@@ -483,11 +535,6 @@ int main()
                   break;
               }
 
-              void write_uart(unsigned char val) {
-            	  // spin while not transmit ready
-                  while (!(IORD_ALTERA_AVALON_UART_STATUS(UART_0_BASE) & ALTERA_AVALON_UART_STATUS_TRDY_MSK));
-                  IOWR_ALTERA_AVALON_UART_TXDATA(UART_0_BASE,  val);
-              }
 
               isRead = (mode & UART_PKT_MODE_DIR_MASK) == UART_PKT_MODE_DIR_READ;
               isWrite = (mode & UART_PKT_MODE_DIR_MASK) == UART_PKT_MODE_DIR_WRITE;
@@ -530,43 +577,7 @@ int main()
                       }
                   }
 
-                  const struct {
-                      enum {
-                          GDEV_UNKNOWN,
-                          GDEV_GPIO,
-                          GDEV_IQ_CORR_RX_GAIN,
-                          GDEV_IQ_CORR_RX_PHASE,
-                          GDEV_IQ_CORR_TX_GAIN,
-                          GDEV_IQ_CORR_TX_PHASE,
-                          GDEV_FPGA_VERSION,
-                          GDEV_TIME_TIMER,
-                          GDEV_XB_LO,
-                          GDEV_VCTXCO,
-                          GDEV_EXPANSION,
-                          GDEV_EXPANSION_DIR,
-                          GDEV_XB_GPS_SPI,
-                          GDEV_XB_GPS_UART,
-                          GDEV_XB_GPS_UART_BAUD,
-                          GDEV_XB_GPS_UART_HASDATA
-                      } gdev;
-                      int start, len;
-                  } gdev_lut[] = {
-                          {GDEV_GPIO,           0, 4},		//config gpio
-                          {GDEV_IQ_CORR_RX_GAIN,    4, 2},
-                          {GDEV_IQ_CORR_RX_PHASE,   6, 2},
-                          {GDEV_IQ_CORR_TX_GAIN,    8, 2},
-                          {GDEV_IQ_CORR_TX_PHASE,  10, 2},
-                          {GDEV_FPGA_VERSION,  12, 4},
-                          {GDEV_TIME_TIMER,    16, 16},		//referring to "time tamer"
-                          {GDEV_VCTXCO,        34, 2},
-                          {GDEV_XB_LO,         36, 4},
-                          {GDEV_EXPANSION,     40, 4},		//expansion gpio
-                          {GDEV_EXPANSION_DIR, 44, 4},
-                          {GDEV_XB_GPS_SPI,    48, 4},		//Custom devices
-                          {GDEV_XB_GPS_UART,   52, 4},
-                          {GDEV_XB_GPS_UART_BAUD,   56, 4},
-                          {GDEV_XB_GPS_UART_HASDATA,60, 4}
-                  };
+
 #define ARRAY_SZ(x) (sizeof(x)/sizeof(x[0]))
 
                   	  	  //compress all data bytes into a tmpvar according to address offset

@@ -1345,23 +1345,21 @@ static int usb_xb_spi(struct bladerf *dev, uint32_t value)
 	return gpio_write(dev, 36, value);
 }
 
-static int usb_xb_gps_spi(struct bladerf *dev, uint32_t send, uint32_t* receive )
+static int usb_xb_gps_spi(struct bladerf *dev, uint8_t send, uint8_t* receive )
 {
 	// Had to add this modefied version of gpio_read because normal gpio_read() will not 
 	// let you initialize the data first sent to the device.
 
 
 	int status;
-	size_t i;
 	struct uart_cmd cmd;
 
-	uint32_t addr = 48;
+	uint8_t addr = 48;
 
 	// low to high byte chunks
-	for (i = 0; i < sizeof(send); i++) {
-		assert((addr + i) <= UINT8_MAX);
-		cmd.addr = (uint8_t)(addr + i);
-		cmd.data = (send >> (8*i)) & 0xff;   // send initialized data - to the 'send' bytes
+		assert(addr <= UINT8_MAX);
+		cmd.addr = addr;
+		cmd.data = send;   // send initialized data - to the 'send' bytes
 
 		status = access_peripheral(dev, UART_PKT_DEV_GPIO,
 			USB_DIR_DEVICE_TO_HOST, &cmd, 1);
@@ -1371,10 +1369,9 @@ static int usb_xb_gps_spi(struct bladerf *dev, uint32_t send, uint32_t* receive 
 		}
 
 		if (receive != NULL){
-			*receive |= (cmd.data << (i * 8));
+			*receive = cmd.data;
 		}
 		
-	}
 
 	return status;
 }

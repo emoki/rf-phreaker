@@ -147,13 +147,14 @@ if(LIBUSB_FOUND)
     # Test for event handling routines
     check_library_exists("${usb_LIBRARY}" libusb_handle_events_timeout "" LIBUSB_HAVE_HANDLE_EVENTS_TIMEOUT)
     check_library_exists("${usb_LIBRARY}" libusb_handle_events_timeout_completed "" LIBUSB_HAVE_HANDLE_EVENTS_TIMEOUT_COMPLETED)
-
-	set(LIBUSB_HAVE_ERROR_NAME, true)
-	set(LIBUSB_HAVE_GET_DEVICE_SPEED, true)
-	set(LIBUSB_HAVE_GET_VERSION, true)
-	set(LIBUSB_HAVE_STRERROR, true)
-	set(LIBUSB_HAVE_HOTPLUG, false)
-	set(LIBUSB_HAVE_HANDLE_EVENTS_TIMEOUT, true)
-	set(LIBUSB_HAVE_HANDLE_EVENTS_TIMEOUT_COMPLETED, true)
 	
+	set(LIBUSB_FOUND true)
+	set(LIBUSB_HAVE_ERROR_NAME true)
+	set(LIBUSB_HAVE_GET_DEVICE_SPEED true)
+	set(LIBUSB_HAVE_GET_VERSION true)
+	set(LIBUSB_HAVE_STRERROR true)
+	set(LIBUSB_HAVE_HOTPLUG false)
+	set(LIBUSB_HAVE_HANDLE_EVENTS_TIMEOUT true)
+	set(LIBUSB_HAVE_HANDLE_EVENTS_TIMEOUT_COMPLETED true)
+
 endif(LIBUSB_FOUND)

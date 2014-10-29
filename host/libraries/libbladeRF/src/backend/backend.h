@@ -111,7 +111,7 @@ struct backend_fns {
 	int(*xb_spi)(struct bladerf *dev, uint32_t send);
 
     /* D.P. Expansion board SPI */
-	int(*xb_gps_spi)(struct bladerf *dev, uint32_t send, uint32_t *receive);
+	int(*xb_gps_spi)(struct bladerf *dev, uint8_t send, uint8_t *receive);
 
     /* Expansion board UART */
     int (*xb_uart_write)(struct bladerf *dev, uint8_t value);

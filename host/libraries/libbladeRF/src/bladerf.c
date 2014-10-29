@@ -1434,7 +1434,7 @@ int bladerf_xb_spi_write(struct bladerf *dev, uint32_t send)
  *----------------------------------------------------------------------------*/
 
 
-int bladerf_xb_gps_spi(struct bladerf *dev, uint32_t send, uint32_t *receive)
+int bladerf_xb_gps_spi(struct bladerf *dev, uint8_t send, uint8_t *receive)
 {
 	int status;
     MUTEX_LOCK(&dev->ctrl_lock);
