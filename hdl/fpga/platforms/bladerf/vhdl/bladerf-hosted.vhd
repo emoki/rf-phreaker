@@ -57,8 +57,12 @@ architecture hosted_bladerf of bladerf is
         correction_rx_phase_gain_export : out std_logic_vector(31 downto 0);
         correction_tx_phase_gain_export : out std_logic_vector(31 downto 0);
         time_tamer_synchronize          : out std_logic;
-        time_tamer_time_tx              : in  std_logic_vector(63 downto 0);
-        time_tamer_time_rx              : in  std_logic_vector(63 downto 0);
+        time_tamer_tx_clock             :   in  std_logic ;
+        time_tamer_tx_reset             :   in  std_logic ;
+        time_tamer_tx_time              :   in  std_logic_vector(63 downto 0);
+        time_tamer_rx_clock             :   in  std_logic ;
+        time_tamer_rx_reset             :   in  std_logic ;
+        time_tamer_rx_time              :   in  std_logic_vector(63 downto 0)
 		  
 		  xb_spi_gps_MISO		:	in		std_logic := 'X';
 		  xb_spi_gps_MOSI		:	out	std_logic;
@@ -799,8 +803,12 @@ begin
         oc_i2c_sda_padoen_o => i2c_sda_oen,
         oc_i2c_arst_i       => '0',
         oc_i2c_scl_pad_i    => i2c_scl_in,
-        time_tamer_time_tx  => std_logic_vector(tx_timestamp),
-        time_tamer_time_rx  => std_logic_vector(rx_timestamp),
+        time_tamer_tx_clock             => tx_clock,
+        time_tamer_tx_reset             => tx_reset,
+        time_tamer_tx_time              => std_logic_vector(tx_timestamp),
+        time_tamer_rx_clock             => rx_clock,
+        time_tamer_rx_reset             => rx_reset,
+        time_tamer_rx_time              => std_logic_vector(rx_timestamp),
         time_tamer_synchronize => timestamp_sync
       ) ;
 
@@ -925,28 +933,38 @@ begin
     mini_exp2               <= 'Z';
 
     increment_tx_time : process(tx_clock, tx_reset)
+        variable tock : boolean := false ;
     begin
         if( tx_reset = '1') then
             tx_timestamp <= (others => '0');
+            tock := false ;
         elsif( rising_edge( tx_clock )) then
             if (meta_en_tx = '0') then
                 tx_timestamp <= (others => '0');
             else
+                if( nios_gpio(17) = '0' or tock = true) then
                 tx_timestamp <= tx_timestamp + 1;
             end if;
+        end if;
+            tock := not tock ;
         end if;
     end process;
 
     increment_rx_time : process(rx_clock, rx_reset)
+        variable tock : boolean := false ;
     begin
         if( rx_reset = '1') then
             rx_timestamp <= (others => '0');
+            tock := false ;
         elsif( rising_edge( rx_clock )) then
             if (meta_en_rx = '0') then
                 rx_timestamp <= (others => '0');
             else
+                if( nios_gpio(17) = '0' or tock = true ) then
                 rx_timestamp <= rx_timestamp + 1;
             end if;
+        end if;
+            tock := not tock ;
         end if;
     end process;
 

@@ -26,7 +26,6 @@
 #include <bladeRF.h>
 
 #include "cmd.h"
-#include "flash_common.h"
 #include "input.h"
 #include "minmax.h"
 #include "conversions.h"
@@ -52,11 +51,6 @@ int cmd_flash_backup(struct cli_state *state, int argc, char **argv)
         return CLI_RET_NARGS;
     }
 
-    status = flash_check_state(state, argv[0]);
-    if (status != 0) {
-        return status;
-    }
-
     filename = input_expand_path(argv[1]);
     if (!filename) {
         return CLI_RET_MEM;
@@ -80,7 +74,7 @@ int cmd_flash_backup(struct cli_state *state, int argc, char **argv)
             address = BLADERF_FLASH_ADDR_FPGA;
             length = BLADERF_FLASH_BYTE_LEN_FPGA;
         } else {
-            cli_err(state, argv[0], "Invalid image type provided.");
+            cli_err(state, argv[0], "Invalid image type provided.\n");
             status = CLI_RET_INVPARAM;
             goto out;
         }
@@ -88,13 +82,13 @@ int cmd_flash_backup(struct cli_state *state, int argc, char **argv)
         assert(argc == 4);
         address = str2uint(argv[2], 0, UINT_MAX, &ok);
         if (!ok || (address % BLADERF_FLASH_EB_SIZE != 0)) {
-            cli_err(state, argv[0], "Invalid address provided.");
+            cli_err(state, argv[0], "Invalid address provided.\n");
             goto out;
         }
 
         length = str2uint(argv[3], 0, UINT_MAX, &ok);
         if (!ok || (length % BLADERF_FLASH_EB_SIZE != 0)) {
-            cli_err(state, argv[0], "Invalid length provided.");
+            cli_err(state, argv[0], "Invalid length provided.\n");
             goto out;
         }
 

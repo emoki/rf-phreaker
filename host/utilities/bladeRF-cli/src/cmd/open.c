@@ -36,11 +36,6 @@ int cmd_open(struct cli_state *state, int argc, char **argv)
     int status;
     int ret;
 
-    /* Disallow opening of a diffrent device if the current one is doing work */
-    if (cli_device_is_streaming(state)) {
-        return CLI_RET_BUSY;
-    }
-
     if (state->dev) {
         bladerf_close(state->dev);
     }
@@ -69,7 +64,7 @@ int cmd_open(struct cli_state *state, int argc, char **argv)
             }
         }
 
-        printf("Using device string: %s\n", dev_ident);
+        printf("\n  Using device string: %s\n", dev_ident);
     }
 
     status = bladerf_open(&state->dev, dev_ident);
@@ -78,6 +73,7 @@ int cmd_open(struct cli_state *state, int argc, char **argv)
         ret = CLI_RET_LIBBLADERF;
     } else {
         ret = 0;
+        putchar('\n');
     }
 
     free(dev_ident);

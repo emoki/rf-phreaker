@@ -28,7 +28,6 @@
 
 #include "conversions.h"
 #include "cmd.h"
-#include "flash_common.h"
 #include "input.h"
 #include "minmax.h"
 #include "rel_assert.h"
@@ -61,13 +60,13 @@ int cmd_flash_init_cal(struct cli_state *state, int argc, char **argv)
 
     rv = str2fpga(argv[1], &fpga_size);
     if (rv != 0) {
-        cli_err(state, argv[0], "Invalid FPGA provided.");
+        cli_err(state, argv[0], "Invalid FPGA provided.\n");
         return rv;
     }
 
     dac = str2uint(argv[2], 0, 0xffff, &ok);
     if(!ok) {
-        cli_err(state, argv[0], "Invalid VCTCXO trim value provided.");
+        cli_err(state, argv[0], "Invalid VCTCXO trim value provided.\n");
         return CLI_RET_INVPARAM;
     }
 
@@ -77,11 +76,6 @@ int cmd_flash_init_cal(struct cli_state *state, int argc, char **argv)
     }
 
     if (argc == 3) {
-        rv = flash_check_state(state, argv[0]);
-        if (rv != 0) {
-            goto cmd_flash_init_cal_out;
-        }
-
         rv = bladerf_erase_flash(state->dev, BLADERF_FLASH_EB_CAL,
                                  BLADERF_FLASH_EB_LEN_CAL);
         if (rv != 0) {
@@ -96,11 +90,11 @@ int cmd_flash_init_cal(struct cli_state *state, int argc, char **argv)
             cli_err(state, argv[0],
             "Failed to write calibration data.\n"
             "\n"
-            "This may have resulted in a corrupted flash. If the device fails to\n"
-            "boot at the next power cycle, re-flash the firmware.\n"
+            "    This may have resulted in a corrupted flash. If the device fails to\n"
+            "    boot at the next power cycle, re-flash the firmware.\n"
             "\n"
-            "See the following page for more information:\n"
-            "  https://github.com/Nuand/bladeRF/wiki/Upgrading-bladeRF-firmware\n"
+            "    See the following page for more information:\n"
+            "      https://github.com/Nuand/bladeRF/wiki/Upgrading-bladeRF-firmware\n"
             );
 
             state->last_lib_error = rv;

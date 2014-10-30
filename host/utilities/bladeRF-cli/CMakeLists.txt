@@ -135,7 +135,6 @@ set(BLADERF_CLI_SOURCE
         src/cmd/doc/cmd_help.h
         src/cmd/cmd.c
         src/cmd/erase.c
-        src/cmd/flash_common.c
         src/cmd/flash_backup.c
         src/cmd/flash_image.c
         src/cmd/flash_init_cal.c
@@ -192,6 +191,8 @@ if(APPLE)
     )
 endif()
 
+set(SRC_TO_SHORTEN ${BLADERF_CLI_SOURCE})
+include(ShortFileMacro)
 add_executable(bladeRF-cli ${BLADERF_CLI_SOURCE})
 
 ################################################################################

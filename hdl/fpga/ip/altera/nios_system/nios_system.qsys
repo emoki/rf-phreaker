@@ -494,8 +494,8 @@
   <parameter name="tightlyCoupledInstructionMaster3MapParam" value="" />
  </module>
  <module kind="altera_avalon_spi" version="13.1" enabled="1" name="spi_0">
-  <parameter name="clockPhase" value="1" />
-  <parameter name="clockPolarity" value="1" />
+  <parameter name="clockPhase" value="0" />
+  <parameter name="clockPolarity" value="0" />
   <parameter name="dataWidth" value="8" />
   <parameter name="disableAvalonFlowControl" value="false" />
   <parameter name="insertDelayBetweenSlaveSelectAndSClk" value="false" />
@@ -504,8 +504,8 @@
   <parameter name="masterSPI" value="true" />
   <parameter name="numberOfSlaves" value="1" />
   <parameter name="syncRegDepth" value="2" />
-  <parameter name="targetClockRate" value="20000000" />
-  <parameter name="targetSlaveSelectToSClkDelay" value="0.0" />
+  <parameter name="targetClockRate" value="40000000" />
+  <parameter name="targetSlaveSelectToSClkDelay" value="2.0" />
   <parameter name="avalonSpec" value="2.0" />
   <parameter name="inputClockRate" value="80000000" />
  </module>
