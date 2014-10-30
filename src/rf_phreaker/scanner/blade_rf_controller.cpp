@@ -538,15 +538,21 @@ measurement_info blade_rf_controller::get_rf_data(frequency_type frequency, time
 	else {
 		auto auto_switch_setting = scanner_blade_rf_->eeprom_.cal_.get_rf_switch(frequency);
 		gpio = auto_switch_setting.switch_setting_ & auto_switch_setting.switch_mask_;
-		if(gpio_cache_ != gpio) {
+
+		uint32_t gpio_in_hw;
+		check_blade_status(bladerf_expansion_gpio_read(comm_blade_rf_->blade_rf(),
+			&gpio_in_hw), __FILE__, __LINE__);
+
+		if((gpio_in_hw & auto_switch_setting.switch_mask_) != gpio) {
+			gpio_in_hw &= ~gpio;
 			check_blade_status(bladerf_expansion_gpio_write(comm_blade_rf_->blade_rf(),
-				gpio), __FILE__, __LINE__);
-			LOG_L(VERBOSE) << "Automatically setting xb gpio to " << gpio;
+				gpio_in_hw & gpio), __FILE__, __LINE__);
+			LOG_L(VERBOSE) << "Automatically setting xb gpio to " << (gpio_in_hw & gpio);
 #ifdef _DEBUG
 			uint32_t tmp = 0;
 			check_blade_status(bladerf_expansion_gpio_read(comm_blade_rf_->blade_rf(),
 				&tmp), __FILE__, __LINE__);
-			assert(gpio == tmp);
+			assert(gpio_in_hw & gpio == tmp);
 #endif
 		}
 	}
