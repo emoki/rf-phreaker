@@ -62,7 +62,7 @@ architecture hosted_bladerf of bladerf is
         time_tamer_tx_time              :   in  std_logic_vector(63 downto 0);
         time_tamer_rx_clock             :   in  std_logic ;
         time_tamer_rx_reset             :   in  std_logic ;
-        time_tamer_rx_time              :   in  std_logic_vector(63 downto 0)
+        time_tamer_rx_time              :   in  std_logic_vector(63 downto 0);
 		  
 		  xb_spi_gps_MISO		:	in		std_logic := 'X';
 		  xb_spi_gps_MOSI		:	out	std_logic;
