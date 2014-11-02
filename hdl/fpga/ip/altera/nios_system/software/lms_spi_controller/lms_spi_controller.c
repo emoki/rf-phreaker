@@ -235,7 +235,7 @@ void create_xb_uart_interrupt(){
 void monitor_xb_uart(void* context){
 	//quick read if data available, else skip
 	uint8_t data = 0;
-	if( IORD_ALTERA_AVALON_UART_STATUS(UART_1_BASE) & ALTERA_AVALON_UART_STATUS_RRDY_MSK ){
+	while( IORD_ALTERA_AVALON_UART_STATUS(UART_1_BASE) & ALTERA_AVALON_UART_STATUS_RRDY_MSK ){
 		data = IORD_ALTERA_AVALON_UART_RXDATA(UART_1_BASE) ;
 
 		fifo_enqueue(&uf, data);
@@ -383,9 +383,7 @@ void init_NIOS(){
 	  IOWR_8DIRECT(I2C, OC_I2C_CTRL, OC_I2C_ENABLE ) ;
 
 	  // Set the UART divisor to 19 to get 4000000bps UART (baud rate = clock/(divisor + 1))
-	  //IOWR_ALTERA_AVALON_UART_DIVISOR(UART_0_BASE, 19) ;
-	  //IOWR_ALTERA_AVALON_UART_DIVISOR(UART_0_BASE, 79) ;   // 1M = 80M/1M - 1   (clk src 80mhz, baud = 1M)
-	  IOWR_ALTERA_AVALON_UART_DIVISOR(UART_0_BASE, 159) ;   // 500k = 80M/500k - 1   (clk src 80mhz, baud = 500k)
+	  IOWR_ALTERA_AVALON_UART_DIVISOR(UART_0_BASE, 19) ;
 
 	  // Set the IQ Correction parameters to 0
 	  IOWR_ALTERA_AVALON_PIO_DATA(IQ_CORR_RX_PHASE_GAIN_BASE, DEFAULT_CORRECTION);
