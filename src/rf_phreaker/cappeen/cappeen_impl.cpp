@@ -602,6 +602,10 @@ long cappeen_impl::input_new_license(const char *serial, uint32_t serial_buf_siz
 
 		if(frequency_correction_graph_)
 			frequency_correction_graph_->cancel_and_wait();
+		if(gps_graph_)
+			gps_graph_->cancel_and_wait();
+		if(processing_graph_)
+			processing_graph_->cancel_and_wait();
 
 		std::string filename(new_license_filename, license_buf_size);
 
@@ -619,6 +623,9 @@ long cappeen_impl::input_new_license(const char *serial, uint32_t serial_buf_siz
 		scanner_->refresh_scanner_info().get();
 		auto hw = scanner_->get_scanner().get()->get_hardware();
 		delegate_->initialize_beagle_info(hw);
+
+		if(gps_graph_)
+			gps_graph_->start(scanner_.get(), data_output_.get(), config_);
 
 		LOG_L(INFO) << "Updated license successfully.";
 	}
