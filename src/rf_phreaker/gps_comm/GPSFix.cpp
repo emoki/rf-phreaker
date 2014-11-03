@@ -164,9 +164,14 @@ namespace rf_phreaker { namespace gps_comm {
 		using namespace boost::posix_time;
 		using namespace boost::gregorian;
 		static ptime epoch(boost::gregorian::date(1970, 1, 1));
-		ptime now(date(year, month, day), time_duration(hour, min, (int32_t)sec));
-		time_duration::sec_type seconds = (now - epoch).total_seconds();
-		return time_t(seconds);
+		try {
+			ptime now(date(year, month, day), time_duration(hour, min, (int32_t)sec));
+			time_duration::sec_type seconds = (now - epoch).total_seconds();
+			return time_t(seconds);
+		}
+		catch(const std::exception &) {
+			return 0;
+		}
 	}
 
 	void GPSTimestamp::settime(double raw_ts){
