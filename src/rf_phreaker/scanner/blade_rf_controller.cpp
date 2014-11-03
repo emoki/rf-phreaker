@@ -95,7 +95,6 @@ std::vector<comm_info_ptr> blade_rf_controller::list_available_scanners()
 void blade_rf_controller::open_scanner(const scanner_serial_type &id)
 {
 	parameter_cache_ = measurement_info();
-	gpio_cache_ = 0;
 
 	close_scanner();
 
@@ -527,37 +526,28 @@ measurement_info blade_rf_controller::get_rf_data(frequency_type frequency, time
 	else
 		blade_bandwidth = parameter_cache_.bandwidth();
 
+	uint32_t gpio_in_hw = 0;
+	check_blade_status(bladerf_expansion_gpio_read(comm_blade_rf_->blade_rf(),
+		&gpio_in_hw), __FILE__, __LINE__);
+	LOG_L(VERBOSE) << "Current xb gpio:" << gpio_in_hw << ".";
 
-	uint32_t gpio = 0;
-	if(switch_mask) {
-		gpio = switch_setting & switch_mask;
-		check_blade_status(bladerf_expansion_gpio_write(comm_blade_rf_->blade_rf(),
-			switch_setting & switch_mask), __FILE__, __LINE__);
-		LOG_L(VERBOSE) << "Manually setting xb gpio to " << gpio;
-	}
-	else {
+	if(switch_mask == 0) {
 		auto auto_switch_setting = scanner_blade_rf_->eeprom_.cal_.get_rf_switch(frequency);
-		gpio = auto_switch_setting.switch_setting_ & auto_switch_setting.switch_mask_;
-
-		uint32_t gpio_in_hw;
-		check_blade_status(bladerf_expansion_gpio_read(comm_blade_rf_->blade_rf(),
-			&gpio_in_hw), __FILE__, __LINE__);
-
-		if((gpio_in_hw & auto_switch_setting.switch_mask_) != gpio) {
-			gpio_in_hw &= ~gpio;
-			check_blade_status(bladerf_expansion_gpio_write(comm_blade_rf_->blade_rf(),
-				gpio_in_hw & gpio), __FILE__, __LINE__);
-			LOG_L(VERBOSE) << "Automatically setting xb gpio to " << (gpio_in_hw & gpio);
-#ifdef _DEBUG
-			uint32_t tmp = 0;
-			check_blade_status(bladerf_expansion_gpio_read(comm_blade_rf_->blade_rf(),
-				&tmp), __FILE__, __LINE__);
-			assert(gpio_in_hw & gpio == tmp);
-#endif
-		}
+		switch_setting = auto_switch_setting.switch_setting_;
+		switch_mask = auto_switch_setting.switch_mask_;
 	}
-	gpio_cache_ = gpio;
-
+	if((gpio_in_hw & switch_mask) != switch_setting) {
+		gpio_in_hw &= ~switch_mask;
+		uint32_t new_gpio = gpio_in_hw | switch_setting;
+		check_blade_status(bladerf_expansion_gpio_write(comm_blade_rf_->blade_rf(),
+			new_gpio), __FILE__, __LINE__);
+		LOG_L(VERBOSE) << "Setting xb gpio to " << new_gpio << ".";
+		uint32_t tmp = 0;
+		check_blade_status(bladerf_expansion_gpio_read(comm_blade_rf_->blade_rf(),
+			&tmp), __FILE__, __LINE__);
+		if(switch_setting != (tmp & switch_mask))
+			throw hardware_error("Unable to set xb gpio pins.");
+	}
 	// BladeRF only accepts data num_samples that are a multiple of 1024.
 	// Because the blade rx sync parameters are configurable we want to make sure we 
 	// clear out every buffer.

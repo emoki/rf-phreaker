@@ -121,7 +121,6 @@ private:
 	std::shared_ptr<scanner_blade_rf> scanner_;
 
 	measurement_info parameter_cache_;
-	uint32_t gpio_cache_;
 
 	int64_t collection_count_;
 
