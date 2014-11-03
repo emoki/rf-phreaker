@@ -1,0 +1,27 @@
+#!/bin/sh -e
+
+UPSTREAM='http://nuand.com/fx3/bladeRF_fw_v1.7.1.img'
+CHECKSUM='bd8211e33d8442d23db21b2badad0a88'
+IMGFILE=/usr/share/Nuand/bladeRF/bladeRF_fw.img
+
+checkfile () {
+	md5sum --check <<- EOMD5SUM
+	$CHECKSUM  $IMGFILE
+	EOMD5SUM
+}
+
+# Fetch firmware if needed
+if [ ! -s $IMGFILE ] || ! checkfile ; then
+	echo "Downloading firmware from nuand.com..."
+	rm -f $IMGFILE
+	wget -O $IMGFILE $UPSTREAM || cat <<- EOMSG 1>&2
+
+		Warning: Failed to download firmware for bladeRF.
+		Please run "dpkg-reconfigure bladerf-firmware-fx3"
+		again when networking is up, or copy the firmware manually
+		to $IMGFILE
+
+	EOMSG
+fi
+
+#DEBHELPER#
