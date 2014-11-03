@@ -220,6 +220,11 @@ void myfft(Ipp32fc *pSeq_F, const Ipp32fc *pSeq_T, int len)
 			FFT_1024(pSeq_T, pSeq_F);
 			Init_FFT_1024(FALSE);
 			break;
+		case 1536:
+			Init_DFT_1536(TRUE);
+			DFT_1536(pSeq_T, pSeq_F);
+			Init_DFT_1536(FALSE);
+			break;
 		case 2048:
 			Init_FFT_2048(TRUE);
 			FFT_2048(pSeq_T, pSeq_F);
