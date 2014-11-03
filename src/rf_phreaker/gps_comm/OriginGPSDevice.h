@@ -2,7 +2,7 @@
  * OriginGPSDevice.h
  *
  *  Created on: Jul 26, 2014
- *      Author: me
+ *      Author: ck
  */
 
 #ifndef ORIGINGPSDEVICE_H_
@@ -13,72 +13,106 @@
 #include <functional>
 #include "BladeDevice.h"
 #include "GPSService.h"
+#include "NMEACommand.h"
 #include "FrontEndBoard.h"
+#include "rf_phreaker/common/exception_types.h"
+
+
+#define SPI_MAX_UPDATE_BYTES 1000
+
 
 namespace rf_phreaker { namespace gps_comm {
 
-class OriginGPSDevice {
-public:
-	enum DataInterface
-	{
-		OTHER,
-		SPI,
-		UART
+
+	class OriginGPSDeviceError : public gps_comm_error {
+	public:
+		std::string message;
+		OriginGPSDeviceError(std::string msg) 
+			: gps_comm_error(msg), message(msg)
+		{};
 	};
 
-private:
-	static const std::string gps_boot_ok;
-	static const uint8_t gps_idle[];
+	class OriginGPSDevice {
+	public:
+		enum DataInterface
+		{
+			OTHER,
+			SPI,
+			UART
+		};
 
-									// -- SPI notes --
-	bool spiWriteCached;			//- the nios caches the return byte from a spi write
-									// the first nios read will return that byte, then
-									// it will send 0 and receive the next byte on
-									// subsequent reads.
-									//- because the gps requires an idle code to get info
-									// there needs to be a toggler to get the cached byte,
-									// or write the new idle code.
-									//-in retrospect, uart was easier to implement.
+	private:
+		static const uint8_t gps_idle[];
 
-	uint32_t idleindex;
-	uint8_t getIdleByte();
+		void setupParsedCommandEventHandlers();		// initialization function
 
 
-	void handleUARTByte(uint8_t);
-	void handleSPIByte(uint8_t);
-	void interpretOriginBytes( uint8_t byte );
-	void setupParsedCommandEventHandlers();
+		uint32_t idleindex;				//handles the spi idle bytes
+		uint8_t getIdleByte();
+
+
+		void handleUARTByte(uint8_t);		// byte received over uart interface
+		void handleSPIByte(uint8_t);		// byte received over spi interface
+		void interpretOriginBytes(uint8_t byte);		// decides where to send new received byte
+
+		void togglePower();				// sends a power toggle pulse over the gpsOnOff pin
 
 
 
-	FrontEndBoard& frontend;
-public:
-	DataInterface dataInterface;		//which interface to r/w
-	GPSService service;					//contains the gps state
+		DataInterface dataInterface;		//which interface to r/w
+		FrontEndBoard& frontend;
+	public:
+		bool log;
+		uint32_t maxSPIUpdateBytes;
+		GPSService service;					//contains the gps state
 
 
-	OriginGPSDevice(FrontEndBoard& fb);
-	virtual ~OriginGPSDevice();
+		OriginGPSDevice(FrontEndBoard& fb);
+		virtual ~OriginGPSDevice();
 
-	bool getWakeup();
-	void setPower(bool b=true);
-	GPSFix getFix();
-	void sendCommand(std::string cmd);
-	std::function<void(NMEACommand)> onCommandReceived;
+		bool awake();								// is the GPS chip on
+		void setPower(bool set_on);					//tries to put the GPS chip into the state requested, 5sec timeout
+		void reset();								//resets gps settings with RESET pin
+		GPSFix getFix();							//gets the current fix information from all data received
+		void sendCommand(std::string cmd);			//send custom string to the GPS chip.
+		void sendCommand(NMEACommand& cmd);			//sends a standard command to the GPS chip
 
-	void setInterface(DataInterface inter);	// sets all data transactions and
-										// parsing activity to the given interface
-	// call every so often (1-10 ms - depending on baud rate) to read the new data and update the internal states.
-	uint32_t update();			//returns number of bytes read
+		void disableAllNMEAOutput();				// stops all messages from the GPS chip, and sets baud to 9600
+		void sendQuery(std::vector<NMEASentence::MessageID> types);		//will query the gps chip for a single update
+		// to each of the messages listed
+		// -- Query Usage --
+		//  sendQuery( /*NMEASentence::MessageID vector list*/ );
+		//    // \-> Will request the information...
+		//  update();
+		//	  // \-> Will read all the requested information, putting it into the fix.
 
-	uint8_t spiWrite(uint8_t data);	//writes byte to gps and returns the response, without parsing it
-	uint8_t spiRead();				//gets the latest data from the gps
+		// Sets which interface (SPI/UART) the parser uses as input, or where to send commands.
+		void setInterface(DataInterface inter);
+		DataInterface getInterface();
 
-	void uartWrite(uint8_t data);
-	uint32_t uartHasData();
-	uint32_t uartRead(uint32_t* data = 0);		//returns the num bytes read, also
-													//can return data
-};
+
+		// call every so often (1-2 sec - depending on baud rate) to read the new data and update the internal states.
+		uint32_t update();			//returns number of bytes read
+		uint32_t fast_update();			//returns number of bytes read
+
+
+
+		// ----- Low Level Data Transfer Functions -------
+		// You shouldn't have to use these...
+
+		// SPI
+		uint8_t spiWrite(uint8_t data);	//writes byte to gps and returns the response, without parsing it
+		uint8_t spiRead();				//gets the latest data from the gps
+
+		// UART
+		void uartWrite(uint8_t data);
+		uint32_t uartHasData();						//returns number of bytes buffered inside of NIOS
+		uint32_t uartRead(uint32_t* data = 0);		//returns the num bytes read, also
+		//can return data
+		void uartBaud(uint16_t b);
+
+		uint32_t synchronizeUart();			//called to make sure the baud rates are correct on NIOS and gps chip.
+	};
 
 }} 
 

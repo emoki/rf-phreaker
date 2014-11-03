@@ -16,34 +16,174 @@ class gps_comm_impl
 public:
 	gps_comm_impl() {}
 
-	void init(bladerf *blade) {
-		blade_device_.reset(new BladeDevice(blade));
-		front_end_board_.reset(new FrontEndBoard(*blade_device_));
-		origin_gps_device_.reset(new OriginGPSDevice(*front_end_board_));
+	void init(bladerf *blade, bool use_spi) {
+		try {
+			blade_device_.reset(new BladeDevice(blade));
+			front_end_board_.reset(new FrontEndBoard(*blade_device_));
+			origin_gps_device_.reset(new OriginGPSDevice(*front_end_board_));
 
-		//origin_gps_device_->service.parser.log = true;
+			// -- Pulls the reset pin for 0.5 sec.
+			origin_gps_device_->reset();
 
-		// This should be reworked since we cannot rely on the WAKE_UP pin.
-		int i = 0;
-		while(!origin_gps_device_->getWakeup()) {
-			origin_gps_device_->setPower();
-			std::this_thread::sleep_for(std::chrono::seconds(1));
-			if(++i > 10)
-				throw gps_comm_error("Unable to wake GPS module.");
+			// -- Pick UART Bauds		 -- Default depends on the chip... NMEA standard is 4800
+#define GPS_PREFERRED_BAUD 9600
+
+
+			// -- Pick Data Interface
+			origin_gps_device_->setInterface(use_spi ? OriginGPSDevice::DataInterface::SPI :
+				OriginGPSDevice::DataInterface::UART);
+
+			// -- Enable Debug information
+			//origin_gps_device_->service.parser.log = true;	//shows nmea success / fail info
+			//origin_gps_device_->log = true;					//shows data xfer / gps state info
+
+
+
+			// -- START GPS DEVICE     [throws OriginGPSDevice:gps_comm_error]
+			// set power now will try it's best to put device in the state requested within 5 sec timeout, otherwise error
+			origin_gps_device_->setPower(true);
+
+			// TODO DISABLE THIS - It is only to show/confirm activity while running "initialization_gtests"
+			// -- Just remove these lines.
+			//origin_gps_device_->service.parser.onCommand += [](NMEASentence nmea){
+			//	if ( nmea.checksumOK() ){
+			//		std::cout << "GPS ::> " << nmea.text << std::endl;
+			//	}
+			//};
+
+			// -- Prevent improper shutdown if the power pulses are not timed right while dealing with blade gpio init pulses...
+			// - overriding default parser handler of no action
+			origin_gps_device_->service.parser.setCommandHandler("PSRF150", [](NMEASentence nmea) {
+				if(!nmea.checksum.compare("3E")) {
+					//std::cout << "GPS POWER ON!" << std::endl;
+				}
+				// Gps sends an invalid checksum when it turns off, checksumOK() will be false.
+				else if(!nmea.checksum.compare("3F")) {
+					//std::cout << "GPS POWER OFF!" << std::endl;
+					//std::cout << "Restarting..." << std::endl;
+
+					// could have another variable, like main_system_on, that decides to allow the restart or not...
+					// - Not sure how to get reference to device from lambda, unique_ptr isn't captureable... that's up to you.
+					//origin_gps_device_->setPower(true);
+				}
+				else {
+					//std::cout << "PSRF150 unknown checksum" << std::endl;
+				}
+			});
+
+
+			if(origin_gps_device_->getInterface() == OriginGPSDevice::DataInterface::SPI) {
+				// can set message rates here too, but SPI is so much less problematic, we can do fine with the defaults.
+			}
+			else if(origin_gps_device_->getInterface() == OriginGPSDevice::DataInterface::UART) {
+
+				// -- Make sure we are communicating with the right startup baud in order to change settings.
+				// -- This will check the data coming in and if it's unreadable, it will automatically adjust the baud rate.
+				// -- Needed because ensuring the same baud on nios and gps is tricky when power/reload occurs.
+				uint32_t detected = origin_gps_device_->synchronizeUart();
+
+				// -- Sends message to gps to stop sending all sentences... will wait for host commands.
+				origin_gps_device_->disableAllNMEAOutput();
+
+				// ===== MESSAGE SELECTION ======
+				// If you decide to use this method (periodic updates sent *from* gps) then make sure to COMMENT OUT the "sendQuery" line in "get_latest_gps()"
+				// [BEGIN] This section will allow you to specify certain messages to update, as the others will be turned off.
+				// - Comment out these if you want to use single updates
+				NMEACommandQueryRate updates;
+
+				//std::cout << "Setting GPGGA to output from GPS" << std::endl;
+				updates.messageID = NMEASentence::GGA;
+				updates.rate = 1;			// seconds per msg
+				origin_gps_device_->sendCommand(updates);
+
+				//std::cout << "Setting GPRMC to output from GPS" << std::endl;
+				updates.messageID = NMEASentence::RMC;
+				updates.rate = 1;			// seconds per msg
+				origin_gps_device_->sendCommand(updates);
+
+				//std::cout << "Setting GPGSV to output almanac." << std::endl;
+				updates.messageID = NMEASentence::GSV;
+				updates.rate = 5;			// seconds per msg
+				origin_gps_device_->sendCommand(updates);
+				// [END]
+
+
+				// change gps baud rate
+				NMEACommandSerialConfiguration cfg;
+				cfg.baud = GPS_PREFERRED_BAUD;		//4800 (NMEA default), 9600, 19200, 38400, 115200, [These need nios interrupts ->] 230400, 460800, 921600
+				//std::cout << "Setting baud rate to " << cfg.baud << std::endl;
+				origin_gps_device_->sendCommand(cfg);
+				origin_gps_device_->sendCommand(cfg);			// 2x just to be sure.
+				//set the actual controller baud right after changing gps
+				origin_gps_device_->uartBaud((uint16_t)cfg.baud);
+			}
+			else {
+				// nothing.
+			}
+		}
+		catch(const BladeError& e) {
+			throw rf_phreaker::gps_comm_error(e.message, e.error_code_);
+		}
+		catch(const std::exception &err) {
+			throw rf_phreaker::gps_comm_error(err.what());
 		}
 	}
 
-	void set_to_spi_comm() {
-		origin_gps_device_->setInterface(OriginGPSDevice::SPI);
-	}
-
-	void set_to_uart_comm() {
-		origin_gps_device_->setInterface(OriginGPSDevice::UART);
+	void power_off() {
+		if(origin_gps_device_)
+			origin_gps_device_->setPower(false);
 	}
 
 	rf_phreaker::gps get_latest_gps() {
-		origin_gps_device_->update();
-		return origin_gps_device_->getFix();
+
+		std::vector<NMEASentence::MessageID> types;
+		types.push_back(NMEASentence::GGA);
+		types.push_back(NMEASentence::RMC);
+
+		// COMMENT THIS OUT IF YOU WANT PERIODIC UPDATES, NOT SINGLE UPDATES
+		//origin_gps_device_->sendQuery(types);
+
+		bool updating = true;
+		int updates = 0;
+		while (updating){
+			try
+			{
+				updates++;
+
+				// synchronous
+				//origin_gps_device_->sendQuery(queryTypes);			//uncomment for single updates  -- Send commands for next update
+
+				// synchronous
+				origin_gps_device_->update();
+
+				updating = false;
+
+				return origin_gps_device_->getFix();
+			}
+			catch (BladeError& e)			// Not re-throwing timeout errors because of below explanation... just retry and we can pull the data.
+			{
+				if (e.code == BLADERF_ERR_TIMEOUT){
+					//std::cout << " <!> ############ Blade TIMEOUT Error, trying again... ############ <!>" << std::endl;
+					//std::cout << "     - Out of sync with nios, trying again will let it catch up." << std::endl;
+					//std::cout << "     - libusb timeout is about 250 ms per access, maybe the host is slow?" << std::endl;
+
+					//if there have been 10 timeouts in a row for a single update... something is severely broken...
+					if (updates > 10){
+						throw BladeError("Nios is unreachable!", e.code);
+					}
+
+					std::this_thread::sleep_for(std::chrono::milliseconds(50));
+					continue;
+				}
+				else
+				{
+					throw rf_phreaker::gps_comm_error(e.message, e.error_code_);
+				}
+			}
+			catch(const std::exception &err) {
+				throw rf_phreaker::gps_comm_error(err.what());
+			}
+		}
 	}
 
 private:

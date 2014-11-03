@@ -10,16 +10,12 @@ gps_comm::~gps_comm() {
 	delete impl_;
 }
 
-void gps_comm::init(bladerf *blade) {
-	impl_->init(blade);
+void gps_comm::init(bladerf *blade, bool use_spi) {
+	impl_->init(blade, use_spi);
 }
 
-void gps_comm::set_to_spi_comm() {
-	impl_->set_to_spi_comm();
-}
-
-void gps_comm::set_to_uart_comm() {
-	impl_->set_to_uart_comm();
+void gps_comm::power_off() {
+	impl_->power_off();
 }
 
 rf_phreaker::gps gps_comm::get_latest_gps(){

@@ -2,10 +2,11 @@
  * BladeError.cpp
  *
  *  Created on: Mar 28, 2014
- *      Author: me
+ *      Author: ck
  */
 
 #include "BladeError.h"
+#include <libbladeRF.h>
 #include <sstream>
 
 using namespace std;
@@ -23,25 +24,41 @@ BladeError::BladeError(string msg, int code)
 	this->message = ss.str();
 }
 string BladeError::getLibErrorMessage(int code) {
-	// TODO Auto-generated constructor stub
 	stringstream ss;
+	/*  ---------- libbladerf.h --------- 9/5/2014
+	#define BLADERF_ERR_UNEXPECTED  (-1)  //< An unexpected failure occurred
+	#define BLADERF_ERR_RANGE       (-2)  //< Provided parameter is out of range
+	#define BLADERF_ERR_INVAL       (-3)  //< Invalid operation/parameter
+	#define BLADERF_ERR_MEM         (-4)  //< Memory allocation error
+	#define BLADERF_ERR_IO          (-5)  //< File/Device I/O error
+	#define BLADERF_ERR_TIMEOUT     (-6)  //< Operation timed out
+	#define BLADERF_ERR_NODEV       (-7)  //< No device(s) available
+	#define BLADERF_ERR_UNSUPPORTED (-8)  //< Operation not supported
+	#define BLADERF_ERR_MISALIGNED  (-9)  //< Misaligned flash access
+	#define BLADERF_ERR_CHECKSUM    (-10) //< Invalid checksum
+	#define BLADERF_ERR_NO_FILE     (-11) //< File not found
+	#define BLADERF_ERR_UPDATE_FPGA (-12) //< An FPGA update is required
+	#define BLADERF_ERR_UPDATE_FW   (-13) //< A firmware update is requied
+	*/
 
-
-	switch(code)
+	switch (code)
 	{
-	case 0: return string("SUCCESS");
-	case -1: return string("ERR_UNEXPECTED: Unexpected failure occured.");
-	case -2: return string("ERR_RANGE: Provided parameter is out of range.");
-	case -3: return string("ERR_INVAL: Invalid operation/parameter.");
-	case -4: return string("ERR_MEM: Memory allocation Error.");
-	case -5: return string("ERR_IO: File/Device IO Error.");
-	case -6: return string("ERR_TIMEOUT: Operation timed out.");
-	case -7: return string("ERR_NODEV: No device available.");
-	case -8: return string("ERR_UNSUPPORTED: Operation not supported.");
-	case -9: return string("ERR_MISALIGNED: Misaligned flash access.");
-	case -10: return string("ERR_CHECKSUM: Invalid checksum.");
+	case 0: return string("SUCCESS!");
+	case BLADERF_ERR_UNEXPECTED: 	return string("ERR_UNEXPECTED: ") + string(bladerf_strerror(code));
+	case BLADERF_ERR_RANGE: 		return string("ERR_RANGE: ") + string(bladerf_strerror(code));
+	case BLADERF_ERR_INVAL: 		return string("ERR_INVAL: ") + string(bladerf_strerror(code));
+	case BLADERF_ERR_MEM: 			return string("ERR_MEM: ") + string(bladerf_strerror(code));
+	case BLADERF_ERR_IO: 			return string("ERR_IO: ") + string(bladerf_strerror(code));
+	case BLADERF_ERR_TIMEOUT: 		return string("ERR_TIMEOUT: ") + string(bladerf_strerror(code));
+	case BLADERF_ERR_NODEV: 		return string("ERR_NODEV: ") + string(bladerf_strerror(code));
+	case BLADERF_ERR_UNSUPPORTED: 	return string("ERR_UNSUPPORTED: ") + string(bladerf_strerror(code));
+	case BLADERF_ERR_MISALIGNED: 	return string("ERR_MISALIGNED: ") + string(bladerf_strerror(code));
+	case BLADERF_ERR_CHECKSUM: 		return string("ERR_CHECKSUM: ") + string(bladerf_strerror(code));
+	case BLADERF_ERR_NO_FILE: 		return string("ERR_NO_FILE: ") + string(bladerf_strerror(code));
+	case BLADERF_ERR_UPDATE_FPGA: 	return string("ERR_UPDATE_FPGA: ") + string(bladerf_strerror(code));
+	case BLADERF_ERR_UPDATE_FW: 	return string("ERR_UPDATE_FW: ") + string(bladerf_strerror(code));
 	default:
-		ss << "Unknown Error Code: (" << code << ").";
+		ss << "Unknown Error Code: (" << code << "). strerror() -> \"" << string(bladerf_strerror(code)) << "\"";
 		return ss.str();
 	}
 }

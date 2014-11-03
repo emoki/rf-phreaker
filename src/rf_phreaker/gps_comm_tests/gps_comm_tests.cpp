@@ -7,6 +7,13 @@
 
 
 int main(int argc, char* argv[]) {
+
+		
+
+	//std::cout << std::endl << "Any key to begin..." << std::endl;
+	//std::cin.ignore();
+
+
 	::testing::InitGoogleTest(&argc, argv);
 	::testing::InitGoogleMock(&argc, argv);
 

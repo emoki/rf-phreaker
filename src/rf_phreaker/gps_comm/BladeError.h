@@ -2,7 +2,7 @@
  * BladeError.h
  *
  *  Created on: Mar 28, 2014
- *      Author: me
+ *      Author: ck
  */
 
 #ifndef BladeError_H_

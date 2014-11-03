@@ -9,7 +9,7 @@
 #ifndef bladeXcode_BladeRFpp_h
 #define bladeXcode_BladeRFpp_h
 
-#include "libbladeRF.h"
+#include <libbladeRF.h>
 #include "BladeContext.h"
 #include "BladeError.h"
 #include "BladeDevice.h"

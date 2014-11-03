@@ -2,11 +2,23 @@
  * BladeGPS.h
  *
  *  Created on: Jul 23, 2014
- *      Author: me
+ *      Author: ck
  */
 
 #ifndef BLADEGPS_H_
 #define BLADEGPS_H_
+
+
+
+// minwindef.h has these defined for some reason...
+#ifdef IN
+	#undef IN
+#endif
+#ifdef OUT
+	#undef OUT
+#endif
+
+
 
 
 #include "BladeRF.hpp"

@@ -15,11 +15,9 @@ public:
 	
 	~gps_comm();
 
-	void init(bladerf *comm);
+	void init(bladerf *comm, bool use_spi);
 
-	void set_to_spi_comm();
-
-	void set_to_uart_comm();
+	void power_off();
 
 	rf_phreaker::gps get_latest_gps();
 

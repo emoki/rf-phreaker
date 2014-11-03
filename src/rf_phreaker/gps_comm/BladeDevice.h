@@ -9,83 +9,101 @@
 #ifndef __bladeXcode__BladeDevice__
 #define __bladeXcode__BladeDevice__
 
+
+
 #include <string>
-#include "libbladeRF.h"
+#include <libbladeRF.h>
+
+// minwindef.h has these defined for some reason...
+#ifdef IN
+	#undef IN
+#endif
+#ifdef OUT
+	#undef OUT
+#endif
+
+
 
 namespace rf_phreaker { namespace gps_comm {
 
-    class BladeDevice
-    {
-    public:
-    	enum GPIODirection
-    	{
-    		GPIO_IN = 0,
-    		GPIO_OUT = 1
-    	};
-    private:
+	class BladeDevice
+	{
+	public:
+		enum GPIODirection
+		{
+			IN = 0,
+			OUT = 1
+		};
+	private:
 		bool isIndirect;	//whether or not an open device was provided on construction (true), or not(false).
-    	bool null;
-        std::string serial;
-        
-        bladerf* handle;
-        bladerf_devinfo devinfo;
-        bool isOpen;
-        bladerf_module activeModule;
-        
-        // could make a template later... not really needed now though
-        bool getbit(uint32_t field, int i); // from zero
-        uint32_t setbit(uint32_t field, int i, bool val);
+		bool null;
+		std::string serial;
 
-    public:
-        BladeDevice();
-        BladeDevice(bladerf* open_device);		// this is really only here because this is a wrapper class
-        										// and wrapping an already open pointer can be really useful
-        ~BladeDevice();
-        BladeDevice(const BladeDevice& ref);	//copy
+		bladerf* handle;
+		bladerf_devinfo devinfo;
+		bool isOpen;
+		bladerf_module activeModule;
 
-        std::string getSerial();
-        bladerf_devinfo getInfo();
+		// could make a template later... not really needed now though
+		bool getbit(uint32_t field, int i); // from zero
+		uint32_t setbit(uint32_t field, int i, bool val);
 
-        void load(bladerf_devinfo& devinfo);
-        bool open();
-        bool close();
-        void loadFPGAImage(std::string path);
-        void setActiveModule(bladerf_module module);  // all subsequent function
-        												// calls that rely on a module will use this one
+	public:
+		BladeDevice();
+		BladeDevice(bladerf* open_device);		// this is really only here because this is a wrapper class
+		// and wrapping an already open pointer can be really useful
+		~BladeDevice();
+		BladeDevice(const BladeDevice& ref);	//copy
 
-        uint32_t 	getXBGPIO();						//returns register
-        bool	 	getXBGPIO(uint32_t index);			//returns bit, index start @ 1
-        void 		setXBGPIO(uint32_t val);			//sets register
-        void 		setXBGPIO(uint32_t index, bool val);	//sets bit, index start @ 1
+		std::string getSerial();
+		bladerf_devinfo getInfo();
+
+		void load(bladerf_devinfo& devinfo);
+		bool open();
+		bool close();
+		void loadFPGAImage(std::string path);
+		void setActiveModule(bladerf_module module);  // all subsequent function
+		// calls that rely on a module will use this one
+
+		uint32_t 	getXBGPIO();						//returns register
+		bool	 	getXBGPIO(uint32_t index);			//returns bit, index start @ 1
+		void 		setXBGPIO(uint32_t val);			//sets register
+		void 		setXBGPIO(uint32_t index, bool val);	//sets bit, index start @ 1
 
 
-        uint32_t 	getXBGPIODir();
-        bool	 	getXBGPIODir(uint32_t index);
-        void 		setXBGPIODir(uint32_t val);
-        void 		setXBGPIODir(uint32_t index, bool val);
+		uint32_t 	getXBGPIODir();
+		bool	 	getXBGPIODir(uint32_t index);
+		void 		setXBGPIODir(uint32_t val);
+		void 		setXBGPIODir(uint32_t index, bool val);
 
-        uint32_t 	getConfigGPIO();
-        bool	 	getConfigGPIO(uint32_t index);
-        void 		setConfigGPIO(uint32_t val);
-        void 		setConfigGPIO(uint32_t index, bool val);
+		uint32_t 	getConfigGPIO();
+		bool	 	getConfigGPIO(uint32_t index);
+		void 		setConfigGPIO(uint32_t val);
+		void 		setConfigGPIO(uint32_t index, bool val);
 
-        uint8_t xboardSPIRead();
-        void xboardSPIWrite(uint8_t val);
+		// data size must be >= 14  !!!!
+		uint32_t xboardExpressRead(uint8_t addr, uint8_t* data);
 
-        uint32_t xboardUARTRead();
-        void xboardUARTWrite(char val);
-        void xboardUARTBaud(uint16_t baud);
-        uint32_t xboardUARTHasData();
+		uint8_t xboardSPI(uint8_t send);
 
-        bladerf* getHandle();
-        uint32_t getSampleRate();
-        void setModuleState(bladerf_module module, bool state);
-        void setFrequency( uint32_t f);
-        uint32_t setBandwidth(uint32_t bw);
-        uint32_t getFrequency( );
-        uint32_t getBandwidth( );
+		uint32_t xboardUARTRead();
+		void xboardUARTWrite(char val);
+		void xboardUARTBaud(uint16_t baud);
+		uint32_t xboardUARTHasData();
 
-    };
+		bladerf* getHandle();
+		uint32_t getSampleRate();
+		void setModuleState(bladerf_module module, bool state);
+		void setFrequency(uint32_t f);
+		uint32_t setBandwidth(uint32_t bw);
+		uint32_t getFrequency();
+		uint32_t getBandwidth();
+
+		void initializeForCollection();
+		void collectDummySnapshot();
+		void enableRXModule();
+		void disableRXModule();
+	};
 }}
 
 #endif /* defined(__bladeXcode__BladeDevice__) */

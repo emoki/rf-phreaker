@@ -18,6 +18,7 @@ set (gps_comm_SRCS
 	BladeError.cpp
 	BladeError.h
 	BladeRF.hpp
+	Event.h
 	FrontEndBoard.h
 	FrontEndBoard.cpp
 	gps_comm.h
@@ -27,8 +28,11 @@ set (gps_comm_SRCS
 	GPSFix.h
 	GPSService.cpp
 	GPSService.h
+	NMEACommand.cpp
+	NMEACommand.h
 	NMEAParser.cpp
 	NMEAParser.h
+	NumberConversion.cpp
 	NumberConversion.h
 	OriginGPSDevice.h
 	OriginGPSDevice.cpp	

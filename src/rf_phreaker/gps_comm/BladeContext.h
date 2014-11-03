@@ -10,7 +10,7 @@
 #define __bladeXcode__BladeContext__
 
 #include <vector>
-#include "libbladeRF.h"
+#include <libbladeRF.h>
 
 
 namespace rf_phreaker { namespace gps_comm {
@@ -22,7 +22,7 @@ namespace rf_phreaker { namespace gps_comm {
         std::vector<bladerf_devinfo> devlist;
     public:
         BladeContext();
-        //copy constructor not made, not sure how if memory leak may occur.
+        //no copy constructor...
         ~BladeContext();
         
         std::vector<bladerf_devinfo>& getDeviceList();

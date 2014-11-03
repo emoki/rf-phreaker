@@ -518,44 +518,7 @@ namespace beagle_api
 		/// Longitude. 
 		double lon_;
 
-		/// Two bytes pulled directly from the on-board GPS module.
-		/// @code 
-		/// Bits 15-13: 
-		///	111 = 3D Fix
-		///	110 = 2D Fix
-		///	101 = Propagate Mode
-		///	100 = Position Hold
-		///	011 = Acquiring Satellites
-		///	010 = Bad Geometry
-		///	001 = Reserved
-		///	000 = Reserved
-		///Bits 12-11: 
-		///	Reserved
-		///Bit 10: 
-		///	Receiver in narrow-band tracking mode (M12+ timing receiver only)
-		///Bit 9: 
-		///	Fast Acquisition Position
-		///Bit 8: 
-		///	Filter Reset To Raw GPS Solution
-		///Bit 7: 
-		///	Cold Start (no almanac, almanac out of date or have almanac but time or position unknown)
-		///Bit 6: 
-		///	Differential Fix
-		///Bit 5: 
-		///	Position Lock
-		///Bit 4: 
-		///	Autosurvey Mode
-		///Bit 3: 
-		///	Insufficient Visible Satellites
-		///Bits 2-1: (Antenna Sense)
-		///	00 = OK
-		///	01 = Overcurrent
-		///	10 = Undercurrent
-		///	11 = No bias voltage
-		///Bit 0: (Code Location)
-		///	0 = EXTERNAL
-		///	1 = INTERNAL
-		/// @endcode
+		/// Reserved
 		uint16_t raw_gps_status_;
 
 	};
