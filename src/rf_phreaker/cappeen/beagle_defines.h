@@ -488,6 +488,7 @@ namespace beagle_api
 		/// under 1 month.
 		int64_t dds_clock_correction_calibration_date_;
 
+		/// Specifies the type of communication that has been established with the scanner. 
 		DEVICESPEED device_speed_;
 	};
 
