@@ -98,7 +98,7 @@ void blade_rf_controller::open_scanner(const scanner_serial_type &id)
 
 	close_scanner();
 
-	std::string open_str = "libusb:serial=" + id;
+	std::string open_str = "*:serial=" + id;
 
 	bladerf *blade_rf;
 	bladerf_devinfo dev_info;
@@ -124,6 +124,7 @@ void blade_rf_controller::open_scanner(const scanner_serial_type &id)
 	refresh_scanner_info();
 
 	LOG_L(DEBUG) << "Opened scanner " << scanner_blade_rf_->serial() << ".";
+	LOG_L(DEBUG) << "USB backend is " << usb_backend_to_string(scanner_blade_rf_->back_end()) << ".";
 	LOG_L(DEBUG) << "Device speed is " << to_string(scanner_blade_rf_->usb_speed()) << ".";
 	LOG_L(DEBUG) << "RF calibration performed on " << boost::posix_time::to_simple_string(boost::posix_time::from_time_t(scanner_blade_rf_->get_rf_calibration_date())) << ".";
 	LOG_L(DEBUG) << "VCTCXO trim value is " << scanner_blade_rf_->vctcxo_trim() << ".";

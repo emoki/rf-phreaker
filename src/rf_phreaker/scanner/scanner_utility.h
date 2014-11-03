@@ -19,6 +19,22 @@ std::string to_string(int usb_speed)
 	}
 }
 
+std::string usb_backend_to_string(int usb_backend) {
+	switch((bladerf_backend)usb_backend) {
+	case BLADERF_BACKEND_ANY: /**< "Don't Care" -- use any available backend */
+		return "BLADERF_BACKEND_ANY";
+	case BLADERF_BACKEND_LINUX:  /**< Linux kernel driver */
+		return "BLADERF_BACKEND_LINUX";
+	case BLADERF_BACKEND_LIBUSB: /**< libusb */
+		return "BLADERF_BACKEND_LIBUSB";
+	case BLADERF_BACKEND_CYPRESS: /**< CyAPI */
+		return "BLADERF_BACKEND_CYPRESS";
+	case BLADERF_BACKEND_DUMMY: /**< Dummy used for development purposes */
+		return "BLADERF_BACKEND_DUMMY";
+	default:
+		return "UNKNOWN_USB_BACKEND";
+	}
+}
 //class hex_conversion
 //{
 //public:
