@@ -267,10 +267,13 @@ long cappeen_impl::close_unit(const char *serial, unsigned int buf_size)
 		std::lock_guard<std::recursive_mutex> lock(mutex_);
 		verify_init();
 
-		gps_graph_->cancel_and_wait();
-		
-		processing_graph_->cancel_and_wait();
-		
+		if(frequency_correction_graph_)
+			frequency_correction_graph_->cancel_and_wait();
+		if(gps_graph_)
+			gps_graph_->cancel_and_wait();
+		if(processing_graph_)
+			processing_graph_->cancel_and_wait();
+
 		std::string str_serial(serial, buf_size);
 		auto current_scanner_id = scanner_->get_scanner().get()->get_hardware().scanner_id_;
 		if(current_scanner_id != serial)
