@@ -656,5 +656,5 @@ long cappeen_impl::input_new_license(const char *serial, uint32_t serial_buf_siz
 
 const char* cappeen_impl::api_version() const
 {
-	return "0.12.0.0";
+	return "0.12.1.0";
 }
