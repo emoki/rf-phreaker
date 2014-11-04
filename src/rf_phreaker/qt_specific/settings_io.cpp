@@ -5,7 +5,7 @@
 using namespace rf_phreaker;
 
 settings_io::settings_io(const std::string &application_name, const std::string &organization)
-	: qsettings_(new QSettings(QSettings::IniFormat, QSettings::UserScope, organization.c_str(), application_name.c_str())) {}
+	: qsettings_(new QSettings(QSettings::IniFormat, QSettings::SystemScope, organization.c_str(), application_name.c_str())) {}
 
 settings_io::settings_io(const std::string &filename)
 	: qsettings_(new QSettings(filename.c_str(), QSettings::IniFormat)) {}

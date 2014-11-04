@@ -6,6 +6,7 @@
 #include "rf_phreaker/processing/frequency_range_creation.h"
 #include "rf_phreaker/common/log.h"
 #include "tbb/task_scheduler_init.h"
+#include "QStandardPaths"
 
 using namespace rf_phreaker;
 using namespace rf_phreaker::cappeen_api;
@@ -38,7 +39,14 @@ long cappeen_impl::initialize(beagle_api::beagle_delegate *del)
 		std::lock_guard<std::recursive_mutex> lock(mutex_);
 		// If logging fails continue anyway.
 		try {
-			logger_.reset(new init_log("cappeen_api", ""));
+			auto paths = QStandardPaths::standardLocations(QStandardPaths::GenericDataLocation);			
+			if(paths.empty()) {
+				LOG_L(INFO) << "Unable to create log file.  Path not found.";
+			}
+			else {
+				auto path = paths.last().toStdString();
+				logger_.reset(new init_log("cappeen_api", path + "/cappeen/"));
+			}
 		}
 		catch(...) {}
 
@@ -123,8 +131,7 @@ long cappeen_impl::initialize(beagle_api::beagle_delegate *del)
 
 void cappeen_impl::read_settings()
 {
-//	settings_io io("cappeen_api_v1", "cappeen");
-	settings_io io("cappeen_api.ini");
+	settings_io io("cappeen_api", "cappeen");
 
 	io.read(config_);
 }
