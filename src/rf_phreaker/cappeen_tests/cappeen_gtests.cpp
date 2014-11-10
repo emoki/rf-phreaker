@@ -87,7 +87,7 @@ TEST(Cappeen, TestMain)
 				do {
 					cappeen_close_unit(&serial[0], serial.size());
 					EXPECT_EQ(0, cappeen_list_available_units(&serials[0], serials.size()));
-					std::string serial(&serials[0]);
+					serial = &serials[0];
 					serial = serial.substr(0, serial.find_first_of(';'));
 					std::this_thread::sleep_for(std::chrono::seconds(1));
 				}
