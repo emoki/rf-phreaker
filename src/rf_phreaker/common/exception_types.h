@@ -3,9 +3,11 @@
 #include <stdexcept>
 #include <stdint.h>
 
-namespace rf_phreaker {
+namespace rf_phreaker
+{
 
-enum error_type {
+enum error_type
+{
 	generic_error_type,
 	comm_error_type,
 	scanner_init_error_type,
@@ -25,17 +27,56 @@ enum error_type {
 	rf_phreaker_api_error_type
 };
 
+inline const char* error_to_str(error_type err) {
+	switch(err) {
+	case comm_error_type:
+		return "comm error";
+	case scanner_init_error_type:
+		return "scanner initialization error";
+	case hardware_error_type:
+		return "hardware error";
+	case misc_error_type:
+		return "miscellaneous error";
+	case file_error_type:
+		return "file error";
+	case blade_rf_error_type:
+		return "blade rf error";
+	case ipp_error_type:
+		return "ipp error";
+	case filter_error_type:
+		return "filter error";
+	case gsm_analysis_error_type:
+		return "gsm analysis error";
+	case umts_analysis_error_type:
+		return "umts analysis error";
+	case lte_analysis_error_type:
+		return "lte analysis error";
+	case processing_error_type:
+		return "processing error";
+	case matlab_interface_error_type:
+		return "matlab interface error";
+	case cappeen_api_error_type:
+		return "cappeen api error";
+	case gps_comm_error_type:
+		return "gps communciation error";
+	case rf_phreaker_api_error_type:
+		return "rf phreaker api error";
+	default:
+		return "unknown error type";
+	}
+}
+
 class rf_phreaker_error : public std::runtime_error
 {
 public:
 	rf_phreaker_error(const std::string &err, int error_code = -1, error_type etype = generic_error_type)
 		: std::runtime_error(err)
 		, error_code_(error_code)
-		, error_type_(etype)
-	{}
+		, error_type_(etype) {}
 
-	int error_code_;
-	error_type error_type_;
+	const int error_code_;
+	const error_type error_type_;
+	const char* error_type_str() const { return error_to_str(error_type_); }
 };
 
 template<error_type T>
@@ -43,8 +84,7 @@ class specific_error : public rf_phreaker_error
 {
 public:
 	specific_error(const std::string &err, int error_code = -1)
-		: rf_phreaker_error(err, error_code, T)
-	{}
+		: rf_phreaker_error(err, error_code, T) {}
 };
 
 typedef specific_error<comm_error_type> comm_error;
@@ -64,53 +104,4 @@ typedef specific_error<cappeen_api_error_type> cappeen_api_error;
 typedef specific_error<gps_comm_error_type> gps_comm_error;
 typedef specific_error<rf_phreaker_api_error_type> rf_phreaker_api_error;
 
-
-//switch(err.error_type_) {
-//case comm_error_type:
-//	break;
-//case scanner_init_error_type:
-//	s = "scanner initialization error";
-//	break;
-//case hardware_error_type:
-//	s = "hardware error";
-//	break;
-//case misc_error_type:
-//	s = "miscellaneous error";
-//	break;
-//case file_error_type:
-//	s = "file error";
-//	break;
-//case blade_rf_error_type:
-//	s = "blade rf error";
-//	break;
-//case ipp_error_type:
-//	s = "ipp error";
-//	break;
-//case filter_error_type:
-//	s = "filter error";
-//	break;
-//case gsm_analysis_error_type:
-//	s = "gsm analysis error";
-//	break;
-//case umts_analysis_error_type:
-//	s = "umts analysis error";
-//	break;
-//case lte_analysis_error_type:
-//	s = "lte analysis error";
-//	break;
-//case processing_error_type:
-//	s = "processing error";
-//	break;
-//case matlab_interface_error_type:
-//	s = "matlab interface error";
-//	break;
-//case cappeen_api_error_type:
-//	s = "cappeen api error";
-//	break;
-//case gps_comm_error_type:
-//	s = "gps communciation error";
-//	break;
-//case rf_phreaker_api_error_type:
-//	s = "rf phreaker api error";
-//	break;
 }
