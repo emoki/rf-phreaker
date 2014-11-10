@@ -63,7 +63,7 @@ public:
 		new_hw_info_ = true;
 	}
 	virtual void __stdcall available_gps_info(long beagle_id, const gps_info &info) {
-		//std::cout << info.utc_time_ << "\t" << info.raw_gps_status_ << "\n";
+		std::cout << std::boolalpha << info.gps_locked_ << "\t" << info.utc_time_ << "\t" << info.raw_gps_status_ << "\n";
 	}
 	virtual void __stdcall available_gsm_sector_info(long beagle_id, const gsm_sector_info *info, long num_records) {}
 	virtual void __stdcall available_umts_sector_info(long beagle_id, const umts_sector_info *info, long num_records) {
@@ -190,7 +190,7 @@ public:
 
 					for(uint32_t jj = 0; jj < k[j].arfcns_.num_elements_; ++jj) {
 						auto &kk = k[j].arfcns_.elements_;
-						t += kk[jj] + " ";
+						t += std::to_string(kk[jj]) + " ";
 					}
 					t += "] | ";
 				}
@@ -204,7 +204,7 @@ public:
 					t += std::to_string(k[j].band_) + " | [";
 					for(uint32_t jj = 0; jj < k[j].physical_cell_ids_.num_elements_; ++jj) {
 						auto &kk = k[j].physical_cell_ids_.elements_;
-						t += kk[jj] + " ";
+						t += std::to_string(kk[jj]) + " ";
 					}
 					t += "] | ";
 				}
@@ -215,7 +215,7 @@ public:
 					t += std::to_string(k[j].band_) + " | [";
 					for(uint32_t jj = 0; jj < k[j].physical_cell_ids_.num_elements_; ++jj) {
 						auto &kk = k[j].physical_cell_ids_.elements_;
-						t += kk[jj] + " ";
+						t += std::to_string(kk[jj]) + " ";
 					}
 					t += "] | ";
 				}
