@@ -185,10 +185,17 @@ namespace rf_phreaker { namespace gps_comm {
 	//ddmmyy
 	void GPSTimestamp::setdate(int32_t raw_date){
 		rawdate = raw_date;
-
-		day = (int32_t)trunc(raw_date / 10000.0);
-		month = (int32_t)trunc((raw_date - 10000 * day) / 100.0);
-		year = raw_date - 10000 * day - 100 * month + 2000;
+		// If uninitialized, use posix time.
+		if(rawdate == 0) {
+			month = 1;
+			day = 1;
+			year = 1970;
+		}
+		else {
+			day = (int32_t)trunc(raw_date / 10000.0);
+			month = (int32_t)trunc((raw_date - 10000 * day) / 100.0);
+			year = raw_date - 10000 * day - 100 * month + 2000;
+		}
 	}
 
 	std::string GPSTimestamp::toString(){
