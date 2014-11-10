@@ -13,6 +13,9 @@ set (qt_specific_VERSION_TWEAK 0)
 
 # Set the source files.
 set (qt_specific_SRCS 
+	file_path_validation.cpp
+	file_path_validation.h
+	qt_init.h
 	settings_io.cpp
 	settings_io.h
 	${SRC_PLATFORM_SPECIFIC}/stdafx.cpp)

@@ -7,8 +7,7 @@
 
 class QSettings;
 
-namespace rf_phreaker
-{
+namespace rf_phreaker {
 // Group keys
 static const std::string standard_output_group_key = "standard_output";
 static const std::string signal_slot_output_group_key = "signal_slot_output";
@@ -54,7 +53,8 @@ static const std::string blade_rx_sync_num_buffers_key = "rx_sync_num_buffers";
 static const std::string blade_rx_sync_buffer_size_key = "rx_sync_buffer_size";
 static const std::string blade_rx_sync_num_transfers_key = "rx_sync_num_transfers";
 static const std::string blade_rx_sync_timeout_key = "rx_sync_num_timeout";
-
+static const std::string output_directory_key = "output_directory";
+static const std::string output_in_binary_key = "output_in_binary";
 class settings_io {
 public:
 	settings_io(const std::string &application_name, const std::string &organization);
@@ -92,7 +92,6 @@ public:
 	void write(const blade_settings &settings);
 
 	void clear();
-
 
 private:
 	std::unique_ptr<QSettings> qsettings_;

@@ -30,6 +30,8 @@ static const int blade_rx_sync_num_buffers_default = 5;
 static const int blade_rx_sync_buffer_size_default = 1024 * 4;
 static const int blade_rx_sync_num_transfers_default = 4;
 static const int blade_rx_sync_timeout_default = 2000;
+static const std::string output_directory_default = "NULL";
+static const bool output_in_binary_default = true;
 
 class output_settings {
 public:
@@ -97,6 +99,8 @@ public:
 	int gps_collection_period_ms_;
 	int num_items_in_flight_;
 	bool use_rf_board_adjustment_;
+	std::string output_directory_;
+	bool output_in_binary_;
 
 	blade_settings blade_settings_;
 

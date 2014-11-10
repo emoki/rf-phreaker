@@ -36,7 +36,8 @@ public:
 	void operator()(add_remove_collection_info info, collection_manager_node::output_ports_type &out)
 	{
 		auto it = std::find_if(containers_.begin(), containers_.end(), [&](collection_info_container &c) {
-			return c.get_technology() == info.tech_; });
+			return c.get_technology() == info.tech_; 
+		});
 
 		if(it != containers_.end())
 			it->adjust(info);
@@ -46,7 +47,7 @@ public:
 		for(auto &c : containers_) {
 			if(!c.is_finished()) {
 				auto ci = c.try_get_next_info();
-				if(c.is_finished()){
+				if(c.is_finished()) {
 					//processing_.store(false);
 					//return;
 					continue;
@@ -55,7 +56,7 @@ public:
 					scanning_finished_for_all_containers = false;
 
 					auto meas = std::make_shared<scanner::measurement_info>(scanner_io_(ci));
-					
+
 					// Make necessary changes to the packet.
 					meas->collection_round(c.collection_round());
 					meas->set_operating_band(ci.operating_band_);
@@ -107,13 +108,18 @@ protected:
 	{
 		if(timestamp.empty())
 			timestamp = static_timestamp_string();
-
-		std::ofstream file(name + timestamp + "_" + std::to_string(count) + ".bin", std::ios::binary);
+		std::string ext = settings_.output_in_binary_ ? ".bin" : ".txt";
+		std::ofstream file(settings_.output_directory_ + "\\" + name + timestamp + "_" + std::to_string(count) + ext,
+			settings_.output_in_binary_ ? std::ios::binary : std::ios::app);
 		if(file) {
-			boost::archive::binary_oarchive oa(file);
-			oa & *meas;
-			//oa & *static_cast<raw_signal*>(meas);
-			//file << *meas;
+			if(settings_.output_in_binary_) {
+				boost::archive::binary_oarchive oa(file);
+				//oa & *static_cast<raw_signal*>(meas);
+				oa & *meas;
+			}
+			else {
+				file << *meas;
+			}
 		}
 	}
 

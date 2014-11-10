@@ -2,11 +2,11 @@
 #include "rf_phreaker/cappeen/operating_band_conversion.h"
 #include "rf_phreaker/cappeen/beagle_defines.h"
 #include "rf_phreaker/qt_specific/settings_io.h"
+#include "rf_phreaker/qt_specific/file_path_validation.h"
 #include "rf_phreaker/common/exception_types.h"
 #include "rf_phreaker/processing/frequency_range_creation.h"
 #include "rf_phreaker/common/log.h"
 #include "tbb/task_scheduler_init.h"
-#include "QStandardPaths"
 
 using namespace rf_phreaker;
 using namespace rf_phreaker::cappeen_api;
@@ -41,14 +41,9 @@ long cappeen_impl::initialize(beagle_api::beagle_delegate *del)
 		std::lock_guard<std::recursive_mutex> lock(mutex_);
 		// If logging fails continue anyway.
 		try {
-			auto paths = QStandardPaths::standardLocations(QStandardPaths::GenericDataLocation);			
-			if(paths.empty()) {
-				LOG_L(INFO) << "Unable to create log file.  Path not found.";
-			}
-			else {
-				auto path = paths.last().toStdString();
-				logger_.reset(new init_log("cappeen_api", path + "/cappeen/"));
-			}
+			if(!file_path_validation::is_path_valid(config_.output_directory_))
+				file_path_validation::make_path(config_.output_directory_);
+			logger_.reset(new logger("cappeen_api", config_.output_directory_));
 		}
 		catch(...) {}
 

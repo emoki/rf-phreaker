@@ -18,6 +18,8 @@ TEST(QtSpecific, TestSettingsIO)
 	EXPECT_EQ(gps_collection_period_ms_default, set.gps_collection_period_ms_);
 	EXPECT_EQ(num_items_in_flight_default, set.num_items_in_flight_);
 	EXPECT_EQ(use_rf_board_adjustment_default, set.use_rf_board_adjustment_);
+	//EXPECT_EQ(output_directory_default, set.output_directory_);  // Manually verify.
+	EXPECT_EQ(output_in_binary_default, set.output_in_binary_);
 
 	EXPECT_EQ(settings_output_default, set.standard_output_.scanner_);
 	EXPECT_EQ(settings_output_default, set.standard_output_.gps_);
@@ -92,6 +94,8 @@ TEST(QtSpecific, TestSettingsIO)
 	set.gps_collection_period_ms_ = tmp++;
 	set.num_items_in_flight_ = tmp++;
 	set.use_rf_board_adjustment_ = true;
+	set.output_directory_ = "c:\\";
+	set.output_in_binary_ = false;
 	set.standard_output_.scanner_ = true;
 	set.standard_output_.gps_ = true;
 	set.standard_output_.umts_sweep_ = true;
@@ -153,6 +157,8 @@ TEST(QtSpecific, TestSettingsIO)
 	EXPECT_EQ(set.gps_collection_period_ms_, set2.gps_collection_period_ms_);
 	EXPECT_EQ(set.num_items_in_flight_, set2.num_items_in_flight_);
 	EXPECT_EQ(set.use_rf_board_adjustment_, set2.use_rf_board_adjustment_);
+	EXPECT_EQ(set.output_directory_, set2.output_directory_);
+	EXPECT_EQ(set.output_in_binary_, set2.output_in_binary_);
 
 	EXPECT_EQ(set.standard_output_.scanner_, set2.standard_output_.scanner_);
 	EXPECT_EQ(set.standard_output_.gps_, set2.standard_output_.gps_);
@@ -232,6 +238,8 @@ TEST(QtSpecific, WriteDefaultSettings)
 	set.gps_collection_period_ms_ = 800;
 	set.num_items_in_flight_ = 0;
 	set.use_rf_board_adjustment_ = true;
+	set.output_directory_ = "";
+	set.output_in_binary_ = true;
 
 	set.standard_output_.scanner_ = true;
 	set.standard_output_.gps_ = true;

@@ -1,6 +1,8 @@
 #include "rf_phreaker/qt_specific/settings_io.h"
+#include "qtcore//qsettings.h"
 #include "rf_phreaker/common/common_utility.h"
-#include "QtCore\qsettings.h"
+#include "rf_phreaker/qt_specific/file_path_validation.h"
+#include "rf_phreaker/common/log.h"
 
 using namespace rf_phreaker;
 
@@ -17,6 +19,15 @@ void settings_io::read(settings &settings) {
 	settings.gps_collection_period_ms_ = qsettings_->value(gps_collection_period_ms_key.c_str(), gps_collection_period_ms_default).toInt();
 	settings.num_items_in_flight_ = qsettings_->value(num_items_in_flight_key.c_str(), num_items_in_flight_default).toInt();
 	settings.use_rf_board_adjustment_ = qsettings_->value(use_rf_board_adjustment_key.c_str(), use_rf_board_adjustment_default).toBool();
+
+	settings.output_directory_ = qsettings_->value(output_directory_key.c_str(), output_directory_default.c_str()).toString().toStdString();
+	if(!file_path_validation::is_path_valid(settings.output_directory_)) {
+		settings.output_directory_ = file_path_validation::get_writable_file_path();
+		LOG(LVERBOSE) << "Output directory is not valid.  Switching to " << settings.output_directory_ << ".";
+	}
+
+	settings.output_in_binary_ = qsettings_->value(output_in_binary_key.c_str(), output_in_binary_default).toBool();
+
 
 	read(settings.standard_output_, standard_output_group_key);
 	read(settings.signal_slots_, signal_slot_output_group_key);
@@ -101,6 +112,8 @@ void settings_io::write(const settings &settings) {
 	qsettings_->setValue(gps_collection_period_ms_key.c_str(), settings.gps_collection_period_ms_);
 	qsettings_->setValue(num_items_in_flight_key.c_str(), settings.num_items_in_flight_);
 	qsettings_->setValue(use_rf_board_adjustment_key.c_str(), settings.use_rf_board_adjustment_);
+	qsettings_->setValue(output_directory_key.c_str(), settings.output_directory_.c_str());
+	qsettings_->setValue(output_in_binary_key.c_str(), settings.output_in_binary_);
 
 	write(settings.standard_output_, standard_output_group_key);
 	write(settings.signal_slots_, signal_slot_output_group_key);
