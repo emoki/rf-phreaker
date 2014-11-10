@@ -12,6 +12,7 @@
 #include "rf_phreaker/processing/data_output_async.h"
 #include "rf_phreaker/processing/processing_graph.h"
 #include "rf_phreaker/processing/gps_graph.h"
+#include "rf_phreaker/processing/frequency_correction_graph.h"
 #include <set>
 
 namespace rf_phreaker { namespace cappeen_api {
@@ -93,6 +94,7 @@ public:
 
 		processing_graph_ = pro;
 		gps_graph_ = gps;
+		frequency_correction_graph_ = freq_correction;
 	}
 
 	void output_hardware(const hardware &t)
@@ -292,6 +294,7 @@ public:
 				case UNKNOWN_ERROR:
 					if(processing_graph_) processing_graph_->cancel_and_wait();
 					if(gps_graph_) gps_graph_->cancel_and_wait();
+					if(frequency_correction_graph_) frequency_correction_graph_->cancel_and_wait();
 					change_beagle_state(beagle_api::BEAGLE_ERROR);
 				default:
 					;
@@ -436,6 +439,7 @@ private:
 
 	processing::processing_graph *processing_graph_;
 	processing::gps_graph *gps_graph_;
+	processing::frequency_correction_graph *frequency_correction_graph_;
 };
 
 }}
