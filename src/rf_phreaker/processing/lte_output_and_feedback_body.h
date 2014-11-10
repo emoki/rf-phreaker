@@ -1,4 +1,6 @@
 #pragma once
+#include <tuple>
+#include "tbb/flow_graph.h"
 #include "rf_phreaker/processing/node_defs.h"
 #include "rf_phreaker/processing/data_output_async.h"
 #include "rf_phreaker/processing/measurement_conversion.h"
@@ -6,8 +8,7 @@
 #include "rf_phreaker/common/common_utility.h"
 #include "rf_phreaker/common/settings.h"
 #include "rf_phreaker/lte_analysis/lte_types.h"
-#include "tbb/flow_graph.h"
-#include <tuple>
+#include "rf_phreaker/common/delegate_sink.h"
 
 namespace rf_phreaker { namespace processing {
 
@@ -17,7 +18,15 @@ public:
 	lte_sweep_output_and_feedback_body(data_output_async *io)
 		: io_(io)
 		, confidence_threshold_(-10.5)
-		, current_collection_round_(-1)
+		, current_collection_round_(-1) {}
+
+	lte_sweep_output_and_feedback_body(const lte_sweep_output_and_feedback_body &body)
+		: io_(body.io_)
+		, confidence_threshold_(body.confidence_threshold_)
+		, current_collection_round_(body.current_collection_round_) 
+		, tracker_(body.tracker_)
+		, freqs_currently_added_(body.freqs_currently_added_)
+		// Cannot copy std::vector<std::future<>>. Use new one.
 	{}
 
 	void operator()(lte_info info, lte_output_and_feedback_node::output_ports_type &out)
@@ -27,10 +36,12 @@ public:
 		}
 		current_collection_round_ = info.meas_->collection_round();
 
+		remove_completed_output();
+
 		//output_debug_info(info);
 
 		// Output basic tech.
-		io_->output_lte_sweep(convert_to_basic_data(*info.meas_, info.avg_rms_))/*.get()*/;
+		past_output_.push_back(io_->output_lte_sweep(convert_to_basic_data(*info.meas_, info.avg_rms_)));
 
 		bool valid_lte = false;
 		for(auto &lte : info.processed_data_) {
@@ -65,7 +76,6 @@ public:
 
 			clean_up_measurements(out);
 		}
-
 		std::get<1>(out).try_put(tbb::flow::continue_msg());
 	}
 
@@ -101,6 +111,17 @@ private:
 		}
 	}
 	
+	void remove_completed_output() {
+		int num_completed = 0;
+		for(auto &fut : past_output_) {
+			if(fut.wait_for(std::chrono::seconds(0)) == std::future_status::ready)
+				++num_completed;
+			else
+				break;
+		}
+		past_output_.erase(std::begin(past_output_), std::begin(past_output_) + num_completed);
+	}
+
 	data_output_async *io_;
 
 	double confidence_threshold_;
@@ -110,6 +131,8 @@ private:
 	lte_measurement_tracker tracker_;
 
 	std::vector<lte_layer_3_collection_info> freqs_currently_added_;
+	
+	std::vector<std::future<void>> past_output_;
 };
 
 class lte_layer_3_output_and_feedback_body
@@ -118,7 +141,15 @@ public:
 	lte_layer_3_output_and_feedback_body(data_output_async *io, int minimum_collection_round)
 		: io_(io)
 		, minimum_collection_round_(minimum_collection_round)
-		, current_collection_round_(-1)
+		, current_collection_round_(-1) 
+	{}
+
+	lte_layer_3_output_and_feedback_body(const lte_layer_3_output_and_feedback_body &body)
+		: io_(body.io_)
+		, minimum_collection_round_(body.minimum_collection_round_)
+		, current_collection_round_(body.current_collection_round_)
+		, tracker_(body.tracker_)
+		// Cannot copy std::vector<std::future<>>. Use new one.
 	{}
 
 	void operator()(lte_info info, lte_output_and_feedback_node::output_ports_type &out)
@@ -127,6 +158,8 @@ public:
 			tracker_.clear();
 		}
 		current_collection_round_ = info.meas_->collection_round();
+
+		remove_completed_output();
 
 		// Remove freq if indicated.
 		if(do_we_remove_collection_info(info)) {
@@ -151,7 +184,7 @@ public:
 			if(lte.size()) {
 				tracker_.update_measurements(info.processed_data_, info.meas_->frequency());
 			
-				io_->output(lte)/*.get()*/;
+				past_output_.push_back(io_->output(lte));
 
 				if(decoded_bw != LteBandwidth_Unknown) {
 					auto sampling_rate = determine_sampling_rate(decoded_bw);
@@ -171,7 +204,6 @@ public:
 				}
 			}
 		}
-
 		std::get<1>(out).try_put(tbb::flow::continue_msg());
 	}
 
@@ -197,6 +229,17 @@ private:
 			(!tracker_.is_tracking(freq) || tracker_.is_within_stronger_measurement_bandwidth(freq)));
 	}
 
+	void remove_completed_output() {
+		int num_completed = 0;
+		for(auto &fut : past_output_) {
+			if(fut.wait_for(std::chrono::seconds(0)) == std::future_status::ready)
+				++num_completed;
+			else
+				break;
+		}
+		past_output_.erase(std::begin(past_output_), std::begin(past_output_) + num_completed);
+	}
+
 	data_output_async *io_;
 
 	int minimum_collection_round_;
@@ -204,6 +247,8 @@ private:
 	int64_t current_collection_round_;
 
 	lte_measurement_tracker tracker_;
+
+	std::vector<std::future<void>> past_output_;
 };
 
 }}
