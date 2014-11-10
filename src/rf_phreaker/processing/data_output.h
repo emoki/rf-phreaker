@@ -55,7 +55,7 @@ public:
 		if(!file_.is_open()) {
 			file_.open(filename_);
 			if(!file_) {
-				LOG_L(ERROR) << "Error opening file: " << filename_ << ".  errno: " << std::strerror(errno);
+				LOG(LERROR) << "Error opening file: " << filename_ << ".  errno: " << std::strerror(errno);
 			}
 			header(file_, Data()) << std::endl;
 		}

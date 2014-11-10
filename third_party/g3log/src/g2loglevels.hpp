@@ -13,6 +13,8 @@
 
 #pragma once
 
+#define G2_DYNAMIC_LOGGING 1
+
 #include <string>
 
 // Levels for logging, made so that it would be easy to change, remove, add levels -- KjellKod
@@ -28,12 +30,15 @@ struct LEVELS {
    const std::string text;
 };
 
-const LEVELS DEBUG{0, {"DEBUG"}}, INFO{DEBUG.value + 1, {"INFO"}},
-WARNING{INFO.value + 1, {"WARNING"}},
+const LEVELS LVERBOSE{0, {"VERBOSE"}}, 
+LDEBUG{LVERBOSE.value + 1, {"DEBUG"}}, 
+LINFO{LDEBUG.value + 1, {"INFO"}},
+LWARNING{LINFO.value + 1, {"WARNING"}}, 
+LERROR{LWARNING.value + 1, {"ERROR"}},
 // Insert here *any* extra logging levels that is needed
 // 1) Remember to update the FATAL initialization below
 // 2) Remember to update the initialization of "g2loglevels.cpp/g_log_level_status"
-FATAL{WARNING.value + 1, {"FATAL"}};
+LFATAL{LERROR.value + 1, {"FATAL"}};
 
 
 namespace g2 {
@@ -43,7 +48,7 @@ namespace g2 {
    }
 
 #ifdef G2_DYNAMIC_LOGGING
-   // Enable/Disable a log level {DEBUG,INFO,WARNING,FATAL}
+   // Enable/Disable a log level {VERBOSE,DEBUG,INFO,WARNING,ERROR,FATAL}
    void setLogLevel(LEVELS level, bool enabled_status);
 #endif
    bool logLevel(LEVELS level);

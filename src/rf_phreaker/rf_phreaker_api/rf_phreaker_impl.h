@@ -80,7 +80,7 @@ private:
 
 	//std::unique_ptr<rf_phreaker_delegate> delegate_;
 
-	std::unique_ptr<init_log> logger_;
+	std::unique_ptr<logger> logger_;
 
 	std::recursive_mutex mutex_;
 };

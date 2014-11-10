@@ -39,37 +39,37 @@ rp_status rf_phreaker_impl::initialize(rp_callbacks *callbacks) {
 		std::lock_guard<std::recursive_mutex> lock(mutex_);
 
 		try {
-			logger_.reset(new init_log("rf_phreaker_api", ""));
+			logger_.reset(new logger("rf_phreaker_api", ""));
 		}
 		catch(...) {}
 
-		LOG_L(INFO) << "Initializing rf phreaker api version " << build_version() << ".";
+		LOG(LINFO) << "Initializing rf phreaker api version " << build_version() << ".";
 
 		is_initialized_ = false;
 
-		LOG_L(VERBOSE) << "Reading settings.";
+		LOG(LVERBOSE) << "Reading settings.";
 		read_settings();
 
-		if(logger_)
-			logger_->log_worker_->changeLoggingLevel(config_.log_level_);
+		//if(logger_)
+		//	logger_->log_worker_->changeLoggingLevel(config_.log_level_);
 
 		// Release all components before changing delegate.
 		//delegate_.release();
 		scanner_.release();
 		data_output_.release();
 		if(processing_graph_) {
-			LOG_L(DEBUG) << "Found processing graph on heap.  Sending cancel request and releasing it.";
+			LOG(LDEBUG) << "Found processing graph on heap.  Sending cancel request and releasing it.";
 			processing_graph_->cancel_and_wait();
 			processing_graph_.release();
 		}
 		if(gps_graph_) {
-			LOG_L(DEBUG) << "Found gps graph on heap.  Sending cancel request and releasing it.";
+			LOG(LDEBUG) << "Found gps graph on heap.  Sending cancel request and releasing it.";
 			gps_graph_->cancel_and_wait();
 			gps_graph_.release();
 		}
 
 		if(frequency_correction_graph_) {
-			LOG_L(DEBUG) << "Found frequency correction graph on heap.  Sending cancel request and releasing it.";
+			LOG(LDEBUG) << "Found frequency correction graph on heap.  Sending cancel request and releasing it.";
 			frequency_correction_graph_->cancel_and_wait();
 			frequency_correction_graph_.release();
 		}
@@ -92,7 +92,7 @@ rp_status rf_phreaker_impl::initialize(rp_callbacks *callbacks) {
 		//tbb::task_scheduler_init init;
 		//init.initialize(15);
 
-		LOG_L(INFO) << "Initialization complete.";
+		LOG(LINFO) << "Initialization complete.";
 		is_initialized_ = true;
 	}
 	catch(const rf_phreaker_error &err) {

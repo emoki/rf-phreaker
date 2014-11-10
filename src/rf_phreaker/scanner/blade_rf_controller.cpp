@@ -1,5 +1,6 @@
 #include "rf_phreaker/scanner/blade_rf_controller.h"
 #include "rf_phreaker/common/exception_types.h"
+#include "rf_phreaker/common/delegate_sink.h"
 #include "rf_phreaker/scanner/comm_blade_rf.h"
 #include "rf_phreaker/scanner/bandwidth_conversion.h"
 #include "rf_phreaker/scanner/lms_utilities.h"
@@ -114,7 +115,7 @@ void blade_rf_controller::open_scanner(const scanner_serial_type &id)
 		catch(rf_phreaker_error &err) {
 			if(++retry > 8)
 				throw err;
-			LOG_L(DEBUG) << err.what() << "  Attempting to reopen...";
+			LOG(LDEBUG) << err.what() << "  Attempting to reopen...";
 			std::this_thread::sleep_for(std::chrono::milliseconds(100));
 		}
 	}
@@ -123,13 +124,13 @@ void blade_rf_controller::open_scanner(const scanner_serial_type &id)
 
 	refresh_scanner_info();
 
-	LOG_L(DEBUG) << "Opened scanner " << scanner_blade_rf_->serial() << ".";
-	LOG_L(DEBUG) << "USB backend is " << usb_backend_to_string(scanner_blade_rf_->back_end()) << ".";
-	LOG_L(DEBUG) << "Device speed is " << to_string(scanner_blade_rf_->usb_speed()) << ".";
-	LOG_L(DEBUG) << "RF calibration performed on " << boost::posix_time::to_simple_string(boost::posix_time::from_time_t(scanner_blade_rf_->get_rf_calibration_date())) << ".";
-	LOG_L(DEBUG) << "VCTCXO trim value is " << scanner_blade_rf_->vctcxo_trim() << ".";
-	LOG_L(DEBUG) << "Frequency correction performed on " << boost::posix_time::to_simple_string(boost::posix_time::from_time_t(scanner_blade_rf_->get_frequency_correction_date())) << ".";
-	LOG_L(DEBUG) << "Frequency correction value is " << scanner_blade_rf_->get_frequency_correction_value() << ".";
+	LOG(LDEBUG) << "Opened scanner " << scanner_blade_rf_->serial() << ".";
+	LOG(LDEBUG) << "USB backend is " << usb_backend_to_string(scanner_blade_rf_->back_end()) << ".";
+	LOG(LDEBUG) << "Device speed is " << to_string(scanner_blade_rf_->usb_speed()) << ".";
+	LOG(LDEBUG) << "RF calibration performed on " << boost::posix_time::to_simple_string(boost::posix_time::from_time_t(scanner_blade_rf_->get_rf_calibration_date())) << ".";
+	LOG(LDEBUG) << "VCTCXO trim value is " << scanner_blade_rf_->vctcxo_trim() << ".";
+	LOG(LDEBUG) << "Frequency correction performed on " << boost::posix_time::to_simple_string(boost::posix_time::from_time_t(scanner_blade_rf_->get_frequency_correction_date())) << ".";
+	LOG(LDEBUG) << "Frequency correction value is " << scanner_blade_rf_->get_frequency_correction_value() << ".";
 }
 
 void blade_rf_controller::refresh_scanner_info()
@@ -163,13 +164,13 @@ void blade_rf_controller::refresh_scanner_info()
 			throw rf_phreaker_error("EEPROM meta data is invalid.");
 	}
 	catch(rf_phreaker_error &err) {
-		LOG_L(ERROR) << "Error reading EEPROM.  " << err.what();
-		g_delegate_sink.log_error(std::string("Error reading EEPROM.  ") + err.what(), err.error_code_);
+		LOG(LERROR) << "Error reading EEPROM.  " << err.what();
+		delegate_sink_async::instance().log_error(std::string("Error reading EEPROM.  ") + err.what(), err.error_code_);
 
 	}
 	catch(std::exception &err) {
-		LOG_L(ERROR) << "Error reading EEPROM.  " << err.what();
-		g_delegate_sink.log_error(std::string("Error reading EEPROM.  ") + err.what(), EEPROM_ERROR);
+		LOG(LERROR) << "Error reading EEPROM.  " << err.what();
+		delegate_sink_async::instance().log_error(std::string("Error reading EEPROM.  ") + err.what(), EEPROM_ERROR);
 
 	}
 
@@ -213,7 +214,7 @@ void blade_rf_controller::do_initial_scanner_config(const scanner_settings &sett
 				status = (bladerf_calibrate_dc(comm_blade_rf_->blade_rf(),
 					BLADERF_DC_CAL_LPF_TUNING));
 				if(status == 0) break;
-				LOG_L(DEBUG) << "Calibration attempt failed: LPF Tuning Module. Retrying...";
+				LOG(LDEBUG) << "Calibration attempt failed: LPF Tuning Module. Retrying...";
 			}
 			if(status)
 				throw blade_rf_error("Calibration failed: LPF Tuning Module.");
@@ -223,7 +224,7 @@ void blade_rf_controller::do_initial_scanner_config(const scanner_settings &sett
 				status = check_blade_status(bladerf_calibrate_dc(comm_blade_rf_->blade_rf(),
 					BLADERF_DC_CAL_RX_LPF));
 				if(status == 0) break;
-				LOG_L(DEBUG) << "Calibration attempt failed: DC RX LPT Module. Retrying...";
+				LOG(LDEBUG) << "Calibration attempt failed: DC RX LPT Module. Retrying...";
 			}
 			if(status)
 				throw blade_rf_error("Calibration failed: DC RX LPT Module.");
@@ -233,7 +234,7 @@ void blade_rf_controller::do_initial_scanner_config(const scanner_settings &sett
 				status = (bladerf_calibrate_dc(comm_blade_rf_->blade_rf(),
 					BLADERF_DC_CAL_RXVGA2));
 				if(status == 0) break;
-				LOG_L(DEBUG) << "Calibration attempt failed: DC RXVGA2 Module. Retrying...";
+				LOG(LDEBUG) << "Calibration attempt failed: DC RXVGA2 Module. Retrying...";
 			}
 			if(status)
 				throw blade_rf_error("Calibration failed: DC RXVGA2 Module.");
@@ -247,7 +248,7 @@ void blade_rf_controller::do_initial_scanner_config(const scanner_settings &sett
 			if(++retry > 4)
 				throw err;
 
-			LOG_L(DEBUG) << err.what() << "  Attempting to recover...";
+			LOG(LDEBUG) << err.what() << "  Attempting to recover...";
 
 			close_scanner();
 			for(int i = 0; i < 3; ++i) {
@@ -280,7 +281,7 @@ void blade_rf_controller::enable_blade_rx()
 {
 	if(blade_settings_.rx_sync_buffer_size_ % 1024 != 0) {
 		blade_settings_.rx_sync_buffer_size_ = add_mod(blade_settings_.rx_sync_buffer_size_, 1024);
-		LOG_L(WARNING) << "The nuand rx sync buffer size is not a multiple of 1024.  Adjusting value to " << blade_settings_.rx_sync_buffer_size_ << ".";
+		LOG(LWARNING) << "The nuand rx sync buffer size is not a multiple of 1024.  Adjusting value to " << blade_settings_.rx_sync_buffer_size_ << ".";
 	}
 #ifdef _DEBUG
 	check_blade_status(bladerf_sync_config(comm_blade_rf_->blade_rf(), BLADERF_MODULE_RX, BLADERF_FORMAT_SC16_Q11,
@@ -330,7 +331,7 @@ void blade_rf_controller::write_vctcxo_trim(uint16_t trim)
 	if(image == nullptr)
 		throw blade_rf_error("Unable to create calibration image.");
 
-	LOG_L(DEBUG) << "Writing vctcxo trim value of " << trim << " to scanner " << comm_blade_rf_->id() << ".";
+	LOG(LDEBUG) << "Writing vctcxo trim value of " << trim << " to scanner " << comm_blade_rf_->id() << ".";
 
 	auto page = BLADERF_FLASH_TO_PAGES(image->address);
 	auto count = BLADERF_FLASH_TO_PAGES(image->length);
@@ -462,7 +463,7 @@ gain_type blade_rf_controller::get_auto_gain(frequency_type freq, bandwidth_type
 measurement_info blade_rf_controller::get_rf_data(frequency_type frequency, time_type time_ns, bandwidth_type bandwidth, const gain_type &gain, frequency_type sampling_rate,
 	uint32_t switch_setting, uint32_t switch_mask)
 {
-	LOG_L(VERBOSE) << "Taking snapshot... " << "frequency: " << frequency / 1e6 << "mhz | time: "
+	LOG(LVERBOSE) << "Taking snapshot... " << "frequency: " << frequency / 1e6 << "mhz | time: "
 		<< time_ns / 1e6 << "ms | bandwidth: " << bandwidth / 1e6 
 		<< "mhz | sampling_rate: " << sampling_rate / 1e6 << "mhz | gain: "
 		<< gain.lna_gain_ << " " << gain.rxvga1_ << " " << gain.rxvga2_;
@@ -475,7 +476,7 @@ measurement_info blade_rf_controller::get_rf_data(frequency_type frequency, time
 			status = (bladerf_set_frequency(comm_blade_rf_->blade_rf(), BLADERF_MODULE_RX,
 				static_cast<uint32_t>(frequency)));
 			if(status == 0) break;
-			LOG_L(DEBUG) << "Setting frequency (" << frequency / 1e6 << "mhz) failed. Retrying...";
+			LOG(LDEBUG) << "Setting frequency (" << frequency / 1e6 << "mhz) failed. Retrying...";
 		}
 		if(status)
 			throw blade_rf_error(std::string("Error setting frequency.  ") + bladerf_strerror(status));
@@ -517,7 +518,7 @@ measurement_info blade_rf_controller::get_rf_data(frequency_type frequency, time
 	uint32_t gpio_in_hw = 0;
 	check_blade_status(bladerf_expansion_gpio_read(comm_blade_rf_->blade_rf(),
 		&gpio_in_hw), __FILE__, __LINE__);
-	LOG_L(VERBOSE) << "Current xb gpio:" << gpio_in_hw << ".";
+	LOG(LVERBOSE) << "Current xb gpio:" << gpio_in_hw << ".";
 
 	if(switch_mask == 0) {
 		auto auto_switch_setting = scanner_blade_rf_->eeprom_.cal_.get_rf_switch(frequency);
@@ -529,7 +530,7 @@ measurement_info blade_rf_controller::get_rf_data(frequency_type frequency, time
 		uint32_t new_gpio = gpio_in_hw | switch_setting;
 		check_blade_status(bladerf_expansion_gpio_write(comm_blade_rf_->blade_rf(),
 			new_gpio), __FILE__, __LINE__);
-		LOG_L(VERBOSE) << "Setting xb gpio to " << new_gpio << ".";
+		LOG(LVERBOSE) << "Setting xb gpio to " << new_gpio << ".";
 		uint32_t tmp = 0;
 		check_blade_status(bladerf_expansion_gpio_read(comm_blade_rf_->blade_rf(),
 			&tmp), __FILE__, __LINE__);
@@ -557,7 +558,7 @@ measurement_info blade_rf_controller::get_rf_data(frequency_type frequency, time
 			num_samples_to_transfer + throw_away_samples, &metadata, 2500);
 		if(status == 0) 
 			break;
-		LOG_L(DEBUG) << "Collecting " << num_samples_to_transfer + throw_away_samples << " samples failed. Status = " << status << ". Retrying...";
+		LOG(LDEBUG) << "Collecting " << num_samples_to_transfer + throw_away_samples << " samples failed. Status = " << status << ". Retrying...";
 		disable_blade_rx();
 		enable_blade_rx();
 	}
@@ -630,7 +631,7 @@ measurement_info blade_rf_controller::get_rf_data(int num_samples)
 #endif
 		if(status == 0) 
 			break;
-		LOG_L(DEBUG) << "Collecting " << return_bytes << " samples failed. Retrying...";
+		LOG(LDEBUG) << "Collecting " << return_bytes << " samples failed. Retrying...";
 		disable_blade_rx();
 		enable_blade_rx();
 	}

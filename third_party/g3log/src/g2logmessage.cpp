@@ -59,7 +59,7 @@ namespace g2 {
 
       // Not crash scenario but LOG or CONTRACT
       auto level_value = _level.value;
-      if (FATAL.value == level_value) {
+	  if(LFATAL.value == level_value) {
          static const std::string fatalExitReason = {"EXIT trigger caused by LOG(FATAL) entry: "};
          out.append("\n\t*******\t " + fatalExitReason + "\n\t" + '"' + message() + '"');
       } else if (internal::CONTRACT.value == level_value) {

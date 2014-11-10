@@ -142,14 +142,14 @@ namespace g2 {
 For flags, width, precision etc please see the above references.
 EXAMPLES:
 {
-   LOGF(INFO, "Characters: %c %c \n", 'a', 65);
-   LOGF(INFO, "Decimals: %d %ld\n", 1977, 650000L);      // printing long
-   LOGF(INFO, "Preceding with blanks: %10d \n", 1977);
-   LOGF(INFO, "Preceding with zeros: %010d \n", 1977);
-   LOGF(INFO, "Some different radixes: %d %x %o %#x %#o \n", 100, 100, 100, 100, 100);
-   LOGF(INFO, "floats: %4.2f %+.0e %E \n", 3.1416, 3.1416, 3.1416);
-   LOGF(INFO, "Width trick: %*d \n", 5, 10);
-   LOGF(INFO, "%s \n", "A string");
+   LOGF(LINFO, "Characters: %c %c \n", 'a', 65);
+   LOGF(LINFO, "Decimals: %d %ld\n", 1977, 650000L);      // printing long
+   LOGF(LINFO, "Preceding with blanks: %10d \n", 1977);
+   LOGF(LINFO, "Preceding with zeros: %010d \n", 1977);
+   LOGF(LINFO, "Some different radixes: %d %x %o %#x %#o \n", 100, 100, 100, 100, 100);
+   LOGF(LINFO, "floats: %4.2f %+.0e %E \n", 3.1416, 3.1416, 3.1416);
+   LOGF(LINFO, "Width trick: %*d \n", 5, 10);
+   LOGF(LINFO, "%s \n", "A string");
    return 0;
 }
 And here is possible output

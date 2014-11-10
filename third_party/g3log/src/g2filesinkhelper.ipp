@@ -86,15 +86,15 @@ namespace g2 {
 
     std::string createLogFileName(const std::string& verified_prefix) {
       std::stringstream oss_name;
-      oss_name << verified_prefix << ".g2log.";
-      oss_name << g2::localtime_formatted(g2::systemtime_now(), file_name_time_formatted);
+      oss_name << verified_prefix /*<< ".g2log."*/;
+      //oss_name << g2::localtime_formatted(g2::systemtime_now(), file_name_time_formatted);
       oss_name << ".log";
       return oss_name.str();
     }
 
     bool openLogFile(const std::string& complete_file_with_path, std::ofstream& outstream) {
       std::ios_base::openmode mode = std::ios_base::out; // for clarity: it's really overkill since it's an ofstream
-      mode |= std::ios_base::trunc;
+      mode |= std::ios_base::app;
       outstream.open(complete_file_with_path, mode);
       if (!outstream.is_open()) {
         std::ostringstream ss_error;

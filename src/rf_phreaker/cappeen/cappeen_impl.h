@@ -62,7 +62,7 @@ private:
 
 	std::unique_ptr<cappeen_delegate> delegate_;
 
-	std::unique_ptr<init_log> logger_;
+	std::unique_ptr<logger> logger_;
 
 	std::recursive_mutex mutex_;
 };

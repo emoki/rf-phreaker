@@ -46,4 +46,4 @@ set (common_SRCS
 add_library (common STATIC ${common_SRCS})
 target_link_libraries (common ${TBB_LIBRARY})
 target_link_libraries (common ipp_custom)
-target_link_libraries (common lib_g2logger)
+target_link_libraries (common g3logger)

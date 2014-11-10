@@ -60,7 +60,7 @@ public:
 		if(rf_sw != nullptr)
 			new_gpio |= rf_sw->setting_;
 		//else {
-		//	LOG_L(WARNING) << "Frequency (" << freq / 1e6 << "mhz) and bandwidth (" << bw / 1e6 << "mhz) is outside the available RF paths.";
+		//	LOG(WARNING) << "Frequency (" << freq / 1e6 << "mhz) and bandwidth (" << bw / 1e6 << "mhz) is outside the available RF paths.";
 		//}
 		return new_gpio;
 	}

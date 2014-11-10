@@ -18,9 +18,8 @@ float calculate_sl(measurement_info &meas)
 int start_logging(int log_level)
 {
 	try {
-		static init_log logger("blade_matlab_interface", "");
-		logger.log_worker_->changeLoggingLevel(log_level);
-
+		static logger logger("blade_matlab_interface", "");
+		logger.change_logging_level(log_level);
 		return 0;
 	}
 	catch(rf_phreaker::rf_phreaker_error &err) {

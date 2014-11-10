@@ -19,7 +19,7 @@ long cappeen_initialize(beagle_api::beagle_delegate *del)
 		status = impl->initialize(del);
 	}
 	catch(...) {
-		LOG(ERROR) << "Failed to initialize cappeen api.";
+		LOG(LERROR) << "Failed to initialize cappeen api.";
 
 		status = beagle_api::BEAGLEUNABLETOINITIALIZE;
 	}

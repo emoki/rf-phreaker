@@ -18,22 +18,22 @@
 namespace g2 {
    namespace internal {
       bool wasFatal(const LEVELS& level) {
-         return level.value >= FATAL.value;
+         return level.value >= LFATAL.value;
       }
 
 #ifdef G2_DYNAMIC_LOGGING
-      // All levels are by default ON: i.e. for DEBUG, INFO, WARNING, FATAL
-      const int g_level_size{FATAL.value + 1};
-      std::atomic<bool> g_log_level_status[4]{{true},{true},{true},{true}};
+      // All levels are by default ON: i.e. for VERBOSE, DEBUG, INFO, WARNING, ERROR, FATAL
+      const int g_level_size{LFATAL.value + 1};
+	  std::atomic<bool> g_log_level_status[6]{{false}, {false}, {true}, {true}, {true}, {true}};
 #endif	
    } // internal
 
 #ifdef G2_DYNAMIC_LOGGING
 
    void setLogLevel(LEVELS log_level, bool enabled) {
-      assert(internal::g_level_size == 4 && "Mismatch between number of logging levels and their use");
+      assert(internal::g_level_size == 6 && "Mismatch between number of logging levels and their use");
       int level = log_level.value;
-      CHECK((level >= DEBUG.value) && (level <= FATAL.value));
+      CHECK((level >= LVERBOSE.value) && (level <= LFATAL.value));
       internal::g_log_level_status[level].store(enabled, std::memory_order_release);
    }
 #endif
@@ -41,7 +41,7 @@ namespace g2 {
    bool logLevel(LEVELS log_level) {
 #ifdef G2_DYNAMIC_LOGGING
       int level = log_level.value;
-      CHECK((level >= DEBUG.value) && (level <= FATAL.value));
+	  CHECK((level >= LVERBOSE.value) && (level <= LFATAL.value));
       bool status = (internal::g_log_level_status[level].load(std::memory_order_acquire));
       return status;
 #endif

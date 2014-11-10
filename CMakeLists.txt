@@ -105,7 +105,7 @@ include_directories ("${PROJECT_SOURCE_DIR}/third_party/hash_utility")
 
 add_subdirectory (third_party/gmock)
 #add_subdirectory (third_party/gtest) #gtest is automatically added by gmock
-add_subdirectory (third_party/g2log/g2log)
+add_subdirectory (third_party/g3log)
 add_subdirectory (third_party/bladerf/host)
 add_subdirectory (third_party/hash_utility)
 add_subdirectory (src/rf_phreaker/common)

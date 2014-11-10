@@ -68,26 +68,27 @@ public:
 	~cappeen_delegate()
 	{}
 
-	void initialize(processing::data_output_async *data_output, processing::processing_graph *pro, processing::gps_graph *gps)
+	void initialize(processing::data_output_async *data_output, processing::processing_graph *pro, processing::gps_graph *gps,
+		processing::frequency_correction_graph *freq_correction)
 	{
-		LOG_L(VERBOSE) << "Creating connections...";
-		LOG_L(VERBOSE) << "Connecting hardware.";
+		LOG(LVERBOSE) << "Creating connections...";
+		LOG(LVERBOSE) << "Connecting hardware.";
 		data_output->connect_hardware(boost::bind(&cappeen_delegate::output_hardware, this, _1)).get();
-		LOG_L(VERBOSE) << "Connecting gps.";
+		LOG(LVERBOSE) << "Connecting gps.";
 		data_output->connect_gps(boost::bind(&cappeen_delegate::output_gps, this, _1)).get();
-		LOG_L(VERBOSE) << "Connecting umts_sweep.";
+		LOG(LVERBOSE) << "Connecting umts_sweep.";
 		data_output->connect_umts_sweep(boost::bind(&cappeen_delegate::output_umts_sweep, this, _1)).get();
-		LOG_L(VERBOSE) << "Connecting umts_layer_3.";
+		LOG(LVERBOSE) << "Connecting umts_layer_3.";
 		data_output->connect_umts_layer_3(boost::bind(&cappeen_delegate::output_umts_layer_3, this, _1)).get();
-		LOG_L(VERBOSE) << "Connecting lte_sweep.";
+		LOG(LVERBOSE) << "Connecting lte_sweep.";
 		data_output->connect_lte_sweep(boost::bind(&cappeen_delegate::output_lte_sweep, this, _1)).get();
-		LOG_L(VERBOSE) << "Connecting lte_layer_3.";
+		LOG(LVERBOSE) << "Connecting lte_layer_3.";
 		data_output->connect_lte_layer_3(boost::bind(&cappeen_delegate::output_lte_layer_3, this, _1)).get();
 
-		LOG_L(VERBOSE) << "Creating log sinks...";
-		LOG_L(VERBOSE) << "Connecting error.";
+		LOG(LVERBOSE) << "Creating log sinks...";
+		LOG(LVERBOSE) << "Connecting error.";
 		delegate_sink_async::instance().connect_error(boost::bind(&cappeen_delegate::output_error, this, _1, _2)).get();
-		LOG_L(VERBOSE) << "Connecting message.";
+		LOG(LVERBOSE) << "Connecting message.";
 		delegate_sink_async::instance().connect_message(boost::bind(&cappeen_delegate::output_message, this, _1, _2)).get();
 
 		processing_graph_ = pro;
@@ -272,14 +273,14 @@ public:
 
 	void output_error_as_message(const std::string &s, int code)
 	{
-		LOG_L(ERROR) << s;
+		LOG(LERROR) << s;
 		if(delegate_ != nullptr)
 			delegate_->available_message(beagle_id_, code, s.c_str(), s.size() + 1);
 	}
 
 	void output_error(const std::string &s, int code)
 	{
-		LOG_L(ERROR) << s;
+		LOG(LERROR) << s;
 		if(delegate_ != nullptr) {
 			if(beagle_info_.state_ == beagle_api::BEAGLE_COLLECTING
 				   || beagle_info_.state_ == beagle_api::BEAGLE_USBOPENED
@@ -302,7 +303,7 @@ public:
 
 	void output_message(const std::string &s, int code)
 	{
-		LOG_L(INFO) << s;
+		LOG(LINFO) << s;
 		if(delegate_ != nullptr)
 			delegate_->available_message(beagle_id_, code, s.c_str(), s.size() + 1);
 	}
@@ -354,7 +355,7 @@ public:
 		beagle_info_.valid_licenses_.elements_ = 0;
 		valid_licenses_.clear();
 		if(t.license_data_.version_ <= 0) {
-			LOG_L(WARNING) << "License is not initialized.";
+			LOG(LWARNING) << "License is not initialized.";
 		}
 		else {
 			try {

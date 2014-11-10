@@ -41,17 +41,17 @@ int main(int argc, char** argv)
   std::cout << "*   compare to the code at:\n*  \t g2log/test_example/main_contract.cpp" << std::endl;
   std::cout << "*\n*   Log file: [" << log_file_name.get() << "]\n\n" << std::endl;
 
-  LOGF(INFO, "Hi log %d", 123);
-  LOG(INFO) << "Test SLOG INFO";
-  LOG(DEBUG) << "Test SLOG DEBUG";
-  LOG(INFO) << "one: " << 1;
-  LOG(INFO) << "two: " << 2;
-  LOG(INFO) << "one and two: " << 1 << " and " << 2;
-  LOG(DEBUG) << "float 2.14: " << 1000/2.14f;
-  LOG(DEBUG) << "pi double: " << pi_d;
-  LOG(DEBUG) << "pi float: " << pi_f;
-  LOG(DEBUG) << "pi float (width 10): " << std::setprecision(10) << pi_f;
-  LOGF(INFO, "pi float printf:%f", pi_f);
+  LOGF(LINFO, "Hi log %d", 123);
+  LOG(LINFO) << "Test SLOG INFO";
+  LOG(LDEBUG) << "Test SLOG DEBUG";
+  LOG(LINFO) << "one: " << 1;
+  LOG(LINFO) << "two: " << 2;
+  LOG(LINFO) << "one and two: " << 1 << " and " << 2;
+  LOG(LDEBUG) << "float 2.14: " << 1000/2.14f;
+  LOG(LDEBUG) << "pi double: " << pi_d;
+  LOG(LDEBUG) << "pi float: " << pi_f;
+  LOG(LDEBUG) << "pi float (width 10): " << std::setprecision(10) << pi_f;
+  LOGF(LINFO, "pi float printf:%f", pi_f);
 
    // FATAL SECTION
   int smaller = 1;

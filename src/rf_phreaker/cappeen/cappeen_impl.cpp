@@ -36,6 +36,8 @@ long cappeen_impl::initialize(beagle_api::beagle_delegate *del)
 {
 	int status = 0;
 	try {
+		read_settings();
+
 		std::lock_guard<std::recursive_mutex> lock(mutex_);
 		// If logging fails continue anyway.
 		try {
@@ -50,52 +52,49 @@ long cappeen_impl::initialize(beagle_api::beagle_delegate *del)
 		}
 		catch(...) {}
 
-		LOG_L(INFO) << "Initializing cappeen api version " << api_version();
+		LOG(LINFO) << "Initializing cappeen api version " << api_version();
 
 		is_initialized_ = false;
 
-		LOG_L(VERBOSE) << "Reading settings.";
-		read_settings();
-
 		if(logger_)
-			logger_->log_worker_->changeLoggingLevel(config_.log_level_);
+			logger_->change_logging_level(config_.log_level_);
 
 		// Release all components before changing delegate.
 		delegate_.release();
 		scanner_.release();
 		data_output_.release();
 		if(processing_graph_) {
-			LOG_L(DEBUG) << "Found processing graph on heap.  Sending cancel request and releasing it.";
+			LOG(LDEBUG) << "Found processing graph on heap.  Sending cancel request and releasing it.";
 			processing_graph_->cancel_and_wait();
 			processing_graph_.release();
 		}
 		if(gps_graph_) {
-			LOG_L(DEBUG) << "Found gps graph on heap.  Sending cancel request and releasing it.";
+			LOG(LDEBUG) << "Found gps graph on heap.  Sending cancel request and releasing it.";
 			gps_graph_->cancel_and_wait();
 			gps_graph_.release();
 		}
 
 		if(frequency_correction_graph_) {
-			LOG_L(DEBUG) << "Found frequency correction graph on heap.  Sending cancel request and releasing it.";
+			LOG(LDEBUG) << "Found frequency correction graph on heap.  Sending cancel request and releasing it.";
 			frequency_correction_graph_->cancel_and_wait();
 			frequency_correction_graph_.release();
 		}
 
 
-		LOG_L(VERBOSE) << "Constructing cappeen_delegate.";
+		LOG(LVERBOSE) << "Constructing cappeen_delegate.";
 		delegate_.reset(new cappeen_delegate(del));
-		LOG_L(VERBOSE) << "Constructing blade_rf_controller_async.";
+		LOG(LVERBOSE) << "Constructing blade_rf_controller_async.";
 		scanner_.reset(new scanner::blade_rf_controller_async(rf_phreaker::scanner::USB_BLADE_RF));
-		LOG_L(VERBOSE) << "Constructing data_output_async.";
+		LOG(LVERBOSE) << "Constructing data_output_async.";
 		data_output_.reset(new processing::data_output_async());
-		LOG_L(VERBOSE) << "Constructing processing_graph.";
+		LOG(LVERBOSE) << "Constructing processing_graph.";
 		processing_graph_.reset(new processing::processing_graph());
-		LOG_L(VERBOSE) << "Constructing gps_graph.";
+		LOG(LVERBOSE) << "Constructing gps_graph.";
 		gps_graph_.reset(new processing::gps_graph());
-		LOG_L(VERBOSE) << "Constructing frequency correction graph.";
+		LOG(LVERBOSE) << "Constructing frequency correction graph.";
 		frequency_correction_graph_.reset(new processing::frequency_correction_graph());
 		
-		LOG_L(VERBOSE) << "Initializing cappeen_delegate.";
+		LOG(LVERBOSE) << "Initializing cappeen_delegate.";
 		delegate_->initialize(data_output_.get(), processing_graph_.get(), gps_graph_.get());
 		//log_worker_->connect_sink(boost::bind(&cappeen_delegate::output_error, delegate_.get(), _1, _2));
 
@@ -108,23 +107,23 @@ long cappeen_impl::initialize(beagle_api::beagle_delegate *del)
 		//tbb::task_scheduler_init init;
 		//init.initialize(15);
 
-		LOG_L(INFO) << "Initialization complete.";
+		LOG(LINFO) << "Initialization complete.";
 		is_initialized_ = true;
 	}
 	catch(const rf_phreaker::rf_phreaker_error &err) {
 		if(delegate_) delegate_->output_error_as_message(err);
 		status = (long)err.error_code_;
-		LOG_L(ERROR) << err.what() << "  Error code: " << err.error_code_ << ".";
+		LOG(LERROR) << err.what() << "  Error code: " << err.error_code_ << ".";
 	}
 	catch(const std::exception &err) {
 		if(delegate_) delegate_->output_error_as_message(err);
 		status = STD_EXCEPTION_ERROR;
-		LOG_L(ERROR) << err.what();
+		LOG(LERROR) << err.what();
 	}
 	catch(...) {
 		if(delegate_) delegate_->output_error_as_message("Unknown error has occurred.", UNKNOWN_ERROR);
 		status = UNKNOWN_ERROR;
-		LOG_L(ERROR) << "Unknown error.";
+		LOG(LERROR) << "Unknown error.";
 	}
 	return status;
 }
@@ -140,20 +139,20 @@ long cappeen_impl::clean_up()
 {
 	long status = 0;
 	try {
-		LOG_L(INFO) << "Cleaning up...";
+		LOG(LINFO) << "Cleaning up...";
 		std::lock_guard<std::recursive_mutex> lock(mutex_);
 
 		// Do more!
 		if(processing_graph_) {
-			LOG_L(VERBOSE) << "Waiting for processing graph...";
+			LOG(LVERBOSE) << "Waiting for processing graph...";
 			processing_graph_->cancel_and_wait();
 		}
 		if(gps_graph_) {
-			LOG_L(VERBOSE) << "Waiting for gps graph...";
+			LOG(LVERBOSE) << "Waiting for gps graph...";
 			gps_graph_->cancel_and_wait();
 		}
 		if(frequency_correction_graph_) {
-			LOG_L(VERBOSE) << "Waiting for frequency correction graph...";
+			LOG(LVERBOSE) << "Waiting for frequency correction graph...";
 			frequency_correction_graph_->cancel_and_wait();
 		}
 		delegate_.release();
@@ -162,7 +161,7 @@ long cappeen_impl::clean_up()
 		processing_graph_.release();
 		gps_graph_.release();
 		frequency_correction_graph_.release();
-		LOG_L(INFO) << "Cleaned up successfully.";
+		LOG(LINFO) << "Cleaned up successfully.";
 	}
 	catch(const rf_phreaker::rf_phreaker_error &err) {
 		if(delegate_) delegate_->output_error_as_message(err);
@@ -188,7 +187,7 @@ long cappeen_impl::list_available_units(char *list, unsigned int buf_size)
 {
 	long status = 0;
 	try {
-		LOG_L(INFO) << "Listing units...";
+		LOG(LINFO) << "Listing units...";
 		std::lock_guard<std::recursive_mutex> lock(mutex_);
 		verify_init();
 
@@ -209,7 +208,7 @@ long cappeen_impl::list_available_units(char *list, unsigned int buf_size)
 			+ boost::lexical_cast<std::string>(str.size() + 1) + ".", BUFFER_TOO_SMALL);
 		else
 			memcpy(list, str.c_str(), str.size() + 1);
-		LOG_L(INFO) << "Listed units successfully.";
+		LOG(LINFO) << "Listed units successfully.";
 	}
 	catch(const rf_phreaker::rf_phreaker_error &err) {
 		if(delegate_) delegate_->output_error_as_message(err);
@@ -236,7 +235,7 @@ long cappeen_impl::open_unit(const char *serial, unsigned int buf_size)
 {
 	long status = 0;
 	try {
-		LOG_L(INFO) << "Opening unit " << serial << "...";
+		LOG(LINFO) << "Opening unit " << serial << "...";
 		std::lock_guard<std::recursive_mutex> lock(mutex_);
 		verify_init();
 
@@ -249,7 +248,7 @@ long cappeen_impl::open_unit(const char *serial, unsigned int buf_size)
 		delegate_->change_beagle_state(BEAGLE_USBOPENED);
 
 		gps_graph_->start(scanner_.get(), data_output_.get(), config_);
-		LOG_L(INFO) << "Opened unit " << serial << " successfully.";
+		LOG(LINFO) << "Opened unit " << serial << " successfully.";
 	}
 	catch(const rf_phreaker::rf_phreaker_error &err) {
 		if(delegate_) delegate_->output_error_as_message(err);
@@ -270,7 +269,7 @@ long cappeen_impl::close_unit(const char *serial, unsigned int buf_size)
 {
 	long status = 0;
 	try{
-		LOG_L(INFO) << "Closing unit " << serial << "...";
+		LOG(LINFO) << "Closing unit " << serial << "...";
 		std::lock_guard<std::recursive_mutex> lock(mutex_);
 		verify_init();
 
@@ -288,7 +287,7 @@ long cappeen_impl::close_unit(const char *serial, unsigned int buf_size)
 
 		scanner_->close_scanner().get();
 		delegate_->change_beagle_state(BEAGLE_USBCLOSED);
-		LOG_L(INFO) << "Closed unit " << serial << " successfully.";
+		LOG(LINFO) << "Closed unit " << serial << " successfully.";
 	}
 	catch(const rf_phreaker::rf_phreaker_error &err) {
 		if(delegate_) delegate_->output_error_as_message(err);
@@ -309,7 +308,7 @@ long cappeen_impl::stop_collection()
 {
 	long status = 0;
 	try {
-		LOG_L(INFO) << "Stopping collection...";
+		LOG(LINFO) << "Stopping collection...";
 		std::lock_guard<std::recursive_mutex> lock(mutex_);
 
 		auto state = delegate_->current_beagle_state();
@@ -318,7 +317,7 @@ long cappeen_impl::stop_collection()
 
 		processing_graph_->cancel_and_wait();
 		delegate_->change_beagle_state(BEAGLE_READY);
-		LOG_L(INFO) << "Stopped collection successfully.";
+		LOG(LINFO) << "Stopped collection successfully.";
 	}
 	catch(const rf_phreaker::rf_phreaker_error &err) {
 		if(delegate_) delegate_->output_error_as_message(err);
@@ -339,7 +338,7 @@ long cappeen_impl::start_collection(const beagle_api::collection_info &collectio
 {
 	long status = 0;
 	try {
-		LOG_L(INFO) << "Starting collection...";
+		LOG(LINFO) << "Starting collection...";
 		std::lock_guard<std::recursive_mutex> lock(mutex_);
 
 		auto state = delegate_->current_beagle_state();
@@ -365,7 +364,7 @@ long cappeen_impl::start_collection(const beagle_api::collection_info &collectio
 		processing_graph_->start(scanner_.get(), data_output_.get(), collection_containers, config_);
 
 		delegate_->change_beagle_state(BEAGLE_COLLECTING);
-		LOG_L(INFO) << "Started collection successfully.";
+		LOG(LINFO) << "Started collection successfully.";
 	}
 	catch(const rf_phreaker::rf_phreaker_error &err) {
 		if(delegate_) delegate_->output_error_as_message(err);
@@ -499,7 +498,7 @@ long cappeen_impl::start_frequency_correction(const beagle_api::collection_info 
 {
 	long status = 0;
 	try {
-		LOG_L(INFO) << "Starting frequency correction using WCDMA bands...";
+		LOG(LINFO) << "Starting frequency correction using WCDMA bands...";
 		std::lock_guard<std::recursive_mutex> lock(mutex_);
 
 		auto state = delegate_->current_beagle_state();
@@ -525,7 +524,7 @@ long cappeen_impl::start_frequency_correction(const beagle_api::collection_info 
 		// Temp sleep to allow graph thread to get going.
 		std::this_thread::sleep_for(std::chrono::seconds(1));
 
-		LOG_L(INFO) << "Frequency collection started successfully.";
+		LOG(LINFO) << "Frequency collection started successfully.";
 	}
 	catch(const rf_phreaker::rf_phreaker_error &err) {
 		if(delegate_) delegate_->output_error_as_message(err);
@@ -548,7 +547,7 @@ long cappeen_impl::start_frequency_correction(uint32_t *wcdma_frequencies, int n
 
 	long status = 0;
 	try {
-		LOG_L(INFO) << "Starting frequency correction using WCDMA channels...";
+		LOG(LINFO) << "Starting frequency correction using WCDMA channels...";
 		std::lock_guard<std::recursive_mutex> lock(mutex_);
 
 		auto state = delegate_->current_beagle_state();
@@ -575,7 +574,7 @@ long cappeen_impl::start_frequency_correction(uint32_t *wcdma_frequencies, int n
 		// Temp sleep to allow graph thread to get going.
 		std::this_thread::sleep_for(std::chrono::seconds(1));
 
-		LOG_L(INFO) << "Frequency collection started successfully.";
+		LOG(LINFO) << "Frequency collection started successfully.";
 	}
 	catch(const rf_phreaker::rf_phreaker_error &err) {
 		if(delegate_) delegate_->output_error_as_message(err);
@@ -597,12 +596,12 @@ long cappeen_impl::input_new_license(const char *serial, uint32_t serial_buf_siz
 {
 	long status = 0;
 	try {
-		LOG_L(INFO) << "Updating new license...";
+		LOG(LINFO) << "Updating new license...";
 		std::lock_guard<std::recursive_mutex> lock(mutex_);
 
 		auto state = delegate_->current_beagle_state();
 		if(state == BEAGLE_USBCLOSED) {
-			LOG_L(INFO) << "Unit not open.  Attempting to open unit before updating license...";
+			LOG(LINFO) << "Unit not open.  Attempting to open unit before updating license...";
 			open_unit(serial, serial_buf_size);
 			state = delegate_->current_beagle_state();
 		}
@@ -637,7 +636,7 @@ long cappeen_impl::input_new_license(const char *serial, uint32_t serial_buf_siz
 		if(gps_graph_)
 			gps_graph_->start(scanner_.get(), data_output_.get(), config_);
 
-		LOG_L(INFO) << "Updated license successfully.";
+		LOG(LINFO) << "Updated license successfully.";
 	}
 	catch(const rf_phreaker::rf_phreaker_error &err) {
 		if(delegate_) delegate_->output_error_as_message(err);

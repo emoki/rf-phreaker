@@ -135,7 +135,7 @@ public:
 
 		// If no insertions change parameters and try again.
 		if(!correction.has_insertions()) {
-			LOG_L(DEBUG) << "Unable to find cells.  Increasing sensitivity...";
+			LOG(LDEBUG) << "Unable to find cells.  Increasing sensitivity...";
 			param.scan_type_ = full_scan_type;
 			param.sensitivity_ = layer_3_settings_.sensitivity_;
 			param.num_coherent_slots_ = layer_3_settings_.num_coherent_slots_;
@@ -143,7 +143,7 @@ public:
 
 			correction = determine_freq_correction(info, param);
 			if(!correction.has_insertions()) {
-				LOG_L(DEBUG) << "Unable to find cells.  Expanding freqeuncy range...";
+				LOG(LDEBUG) << "Unable to find cells.  Expanding freqeuncy range...";
 				param.start_freq_ = frequency_correction_settings_.initial_frequency_correction_range_start_;
 				param.end_freq_ = frequency_correction_settings_.initial_frequency_correction_range_end_;
 				correction = determine_freq_correction(info, param);
@@ -153,7 +153,7 @@ public:
 		if(correction.has_insertions()) {
 			auto best_shift = correction.find_best_freq_shift();
 
-			LOG_L(DEBUG) << correction.cpichs_.size() << " cells found. Best shifts averaged = " << best_shift << "hz.";
+			LOG(LDEBUG) << correction.cpichs_.size() << " cells found. Best shifts averaged = " << best_shift << "hz.";
 			
 			if(info->collection_round() > min_collection_round_) {
 				++num_shifts_;
@@ -165,7 +165,7 @@ public:
 			}
 		}
 		else {
-			LOG_L(DEBUG) << "No valid cells found.";
+			LOG(LDEBUG) << "No valid cells found.";
 		}
 
 		std::get<1>(out).try_put(tbb::flow::continue_msg());
@@ -181,7 +181,7 @@ private:
 	
 		analysis_.set_num_coherent_slots_for_psch(param.num_coherent_slots_);
 
-		LOG_L(DEBUG) << "Starting frequency correction for " << info->frequency() / 1e6 << "mhz. Start offset = " << param.start_freq_ << "hz. End offset = " << param.end_freq_ << "hz. Increment = " << param.increment_ << "hz.";
+		LOG(LDEBUG) << "Starting frequency correction for " << info->frequency() / 1e6 << "mhz. Start offset = " << param.start_freq_ << "hz. End offset = " << param.end_freq_ << "hz. Increment = " << param.increment_ << "hz.";
 		for(int i = param.start_freq_; i <= param.end_freq_; i += param.increment_) {
 			num_meas = 100;
 			raw_signal shifted_signal(*info);

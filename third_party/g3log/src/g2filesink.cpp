@@ -35,7 +35,7 @@ FileSink::FileSink(const std::string& log_prefix, const std::string& log_directo
       _outptr = createLogFile(_log_file_with_path);
    }
    assert(_outptr && "cannot open log file at startup");
-   addLogFileHeader();
+   //addLogFileHeader();
 }
 
 
