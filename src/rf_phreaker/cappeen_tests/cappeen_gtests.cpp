@@ -85,6 +85,7 @@ TEST(Cappeen, TestMain)
 			}
 			else {
 				do {
+					cappeen_close_unit(&serial[0], serial.size());
 					EXPECT_EQ(0, cappeen_list_available_units(&serials[0], serials.size()));
 					std::string serial(&serials[0]);
 					serial = serial.substr(0, serial.find_first_of(';'));
@@ -97,7 +98,6 @@ TEST(Cappeen, TestMain)
 	}
 
 	EXPECT_EQ(0, cappeen_clean_up());
-	//system("pause");
 }
 
 TEST(Cappeen, DISABLED_FreqNotInCalibration) {
