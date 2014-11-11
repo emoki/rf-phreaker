@@ -25,7 +25,7 @@ public:
 		Ipp32fc sig_rms_inverse;
 		sig_rms_inverse.re = static_cast<Ipp32f>(1.0 / l2_norm);
 		sig_rms_inverse.im = 0;
-		ipp_helper::check_status(ippsMulC_32fc_I(sig_rms_inverse, source_destination, length));
+		ipp_helper::check_status(ippsMulC_32fc(source_destination, sig_rms_inverse, source_destination, length));
 	}
 	static void normalize_signal(Ipp32fc *source, Ipp32fc * destination, int length)
 	{
@@ -52,7 +52,7 @@ public:
 	{
 		Ipp32fc mean;
 		ipp_helper::check_status(ippsMean_32fc(srcdst, length, &mean, ippAlgHintAccurate));
-		ipp_helper::check_status(ippsSubC_32fc_I(mean, srcdst, length));
+		ipp_helper::check_status(ippsSubC_32fc(srcdst, mean, srcdst, length));
 	}
 };
 
