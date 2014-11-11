@@ -36,9 +36,10 @@ long cappeen_impl::initialize(beagle_api::beagle_delegate *del)
 {
 	int status = 0;
 	try {
+		std::lock_guard<std::recursive_mutex> lock(mutex_);
+
 		read_settings();
 
-		std::lock_guard<std::recursive_mutex> lock(mutex_);
 		// If logging fails continue anyway.
 		try {
 			if(!file_path_validation::is_path_valid(config_.output_directory_))
