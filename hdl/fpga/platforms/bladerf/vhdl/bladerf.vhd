@@ -92,6 +92,8 @@ entity bladerf is
 	 exp_uart_rx        	:   in     	std_logic ;
 	 exp_uart_tx       	:   out     std_logic ;
 	 
+    exp_1wire           :   inout      std_logic ;
+	 
     exp_clock_in        :   in      std_logic ;
     exp_gpio            :   inout   std_logic_vector(32 downto 2)
   ) ;

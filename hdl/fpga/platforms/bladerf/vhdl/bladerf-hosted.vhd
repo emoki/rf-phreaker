@@ -64,6 +64,11 @@ architecture hosted_bladerf of bladerf is
         time_tamer_rx_reset             :   in  std_logic ;
         time_tamer_rx_time              :   in  std_logic_vector(63 downto 0);
 		  
+		  
+		  pps_count_in_export				:   in std_logic_vector(31 downto 0);
+		  pps_cfg_out_export 				:	 out std_logic_vector(7 downto 0);
+		
+		
 		  xb_spi_gps_MISO		:	in		std_logic := 'X';
 		  xb_spi_gps_MOSI		:	out	std_logic;
 		  xb_spi_gps_SCLK		:	out	std_logic;
@@ -248,6 +253,11 @@ architecture hosted_bladerf of bladerf is
 	 
 	 signal nios_xb_uart_rxd : std_logic;
 	 signal nios_xb_uart_txd : std_logic;
+	 
+	 --custom pps calibration signals
+	 signal pps_calibration_clock_count : std_logic_vector(31 downto 0);
+	 signal pps_calibration_config		: std_logic_vector(7 downto 0);
+	 
 
     signal xb_mode  : std_logic_vector(1 downto 0);
 
@@ -765,6 +775,19 @@ begin
     fx3_uart_rxd <= nios_uart_rxd when sys_rst_sync = '0' else 'Z' ;
 	 
 	 
+	 
+	 
+	 /* Add PPS Calibration Counter Component */
+	 U_pps_counter : entity work.pps_calibration_counter
+      port map (
+        clock           =>  rx_clock,											/* Directly tied to the receiver clock - also is the 80mhz system component clock from the pll. */
+        reset           =>  pps_calibration_config(7),
+		  pps             =>  exp_clock_in,									   /* GPS pps calibration input - 1 sec pulse */
+		  sample_size     =>  unsigned(pps_calibration_config(6 downto 0)),		/* 7 bit sample size setting */
+	 
+		  clock_count     =>  pps_calibration_clock_count		         /* The clock counts over the sample_size period */
+	 
+      ) ;
 
     -- NIOS control system for si5338, vctcxo trim and lms control
     U_nios_system : nios_system
@@ -809,7 +832,11 @@ begin
         time_tamer_rx_clock             => rx_clock,
         time_tamer_rx_reset             => rx_reset,
         time_tamer_rx_time              => std_logic_vector(rx_timestamp),
-        time_tamer_synchronize => timestamp_sync
+        time_tamer_synchronize => timestamp_sync,
+		  
+		  
+		  pps_count_in_export				=>   pps_calibration_clock_count,
+		  pps_cfg_out_export 				=>	  pps_calibration_config
       ) ;
 
     xb_gpio_direction_proc : for i in 0 to 31 generate

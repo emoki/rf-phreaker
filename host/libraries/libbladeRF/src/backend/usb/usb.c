@@ -1357,26 +1357,32 @@ static int usb_xb_express_write(struct bladerf* dev, int custom_addr, uint8_t* d
 	return 0;
 }
 
+// carried over from original Nuand xb200
 static int usb_xb_spi(struct bladerf *dev, uint32_t value)
 {
 	return gpio_write(dev, 36, value);
 }
 
-static int usb_xb_gps_spi(struct bladerf *dev, uint8_t send, uint8_t* receive )
+static int usb_nios_rpc(struct bladerf *dev, uint8_t addr, uint32_t send, uint32_t* receive)
 {
+	// This does a gpio read, but sends data on initiating, allowing for a full transaction like an RPC.
 	// Had to add this modefied version of gpio_read because normal gpio_read() will not 
 	// let you initialize the data first sent to the device.
+	// In addition, all the xb device io is getting repetitive, so if possible, this will
+	// be used to perform all xb io from now on.
 
 
 	int status;
+	size_t i;
 	struct uart_cmd cmd;
 
-	uint8_t addr = 48;
+	*receive = 0;
 
 	// low to high byte chunks
-		assert(addr <= UINT8_MAX);
-		cmd.addr = addr;
-		cmd.data = send;   // send initialized data - to the 'send' bytes
+	for (i = 0; i < sizeof(*receive); i++) {
+		assert((addr + i) <= UINT8_MAX);
+		cmd.addr = (uint8_t)(addr + i);
+		cmd.data = (uint8_t)((send >> (i * 8)) & 0xff);
 
 		status = access_peripheral(dev, UART_PKT_DEV_GPIO,
 			USB_DIR_DEVICE_TO_HOST, &cmd, 1);
@@ -1385,12 +1391,14 @@ static int usb_xb_gps_spi(struct bladerf *dev, uint8_t send, uint8_t* receive )
 			return status;
 		}
 
-		if (receive != NULL){
-			*receive = cmd.data;
-		}
-		
+		*receive |= (cmd.data << (i * 8));
+	}
 
-	return status;
+	return 0;
+}
+static int usb_xb_gps_spi(struct bladerf *dev, uint8_t send, uint8_t* receive )
+{
+	return usb_nios_rpc(dev, 48, send, receive);
 }
 
 
@@ -1412,6 +1420,10 @@ static int usb_xb_uart_hasdata(struct bladerf *dev, uint32_t* value)
 	int sts = gpio_read(dev, 60, value);
 	return sts;
 }
+
+
+
+
 
 static int usb_set_firmware_loopback(struct bladerf *dev, bool enable) {
     int result;
@@ -1554,6 +1566,8 @@ const struct backend_fns backend_fns_usb = {
     FIELD_INIT(.lms_read, usb_lms_read),
 
     FIELD_INIT(.dac_write, usb_dac_write),
+
+	FIELD_INIT(.nios_rpc, usb_nios_rpc),
 
 	FIELD_INIT(.xb_spi, usb_xb_spi),
     FIELD_INIT(.xb_gps_spi, usb_xb_gps_spi),
