@@ -1398,7 +1398,10 @@ static int usb_nios_rpc(struct bladerf *dev, uint8_t addr, uint32_t send, uint32
 }
 static int usb_xb_gps_spi(struct bladerf *dev, uint8_t send, uint8_t* receive )
 {
-	return usb_nios_rpc(dev, 48, send, receive);
+	uint32_t resp;
+	int sts = usb_nios_rpc(dev, 48, send, &resp);
+	*receive = (uint8_t)resp;
+	return sts;
 }
 
 
@@ -1567,7 +1570,6 @@ const struct backend_fns backend_fns_usb = {
 
     FIELD_INIT(.dac_write, usb_dac_write),
 
-	FIELD_INIT(.nios_rpc, usb_nios_rpc),
 
 	FIELD_INIT(.xb_spi, usb_xb_spi),
     FIELD_INIT(.xb_gps_spi, usb_xb_gps_spi),
@@ -1575,7 +1577,9 @@ const struct backend_fns backend_fns_usb = {
     FIELD_INIT(.xb_uart_write, usb_xb_uart_write),
     FIELD_INIT(.xb_uart_read, usb_xb_uart_read),
     FIELD_INIT(.xb_uart_baud_write, usb_xb_uart_baud),
-    FIELD_INIT(.xb_uart_hasdata, usb_xb_uart_hasdata),
+	FIELD_INIT(.xb_uart_hasdata, usb_xb_uart_hasdata), 
+
+	FIELD_INIT(.nios_rpc, usb_nios_rpc),
 
 	FIELD_INIT(.xb_express_read, usb_xb_express_read),
 
