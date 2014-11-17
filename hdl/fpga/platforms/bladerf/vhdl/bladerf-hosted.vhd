@@ -786,7 +786,7 @@ begin
 		  sample_size     =>  pps_calibration_config(6 downto 0),		/* 7 bit sample size setting */
 	 
 		  clock_count     =>  pps_calibration_clock_count		         /* The clock counts over the sample_size period */
-	 
+			--data_ready		=>		--/* Not Connected */					/* High when count is ready. */
       ) ;
 
     -- NIOS control system for si5338, vctcxo trim and lms control
