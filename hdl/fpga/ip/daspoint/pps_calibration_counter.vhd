@@ -17,7 +17,7 @@ entity pps_calibration_counter is
     clock           :   in      std_logic ;					--/* System clock input to count */
     reset           :   in      std_logic ;					--/* Apply a falling edge to clear state and begin a new sample */
 	 pps             :   in      std_logic ;					--/* GPS pps calibration input - 1 sec pulse */
-	 sample_size     :   in     unsigned(6 downto 0) ;		--/* 7 bit sample size setting */
+	 sample_size     :   in     std_logic_vector(6 downto 0) ;		--/* 7 bit sample size setting */
 	 
     clock_count     :   out     std_logic_vector(31 downto 0)		--/* The clock counts over the sample_size period */
   ) ;
@@ -39,7 +39,7 @@ begin
 				clock_count <= (others => '0');
             data_ready <= '0' ;
             firstpulse := '0' ;
-				samplesize7 := sample_size ;
+				samplesize7 := unsigned(sample_size) ;
         else
              
 				 if (data_ready = '0') then 
@@ -54,7 +54,8 @@ begin
 								data_ready <= '1';
 							end if;
 						end if;
-						clock_count <= (others => '0');
+						clock_count(31 downto 7) <= (others => '0');
+						clock_count(6 downto 0) <= std_logic_vector(samplesize7);
 				 else 
 					   clock_count <= std_logic_vector(tickcount32);
 				 end if;

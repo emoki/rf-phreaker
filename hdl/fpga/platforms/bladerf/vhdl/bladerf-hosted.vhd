@@ -780,10 +780,10 @@ begin
 	 /* Add PPS Calibration Counter Component */
 	 U_pps_counter : entity work.pps_calibration_counter
       port map (
-        clock           =>  rx_clock,											/* Directly tied to the receiver clock - also is the 80mhz system component clock from the pll. */
+        clock           =>  c4_clock,											/* Directly tied to the clock from the vcxto. 34.4 mhz? Considered 80 mhz from nios... */
         reset           =>  pps_calibration_config(7),
 		  pps             =>  exp_clock_in,									   /* GPS pps calibration input - 1 sec pulse */
-		  sample_size     =>  unsigned(pps_calibration_config(6 downto 0)),		/* 7 bit sample size setting */
+		  sample_size     =>  pps_calibration_config(6 downto 0),		/* 7 bit sample size setting */
 	 
 		  clock_count     =>  pps_calibration_clock_count		         /* The clock counts over the sample_size period */
 	 

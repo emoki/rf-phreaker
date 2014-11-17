@@ -324,7 +324,8 @@ void gps_calibration_start(uint32_t nsamp){
 	uint8_t cfg = rst | ssize;
 
 	IOWR_ALTERA_AVALON_PIO_DATA(PIO_4_BASE, cfg);		// send cfg
-	IOWR_ALTERA_AVALON_PIO_DATA(PIO_4_BASE, 0);			// latch size & start counter
+	IOWR_ALTERA_AVALON_PIO_DATA(PIO_4_BASE, ssize);		// make sure size is latched
+	IOWR_ALTERA_AVALON_PIO_DATA(PIO_4_BASE, 0);			// start counter
 
 }
 
@@ -535,6 +536,7 @@ int main()
       uint32_t iovar = 0;
 
       uint32_t uart_hasdata_cached = 0;
+      uint32_t gps_calibration_counter_cached = 0;
 
 
       state = LOOKING_FOR_MAGIC;
@@ -696,7 +698,10 @@ int main()
                             else if (device == GDEV_IQ_CORR_TX_PHASE)
                             	cmd_ptr->data = (IORD_ALTERA_AVALON_PIO_DATA(IQ_CORR_TX_PHASE_GAIN_BASE)) >> ((cmd_ptr->addr + 2) * 8);
                             else if (device == GDEV_XB_GPS_CALIBRATION_READ){
-								cmd_ptr->data = gps_calibration_counter;
+                            	if(cmd_ptr->addr == 0){
+                            		gps_calibration_counter_cached = gps_calibration_counter;
+                            	}
+								cmd_ptr->data = (gps_calibration_counter_cached >> (cmd_ptr->addr * 8)) & 0xff;
                             }
                         } else if (isWrite) {
                             if (device == GDEV_TIME_TIMER) {

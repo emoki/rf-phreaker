@@ -1398,10 +1398,24 @@ static int usb_nios_rpc(struct bladerf *dev, uint8_t addr, uint32_t send, uint32
 }
 static int usb_xb_gps_spi(struct bladerf *dev, uint8_t send, uint8_t* receive )
 {
-	uint32_t resp;
-	int sts = usb_nios_rpc(dev, 48, send, &resp);
-	*receive = (uint8_t)resp;
-	return sts;
+	int status;
+	struct uart_cmd cmd;
+
+	*receive = 0;
+
+	cmd.addr = 48;
+	cmd.data = send;
+
+	status = access_peripheral(dev, UART_PKT_DEV_GPIO,
+		USB_DIR_DEVICE_TO_HOST, &cmd, 1);
+
+	if (status < 0) {
+		return status;
+	}
+
+	*receive |= cmd.data;
+
+	return 0;
 }
 
 
