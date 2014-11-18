@@ -1,10 +1,11 @@
 #include "rf_phreaker/common/operating_band_range_specifier.h"
 #include "rf_phreaker/common/common_utility.h"
 
-namespace rf_phreaker {
-
-operating_band_range_specifier::operating_band_range_specifier(void)
+namespace rf_phreaker
 {
+
+
+operating_band_range_specifier::operating_band_range_specifier(void) {
 	// Push back the ranges in the same order as they are in the operating_band_enum.
 	// The edges of the bands start at the center frequency of the first channel 
 	// and end at the center frequency of the last channel - no point scanning outside them.
@@ -52,7 +53,7 @@ operating_band_range_specifier::operating_band_range_specifier(void)
 	operating_bands_.push_back(operating_band_range(LTE_OPERATING_BAND_2, khz(1930000), khz(1990000)));	//	1850 - 1910	1930 - 1990	FDD
 	operating_bands_.push_back(operating_band_range(LTE_OPERATING_BAND_3, khz(1805000), khz(1880000)));	//	1710 - 1785	1805 - 1880	FDD
 	operating_bands_.push_back(operating_band_range(LTE_OPERATING_BAND_4, khz(2110000LL), khz(2155000LL)));	//	1710 - 1755	2110 - 2155	FDD
-	operating_bands_.push_back(operating_band_range(LTE_OPERATING_BAND_5, khz(869000 ), khz(894000)));	//	824 - 849	869 - 894	FDD
+	operating_bands_.push_back(operating_band_range(LTE_OPERATING_BAND_5, khz(869000), khz(894000)));	//	824 - 849	869 - 894	FDD
 	operating_bands_.push_back(operating_band_range(LTE_OPERATING_BAND_6, khz(875000), khz(885000)));	//	830 - 840	875 - 885	FDD			
 	operating_bands_.push_back(operating_band_range(LTE_OPERATING_BAND_7, khz(2620000LL), khz(2690000LL)));	//	2500 - 2570	2620 - 2690	FDD
 	operating_bands_.push_back(operating_band_range(LTE_OPERATING_BAND_8, khz(925000), khz(960000)));	//	880 - 915	925 - 960	FDD
@@ -90,42 +91,34 @@ operating_band_range_specifier::operating_band_range_specifier(void)
 	operating_bands_.push_back(operating_band_range(LTE_OPERATING_BAND_44, khz(703000), khz(803000)));	//	
 }
 
+operating_band_range_specifier::~operating_band_range_specifier(void) {}
 
-operating_band_range_specifier::~operating_band_range_specifier(void)
-{
-}
-
-operating_band_range operating_band_range_specifier::get_band_freq_range(operating_band band) const
-{
+operating_band_range operating_band_range_specifier::get_band_freq_range(operating_band band) const {
 	return operating_bands_[band];
 }
 
-std::vector<operating_band_range> operating_band_range_specifier::find_avaliable_gsm_operating_bands(frequency_type freq) const
-{
+std::vector<operating_band_range> operating_band_range_specifier::find_avaliable_gsm_operating_bands(frequency_type freq) const {
 	return find_avaliable_operating_bands(freq, FIRST_GSM_OPERATING_BAND, LAST_GSM_OPERATING_BAND);
 }
 
-std::vector<operating_band_range> operating_band_range_specifier::find_avaliable_umts_operating_bands(frequency_type freq) const
-{
+std::vector<operating_band_range> operating_band_range_specifier::find_avaliable_umts_operating_bands(frequency_type freq) const {
 	return find_avaliable_operating_bands(freq, FIRST_UMTS_OPERATING_BAND, LAST_UMTS_OPERATING_BAND);
 }
 
-std::vector<operating_band_range> operating_band_range_specifier::find_avaliable_lte_operating_bands(frequency_type freq) const
-{
+std::vector<operating_band_range> operating_band_range_specifier::find_avaliable_lte_operating_bands(frequency_type freq) const {
 	return find_avaliable_operating_bands(freq, FIRST_LTE_OPERATING_BAND, LAST_LTE_OPERATING_BAND);
 }
 
-std::vector<operating_band_range> operating_band_range_specifier::find_avaliable_operating_bands(frequency_type freq, operating_band begin, operating_band inclusive_end) const
-{
+std::vector<operating_band_range> operating_band_range_specifier::find_avaliable_operating_bands(frequency_type freq, operating_band begin, operating_band inclusive_end) const {
 	std::vector<operating_band_range> valid_bands;
 
-	for(int i = begin; i <= inclusive_end; ++i)
-	{
+	for(int i = begin; i <= inclusive_end; ++i) {
 		if(operating_bands_[i].low_freq_hz_ <= freq && operating_bands_[i].high_freq_hz_ >= freq)
 			valid_bands.push_back(operating_bands_[i]);
 	}
 
 	return valid_bands;
 }
+
 
 }
