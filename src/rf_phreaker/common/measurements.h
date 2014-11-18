@@ -9,21 +9,6 @@
 
 namespace rf_phreaker {
 
-	struct frequency_path
-	{
-		frequency_path() : low_freq_(-1), high_freq_(-1) {}
-		frequency_path(frequency_type start, frequency_type end) : low_freq_(start), high_freq_(end) {}
-		frequency_type low_freq_;
-		frequency_type high_freq_;
-	};
-
-	enum device_communication
-	{
-		USB_HI_SPEED,
-		USB_SUPER_SPEED,
-		UNKNOWN_SPEED
-	};
-	
 	struct hardware 
 	{
 		scanner_serial_type serial_;
