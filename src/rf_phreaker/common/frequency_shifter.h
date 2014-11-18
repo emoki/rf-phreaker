@@ -28,7 +28,7 @@ public:
 
 		generate_tone(tone_, length, frequency_hz_to_shift);
 
-		ipp_helper::check_status(ippsMul_32fc_I(tone_.get(), signal.get(), length));
+		ipp_helper::check_status(ippsMul_32fc(signal.get(), tone_.get(), signal.get(), length));
 	}
 
 	void generate_tone(ipp_32fc_array &tone, int32_t length, double frequency_hz_to_shift)
