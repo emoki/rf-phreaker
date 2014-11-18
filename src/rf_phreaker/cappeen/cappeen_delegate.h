@@ -397,25 +397,12 @@ public:
 
 	bool is_within_freq_paths(frequency_type start, frequency_type stop)
 	{
-		for(auto f = start; f <= stop; f += khz(100)) {
-			if(!is_within_freq_paths(f))
-				return false;
-		}
-		return true;
+		return rf_phreaker::is_within_freq_paths(frequency_paths_, start, stop);
 	}
 
 	bool is_within_freq_paths(frequency_type f) 
 	{
-		bool found_freq = false;
-		for(auto path : frequency_paths_) {
-				// Increase range by a 1 mhz on each to account for when we jump from
-				// one path to the next.
-			if(f >= path.low_freq_ - mhz(1) && f <= path.high_freq_ + mhz(1)) {
-				found_freq = true;
-				break;
-			}
-		}
-		return found_freq;
+		return rf_phreaker::is_within_freq_paths(frequency_paths_, f);
 	}
 
 	beagle_api::BEAGLESTATE current_beagle_state() { return beagle_info_.state_; }

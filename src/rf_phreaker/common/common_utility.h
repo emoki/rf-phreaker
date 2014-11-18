@@ -112,6 +112,27 @@ inline std::string static_timestamp_string() {
 	return static_timestamp;
 }
 
+inline bool is_within_freq_paths(const std::vector<frequency_path> &paths, frequency_type f) {
+	bool found_freq = false;
+	for(auto path : paths) {
+		// Increase range by a 1 mhz on each to account for when we jump from
+		// one path to the next.
+		if(f >= path.low_freq_ - mhz(1) && f <= path.high_freq_ + mhz(1)) {
+			found_freq = true;
+			break;
+		}
+	}
+	return found_freq;
+}
+
+inline bool is_within_freq_paths(const std::vector<frequency_path> &paths, frequency_type start, frequency_type stop) {
+	for(auto f = start; f <= stop; f += khz(100)) {
+		if(!is_within_freq_paths(paths, f))
+			return false;
+	}
+	return true;
+}
+
 inline std::string to_string(const operating_band &b) {
 	std::string s;
 	switch(b) {
