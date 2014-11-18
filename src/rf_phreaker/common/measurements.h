@@ -26,7 +26,7 @@ namespace rf_phreaker {
 	
 	struct hardware 
 	{
-		scanner_serial_type scanner_id_;
+		scanner_serial_type serial_;
 		device_communication device_communication_;
 		int64_t frequency_correction_calibration_date_;
 		int64_t rf_calibration_date_;
@@ -36,7 +36,7 @@ namespace rf_phreaker {
 
 	struct gps
 	{
-		scanner_serial_type scanner_id_;
+		scanner_serial_type serial_;
 		bool lock_;
 		int64_t coordinated_universal_time_;  
 		int32_t visible_satellites_;

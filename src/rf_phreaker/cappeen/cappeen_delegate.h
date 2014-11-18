@@ -321,7 +321,7 @@ public:
 	{
 		beagle_info_.beagle_id_ = beagle_id_;
 		memset(beagle_info_.beagle_serial_, 0, sizeof(beagle_info_.beagle_serial_));
-		memcpy(beagle_info_.beagle_serial_, t.scanner_id_.c_str(), t.scanner_id_.size());
+		memcpy(beagle_info_.beagle_serial_, t.serial_.c_str(), t.serial_.size());
 		beagle_info_.dds_clock_correction_calibration_date_ = t.frequency_correction_calibration_date_;
 		beagle_info_.rf_calibration_date_ = t.rf_calibration_date_;
 
@@ -363,7 +363,7 @@ public:
 		else {
 			try {
 				std::unique_ptr<cappeen_license> license(new cappeen_license_version_3(cell_analysis_license));
-				license->initialize_license(t.license_data_, t.scanner_id_);
+				license->initialize_license(t.license_data_, t.serial_);
 				if(!license->corrupt_license()) {
 					for(int i = 0; i < beagle_api::MAX_TECHNOLOGIES_AND_BANDS; ++i) {
 						auto lic = static_cast<beagle_api::TECHNOLOGIES_AND_BANDS>(i);

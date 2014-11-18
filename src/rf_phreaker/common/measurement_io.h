@@ -9,8 +9,9 @@
 #include <iomanip>
 #include <time.h>
 
-namespace rf_phreaker
-{
+namespace rf_phreaker {
+
+
 static std::string delimiter = "\t";
 static std::string spacer = " | ";
 
@@ -36,15 +37,13 @@ inline std::ostream& header(std::ostream &os, const hardware &t) {
 	return os;
 }
 
-inline std::ostream& operator<<(std::ostream &os, const hardware &t)
-{
-	os << t.scanner_id_ << delimiter;
+inline std::ostream& operator<<(std::ostream &os, const hardware &t) {
+	os << t.serial_ << delimiter;
 
 	for(const auto &d : t.frequency_paths_)
 		os << d.low_freq_ << "-" << d.high_freq_ << spacer;
 
-	switch(t.device_communication_)
-	{
+	switch(t.device_communication_) {
 	case USB_HI_SPEED:
 		os << "USB_HI_SPEED" << delimiter;
 		break;
@@ -55,7 +54,7 @@ inline std::ostream& operator<<(std::ostream &os, const hardware &t)
 	default:
 		os << "UNKNOWN_SPEED" << delimiter;
 	}
-	
+
 	char mbstr[100];
 	std::strftime(mbstr, sizeof(mbstr), "%A %c", std::localtime(&t.rf_calibration_date_));
 	os << mbstr << delimiter; //std::put_time(t1, "%Y-%m-%d %X") << "\n";
@@ -84,8 +83,8 @@ inline std::ostream& header(std::ostream &os, const gps &t) {
 	return os;
 }
 
-inline std::ostream& operator<<(std::ostream &os, const gps &t){
-	os << t.scanner_id_ << delimiter
+inline std::ostream& operator<<(std::ostream &os, const gps &t) {
+	os << t.serial_ << delimiter
 		<< (t.lock_ ? "TRUE" : "FALSE") << delimiter
 		<< t.coordinated_universal_time_ << delimiter
 		<< t.visible_satellites_ << delimiter
@@ -126,12 +125,11 @@ inline std::ostream& header(std::ostream &os, const umts_data &t) {
 		<< "cpich" << delimiter
 		<< "ecio" << delimiter
 		<< "rscp" << delimiter;
-		layer_3_information::header(os, t.layer_3_);
+	layer_3_information::header(os, t.layer_3_);
 	return os;
 }
 
-inline std::ostream& operator<<(std::ostream &os, const umts_data &t)
-{
+inline std::ostream& operator<<(std::ostream &os, const umts_data &t) {
 	os << static_cast<basic_data>(t) << delimiter
 		<< t.uarfcn_ << delimiter
 		<< to_string(t.operating_band_) << delimiter
@@ -163,8 +161,7 @@ inline std::ostream& header(std::ostream &os, const lte_data &t) {
 	return os;
 }
 
-inline std::ostream& operator<<(std::ostream &os, const lte_data &t)
-{
+inline std::ostream& operator<<(std::ostream &os, const lte_data &t) {
 	os << static_cast<basic_data>(t) << delimiter
 		<< t.earfcn_ << delimiter
 		<< to_string(t.operating_band_) << delimiter

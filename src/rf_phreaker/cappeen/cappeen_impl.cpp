@@ -277,7 +277,7 @@ long cappeen_impl::close_unit(const char *serial, unsigned int buf_size)
 			processing_graph_->cancel_and_wait();
 
 		std::string str_serial(serial, buf_size);
-		auto current_scanner_id = scanner_->get_scanner().get()->get_hardware().scanner_id_;
+		auto current_scanner_id = scanner_->get_scanner().get()->get_hardware().serial_;
 		if(current_scanner_id != serial)
 			throw cappeen_api_error("Unit (" + str_serial + ") was not found.", COMMNOTFOUND);
 

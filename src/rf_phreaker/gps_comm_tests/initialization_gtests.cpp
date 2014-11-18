@@ -15,7 +15,7 @@
 using namespace rf_phreaker::gps_comm;
 
 inline std::ostream& operator<<(std::ostream &os, const rf_phreaker::gps &t) {
-	os << t.scanner_id_ << "\t"
+	os << t.serial_ << "\t"
 		<< (t.lock_ ? "TRUE" : "FALSE") << "\t"
 		<< t.coordinated_universal_time_ << "\t"
 		<< t.visible_satellites_ << "\t"

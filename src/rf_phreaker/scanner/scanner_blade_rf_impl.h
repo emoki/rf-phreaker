@@ -55,7 +55,7 @@ public:
 		default:
 			hw.device_communication_ = UNKNOWN_SPEED;
 		}
-		hw.scanner_id_ = serial();
+		hw.serial_ = serial();
 		hw.frequency_correction_calibration_date_ = get_frequency_correction_date();
 		hw.rf_calibration_date_ = eeprom_.cal_.rf_board_calibration_date_;
 		
