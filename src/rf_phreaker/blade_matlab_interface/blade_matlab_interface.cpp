@@ -85,7 +85,7 @@ int list_blade_devices(int8_t *device_list, int list_size)
 int open_first_blade_device()
 {
 	try {
-		cali.release();
+		cali.reset();
 		auto devices = controller.list_available_scanners();
 		if(devices.size() && (*devices.begin())->id() == "")
 			devices = controller.list_available_scanners();
@@ -112,7 +112,7 @@ int open_first_blade_device()
 int open_blade_device(const char *serial)
 {
 	try {
-		cali.release();
+		cali.reset();
 		controller.open_scanner(serial);
 		controller.do_initial_scanner_config();
 		return matlab_interface_no_error;
@@ -130,7 +130,7 @@ int open_blade_device(const char *serial)
 int close_blade_device()
 {
 	try {
-		cali.release();
+		cali.reset();
 		controller.close_scanner();
 		return matlab_interface_no_error;
 	}
@@ -374,7 +374,7 @@ int write_calibration(const int8_t *nuand_calibration_filename, const int8_t *rf
 		check_null(rf_board_calibration_filename);
 		check_null(switch_setting_filename);
 
-		cali.release();
+		cali.reset();
 
 		calibration cal;
 		cal.read_nuand_calibration_file(std::string((char*)nuand_calibration_filename));

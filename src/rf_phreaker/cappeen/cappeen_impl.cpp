@@ -21,13 +21,13 @@ cappeen_impl::~cappeen_impl()
 {
 	try {
 		// Do not stop graphs as this will cause an access volation in std::mutex.
-		delegate_.release();
-		scanner_.release();
-		data_output_.release();
-		processing_graph_.release();
-		gps_graph_.release();
-		frequency_correction_graph_.release();
-		logger_.release();
+		delegate_.reset();
+		scanner_.reset();
+		data_output_.reset();
+		processing_graph_.reset();
+		gps_graph_.reset();
+		frequency_correction_graph_.reset();
+		logger_.reset();
 	}
 	catch(...) {}
 }
@@ -56,24 +56,24 @@ long cappeen_impl::initialize(beagle_api::beagle_delegate *del)
 			logger_->change_logging_level(config_.log_level_);
 
 		// Release all components before changing delegate.
-		delegate_.release();
-		scanner_.release();
-		data_output_.release();
+		delegate_.reset();
+		scanner_.reset();
+		data_output_.reset();
 		if(processing_graph_) {
 			LOG(LDEBUG) << "Found processing graph on heap.  Sending cancel request and releasing it.";
 			processing_graph_->cancel_and_wait();
-			processing_graph_.release();
+			processing_graph_.reset();
 		}
 		if(gps_graph_) {
 			LOG(LDEBUG) << "Found gps graph on heap.  Sending cancel request and releasing it.";
 			gps_graph_->cancel_and_wait();
-			gps_graph_.release();
+			gps_graph_.reset();
 		}
 
 		if(frequency_correction_graph_) {
 			LOG(LDEBUG) << "Found frequency correction graph on heap.  Sending cancel request and releasing it.";
 			frequency_correction_graph_->cancel_and_wait();
-			frequency_correction_graph_.release();
+			frequency_correction_graph_.reset();
 		}
 
 
@@ -151,12 +151,12 @@ long cappeen_impl::clean_up()
 			LOG(LVERBOSE) << "Waiting for frequency correction graph...";
 			frequency_correction_graph_->cancel_and_wait();
 		}
-		delegate_.release();
-		scanner_.release();
-		data_output_.release();
-		processing_graph_.release();
-		gps_graph_.release();
-		frequency_correction_graph_.release();
+		delegate_.reset();
+		scanner_.reset();
+		data_output_.reset();
+		processing_graph_.reset();
+		gps_graph_.reset();
+		frequency_correction_graph_.reset();
 		LOG(LINFO) << "Cleaned up successfully.";
 	}
 	catch(const rf_phreaker::rf_phreaker_error &err) {
@@ -173,7 +173,7 @@ long cappeen_impl::clean_up()
 	}
 
 	try {
-		logger_.release();
+		logger_.reset();
 	}
 	catch(...) {}
 	return status;
