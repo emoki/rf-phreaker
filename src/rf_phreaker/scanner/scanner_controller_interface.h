@@ -38,6 +38,8 @@ public:
 	virtual std::future<rf_phreaker::gps> get_gps_data() = 0;
 
 	virtual std::future<measurement_info> get_rf_data(frequency_type freq, time_type time_ns, bandwidth_type bandwidth, frequency_type sampling_rate = 0) = 0;
+
+	virtual std::future<measurement_info> get_rf_data(frequency_type freq, time_type time_ns, bandwidth_type bandwidth, gain_type &gain, frequency_type sampling_rate = 0) = 0;
 };
 
 
