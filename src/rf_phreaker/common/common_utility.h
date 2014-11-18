@@ -63,6 +63,11 @@ inline frequency_type round_to_nearest(num f) {
 	return static_cast<frequency_type>((f + nearest / 2.0) / nearest * nearest);
 }
 
+inline void copy_serial(const std::string &serial, char *s, size_t size) {
+	memset(s, 0, size);
+	memcpy(s, serial.c_str(), serial.size() > size ? size : serial.size());
+}
+
 inline int convert_to_samples(time_type time_ns, frequency_type actual_sampling_rate_used)
 {
 	return static_cast<int>(time_ns / 1e9 * actual_sampling_rate_used);
