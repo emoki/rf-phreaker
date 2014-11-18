@@ -15,8 +15,12 @@ public:
 		: handler_(g2::LogWorker::createWithDefaultLogger(filename, dir)) {
 		g2::initializeLogging(handler_.worker.get());
 	}
-	void release()
-	{
+
+	~logger() {
+		shutdown();
+	}
+
+	void shutdown() {
 		g2::internal::shutDownLoggingForActiveOnly(handler_.worker.get());
 	}
 
