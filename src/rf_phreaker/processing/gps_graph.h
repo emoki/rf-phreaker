@@ -17,7 +17,15 @@ public:
 	gps_graph() 
 	{}
 
-	~gps_graph() {}
+	~gps_graph() {
+		try {
+			if(graph_) {
+				graph_->root_task()->cancel_group_execution();
+				graph_->wait_for_all();
+			}
+		}
+		catch(...) {}
+	}
 
 	void start(rf_phreaker::scanner::scanner_controller_interface *sc, data_output_async *out, const settings &config)
 	{
