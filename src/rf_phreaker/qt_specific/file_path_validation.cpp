@@ -8,6 +8,7 @@
 namespace rf_phreaker {
 
 std::string file_path_validation::get_writable_file_path() {
+	qt_init::init();
 	auto paths = QStandardPaths::standardLocations(QStandardPaths::DataLocation);
 	if(paths.empty()) {
 		throw rf_phreaker::file_error("Unable to find writable path.");
