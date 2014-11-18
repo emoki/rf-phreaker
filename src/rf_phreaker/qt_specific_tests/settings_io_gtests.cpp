@@ -238,7 +238,7 @@ TEST(QtSpecific, TestSettingsIO)
 	set_io.read(set);
 	set_io.write(set);
 }
-#include "QtCore\qsettings.h"
+
 TEST(QtSpecific, TestLocation) {
 	using namespace rf_phreaker;
 
