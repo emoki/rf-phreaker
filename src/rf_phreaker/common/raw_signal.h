@@ -84,6 +84,8 @@ public:
 
 	void frequency(rf_phreaker::frequency_type f) { frequency_ = f; }
 
+	typedef ipp_32fc_array::data_type_ sample_type;
+
 	friend inline std::ostream& operator<<(std::ostream &os, const rf_phreaker::raw_signal &t);
 	friend inline std::istream& operator>>(std::istream &os, rf_phreaker::raw_signal &t);
 
