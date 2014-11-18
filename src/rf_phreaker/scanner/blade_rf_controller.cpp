@@ -189,6 +189,8 @@ void blade_rf_controller::close_scanner()
 	if(comm_blade_rf_.get()) {
 		bladerf_close(comm_blade_rf_->blade_rf());
 		comm_blade_rf_.reset();
+		scanner_blade_rf_.reset();
+		scanner_.reset();
 	}
 }
 
