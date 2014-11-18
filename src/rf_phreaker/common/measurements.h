@@ -44,6 +44,12 @@ namespace rf_phreaker {
 		int32_t status_flags_;
 	};
 
+	struct gsm_data : public basic_data {
+		channel_type arfcn_;
+		operating_band operating_band_;
+		double ctoi_;
+	};
+
 	struct umts_data : public basic_data
 	{
 		channel_type uarfcn_;
