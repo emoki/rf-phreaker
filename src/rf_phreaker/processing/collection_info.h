@@ -16,6 +16,8 @@ typedef std::vector<collection_info> collection_info_group_type;
 
 void initialize_collection_info_defaults(const settings &config);
 
+collection_info create_tech_collection_info(rf_phreaker::specifier tech, frequency_type freq, operating_band band);
+
 class collection_info
 {
 public:
@@ -47,10 +49,20 @@ public:
 	operating_band operating_band_;
 };
 
+class sweep_collection_info : public collection_info
+{
+public:
+	sweep_collection_info(frequency_type freq, operating_band band = OPERATING_BAND_UNKNOWN)
+		: collection_info(freq, time_ns__, bandwidth__, sampling_rate__, band) {}
+	static time_type time_ns__;
+	static bandwidth_type bandwidth__;
+	static frequency_type sampling_rate__;
+};
+
 class umts_sweep_collection_info : public collection_info
 {
 public:
-	umts_sweep_collection_info(frequency_type freq, operating_band band = OPERATING_BAND_UNKNOWN) 
+	umts_sweep_collection_info(frequency_type freq, operating_band band = OPERATING_BAND_UNKNOWN)
 		: collection_info(freq, time_ns__, bandwidth__, sampling_rate__, band) {}
 	static time_type time_ns__;
 	static bandwidth_type bandwidth__;
