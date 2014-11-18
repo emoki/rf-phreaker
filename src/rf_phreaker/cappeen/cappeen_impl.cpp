@@ -20,14 +20,13 @@ cappeen_impl::cappeen_impl()
 cappeen_impl::~cappeen_impl()
 {
 	try {
-		// Do not stop graphs as this will cause an access volation in std::mutex.
+		logger_.reset();
+		gps_graph_.reset();
+		processing_graph_.reset();
+		frequency_correction_graph_.reset();
+		data_output_.reset();
 		delegate_.reset();
 		scanner_.reset();
-		data_output_.reset();
-		processing_graph_.reset();
-		gps_graph_.reset();
-		frequency_correction_graph_.reset();
-		logger_.reset();
 	}
 	catch(...) {}
 }
@@ -152,12 +151,12 @@ long cappeen_impl::clean_up()
 			LOG(LVERBOSE) << "Waiting for frequency correction graph...";
 			frequency_correction_graph_->cancel_and_wait();
 		}
+		gps_graph_.reset();
+		processing_graph_.reset();
+		frequency_correction_graph_.reset();
+		data_output_.reset();
 		delegate_.reset();
 		scanner_.reset();
-		data_output_.reset();
-		processing_graph_.reset();
-		gps_graph_.reset();
-		frequency_correction_graph_.reset();
 		LOG(LINFO) << "Cleaned up successfully.";
 	}
 	catch(const rf_phreaker::rf_phreaker_error &err) {
