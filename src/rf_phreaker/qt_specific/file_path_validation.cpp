@@ -12,7 +12,7 @@ std::string file_path_validation::get_writable_file_path() {
 	if(paths.empty()) {
 		throw rf_phreaker::file_error("Unable to find writable path.");
 	}
-	return paths.first().toStdString();
+	return paths.first().toStdString() + "/";
 }
 
 bool file_path_validation::is_path_valid(const std::string &path) {
