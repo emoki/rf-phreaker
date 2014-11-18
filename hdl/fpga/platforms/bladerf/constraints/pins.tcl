@@ -23,6 +23,7 @@ set_instance_assignment -name IO_STANDARD "1.8 V" -to exp_gpio[4]
 set_instance_assignment -name IO_STANDARD "1.8 V" -to exp_gpio[3]
 set_instance_assignment -name IO_STANDARD "1.8 V" -to exp_gpio[2]
 set_instance_assignment -name IO_STANDARD "1.8 V" -to exp_present
+set_instance_assignment -name IO_STANDARD "1.8 V" -to exp_1wire
 set_instance_assignment -name IO_STANDARD "1.8 V" -to exp_spi_cs
 set_instance_assignment -name IO_STANDARD "1.8 V" -to exp_spi_clock
 set_instance_assignment -name IO_STANDARD "1.8 V" -to exp_spi_miso
@@ -139,6 +140,7 @@ set_instance_assignment -name IO_STANDARD "1.8 V" -to si_sda
 set_instance_assignment -name IO_STANDARD "1.8 V" -to mini_exp1
 set_instance_assignment -name IO_STANDARD "1.8 V" -to mini_exp2
 set_instance_assignment -name IO_STANDARD "1.8 V" -to ref_1pps
+set_instance_assignment -name IO_STANDARD "1.8 V" -to gps_ref_1pps
 set_instance_assignment -name IO_STANDARD "1.8 V" -to ref_sma_clock
 set_instance_assignment -name IO_STANDARD "1.8 V" -to si_scl
 set_instance_assignment -name IO_STANDARD "1.8 V" -to fx3_pclk
@@ -260,6 +262,7 @@ set_location_assignment PIN_F15 -to exp_gpio[14]
 set_location_assignment PIN_D15 -to exp_gpio[15]
 set_location_assignment PIN_A13 -to exp_gpio[16]
 set_location_assignment PIN_C13 -to exp_present
+set_location_assignment PIN_B20 -to exp_1wire
 set_location_assignment PIN_G1 -to fx3_pclk
 set_location_assignment PIN_AA15 -to lms_sclk
 set_location_assignment PIN_D13 -to exp_spi_cs
@@ -273,7 +276,7 @@ set_location_assignment PIN_AB7 -to led[2]
 set_location_assignment PIN_AA21 -to lms_tx_v[1]
 set_location_assignment PIN_J3 -to fx3_ctl[9]
 set_location_assignment PIN_G22 -to c4_tx_clock
-set_location_assignment PIN_A12 -to exp_clock_in
+set_location_assignment EDGE_BOTTOM -to exp_clock_in
 set_location_assignment PIN_A14 -to exp_gpio[25]
 set_location_assignment PIN_A15 -to exp_gpio[26]
 set_location_assignment PIN_A16 -to exp_gpio[27]
@@ -281,7 +284,7 @@ set_location_assignment PIN_A17 -to exp_gpio[28]
 set_location_assignment PIN_A18 -to exp_gpio[32]
 set_location_assignment PIN_A19 -to exp_gpio[31]
 set_location_assignment PIN_A20 -to exp_gpio[30]
-set_location_assignment PIN_B20 -to exp_gpio[29]
+set_location_assignment EDGE_BOTTOM -to exp_gpio[29]
 set_location_assignment PIN_B14 -to exp_gpio[17]
 set_location_assignment PIN_B15 -to exp_gpio[18]
 set_location_assignment PIN_B16 -to exp_gpio[20]
@@ -294,6 +297,7 @@ set_location_assignment PIN_AB10 -to led[3]
 set_location_assignment PIN_AB8 -to mini_exp1
 set_location_assignment PIN_AB9 -to mini_exp2
 set_location_assignment PIN_AB11 -to ref_1pps
+set_location_assignment PIN_A12 -to gps_ref_1pps
 set_location_assignment PIN_AB12 -to ref_sma_clock
 set_location_assignment PIN_A6 -to si_scl
 set_location_assignment PIN_A7 -to si_sda

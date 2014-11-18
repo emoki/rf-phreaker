@@ -703,6 +703,9 @@ int main()
                             	}
 								cmd_ptr->data = (gps_calibration_counter_cached >> (cmd_ptr->addr * 8)) & 0xff;
                             }
+                            else if (device == GDEV_XB_GPS_CALIBRATION_START) {
+								COLLECT_BYTES(gps_calibration_start(tmpvar));
+							}
                         } else if (isWrite) {
                             if (device == GDEV_TIME_TIMER) {
                                 IOWR_8DIRECT(TIME_TAMER, cmd_ptr->addr, 1) ;
@@ -733,9 +736,6 @@ int main()
                             } else if (device == GDEV_IQ_CORR_TX_PHASE) {
                                 COLLECT_BYTES(SPLIT_WRITE(IQ_CORR_TX_PHASE_GAIN_BASE, 16));
                             }
-                            else if (device == GDEV_XB_GPS_CALIBRATION_START) {
-								COLLECT_BYTES(gps_calibration_start(tmpvar));
-							}
 
                         } else {
                             cmd_ptr->addr = 0;

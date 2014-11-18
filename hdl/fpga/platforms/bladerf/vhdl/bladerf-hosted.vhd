@@ -782,7 +782,7 @@ begin
       port map (
         clock           =>  c4_clock,											/* Directly tied to the clock from the vcxto. 34.4 mhz? Considered 80 mhz from nios... */
         reset           =>  pps_calibration_config(7),
-		  pps             =>  exp_clock_in,									   /* GPS pps calibration input - 1 sec pulse */
+		  pps             =>  gps_ref_1pps,									   /* GPS pps calibration input - 1 sec pulse */
 		  sample_size     =>  pps_calibration_config(6 downto 0),		/* 7 bit sample size setting */
 	 
 		  clock_count     =>  pps_calibration_clock_count		         /* The clock counts over the sample_size period */
@@ -908,9 +908,10 @@ begin
         end if ;
     end process ;
 
-    led(1) <= led1_blink        when nios_gpio(15) = '0' else not nios_gpio(12);
+    led(1) <= led1_blink        when nios_gpio(15) = '0' else not nios_gpio(12);			-- LED2
     led(2) <= tx_underflow_led  when nios_gpio(15) = '0' else not nios_gpio(13);
-    led(3) <= rx_overflow_led   when nios_gpio(15) = '0' else not nios_gpio(14);
+    --led(3) <= rx_overflow_led   when nios_gpio(15) = '0' else not nios_gpio(14);
+	 led(3) <= not gps_ref_1pps   when nios_gpio(15) = '0' else not nios_gpio(14);				--LED3
 
 --    toggle_led2 : process(rx_clock)
 --        variable count : natural range 0 to 38_400_00 := 38_400_00 ;
