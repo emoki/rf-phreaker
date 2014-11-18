@@ -146,6 +146,13 @@ enum operating_band
 	LAST_LTE_OPERATING_BAND = LTE_OPERATING_BAND_44,
 };
 
+struct channel_freq
+{
+	channel_type channel_;
+	frequency_type freq_;
+	operating_band band_;
+};
+
 
 }
 
