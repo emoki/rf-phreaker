@@ -17,6 +17,7 @@ static const std::string umts_sweep_collection_group_key = "umts_sweep_collectio
 static const std::string umts_layer_3_collection_group_key = "umts_layer_3_collection";
 static const std::string lte_sweep_collection_group_key = "lte_sweep_collection";
 static const std::string lte_layer_3_collection_group_key = "lte_layer_3_collection";
+static const std::string sweep_collection_group_key = "sweep_collection";
 static const std::string umts_decode_thresholds_group_key = "umts_decode_thresholds";
 static const std::string lte_decode_thresholds_group_key = "lte_decode_thresholds";
 static const std::string umts_sweep_general_group_key = "umts_sweep_general";
@@ -31,6 +32,7 @@ static const std::string umts_sweep_output_key = "umts_sweep_output";
 static const std::string umts_layer_3_output_key = "umts_layer_3_output";
 static const std::string lte_sweep_output_key = "lte_sweep_output";
 static const std::string lte_layer_3_output_key = "lte_layer_3_output";
+static const std::string sweep_output_key = "sweep_output";
 static const std::string output_raw_packets_key = "output_raw_packets";
 static const std::string log_level_key = "log_level";
 static const std::string sampling_rate_key = "sampling_rate";
@@ -55,6 +57,8 @@ static const std::string blade_rx_sync_num_transfers_key = "rx_sync_num_transfer
 static const std::string blade_rx_sync_timeout_key = "rx_sync_num_timeout";
 static const std::string output_directory_key = "output_directory";
 static const std::string output_in_binary_key = "output_in_binary";
+static const std::string simultaneous_collection_key = "simultaneous_collection";
+
 class settings_io {
 public:
 	settings_io(const std::string &application_name, const std::string &organization);

@@ -20,6 +20,7 @@ TEST(QtSpecific, TestSettingsIO)
 	EXPECT_EQ(use_rf_board_adjustment_default, set.use_rf_board_adjustment_);
 	//EXPECT_EQ(output_directory_default, set.output_directory_);  // Manually verify.
 	EXPECT_EQ(output_in_binary_default, set.output_in_binary_);
+	EXPECT_EQ(simultaneous_collection_default, set.simultaneous_collection_);
 
 	EXPECT_EQ(settings_output_default, set.standard_output_.scanner_);
 	EXPECT_EQ(settings_output_default, set.standard_output_.gps_);
@@ -57,6 +58,10 @@ TEST(QtSpecific, TestSettingsIO)
 	EXPECT_EQ(settings_sampling_rate_default, set.lte_layer_3_collection_.sampling_rate_);
 	EXPECT_EQ(settings_bandwidth_default, set.lte_layer_3_collection_.bandwidth_);
 	EXPECT_EQ(settings_collection_time_default, set.lte_layer_3_collection_.collection_time_);
+
+	EXPECT_EQ(settings_sampling_rate_default, set.sweep_collection_.sampling_rate_);
+	EXPECT_EQ(settings_bandwidth_default, set.sweep_collection_.bandwidth_);
+	EXPECT_EQ(settings_collection_time_default, set.sweep_collection_.collection_time_);
 
 	EXPECT_EQ(settings_layer_3_max_update_threshold_default, set.umts_decode_layer_3_.max_update_threshold_);
 	EXPECT_EQ(settings_layer_3_min_collection_round_default, set.umts_decode_layer_3_.minimum_collection_round_);
@@ -96,6 +101,7 @@ TEST(QtSpecific, TestSettingsIO)
 	set.use_rf_board_adjustment_ = true;
 	set.output_directory_ = "c:\\";
 	set.output_in_binary_ = false;
+	set.simultaneous_collection_ = false;
 	set.standard_output_.scanner_ = true;
 	set.standard_output_.gps_ = true;
 	set.standard_output_.umts_sweep_ = true;
@@ -126,6 +132,9 @@ TEST(QtSpecific, TestSettingsIO)
 	set.lte_layer_3_collection_.sampling_rate_ = tmp++;
 	set.lte_layer_3_collection_.bandwidth_ = tmp++;
 	set.lte_layer_3_collection_.collection_time_ = tmp++;
+	set.sweep_collection_.sampling_rate_ = tmp++;
+	set.sweep_collection_.bandwidth_ = tmp++;
+	set.sweep_collection_.collection_time_ = tmp++;
 	set.umts_decode_layer_3_.max_update_threshold_ = tmp++;
 	set.umts_decode_layer_3_.minimum_collection_round_= tmp++;
 	set.umts_decode_layer_3_.decode_threshold_ = tmp++;
@@ -190,6 +199,10 @@ TEST(QtSpecific, TestSettingsIO)
 	EXPECT_EQ(set.lte_layer_3_collection_.bandwidth_, set2.lte_layer_3_collection_.bandwidth_);
 	EXPECT_EQ(set.lte_layer_3_collection_.collection_time_, set2.lte_layer_3_collection_.collection_time_);
 
+	EXPECT_EQ(set.sweep_collection_.sampling_rate_, set2.sweep_collection_.sampling_rate_);
+	EXPECT_EQ(set.sweep_collection_.bandwidth_, set2.sweep_collection_.bandwidth_);
+	EXPECT_EQ(set.sweep_collection_.collection_time_, set2.sweep_collection_.collection_time_);
+
 	EXPECT_EQ(set.umts_decode_layer_3_.max_update_threshold_, set2.umts_decode_layer_3_.max_update_threshold_);
 	EXPECT_EQ(set.umts_decode_layer_3_.minimum_collection_round_, set2.umts_decode_layer_3_.minimum_collection_round_);
 	EXPECT_EQ(set.umts_decode_layer_3_.decode_threshold_, set2.umts_decode_layer_3_.decode_threshold_);
@@ -225,75 +238,14 @@ TEST(QtSpecific, TestSettingsIO)
 	set_io.read(set);
 	set_io.write(set);
 }
-
-TEST(QtSpecific, WriteDefaultSettings)
-{
+#include "QtCore\qsettings.h"
+TEST(QtSpecific, TestLocation) {
 	using namespace rf_phreaker;
 
 	settings set;
-	//settings_io set_io("rf_phreaker_graph_test", "cappeen");
-	settings_io set_io("cappeen_api.ini");
+	settings_io set_io("cappeen_api", "cappeen");
 
-	set.log_level_ = 3;
-	set.gps_collection_period_ms_ = 800;
-	set.num_items_in_flight_ = 0;
-	set.use_rf_board_adjustment_ = true;
-	set.output_directory_ = "";
-	set.output_in_binary_ = true;
+	set_io.read(set);
 
-	set.standard_output_.scanner_ = true;
-	set.standard_output_.gps_ = true;
-	set.standard_output_.umts_sweep_ = true;
-	set.standard_output_.umts_layer_3_ = true;
-	set.standard_output_.lte_sweep_ = true;
-	set.standard_output_.lte_layer_3_ = true;
-
-	set.signal_slots_.scanner_ = true;
-	set.signal_slots_.gps_ = true;
-	set.signal_slots_.umts_sweep_ = true;
-	set.signal_slots_.umts_layer_3_ = true;
-	set.signal_slots_.lte_sweep_ = true;
-	set.signal_slots_.lte_layer_3_ = true;
-
-	set.umts_sweep_collection_.sampling_rate_ = khz(4875);
-	set.umts_sweep_collection_.bandwidth_ = mhz(5);
-	set.umts_sweep_collection_.collection_time_ = milli_to_nano(32);
-
-	set.umts_layer_3_collection_.sampling_rate_ = khz(4875);
-	set.umts_layer_3_collection_.bandwidth_ = mhz(5);
-	set.umts_layer_3_collection_.collection_time_ = milli_to_nano(170);
-
-	set.umts_decode_layer_3_.max_update_threshold_ = 11000;
-	set.umts_decode_layer_3_.minimum_collection_round_ = 5;
-	set.umts_decode_layer_3_.decode_threshold_ = -13;
-	set.umts_decode_layer_3_.decode_minimum_threshold_ = -25;
-
-	set.umts_sweep_general_.sensitivity_ = -25;
-	set.umts_sweep_general_.full_scan_interval_ = 1;
-	set.umts_sweep_general_.num_coherent_slots_= 8;
-
-	set.umts_layer_3_general_.sensitivity_ = -28;
-	set.umts_layer_3_general_.full_scan_interval_ = 110;
-	set.umts_layer_3_general_.num_coherent_slots_ = 14;
-
-	set.lte_sweep_collection_.sampling_rate_ = khz(4875);
-	set.lte_sweep_collection_.bandwidth_ = khz(2500);
-	set.lte_sweep_collection_.collection_time_ = milli_to_nano(42);
-
-	set.lte_layer_3_collection_.sampling_rate_ = khz(4875);
-	set.lte_layer_3_collection_.bandwidth_ = khz(2500);
-	set.lte_layer_3_collection_.collection_time_ = milli_to_nano(42);
-
-	set.lte_decode_layer_3_.max_update_threshold_ = 110;
-	set.lte_decode_layer_3_.minimum_collection_round_ = 5;
-	set.lte_decode_layer_3_.decode_threshold_ = -13;
-	set.lte_decode_layer_3_.decode_minimum_threshold_ = -25;
-
-	set.frequency_correction_settings_.initial_frequency_correction_range_start_ = khz(-2);
-	set.frequency_correction_settings_.initial_frequency_correction_range_end_ = khz(2);
-	set.frequency_correction_settings_.general_settings_.full_scan_interval_ = 1;
-	set.frequency_correction_settings_.general_settings_.num_coherent_slots_ = 2;
-	set.frequency_correction_settings_.general_settings_.sensitivity_ = -23;
-
-	set_io.write(set);
+	int i = 0;
 }

@@ -7,7 +7,7 @@
 using namespace rf_phreaker;
 
 settings_io::settings_io(const std::string &application_name, const std::string &organization)
-	: qsettings_(new QSettings(QSettings::IniFormat, QSettings::SystemScope, organization.c_str(), application_name.c_str())) {}
+	: qsettings_(new QSettings(QSettings::IniFormat, QSettings::UserScope, organization.c_str(), application_name.c_str())) {}
 
 settings_io::settings_io(const std::string &filename)
 	: qsettings_(new QSettings(filename.c_str(), QSettings::IniFormat)) {}
@@ -27,7 +27,7 @@ void settings_io::read(settings &settings) {
 	}
 
 	settings.output_in_binary_ = qsettings_->value(output_in_binary_key.c_str(), output_in_binary_default).toBool();
-
+	settings.simultaneous_collection_ = qsettings_->value(simultaneous_collection_key.c_str(), simultaneous_collection_default).toBool();
 
 	read(settings.standard_output_, standard_output_group_key);
 	read(settings.signal_slots_, signal_slot_output_group_key);
@@ -38,6 +38,7 @@ void settings_io::read(settings &settings) {
 	read(settings.umts_layer_3_collection_, umts_layer_3_collection_group_key);
 	read(settings.lte_sweep_collection_, lte_sweep_collection_group_key);
 	read(settings.lte_layer_3_collection_, lte_layer_3_collection_group_key);
+	read(settings.sweep_collection_, sweep_collection_group_key);
 
 	read(settings.umts_decode_layer_3_, umts_decode_thresholds_group_key);
 	read(settings.lte_decode_layer_3_, lte_decode_thresholds_group_key);
@@ -58,6 +59,7 @@ void settings_io::read(output_settings &settings, const std::string &group_key) 
 	settings.umts_layer_3_ = qsettings_->value(umts_layer_3_output_key.c_str(), settings_output_default).toBool();
 	settings.lte_sweep_ = qsettings_->value(lte_sweep_output_key.c_str(), settings_output_default).toBool();
 	settings.lte_layer_3_ = qsettings_->value(lte_layer_3_output_key.c_str(), settings_output_default).toBool();
+	settings.sweep_= qsettings_->value(sweep_output_key.c_str(), settings_output_default).toBool();
 	qsettings_->endGroup();
 
 }
@@ -114,7 +116,8 @@ void settings_io::write(const settings &settings) {
 	qsettings_->setValue(use_rf_board_adjustment_key.c_str(), settings.use_rf_board_adjustment_);
 	qsettings_->setValue(output_directory_key.c_str(), settings.output_directory_.c_str());
 	qsettings_->setValue(output_in_binary_key.c_str(), settings.output_in_binary_);
-
+	qsettings_->setValue(simultaneous_collection_key.c_str(), settings.simultaneous_collection_);
+	
 	write(settings.standard_output_, standard_output_group_key);
 	write(settings.signal_slots_, signal_slot_output_group_key);
 	write(settings.packet_output_, packet_output_group_key);
@@ -124,6 +127,7 @@ void settings_io::write(const settings &settings) {
 	write(settings.umts_layer_3_collection_, umts_layer_3_collection_group_key);
 	write(settings.lte_sweep_collection_, lte_sweep_collection_group_key);
 	write(settings.lte_layer_3_collection_, lte_layer_3_collection_group_key);
+	write(settings.sweep_collection_, sweep_collection_group_key);
 
 	write(settings.umts_decode_layer_3_, umts_decode_thresholds_group_key);
 	write(settings.lte_decode_layer_3_, lte_decode_thresholds_group_key);
@@ -144,6 +148,7 @@ void settings_io::write(const output_settings &settings, const std::string &grou
 	qsettings_->setValue(umts_layer_3_output_key.c_str(), settings.umts_layer_3_);
 	qsettings_->setValue(lte_sweep_output_key.c_str(), settings.lte_sweep_);
 	qsettings_->setValue(lte_layer_3_output_key.c_str(), settings.lte_layer_3_);
+	qsettings_->setValue(sweep_output_key.c_str(), settings.sweep_);
 	qsettings_->endGroup();
 }
 

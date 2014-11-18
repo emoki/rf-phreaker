@@ -32,6 +32,7 @@ static const int blade_rx_sync_num_transfers_default = 4;
 static const int blade_rx_sync_timeout_default = 2000;
 static const std::string output_directory_default = "NULL";
 static const bool output_in_binary_default = true;
+static const bool simultaneous_collection_default = false;
 
 class output_settings {
 public:
@@ -41,6 +42,7 @@ public:
 	bool umts_layer_3_;
 	bool lte_sweep_;
 	bool lte_layer_3_;
+	bool sweep_;
 };
 
 class collection_settings {
@@ -101,6 +103,7 @@ public:
 	bool use_rf_board_adjustment_;
 	std::string output_directory_;
 	bool output_in_binary_;
+	bool simultaneous_collection_;
 
 	blade_settings blade_settings_;
 
@@ -113,6 +116,7 @@ public:
 	collection_settings umts_layer_3_collection_;
 	collection_settings lte_sweep_collection_;
 	collection_settings lte_layer_3_collection_;
+	collection_settings sweep_collection_;
 
 	layer_3_settings umts_decode_layer_3_;
 	layer_3_settings lte_decode_layer_3_;
