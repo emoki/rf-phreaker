@@ -41,7 +41,7 @@ public:
 		//output_debug_info(info);
 
 		// Output basic tech.
-		past_output_.push_back(io_->output_lte_sweep(convert_to_basic_data(*info.meas_, info.avg_rms_)));
+		past_output_.push_back(io_->output(convert_to_basic_data(*info.meas_, info.avg_rms_), std::vector<lte_data>()));
 
 		bool valid_lte = false;
 		for(auto &lte : info.processed_data_) {
@@ -167,10 +167,10 @@ public:
 				info.meas_->bandwidth(), info.meas_->get_operating_band()), LTE_LAYER_3_DECODE));
 		}
 		
+		std::vector<lte_data> lte;
+
 		if(!info.processed_data_.empty()) {
 			//output_debug_info(info);
-
-			std::vector<lte_data> lte;
 
 			auto decoded_bw = tracker_.find_decoded_bandwidth(info.meas_->frequency());
 				
@@ -184,8 +184,6 @@ public:
 			if(lte.size()) {
 				tracker_.update_measurements(info.processed_data_, info.meas_->frequency());
 			
-				past_output_.push_back(io_->output(lte));
-
 				if(decoded_bw != LteBandwidth_Unknown) {
 					auto sampling_rate = determine_sampling_rate(decoded_bw);
 
@@ -204,6 +202,8 @@ public:
 				}
 			}
 		}
+		past_output_.push_back(io_->output(std::move(lte), convert_to_basic_data(*info.meas_, info.avg_rms_)));
+
 		std::get<1>(out).try_put(tbb::flow::continue_msg());
 	}
 

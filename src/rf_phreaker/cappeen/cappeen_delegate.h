@@ -5,6 +5,7 @@
 #include "rf_phreaker/cappeen/rf_phreaker_wrappers.h"
 #include "rf_phreaker/cappeen/cappeen_license.h"
 #include "rf_phreaker/common/measurements.h"
+#include "rf_phreaker/common/common_utility.h"
 #include "rf_phreaker/common/exception_types.h"
 #include "rf_phreaker/common/log.h"
 #include "rf_phreaker/common/channel_conversion.h"
@@ -78,13 +79,13 @@ public:
 		LOG(LVERBOSE) << "Connecting gps.";
 		data_output->connect_gps(boost::bind(&cappeen_delegate::output_gps, this, _1)).get();
 		LOG(LVERBOSE) << "Connecting umts_sweep.";
-		data_output->connect_umts_sweep(boost::bind(&cappeen_delegate::output_umts_sweep, this, _1)).get();
+		data_output->connect_umts_sweep(boost::bind(&cappeen_delegate::output_umts_sweep, this, _1, _2)).get();
 		LOG(LVERBOSE) << "Connecting umts_layer_3.";
-		data_output->connect_umts_layer_3(boost::bind(&cappeen_delegate::output_umts_layer_3, this, _1)).get();
+		data_output->connect_umts_layer_3(boost::bind(&cappeen_delegate::output_umts_layer_3, this, _1, _2)).get();
 		LOG(LVERBOSE) << "Connecting lte_sweep.";
-		data_output->connect_lte_sweep(boost::bind(&cappeen_delegate::output_lte_sweep, this, _1)).get();
+		data_output->connect_lte_sweep(boost::bind(&cappeen_delegate::output_lte_sweep, this, _1, _2)).get();
 		LOG(LVERBOSE) << "Connecting lte_layer_3.";
-		data_output->connect_lte_layer_3(boost::bind(&cappeen_delegate::output_lte_layer_3, this, _1)).get();
+		data_output->connect_lte_layer_3(boost::bind(&cappeen_delegate::output_lte_layer_3, this, _1, _2)).get();
 
 		LOG(LVERBOSE) << "Creating log sinks...";
 		LOG(LVERBOSE) << "Connecting error.";
@@ -119,7 +120,7 @@ public:
 		delegate_->available_gps_info(beagle_id_, g);
 	}
 	
-	void output_umts_sweep(const basic_data &t)
+	void output_umts_sweep(const basic_data &t, const std::vector<umts_data> &)
 	{
 		beagle_api::umts_sweep_info a;
 		a.frequency_ = t.carrier_frequency_;
@@ -128,8 +129,10 @@ public:
 		delegate_->available_umts_sweep_info(beagle_id_, &a, 1);
 	}
 	
-	void output_umts_layer_3(const std::vector<umts_data> &t)
+	void output_umts_layer_3(const std::vector<umts_data> &t, const basic_data &)
 	{
+		if(t.empty()) return;
+		
 		std::vector<beagle_api::umts_sector_info> v(t.size());
 
 		// Determine total amount of inter_rat_bufs needed.
@@ -196,7 +199,7 @@ public:
 		delegate_->available_umts_sector_info(beagle_id_, &v[0], v.size());
 	}
 	
-	void output_lte_sweep(const basic_data &t)
+	void output_lte_sweep(const basic_data &t, const std::vector<lte_data> &)
 	{
 		beagle_api::lte_sweep_info a;
 		a.frequency_ = t.carrier_frequency_;
@@ -205,8 +208,10 @@ public:
 		delegate_->available_lte_sweep_info(beagle_id_, &a, 1);
 	}
 	
-	void output_lte_layer_3(const std::vector<lte_data> &t)
+	void output_lte_layer_3(const std::vector<lte_data> &t, const basic_data &)
 	{
+		if(t.empty()) return;
+
 		std::vector<beagle_api::lte_sector_info> v(t.size());
 		std::vector<lte_sib1_wrapper> sib1; sib1.reserve(t.size());;
 		std::vector<lte_sib3_wrapper> sib3; sib3.reserve(t.size());;

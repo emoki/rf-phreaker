@@ -24,7 +24,7 @@ public:
 		remove_completed_output();
 
 		// Output basic tech.
-		past_output_.push_back(io_->output_umts_sweep(convert_to_basic_data(*info.meas_, info.avg_rms_)));
+		past_output_.push_back(io_->output(convert_to_basic_data(*info.meas_, info.avg_rms_), std::vector<umts_data>()));
 
 		if(info.processed_data_.size()) {
 			// Add the freq to the layer_3_decoder.
@@ -70,15 +70,14 @@ public:
 			std::get<0>(out).try_put(remove_collection_info(umts_layer_3_collection_info(info.meas_->frequency(), info.meas_->get_operating_band()), UMTS_LAYER_3_DECODE));
 		}
 
+		std::vector<umts_data> umts;
+
 		if(!info.processed_data_.empty()) {
-			std::vector<umts_data> umts;
 
 			for(const auto &dat : info.processed_data_)
 				umts.push_back(convert_to_umts_data(*info.meas_, dat));
-
-			past_output_.push_back(io_->output(umts));
-
 		}
+		past_output_.push_back(io_->output(std::move(umts), convert_to_basic_data(*info.meas_, info.avg_rms_)));
 
 		std::get<1>(out).try_put(tbb::flow::continue_msg());
 	}

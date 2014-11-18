@@ -9,46 +9,31 @@
 
 namespace rf_phreaker { namespace processing {
 
-
-template<typename Data, typename Signal>
+template<typename Signal, typename MainData, typename... Args>
 class d_output
 {
 public:
 	d_output(bool output_to_signal = true, bool output_to_file = false, bool standard_output = false)
 		: output_to_signal_(output_to_signal)
-		, output_to_file_(output_to_file_)
+		, output_to_file_(output_to_file)
 		, output_to_standard_output_(standard_output) {}
 
 	d_output(typename Signal::slot_type &slot, bool output_to_signal = true, bool output_to_file = false, bool standard_output = false)
 		: output_to_signal_(output_to_signal)
-		, output_to_file_(output_to_file_)
+		, output_to_file_(output_to_file)
 		, output_to_standard_output_(standard_output) {
 		signal_.connect(slot);
 	}
 
-	void output(std::vector<Data> data) {
-		if(output_to_standard_output_) {
-			for(const auto &d : data)
-				std::cout << d << "\n";
-		}
-		if(output_to_file_) {
-			check_file_and_header();
-			for(const auto &d : data)
-				file_ << d << std::endl;
-		}
-		if(output_to_signal_)
-			signal_(data);
-	}
-
-	void output(Data data) {
+	void output(MainData data, Args... args) {
 		if(output_to_standard_output_)
-			std::cout << data << "\n";
+			output_to_std(data, is_vector<MainData>{});
 		if(output_to_file_) {
 			check_file_and_header();
-			file_ << data << std::endl;
+			output_to_file(data, is_vector<MainData>{});
 		}
 		if(output_to_signal_)
-			signal_(data);
+			signal_(data, args...);
 	}
 
 	void check_file_and_header() {
@@ -57,7 +42,7 @@ public:
 			if(!file_) {
 				LOG(LERROR) << "Error opening file: " << filename_ << ".  errno: " << std::strerror(errno);
 			}
-			header(file_, Data()) << std::endl;
+			header(file_, MainData()) << std::endl;
 		}
 	}
 
@@ -82,15 +67,29 @@ public:
 		output_to_signal_ = signal_output;
 	}
 
-	void append_filename(const std::string &filename) {
-		filename_ = file_base(Data()) + filename + ".txt";
-	}
-
 	void set_filename(const std::string &filename) {
 		filename_ = filename;
 	}
 
 private:
+	void output_to_std(const MainData &data, std::true_type) {
+		for(auto &i : data)
+			std::cout << i << std::endl;
+	}
+
+	void output_to_std(const MainData &data, std::false_type) {
+		std::cout << data << std::endl;
+	}
+
+	void output_to_file(const MainData &data, std::true_type) {
+		for(auto &i : data)
+			file_ << i << std::endl;
+	}
+
+	void output_to_file(const MainData &data, std::false_type) {
+		file_ << data << std::endl;
+	}
+
 	Signal signal_;
 	bool output_to_standard_output_;
 	bool output_to_file_;
@@ -99,16 +98,18 @@ private:
 	std::string filename_;
 };
 
+// This class consolidates the data output and using data_output_async we can serialize access to it.
 class data_output
 {
 public:
 	data_output()
-		: hardware_output_(std::make_shared<d_output<hardware, hardware_signal_type>>())
-		, gps_output_(std::make_shared<d_output<gps, gps_signal_type>>())
-		, umts_layer_3_output_(std::make_shared<d_output<umts_data, umts_signal_type>>())
-		, lte_layer_3_output_(std::make_shared<d_output<lte_data, lte_signal_type>>())
-		, umts_sweep_output_(std::make_shared<d_output<basic_data, basic_signal_type>>())
-		, lte_sweep_output_(std::make_shared<d_output<basic_data, basic_signal_type>>()) {
+		: hardware_output_(std::make_shared<hardware_output_type>())
+		, gps_output_(std::make_shared<gps_output_type>())
+		, umts_layer_3_output_(std::make_shared<umts_layer_3_output_type>())
+		, lte_layer_3_output_(std::make_shared<lte_layer_3_output_type>())
+		, umts_sweep_output_(std::make_shared<umts_sweep_output_type>())
+		, lte_sweep_output_(std::make_shared<lte_sweep_output_type>()) 
+		, sweep_output_(std::make_shared<sweep_output_type>()) {
 		auto time = static_timestamp_string();
 		hardware_output_->set_filename("scanner_" + time + ".txt");
 		gps_output_->set_filename("gps_" + time + ".txt");
@@ -116,6 +117,7 @@ public:
 		lte_layer_3_output_->set_filename("lte_layer_3_" + time + ".txt");
 		umts_sweep_output_->set_filename("umts_sweep_" + time + ".txt");
 		lte_sweep_output_->set_filename("lte_sweep_" + time + ".txt");
+		sweep_output_->set_filename("sweep_" + time + ".txt");
 	}
 
 	data_output(data_output &out)
@@ -124,15 +126,9 @@ public:
 		, umts_layer_3_output_(out.umts_layer_3_output_)
 		, lte_layer_3_output_(out.lte_layer_3_output_)
 		, umts_sweep_output_(out.umts_sweep_output_)
-		, lte_sweep_output_(out.lte_sweep_output_) {
-		auto time = static_timestamp_string();
-		hardware_output_->set_filename("scanner_" + time + ".txt");
-		gps_output_->set_filename("gps_" + time + ".txt");
-		umts_layer_3_output_->set_filename("umts_layer_3_" + time + ".txt");
-		lte_layer_3_output_->set_filename("lte_layer_3_" + time + ".txt");
-		umts_sweep_output_->set_filename("umts_sweep_" + time + ".txt");
-		lte_sweep_output_->set_filename("lte_sweep_" + time + ".txt");
-	}
+		, lte_sweep_output_(out.lte_sweep_output_) 
+		, sweep_output_(std::make_shared<sweep_output_type>()) 
+		{}
 
 
 	data_output(data_output &&out) {
@@ -142,14 +138,19 @@ public:
 		std::swap(lte_layer_3_output_, out.lte_layer_3_output_);
 		std::swap(umts_sweep_output_, out.umts_sweep_output_);
 		std::swap(lte_sweep_output_, out.lte_sweep_output_);
+		std::swap(sweep_output_, out.sweep_output_);
 	}
 
-	void output(hardware data) { hardware_output_->output(data); }
-	void output(gps data) { gps_output_->output(data); }
-	void output(std::vector<umts_data> data) { umts_layer_3_output_->output(data); }
-	void output(std::vector<lte_data> data) { lte_layer_3_output_->output(data); }
-	void output_umts_sweep(basic_data data) { umts_sweep_output_->output(data); }
-	void output_lte_sweep(basic_data data) { lte_sweep_output_->output(data); }
+	void output(hardware d) { hardware_output_->output(d); }
+	void output(gps d) { gps_output_->output(d); }
+	void output(std::vector<gsm_data> t, basic_data b) { /* TODO - complete later. */ }
+	void output(std::vector<umts_data> t, basic_data b) { umts_layer_3_output_->output(t, b); }
+	void output(std::vector<lte_data> t, basic_data b) { lte_layer_3_output_->output(t, b); }
+	void output(basic_data b, std::vector<umts_data> t) { umts_sweep_output_->output(b, t); }
+	void output(basic_data b, std::vector<lte_data> t) { lte_sweep_output_->output(b, t); }
+	void output(basic_data b, std::vector<gsm_data> g, std::vector<umts_data> u, std::vector<lte_data> l) {
+		sweep_output_->output(b, g, u, l);
+	}
 
 	template<typename Func> void connect_hardware(Func &f) { hardware_output_->connect(f); }
 	template<typename Func> void connect_gps(Func &f) { gps_output_->connect(f); }
@@ -157,6 +158,7 @@ public:
 	template<typename Func> void connect_lte_layer_3(Func &f) { lte_layer_3_output_->connect(f); }
 	template<typename Func> void connect_umts_sweep(Func &f) { umts_sweep_output_->connect(f); }
 	template<typename Func> void connect_lte_sweep(Func &f) { lte_sweep_output_->connect(f); }
+	template<typename Func> void connect_sweep(Func &f) { sweep_output_->connect(f); }
 
 	void disconnect() {
 		hardware_output_->disconnect();
@@ -165,6 +167,7 @@ public:
 		lte_layer_3_output_->disconnect();
 		umts_sweep_output_->disconnect();
 		lte_sweep_output_->disconnect();
+		sweep_output_->disconnect();
 	}
 
 	void set_standard_output(const output_settings &settings) {
@@ -174,6 +177,7 @@ public:
 		lte_layer_3_output_->set_standard_output(settings.lte_layer_3_);
 		umts_sweep_output_->set_standard_output(settings.umts_sweep_);
 		lte_sweep_output_->set_standard_output(settings.lte_sweep_);
+		sweep_output_->set_standard_output(settings.sweep_);
 	}
 
 	void set_file_output(const output_settings &settings) {
@@ -183,6 +187,7 @@ public:
 		lte_layer_3_output_->set_file_output(settings.lte_layer_3_);
 		umts_sweep_output_->set_file_output(settings.umts_sweep_);
 		lte_sweep_output_->set_file_output(settings.lte_sweep_);
+		sweep_output_->set_file_output(settings.sweep_);
 	}
 
 	void set_signal_output(const output_settings &settings) {
@@ -191,26 +196,39 @@ public:
 		umts_layer_3_output_->set_signal_output(settings.umts_layer_3_);
 		lte_layer_3_output_->set_signal_output(settings.lte_layer_3_);
 		umts_sweep_output_->set_signal_output(settings.umts_sweep_);
-		lte_sweep_output_->set_signal_output(settings.lte_sweep_);
+		sweep_output_->set_signal_output(settings.sweep_);
 	}
 
-	void append_filename(const std::string &filename) {
-		hardware_output_->append_filename(filename);
-		gps_output_->append_filename(filename);
-		umts_layer_3_output_->append_filename(filename);
-		lte_layer_3_output_->append_filename(filename);
-		umts_sweep_output_->append_filename(filename);
-		lte_sweep_output_->append_filename(filename);
+	void set_output_path(const std::string &path) {
+		auto time = static_timestamp_string();
+		hardware_output_->set_filename(path + "scanner_" + time + ".txt");
+		gps_output_->set_filename(path + "gps_" + time + ".txt");
+		umts_layer_3_output_->set_filename(path + "umts_layer_3_" + time + ".txt");
+		lte_layer_3_output_->set_filename(path + "lte_layer_3_" + time + ".txt");
+		umts_sweep_output_->set_filename(path + "umts_sweep_" + time + ".txt");
+		lte_sweep_output_->set_filename(path + "lte_sweep_" + time + ".txt");
+		sweep_output_->set_filename(path + "sweep_" + time + ".txt");
 	}
 
 private:
-	std::shared_ptr<d_output<hardware, hardware_signal_type>> hardware_output_;
-	std::shared_ptr<d_output<gps, gps_signal_type>> gps_output_;
-	std::shared_ptr<d_output<umts_data, umts_signal_type>> umts_layer_3_output_;
-	std::shared_ptr<d_output<lte_data, lte_signal_type>> lte_layer_3_output_;
-	std::shared_ptr<d_output<basic_data, basic_signal_type>> umts_sweep_output_;
-	std::shared_ptr<d_output<basic_data, basic_signal_type>> lte_sweep_output_;
+	typedef d_output<hardware_signal_type, hardware> hardware_output_type;
+	typedef d_output<gps_signal_type, gps> gps_output_type;
+	typedef d_output<basic_signal_type, basic_data> basic_output_type;
+	typedef d_output<umts_signal_type, std::vector<umts_data>, basic_data> umts_layer_3_output_type;
+	typedef d_output<lte_signal_type, std::vector<lte_data>, basic_data> lte_layer_3_output_type;
+	typedef d_output<umts_sweep_signal_type, basic_data, std::vector<umts_data>> umts_sweep_output_type;
+	typedef d_output<lte_sweep_signal_type, basic_data, std::vector<lte_data>> lte_sweep_output_type;
+	typedef d_output<sweep_signal_type, basic_data, std::vector<gsm_data>,
+		std::vector<umts_data>, std::vector<lte_data>> sweep_output_type;
 
+
+	std::shared_ptr<hardware_output_type> hardware_output_;
+	std::shared_ptr<gps_output_type> gps_output_;
+	std::shared_ptr<umts_layer_3_output_type> umts_layer_3_output_;
+	std::shared_ptr<lte_layer_3_output_type> lte_layer_3_output_;
+	std::shared_ptr<umts_sweep_output_type> umts_sweep_output_;
+	std::shared_ptr<lte_sweep_output_type> lte_sweep_output_;
+	std::shared_ptr<sweep_output_type> sweep_output_;
 };
 
 }}

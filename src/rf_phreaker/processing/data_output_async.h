@@ -11,22 +11,10 @@ class data_output_async
 public:
 	data_output_async() {}
 
-	template<typename Data>
-	std::future<void> output(Data data) {
+	template<typename... Args>
+	std::future<void> output(Args... args) {
 		return out_([=](data_output out) {
-			out.output(data);
-		});
-	}
-
-	std::future<void> output_umts_sweep(basic_data data) {
-		return out_([=](data_output out) {
-			out.output_umts_sweep(data);
-		});
-	}
-
-	std::future<void> output_lte_sweep(basic_data data) {
-		return out_([=](data_output out) {
-			out.output_lte_sweep(data);
+			out.output(args...);
 		});
 	}
 
@@ -48,9 +36,9 @@ public:
 		});
 	}
 
-	std::future<void> append_filename(const std::string &filename) {
+	std::future<void> set_output_path(const std::string &path) {
 		return out_([=](data_output out) {
-			out.append_filename(filename);
+			out.set_output_path(path);
 		});
 	}
 
@@ -93,6 +81,13 @@ public:
 	std::future<void> connect_lte_sweep(Func &f) {
 		return out_([=](data_output out) {
 			out.connect_lte_sweep(f);
+		});
+	}
+
+	template<typename Func>
+	std::future<void> connect_sweep(Func &f) {
+		return out_([=](data_output out) {
+			out.connect_sweep(f);
 		});
 	}
 

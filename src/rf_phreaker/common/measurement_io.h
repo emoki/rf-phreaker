@@ -182,4 +182,17 @@ inline std::ostream& operator<<(std::ostream &os, const lte_data &t) {
 	return os;
 }
 
+template<typename Data>
+inline std::ostream& header(std::ostream &os, const std::vector<Data> &t) {
+	return header(os, Data());
+}
+
+template<typename Data>
+inline std::ostream& operator<<(std::ostream &os, const std::vector<Data> &t) {
+	for(auto &i : t)
+		os << i << std::endl;
+	return os;
+}
+
+
 }

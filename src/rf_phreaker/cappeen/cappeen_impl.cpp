@@ -94,6 +94,7 @@ long cappeen_impl::initialize(beagle_api::beagle_delegate *del)
 		delegate_->initialize(data_output_.get(), processing_graph_.get(), gps_graph_.get(), frequency_correction_graph_.get());
 		//log_worker_->connect_sink(boost::bind(&cappeen_delegate::output_error, delegate_.get(), _1, _2));
 
+		data_output_->set_output_path(config_.output_directory_);
 		data_output_->set_file_output(config_.file_output_);
 		data_output_->set_standard_output(config_.standard_output_);
 		data_output_->set_signal_output(config_.signal_slots_);

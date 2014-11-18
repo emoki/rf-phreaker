@@ -3,6 +3,7 @@
 #include <regex>
 #include <locale>
 #include <chrono>
+#include <type_traits>
 #include "rf_phreaker/common/common_types.h"
 
 #define khz(x) (static_cast<rf_phreaker::frequency_type>(x)*1000)             /**< Convenience for kHz */
@@ -111,6 +112,10 @@ inline std::string static_timestamp_string() {
 	static std::string static_timestamp = std::to_string(std::chrono::system_clock::to_time_t(std::chrono::system_clock::now()));
 	return static_timestamp;
 }
+
+template<typename T> struct is_vector : public std::false_type {};
+template<typename T, typename A>
+struct is_vector<std::vector<T, A>> : public std::true_type{};
 
 inline bool is_within_freq_paths(const std::vector<frequency_path> &paths, frequency_type f) {
 	bool found_freq = false;
