@@ -226,8 +226,8 @@ void create_xb_uart_interrupt(){
 			0);
 
 	// enable read interrupt, disable others
-	uint8_t ctl = IORD_ALTERA_AVALON_UART_CONTROL(UART_1_BASE);
-	IOWR_ALTERA_AVALON_UART_CONTROL(UART_1_BASE, ctl | (1 << ALTERA_AVALON_UART_CONTROL_RRDY_OFST) );
+	uint8_t ctl = IORD_FIFOED_AVALON_UART_CONTROL(UART_1_BASE);
+	IOWR_FIFOED_AVALON_UART_CONTROL(UART_1_BASE, ctl | (1 << FIFOED_AVALON_UART_CONTROL_RRDY_OFST) );
 }
 
 
@@ -235,8 +235,8 @@ void create_xb_uart_interrupt(){
 void monitor_xb_uart(void* context){
 	//quick read if data available, else skip
 	uint8_t data = 0;
-	while( IORD_ALTERA_AVALON_UART_STATUS(UART_1_BASE) & ALTERA_AVALON_UART_STATUS_RRDY_MSK ){
-		data = IORD_ALTERA_AVALON_UART_RXDATA(UART_1_BASE) ;
+	while( IORD_FIFOED_AVALON_UART_STATUS(UART_1_BASE) & FIFOED_AVALON_UART_STATUS_RRDY_MSK ){
+		data = IORD_FIFOED_AVALON_UART_RXDATA(UART_1_BASE) ;
 
 		fifo_enqueue(&uf, data);
 	}
@@ -249,7 +249,7 @@ void monitor_xb_uart(void* context){
 
 void xb_gps_uart_baud( uint32_t baud ) {
 	 uint16_t div = (uint16_t)((float)ALT_CPU_FREQ / (float)baud + 0.5);
-     IOWR_ALTERA_AVALON_UART_DIVISOR(UART_1_BASE, div);
+     IOWR_FIFOED_AVALON_UART_DIVISOR(UART_1_BASE, div);
 }
 
 
@@ -259,8 +259,8 @@ uint8_t xb_gps_uart_read(  ) {
 
 void xb_gps_uart_write( uint8_t val ) {
 
-	  while (!(IORD_ALTERA_AVALON_UART_STATUS(UART_1_BASE) & ALTERA_AVALON_UART_STATUS_TRDY_MSK));
-	  IOWR_ALTERA_AVALON_UART_TXDATA(UART_1_BASE,  val );
+	  while (!(IORD_FIFOED_AVALON_UART_STATUS(UART_1_BASE) & FIFOED_AVALON_UART_STATUS_TRDY_MSK));
+	  IOWR_FIFOED_AVALON_UART_TXDATA(UART_1_BASE,  val );
 }
 uint32_t xb_gps_uart_hasdata(  ) {
 
@@ -424,7 +424,7 @@ void init_NIOS(){
 	  IOWR_8DIRECT(I2C, OC_I2C_CTRL, OC_I2C_ENABLE ) ;
 
 	  // Set the UART divisor to 19 to get 4000000bps UART (baud rate = clock/(divisor + 1))
-	  IOWR_ALTERA_AVALON_UART_DIVISOR(UART_0_BASE, 19) ;
+	  IOWR_FIFOED_AVALON_UART_DIVISOR(UART_0_BASE, 19) ;
 
 	  // Set the IQ Correction parameters to 0
 	  IOWR_ALTERA_AVALON_PIO_DATA(IQ_CORR_RX_PHASE_GAIN_BASE, DEFAULT_CORRECTION);
@@ -479,9 +479,9 @@ const struct {
 
 void write_uart(unsigned char val) {
   // spin while not transmit ready
-  while (!(IORD_ALTERA_AVALON_UART_STATUS(UART_0_BASE) & ALTERA_AVALON_UART_STATUS_TRDY_MSK))
+  while (!(IORD_FIFOED_AVALON_UART_STATUS(UART_0_BASE) & FIFOED_AVALON_UART_STATUS_TRDY_MSK))
   {}
-  IOWR_ALTERA_AVALON_UART_TXDATA(UART_0_BASE,  val);
+  IOWR_FIFOED_AVALON_UART_TXDATA(UART_0_BASE,  val);
 }
 
 // Entry point
@@ -547,13 +547,13 @@ int main()
 
 
           // Check if anything is in the FSK UART
-          if( IORD_ALTERA_AVALON_UART_STATUS(UART_0_BASE) & ALTERA_AVALON_UART_STATUS_RRDY_MSK )
+          if( IORD_FIFOED_AVALON_UART_STATUS(UART_0_BASE) & FIFOED_AVALON_UART_STATUS_RRDY_MSK )
           {
               uint8_t val ;
               int isRead;
               int isWrite;
 
-              val = IORD_ALTERA_AVALON_UART_RXDATA(UART_0_BASE) ;
+              val = IORD_FIFOED_AVALON_UART_RXDATA(UART_0_BASE) ;
 
 
               // when a "magic is found, a specific behavior - parsing the following data as uart commands - ensues until set back to LOOKING
