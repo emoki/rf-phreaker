@@ -23,7 +23,7 @@
 #include "system.h"
 #include "altera_avalon_spi.h"
 #include "altera_avalon_spi_regs.h"
-#include "altera_avalon_uart_regs.h"
+#include "fifoed_avalon_uart_regs.h"
 #include "altera_avalon_jtag_uart_regs.h"
 #include "altera_avalon_pio_regs.h"
 #include "priv/alt_busy_sleep.h"
@@ -226,8 +226,8 @@ void create_xb_uart_interrupt(){
 			0);
 
 	// enable read interrupt, disable others
-	uint8_t ctl = IORD_ALTERA_AVALON_UART_CONTROL(UART_1_BASE);
-	IOWR_ALTERA_AVALON_UART_CONTROL(UART_1_BASE, ctl | (1 << ALTERA_AVALON_UART_CONTROL_RRDY_OFST) );
+	uint8_t ctl = IORD_FIFOED_AVALON_UART_CONTROL(UART_1_BASE);
+	IOWR_FIFOED_AVALON_UART_CONTROL(UART_1_BASE, ctl | (1 << FIFOED_AVALON_UART_CONTROL_RRDY_OFST) );
 }
 
 
@@ -235,8 +235,8 @@ void create_xb_uart_interrupt(){
 void monitor_xb_uart(void* context){
 	//quick read if data available, else skip
 	uint8_t data = 0;
-	while( IORD_ALTERA_AVALON_UART_STATUS(UART_1_BASE) & ALTERA_AVALON_UART_STATUS_RRDY_MSK ){
-		data = IORD_ALTERA_AVALON_UART_RXDATA(UART_1_BASE) ;
+	while( IORD_FIFOED_AVALON_UART_STATUS(UART_1_BASE) & FIFOED_AVALON_UART_STATUS_RRDY_MSK ){
+		data = IORD_FIFOED_AVALON_UART_RXDATA(UART_1_BASE) ;
 
 		fifo_enqueue(&uf, data);
 	}
@@ -249,7 +249,7 @@ void monitor_xb_uart(void* context){
 
 void xb_gps_uart_baud( uint32_t baud ) {
 	 uint16_t div = (uint16_t)((float)ALT_CPU_FREQ / (float)baud + 0.5);
-     IOWR_ALTERA_AVALON_UART_DIVISOR(UART_1_BASE, div);
+     IOWR_FIFOED_AVALON_UART_DIVISOR(UART_1_BASE, div);
 }
 
 
@@ -259,8 +259,8 @@ uint8_t xb_gps_uart_read(  ) {
 
 void xb_gps_uart_write( uint8_t val ) {
 
-	  while (!(IORD_ALTERA_AVALON_UART_STATUS(UART_1_BASE) & ALTERA_AVALON_UART_STATUS_TRDY_MSK));
-	  IOWR_ALTERA_AVALON_UART_TXDATA(UART_1_BASE,  val );
+	  while (!(IORD_FIFOED_AVALON_UART_STATUS(UART_1_BASE) & FIFOED_AVALON_UART_STATUS_TRDY_MSK));
+	  IOWR_FIFOED_AVALON_UART_TXDATA(UART_1_BASE,  val );
 }
 uint32_t xb_gps_uart_hasdata(  ) {
 
@@ -309,6 +309,47 @@ void lms_spi_write( uint8_t address, uint8_t val )
     }
     return;
 }
+
+// nsamp must be within 0-127. Note: 80mhz clock will overflow in 53 sec.
+void gps_calibration_start(uint32_t nsamp){
+
+	// config register  { 7 6 5 4 3 2 1 0 }
+	//                    r n n n n n n n
+	// n = nsamp (7 bits - 1 :: max = 126)
+	// r = reset flag
+	// * = not used
+
+	uint8_t rst = 0x80;
+	uint8_t ssize = (uint8_t )(( nsamp & ((1<<7)-1) ));
+	uint8_t cfg = rst | ssize;
+
+	IOWR_ALTERA_AVALON_PIO_DATA(PIO_4_BASE, cfg);		// send cfg
+	IOWR_ALTERA_AVALON_PIO_DATA(PIO_4_BASE, ssize);		// make sure size is latched
+	IOWR_ALTERA_AVALON_PIO_DATA(PIO_4_BASE, 0);			// start counter
+
+}
+
+// Returns 0 when counting, and # > 0 when complete.
+static uint32_t gps_calibration_counter = 0;
+void gps_calibration_monitor(){
+	gps_calibration_counter = IORD_ALTERA_AVALON_PIO_DATA(PIO_3_BASE);
+}
+
+
+static char fb_serial[8] = {0};
+void fb_update_1wire_serial(){
+	//read bits from 1wire hw...
+}
+
+uint32_t fb_read_1wire_serial(uint32_t section){
+	if(section >= sizeof(fb_serial)/sizeof(uint32_t)){
+		return 0;
+	}
+
+	uint32_t chunk = *((uint32_t*)(fb_serial + sizeof(uint32_t)*section));
+	return chunk;
+}
+
 
 
 void init_uart_FSM(){
@@ -383,7 +424,7 @@ void init_NIOS(){
 	  IOWR_8DIRECT(I2C, OC_I2C_CTRL, OC_I2C_ENABLE ) ;
 
 	  // Set the UART divisor to 19 to get 4000000bps UART (baud rate = clock/(divisor + 1))
-	  IOWR_ALTERA_AVALON_UART_DIVISOR(UART_0_BASE, 19) ;
+	  IOWR_FIFOED_AVALON_UART_DIVISOR(UART_0_BASE, 19) ;
 
 	  // Set the IQ Correction parameters to 0
 	  IOWR_ALTERA_AVALON_PIO_DATA(IQ_CORR_RX_PHASE_GAIN_BASE, DEFAULT_CORRECTION);
@@ -409,7 +450,9 @@ const struct {
 	  GDEV_XB_GPS_SPI,
 	  GDEV_XB_GPS_UART,
 	  GDEV_XB_GPS_UART_BAUD,
-	  GDEV_XB_GPS_UART_HASDATA
+	  GDEV_XB_GPS_UART_HASDATA,
+	  GDEV_XB_GPS_CALIBRATION_START,
+	  GDEV_XB_GPS_CALIBRATION_READ
   } gdev;
 
   int start, len;
@@ -428,15 +471,17 @@ const struct {
 	  {GDEV_XB_GPS_SPI,    48, 4},		//Custom devices
 	  {GDEV_XB_GPS_UART,   52, 4},
 	  {GDEV_XB_GPS_UART_BAUD,   56, 4},
-	  {GDEV_XB_GPS_UART_HASDATA,60, 4}
+	  {GDEV_XB_GPS_UART_HASDATA,60, 4},
+	  {GDEV_XB_GPS_CALIBRATION_START,64, 4},
+	  {GDEV_XB_GPS_CALIBRATION_READ,68, 4}
 };
 
 
 void write_uart(unsigned char val) {
   // spin while not transmit ready
-  while (!(IORD_ALTERA_AVALON_UART_STATUS(UART_0_BASE) & ALTERA_AVALON_UART_STATUS_TRDY_MSK))
+  while (!(IORD_FIFOED_AVALON_UART_STATUS(UART_0_BASE) & FIFOED_AVALON_UART_STATUS_TRDY_MSK))
   {}
-  IOWR_ALTERA_AVALON_UART_TXDATA(UART_0_BASE,  val);
+  IOWR_FIFOED_AVALON_UART_TXDATA(UART_0_BASE,  val);
 }
 
 // Entry point
@@ -464,10 +509,12 @@ int main()
   }
 */
 
-int write_num = 0;
 
-  //setup xb uart intrrupt handler, so no data is skipped
+  //--setup xb uart intrrupt handler, so no data is skipped
   //create_xb_uart_interrupt();
+
+  //--read the RF board serial number
+  //fb_update_1wire_serial();
 
   init_NIOS();
 
@@ -489,22 +536,24 @@ int write_num = 0;
       uint32_t iovar = 0;
 
       uint32_t uart_hasdata_cached = 0;
+      uint32_t gps_calibration_counter_cached = 0;
 
 
       state = LOOKING_FOR_MAGIC;
       while(1)
       {
-    	  // comment out for the SPI build
 		  monitor_xb_uart(0);
+		  gps_calibration_monitor();
+
 
           // Check if anything is in the FSK UART
-          if( IORD_ALTERA_AVALON_UART_STATUS(UART_0_BASE) & ALTERA_AVALON_UART_STATUS_RRDY_MSK )
+          if( IORD_FIFOED_AVALON_UART_STATUS(UART_0_BASE) & FIFOED_AVALON_UART_STATUS_RRDY_MSK )
           {
               uint8_t val ;
               int isRead;
               int isWrite;
 
-              val = IORD_ALTERA_AVALON_UART_RXDATA(UART_0_BASE) ;
+              val = IORD_FIFOED_AVALON_UART_RXDATA(UART_0_BASE) ;
 
 
               // when a "magic is found, a specific behavior - parsing the following data as uart commands - ensues until set back to LOOKING
@@ -619,7 +668,9 @@ int write_num = 0;
                             else if (device == GDEV_XB_GPS_SPI){
                             	//sends data to gps, then reads response
                             	// round trip ~ 10us  (5Mhz clock)
-                            	cmd_ptr->data = xb_gps_spi( cmd_ptr->data );
+                            	if(cmd_ptr->addr == 0){
+                            		cmd_ptr->data = xb_gps_spi( cmd_ptr->data );
+                            	}
                             }
                             else if (device == GDEV_XB_GPS_UART){
                             	//cmd bytes come in low first
@@ -646,6 +697,15 @@ int write_num = 0;
                             	cmd_ptr->data = (IORD_ALTERA_AVALON_PIO_DATA(IQ_CORR_TX_PHASE_GAIN_BASE)) >> (cmd_ptr->addr * 8);
                             else if (device == GDEV_IQ_CORR_TX_PHASE)
                             	cmd_ptr->data = (IORD_ALTERA_AVALON_PIO_DATA(IQ_CORR_TX_PHASE_GAIN_BASE)) >> ((cmd_ptr->addr + 2) * 8);
+                            else if (device == GDEV_XB_GPS_CALIBRATION_READ){
+                            	if(cmd_ptr->addr == 0){
+                            		gps_calibration_counter_cached = gps_calibration_counter;
+                            	}
+								cmd_ptr->data = (gps_calibration_counter_cached >> (cmd_ptr->addr * 8)) & 0xff;
+                            }
+                            else if (device == GDEV_XB_GPS_CALIBRATION_START) {
+								COLLECT_BYTES(gps_calibration_start(tmpvar));
+							}
                         } else if (isWrite) {
                             if (device == GDEV_TIME_TIMER) {
                                 IOWR_8DIRECT(TIME_TAMER, cmd_ptr->addr, 1) ;
@@ -676,6 +736,7 @@ int write_num = 0;
                             } else if (device == GDEV_IQ_CORR_TX_PHASE) {
                                 COLLECT_BYTES(SPLIT_WRITE(IQ_CORR_TX_PHASE_GAIN_BASE, 16));
                             }
+
                         } else {
                             cmd_ptr->addr = 0;
                             cmd_ptr->data = 0;

@@ -1467,6 +1467,24 @@ int bladerf_xb_spi_write(struct bladerf *dev, uint32_t send)
 	return status;
 }
 
+
+
+/*------------------------------------------------------------------------------
+* DP NIOS Read/Write
+*----------------------------------------------------------------------------*/
+
+int bladerf_nios_rpc(struct bladerf *dev, uint8_t addr, uint32_t send, uint32_t *receive)
+{
+	int status;
+	MUTEX_LOCK(&dev->ctrl_lock);
+
+	status = dev->fn->nios_rpc(dev, addr, send, receive);
+
+	MUTEX_UNLOCK(&dev->ctrl_lock);
+	return status;
+}
+
+
 /*------------------------------------------------------------------------------
  * DP XB SPI register write/read
  *----------------------------------------------------------------------------*/

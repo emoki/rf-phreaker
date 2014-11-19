@@ -23,7 +23,8 @@ set_instance_assignment -name IO_STANDARD "1.8 V" -to dac_csx
 set_instance_assignment -name IO_STANDARD "1.8 V" -to dac_sclk
 set_instance_assignment -name IO_STANDARD "1.8 V" -to dac_sdi
 set_instance_assignment -name IO_STANDARD "1.8 V" -to dac_sdo
-set_instance_assignment -name IO_STANDARD "1.8 V" -to refexp_1pps
+set_instance_assignment -name IO_STANDARD "1.8 V" -to ref_1pps
+set_instance_assignment -name IO_STANDARD "1.8 V" -to gps_ref_1pps
 set_instance_assignment -name IO_STANDARD "1.8 V" -to exp_clock
 set_instance_assignment -name IO_STANDARD "1.8 V" -to exp_gpio[16]
 set_instance_assignment -name IO_STANDARD "1.8 V" -to exp_gpio[15]
@@ -42,6 +43,7 @@ set_instance_assignment -name IO_STANDARD "1.8 V" -to exp_gpio[3]
 set_instance_assignment -name IO_STANDARD "1.8 V" -to exp_gpio[2]
 set_instance_assignment -name IO_STANDARD "1.8 V" -to exp_gpio[1]
 set_instance_assignment -name IO_STANDARD "1.8 V" -to exp_present
+set_instance_assignment -name IO_STANDARD "1.8 V" -to exp_1wire
 set_instance_assignment -name IO_STANDARD "1.8 V" -to exp_spi_clock
 set_instance_assignment -name IO_STANDARD "1.8 V" -to exp_spi_miso
 set_instance_assignment -name IO_STANDARD "1.8 V" -to exp_spi_mosi
@@ -156,6 +158,7 @@ set_instance_assignment -name CURRENT_STRENGTH_NEW 4MA -to exp_gpio[3]
 set_instance_assignment -name CURRENT_STRENGTH_NEW 4MA -to exp_gpio[2]
 set_instance_assignment -name CURRENT_STRENGTH_NEW 4MA -to exp_gpio[1]
 set_instance_assignment -name CURRENT_STRENGTH_NEW 4MA -to exp_present
+set_instance_assignment -name CURRENT_STRENGTH_NEW 4MA -to exp_1wire
 set_instance_assignment -name CURRENT_STRENGTH_NEW 4MA -to exp_spi_clock
 set_instance_assignment -name CURRENT_STRENGTH_NEW 4MA -to exp_spi_miso
 set_instance_assignment -name CURRENT_STRENGTH_NEW 4MA -to exp_spi_mosi
@@ -247,7 +250,8 @@ set_instance_assignment -name CURRENT_STRENGTH_NEW 4MA -to lms_tx_data[1]
 set_instance_assignment -name CURRENT_STRENGTH_NEW 4MA -to lms_tx_data[0]
 set_instance_assignment -name CURRENT_STRENGTH_NEW 4MA -to lms_tx_enable
 set_instance_assignment -name CURRENT_STRENGTH_NEW 4MA -to lms_tx_iq_select
-set_instance_assignment -name CURRENT_STRENGTH_NEW 4MA -to refexp_1pps
+set_instance_assignment -name CURRENT_STRENGTH_NEW 4MA -to ref_1pps
+set_instance_assignment -name CURRENT_STRENGTH_NEW 4MA -to gps_ref_1pps
 set_location_assignment PIN_A11 -to c4_clock
 set_location_assignment PIN_B10 -to dac_csx
 set_location_assignment PIN_B9 -to dac_sclk

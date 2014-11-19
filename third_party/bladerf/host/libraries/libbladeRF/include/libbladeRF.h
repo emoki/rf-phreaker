@@ -2616,13 +2616,29 @@ int CALL_CONV bladerf_dac_write(struct bladerf *dev, uint16_t val);
 * Write value to NUAND xb200 SPI chip
 *
 * @param   dev         Device handle
-* @param   val         Data to write to XB SPI
-* @param 	resp		Data in response
+* @param   send        Data to write to XB SPI
+* @param   resp		   Data in response
 *
 * @return 0 on success, value from \ref RETCODES list on failure
 */
 API_EXPORT
 int CALL_CONV bladerf_xb_spi_write(struct bladerf *dev, uint32_t send);
+
+
+
+/**
+* Call NIOS RPC at address 'addr', send param 'send', read response 'receive'
+*
+* @param   dev          Device handle
+* @param   addr         Nios rpc address
+* @param   send         Data to write to XB SPI
+* @param   receive		Data in response
+*
+* @return 0 on success, value from \ref RETCODES list on failure
+*/
+API_EXPORT
+int CALL_CONV bladerf_nios_rpc(struct bladerf *dev, uint8_t addr, uint32_t send, uint32_t *receive);
+
 
 
 /**
