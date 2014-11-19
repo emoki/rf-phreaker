@@ -158,7 +158,7 @@ set_instance_assignment -name CURRENT_STRENGTH_NEW 4MA -to exp_gpio[3]
 set_instance_assignment -name CURRENT_STRENGTH_NEW 4MA -to exp_gpio[2]
 set_instance_assignment -name CURRENT_STRENGTH_NEW 4MA -to exp_gpio[1]
 set_instance_assignment -name CURRENT_STRENGTH_NEW 4MA -to exp_present
-set_instance_assignment -name CURRENT_STRENGTH_NEW 4MA -to exp_exp_1wire
+set_instance_assignment -name CURRENT_STRENGTH_NEW 4MA -to exp_1wire
 set_instance_assignment -name CURRENT_STRENGTH_NEW 4MA -to exp_spi_clock
 set_instance_assignment -name CURRENT_STRENGTH_NEW 4MA -to exp_spi_miso
 set_instance_assignment -name CURRENT_STRENGTH_NEW 4MA -to exp_spi_mosi
