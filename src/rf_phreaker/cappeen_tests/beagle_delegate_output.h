@@ -11,7 +11,19 @@ using namespace beagle_api;
 class output : public beagle_delegate
 {
 public:
-	output() { error_occurred_ = false; new_hw_info_ = false; }
+	output() { reinit(); }
+
+	void reinit() { error_occurred_ = false; new_hw_info_ = false; }
+	void wait(int s) {
+		error_occurred_ = false;
+		new_hw_info_ = false;
+
+		for(int i = 0; i < s; ++i) {
+			std::this_thread::sleep_for(std::chrono::seconds(1));
+			if(error_occurred_ || new_hw_info_)
+				break;
+		}
+	}
 
 	virtual void __stdcall available_beagle_info(long beagle_id, const beagle_info &info) {
 		std::cout << "serial: " << info.beagle_serial_ << "\n";
@@ -63,10 +75,12 @@ public:
 		new_hw_info_ = true;
 	}
 	virtual void __stdcall available_gps_info(long beagle_id, const gps_info &info) {
+		if(!output_) return;
 		std::cout << std::boolalpha << info.gps_locked_ << "\t" << info.utc_time_ << "\t" << info.raw_gps_status_ << "\n";
 	}
 	virtual void __stdcall available_gsm_sector_info(long beagle_id, const gsm_sector_info *info, long num_records) {}
 	virtual void __stdcall available_umts_sector_info(long beagle_id, const umts_sector_info *info, long num_records) {
+		if(!output_) return;
 		for(int i = 0; i < num_records; ++i) {
 			std::cout << info[i].carrier_freq_ << "\t" << info[i].carrier_sl_ << "\t" << info[i].cpich_ << "\t" << info[i].ecio_
 				<< "\t" << info[i].mcc_
@@ -85,10 +99,12 @@ public:
 	}
 	std::set<frequency_type> tmp;
 	virtual void __stdcall available_umts_sweep_info(long beagle_id, const umts_sweep_info *info, long num_records) {
+		if(!output_) return;
 		for(int i = 0; i < num_records; ++i)
 			std::cout << info[i].frequency_ << "\t" << info[i].rssi_ << "\t" << "umts" << "\n";
 	}
 	virtual void __stdcall available_lte_sector_info(long beagle_id, const lte_sector_info *info, long num_records) {
+		if(!output_) return;
 		static std::ofstream lte_output("lte_sector_info.txt");
 		for(int i = 0; i < num_records; ++i) {
 			std::string t;
@@ -226,6 +242,7 @@ public:
 		}
 	}
 	virtual void __stdcall available_lte_sweep_info(long beagle_id, const lte_sweep_info *info, long num_records) {
+		if(!output_) return;
 		for(int i = 0; i < num_records; ++i)
 			std::cout << info[i].frequency_ << "\t" << info[i].rssi_ << "\t" << "lte" << "\n";
 	}
@@ -237,6 +254,7 @@ public:
 		std::cout << "----------MESSAGE-------------  CODE: " << possible_message_number << "  STR : " << str << "\n";
 	}
 
+	std::atomic_bool output_;
 	std::atomic_bool error_occurred_;
 	std::atomic_bool new_hw_info_;
 };

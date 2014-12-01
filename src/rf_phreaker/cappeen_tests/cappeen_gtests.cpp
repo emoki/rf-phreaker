@@ -47,34 +47,11 @@ TEST(Cappeen, TestMain)
 
 		for(int i = 0; i < 5000000; ++i) {
 			EXPECT_EQ(0, cappeen_open_unit(&serial[0], serial.size()));
-			std::this_thread::sleep_for(std::chrono::milliseconds(500));
-			out.new_hw_info_ = false;
-			out.error_occurred_ = false;
-
-			//std::cout << "Starting frequency correction.\n";
-			//std::vector<uint32_t> freqs; 
-			//freqs.push_back(871800000); 
-			//freqs.push_back(876800000); 
-			//freqs.push_back(1942500000);
-			//freqs.push_back(1937500000); 
-			//freqs.push_back(2147500000);
-			//freqs.push_back(2152500000);
-			//EXPECT_EQ(0, cappeen_start_frequency_correction_using_frequencies(&freqs[0], freqs.size()));
-			//EXPECT_EQ(0, cappeen_start_frequency_correction_using_sweep(info));
-			//for(int i = 0; i < 10000; ++i) {
-			//	std::this_thread::sleep_for(std::chrono::seconds(1));
-			//	if(out.error_occurred_ || out.new_hw_info_)
-			//		break;
-			//}
 
 			std::cout << "Starting collection.\n";
 			EXPECT_EQ(0, cappeen_start_collection(info));
 
-			for(int i = 0; i < 60*60; ++i) {
-				std::this_thread::sleep_for(std::chrono::seconds(1));
-				if(out.error_occurred_)
-					break;
-			}
+			out.wait(5 * 60 * 60);
 
 			//bad_output bad_out;
 			//EXPECT_EQ(0, cappeen_initialize(&bad_out));
@@ -92,11 +69,115 @@ TEST(Cappeen, TestMain)
 					std::this_thread::sleep_for(std::chrono::seconds(1));
 				}
 				while(serial.empty());
-				out.error_occurred_ = false;
 			}
 		}
 	}
 
+	EXPECT_EQ(0, cappeen_clean_up());
+}
+
+TEST(Cappeen, FreqCorrection) {
+	using namespace rf_phreaker::cappeen_api;
+	output out;
+	out.output_ = false;
+	EXPECT_EQ(0, cappeen_initialize(&out));
+
+	std::array<char, 1024 * 10> serials;
+	EXPECT_EQ(0, cappeen_list_available_units(&serials[0], serials.size()));
+
+	std::string serial(&serials[0]);
+	serial = serial.substr(0, serial.find_first_of(';'));
+
+	if(!serial.empty()) {
+		collection_info info;
+		info.collection_filename_ = "test_file";
+		std::vector<TECHNOLOGIES_AND_BANDS> tech_bands;
+		info.tech_and_bands_to_sweep_.elements_ = 0;
+		info.tech_and_bands_to_sweep_.num_elements_ = 0;;
+		tech_bands.push_back(WCDMA_BAND_850);
+		tech_bands.push_back(WCDMA_BAND_1900);
+		tech_bands.push_back(WCDMA_BAND_2100);
+		info.tech_and_bands_to_sweep_.elements_ = &tech_bands[0];
+		info.tech_and_bands_to_sweep_.num_elements_ = tech_bands.size();
+	
+		std::vector<uint32_t> freqs;
+		freqs.push_back(871800000);
+		freqs.push_back(876800000);
+		freqs.push_back(1942500000);
+		freqs.push_back(1937500000);
+		freqs.push_back(2147500000);
+		freqs.push_back(2152500000);
+
+		for(int i = 0; i < 5000000; ++i) {
+			EXPECT_EQ(0, cappeen_open_unit(&serial[0], serial.size()));
+			
+			//std::cout << "Collect GPS.\n";
+			//out.wait(10 * 60);
+
+			std::cout << "Starting frequency correction using freqs.\n";
+			EXPECT_EQ(0, cappeen_start_frequency_correction_using_frequencies(&freqs[0], freqs.size()));
+
+			out.wait(10 * 60);
+
+			std::cout << "Finished freq correction.\n";
+
+			std::cout << "Starting collection.\n";
+			EXPECT_EQ(0, cappeen_start_collection(info));
+
+			out.wait(5 * 60);
+			
+			EXPECT_EQ(0, cappeen_stop_collection());
+			EXPECT_EQ(0, cappeen_close_unit(&serial[0], serial.size()));
+			EXPECT_EQ(0, cappeen_open_unit(&serial[0], serial.size()));
+			std::this_thread::sleep_for(std::chrono::milliseconds(500));
+
+			std::cout << "Collect GPS.\n";
+			out.wait(5 * 60);
+
+			std::cout << "Starting frequency correction using sweep.\n";
+			EXPECT_EQ(0, cappeen_start_frequency_correction_using_sweep(info));
+
+			out.wait(10 * 60);
+
+			std::cout << "Finished freq correction.\n";
+
+
+			std::cout << "Starting collection.\n";
+			EXPECT_EQ(0, cappeen_start_collection(info));
+
+			out.wait(10 * 60);
+
+			std::cout << "Stopping collection.\n";
+			EXPECT_EQ(0, cappeen_stop_collection());
+
+			EXPECT_EQ(0, cappeen_close_unit(&serial[0], serial.size()));
+			EXPECT_EQ(0, cappeen_open_unit(&serial[0], serial.size()));
+			std::this_thread::sleep_for(std::chrono::milliseconds(500));
+
+			std::cout << "Starting collection.\n";
+			EXPECT_EQ(0, cappeen_start_collection(info));
+
+			out.wait(125 * 60);
+
+			if(!out.error_occurred_) {
+				std::cout << "Stopping collection.";
+				EXPECT_EQ(0, cappeen_stop_collection());
+				EXPECT_EQ(0, cappeen_close_unit(&serial[0], serial.size()));
+			}
+			else {
+				do {
+					std::cout << "Error occurred.";
+					cappeen_close_unit(&serial[0], serial.size());
+					EXPECT_EQ(0, cappeen_list_available_units(&serials[0], serials.size()));
+					serial = &serials[0];
+					serial = serial.substr(0, serial.find_first_of(';'));
+					std::this_thread::sleep_for(std::chrono::seconds(1));
+				}
+				while(serial.empty());
+				out.reinit();
+			}
+		}
+	}
 	EXPECT_EQ(0, cappeen_clean_up());
 }
 
