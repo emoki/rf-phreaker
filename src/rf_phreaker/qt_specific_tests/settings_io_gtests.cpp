@@ -170,6 +170,7 @@ TEST(QtSpecific, TestSettingsIO)
 	EXPECT_EQ(set.use_rf_board_adjustment_, set2.use_rf_board_adjustment_);
 	EXPECT_EQ(set.output_directory_, set2.output_directory_);
 	EXPECT_EQ(set.output_in_binary_, set2.output_in_binary_);
+	EXPECT_EQ(set.simultaneous_collection_, set2.simultaneous_collection_);
 	EXPECT_EQ(set.eeprom_update_period_for_1pps_calibration_minutes_, set2.eeprom_update_period_for_1pps_calibration_minutes_);
 
 	EXPECT_EQ(set.standard_output_.scanner_, set2.standard_output_.scanner_);
