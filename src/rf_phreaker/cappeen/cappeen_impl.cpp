@@ -235,6 +235,13 @@ long cappeen_impl::open_unit(const char *serial, unsigned int buf_size)
 		std::lock_guard<std::recursive_mutex> lock(mutex_);
 		verify_init();
 
+		if(frequency_correction_graph_)
+			frequency_correction_graph_->cancel_and_wait();
+		if(gps_graph_)
+			gps_graph_->cancel_and_wait();
+		if(processing_graph_)
+			processing_graph_->cancel_and_wait();
+
 		scanner_->open_scanner(serial).get();
 		
 		scanner_->do_initial_scanner_config(config_.blade_settings_).get();
