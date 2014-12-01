@@ -33,6 +33,7 @@ static const int blade_rx_sync_timeout_default = 2000;
 static const std::string output_directory_default = "NULL";
 static const bool output_in_binary_default = true;
 static const bool simultaneous_collection_default = false;
+static const int eeprom_update_period_for_1pps_calibration_minutes_default = 60;
 
 class output_settings {
 public:
@@ -104,6 +105,7 @@ public:
 	std::string output_directory_;
 	bool output_in_binary_;
 	bool simultaneous_collection_;
+	int eeprom_update_period_for_1pps_calibration_minutes_;
 
 	blade_settings blade_settings_;
 

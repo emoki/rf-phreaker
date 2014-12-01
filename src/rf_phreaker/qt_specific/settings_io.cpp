@@ -23,11 +23,13 @@ void settings_io::read(settings &settings) {
 	settings.output_directory_ = qsettings_->value(output_directory_key.c_str(), output_directory_default.c_str()).toString().toStdString();
 	if(!file_path_validation::is_path_valid(settings.output_directory_)) {
 		settings.output_directory_ = file_path_validation::get_writable_file_path();
-		LOG(LVERBOSE) << "Output directory is not valid.  Switching to " << settings.output_directory_ << ".";
+		//LOG(LVERBOSE) << "Output directory is not valid.  Switching to " << settings.output_directory_ << ".";
 	}
 
 	settings.output_in_binary_ = qsettings_->value(output_in_binary_key.c_str(), output_in_binary_default).toBool();
 	settings.simultaneous_collection_ = qsettings_->value(simultaneous_collection_key.c_str(), simultaneous_collection_default).toBool();
+	settings.eeprom_update_period_for_1pps_calibration_minutes_ = qsettings_->value(eeprom_update_period_for_1pps_calibration_minutes_key.c_str(),
+		eeprom_update_period_for_1pps_calibration_minutes_default).toInt();
 
 	read(settings.standard_output_, standard_output_group_key);
 	read(settings.signal_slots_, signal_slot_output_group_key);
@@ -117,6 +119,7 @@ void settings_io::write(const settings &settings) {
 	qsettings_->setValue(output_directory_key.c_str(), settings.output_directory_.c_str());
 	qsettings_->setValue(output_in_binary_key.c_str(), settings.output_in_binary_);
 	qsettings_->setValue(simultaneous_collection_key.c_str(), settings.simultaneous_collection_);
+	qsettings_->setValue(eeprom_update_period_for_1pps_calibration_minutes_key.c_str(), settings.eeprom_update_period_for_1pps_calibration_minutes_);
 	
 	write(settings.standard_output_, standard_output_group_key);
 	write(settings.signal_slots_, signal_slot_output_group_key);

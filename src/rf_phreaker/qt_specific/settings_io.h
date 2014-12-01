@@ -58,6 +58,7 @@ static const std::string blade_rx_sync_timeout_key = "rx_sync_num_timeout";
 static const std::string output_directory_key = "output_directory";
 static const std::string output_in_binary_key = "output_in_binary";
 static const std::string simultaneous_collection_key = "simultaneous_collection";
+static const std::string eeprom_update_period_for_1pps_calibration_minutes_key = "eeprom_update_period_for_1pps_calibration_minutes";
 
 class settings_io {
 public:

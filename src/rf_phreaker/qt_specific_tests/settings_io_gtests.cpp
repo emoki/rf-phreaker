@@ -21,7 +21,8 @@ TEST(QtSpecific, TestSettingsIO)
 	//EXPECT_EQ(output_directory_default, set.output_directory_);  // Manually verify.
 	EXPECT_EQ(output_in_binary_default, set.output_in_binary_);
 	EXPECT_EQ(simultaneous_collection_default, set.simultaneous_collection_);
-
+	EXPECT_EQ(eeprom_update_period_for_1pps_calibration_minutes_default, set.eeprom_update_period_for_1pps_calibration_minutes_);
+	
 	EXPECT_EQ(settings_output_default, set.standard_output_.scanner_);
 	EXPECT_EQ(settings_output_default, set.standard_output_.gps_);
 	EXPECT_EQ(settings_output_default, set.standard_output_.umts_sweep_);
@@ -102,6 +103,7 @@ TEST(QtSpecific, TestSettingsIO)
 	set.output_directory_ = "c:\\";
 	set.output_in_binary_ = false;
 	set.simultaneous_collection_ = false;
+	set.eeprom_update_period_for_1pps_calibration_minutes_ = tmp++;
 	set.standard_output_.scanner_ = true;
 	set.standard_output_.gps_ = true;
 	set.standard_output_.umts_sweep_ = true;
@@ -168,6 +170,7 @@ TEST(QtSpecific, TestSettingsIO)
 	EXPECT_EQ(set.use_rf_board_adjustment_, set2.use_rf_board_adjustment_);
 	EXPECT_EQ(set.output_directory_, set2.output_directory_);
 	EXPECT_EQ(set.output_in_binary_, set2.output_in_binary_);
+	EXPECT_EQ(set.eeprom_update_period_for_1pps_calibration_minutes_, set2.eeprom_update_period_for_1pps_calibration_minutes_);
 
 	EXPECT_EQ(set.standard_output_.scanner_, set2.standard_output_.scanner_);
 	EXPECT_EQ(set.standard_output_.gps_, set2.standard_output_.gps_);
