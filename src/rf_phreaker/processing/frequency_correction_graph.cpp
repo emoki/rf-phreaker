@@ -12,8 +12,7 @@
 using namespace rf_phreaker::scanner;
 using namespace rf_phreaker::processing;
 
-frequency_correction_graph::frequency_correction_graph(void)
-{}
+frequency_correction_graph::frequency_correction_graph(void) {}
 
 frequency_correction_graph::~frequency_correction_graph(void) {
 	try {
@@ -25,9 +24,10 @@ frequency_correction_graph::~frequency_correction_graph(void) {
 	catch(...) {}
 }
 
-void frequency_correction_graph::start(scanner_controller_interface *sc, data_output_async *out, const collection_info_containers &collection_info, const rf_phreaker::settings &config)
-{
+void frequency_correction_graph::start(scanner_controller_interface *sc, data_output_async *out, const collection_info_containers &collection_info, const rf_phreaker::settings &config) {
 	std::lock_guard<std::recursive_mutex> lock(mutex_);
+
+	is_initialized_ = false;
 
 	if(thread_ && thread_->joinable()) {
 		cancel();
@@ -45,7 +45,7 @@ void frequency_correction_graph::start(scanner_controller_interface *sc, data_ou
 			graph_ = (std::make_shared<tbb::flow::graph>());
 
 			start_node_ = std::make_shared<start_node>(*graph_, [=](add_remove_collection_info &info) { return true; }, false);
-			collection_manager_node_ = std::make_shared<collection_manager_node>(*graph_, tbb::flow::serial, 
+			collection_manager_node_ = std::make_shared<collection_manager_node>(*graph_, tbb::flow::serial,
 				freq_correction_collection_manager_body(graph_.get(), sc, collection_info, config.packet_output_,
 				config));
 
@@ -89,6 +89,8 @@ void frequency_correction_graph::start(scanner_controller_interface *sc, data_ou
 
 			start_node_->activate();
 
+			is_initialized_ = true;
+
 			graph_->wait_for_all();
 		}
 		catch(const rf_phreaker::rf_phreaker_error &err) {
@@ -103,25 +105,29 @@ void frequency_correction_graph::start(scanner_controller_interface *sc, data_ou
 	}, sc, out, collection_info, config));
 }
 
-void frequency_correction_graph::wait()
-{
+void frequency_correction_graph::wait() {
 	std::lock_guard<std::recursive_mutex> lock(mutex_);
 	if(thread_ && thread_->joinable()) {
 		thread_->join();
 	}
 }
 
-void frequency_correction_graph::cancel()
-{
+void frequency_correction_graph::cancel() {
 	std::lock_guard<std::recursive_mutex> lock(mutex_);
 	if(thread_ && thread_->joinable()) {
+		int count = 0;
+		while(!is_initialized_) {
+			std::this_thread::sleep_for(std::chrono::milliseconds(20));
+			if(count++ > 500)
+				throw processing_error("Unable to stop graph.");
+		}
 		graph_->root_task()->cancel_group_execution();
 	}
 }
 
-void frequency_correction_graph::cancel_and_wait()
-{
+void frequency_correction_graph::cancel_and_wait() {
 	std::lock_guard<std::recursive_mutex> lock(mutex_);
 	cancel();
 	wait();
+	is_initialized_ = false;
 }

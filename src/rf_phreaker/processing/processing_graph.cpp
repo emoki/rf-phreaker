@@ -30,6 +30,8 @@ void processing_graph::start(scanner_controller_interface *sc, data_output_async
 {
 	std::lock_guard<std::recursive_mutex> lock(mutex_);
 
+	is_initialized_ = false;
+
 	if(thread_ && thread_->joinable()) {
 		cancel();
 		wait();
@@ -122,6 +124,8 @@ void processing_graph::start(scanner_controller_interface *sc, data_output_async
 
 			start_node_->activate();
 
+			is_initialized_ = true;
+
 			graph_->wait_for_all();
 		}
 		catch(const rf_phreaker::rf_phreaker_error &err) {
@@ -148,6 +152,12 @@ void processing_graph::cancel()
 {
 	std::lock_guard<std::recursive_mutex> lock(mutex_);
 	if(thread_ && thread_->joinable()) {
+		int count = 0;
+		while(!is_initialized_) {
+			std::this_thread::sleep_for(std::chrono::milliseconds(20));
+			if(count++ > 500)
+				throw processing_error("Unable to stop graph.");
+		}
 		graph_->root_task()->cancel_group_execution();
 	}
 }
@@ -157,4 +167,5 @@ void processing_graph::cancel_and_wait()
 	std::lock_guard<std::recursive_mutex> lock(mutex_);
 	cancel();
 	wait();
+	is_initialized_ = false;
 }

@@ -40,6 +40,8 @@ private:
 	std::unique_ptr<std::thread> thread_;
 
 	std::recursive_mutex mutex_;
+
+	std::atomic_bool is_initialized_;
 };
 
 

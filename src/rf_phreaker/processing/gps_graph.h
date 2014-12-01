@@ -11,11 +11,11 @@
 
 namespace rf_phreaker { namespace processing {
 
+
 class gps_graph
 {
 public:
-	gps_graph() 
-	{}
+	gps_graph() {}
 
 	~gps_graph() {
 		try {
@@ -27,9 +27,10 @@ public:
 		catch(...) {}
 	}
 
-	void start(rf_phreaker::scanner::scanner_controller_interface *sc, data_output_async *out, const settings &config)
-	{
+	void start(rf_phreaker::scanner::scanner_controller_interface *sc, data_output_async *out, const settings &config) {
 		std::lock_guard<std::recursive_mutex> lock(mutex_);
+
+		is_initialized_ = false;
 
 		if(thread_ && thread_->joinable()) {
 			cancel();
@@ -53,6 +54,8 @@ public:
 
 				start_node_->activate();
 
+				is_initialized_ = true;
+
 				graph_->wait_for_all();
 			}
 			catch(const rf_phreaker::rf_phreaker_error &err) {
@@ -69,25 +72,31 @@ public:
 
 	void cancel_and_wait()
 	{
+	void cancel_and_wait() {
 		std::lock_guard<std::recursive_mutex> lock(mutex_);
 		cancel();
 		wait();
+		is_initialized_ = false;
 	}
 
 private:
 
-	void wait()
-	{
+	void wait() {
 		std::lock_guard<std::recursive_mutex> lock(mutex_);
 		if(thread_ && thread_->joinable()) {
 			thread_->join();
 		}
 	}
 
-	void cancel()
-	{
+	void cancel() {
 		std::lock_guard<std::recursive_mutex> lock(mutex_);
 		if(thread_ && thread_->joinable()) {
+			int count = 0;
+			while(!is_initialized_) {
+				std::this_thread::sleep_for(std::chrono::milliseconds(20));
+				if(count++ > 500)
+					throw processing_error("Unable to stop graph.");
+			}
 			graph_->root_task()->cancel_group_execution();
 		}
 	}
@@ -100,6 +109,8 @@ private:
 	std::unique_ptr<std::thread> thread_;
 
 	std::recursive_mutex mutex_;
+
+	std::atomic_bool is_initialized_;
 };
 
 }}
