@@ -182,6 +182,10 @@ void blade_rf_controller::refresh_scanner_info()
 		*scanner_blade_rf_ = blade;
 		*scanner_ = scanner_blade_rf_.get();
 	}
+
+	if(scanner_blade_rf_->eeprom_.cal_.nuand_freq_correction_value_ && scanner_blade_rf_->eeprom_.cal_.nuand_freq_correction_value_ != scanner_blade_rf_->vctcxo_trim_value_) {
+		update_vctcxo_trim(scanner_blade_rf_->eeprom_.cal_.nuand_freq_correction_value_);
+	}
 }
 
 void blade_rf_controller::close_scanner()
@@ -268,10 +272,6 @@ void blade_rf_controller::do_initial_scanner_config(const scanner_settings &sett
 
 	// TODO - Change this so that we only alter switch settings.
 	check_blade_status(bladerf_expansion_gpio_dir_write(comm_blade_rf_->blade_rf(), 0xFFFFFFFF), __FILE__, __LINE__);
-
-	if(scanner_blade_rf_->eeprom_.cal_.nuand_freq_correction_value_ && scanner_blade_rf_->eeprom_.cal_.nuand_freq_correction_value_ != scanner_blade_rf_->vctcxo_trim_value_) {
-		update_vctcxo_trim(scanner_blade_rf_->eeprom_.cal_.nuand_freq_correction_value_);
-	}
 
 	enable_blade_rx();
 
