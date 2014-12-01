@@ -9,9 +9,13 @@ set (rf_phreaker_api_VERSION_TWEAK 0)
 
 # Set the source files.
 set (rf_phreaker_api_SRCS 
+	data_wrappers.h
+	log_handler.h
 	rf_phreaker_api.cpp
 	rf_phreaker_api.h
-	rf_phreaker_api_converter.h
+	rf_phreaker_utility.h
+	rf_phreaker_conversion.h
+	rf_phreaker_handler.h
 	rf_phreaker_impl.cpp
 	rf_phreaker_impl.h
 	measurement_io.h

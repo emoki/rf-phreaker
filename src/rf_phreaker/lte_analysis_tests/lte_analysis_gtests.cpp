@@ -28,9 +28,9 @@ TEST(LteAnalysisTests, TestGeneral)
 		// ./cmake_build_directory			(cmake build directory)
 		// ./lte_phreaker					(git root directory)
 		// ./lte_phreaker/test_files		(directory containing test data)
-		std::string folder_path = "../../../../rf_phreaker/test_files/for_rajesh/";
+		std::string folder_path = "../../../../rf_phreaker/test_files/cobham3/";
 
-		std::string prefix = "lte_10mhz_sib6_1412915486_";
+		std::string prefix = "lte_layer_3_1413296677_";
 		std::string suffix = ".bin";
 		//std::string suffix = ".txt";
 
