@@ -60,8 +60,7 @@ void BladeDevice::setActiveModule(bladerf_module module)
 	activeModule = module;
 }
 
-// this moves the device, because it is a resource, only 1 can contain it.
-// could use some shared pointer, but this should work atm.
+
 BladeDevice::~BladeDevice()
 {
 	if (isOpen && !isIndirect)
@@ -165,6 +164,21 @@ void BladeDevice::setConfigGPIO(uint32_t index, bool val)
 
 
 
+
+
+
+
+//----------- Cleaner NIOS IO ---------------
+uint32_t BladeDevice::niosRPC(NiosRPC addr, uint32_t send){
+	uint32_t resp = 0;
+	BladeError::check( bladerf_nios_rpc( handle, addr, send, &resp) );
+	return resp;
+}
+
+
+
+
+
 uint32_t BladeDevice::xboardExpressRead(uint8_t addr, uint8_t* data){
 	uint32_t count = 0;
 	BladeError::check( bladerf_xb_express_read(handle, addr, data, &count) );
@@ -172,7 +186,7 @@ uint32_t BladeDevice::xboardExpressRead(uint8_t addr, uint8_t* data){
 }
 
 // ----------- [ XB SPI link  ] -------
-// Sends 'send' and returns the 32bit reply.
+// Sends 'send' and returns the 8bit reply.
 uint8_t BladeDevice::xboardSPI(uint8_t send)
 {
 	uint8_t resp = 0;

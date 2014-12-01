@@ -14,7 +14,7 @@
 #include <string>
 #include <libbladeRF.h>
 
-// minwindef.h has these defined for some reason...
+// minwindef.h has these defined for some reason... they screw with GPIODirection enum.
 #ifdef IN
 	#undef IN
 #endif
@@ -34,6 +34,11 @@ namespace rf_phreaker { namespace gps_comm {
 			IN = 0,
 			OUT = 1
 		};
+		enum NiosRPC : uint8_t
+		{
+			GPS_CALIBRATION_START = 64,
+			GPS_CALIBRATION_READ = 68
+		};
 	private:
 		bool isIndirect;	//whether or not an open device was provided on construction (true), or not(false).
 		bool null;
@@ -44,8 +49,10 @@ namespace rf_phreaker { namespace gps_comm {
 		bool isOpen;
 		bladerf_module activeModule;
 
-		// could make a template later... not really needed now though
-		bool getbit(uint32_t field, int i); // from zero
+		// indexed from zero
+		bool getbit(uint32_t field, int i); 
+
+		// indexed from zero
 		uint32_t setbit(uint32_t field, int i, bool val);
 
 	public:
@@ -83,6 +90,9 @@ namespace rf_phreaker { namespace gps_comm {
 
 		// data size must be >= 14  !!!!
 		uint32_t xboardExpressRead(uint8_t addr, uint8_t* data);
+
+
+		uint32_t niosRPC(NiosRPC addr, uint32_t send);
 
 		uint8_t xboardSPI(uint8_t send);
 

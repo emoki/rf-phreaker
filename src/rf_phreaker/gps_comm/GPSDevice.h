@@ -1,12 +1,12 @@
 /*
- * OriginGPSDevice.h
+ * GPSDevice.h
  *
  *  Created on: Jul 26, 2014
  *      Author: ck
  */
 
-#ifndef ORIGINGPSDEVICE_H_
-#define ORIGINGPSDEVICE_H_
+#ifndef GPSDevice_H_
+#define GPSDevice_H_
 
 
 #include <string>
@@ -24,15 +24,15 @@
 namespace rf_phreaker { namespace gps_comm {
 
 
-	class OriginGPSDeviceError : public gps_comm_error {
+	class GPSDeviceError : public gps_comm_error {
 	public:
 		std::string message;
-		OriginGPSDeviceError(std::string msg) 
+		GPSDeviceError(std::string msg) 
 			: gps_comm_error(msg), message(msg)
 		{};
 	};
 
-	class OriginGPSDevice {
+	class GPSDevice {
 	public:
 		enum DataInterface
 		{
@@ -67,8 +67,8 @@ namespace rf_phreaker { namespace gps_comm {
 		GPSService service;					//contains the gps state
 
 
-		OriginGPSDevice(FrontEndBoard& fb);
-		virtual ~OriginGPSDevice();
+		GPSDevice(FrontEndBoard& fb);
+		virtual ~GPSDevice();
 
 		bool awake();								// is the GPS chip on
 		void setPower(bool set_on);					//tries to put the GPS chip into the state requested, 5sec timeout
@@ -77,14 +77,14 @@ namespace rf_phreaker { namespace gps_comm {
 		void sendCommand(std::string cmd);			//send custom string to the GPS chip.
 		void sendCommand(NMEACommand& cmd);			//sends a standard command to the GPS chip
 
-		void disableAllNMEAOutput();				// stops all messages from the GPS chip, and sets baud to 9600
+		void disableAllNMEAOutput();				// stops all messages from the GPS chip
 		void sendQuery(std::vector<NMEASentence::MessageID> types);		//will query the gps chip for a single update
 		// to each of the messages listed
 		// -- Query Usage --
-		//  sendQuery( /*NMEASentence::MessageID vector list*/ );
-		//    // \-> Will request the information...
-		//  update();
-		//	  // \-> Will read all the requested information, putting it into the fix.
+		//  sendQuery( /*NMEASentence::MessageID vector list*/ );		//  Will request the information...
+		//    
+		//  update();		//  Will read all the requested information, putting it into the fix.
+		//	  
 
 		// Sets which interface (SPI/UART) the parser uses as input, or where to send commands.
 		void setInterface(DataInterface inter);
@@ -96,9 +96,16 @@ namespace rf_phreaker { namespace gps_comm {
 		uint32_t fast_update();			//returns number of bytes read
 
 
+		void uartBaud(uint16_t b);
 
+		uint32_t synchronizeUart();			//called to make sure the baud rates are correct on NIOS and gps chip.
+
+		void requestNewCalibrationCount(uint8_t samples);		//call to initiate a calibration count using 'samples' gps pps pulses
+		uint32_t checkCalibrationCount();					//call periodically to check if the measurement is available. >0 if measurment is complete.
+
+
+	private:
 		// ----- Low Level Data Transfer Functions -------
-		// You shouldn't have to use these...
 
 		// SPI
 		uint8_t spiWrite(uint8_t data);	//writes byte to gps and returns the response, without parsing it
@@ -108,12 +115,9 @@ namespace rf_phreaker { namespace gps_comm {
 		void uartWrite(uint8_t data);
 		uint32_t uartHasData();						//returns number of bytes buffered inside of NIOS
 		uint32_t uartRead(uint32_t* data = 0);		//returns the num bytes read, also
-		//can return data
-		void uartBaud(uint16_t b);
 
-		uint32_t synchronizeUart();			//called to make sure the baud rates are correct on NIOS and gps chip.
 	};
 
 }} 
 
-#endif /* ORIGINGPSDEVICE_H_ */
+#endif /* GPSDevice_H_ */

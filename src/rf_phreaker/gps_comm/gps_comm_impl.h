@@ -5,7 +5,7 @@
 #include "rf_phreaker/common/exception_types.h"
 #include "rf_phreaker/gps_comm/BladeDevice.h"
 #include "rf_phreaker/gps_comm/FrontEndBoard.h"
-#include "rf_phreaker/gps_comm/OriginGPSDevice.h"
+#include "rf_phreaker/gps_comm/GPSDevice.h"
 
 
 namespace rf_phreaker { namespace gps_comm {
@@ -20,7 +20,7 @@ public:
 		try {
 			blade_device_.reset(new BladeDevice(blade));
 			front_end_board_.reset(new FrontEndBoard(*blade_device_));
-			origin_gps_device_.reset(new OriginGPSDevice(*front_end_board_));
+			origin_gps_device_.reset(new GPSDevice(*front_end_board_));
 
 			// -- Pulls the reset pin for 0.5 sec.
 			origin_gps_device_->reset();
@@ -30,8 +30,8 @@ public:
 
 
 			// -- Pick Data Interface
-			origin_gps_device_->setInterface(use_spi ? OriginGPSDevice::DataInterface::SPI :
-				OriginGPSDevice::DataInterface::UART);
+			origin_gps_device_->setInterface(use_spi ? GPSDevice::DataInterface::SPI :
+				GPSDevice::DataInterface::UART);
 
 			// -- Enable Debug information
 			//origin_gps_device_->service.parser.log = true;	//shows nmea success / fail info
@@ -39,7 +39,7 @@ public:
 
 
 
-			// -- START GPS DEVICE     [throws OriginGPSDevice:gps_comm_error]
+			// -- START GPS DEVICE     [throws GPSDevice:gps_comm_error]
 			// set power now will try it's best to put device in the state requested within 5 sec timeout, otherwise error
 			origin_gps_device_->setPower(true);
 
@@ -72,10 +72,10 @@ public:
 			});
 
 
-			if(origin_gps_device_->getInterface() == OriginGPSDevice::DataInterface::SPI) {
+			if(origin_gps_device_->getInterface() == GPSDevice::DataInterface::SPI) {
 				// can set message rates here too, but SPI is so much less problematic, we can do fine with the defaults.
 			}
-			else if(origin_gps_device_->getInterface() == OriginGPSDevice::DataInterface::UART) {
+			else if(origin_gps_device_->getInterface() == GPSDevice::DataInterface::UART) {
 
 				// -- Make sure we are communicating with the right startup baud in order to change settings.
 				// -- This will check the data coming in and if it's unreadable, it will automatically adjust the baud rate.
@@ -133,6 +133,7 @@ public:
 		if(origin_gps_device_)
 			origin_gps_device_->setPower(false);
 	}
+	
 
 	rf_phreaker::gps get_latest_gps() {
 
@@ -186,10 +187,18 @@ public:
 		}
 	}
 
+	void initiate_pps_clock_counter(uint8_t samples){
+		origin_gps_device_->requestNewCalibrationCount(samples);
+	}
+
+	uint32_t read_pps_clock_counter(){
+		return origin_gps_device_->checkCalibrationCount();
+	}
+
 private:
 	std::unique_ptr<BladeDevice> blade_device_;
 	std::unique_ptr<FrontEndBoard> front_end_board_;
-	std::unique_ptr<OriginGPSDevice> origin_gps_device_;
+	std::unique_ptr<GPSDevice> origin_gps_device_;
 };
 
 }}

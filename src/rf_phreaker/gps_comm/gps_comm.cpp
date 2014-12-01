@@ -22,4 +22,12 @@ rf_phreaker::gps gps_comm::get_latest_gps(){
 	return impl_->get_latest_gps();
 }
 
+void gps_comm::initiate_pps_clock_counter(uint8_t samples){
+	impl_->initiate_pps_clock_counter(samples);
+}
+
+uint32_t gps_comm::read_pps_clock_counter(){
+	return impl_->read_pps_clock_counter();
+}
+
 }}

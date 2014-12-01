@@ -61,8 +61,8 @@ void FrontEndBoard::setFilterBand(uint32_t x, bool on){
 	switch (x)
 	{
 	case 1:		setPin(ControlPin::CSx_BAND_X1, on); break;
-	case 2:		setPin(ControlPin::CSx_BAND_X1, on); break;
-	case 3:		setPin(ControlPin::CSx_BAND_X1, on); break;
+	case 2:		setPin(ControlPin::CSx_BAND_X2, on); break;
+	case 3:		setPin(ControlPin::CSx_BAND_X3, on); break;
 	default: break;
 	}
 }

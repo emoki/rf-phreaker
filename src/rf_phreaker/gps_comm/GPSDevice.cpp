@@ -1,11 +1,11 @@
 /*
- * OriginGPSDevice.cpp
+ * GPSDevice.cpp
  *
  *  Created on: Jul 26, 2014
  *      Author: me
  */
 
-#include "OriginGPSDevice.h"
+#include "GPSDevice.h"
 #include "NMEAParser.h"
 #include <thread>
 #include <typeinfo>
@@ -19,9 +19,9 @@ namespace rf_phreaker { namespace gps_comm {
 
 
 
-	const uint8_t OriginGPSDevice::gps_idle[] = { 0xA7, 0xB4 };
+	const uint8_t GPSDevice::gps_idle[] = { 0xA7, 0xB4 };
 
-	OriginGPSDevice::OriginGPSDevice(FrontEndBoard& fb) : frontend(fb), maxSPIUpdateBytes(SPI_MAX_UPDATE_BYTES) {
+	GPSDevice::GPSDevice(FrontEndBoard& fb) : frontend(fb), maxSPIUpdateBytes(SPI_MAX_UPDATE_BYTES) {
 		log = false;
 
 		service.fix.scanningDeviceSerial = frontend.getBlade().getSerial();
@@ -46,20 +46,20 @@ namespace rf_phreaker { namespace gps_comm {
 	}
 
 
-	OriginGPSDevice::~OriginGPSDevice(){
+	GPSDevice::~GPSDevice(){
 
 	}
 
 
-	void OriginGPSDevice::setInterface(DataInterface inter){
+	void GPSDevice::setInterface(DataInterface inter){
 		dataInterface = inter;
 	}
 
-	OriginGPSDevice::DataInterface OriginGPSDevice::getInterface(){
+	GPSDevice::DataInterface GPSDevice::getInterface(){
 		return dataInterface;
 	}
 
-	void OriginGPSDevice::togglePower(){
+	void GPSDevice::togglePower(){
 		frontend.setPin(FrontEndBoard::ControlPin::GPS_ON_OFF, true);
 		this_thread::sleep_for(chrono::milliseconds(25));
 		frontend.setPin(FrontEndBoard::ControlPin::GPS_ON_OFF, false);
@@ -68,7 +68,7 @@ namespace rf_phreaker { namespace gps_comm {
 
 	// wakeup signal is reliable, so this checks to make sure it is in right state.
 	// if wakeup is unreliable (like if board disconnected), a timeout will occur, and exception is thrown.
-	void OriginGPSDevice::setPower(bool set_on){
+	void GPSDevice::setPower(bool set_on){
 
 		// Origin module responds to 100ms on/off pulse (like a button press) to
 		// toggle it on, and then off again sometime later.
@@ -102,7 +102,7 @@ namespace rf_phreaker { namespace gps_comm {
 			}
 			// if couldn't turn off in timeout...
 			if(!awake()) 
-				throw OriginGPSDeviceError("Could not turn on GPS device. Wakeup timed out.");
+				throw GPSDeviceError("Could not turn on GPS device. Wakeup timed out.");
 		}
 		else
 		{			// TURN OFF
@@ -127,7 +127,7 @@ namespace rf_phreaker { namespace gps_comm {
 			}
 			// if couldn't turn off in timeout...
 			if (awake())
-				throw OriginGPSDeviceError("Could not turn off GPS device. Wakeup timed out.");
+				throw GPSDeviceError("Could not turn off GPS device. Wakeup timed out.");
 		}
 
 		if (log){
@@ -135,7 +135,7 @@ namespace rf_phreaker { namespace gps_comm {
 		}
 
 	}
-	void OriginGPSDevice::reset(){
+	void GPSDevice::reset(){
 
 		frontend.setPin(FrontEndBoard::ControlPin::GPS_RESET, false);
 		this_thread::sleep_for(chrono::milliseconds(500));
@@ -144,19 +144,26 @@ namespace rf_phreaker { namespace gps_comm {
 	}
 
 
-	bool OriginGPSDevice::awake()
+	bool GPSDevice::awake()
 	{
 		return frontend.getPin(FrontEndBoard::ControlPin::GPS_WAKEUP);
 	}
 
 
-	GPSFix OriginGPSDevice::getFix(){
+	GPSFix GPSDevice::getFix(){
 
 		return service.fix;
 	}
 
+	void GPSDevice::requestNewCalibrationCount(uint8_t samples){
+		frontend.getBlade().niosRPC(BladeDevice::NiosRPC::GPS_CALIBRATION_START, samples);
+	}
+	uint32_t GPSDevice::checkCalibrationCount(){
+		return frontend.getBlade().niosRPC(BladeDevice::NiosRPC::GPS_CALIBRATION_READ, 0);
+	}
 
-	void OriginGPSDevice::disableAllNMEAOutput(){
+
+	void GPSDevice::disableAllNMEAOutput(){
 		//configure the gps settings
 
 		NMEACommandSerialConfiguration cfg;
@@ -187,7 +194,7 @@ namespace rf_phreaker { namespace gps_comm {
 	}
 
 
-	void OriginGPSDevice::sendQuery(vector<NMEASentence::MessageID> types){
+	void GPSDevice::sendQuery(vector<NMEASentence::MessageID> types){
 
 		NMEACommandQueryRate query;
 		// --- query these ONCE --
@@ -200,7 +207,7 @@ namespace rf_phreaker { namespace gps_comm {
 	}
 
 
-	void OriginGPSDevice::sendCommand(NMEACommand& cmd){
+	void GPSDevice::sendCommand(NMEACommand& cmd){
 		string scmd = cmd.toString();
 		if (log){
 			cout << "Sending command to gps: " << scmd << endl;
@@ -210,7 +217,7 @@ namespace rf_phreaker { namespace gps_comm {
 	};
 
 
-	void OriginGPSDevice::sendCommand(std::string cmd){
+	void GPSDevice::sendCommand(std::string cmd){
 		if (dataInterface == DataInterface::SPI){
 			
 			uint32_t send = 0;
@@ -236,7 +243,7 @@ namespace rf_phreaker { namespace gps_comm {
 
 
 	//decides how to interpret each new incoming byte, regardless of interface
-	void OriginGPSDevice::interpretOriginBytes(uint8_t byte){
+	void GPSDevice::interpretOriginBytes(uint8_t byte){
 		if (log){
 			
 			std::cout << " [" << std::hex << std::showbase << std::setw(2) << (int)byte << std::dec << std::noshowbase << "] ";
@@ -265,7 +272,7 @@ namespace rf_phreaker { namespace gps_comm {
 
 
 	//handles bytes from uart interface to uart buffer
-	void OriginGPSDevice::handleUARTByte(uint8_t b){
+	void GPSDevice::handleUARTByte(uint8_t b){
 		if (dataInterface == DataInterface::UART)
 		{
 			interpretOriginBytes(b);
@@ -274,7 +281,7 @@ namespace rf_phreaker { namespace gps_comm {
 
 
 	//handles bytes from spi interface to spi buffer
-	void OriginGPSDevice::handleSPIByte(uint8_t b){
+	void GPSDevice::handleSPIByte(uint8_t b){
 		if (dataInterface == DataInterface::SPI)
 		{
 			// gps will return 0xA7, 0xB4 bytes when there is no data....
@@ -287,7 +294,7 @@ namespace rf_phreaker { namespace gps_comm {
 
 
 
-	uint32_t OriginGPSDevice::update(){
+	uint32_t GPSDevice::update(){
 
 		uint32_t bytesread = 0;
 		if (dataInterface == DataInterface::SPI)
@@ -300,7 +307,7 @@ namespace rf_phreaker { namespace gps_comm {
 			{
 				if (b == ((uint8_t)-1)){
 					//All spi input is high - board has disconnected...
-					throw OriginGPSDeviceError("GPS device SPI interface unavailable! Wrong board? Board removed?");
+					throw GPSDeviceError("GPS device SPI interface unavailable! Wrong board? Board removed?");
 				}
 
 				if (log){
@@ -346,7 +353,7 @@ namespace rf_phreaker { namespace gps_comm {
 				// if incoming uart data is zero - which should not happen from GPS because NMEA only sends ascii - then no more data
 				// if incoming uart data is 0xff, then the uart is disconnected or faulty in some way.
 				if (data == ((uint32_t)-1)  ){
-					throw OriginGPSDeviceError("GPS device UART interface unavailable! Wrong board? Board removed? Wrong FPGA load?");
+					throw GPSDeviceError("GPS device UART interface unavailable! Wrong board? Board removed? Wrong FPGA load?");
 				}
 
 				if (bytesread > 1024){	//1024 is internal buffer size of nios
@@ -379,12 +386,12 @@ namespace rf_phreaker { namespace gps_comm {
 	}
 
 	// DO NOT CALL
-	uint32_t OriginGPSDevice::fast_update(){
+	uint32_t GPSDevice::fast_update(){
 		// The idea is to send 14 bytes of data per  USB transaction to the NIOS instead of the 1 byte as it stands now.
 		// The libbladerf functions are ready, but the NIOS code is not implemented. It requires setting up a new handler
 		// for a different "magic." Did not finish because current speeds are acceptable.
 
-		throw OriginGPSDeviceError("GPS Error: fast_update() is not implemented. The shell is ready in libbladerf but it's not ready on Nios.");
+		throw GPSDeviceError("GPS Error: fast_update() is not implemented. The shell is ready in libbladerf but it's not ready on Nios.");
 
 		uint32_t bytesread = 0;
 		if (dataInterface == DataInterface::SPI)
@@ -452,22 +459,22 @@ namespace rf_phreaker { namespace gps_comm {
 
 
 	//idle byte rotation is only used for spi interface
-	uint8_t OriginGPSDevice::getIdleByte(){
+	uint8_t GPSDevice::getIdleByte(){
 		idleindex++;
 		idleindex = idleindex % sizeof(gps_idle);
 		//cout << "gps idle: " << (int)(gps_idle[idleindex+1]) << "   -->index:" << idleindex << endl;
 
-		return OriginGPSDevice::gps_idle[idleindex];
+		return GPSDevice::gps_idle[idleindex];
 	}
 
 
-	uint8_t OriginGPSDevice::spiWrite(uint8_t data)
+	uint8_t GPSDevice::spiWrite(uint8_t data)
 	{
 		return frontend.getBlade().xboardSPI(data);			//returns 0 for all
 	}
 
 	// Reads a 4 byte sequence, handles the idle bytes.
-	uint8_t OriginGPSDevice::spiRead()
+	uint8_t GPSDevice::spiRead()
 	{
 		// Reading is sending a 0. 
 		//uint8_t b = frontend.getBlade().xboardSPI(getIdleByte());	//write idle for test
@@ -480,18 +487,18 @@ namespace rf_phreaker { namespace gps_comm {
 	}
 
 
-	uint32_t OriginGPSDevice::uartHasData(){
+	uint32_t GPSDevice::uartHasData(){
 		uint32_t amt = frontend.getBlade().xboardUARTHasData();
 		return amt;
 	}
 
 
-	void OriginGPSDevice::uartWrite(uint8_t data){
+	void GPSDevice::uartWrite(uint8_t data){
 		frontend.getBlade().xboardUARTWrite(data);
 	}
 
 
-	uint32_t OriginGPSDevice::uartRead(uint32_t* data){
+	uint32_t GPSDevice::uartRead(uint32_t* data){
 
 		uint32_t d = frontend.getBlade().xboardUARTRead();
 		uint32_t num = 0;
@@ -515,14 +522,14 @@ namespace rf_phreaker { namespace gps_comm {
 	}
 
 
-	void OriginGPSDevice::uartBaud(uint16_t b){
+	void GPSDevice::uartBaud(uint16_t b){
 		frontend.getBlade().xboardUARTBaud(b);
 	}
 
 	// This collects more bytes before concluding what baud the gps is on. Also cycles through all the bauds
 	// so we don't have to be given default_baud. This might not have been the right place to implement because now I have a parser in
 	// the GPS device... but it's just so much better.
-	uint32_t OriginGPSDevice::synchronizeUart(){
+	uint32_t GPSDevice::synchronizeUart(){
 		// ----------------------------------------
 		// This is muuuuuuuuuuuuuuuuuuch better!
 		// ----------------------------------------
@@ -639,7 +646,7 @@ namespace rf_phreaker { namespace gps_comm {
 				}
 
 				if (data == ((uint32_t)-1)){
-					throw OriginGPSDeviceError("GPS device UART interface unavailable! Wrong board? Board removed? Wrong FPGA load?");
+					throw GPSDeviceError("GPS device UART interface unavailable! Wrong board? Board removed? Wrong FPGA load?");
 				}
 
 				elapsed = (clock() - checkstart) / (float)CLOCKS_PER_SEC;

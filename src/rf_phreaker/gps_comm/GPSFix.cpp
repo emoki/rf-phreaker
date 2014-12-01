@@ -56,7 +56,7 @@ namespace rf_phreaker { namespace gps_comm {
 			clear();
 		}
 
-		//satellites.push_back(sat);
+		satellites.push_back(sat);
 	}
 	double GPSAlmanac::percentComplete(){
 		if (totalPages == 0){
@@ -304,22 +304,22 @@ namespace rf_phreaker { namespace gps_comm {
 			<< "| Scanning Device: \t" << scanningDeviceSerial << endl
 			<< "| Satellites: \t\t" << trackingSatellites << " (tracking) of " << visibleSatellites << " (visible)" << endl
 			<< "| < Fix Details >" << endl
-			<< "|   Age:             " << timeSinceLastFix().count() << " ms" << endl
-			<< "|   Timestamp:       " << timestamp.toString() << "   UTC    (raw: " << timestamp.rawtime << " time, " << timestamp.rawdate << " date)" << endl
-			<< "|   Raw Status:      " << status << "  (V=Void, A=Active)" << endl
-			<< "|   Type:            " << (int)type << "  (1=none, 2=2D, 3=3D)" << endl
-			<< "|   Quality:         " << (int)quality << "  (0=invalid, 1=std fix, 6=estimate)" << endl
-			<< "|   Lat/Lon (N,E):   " << setprecision(6) << fixed << latitude << ", " << longitude << endl;
+			<< "|   Age:                " << timeSinceLastFix().count() << " ms" << endl
+			<< "|   Timestamp:          " << timestamp.toString() << "   UTC    (raw: " << timestamp.rawtime << " time, " << timestamp.rawdate << " date)" << endl
+			<< "|   Raw Status:         " << status << "  (V=Void, A=Active)" << endl
+			<< "|   Type:               " << (int)type << "  (1=none, 2=2D, 3=3D)" << endl
+			<< "|   Quality:            " << (int)quality << "  (0=invalid, 1=std fix, 6=estimate)" << endl
+			<< "|   Lat/Lon (N,E):      " << setprecision(6) << fixed << latitude << ", " << longitude << endl;
 
 		ss.flags(oldflags);  //reset
 
-		ss << "|   DOP (P,H,V):     " << dilution << ",   " << horizontalDilution << ",   " << verticalDilution << endl
-			<< "|   Accuracy(H,V):   " << horizontalAccuracy() << " m,   " << verticalAccuracy() << " m" << endl;
+		ss << "|   DOP (P,H,V):        " << dilution << ",   " << horizontalDilution << ",   " << verticalDilution << endl
+			<< "|   Accuracy(H,V):      " << horizontalAccuracy() << " m,   " << verticalAccuracy() << " m" << endl;
 
-		ss << "|   Altitude:        " << altitude << " m" << endl
-			<< "|   Speed:           " << speed << " km/h" << endl
-			<< "|   Travel Dir:      " << travelAngle << " deg  [" << travelAngleToCompassDirection(travelAngle) << "]" << endl
-			<< "|   SNR:             avg: " << almanac.averageSNR() << " dB   [min: " << almanac.minSNR() << " dB,  max:" << almanac.maxSNR() << " dB]" << endl;
+		ss << "|   Altitude:           " << altitude << " m" << endl
+			<< "|   Speed:              " << speed << " km/h" << endl
+			<< "|   Travel Dir:         " << travelAngle << " deg  [" << travelAngleToCompassDirection(travelAngle) << "]" << endl
+			<< "|   SNR:                avg: " << almanac.averageSNR() << " dB   [min: " << almanac.minSNR() << " dB,  max:" << almanac.maxSNR() << " dB]" << endl;
 
 		ss << "| < Almanac (" << almanac.percentComplete() << "%) >" << endl;
 		if (almanac.satellites.size() == 0){

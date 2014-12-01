@@ -34,8 +34,8 @@ set (gps_comm_SRCS
 	NMEAParser.h
 	NumberConversion.cpp
 	NumberConversion.h
-	OriginGPSDevice.h
-	OriginGPSDevice.cpp	
+	GPSDevice.h
+	GPSDevice.cpp	
 	${SRC_PLATFORM_SPECIFIC}/stdafx.cpp)
 
 include_directories(${libbladeRF_SOURCE_DIR}/include)	

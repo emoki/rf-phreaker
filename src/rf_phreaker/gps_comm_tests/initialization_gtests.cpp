@@ -27,7 +27,7 @@ inline std::ostream& operator<<(std::ostream &os, const rf_phreaker::gps &t) {
 	return os;
 }
 
-TEST(ReadWriteEEPROM, TestGeneral) {
+TEST(ReadWriteEEPROM, DISABLED_TestGeneral) {
 
 	bladerf *device;
 	std::unique_ptr<BladeDevice> blade_device_;
@@ -46,7 +46,7 @@ TEST(ReadWriteEEPROM, TestGeneral) {
 	blade_device_.reset(new BladeDevice(device));
 
 	std::cout << " Loading FPGA... " << std::endl;
-	sts = bladerf_load_fpga(device, "fpga_load-fw-v2.rbf");
+	sts = bladerf_load_fpga(device, "fpga_load.rbf");
 
 	if(sts != 0) {
 		std::cout << "==== FPGA LOAD FAILED! ====  " << bladerf_strerror(sts) << std::endl;
