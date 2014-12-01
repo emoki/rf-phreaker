@@ -29,13 +29,19 @@ public:
 
 	virtual std::future<const scanner*> get_scanner() = 0;
 
-	virtual std::future<void> write_vctcxo_trim_and_update_calibration(frequency_type carrier_freq, frequency_type freq_shift) = 0;
+	virtual std::future<void> calculate_vctcxo_trim_and_update_calibration(double error_hz) = 0;
 
-	virtual std::future<void> update_vctcxo_trim(frequency_type carrier_freq, frequency_type freq_shift) = 0;
+	virtual std::future<void> calculate_and_update_vctcxo_trim(double error_hz) = 0;
 
 	virtual std::future<void> write_license(const license &license) = 0;
 
 	virtual std::future<rf_phreaker::gps> get_gps_data() = 0;
+
+	virtual std::future<void> start_gps_1pps_integration(int seconds) = 0;
+
+	virtual std::future<bool> attempt_gps_1pps_calibration() = 0;
+
+	virtual std::future<gps_1pps_integration> get_last_valid_gps_1pps_integration() = 0;
 
 	virtual std::future<measurement_info> get_rf_data(frequency_type freq, time_type time_ns, bandwidth_type bandwidth, frequency_type sampling_rate = 0) = 0;
 

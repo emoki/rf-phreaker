@@ -48,15 +48,15 @@ public:
 		});
 	}
 
-	virtual std::future<void> write_vctcxo_trim_and_update_calibration(frequency_type carrier_freq, frequency_type freq_shift) {
+	virtual std::future<void> calculate_vctcxo_trim_and_update_calibration(double error_hz) {
 		return controller_([=](blade_rf_controller &c) {
-			return c.write_vctcxo_trim_and_update_calibration(carrier_freq, freq_shift);
+			return c.calculate_vctcxo_trim_and_update_calibration(error_hz);
 		});
 	}
 
-	virtual std::future<void> update_vctcxo_trim(frequency_type carrier_freq, frequency_type freq_shift) {
+	virtual std::future<void> calculate_and_update_vctcxo_trim(double error_hz) {
 		return controller_([=](blade_rf_controller &c) {
-			return c.update_vctcxo_trim(carrier_freq, freq_shift);
+			return c.calculate_and_update_vctcxo_trim(error_hz);
 		});
 	}
 
@@ -87,6 +87,24 @@ public:
 	virtual std::future<void> set_log_level(int level) {
 		return controller_([=](blade_rf_controller &c) {
 			return c.set_log_level(level);
+		});
+	}
+
+	virtual std::future<void> start_gps_1pps_integration(int seconds) {
+		return controller_([=](blade_rf_controller &c) {
+			return c.start_gps_1pps_integration(seconds);
+		});
+	}
+
+	virtual std::future<bool> attempt_gps_1pps_calibration() {
+		return controller_([=](blade_rf_controller &c) {
+			return c.attempt_gps_1pps_calibration();
+		});
+	}
+
+	virtual std::future<gps_1pps_integration> get_last_valid_gps_1pps_integration() {
+		return controller_([=](blade_rf_controller &c) {
+			return c.get_last_valid_gps_1pps_integration();
 		});
 	}
 

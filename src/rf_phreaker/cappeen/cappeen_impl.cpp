@@ -7,6 +7,7 @@
 #include "rf_phreaker/processing/frequency_range_creation.h"
 #include "rf_phreaker/common/log.h"
 #include "tbb/task_scheduler_init.h"
+#include "boost/date_time/posix_time/posix_time.hpp"
 
 using namespace rf_phreaker;
 using namespace rf_phreaker::cappeen_api;
@@ -271,7 +272,7 @@ long cappeen_impl::open_unit(const char *serial, unsigned int buf_size)
 long cappeen_impl::close_unit(const char *serial, unsigned int buf_size)
 {
 	long status = 0;
-	try{
+	try {
 		LOG(LINFO) << "Closing unit " << serial << "...";
 		std::lock_guard<std::recursive_mutex> lock(mutex_);
 		verify_init();
@@ -283,11 +284,24 @@ long cappeen_impl::close_unit(const char *serial, unsigned int buf_size)
 		if(processing_graph_)
 			processing_graph_->cancel_and_wait();
 
+		auto hw = scanner_->get_scanner().get()->get_hardware();
+
 		std::string str_serial(serial, buf_size);
-		auto current_scanner_id = scanner_->get_scanner().get()->get_hardware().serial_;
+		auto current_scanner_id = hw.serial_;
 		if(current_scanner_id != serial)
 			throw cappeen_api_error("Unit (" + str_serial + ") was not found.", COMMNOTFOUND);
 
+		// Write gps 1pps calibration to EEPROM if neccessary.
+		auto gps_1pps = scanner_->get_last_valid_gps_1pps_integration().get();
+		auto time_diff = gps_1pps.time_calculated() - hw.frequency_correction_calibration_date_;
+		LOG(LDEBUG) << "Frequency correction value last updated on " << boost::posix_time::to_simple_string(boost::posix_time::from_time_t(hw.frequency_correction_calibration_date_))
+			<< ".  GPS 1PPS calibration last occurred on " << boost::posix_time::to_simple_string(boost::posix_time::from_time_t(gps_1pps.time_calculated())) << ".";
+		if(gps_1pps.is_valid() && time_diff > config_.eeprom_update_period_for_1pps_calibration_minutes_ * 60) {
+			LOG(LDEBUG) << "Storing latest GPS 1PPS calibration using " << gps_1pps.clock_ticks() << " clock ticks for an error of " << gps_1pps.error_in_hz() << " Hz.";
+			scanner_->calculate_vctcxo_trim_and_update_calibration(gps_1pps.error_in_hz());
+		}
+
+		// Close scanner.
 		scanner_->close_scanner().get();
 		delegate_->change_beagle_state(BEAGLE_USBCLOSED);
 		LOG(LINFO) << "Closed unit " << serial << " successfully.";
@@ -522,6 +536,9 @@ long cappeen_impl::start_frequency_correction(const beagle_api::collection_info 
 		if(collection_containers.empty())
 			throw cappeen_api_error("Please input at least one WCDMA band to start frequency correction.", GENERAL_ERROR);
 
+		if(gps_graph_)
+			gps_graph_->disable_1pps_calibration();
+
 		frequency_correction_graph_->start(scanner_.get(), data_output_.get(), collection_containers, config_);
 
 		// Temp sleep to allow graph thread to get going.
@@ -571,6 +588,9 @@ long cappeen_impl::start_frequency_correction(uint32_t *wcdma_frequencies, int n
 
 		if(num_channels <= 0)
 			throw cappeen_api_error("Please input at least one WCDMA frequency to start frequency correction.", GENERAL_ERROR);
+
+		if(gps_graph_)
+			gps_graph_->disable_1pps_calibration();
 
 		frequency_correction_graph_->start(scanner_.get(), data_output_.get(), containers, config_);
 

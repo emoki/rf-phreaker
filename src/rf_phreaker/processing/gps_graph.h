@@ -40,15 +40,20 @@ public:
 		thread_.reset(new std::thread([this](rf_phreaker::scanner::scanner_controller_interface *sc, data_output_async *out, const settings &config) {
 			try {
 				start_node_.reset();
+				gps_command_entry_point_.reset();
 				nodes_.clear();
 
 				graph_ = (std::make_shared<tbb::flow::graph>());
 
-				start_node_ = std::make_shared<gps_start_node>(*graph_, [=](tbb::flow::continue_msg&) { return true; }, false);
+				start_node_ = std::make_shared<gps_start_node>(*graph_, [=](gps_command&) { return true; }, false);
 
 				auto gps = std::make_shared<gps_node>(*graph_, tbb::flow::serial, gps_body(sc, out, config));
 
 				start_node_->register_successor(*gps);
+
+				gps_command_entry_point_ = std::make_shared<gps_queue_node>(*graph_);
+				
+				gps_command_entry_point_->register_successor(*gps);
 
 				nodes_.push_back(gps);
 
@@ -70,8 +75,18 @@ public:
 		}, sc, out, config));
 	}
 
-	void cancel_and_wait()
-	{
+	void enable_1pps_calibration() {
+		if(thread_ && gps_command_entry_point_) {
+			gps_command_entry_point_->try_put(gps_command::ENABLE_1PPS);
+		}
+	}
+
+	void disable_1pps_calibration() {
+		if(thread_ && gps_command_entry_point_) {
+			gps_command_entry_point_->try_put(gps_command::DISABLE_1PPS);
+		}
+	}
+
 	void cancel_and_wait() {
 		std::lock_guard<std::recursive_mutex> lock(mutex_);
 		cancel();
@@ -105,6 +120,8 @@ private:
 	std::vector<std::shared_ptr<tbb::flow::graph_node>> nodes_;
 
 	std::shared_ptr<gps_start_node> start_node_;
+
+	std::shared_ptr<gps_queue_node> gps_command_entry_point_;
 
 	std::unique_ptr<std::thread> thread_;
 

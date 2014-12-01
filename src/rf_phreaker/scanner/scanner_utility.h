@@ -35,6 +35,22 @@ std::string usb_backend_to_string(int usb_backend) {
 		return "UNKNOWN_USB_BACKEND";
 	}
 }
+
+// hz per dac lsb
+double dac_trim_hz_per_lsb_coefficient() {
+	double vref = 2.5;									// dac Vref
+	double dac_v_lsb = vref / (double)(1 << 16);		// voltage per lsb = vref / 2^n		== 0.03814697265625 mV
+
+	double vctcxo_frequency_tuning_range_ppm = 7.25*2.0;	// ASVTX-12 minimum +/- 5ppm and maximum +/- 9.5  avg would be 
+	double vctcxo_voltage_tuning_range = 2.0;				// +0.4v - +2.4v
+	double vctcxo_f_ppm = 38.4;								// 38.4 Mhz -> ppm -> 38.4 hz
+
+	// 5ppm ~ 0.007 hz;  9ppm ~ 0.013 hz;
+	double tune_hz_per_dac_lsb = vctcxo_frequency_tuning_range_ppm * vctcxo_f_ppm / vctcxo_voltage_tuning_range * dac_v_lsb;
+
+	return tune_hz_per_dac_lsb;
+}
+
 //class hex_conversion
 //{
 //public:

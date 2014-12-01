@@ -195,6 +195,7 @@ void blade_rf_controller::close_scanner()
 		comm_blade_rf_.reset();
 		scanner_blade_rf_.reset();
 		scanner_.reset();
+		gps_comm_.reset();
 	}
 }
 
@@ -307,19 +308,21 @@ void blade_rf_controller::disable_blade_rx()
 		false), __FILE__, __LINE__);
 }
 
-void blade_rf_controller::write_vctcxo_trim_and_update_calibration(frequency_type carrier_freq, frequency_type freq_shift)
+void blade_rf_controller::calculate_vctcxo_trim_and_update_calibration(double error_hz)
 {
-	auto trim = calculate_vctcxo_trim_value(carrier_freq, freq_shift);
+	auto trim = calculate_vctcxo_trim_value(error_hz);
 	update_vctcxo_trim(trim);
 	write_vctcxo_trim(trim);
 	update_frequency_correction_value_and_date_in_calibration(trim, std::chrono::system_clock::to_time_t(std::chrono::system_clock::now()));
 	refresh_scanner_info();
 }
 
-uint16_t blade_rf_controller::calculate_vctcxo_trim_value(frequency_type carrier_freq, frequency_type freq_shift)
+uint16_t blade_rf_controller::calculate_vctcxo_trim_value(double error_hz)
 {
 	check_blade_comm();
-	auto adjust = boost::math::round(freq_shift / ((carrier_freq / 38.4e6) * 0.011355));
+
+	auto adjust = boost::math::round(error_hz / dac_trim_hz_per_lsb_coefficient() * .9);
+
 	return scanner_blade_rf_->vctcxo_trim() - (int16_t)adjust;
 }
 
@@ -354,9 +357,9 @@ void blade_rf_controller::update_frequency_correction_value_and_date_in_calibrat
 	write_eeprom(eeprom);
 }
 
-void blade_rf_controller::update_vctcxo_trim(frequency_type carrier_freq, frequency_type freq_shift)
+void blade_rf_controller::calculate_and_update_vctcxo_trim(double error_hz)
 {
-	auto trim = calculate_vctcxo_trim_value(carrier_freq, freq_shift);
+	auto trim = calculate_vctcxo_trim_value(error_hz);
 	update_vctcxo_trim(trim);
 }
 
@@ -365,6 +368,8 @@ void blade_rf_controller::update_vctcxo_trim(uint16_t trim)
 	check_blade_comm();
 
 	disable_blade_rx();
+
+	LOG(LDEBUG) << "Updating VCTCXO trim value to " << trim << ".";
 
 	check_blade_status(bladerf_dac_write(comm_blade_rf_->blade_rf(), trim), __FILE__, __LINE__);
 	
@@ -435,7 +440,10 @@ const scanner_blade_rf* blade_rf_controller::get_scanner_blade_rf()
 gps blade_rf_controller::get_gps_data()
 {
 	check_blade_comm();
-	return gps_comm_->get_latest_gps();
+	if(gps_comm_)
+		return gps_comm_->get_latest_gps();
+	else 
+		return gps{"", false, 0, 0, 0, 0, 0, 0, 0};
 }
 
 measurement_info blade_rf_controller::get_rf_data_use_auto_gain(frequency_type frequency, time_type time_ns, bandwidth_type bandwidth, frequency_type sampling_rate)
@@ -797,5 +805,39 @@ void blade_rf_controller::set_blade_sync_rx_settings(const blade_settings &setti
 	enable_blade_rx();
 }
 
+void blade_rf_controller::start_gps_1pps_integration(int seconds) {
+	LOG(LDEBUG) << "Starting GPS calibration.  Integrating over " << seconds << " seconds.";
+	if(gps_comm_) {
+		gps_comm_->initiate_pps_clock_counter(seconds);
+	}
+	current_1pps_integration_ = {seconds, 0};
+}
+
+bool blade_rf_controller::attempt_gps_1pps_calibration() {
+	bool success = false;
+	if(gps_comm_) {
+		current_1pps_integration_.set_clock_ticks(gps_comm_->read_pps_clock_counter(), gps_comm_->get_latest_gps().coordinated_universal_time_);
+		LOG(LDEBUG) << "Retrieving GPS calibration values:  " << current_1pps_integration_.clock_ticks() << " clock ticks.  Error of "
+			<< current_1pps_integration_.error_in_hz() << " Hz.";
+		if(current_1pps_integration_.is_valid()) {
+			if(current_1pps_integration_.within_tolerance()) {
+				last_1pps_integration_ = current_1pps_integration_;
+				auto new_trim = calculate_vctcxo_trim_value(current_1pps_integration_.error_in_hz());
+				update_vctcxo_trim(new_trim);
+				success = true;
+				LOG(LDEBUG) << "GPS calibration successful!";
+			}
+			else
+				LOG(LDEBUG) << "GPS calibration failed.  Clock ticks were not within tolerance.";
+		}
+		else
+			LOG(LDEBUG) << "GPS calibration failed.  Clock ticks not recorded.";
+	}
+	return success;
+}
+
+gps_1pps_integration blade_rf_controller::get_last_valid_gps_1pps_integration() {
+	return last_1pps_integration_;
+}
 
 }}

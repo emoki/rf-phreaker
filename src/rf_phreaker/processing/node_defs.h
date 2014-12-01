@@ -65,8 +65,20 @@ typedef tbb::flow::multifunction_node<umts_info, std::tuple<add_remove_collectio
 typedef tbb::flow::multifunction_node<lte_info, std::tuple<add_remove_collection_info, tbb::flow::continue_msg>> lte_output_and_feedback_node;
 typedef tbb::flow::multifunction_node<measurement_package, std::tuple<add_remove_collection_info, tbb::flow::continue_msg>> frequency_correction_node;
 
-typedef tbb::flow::source_node <tbb::flow::continue_msg> gps_start_node;
-typedef tbb::flow::function_node<tbb::flow::continue_msg, tbb::flow::continue_msg, tbb::flow::rejecting> gps_node;
+struct gps_command {
+	enum GPS_COMMAND
+	{
+		COLLECT_GPS,
+		ENABLE_1PPS,
+		DISABLE_1PPS,
+	};
+	gps_command(GPS_COMMAND c) : cmd_(c) {}
+	gps_command() : cmd_(COLLECT_GPS) {}
+	GPS_COMMAND cmd_;
+};
+typedef tbb::flow::source_node <gps_command> gps_start_node;
+typedef tbb::flow::function_node<gps_command, tbb::flow::continue_msg, tbb::flow::rejecting> gps_node;
+typedef tbb::flow::queue_node<gps_command> gps_queue_node;
 
 
 

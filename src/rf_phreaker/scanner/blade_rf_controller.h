@@ -43,9 +43,11 @@ public:
 	void refresh_scanner_info();
 
 	void write_vctcxo_trim(uint16_t trim);
-	void write_vctcxo_trim_and_update_calibration(frequency_type carrier_freq, frequency_type freq_shift);
+
+	void calculate_vctcxo_trim_and_update_calibration(double error_hz);
 	
-	void update_vctcxo_trim(frequency_type carrier_freq, frequency_type freq_shift);
+	void calculate_and_update_vctcxo_trim(double error_hz);
+
 	void update_vctcxo_trim(uint16_t trim);
 
 	void read_vctcxo_trim(uint16_t &trim);
@@ -99,6 +101,12 @@ public:
 
 	void set_blade_sync_rx_settings(const blade_settings &settings);
 
+	void start_gps_1pps_integration(int seconds);
+
+	bool attempt_gps_1pps_calibration();
+
+	gps_1pps_integration get_last_valid_gps_1pps_integration();
+
 private:
 	void enable_blade_rx();
 
@@ -108,8 +116,8 @@ private:
 
 	void check_blade_comm();
 
-	uint16_t calculate_vctcxo_trim_value(frequency_type carrier_freq, frequency_type freq_shift);
-
+	uint16_t calculate_vctcxo_trim_value(double error_in_hz);
+		
 	ipp_16sc_aligned_buffer aligned_buffer_;
 
 	gain_manager gain_manager_;
@@ -117,6 +125,7 @@ private:
 	std::unique_ptr<comm_blade_rf> comm_blade_rf_;
 
 	std::shared_ptr<scanner_blade_rf_impl> scanner_blade_rf_;
+
 	std::shared_ptr<scanner_blade_rf> scanner_;
 
 	measurement_info parameter_cache_;
@@ -126,6 +135,10 @@ private:
 	std::unique_ptr<gps_comm::gps_comm> gps_comm_;
 
 	blade_settings blade_settings_;
+
+	gps_1pps_integration last_1pps_integration_;
+
+	gps_1pps_integration current_1pps_integration_;
 };
 
 }}

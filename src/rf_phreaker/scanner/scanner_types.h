@@ -4,6 +4,7 @@
 #include <stdint.h>
 #include <string>
 #include <vector>
+#include <chrono>
 
 namespace rf_phreaker { namespace scanner {
 
@@ -24,6 +25,26 @@ struct iq_sample_type
 	sample_type q;
 };
 
+struct gps_1pps_integration {
+	gps_1pps_integration() : seconds_integrated_(0), clock_ticks_(0), reference_clock_(38400000) {}
+	gps_1pps_integration(int s, int t) : seconds_integrated_(s), clock_ticks_(t), reference_clock_(38400000) {}
+	gps_1pps_integration(int s, int t, int r) : seconds_integrated_(s), clock_ticks_(t), reference_clock_(r) {}
+	int64_t clock_ticks() { return clock_ticks_; }
+	int seconds_integrated() { return seconds_integrated_; }
+	bool is_valid() { return clock_ticks_ != 0; }
+	double error_in_hz() { return clock_ticks_ / (double)seconds_integrated_ - reference_clock_; }
+	bool within_tolerance() { return abs(seconds_integrated_ * reference_clock_ - clock_ticks_) < reference_clock_ / 2; }
+	void set_clock_ticks(int64_t ticks, time_t current_time) {
+		clock_ticks_ = ticks;
+		time_calculated_ = current_time;
+	}
+	time_t time_calculated() { return time_calculated_; }
+private:
+	int seconds_integrated_;
+	int64_t clock_ticks_;
+	int64_t reference_clock_;
+	time_t time_calculated_;
+};
 
 
 }}

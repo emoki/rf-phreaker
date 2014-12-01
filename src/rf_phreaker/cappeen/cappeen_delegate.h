@@ -301,8 +301,10 @@ public:
 					if(gps_graph_) gps_graph_->cancel_and_wait();
 					if(frequency_correction_graph_) frequency_correction_graph_->cancel_and_wait();
 					change_beagle_state(beagle_api::BEAGLE_ERROR);
-				default:
-					;
+					break;
+				case FREQUENCY_CORRECTION_FAILED:
+					if(gps_graph_) gps_graph_->enable_1pps_calibration();
+				default:;
 				}
 			}
 			delegate_->available_error(beagle_id_, convert_message(code), s.c_str(), s.size() + 1);
@@ -312,8 +314,15 @@ public:
 	void output_message(const std::string &s, int code)
 	{
 		LOG(LINFO) << s;
-		if(delegate_ != nullptr)
+		if(delegate_ != nullptr) {
 			delegate_->available_message(beagle_id_, code, s.c_str(), s.size() + 1);
+			switch(code) {
+			case FREQUENCY_CORRECTION_SUCCESSFUL:
+				if(gps_graph_) gps_graph_->enable_1pps_calibration();
+				break;
+			default:;
+			}
+		}
 	}
 
 	void change_beagle_state(beagle_api::BEAGLESTATE state)

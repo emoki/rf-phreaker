@@ -69,7 +69,7 @@ public:
 		, frequency_correction_settings_(freq_corr_settings)
 		, layer_3_settings_(layer_3_settings)
 		, shifter_((double)s.sampling_rate_)
-		, shift_sum_(0)
+		, error_sum_(0)
 		, num_shifts_(0)
 		, has_corrected_freq_error_(false)
 		, min_collection_round_(1)
@@ -87,7 +87,7 @@ public:
 		, frequency_correction_settings_(b.frequency_correction_settings_)
 		, layer_3_settings_(b.layer_3_settings_)
 		, shifter_(umts_settings_.sampling_rate())
-		, shift_sum_(b.shift_sum_)
+		, error_sum_(b.error_sum_)
 		, num_shifts_(b.num_shifts_)
 		, has_corrected_freq_error_(false)
 		, min_collection_round_(b.min_collection_round_)
@@ -98,7 +98,8 @@ public:
 		if(info->collection_round() > min_collection_round_ && num_shifts_ > 10 || (info->collection_round() > 8)) {
 			graph_->root_task()->cancel_group_execution();
 			if(num_shifts_ > 0) {
-				sc_->write_vctcxo_trim_and_update_calibration(info->frequency(), (frequency_type)(shift_sum_ / (double)num_shifts_)).get();
+				auto avg_error = error_sum_ / (double)num_shifts_;
+				sc_->calculate_vctcxo_trim_and_update_calibration(avg_error).get();
 
 				std::string message("Frequency correction successful.");
 
@@ -143,7 +144,7 @@ public:
 
 			correction = determine_freq_correction(info, param);
 			if(!correction.has_insertions()) {
-				LOG(LDEBUG) << "Unable to find cells.  Expanding freqeuncy range...";
+				LOG(LDEBUG) << "Unable to find cells.  Expanding frequency range...";
 				param.start_freq_ = frequency_correction_settings_.initial_frequency_correction_range_start_;
 				param.end_freq_ = frequency_correction_settings_.initial_frequency_correction_range_end_;
 				correction = determine_freq_correction(info, param);
@@ -157,10 +158,10 @@ public:
 			
 			if(info->collection_round() > min_collection_round_) {
 				++num_shifts_;
-				shift_sum_ += best_shift;
+				error_sum_ += calculate_error(best_shift, info->frequency());
 			}
 			else {
-				sc_->update_vctcxo_trim(info->frequency(), best_shift);
+				sc_->calculate_and_update_vctcxo_trim(calculate_error(best_shift, info->frequency()));
 				has_corrected_freq_error_ = true;
 			}
 		}
@@ -172,6 +173,10 @@ public:
 	}
 
 private:
+	double calculate_error(frequency_type shift, frequency_type carrier_freq) {
+		return shift * (38.4e6 / carrier_freq);
+	}
+	
 	correction_lookup determine_freq_correction(measurement_package &info, const freq_correction_param &param)
 	{
 		correction_lookup correction;
@@ -207,7 +212,7 @@ private:
 	umts_general_settings layer_3_settings_;
 	frequency_shifter shifter_;
 
-	double shift_sum_;
+	double error_sum_;
 	double num_shifts_;
 	bool has_corrected_freq_error_;
 	int min_collection_round_;
