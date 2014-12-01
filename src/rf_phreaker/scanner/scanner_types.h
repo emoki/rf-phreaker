@@ -25,11 +25,6 @@ struct iq_sample_type
 };
 
 
-static const int serialize_buffer_size = 256;
-
-const double freq_ref_hz_default = 30720000;
-
-//static const char *scanner_description = "USB <-> Scanner";
 
 }}
 

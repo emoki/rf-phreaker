@@ -27,8 +27,6 @@ set (scanner_SRCS
 	measurement_info.h
 	measurement_info_serialization.h
     rf_switch_conversion.h
-	sampling_rate_conversion.cpp
-	sampling_rate_conversion.h
 	scanner.h
 	scanner_blade_rf.cpp
 	scanner_blade_rf.h

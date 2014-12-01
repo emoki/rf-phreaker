@@ -10,7 +10,6 @@
 #include "rf_phreaker/scanner/scanner_comm.h"
 #include "rf_phreaker/scanner/measurement_info.h"
 #include "rf_phreaker/scanner/byte_aligned_buffer.h"
-#include "rf_phreaker/scanner/sampling_rate_conversion.h"
 #include "rf_phreaker/scanner/rf_switch_conversion.h"
 #include "rf_phreaker/scanner/lms_defines.h"
 #include "rf_phreaker/scanner/scanner_blade_rf.h"
