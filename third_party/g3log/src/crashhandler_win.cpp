@@ -24,13 +24,13 @@
 namespace {
 
    void crashHandler(int signal_number) {
-      using namespace g2::internal;
-      std::ostringstream fatal_stream;
-      fatal_stream << "\n\n***** FATAL TRIGGER RECEIVED ******* " << std::endl;
-      fatal_stream << "\n***** RETHROWING SIGNAL " << signalName(signal_number) << "(" << signal_number << ")" << std::endl;
+      //using namespace g2::internal;
+      //std::ostringstream fatal_stream;
+      //fatal_stream << "\n\n***** FATAL TRIGGER RECEIVED ******* " << std::endl;
+      //fatal_stream << "\n***** RETHROWING SIGNAL " << signalName(signal_number) << "(" << signal_number << ")" << std::endl;
 
-      LogCapture trigger(FATAL_SIGNAL, signal_number);
-      trigger.stream() << fatal_stream.str();
+      //LogCapture trigger(FATAL_SIGNAL, signal_number);
+      //trigger.stream() << fatal_stream.str();
    } // scope exit - message sent to LogWorker, wait to die...
 } // end anonymous namespace
 

@@ -163,18 +163,18 @@ namespace g2 {
        * message and kills the software with the fatal signal.
        */
       void fatalCallToLogger(FatalMessagePtr message) {
-         if (!isLoggingInitialized()) {
-            std::ostringstream error;
-            error << "FATAL CALL but logger is NOT initialized\n"
-                    << "SIGNAL: " << message.get()->signal()
-                    << "\nMessage: \n" << message.get()->toString() << std::flush;
-            std::cerr << error.str() << std::flush;
-            internal::exitWithDefaultSignalHandler(message.get()->_signal_id);
-         }
-         g_logger_instance->fatal(message);
-         while (true) {
-            std::this_thread::sleep_for(std::chrono::seconds(1));
-         }
+         //if (!isLoggingInitialized()) {
+         //   std::ostringstream error;
+         //   error << "FATAL CALL but logger is NOT initialized\n"
+         //           << "SIGNAL: " << message.get()->signal()
+         //           << "\nMessage: \n" << message.get()->toString() << std::flush;
+         //   std::cerr << error.str() << std::flush;
+         //   internal::exitWithDefaultSignalHandler(message.get()->_signal_id);
+         //}
+         //g_logger_instance->fatal(message);
+         //while (true) {
+         //   std::this_thread::sleep_for(std::chrono::seconds(1));
+         //}
       }
 
 
