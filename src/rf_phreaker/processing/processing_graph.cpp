@@ -16,15 +16,7 @@ using namespace rf_phreaker::processing;
 processing_graph::processing_graph(void)
 {}
 
-processing_graph::~processing_graph(void) {
-	try {
-		if(graph_) {
-			graph_->root_task()->cancel_group_execution();
-			graph_->wait_for_all();
-		}
-	}
-	catch(...) {}
-}
+processing_graph::~processing_graph(void) {}
 
 void processing_graph::start(scanner_controller_interface *sc, data_output_async *out, const collection_info_containers &collection_info, const rf_phreaker::settings &config)
 {

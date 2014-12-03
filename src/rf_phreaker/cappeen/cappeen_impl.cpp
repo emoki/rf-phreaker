@@ -5,8 +5,6 @@
 #include "rf_phreaker/qt_specific/file_path_validation.h"
 #include "rf_phreaker/common/exception_types.h"
 #include "rf_phreaker/processing/frequency_range_creation.h"
-#include "rf_phreaker/common/log.h"
-#include "tbb/task_scheduler_init.h"
 #include "boost/date_time/posix_time/posix_time.hpp"
 
 using namespace rf_phreaker;
@@ -21,13 +19,14 @@ cappeen_impl::cappeen_impl()
 cappeen_impl::~cappeen_impl()
 {
 	try {
-		logger_.reset();
+		// Order of components is important when destructing.
 		gps_graph_.reset();
 		processing_graph_.reset();
 		frequency_correction_graph_.reset();
 		data_output_.reset();
-		delegate_.reset();
 		scanner_.reset();
+		delegate_.reset();
+		logger_.reset();
 	}
 	catch(...) {}
 }
@@ -56,9 +55,6 @@ long cappeen_impl::initialize(beagle_api::beagle_delegate *del)
 			logger_->change_logging_level(config_.log_level_);
 
 		// Release all components before changing delegate.
-		delegate_.reset();
-		scanner_.reset();
-		data_output_.reset();
 		if(processing_graph_) {
 			LOG(LDEBUG) << "Found processing graph on heap.  Sending cancel request and releasing it.";
 			processing_graph_->cancel_and_wait();
@@ -75,7 +71,9 @@ long cappeen_impl::initialize(beagle_api::beagle_delegate *del)
 			frequency_correction_graph_->cancel_and_wait();
 			frequency_correction_graph_.reset();
 		}
-
+		data_output_.reset();
+		delegate_.reset();
+		scanner_.reset();
 
 		LOG(LVERBOSE) << "Constructing cappeen_delegate.";
 		delegate_.reset(new cappeen_delegate(del));
@@ -92,7 +90,6 @@ long cappeen_impl::initialize(beagle_api::beagle_delegate *del)
 		
 		LOG(LVERBOSE) << "Initializing cappeen_delegate.";
 		delegate_->initialize(data_output_.get(), processing_graph_.get(), gps_graph_.get(), frequency_correction_graph_.get());
-		//log_worker_->connect_sink(boost::bind(&cappeen_delegate::output_error, delegate_.get(), _1, _2));
 
 		data_output_->set_output_path(config_.output_directory_);
 		data_output_->set_file_output(config_.file_output_);
@@ -101,8 +98,8 @@ long cappeen_impl::initialize(beagle_api::beagle_delegate *del)
 
 		scanner_->set_log_level(config_.blade_settings_.log_level_);
 
-		//tbb::task_scheduler_init init;
-		//init.initialize(15);
+		if(!tbb_task_scheduler_.is_active())
+			tbb_task_scheduler_.initialize(-1);
 
 		LOG(LINFO) << "Initialization complete.";
 		is_initialized_ = true;

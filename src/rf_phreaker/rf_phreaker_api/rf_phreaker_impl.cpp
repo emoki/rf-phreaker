@@ -24,14 +24,14 @@ rf_phreaker_impl::rf_phreaker_impl()
 
 rf_phreaker_impl::~rf_phreaker_impl() {
 	try {
-		// Do not stop graphs as this will cause an access volation in std::mutex.
-		logger_.reset();
+		// Order of components is important when destructing.
 		gps_graph_.reset();
 		processing_graph_.reset();
 		frequency_correction_graph_.reset();
 		data_output_.reset();
 		handler_.reset();
 		scanners_.clear();
+		logger_.reset();
 	}
 	catch(...) {}
 }
@@ -54,15 +54,12 @@ rp_status rf_phreaker_impl::initialize(rp_callbacks *callbacks) {
 
 		if(logger_) {
 			logger_->change_logging_level(config_.log_level_);
-			logger_->handler_.worker->addSink(std2::make_unique<log_handler>(callbacks), &log_handler::receive_log_message);
+			logger_->handler_->worker->addSink(std2::make_unique<log_handler>(callbacks), &log_handler::receive_log_message);
 		}
 
 		LOG(LINFO) << "Initializing rf phreaker api version " << build_version() << ".";
 
 		// Release all components before changing delegate.
-		handler_.release();
-		scanners_.clear();
-		data_output_.release();
 		if(processing_graph_) {
 			LOG(LDEBUG) << "Found processing graph on heap.  Sending cancel request and releasing it.";
 			processing_graph_->cancel_and_wait();
@@ -79,6 +76,9 @@ rp_status rf_phreaker_impl::initialize(rp_callbacks *callbacks) {
 			frequency_correction_graph_->cancel_and_wait();
 			frequency_correction_graph_.release();
 		}
+		data_output_.release();
+		handler_.release();
+		scanners_.clear();
 
 		data_output_.reset(new processing::data_output_async());
 		handler_.reset(new rf_phreaker_handler(data_output_.get(), callbacks));
@@ -92,8 +92,8 @@ rp_status rf_phreaker_impl::initialize(rp_callbacks *callbacks) {
 
 		processing::initialize_collection_info_defaults(config_);
 
-		//tbb::task_scheduler_init init;
-		//init.initialize(15);
+		if(!tbb_task_scheduler_.is_active())
+			tbb_task_scheduler_.initialize(-1);
 
 		LOG(LINFO) << "Initialization complete.";
 		is_initialized_ = true;

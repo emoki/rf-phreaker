@@ -14,15 +14,7 @@ using namespace rf_phreaker::processing;
 
 frequency_correction_graph::frequency_correction_graph(void) {}
 
-frequency_correction_graph::~frequency_correction_graph(void) {
-	try {
-		if(graph_) {
-			graph_->root_task()->cancel_group_execution();
-			graph_->wait_for_all();
-		}
-	}
-	catch(...) {}
-}
+frequency_correction_graph::~frequency_correction_graph(void) {}
 
 void frequency_correction_graph::start(scanner_controller_interface *sc, data_output_async *out, const collection_info_containers &collection_info, const rf_phreaker::settings &config) {
 	std::lock_guard<std::recursive_mutex> lock(mutex_);

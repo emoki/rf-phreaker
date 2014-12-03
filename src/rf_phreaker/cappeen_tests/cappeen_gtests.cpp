@@ -468,10 +468,45 @@ TEST(Cappeen, DISABLED_LicenseCellAnalysisEverything) {
 	}
 }
 
-TEST(Cappeen, DISABLED_NoClose)
-{
-	//system("pause");
+TEST(Cappeen, NoCloseNoStopNoCleanup) {
+	std::cout << cappeen_api_version() << std::endl;
 
+	output out;
+	EXPECT_EQ(0, cappeen_initialize(&out));
+	EXPECT_EQ(0, cappeen_initialize(&out));
+	EXPECT_EQ(0, cappeen_clean_up());
+}
+
+TEST(Cappeen, InitializeTwice) {
+	std::cout << cappeen_api_version() << std::endl;
+
+	output out;
+	EXPECT_EQ(0, cappeen_initialize(&out));
+
+	std::array<char, 1024 * 10> serials;
+	EXPECT_EQ(0, cappeen_list_available_units(&serials[0], serials.size()));
+
+	std::string serial(&serials[0]);
+	serial = serial.substr(0, serial.find_first_of(';'));
+
+	if(!serial.empty()) {
+
+		collection_info info;
+		info.collection_filename_ = "test_file";
+		std::vector<TECHNOLOGIES_AND_BANDS> tech_bands;
+		tech_bands.push_back(LTE_BAND_1);
+		info.tech_and_bands_to_sweep_.elements_ = &tech_bands[0];
+		info.tech_and_bands_to_sweep_.num_elements_ = tech_bands.size();
+
+		EXPECT_EQ(0, cappeen_open_unit(&serial[0], serial.size()));
+		EXPECT_EQ(0, cappeen_start_collection(info));
+
+		std::this_thread::sleep_for(std::chrono::seconds(20));
+	}
+}
+
+TEST(Cappeen, NoClose)
+{
 	std::cout << cappeen_api_version() << std::endl;
 
 	output out;
@@ -502,7 +537,7 @@ TEST(Cappeen, DISABLED_NoClose)
 	EXPECT_EQ(0, cappeen_clean_up());
 }
 
-TEST(Cappeen, DISABLED_NoCloseNoStop)
+TEST(Cappeen, NoCloseNoStop)
 {
 	std::cout << cappeen_api_version() << std::endl;
 
@@ -527,7 +562,35 @@ TEST(Cappeen, DISABLED_NoCloseNoStop)
 		EXPECT_EQ(0, cappeen_open_unit(&serial[0], serial.size()));
 		EXPECT_EQ(0, cappeen_start_collection(info));
 
-		//std::this_thread::sleep_for(std::chrono::seconds(1));
+		std::this_thread::sleep_for(std::chrono::seconds(20));
 	}
 	EXPECT_EQ(0, cappeen_clean_up());
+}
+
+TEST(Cappeen, NoCloseNoStopNoCleanupLastTest) {
+	std::cout << cappeen_api_version() << std::endl;
+
+	output out;
+	EXPECT_EQ(0, cappeen_initialize(&out));
+
+	std::array<char, 1024 * 10> serials;
+	EXPECT_EQ(0, cappeen_list_available_units(&serials[0], serials.size()));
+
+	std::string serial(&serials[0]);
+	serial = serial.substr(0, serial.find_first_of(';'));
+
+	if(!serial.empty()) {
+
+		collection_info info;
+		info.collection_filename_ = "test_file";
+		std::vector<TECHNOLOGIES_AND_BANDS> tech_bands;
+		tech_bands.push_back(LTE_BAND_1);
+		info.tech_and_bands_to_sweep_.elements_ = &tech_bands[0];
+		info.tech_and_bands_to_sweep_.num_elements_ = tech_bands.size();
+
+		EXPECT_EQ(0, cappeen_open_unit(&serial[0], serial.size()));
+		EXPECT_EQ(0, cappeen_start_collection(info));
+
+		std::this_thread::sleep_for(std::chrono::seconds(20));
+	}
 }

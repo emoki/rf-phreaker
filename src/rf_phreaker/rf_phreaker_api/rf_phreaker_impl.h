@@ -3,6 +3,7 @@
 #include <memory>
 #include <string>
 #include <mutex>
+#include "tbb/task_scheduler_init.h"
 #include "rf_phreaker/rf_phreaker_api/rf_phreaker_api.h"
 #include "rf_phreaker/rf_phreaker_api/rf_phreaker_handler.h"
 #include "rf_phreaker/scanner/blade_rf_controller_async.h"
@@ -100,10 +101,8 @@ private:
 
 	rf_phreaker::settings config_;
 
-	typedef std::vector<std::shared_ptr<rp_device>> scanners_type;
-	scanners_type scanners_;
-
-	std::unique_ptr<processing::data_output_async> data_output_;
+	// Order of components is important when destructing.
+	std::unique_ptr<rf_phreaker_handler> handler_;
 
 	std::unique_ptr<processing::processing_graph> processing_graph_;
 
@@ -111,15 +110,20 @@ private:
 
 	std::unique_ptr<processing::frequency_correction_graph> frequency_correction_graph_;
 
+	std::unique_ptr<processing::data_output_async> data_output_;
+
+	typedef std::vector<std::shared_ptr<rp_device>> scanners_type;
+	scanners_type scanners_;
+
 	operating_band_range_specifier operating_bands_;
 
 	processing::collection_info_containers containers_;
 
-	std::unique_ptr<rf_phreaker_handler> handler_;
-
 	std::unique_ptr<logger> logger_;
 
 	std::recursive_mutex mutex_;
+
+	tbb::task_scheduler_init tbb_task_scheduler_;
 };
 
 }}

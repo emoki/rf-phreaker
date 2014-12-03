@@ -7,21 +7,26 @@
 #include "rf_phreaker/../../third_party/g3log/src/g2logworker.hpp"
 
 namespace rf_phreaker {
-
+	
 class logger
 {
+private:
 public:
+
+	logger() {}
+
 	logger(const std::string& filename, const std::string& dir = "")
-		: handler_(g2::LogWorker::createWithDefaultLogger(filename, dir)) {
-		g2::initializeLogging(handler_.worker.get());
+		: handler_(new g2::DefaultFileLogger{g2::LogWorker::createWithDefaultLogger(filename, dir)}) {
+		g2::initializeLogging(handler_->worker.get());
 	}
 
 	~logger() {
-		shutdown();
+		g2::internal::shutDownLogging();
 	}
 
-	void shutdown() {
-		g2::internal::shutDownLoggingForActiveOnly(handler_.worker.get());
+	void init(const std::string& filename, const std::string& dir = "") {
+		handler_.reset(new g2::DefaultFileLogger{g2::LogWorker::createWithDefaultLogger(filename, dir)});
+		g2::initializeLogging(handler_->worker.get());
 	}
 
 	void change_logging_level(int level) {
@@ -33,8 +38,9 @@ public:
 		g2::setLogLevel(LFATAL, level <= LFATAL.value);
 	}
 
-	g2::DefaultFileLogger handler_;
+	std::unique_ptr<g2::DefaultFileLogger> handler_;
 };
+
 
 }
 
