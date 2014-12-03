@@ -21,6 +21,11 @@ void settings_io::read(settings &settings) {
 	settings.use_rf_board_adjustment_ = qsettings_->value(use_rf_board_adjustment_key.c_str(), use_rf_board_adjustment_default).toBool();
 
 	settings.output_directory_ = qsettings_->value(output_directory_key.c_str(), output_directory_default.c_str()).toString().toStdString();
+	if(settings.output_directory_.size()) {
+		auto it = settings.output_directory_.rbegin();
+		if(*it != '\\' || *it != '/')
+			settings.output_directory_ += "/";
+	}
 	if(!file_path_validation::is_path_valid(settings.output_directory_)) {
 		settings.output_directory_ = file_path_validation::get_writable_file_path();
 		//LOG(LVERBOSE) << "Output directory is not valid.  Switching to " << settings.output_directory_ << ".";
