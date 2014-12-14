@@ -86,13 +86,13 @@ void frequency_correction_graph::start(scanner_controller_interface *sc, data_ou
 			graph_->wait_for_all();
 		}
 		catch(const rf_phreaker::rf_phreaker_error &err) {
-			delegate_sink_async::instance().log_error(err.what(), GENERAL_ERROR);
+			delegate_sink::instance().log_error(err.what(), GENERAL_ERROR);
 		}
 		catch(const std::exception &err) {
-			delegate_sink_async::instance().log_error(err.what(), STD_EXCEPTION_ERROR);
+			delegate_sink::instance().log_error(err.what(), STD_EXCEPTION_ERROR);
 		}
 		catch(...) {
-			delegate_sink_async::instance().log_error("An unknown error has occurred.", UNKNOWN_ERROR);
+			delegate_sink::instance().log_error("An unknown error has occurred.", UNKNOWN_ERROR);
 		}
 	}, sc, out, collection_info, config));
 }

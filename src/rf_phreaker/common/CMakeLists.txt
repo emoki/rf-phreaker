@@ -41,6 +41,7 @@ set (common_SRCS
 	raw_signal.h
 	settings.h
 	signal_slot.h
+	singleton.h
 	${SRC_PLATFORM_SPECIFIC}/stdafx.cpp)
 
 add_library (common STATIC ${common_SRCS})

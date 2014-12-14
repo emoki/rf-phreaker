@@ -89,9 +89,9 @@ public:
 
 		LOG(LVERBOSE) << "Creating log sinks...";
 		LOG(LVERBOSE) << "Connecting error.";
-		delegate_sink_async::instance().connect_error(boost::bind(&cappeen_delegate::output_error, this, _1, _2)).get();
+		delegate_sink::instance().connect_error(boost::bind(&cappeen_delegate::output_error, this, _1, _2)).get();
 		LOG(LVERBOSE) << "Connecting message.";
-		delegate_sink_async::instance().connect_message(boost::bind(&cappeen_delegate::output_message, this, _1, _2)).get();
+		delegate_sink::instance().connect_message(boost::bind(&cappeen_delegate::output_message, this, _1, _2)).get();
 
 		processing_graph_ = pro;
 		gps_graph_ = gps;
