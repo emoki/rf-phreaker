@@ -1,3 +1,6 @@
+#include <fstream>
+#include <boost/archive/text_oarchive.hpp>
+#include <boost/archive/binary_oarchive.hpp>
 #include "rf_phreaker/blade_matlab_interface/blade_matlab_interface.h"
 #include "rf_phreaker/blade_matlab_interface/matlab_interface_helper.h"
 #include "rf_phreaker/common/exception_types.h"
@@ -380,6 +383,14 @@ int write_calibration(const int8_t *nuand_calibration_filename, const int8_t *rf
 		cal.read_nuand_calibration_file(std::string((char*)nuand_calibration_filename));
 		cal.read_rf_board_calibration_file(std::string((char*)rf_board_calibration_filename));
 		cal.read_rf_switch_file(std::string((char*)switch_setting_filename));
+
+		{
+			std::ofstream f(cal.nuand_serial_ + "_calibration_" /*+ current_date_time_string()*/ + ".txt", std::ios::binary);
+			boost::archive::binary_oarchive oa(f);
+			//std::ofstream f(cal.nuand_serial_ + "_calibration_" /*+ current_date_time_string()*/ + ".txt");
+			//boost::archive::text_oarchive oa(f);
+			oa & cal;
+		}
 
 		controller.initialize_eeprom();
 		controller.write_calibration(cal);
