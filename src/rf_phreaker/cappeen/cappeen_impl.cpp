@@ -247,15 +247,19 @@ long cappeen_impl::open_unit(const char *serial, unsigned int buf_size)
 		if(processing_graph_)
 			processing_graph_->cancel_and_wait();
 
+		delegate_->change_beagle_state(BEAGLE_USBOPENED);
+
 		scanner_->open_scanner(serial).get();
 		
 		scanner_->do_initial_scanner_config(config_.blade_settings_).get();
 
 		auto hw = scanner_->get_scanner().get()->get_hardware();
 		delegate_->initialize_beagle_info(hw);
-		delegate_->change_beagle_state(BEAGLE_USBOPENED);
 
 		gps_graph_->start(scanner_.get(), data_output_.get(), config_);
+
+		delegate_->change_beagle_state(BEAGLE_READY);
+
 		LOG(LINFO) << "Opened unit " << serial << " successfully.";
 	}
 	catch(const rf_phreaker::rf_phreaker_error &err) {
