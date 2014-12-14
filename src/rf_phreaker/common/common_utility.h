@@ -4,6 +4,7 @@
 #include <locale>
 #include <chrono>
 #include <type_traits>
+#include "boost/date_time.hpp"
 #include "rf_phreaker/common/common_types.h"
 
 #define khz(x) (static_cast<rf_phreaker::frequency_type>(x)*1000)             /**< Convenience for kHz */
@@ -116,6 +117,14 @@ inline std::string timestamp_string() {
 inline std::string static_timestamp_string() {
 	static std::string static_timestamp = std::to_string(std::chrono::system_clock::to_time_t(std::chrono::system_clock::now()));
 	return static_timestamp;
+}
+
+inline std::string to_date_time_string(time_t t) {
+	return boost::posix_time::to_simple_string(boost::posix_time::from_time_t(t));
+}
+
+inline std::string current_date_time_string() {
+	return to_date_time_string(std::chrono::system_clock::to_time_t(std::chrono::system_clock::now()));
 }
 
 template<typename T> struct is_vector : public std::false_type {};
