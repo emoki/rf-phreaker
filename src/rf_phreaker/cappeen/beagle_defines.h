@@ -670,7 +670,7 @@ namespace beagle_api
 		/// Physical layer identity.  
 		int16_t primary_sync_id_;
 
-		///  Ratio of the primary sync signal vs total recieved power.
+		///  Ratio of the primary sync signal vs total received power.
 		double primary_sync_quality_;
 
 		/// Physical layer cell identity group number.

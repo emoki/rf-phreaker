@@ -17,7 +17,7 @@ TEST(BladeControllerTest, TestBladeControllerGeneral)
 	try {
 		blade_rf_controller blade;
 
-		// We ask twice because the first time we don't recieve a valid serial.  An error occurs inside libusb...
+		// We ask twice because the first time we don't receive a valid serial.  An error occurs inside libusb...
 		auto scanner_list = blade.list_available_scanners();
 		if(scanner_list.size() && (*scanner_list.begin())->id() == "")
 			scanner_list = blade.list_available_scanners();
@@ -157,7 +157,7 @@ TEST(BladeControllerTest, DISABLED_TestBladeControllerAsync)
 	try {
 		blade_rf_controller_async blade;
 
-		// We ask twice because the first time we don't recieve a valid serial.  An error occurs inside libusb...
+		// We ask twice because the first time we don't receive a valid serial.  An error occurs inside libusb...
 		auto scanner_list = blade.list_available_scanners().get();
 		if(scanner_list.size() && (*scanner_list.begin())->id() == "")
 			scanner_list = blade.list_available_scanners().get();
@@ -219,7 +219,7 @@ TEST(BladeControllerTest, DISABLED_TestBladeControllerReadLimeReg) {
 	try {
 		blade_rf_controller blade;
 
-		// We ask twice because the first time we don't recieve a valid serial.  An error occurs inside libusb...
+		// We ask twice because the first time we don't receive a valid serial.  An error occurs inside libusb...
 		auto scanner_list = blade.list_available_scanners();
 		if(scanner_list.size() && (*scanner_list.begin())->id() == "")
 			scanner_list = blade.list_available_scanners();
