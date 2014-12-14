@@ -1,5 +1,5 @@
 #include "rf_phreaker/qt_specific/settings_io.h"
-#include "qtcore//qsettings.h"
+#include "qtcore/qsettings.h"
 #include "rf_phreaker/common/common_utility.h"
 #include "rf_phreaker/qt_specific/file_path_validation.h"
 #include "rf_phreaker/common/log.h"
