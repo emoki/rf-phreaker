@@ -103,7 +103,7 @@ namespace rf_phreaker { namespace gps_comm {
 		void requestNewCalibrationCount(uint8_t samples);		//call to initiate a calibration count using 'samples' gps pps pulses
 		uint32_t checkCalibrationCount();					//call periodically to check if the measurement is available. >0 if measurment is complete.
 
-
+		std::string formatCommand(std::string cmd);
 	private:
 		// ----- Low Level Data Transfer Functions -------
 

@@ -3,6 +3,7 @@
 #include "libbladeRF.h"
 #include "rf_phreaker/common/measurements.h"
 #include "rf_phreaker/common/exception_types.h"
+#include "rf_phreaker/common/log.h"
 #include "rf_phreaker/gps_comm/BladeDevice.h"
 #include "rf_phreaker/gps_comm/FrontEndBoard.h"
 #include "rf_phreaker/gps_comm/GPSDevice.h"
@@ -53,20 +54,24 @@ public:
 
 			// -- Prevent improper shutdown if the power pulses are not timed right while dealing with blade gpio init pulses...
 			// - overriding default parser handler of no action
-			origin_gps_device_->service.parser.setCommandHandler("PSRF150", [](NMEASentence nmea) {
+			origin_gps_device_->service.parser.setCommandHandler("PSRF150", [&](NMEASentence nmea) {
 				if(!nmea.checksum.compare("3E")) {
 					//std::cout << "GPS POWER ON!" << std::endl;
+					LOG(LGPS) << "Received gps power on message.";
 				}
 				// Gps sends an invalid checksum when it turns off, checksumOK() will be false.
 				else if(!nmea.checksum.compare("3F")) {
 					//std::cout << "GPS POWER OFF!" << std::endl;
 					//std::cout << "Restarting..." << std::endl;
 
+					LOG(LGPS) << "Received gps power off message.  Attempting to restart..";
+
 					// could have another variable, like main_system_on, that decides to allow the restart or not...
 					// - Not sure how to get reference to device from lambda, unique_ptr isn't captureable... that's up to you.
-					//origin_gps_device_->setPower(true);
+					origin_gps_device_->setPower(true);
 				}
 				else {
+					LOG(LGPS) << "Unknown PSRF150 checksum.";
 					//std::cout << "PSRF150 unknown checksum" << std::endl;
 				}
 			});
@@ -164,13 +169,14 @@ public:
 			catch (BladeError& e)			// Not re-throwing timeout errors because of below explanation... just retry and we can pull the data.
 			{
 				if (e.code == BLADERF_ERR_TIMEOUT){
+					LOG(LGPS) << "Timeout while receiving gps data. Retrying...";
 					//std::cout << " <!> ############ Blade TIMEOUT Error, trying again... ############ <!>" << std::endl;
 					//std::cout << "     - Out of sync with nios, trying again will let it catch up." << std::endl;
 					//std::cout << "     - libusb timeout is about 250 ms per access, maybe the host is slow?" << std::endl;
 
 					//if there have been 10 timeouts in a row for a single update... something is severely broken...
 					if (updates > 10){
-						throw BladeError("Nios is unreachable!", e.code);
+						throw BladeError("Unable to communicate to FPGA!", e.code);
 					}
 
 					std::this_thread::sleep_for(std::chrono::milliseconds(50));
@@ -185,6 +191,7 @@ public:
 				throw rf_phreaker::gps_comm_error(err.what());
 			}
 		}
+		return rf_phreaker::gps{0};
 	}
 
 	void initiate_pps_clock_counter(uint8_t samples){

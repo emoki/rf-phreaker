@@ -71,9 +71,18 @@ public:
 	NMEASentence(std::string text);
 	virtual ~NMEASentence();
 
-	bool checksumOK();
+	bool checksumOK() const;
 	bool valid();
-
+	std::string paramsToString() {
+		std::string str;
+		size_t size = parameters.size();
+		for(size_t i = 0; i < size; ++i) {
+			str += parameters[i];
+			if(i + 1 < size)
+				str += ",";
+		}
+		return str;
+	}
 };
 
 

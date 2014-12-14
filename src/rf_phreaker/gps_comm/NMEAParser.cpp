@@ -9,6 +9,7 @@
 #include "NumberConversion.h"
 #include <sstream>
 #include <iostream>
+#include "rf_phreaker/common/log.h"
 
 using namespace std;
 
@@ -26,7 +27,7 @@ NMEASentence::~NMEASentence(){
 bool NMEASentence::valid(){
 	return isvalid;
 }
-bool NMEASentence::checksumOK(){
+bool NMEASentence::checksumOK() const {
 	return (parsedChecksum != 0 && calculatedChecksum != 0)
 		&&
 		(parsedChecksum == calculatedChecksum);
@@ -69,6 +70,7 @@ void NMEAParser::parseByte(uint8_t b){
 		}
 		else
 		{
+			LOG(LGPSPARSE) << "Malformed newline - missing carriage return (\\r).";
 			if (log){
 				cout << "NMEA parser Warning: malformed newline, missing carriage return (\\r) " << endl;
 			}
@@ -91,6 +93,8 @@ void NMEAParser::parseByte(uint8_t b){
 void NMEAParser::handleTextCommand(std::string cmd){
 
 	if (cmd.size() == 0){
+		LOG(LGPSPARSE) << "Received a blank NMEA string.  Skip parsing.";
+
 		if (log){
 			cout << endl << " >> NMEA parser Info: Received new NMEA string. Blank -- Skipped processing." << endl;
 		}
@@ -99,7 +103,8 @@ void NMEAParser::handleTextCommand(std::string cmd){
 
 	ios_base::fmtflags oldflags = cout.flags();
 
-	if (log){
+	LOG(LGPSPARSE) << "Received a new NMEA string. (\"" << cmd << "\"";
+	if(log) {
 		cout << endl << " >> NMEA parser Info: Received new NMEA string. (\"" << cmd << "\")" << endl;
 	}
 
@@ -116,20 +121,12 @@ void NMEAParser::handleTextCommand(std::string cmd){
 	cout.flags(oldflags);  //reset
 
 	if (!nmea.valid()){
-		if (!log){
-			return;
-		}
-
-		if (nmea.text.size() > 10){
-			cout << "NMEA parser Error: Invalid text. (\"" << nmea.text.substr(0, 10) << "...\")" << endl;
-		}
-		else{
-			cout << "NMEA parser Error: Invalid text. (\"" << nmea.text << "\")" << endl;
-		}
+		LOG(LGPSPARSE) << "Invalid text. (\"" << (nmea.text.size() > 15 ? nmea.text.substr(0, 15) : nmea.text) << "...\")";
 		return;
 	}
 
 	if (nmea.checksumOK()){
+		LOG(LGPSPARSE) << "NMEA parse success: [$" << nmea.name << "] checksum: 0x" << nmea.checksum << ", params: [" << nmea.paramsToString() << "].";
 
 		if (log){		//shows parsed params...
 			cout << "\tParse Success >> name: " << nmea.name
@@ -147,6 +144,8 @@ void NMEAParser::handleTextCommand(std::string cmd){
 	}
 	else
 	{
+		LOG(LGPSPARSE) << "NMEA parse failed (checksum wrong): Parsed: 0x" << std::hex << (int)nmea.parsedChecksum << ", calculated: 0x"
+			<< std::hex << (int)nmea.calculatedChecksum << ".";
 		if (log){
 			cout << "\t Parse Failed >> Checksum is incorrect. [parsed: 0x"
 				<< std::hex << (int)nmea.parsedChecksum << ", calculated: 0x"
@@ -166,6 +165,7 @@ void NMEAParser::handleTextCommand(std::string cmd){
 	}
 	else
 	{
+		LOG(LGPSPARSE) << "Null event handler for NMEA message (" << nmea.name << ")";
 		if (log)
 		{
 			cout << "NMEA parser Warning: null event handler for type (name: \"" << nmea.name << "\")" << endl;
@@ -237,6 +237,7 @@ void NMEAParser::parseText(NMEASentence& nmea, string txt){
 	}
 	else
 	{
+		LOG(LGPSPARSE) << "No checksum info provided.  Unable to find '*'.";
 		if (log){
 			cout << "NMEA parser Error: No checksum information provided. Could not find '*'." << endl;
 		}
@@ -303,6 +304,7 @@ void NMEAParser::parseText(NMEASentence& nmea, string txt){
 			nmea.parameters[nmea.parameters.size() - 1] = last.substr(0, checki);
 			if (checki == last.size() - 1){
 				//.. '*' is last character... just ignore it
+				LOG(LGPSPARSE) << "Found checksum signifier but not actual data.";
 				if (log)
 				{
 					cout << "NMEA parser Error: checksum '*' character at end, but no  data." << endl;
@@ -310,6 +312,7 @@ void NMEAParser::parseText(NMEASentence& nmea, string txt){
 			}
 			else{
 				nmea.checksum = last.substr(checki + 1, last.size() - checki);		//extract checksum without '*'
+				LOG(LGPSPARSE) << "Found checksum: " << nmea.checksum << ".";
 				if (log)
 				{
 					cout << "NMEA parser Info: found checksum. (\"*" << nmea.checksum << "\")" << endl;
@@ -321,6 +324,7 @@ void NMEAParser::parseText(NMEASentence& nmea, string txt){
 				}
 				catch(NumberConversionError &)
 				{
+					LOG(LGPSPARSE) << "Unable to convert checksum.";
 					if (log){
 						cout << "NMEA parser Error: parseInt() error. Parsed checksum string was not readable as hex. (\"" << nmea.checksum << "\")" << endl;
 					}

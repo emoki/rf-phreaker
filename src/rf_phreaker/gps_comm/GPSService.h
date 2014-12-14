@@ -27,6 +27,7 @@ public:
 	GPSService();
 	virtual ~GPSService();
 
+	void validateNmea(const NMEASentence &nmea, size_t numParam) const;
 
 	void readbyte(uint8_t b);		//must include  \r\n
 	void readline(std::string s);	//without '\r\n'

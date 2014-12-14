@@ -12,6 +12,8 @@
 #include <chrono>
 #include <iostream>
 #include <iomanip>
+#include "boost/algorithm/string.hpp"
+#include "rf_phreaker/common/log.h"
 
 using namespace std;
 
@@ -52,6 +54,7 @@ namespace rf_phreaker { namespace gps_comm {
 
 
 	void GPSDevice::setInterface(DataInterface inter){
+		LOG(LGPS) << "Setting gps interface to " << (inter == SPI ? "SPI." : (inter == UART ? "UART." : "unknown."));
 		dataInterface = inter;
 	}
 
@@ -75,6 +78,7 @@ namespace rf_phreaker { namespace gps_comm {
 		uint32_t timeout_ms = 1000;
 		uint32_t checktime_ms = 10;
 
+		LOG(LGPS) << "Current gps power is " << std::boolalpha << awake() << ".";
 		if (log){
 			cout << "Current GPS Power: " << boolalpha << awake() << endl;
 		}
@@ -84,6 +88,8 @@ namespace rf_phreaker { namespace gps_comm {
 			if (log){
 				cout << "GPS turning power ON..." << endl;
 			}
+
+			LOG(LGPS) << "Turning gps power on.";
 
 			for(int i = 0; i < 5; ++i) {
 				uint32_t counter_ms = 0;
@@ -102,13 +108,15 @@ namespace rf_phreaker { namespace gps_comm {
 			}
 			// if couldn't turn off in timeout...
 			if(!awake()) 
-				throw GPSDeviceError("Could not turn on GPS device. Wakeup timed out.");
+				throw GPSDeviceError("Unable to power off gps device.  Timed out while waiting for wakeup signal.");
 		}
 		else
 		{			// TURN OFF
 			if (log){
 				cout << "GPS turning power OFF..." << endl;
 			}
+
+			LOG(LGPS) << "Turning gps power off.";
 
 			for(int i = 0; i < 5; ++i) {
 				uint32_t counter_ms = 0;
@@ -127,16 +135,18 @@ namespace rf_phreaker { namespace gps_comm {
 			}
 			// if couldn't turn off in timeout...
 			if (awake())
-				throw GPSDeviceError("Could not turn off GPS device. Wakeup timed out.");
+				throw GPSDeviceError("Unable to power down GPS device.  Timed out while waiting for wakeup signal.");
 		}
 
 		if (log){
 			cout << "GPS Awake: " << awake() << endl;
 		}
 
+		LOG(LGPS) << "gps awake status: " << boolalpha << awake() << ".";
+
 	}
 	void GPSDevice::reset(){
-
+		LOG(LGPS) << "Resetting gps device.";
 		frontend.setPin(FrontEndBoard::ControlPin::GPS_RESET, false);
 		this_thread::sleep_for(chrono::milliseconds(500));
 		frontend.setPin(FrontEndBoard::ControlPin::GPS_RESET, true);
@@ -164,6 +174,8 @@ namespace rf_phreaker { namespace gps_comm {
 
 
 	void GPSDevice::disableAllNMEAOutput(){
+
+		LOG(LGPS) << "Disabling all NMEA output on gps device.";
 		//configure the gps settings
 
 		NMEACommandSerialConfiguration cfg;
@@ -213,8 +225,16 @@ namespace rf_phreaker { namespace gps_comm {
 			cout << "Sending command to gps: " << scmd << endl;
 		}
 
+		LOG(LGPS) << "Sending " << formatCommand(scmd) << " command to gps device.";
+
 		sendCommand(scmd);
 	};
+
+	std::string GPSDevice::formatCommand(std::string cmd) {
+		boost::algorithm::replace_all(cmd, "\r", "\\r");
+		boost::algorithm::replace_all(cmd, "\n", "\\n");
+		return cmd;
+	}
 
 
 	void GPSDevice::sendCommand(std::string cmd){
@@ -307,7 +327,7 @@ namespace rf_phreaker { namespace gps_comm {
 			{
 				if (b == ((uint8_t)-1)){
 					//All spi input is high - board has disconnected...
-					throw GPSDeviceError("GPS device SPI interface unavailable! Wrong board? Board removed?");
+					throw GPSDeviceError("gps device SPI interface unavailable!"); // Possibly the board is removed or hw/fpga is configured wrong.
 				}
 
 				if (log){
@@ -353,7 +373,7 @@ namespace rf_phreaker { namespace gps_comm {
 				// if incoming uart data is zero - which should not happen from GPS because NMEA only sends ascii - then no more data
 				// if incoming uart data is 0xff, then the uart is disconnected or faulty in some way.
 				if (data == ((uint32_t)-1)  ){
-					throw GPSDeviceError("GPS device UART interface unavailable! Wrong board? Board removed? Wrong FPGA load?");
+					throw GPSDeviceError("gps device UART interface unavailable!"); // Possibly the board is removed or hw/fpga is configured wrong.
 				}
 
 				if (bytesread > 1024){	//1024 is internal buffer size of nios
@@ -391,11 +411,12 @@ namespace rf_phreaker { namespace gps_comm {
 		// The libbladerf functions are ready, but the NIOS code is not implemented. It requires setting up a new handler
 		// for a different "magic." Did not finish because current speeds are acceptable.
 
-		throw GPSDeviceError("GPS Error: fast_update() is not implemented. The shell is ready in libbladerf but it's not ready on Nios.");
+		throw GPSDeviceError("fast_update is not implemented. The shell is ready in libbladerf but it's not ready on Nios.");
 
 		uint32_t bytesread = 0;
 		if (dataInterface == DataInterface::SPI)
 		{
+			LOG(LGPS) << "fast_update not enabled for SPI.";
 			if (log){
 				cout << "No fast_update() for SPI..." << endl;
 			}
@@ -523,6 +544,7 @@ namespace rf_phreaker { namespace gps_comm {
 
 
 	void GPSDevice::uartBaud(uint16_t b){
+		LOG(LGPS) << "Setting baud rate to " << b << ".";
 		frontend.getBlade().xboardUARTBaud(b);
 	}
 
@@ -544,15 +566,16 @@ namespace rf_phreaker { namespace gps_comm {
 		//		- Check for > 0 successful parses - if yes, keep controller at that correct baud rate.
 		//	- If no baud found - revert to NMEA standard (4800) - could throw an error if you want.
 				
+		LOG(LGPS) << "Attempting to synchronize baud rate...";
 
 		if (dataInterface != DataInterface::UART){
 			return 0;
 		}
 
-		float baudcheck_timeout_s = 5;		//max time to spend on each baud. Usually if it's the right one, the parser will catch on and
-											// get a success within 1 sec.
+		//max time to spend on each baud. Usually if it's the right one, the parser will catch on and
+		// get a success within 1 sec.
+		float baudcheck_timeout_s = 5;		
 
-		
 		bool oldlog = log;
 		//log = true;
 
@@ -587,18 +610,24 @@ namespace rf_phreaker { namespace gps_comm {
 			}
 			uartBaud(baud);
 
-			do{
+			int skipped_bytes_num = 0, new_data = 0;
 
+			do {
 				if ( bytesread < 1024 && sleeps == 0 && !buffer_cleared){				//if sleeps == 0, the nios buffer has initial data. else we are getting new.
-					setInterface(DataInterface::OTHER);		//skip these bytes... they might be old from a different baud
+					if(dataInterface != DataInterface::OTHER)
+						setInterface(DataInterface::OTHER);		//skip these bytes... they might be old from a different baud
 					//cout << "skip." << endl;
+
+					skipped_bytes_num++;
 				}
 				else {
 					if (log && dataInterface == DataInterface::OTHER){
 						cout << "Buffer cleared... reading fresh data." << endl;
 					}
+					new_data++;
 					//cout << "read." << endl;
-					setInterface(DataInterface::UART);		//keep these bytes... they are definately from the selected baud
+					if(dataInterface != DataInterface::UART)
+						setInterface(DataInterface::UART);		//keep these bytes... they are definitely from the selected baud
 				}
 
 				bool reading = true;
@@ -611,8 +640,9 @@ namespace rf_phreaker { namespace gps_comm {
 					}
 					catch (BladeError& e){
 						if (e.code == BLADERF_ERR_TIMEOUT){
+							LOG(LGPS) << "Timeout while receiving gps data. Retrying...";
 							if (reads > 10){
-								e.message += " - Nios Unreachable.";
+								e.message += " - Unable to communicate to FPGA!";
 								throw e;
 							}
 							continue;
@@ -638,6 +668,7 @@ namespace rf_phreaker { namespace gps_comm {
 					std::this_thread::sleep_for(std::chrono::milliseconds(100));
 					sleeps++;
 					if (sleeps > 20){		//2 sec of possible silence (0's)
+						LOG(LGPS) << "Timeout while waiting for next byte.";
 						if (log){
 							cout << " > Too long to read a byte... skipping." << endl;
 						}
@@ -646,11 +677,12 @@ namespace rf_phreaker { namespace gps_comm {
 				}
 
 				if (data == ((uint32_t)-1)){
-					throw GPSDeviceError("GPS device UART interface unavailable! Wrong board? Board removed? Wrong FPGA load?");
+					throw GPSDeviceError("gps device UART interface unavailable");
 				}
 
 				elapsed = (clock() - checkstart) / (float)CLOCKS_PER_SEC;
 				if (elapsed > baudcheck_timeout_s){
+					LOG(LGPS) << "Sampling timeout - skipping baud rate.";
 					if (log){
 						cout << " > Sampling timeout... skipping." << endl;
 					}
@@ -660,8 +692,11 @@ namespace rf_phreaker { namespace gps_comm {
 				
 			} while ( successes == 0 && bytesread < 1024 + 500);			// enough to flush the buffer and start reading with the new baud
 
+			LOG(LGPS) << "Skipped data " << skipped_bytes_num << " times.  Read data " << new_data << " times.";
+
 			if (successes > 0){
 				finalBaud = baud;
+				LOG(LGPS) << "Found " << successes << " possible baud rate matches.  Synchronizing to a baud rate of " << finalBaud << ".";
 				if (log){
 					cout << " > CORRECT!" << endl;
 				}
@@ -672,6 +707,7 @@ namespace rf_phreaker { namespace gps_comm {
 
 		if(successes == 0) {
 			// last ditch effort... Set baud to NMEA standard 4800
+			LOG(LGPS) << "Unable to detect baud rate.  Reverting to default 4800.";
 			if (log){
 				cout << " <!> No baud rate detected with NMEA data. Reverting to standard 4800." << endl;
 			}
@@ -680,6 +716,7 @@ namespace rf_phreaker { namespace gps_comm {
 		}
 
 		if (log){
+
 			cout << " Synchronized at " << finalBaud << " baud. Continue;" << endl;
 		}
 

@@ -10,6 +10,8 @@
 #include <iostream>
 #include "NumberConversion.h"
 #include <cmath>
+#include "rf_phreaker/common/log.h"
+#include "rf_phreaker/common/exception_types.h"
 
 using namespace std;
 using namespace std::chrono;
@@ -63,9 +65,21 @@ GPSService::~GPSService() {
 void GPSService::readbyte(uint8_t b){
 	parser.parseByte(b);
 }
+
 void GPSService::readline(string line){
 	parser.handleTextCommand(line);
 }
+
+void GPSService::validateNmea(const NMEASentence &nmea, size_t numParam) const {
+	if(!nmea.checksumOK())
+		throw NMEAParseError("Checksum is invalid!");
+	else if(nmea.parameters.size() < numParam) {
+		throw NMEAParseError("Expected " + std::to_string(numParam) + " but only parsing "
+			+ std::to_string(nmea.parameters.size()) + " gps parameters.");
+	}
+}
+
+
 void GPSService::initSentenceHandlers(){
 
 	// http://www.gpsinformation.org/dale/nmea.htm
@@ -80,6 +94,7 @@ void GPSService::initSentenceHandlers(){
 	$PSRF150	- (proprietary) gps module ok_to_send
 	*/
 	parser.setCommandHandler("PSRF150", [this](NMEASentence nmea){
+		LOG(LGPSPARSE) << "Interpreting PSRF150";
 		//gps module is ready to send data
 	});
 	parser.setCommandHandler("GPGGA", [this](NMEASentence nmea){
@@ -112,16 +127,11 @@ void GPSService::initSentenceHandlers(){
 		[13] (empty field) DGPS station ID number
 		[13]  *47          the checksum data, always begins with *
 		*/
+		LOG(LGPSPARSE) << "Interpreting GPGGA";
+
 		try
 		{
-			if (!nmea.checksumOK()){
-				throw NMEAParseError("Checksum is invalid!");
-			}
-
-			if (nmea.parameters.size() < 14){
-				throw NMEAParseError("GPS data is missing parameters.");
-			}
-
+			validateNmea(nmea, 14);
 
 			// TIMESTAMP
 			this->fix.timestamp.settime(parseDouble(nmea.parameters[0]));
@@ -173,15 +183,9 @@ void GPSService::initSentenceHandlers(){
 				this->fix.hostTimeAtFix = this->hostClock.now();
 			}
 		}
-		catch (NumberConversionError& ex)
-		{
-			cout << "GPS Number Bad Format [$GPGGA] :: " + ex.message << endl;
+		catch(const gps_comm_error &err) {
+			LOG(LGPSPARSE) << "[$GPGGA]: " << err.what();
 		}
-		catch (NMEAParseError& ex)
-		{
-			cout << "GPS Data Bad Format [$GPGGA] :: " + ex.message << endl;
-		}
-
 	});
 	parser.setCommandHandler("GPGSA", [this](NMEASentence nmea){
 		/*  -- EXAMPLE --
@@ -201,18 +205,11 @@ void GPSService::initSentenceHandlers(){
 		[16] 2.1      Vertical dilution of precision (VDOP)
 		[16] *39      the checksum data, always begins with *
 		*/
-
+		LOG(LGPSPARSE) << "Interpreting GPGSA";
 
 		try
 		{
-			if (!nmea.checksumOK()){
-				throw NMEAParseError("Checksum is invalid!");
-			}
-
-			if (nmea.parameters.size() < 17){
-				throw NMEAParseError("GPS data is missing parameters.");
-			}
-
+			validateNmea(nmea, 17);
 
 			// FIX TYPE
 			bool lockupdate = false;
@@ -243,13 +240,8 @@ void GPSService::initSentenceHandlers(){
 			this->fix.verticalDilution = vdop;
 
 		}
-		catch (NumberConversionError& ex)
-		{
-			cout << "GPS Number Bad Format [$GPGSA] :: " + ex.message << endl;
-		}
-		catch (NMEAParseError& ex)
-		{
-			cout << "GPS Data Bad Format [$GPGSA] :: " + ex.message << endl;
+		catch(const gps_comm_error &err) {
+			LOG(LGPSPARSE) << "[$GPGSA]: " << err.what();
 		}
 	});
 	parser.setCommandHandler("GPGSV", [this](NMEASentence nmea){
@@ -274,10 +266,11 @@ void GPSService::initSentenceHandlers(){
 		[...]   for up to 4 satellites per sentence
 		[17] *75          the checksum data, always begins with *
 		*/
+		LOG(LGPSPARSE) << "Interpreting GPGSV";
 
 		try
 		{
-			if (!nmea.checksumOK()){
+			if (!nmea.checksumOK()) {
 				throw NMEAParseError("Checksum is invalid!");
 			}
 
@@ -328,13 +321,8 @@ void GPSService::initSentenceHandlers(){
 			//cout << "ALMANAC FINISHED page " << this->fix.almanac.processedPages << " of " << this->fix.almanac.totalPages << endl;
 
 		}
-		catch (NumberConversionError& ex)
-		{
-			cout << "GPS Number Bad Format [$GPGSV] :: " + ex.message << endl;
-		}
-		catch (NMEAParseError& ex)
-		{
-			cout << "GPS Data Bad Format [$GPGSV] :: " + ex.message << endl;
+		catch(const gps_comm_error &err) {
+			LOG(LGPSPARSE) << "[$GPGSV]: " << err.what();
 		}
 	});
 	parser.setCommandHandler("GPRMC", [this](NMEASentence nmea){
@@ -356,16 +344,11 @@ void GPSService::initSentenceHandlers(){
 		[10] *6A          The checksum data, always begins with *
 		// NMEA 2.3 includes another field after
 		*/
+		LOG(LGPSPARSE) << "Interpreting GPRMC";
 
 		try
 		{
-			if (!nmea.checksumOK()){
-				throw NMEAParseError("Checksum is invalid!");
-			}
-
-			if (nmea.parameters.size() < 11){
-				throw NMEAParseError("GPS data is missing parameters.");
-			}
+			validateNmea(nmea, 11);
 
 			// TIMESTAMP
 			this->fix.timestamp.settime(parseDouble(nmea.parameters[0]));
@@ -418,13 +401,8 @@ void GPSService::initSentenceHandlers(){
 				this->fix.hostTimeAtFix = this->hostClock.now();
 			}
 		}
-		catch (NumberConversionError& ex)
-		{
-			cout << "GPS Number Bad Format [$GPRMC] :: " + ex.message << endl;
-		}
-		catch (NMEAParseError& ex)
-		{
-			cout << "GPS Data Bad Format [$GPRMC] :: " + ex.message << endl;
+		catch(const gps_comm_error &err) {
+			LOG(LGPSPARSE) << "[$GPRMC]: " << err.what();
 		}
 	});
 
@@ -442,28 +420,18 @@ void GPSService::initSentenceHandlers(){
 		[6-7]	010.2,K      Ground speed, Kilometers per hour
 		[7]	*48          Checksum
 		*/
+		LOG(LGPSPARSE) << "Interpreting GPVTG";
 
 		try
 		{
-			if (!nmea.checksumOK()){
-				throw NMEAParseError("Checksum is invalid!");
-			}
-
-			if (nmea.parameters.size() < 8){
-				throw NMEAParseError("GPS data is missing parameters.");
-			}
+			validateNmea(nmea, 8);
 
 			// SPEED
 			// if empty, is converted to 0
 			this->fix.speed = parseDouble(nmea.parameters[6]);		//km/h
 		}
-		catch (NumberConversionError& ex)
-		{
-			cout << "GPS Number Bad Format [$GPVTG] :: " + ex.message << endl;
-		}
-		catch (NMEAParseError& ex)
-		{
-			cout << "GPS Data Bad Format [$GPVTG] :: " + ex.message << endl;
+		catch(const gps_comm_error &err) {
+			LOG(LGPSPARSE) << "[$GPVTG]: " << err.what();
 		}
 	});
 
