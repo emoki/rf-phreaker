@@ -29,7 +29,6 @@ set (CMAKE_RUNTIME_OUTPUT_DIRECTORY "${PROJECT_SOURCE_DIR}/output")
 set (CMAKE_LIBRARY_OUTPUT_DIRECTORY ${PROJECT_SOURCE_DIR}/output)
 set (CMAKE_ARCHIVE_OUTPUT_DIRECTORY ${PROJECT_SOURCE_DIR}/output)
 
-
 # Find TBB.
 if (MSVC)
 	set (TBB_DEFAULT_INSTALL_DIR "${rf_phreaker_SOURCE_DIR}/third_party/tbb_win" CACHE PATH "Folder contains TBB")
@@ -61,9 +60,11 @@ find_package (Boost 1.56.0 COMPONENTS system filesystem thread date_time timer c
 # Set QT
 cmake_policy(SET CMP0020 NEW) # This should also be specified in any project that uses QT.
 set (CMAKE_INCLUDE_CURRENT_DIR ON)
-set (qt_INSTALL_PATH "c:/bin/qt/5.3/msvc2012_opengl" CACHE STRING "Path to QT.")
+set (qt_INSTALL_PATH "c:/bin/qt/5.3/msvc2013_opengl" CACHE STRING "Path to QT.")
 set (CMAKE_PREFIX_PATH ${qt_INSTALL_PATH} ${CMAKE_PREFIX_PATH})
-find_package (Qt5Core)
+# All qt packages must be found within top level dir.
+find_package (Qt5 COMPONENTS Core Quick Widgets)
+
 # Figure out the best way to copy qt dlls
 
 
@@ -141,6 +142,7 @@ add_subdirectory (src/rf_phreaker/cappeen)
 add_subdirectory (src/rf_phreaker/cappeen_tests)
 add_subdirectory (src/rf_phreaker/rf_phreaker_api)
 add_subdirectory (src/rf_phreaker/rf_phreaker_api_tests)
+add_subdirectory (src/rf_phreaker/rf_phreaker_gui)
 add_subdirectory (src/rf_phreaker/general_utility)
 add_subdirectory (src/rf_phreaker/gps_comm)
 add_subdirectory (src/rf_phreaker/gps_comm_tests)

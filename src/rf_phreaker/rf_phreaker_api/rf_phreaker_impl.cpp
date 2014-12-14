@@ -455,8 +455,8 @@ rp_status rf_phreaker_impl::remove_collection_frequency(rp_device *device, rp_te
 //
 //		if(!is_initialized_)
 //			throw rf_phreaker_api_error("Not initialized.", RP_STATUS_NOT_INITIALIZED);
-//		else if(data == RAW_IQ)
-//			throw rf_phreaker_api_error("Invalid rp_technology - RAW_IQ does not have associated channels.", RP_STATUS_INVALID_PARAMETER);
+//		else if(data == RAW_DATA)
+//			throw rf_phreaker_api_error("Invalid rp_technology - RAW_DATA does not have associated channels.", RP_STATUS_INVALID_PARAMETER);
 //
 //		auto specifier = to_layer_3_specifier(data);
 //		
