@@ -77,13 +77,13 @@ long cappeen_impl::initialize(beagle_api::beagle_delegate *del)
 
 		LOG(LVERBOSE) << "Constructing cappeen_delegate.";
 		delegate_.reset(new cappeen_delegate(del));
-		LOG(LVERBOSE) << "Constructing blade_rf_controller_async.";
+		LOG(LVERBOSE) << "Constructing bladerf controller async.";
 		scanner_.reset(new scanner::blade_rf_controller_async(rf_phreaker::scanner::USB_BLADE_RF));
-		LOG(LVERBOSE) << "Constructing data_output_async.";
+		LOG(LVERBOSE) << "Constructing data output async.";
 		data_output_.reset(new processing::data_output_async());
-		LOG(LVERBOSE) << "Constructing processing_graph.";
+		LOG(LVERBOSE) << "Constructing processing graph.";
 		processing_graph_.reset(new processing::processing_graph());
-		LOG(LVERBOSE) << "Constructing gps_graph.";
+		LOG(LVERBOSE) << "Constructing gps graph.";
 		gps_graph_.reset(new processing::gps_graph());
 		LOG(LVERBOSE) << "Constructing frequency correction graph.";
 		frequency_correction_graph_.reset(new processing::frequency_correction_graph());
@@ -149,11 +149,17 @@ long cappeen_impl::clean_up()
 			LOG(LVERBOSE) << "Waiting for frequency correction graph...";
 			frequency_correction_graph_->cancel_and_wait();
 		}
+		LOG(LVERBOSE) << "Deleting gps graph...";
 		gps_graph_.reset();
+		LOG(LVERBOSE) << "Deleting processing graph...";
 		processing_graph_.reset();
+		LOG(LVERBOSE) << "Deleting frequency correction graph...";
 		frequency_correction_graph_.reset();
+		LOG(LVERBOSE) << "Deleting data output async...";
 		data_output_.reset();
+		LOG(LVERBOSE) << "Deleting cappeen delegate...";
 		delegate_.reset();
+		LOG(LVERBOSE) << "Deleting bladerf controller async...";
 		scanner_.reset();
 		LOG(LINFO) << "Cleaned up successfully.";
 	}
@@ -171,6 +177,7 @@ long cappeen_impl::clean_up()
 	}
 
 	try {
+		LOG(LVERBOSE) << "Deleting logger...";
 		logger_.reset();
 	}
 	catch(...) {}
