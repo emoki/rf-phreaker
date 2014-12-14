@@ -30,14 +30,19 @@ struct LEVELS {
    const std::string text;
 };
 
-const LEVELS LVERBOSE{0, {"VERBOSE"}}, 
+const LEVELS 
+LMIN{0, {"MIN"}},
+LGPS{LMIN.value + 1, {"GPS"}},
+LGPSPARSE{LGPS.value + 1, {"GPS_PARSE"}},
+LCOLLECTION{LGPSPARSE.value + 1, {"COLLECTION"}},
+// Insert here *any* extra logging levels that is needed and change MIN value
+// 1) Remember to update the FATAL initialization below
+// 2) Remember to update the initialization of "g2loglevels.cpp/g_log_level_status"
+LVERBOSE{LCOLLECTION.value + 1, {"VERBOSE"}},
 LDEBUG{LVERBOSE.value + 1, {"DEBUG"}}, 
 LINFO{LDEBUG.value + 1, {"INFO"}},
 LWARNING{LINFO.value + 1, {"WARNING"}}, 
 LERROR{LWARNING.value + 1, {"ERROR"}},
-// Insert here *any* extra logging levels that is needed
-// 1) Remember to update the FATAL initialization below
-// 2) Remember to update the initialization of "g2loglevels.cpp/g_log_level_status"
 LFATAL{LERROR.value + 1, {"FATAL"}};
 
 
