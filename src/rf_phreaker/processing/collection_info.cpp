@@ -82,7 +82,7 @@ collection_info rf_phreaker::processing::create_tech_collection_info(rf_phreaker
 		a.operating_band_ = band;
 		return a;
 	}
-	//case RAW_IQ:
+    //case RAW_DATA:
 	//	collection_info a(freq);
 	//	a.operating_band_ = band;
 	//	return a;

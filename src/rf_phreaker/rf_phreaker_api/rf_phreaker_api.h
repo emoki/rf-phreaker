@@ -55,7 +55,7 @@ typedef enum rp_status {
 typedef enum rp_technology {
 	GSM,
 	CDMA,
-	WCMDA,
+    WCDMA,
 	LTE,
 	RAW_DATA
 } rp_technology;

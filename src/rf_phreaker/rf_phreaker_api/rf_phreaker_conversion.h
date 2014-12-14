@@ -52,14 +52,14 @@ inline rf_phreaker::specifier to_sweep_specifier(rp_technology tech) {
 	switch(tech) {
 	case GSM:
 		return GSM_SWEEP;
-	case WCMDA:
+    case WCDMA:
 		return UMTS_SWEEP;
 	case LTE:
 		return LTE_SWEEP;
 	case CDMA:
 		return CDMA_SWEEP;
 	case RAW_DATA:
-		return RAW_IQ;
+        return RAW_DATA;
 	default:
 		throw rf_phreaker_api_error("sweep specifier not supported.");
 	}
@@ -69,14 +69,14 @@ inline rf_phreaker::specifier to_layer_3_specifier(rp_technology tech) {
 	switch(tech) {
 	case GSM:
 		return GSM_LAYER_3_DECODE;
-	case WCMDA:
+    case WCDMA:
 		return UMTS_LAYER_3_DECODE;
 	case LTE:
 		return LTE_LAYER_3_DECODE;
 	case CDMA:
 		return CDMA_LAYER_3_DECODE;
 	case RAW_DATA:
-		return RAW_IQ;
+        return RAW_DATA;
 	default:
 		throw rf_phreaker_api_error("sweep specifier not supported.");
 	}
@@ -128,11 +128,11 @@ inline rp_operating_band to_api_operating_band(rf_phreaker::operating_band t) {
 	case UMTS_OPERATING_BAND_1:
 		return rp_operating_band::UMTS_OPERATING_BAND_1;	//  2100	IMT	1920 - 1980	2110 – 2170
 	case UMTS_OPERATING_BAND_2:
-		return rp_operating_band::UMTS_OPERATING_BAND_2;	//  1900	PCS A-F	1850 – 1910	1930 – 1990
+		return rp_operating_band::UMTS_OPERATING_BAND_2;	//  1900	PCS A-F	1850 – 1910	1930 – 1990
 	case UMTS_OPERATING_BAND_3:
 		return rp_operating_band::UMTS_OPERATING_BAND_3;	//	1800	DCS	1710 – 1785	1805 – 1880
 	case UMTS_OPERATING_BAND_4:
-		return rp_operating_band::UMTS_OPERATING_BAND_4;	//	1700	AWS A-F	1710 – 1755	2110 – 2155			
+		return rp_operating_band::UMTS_OPERATING_BAND_4;	//	1700	AWS A-F	1710 – 1755	2110 – 2155			
 	case UMTS_OPERATING_BAND_5:
 		return rp_operating_band::UMTS_OPERATING_BAND_5;	//	850	CLR	824 – 849	869 – 894				
 	case UMTS_OPERATING_BAND_6:
@@ -167,85 +167,85 @@ inline rp_operating_band to_api_operating_band(rf_phreaker::operating_band t) {
 		return rp_operating_band::UMTS_OPERATING_BAND_26;	//	850	ECLR	814 – 849	859 – 894
 
 	case LTE_OPERATING_BAND_1:
-		return rp_operating_band::LTE_OPERATING_BAND_1;	//	1920 - 1980	2110 - 2170	FDD
+		return rp_operating_band::LTE_OPERATING_BAND_1;	//	1920 - 1980	2110 - 2170	FDD
 	case LTE_OPERATING_BAND_2:
-		return rp_operating_band::LTE_OPERATING_BAND_2;	//	1850 - 1910	1930 - 1990	FDD
+		return rp_operating_band::LTE_OPERATING_BAND_2;	//	1850 - 1910	1930 - 1990	FDD
 	case LTE_OPERATING_BAND_3:
-		return rp_operating_band::LTE_OPERATING_BAND_3;	//	1710 - 1785	1805 - 1880	FDD
+		return rp_operating_band::LTE_OPERATING_BAND_3;	//	1710 - 1785	1805 - 1880	FDD
 	case LTE_OPERATING_BAND_4:
-		return rp_operating_band::LTE_OPERATING_BAND_4;	//	1710 - 1755	2110 - 2155	FDD
+		return rp_operating_band::LTE_OPERATING_BAND_4;	//	1710 - 1755	2110 - 2155	FDD
 	case LTE_OPERATING_BAND_5:
-		return rp_operating_band::LTE_OPERATING_BAND_5;	//	824 - 849	869 - 894	FDD
+		return rp_operating_band::LTE_OPERATING_BAND_5;	//	824 - 849	869 - 894	FDD
 	case LTE_OPERATING_BAND_6:
-		return rp_operating_band::LTE_OPERATING_BAND_6;	//	830 - 840	875 - 885	FDD			
+		return rp_operating_band::LTE_OPERATING_BAND_6;	//	830 - 840	875 - 885	FDD			
 	case LTE_OPERATING_BAND_7:
-		return rp_operating_band::LTE_OPERATING_BAND_7;	//	2500 - 2570	2620 - 2690	FDD
+		return rp_operating_band::LTE_OPERATING_BAND_7;	//	2500 - 2570	2620 - 2690	FDD
 	case LTE_OPERATING_BAND_8:
-		return rp_operating_band::LTE_OPERATING_BAND_8;	//	880 - 915	925 - 960	FDD
+		return rp_operating_band::LTE_OPERATING_BAND_8;	//	880 - 915	925 - 960	FDD
 	case LTE_OPERATING_BAND_9:
-		return rp_operating_band::LTE_OPERATING_BAND_9;	//	1749.9 - 1784.9	1844.9 - 1879.9	FDD
+		return rp_operating_band::LTE_OPERATING_BAND_9;	//	1749.9 - 1784.9	1844.9 - 1879.9	FDD
 	case LTE_OPERATING_BAND_10:
-		return rp_operating_band::LTE_OPERATING_BAND_10;	//	1710 - 1770	2110 - 2170	FDD			
+		return rp_operating_band::LTE_OPERATING_BAND_10;	//	1710 - 1770	2110 - 2170	FDD			
 	case LTE_OPERATING_BAND_11:
-		return rp_operating_band::LTE_OPERATING_BAND_11;	//	1427.9 - 1447.9	1475.9 - 1495.9	FDD
+		return rp_operating_band::LTE_OPERATING_BAND_11;	//	1427.9 - 1447.9	1475.9 - 1495.9	FDD
 	case LTE_OPERATING_BAND_12:
-		return rp_operating_band::LTE_OPERATING_BAND_12;	//	699 - 716	729 - 746	FDD
+		return rp_operating_band::LTE_OPERATING_BAND_12;	//	699 - 716	729 - 746	FDD
 	case LTE_OPERATING_BAND_13:
-		return rp_operating_band::LTE_OPERATING_BAND_13;	//	777 - 787	746 - 756	FDD
+		return rp_operating_band::LTE_OPERATING_BAND_13;	//	777 - 787	746 - 756	FDD
 	case LTE_OPERATING_BAND_14:
-		return rp_operating_band::LTE_OPERATING_BAND_14;	//	788 - 798	758 - 768	FDD
+		return rp_operating_band::LTE_OPERATING_BAND_14;	//	788 - 798	758 - 768	FDD
 	case LTE_OPERATING_BAND_17:
-		return rp_operating_band::LTE_OPERATING_BAND_17;	//	704 - 716	734 - 746	FDD			
+		return rp_operating_band::LTE_OPERATING_BAND_17;	//	704 - 716	734 - 746	FDD			
 	case LTE_OPERATING_BAND_18:
-		return rp_operating_band::LTE_OPERATING_BAND_18;	//	815 - 830	860 - 875	FDD
+		return rp_operating_band::LTE_OPERATING_BAND_18;	//	815 - 830	860 - 875	FDD
 	case LTE_OPERATING_BAND_19:
-		return rp_operating_band::LTE_OPERATING_BAND_19;	//	830 - 845	875 - 890	FDD			
+		return rp_operating_band::LTE_OPERATING_BAND_19;	//	830 - 845	875 - 890	FDD			
 	case LTE_OPERATING_BAND_20:
-		return rp_operating_band::LTE_OPERATING_BAND_20;	//	832 - 862	791 - 821	FDD
+		return rp_operating_band::LTE_OPERATING_BAND_20;	//	832 - 862	791 - 821	FDD
 	case LTE_OPERATING_BAND_21:
-		return rp_operating_band::LTE_OPERATING_BAND_21;	//	1447.9 - 1462.9	1495.9 - 1510.9	FDD
+		return rp_operating_band::LTE_OPERATING_BAND_21;	//	1447.9 - 1462.9	1495.9 - 1510.9	FDD
 	case LTE_OPERATING_BAND_22:
-		return rp_operating_band::LTE_OPERATING_BAND_22;	//	3410 - 3490	3510 - 3590	FDD
+		return rp_operating_band::LTE_OPERATING_BAND_22;	//	3410 - 3490	3510 - 3590	FDD
 	case LTE_OPERATING_BAND_23:
-		return rp_operating_band::LTE_OPERATING_BAND_23;	//	2000 - 2020	2180 - 2200	FDD			
+		return rp_operating_band::LTE_OPERATING_BAND_23;	//	2000 - 2020	2180 - 2200	FDD			
 	case LTE_OPERATING_BAND_24:
-		return rp_operating_band::LTE_OPERATING_BAND_24;	//	1626.5 - 1660.5	1525 - 1559	FDD
+		return rp_operating_band::LTE_OPERATING_BAND_24;	//	1626.5 - 1660.5	1525 - 1559	FDD
 	case LTE_OPERATING_BAND_25:
-		return rp_operating_band::LTE_OPERATING_BAND_25;	//	1850 - 1915	1930 - 1995	FDD			
+		return rp_operating_band::LTE_OPERATING_BAND_25;	//	1850 - 1915	1930 - 1995	FDD			
 	case LTE_OPERATING_BAND_26:
-		return rp_operating_band::LTE_OPERATING_BAND_26;	//	814 - 849	859 - 894	FDD			
+		return rp_operating_band::LTE_OPERATING_BAND_26;	//	814 - 849	859 - 894	FDD			
 	case LTE_OPERATING_BAND_27:
-		return rp_operating_band::LTE_OPERATING_BAND_27;	//	807 - 824	852 - 869	FDD
+		return rp_operating_band::LTE_OPERATING_BAND_27;	//	807 - 824	852 - 869	FDD
 	case LTE_OPERATING_BAND_28:
-		return rp_operating_band::LTE_OPERATING_BAND_28;	//	703 - 748	758 - 803	FDD
+		return rp_operating_band::LTE_OPERATING_BAND_28;	//	703 - 748	758 - 803	FDD
 	case LTE_OPERATING_BAND_29:
-		return rp_operating_band::LTE_OPERATING_BAND_29;	//	N/A	716 - 728	FDD	
+		return rp_operating_band::LTE_OPERATING_BAND_29;	//	N/A	716 - 728	FDD	
 	case LTE_OPERATING_BAND_30:
 		return rp_operating_band::LTE_OPERATING_BAND_30;	//	2305 - 2315	 2350 - 2360 FDD
 	case LTE_OPERATING_BAND_33:
-		return rp_operating_band::LTE_OPERATING_BAND_33;	//	1900 - 1920		TDD
+		return rp_operating_band::LTE_OPERATING_BAND_33;	//	1900 - 1920		TDD
 	case LTE_OPERATING_BAND_34:
-		return rp_operating_band::LTE_OPERATING_BAND_34;	//	2010 - 2025		TDD
+		return rp_operating_band::LTE_OPERATING_BAND_34;	//	2010 - 2025		TDD
 	case LTE_OPERATING_BAND_35:
-		return rp_operating_band::LTE_OPERATING_BAND_35;	//	1850 - 1910		TDD
+		return rp_operating_band::LTE_OPERATING_BAND_35;	//	1850 - 1910		TDD
 	case LTE_OPERATING_BAND_36:
-		return rp_operating_band::LTE_OPERATING_BAND_36;	//	1930 - 1990		TDD
+		return rp_operating_band::LTE_OPERATING_BAND_36;	//	1930 - 1990		TDD
 	case LTE_OPERATING_BAND_37:
-		return rp_operating_band::LTE_OPERATING_BAND_37;	//	1910 - 1930		TDD
+		return rp_operating_band::LTE_OPERATING_BAND_37;	//	1910 - 1930		TDD
 	case LTE_OPERATING_BAND_38:
-		return rp_operating_band::LTE_OPERATING_BAND_38;	//	2570 - 2620		TDD
+		return rp_operating_band::LTE_OPERATING_BAND_38;	//	2570 - 2620		TDD
 	case LTE_OPERATING_BAND_39:
-		return rp_operating_band::LTE_OPERATING_BAND_39;	//	1880 - 1920		TDD
+		return rp_operating_band::LTE_OPERATING_BAND_39;	//	1880 - 1920		TDD
 	case LTE_OPERATING_BAND_40:
-		return rp_operating_band::LTE_OPERATING_BAND_40;	//	2300 - 2400		TDD
+		return rp_operating_band::LTE_OPERATING_BAND_40;	//	2300 - 2400		TDD
 	case LTE_OPERATING_BAND_41:
-		return rp_operating_band::LTE_OPERATING_BAND_41;	//	2496 - 2690		TDD
+		return rp_operating_band::LTE_OPERATING_BAND_41;	//	2496 - 2690		TDD
 	case LTE_OPERATING_BAND_42:
-		return rp_operating_band::LTE_OPERATING_BAND_42;	//	3400 - 3600		TDD
+		return rp_operating_band::LTE_OPERATING_BAND_42;	//	3400 - 3600		TDD
 	case LTE_OPERATING_BAND_43:
-		return rp_operating_band::LTE_OPERATING_BAND_43;	//	3600 - 3800		TDD
+		return rp_operating_band::LTE_OPERATING_BAND_43;	//	3600 - 3800		TDD
 	case LTE_OPERATING_BAND_44:
-		return rp_operating_band::LTE_OPERATING_BAND_44;	//	703 - 803		TDD
+		return rp_operating_band::LTE_OPERATING_BAND_44;	//	703 - 803		TDD
 
 	case OPERATING_BAND_UNKNOWN:
 	default:
@@ -287,11 +287,11 @@ inline rf_phreaker::operating_band to_operating_band(rp_operating_band t) {
 	case rp_operating_band::UMTS_OPERATING_BAND_1:
 		return operating_band::UMTS_OPERATING_BAND_1;	//  2100	IMT	1920 - 1980	2110 – 2170
 	case rp_operating_band::UMTS_OPERATING_BAND_2:
-		return operating_band::UMTS_OPERATING_BAND_2;	//  1900	PCS A-F	1850 – 1910	1930 – 1990
+		return operating_band::UMTS_OPERATING_BAND_2;	//  1900	PCS A-F	1850 – 1910	1930 – 1990
 	case rp_operating_band::UMTS_OPERATING_BAND_3:
 		return operating_band::UMTS_OPERATING_BAND_3;	//	1800	DCS	1710 – 1785	1805 – 1880
 	case rp_operating_band::UMTS_OPERATING_BAND_4:
-		return operating_band::UMTS_OPERATING_BAND_4;	//	1700	AWS A-F	1710 – 1755	2110 – 2155			
+		return operating_band::UMTS_OPERATING_BAND_4;	//	1700	AWS A-F	1710 – 1755	2110 – 2155			
 	case rp_operating_band::UMTS_OPERATING_BAND_5:
 		return operating_band::UMTS_OPERATING_BAND_5;	//	850	CLR	824 – 849	869 – 894				
 	case rp_operating_band::UMTS_OPERATING_BAND_6:
@@ -326,85 +326,85 @@ inline rf_phreaker::operating_band to_operating_band(rp_operating_band t) {
 		return operating_band::UMTS_OPERATING_BAND_26;	//	850	ECLR	814 – 849	859 – 894
 
 	case rp_operating_band::LTE_OPERATING_BAND_1:
-		return operating_band::LTE_OPERATING_BAND_1;	//	1920 - 1980	2110 - 2170	FDD
+		return operating_band::LTE_OPERATING_BAND_1;	//	1920 - 1980	2110 - 2170	FDD
 	case rp_operating_band::LTE_OPERATING_BAND_2:
-		return operating_band::LTE_OPERATING_BAND_2;	//	1850 - 1910	1930 - 1990	FDD
+		return operating_band::LTE_OPERATING_BAND_2;	//	1850 - 1910	1930 - 1990	FDD
 	case rp_operating_band::LTE_OPERATING_BAND_3:
-		return operating_band::LTE_OPERATING_BAND_3;	//	1710 - 1785	1805 - 1880	FDD
+		return operating_band::LTE_OPERATING_BAND_3;	//	1710 - 1785	1805 - 1880	FDD
 	case rp_operating_band::LTE_OPERATING_BAND_4:
-		return operating_band::LTE_OPERATING_BAND_4;	//	1710 - 1755	2110 - 2155	FDD
+		return operating_band::LTE_OPERATING_BAND_4;	//	1710 - 1755	2110 - 2155	FDD
 	case rp_operating_band::LTE_OPERATING_BAND_5:
-		return operating_band::LTE_OPERATING_BAND_5;	//	824 - 849	869 - 894	FDD
+		return operating_band::LTE_OPERATING_BAND_5;	//	824 - 849	869 - 894	FDD
 	case rp_operating_band::LTE_OPERATING_BAND_6:
-		return operating_band::LTE_OPERATING_BAND_6;	//	830 - 840	875 - 885	FDD			
+		return operating_band::LTE_OPERATING_BAND_6;	//	830 - 840	875 - 885	FDD			
 	case rp_operating_band::LTE_OPERATING_BAND_7:
-		return operating_band::LTE_OPERATING_BAND_7;	//	2500 - 2570	2620 - 2690	FDD
+		return operating_band::LTE_OPERATING_BAND_7;	//	2500 - 2570	2620 - 2690	FDD
 	case rp_operating_band::LTE_OPERATING_BAND_8:
-		return operating_band::LTE_OPERATING_BAND_8;	//	880 - 915	925 - 960	FDD
+		return operating_band::LTE_OPERATING_BAND_8;	//	880 - 915	925 - 960	FDD
 	case rp_operating_band::LTE_OPERATING_BAND_9:
-		return operating_band::LTE_OPERATING_BAND_9;	//	1749.9 - 1784.9	1844.9 - 1879.9	FDD
+		return operating_band::LTE_OPERATING_BAND_9;	//	1749.9 - 1784.9	1844.9 - 1879.9	FDD
 	case rp_operating_band::LTE_OPERATING_BAND_10:
-		return operating_band::LTE_OPERATING_BAND_10;	//	1710 - 1770	2110 - 2170	FDD			
+		return operating_band::LTE_OPERATING_BAND_10;	//	1710 - 1770	2110 - 2170	FDD			
 	case rp_operating_band::LTE_OPERATING_BAND_11:
-		return operating_band::LTE_OPERATING_BAND_11;	//	1427.9 - 1447.9	1475.9 - 1495.9	FDD
+		return operating_band::LTE_OPERATING_BAND_11;	//	1427.9 - 1447.9	1475.9 - 1495.9	FDD
 	case rp_operating_band::LTE_OPERATING_BAND_12:
-		return operating_band::LTE_OPERATING_BAND_12;	//	699 - 716	729 - 746	FDD
+		return operating_band::LTE_OPERATING_BAND_12;	//	699 - 716	729 - 746	FDD
 	case rp_operating_band::LTE_OPERATING_BAND_13:
-		return operating_band::LTE_OPERATING_BAND_13;	//	777 - 787	746 - 756	FDD
+		return operating_band::LTE_OPERATING_BAND_13;	//	777 - 787	746 - 756	FDD
 	case rp_operating_band::LTE_OPERATING_BAND_14:
-		return operating_band::LTE_OPERATING_BAND_14;	//	788 - 798	758 - 768	FDD
+		return operating_band::LTE_OPERATING_BAND_14;	//	788 - 798	758 - 768	FDD
 	case rp_operating_band::LTE_OPERATING_BAND_17:
-		return operating_band::LTE_OPERATING_BAND_17;	//	704 - 716	734 - 746	FDD			
+		return operating_band::LTE_OPERATING_BAND_17;	//	704 - 716	734 - 746	FDD			
 	case rp_operating_band::LTE_OPERATING_BAND_18:
-		return operating_band::LTE_OPERATING_BAND_18;	//	815 - 830	860 - 875	FDD
+		return operating_band::LTE_OPERATING_BAND_18;	//	815 - 830	860 - 875	FDD
 	case rp_operating_band::LTE_OPERATING_BAND_19:
-		return operating_band::LTE_OPERATING_BAND_19;	//	830 - 845	875 - 890	FDD			
+		return operating_band::LTE_OPERATING_BAND_19;	//	830 - 845	875 - 890	FDD			
 	case rp_operating_band::LTE_OPERATING_BAND_20:
-		return operating_band::LTE_OPERATING_BAND_20;	//	832 - 862	791 - 821	FDD
+		return operating_band::LTE_OPERATING_BAND_20;	//	832 - 862	791 - 821	FDD
 	case rp_operating_band::LTE_OPERATING_BAND_21:
-		return operating_band::LTE_OPERATING_BAND_21;	//	1447.9 - 1462.9	1495.9 - 1510.9	FDD
+		return operating_band::LTE_OPERATING_BAND_21;	//	1447.9 - 1462.9	1495.9 - 1510.9	FDD
 	case rp_operating_band::LTE_OPERATING_BAND_22:
-		return operating_band::LTE_OPERATING_BAND_22;	//	3410 - 3490	3510 - 3590	FDD
+		return operating_band::LTE_OPERATING_BAND_22;	//	3410 - 3490	3510 - 3590	FDD
 	case rp_operating_band::LTE_OPERATING_BAND_23:
-		return operating_band::LTE_OPERATING_BAND_23;	//	2000 - 2020	2180 - 2200	FDD			
+		return operating_band::LTE_OPERATING_BAND_23;	//	2000 - 2020	2180 - 2200	FDD			
 	case rp_operating_band::LTE_OPERATING_BAND_24:
-		return operating_band::LTE_OPERATING_BAND_24;	//	1626.5 - 1660.5	1525 - 1559	FDD
+		return operating_band::LTE_OPERATING_BAND_24;	//	1626.5 - 1660.5	1525 - 1559	FDD
 	case rp_operating_band::LTE_OPERATING_BAND_25:
-		return operating_band::LTE_OPERATING_BAND_25;	//	1850 - 1915	1930 - 1995	FDD			
+		return operating_band::LTE_OPERATING_BAND_25;	//	1850 - 1915	1930 - 1995	FDD			
 	case rp_operating_band::LTE_OPERATING_BAND_26:
-		return operating_band::LTE_OPERATING_BAND_26;	//	814 - 849	859 - 894	FDD			
+		return operating_band::LTE_OPERATING_BAND_26;	//	814 - 849	859 - 894	FDD			
 	case rp_operating_band::LTE_OPERATING_BAND_27:
-		return operating_band::LTE_OPERATING_BAND_27;	//	807 - 824	852 - 869	FDD
+		return operating_band::LTE_OPERATING_BAND_27;	//	807 - 824	852 - 869	FDD
 	case rp_operating_band::LTE_OPERATING_BAND_28:
-		return operating_band::LTE_OPERATING_BAND_28;	//	703 - 748	758 - 803	FDD
+		return operating_band::LTE_OPERATING_BAND_28;	//	703 - 748	758 - 803	FDD
 	case rp_operating_band::LTE_OPERATING_BAND_29:
-		return operating_band::LTE_OPERATING_BAND_29;	//	N/A	716 - 728	FDD	
+		return operating_band::LTE_OPERATING_BAND_29;	//	N/A	716 - 728	FDD	
 	case rp_operating_band::LTE_OPERATING_BAND_30:
 		return operating_band::LTE_OPERATING_BAND_30;	//	2305 - 2315	 2350 - 2360 FDD
 	case rp_operating_band::LTE_OPERATING_BAND_33:
-		return operating_band::LTE_OPERATING_BAND_33;	//	1900 - 1920		TDD
+		return operating_band::LTE_OPERATING_BAND_33;	//	1900 - 1920		TDD
 	case rp_operating_band::LTE_OPERATING_BAND_34:
-		return operating_band::LTE_OPERATING_BAND_34;	//	2010 - 2025		TDD
+		return operating_band::LTE_OPERATING_BAND_34;	//	2010 - 2025		TDD
 	case rp_operating_band::LTE_OPERATING_BAND_35:
-		return operating_band::LTE_OPERATING_BAND_35;	//	1850 - 1910		TDD
+		return operating_band::LTE_OPERATING_BAND_35;	//	1850 - 1910		TDD
 	case rp_operating_band::LTE_OPERATING_BAND_36:
-		return operating_band::LTE_OPERATING_BAND_36;	//	1930 - 1990		TDD
+		return operating_band::LTE_OPERATING_BAND_36;	//	1930 - 1990		TDD
 	case rp_operating_band::LTE_OPERATING_BAND_37:
-		return operating_band::LTE_OPERATING_BAND_37;	//	1910 - 1930		TDD
+		return operating_band::LTE_OPERATING_BAND_37;	//	1910 - 1930		TDD
 	case rp_operating_band::LTE_OPERATING_BAND_38:
-		return operating_band::LTE_OPERATING_BAND_38;	//	2570 - 2620		TDD
+		return operating_band::LTE_OPERATING_BAND_38;	//	2570 - 2620		TDD
 	case rp_operating_band::LTE_OPERATING_BAND_39:
-		return operating_band::LTE_OPERATING_BAND_39;	//	1880 - 1920		TDD
+		return operating_band::LTE_OPERATING_BAND_39;	//	1880 - 1920		TDD
 	case rp_operating_band::LTE_OPERATING_BAND_40:
-		return operating_band::LTE_OPERATING_BAND_40;	//	2300 - 2400		TDD
+		return operating_band::LTE_OPERATING_BAND_40;	//	2300 - 2400		TDD
 	case rp_operating_band::LTE_OPERATING_BAND_41:
-		return operating_band::LTE_OPERATING_BAND_41;	//	2496 - 2690		TDD
+		return operating_band::LTE_OPERATING_BAND_41;	//	2496 - 2690		TDD
 	case rp_operating_band::LTE_OPERATING_BAND_42:
-		return operating_band::LTE_OPERATING_BAND_42;	//	3400 - 3600		TDD
+		return operating_band::LTE_OPERATING_BAND_42;	//	3400 - 3600		TDD
 	case rp_operating_band::LTE_OPERATING_BAND_43:
-		return operating_band::LTE_OPERATING_BAND_43;	//	3600 - 3800		TDD
+		return operating_band::LTE_OPERATING_BAND_43;	//	3600 - 3800		TDD
 	case rp_operating_band::LTE_OPERATING_BAND_44:
-		return operating_band::LTE_OPERATING_BAND_44;	//	703 - 803		TDD
+		return operating_band::LTE_OPERATING_BAND_44;	//	703 - 803		TDD
 
 	case OPERATING_BAND_UNKNOWN:
 	default:
