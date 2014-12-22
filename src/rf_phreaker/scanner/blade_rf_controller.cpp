@@ -473,7 +473,7 @@ gain_type blade_rf_controller::get_auto_gain(frequency_type freq, bandwidth_type
 measurement_info blade_rf_controller::get_rf_data(frequency_type frequency, time_type time_ns, bandwidth_type bandwidth, const gain_type &gain, frequency_type sampling_rate,
 	uint32_t switch_setting, uint32_t switch_mask)
 {
-	LOG(LVERBOSE) << "Taking snapshot... " << "frequency: " << frequency / 1e6 << "mhz | time: "
+	LOG(LCOLLECTION) << "Taking snapshot... " << "frequency: " << frequency / 1e6 << "mhz | time: "
 		<< time_ns / 1e6 << "ms | bandwidth: " << bandwidth / 1e6 
 		<< "mhz | sampling_rate: " << sampling_rate / 1e6 << "mhz | gain: "
 		<< gain.lna_gain_ << " " << gain.rxvga1_ << " " << gain.rxvga2_;
@@ -528,7 +528,7 @@ measurement_info blade_rf_controller::get_rf_data(frequency_type frequency, time
 	uint32_t gpio_in_hw = 0;
 	check_blade_status(bladerf_expansion_gpio_read(comm_blade_rf_->blade_rf(),
 		&gpio_in_hw), __FILE__, __LINE__);
-	LOG(LVERBOSE) << "Current xb gpio:" << gpio_in_hw << ".";
+	LOG(LCOLLECTION) << "Current xb gpio:" << gpio_in_hw << ".";
 
 	if(switch_mask == 0) {
 		auto auto_switch_setting = scanner_blade_rf_->eeprom_.cal_.get_rf_switch(frequency);
@@ -540,7 +540,7 @@ measurement_info blade_rf_controller::get_rf_data(frequency_type frequency, time
 		uint32_t new_gpio = gpio_in_hw | switch_setting;
 		check_blade_status(bladerf_expansion_gpio_write(comm_blade_rf_->blade_rf(),
 			new_gpio), __FILE__, __LINE__);
-		LOG(LVERBOSE) << "Setting xb gpio to " << new_gpio << ".";
+		LOG(LCOLLECTION) << "Setting xb gpio to " << new_gpio << ".";
 		uint32_t tmp = 0;
 		check_blade_status(bladerf_expansion_gpio_read(comm_blade_rf_->blade_rf(),
 			&tmp), __FILE__, __LINE__);
