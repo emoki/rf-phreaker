@@ -23,7 +23,7 @@ void settings_io::read(settings &settings) {
 	settings.output_directory_ = qsettings_->value(output_directory_key.c_str(), output_directory_default.c_str()).toString().toStdString();
 	if(settings.output_directory_.size()) {
 		auto it = settings.output_directory_.rbegin();
-		if(*it != '\\' || *it != '/')
+		if(*it != '\\' && *it != '/')
 			settings.output_directory_ += "/";
 	}
 	if(!file_path_validation::is_path_valid(settings.output_directory_)) {
