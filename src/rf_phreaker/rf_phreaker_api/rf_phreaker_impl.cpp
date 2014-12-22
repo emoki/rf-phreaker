@@ -244,7 +244,7 @@ rp_status rf_phreaker_impl::connect_device(rp_serial serial, rp_device **device_
 
 		device->async_.set_log_level(config_.blade_settings_.log_level_);
 
-		device->async_.open_scanner(serial.serial_).get();
+		device->async_.open_scanner_and_refresh_scanner_info(serial.serial_).get();
 
 		device->async_.do_initial_scanner_config(config_.blade_settings_).get();
 

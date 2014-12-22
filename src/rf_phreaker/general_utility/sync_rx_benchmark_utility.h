@@ -50,7 +50,7 @@ public:
 			
 			std::cout << "Opening scanner " << id << std::endl;
 
-			scanner.open_scanner(id);
+			scanner.open_scanner_and_refresh_scanner_info(id);
 
 			scanner.do_initial_scanner_config(blade_config);
 

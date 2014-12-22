@@ -255,7 +255,7 @@ long cappeen_impl::open_unit(const char *serial, unsigned int buf_size)
 		delegate_->initialize_beagle_info(tmp_hw);
 		delegate_->change_beagle_state(BEAGLE_USBOPENED);
 
-		scanner_->open_scanner(serial).get();
+		scanner_->open_scanner_and_refresh_scanner_info(serial).get();
 		
 		scanner_->do_initial_scanner_config(config_.blade_settings_).get();
 

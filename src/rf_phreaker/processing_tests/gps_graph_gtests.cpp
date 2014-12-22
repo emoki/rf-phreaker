@@ -23,7 +23,7 @@ TEST(ProcessingGpsGraph, DISABLED_TestGeneral)
 		if(scanner_list.size()) {
 			auto scanner_id = (*scanner_list.begin())->id();
 
-			blade.open_scanner(scanner_id);
+			blade.open_scanner_and_refresh_scanner_info(scanner_id);
 
 			blade.do_initial_scanner_config();
 

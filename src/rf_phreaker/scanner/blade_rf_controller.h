@@ -36,6 +36,8 @@ public:
 
 	void open_scanner(const scanner_serial_type &id);
 
+	void open_scanner_and_refresh_scanner_info(const scanner_serial_type &id);
+
 	void close_scanner();
 
 	void do_initial_scanner_config(const scanner_settings &settings = blade_settings());

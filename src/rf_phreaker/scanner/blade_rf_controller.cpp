@@ -93,6 +93,11 @@ std::vector<comm_info_ptr> blade_rf_controller::list_available_scanners()
 	return devices;
 }
 
+void blade_rf_controller::open_scanner_and_refresh_scanner_info(const scanner_serial_type &id) {
+	open_scanner(id);
+	refresh_scanner_info();
+}
+
 void blade_rf_controller::open_scanner(const scanner_serial_type &id)
 {
 	parameter_cache_ = measurement_info();
@@ -121,16 +126,6 @@ void blade_rf_controller::open_scanner(const scanner_serial_type &id)
 	}
 
 	comm_blade_rf_.reset(new comm_blade_rf(dev_info, blade_rf));
-
-	refresh_scanner_info();
-
-	LOG(LDEBUG) << "Opened scanner " << scanner_blade_rf_->serial() << ".";
-	LOG(LDEBUG) << "USB backend is " << usb_backend_to_string(scanner_blade_rf_->back_end()) << ".";
-	LOG(LDEBUG) << "Device speed is " << to_string(scanner_blade_rf_->usb_speed()) << ".";
-	LOG(LDEBUG) << "RF calibration performed on " << boost::posix_time::to_simple_string(boost::posix_time::from_time_t(scanner_blade_rf_->get_rf_calibration_date())) << ".";
-	LOG(LDEBUG) << "VCTCXO trim value is " << scanner_blade_rf_->vctcxo_trim() << ".";
-	LOG(LDEBUG) << "Frequency correction performed on " << boost::posix_time::to_simple_string(boost::posix_time::from_time_t(scanner_blade_rf_->get_frequency_correction_date())) << ".";
-	LOG(LDEBUG) << "Frequency correction value is " << scanner_blade_rf_->get_frequency_correction_value() << ".";
 }
 
 void blade_rf_controller::refresh_scanner_info()
@@ -186,6 +181,17 @@ void blade_rf_controller::refresh_scanner_info()
 	if(scanner_blade_rf_->eeprom_.cal_.nuand_freq_correction_value_ && scanner_blade_rf_->eeprom_.cal_.nuand_freq_correction_value_ != scanner_blade_rf_->vctcxo_trim_value_) {
 		update_vctcxo_trim(scanner_blade_rf_->eeprom_.cal_.nuand_freq_correction_value_);
 	}
+
+	LOG(LDEBUG) << "Scanner serial is" << scanner_blade_rf_->serial() << ".";
+	LOG(LDEBUG) << "USB backend is " << usb_backend_to_string(scanner_blade_rf_->back_end()) << ".";
+	LOG(LDEBUG) << "Device speed is " << to_string(scanner_blade_rf_->usb_speed()) << ".";
+	LOG(LDEBUG) << "Blade library version is " << scanner_blade_rf_->blade_rf_version_description();
+	LOG(LDEBUG) << "Blade fpga version is " << scanner_blade_rf_->fpga_version_description();
+	LOG(LDEBUG) << "Blade firmware version is " << scanner_blade_rf_->firmware_version_description();
+	LOG(LDEBUG) << "RF calibration performed on " << boost::posix_time::to_simple_string(boost::posix_time::from_time_t(scanner_blade_rf_->get_rf_calibration_date())) << ".";
+	LOG(LDEBUG) << "VCTCXO trim value is " << scanner_blade_rf_->vctcxo_trim() << ".";
+	LOG(LDEBUG) << "Frequency correction performed on " << boost::posix_time::to_simple_string(boost::posix_time::from_time_t(scanner_blade_rf_->get_frequency_correction_date())) << ".";
+	LOG(LDEBUG) << "Frequency correction value is " << scanner_blade_rf_->get_frequency_correction_value() << ".";
 }
 
 void blade_rf_controller::close_scanner()
@@ -260,7 +266,7 @@ void blade_rf_controller::do_initial_scanner_config(const scanner_settings &sett
 			close_scanner();
 			for(int i = 0; i < 3; ++i) {
 				std::this_thread::sleep_for(std::chrono::seconds(3));
-				open_scanner(id);
+				open_scanner_and_refresh_scanner_info(id);
 				std::this_thread::sleep_for(std::chrono::seconds(1));
 				break;
 			}

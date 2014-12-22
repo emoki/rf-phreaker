@@ -24,6 +24,12 @@ public:
 		});
 	}
 
+	virtual std::future<void> open_scanner_and_refresh_scanner_info(const scanner_serial_type &id) {
+		return controller_([&](blade_rf_controller &c) {
+			c.open_scanner_and_refresh_scanner_info(id);
+		});
+	}
+
 	virtual std::future<void> close_scanner() {
 		return controller_([=](blade_rf_controller &c) {
 			c.close_scanner();

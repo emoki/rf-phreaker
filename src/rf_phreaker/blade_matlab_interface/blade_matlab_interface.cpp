@@ -95,7 +95,7 @@ int open_first_blade_device()
 
 		if(devices.size() && (*devices.begin())->id().size())
 		{
-			controller.open_scanner((*devices.begin())->id());
+			controller.open_scanner_and_refresh_scanner_info((*devices.begin())->id());
 			controller.do_initial_scanner_config();
 			return matlab_interface_no_error;
 		}
@@ -116,7 +116,7 @@ int open_blade_device(const char *serial)
 {
 	try {
 		cali.reset();
-		controller.open_scanner(serial);
+		controller.open_scanner_and_refresh_scanner_info(serial);
 		controller.do_initial_scanner_config();
 		return matlab_interface_no_error;
 	}

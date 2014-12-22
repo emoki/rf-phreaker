@@ -19,7 +19,7 @@ public:
 
 	virtual std::future<std::vector<comm_info_ptr>> list_available_scanners() = 0;
 
-	virtual std::future<void> open_scanner(const scanner_serial_type &id) = 0;
+	virtual std::future<void> open_scanner_and_refresh_scanner_info(const scanner_serial_type &id) = 0;
 
 	virtual std::future<void> close_scanner() = 0;
 
