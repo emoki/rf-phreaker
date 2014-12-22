@@ -810,7 +810,7 @@ void blade_rf_controller::start_gps_1pps_integration(int seconds) {
 	if(gps_comm_) {
 		gps_comm_->initiate_pps_clock_counter(seconds);
 	}
-	current_1pps_integration_ = {seconds, 0};
+	current_1pps_integration_ = {seconds, 0, 0};
 }
 
 bool blade_rf_controller::attempt_gps_1pps_calibration() {
