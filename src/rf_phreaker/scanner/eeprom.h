@@ -9,15 +9,15 @@
 
 namespace rf_phreaker { namespace scanner {
 
-#define RF_PHREAKER_FLAGE_PAGE 256
+#define RF_PHREAKER_FLAGE_PAGE_SIZE 256
 #define RF_PHREAKER_FLASH_ADDR 0x00040000
-#define RF_PHREAKER_FLASH_PAGE (RF_PHREAKER_FLASH_ADDR / RF_PHREAKER_FLAGE_PAGE)
+#define RF_PHREAKER_FLASH_PAGE (RF_PHREAKER_FLASH_ADDR / RF_PHREAKER_FLAGE_PAGE_SIZE)
 #define RF_PHREAKER_FLASH_EB (RF_PHREAKER_FLASH_ADDR / (64 * 1024))
 #define RF_PHREAKER_FLASH_BYTE_LEN 0x00370000
 #define RF_PHREAKER_FLASH_METADATA_BYTE_LEN 256
 
 inline uint32_t convert_to_page(uint32_t num) {
-	return add_mod(num, RF_PHREAKER_FLAGE_PAGE) / RF_PHREAKER_FLAGE_PAGE;
+	return add_mod(num, RF_PHREAKER_FLAGE_PAGE_SIZE) / RF_PHREAKER_FLAGE_PAGE_SIZE;
 }
 
 class eeprom
@@ -47,13 +47,14 @@ public:
 		std::stringstream ss;
 		boost::archive::text_oarchive oa(ss);
 		oa & *this;
-		std::vector<uint8_t> bytes(add_mod(ss.str().size(), RF_PHREAKER_FLAGE_PAGE));
+		std::vector<uint8_t> bytes(add_mod(ss.str().size(), RF_PHREAKER_FLAGE_PAGE_SIZE));
 		std::string tmp(ss.str());
 		std::copy(tmp.begin(), tmp.end(), bytes.begin());
 		return bytes;
 	}
 	calibration cal_;
 	license license_;
+
 
 private:
 	friend class boost::serialization::access;
@@ -88,8 +89,8 @@ public:
 	{
 		// Include a flash page for padding
 		auto meta_bytes = serialize_to_bytes();
-		eeprom_address_ = eeprom::absolute_byte_address() + meta_bytes.size() + RF_PHREAKER_FLAGE_PAGE;
-		assert(eeprom_address_ == add_mod(eeprom_address_, RF_PHREAKER_FLAGE_PAGE)); 
+		eeprom_address_ = eeprom::absolute_byte_address() + meta_bytes.size() + RF_PHREAKER_FLAGE_PAGE_SIZE;
+		assert(eeprom_address_ == add_mod(eeprom_address_, RF_PHREAKER_FLAGE_PAGE_SIZE)); 
 	}
 
 	uint32_t eeprom_byte_length() const {
@@ -101,7 +102,7 @@ public:
 	}
 
 	uint32_t eeprom_byte_address() const {
-		assert(eeprom_address_ == add_mod(eeprom_address_, RF_PHREAKER_FLAGE_PAGE));
+		assert(eeprom_address_ == add_mod(eeprom_address_, RF_PHREAKER_FLAGE_PAGE_SIZE));
 		return eeprom_address_;
 	}
 
@@ -125,7 +126,7 @@ public:
 		std::stringstream ss;
 		boost::archive::text_oarchive oa(ss);
 		oa & *this;
-		std::vector<uint8_t> bytes(add_mod(ss.str().size(), RF_PHREAKER_FLAGE_PAGE));
+		std::vector<uint8_t> bytes(add_mod(ss.str().size(), RF_PHREAKER_FLAGE_PAGE_SIZE));
 		std::string tmp(ss.str());
 		std::copy(tmp.begin(), tmp.end(), bytes.begin());
 		return bytes;
