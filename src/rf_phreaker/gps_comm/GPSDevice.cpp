@@ -692,7 +692,7 @@ namespace rf_phreaker { namespace gps_comm {
 				
 			} while ( successes == 0 && bytesread < 1024 + 500);			// enough to flush the buffer and start reading with the new baud
 
-			LOG(LGPS) << "Skipped data " << skipped_bytes_num << " times.  Read data " << new_data << " times.";
+			LOG(LGPS) << "Skipped data " << skipped_bytes_num << " times.  Read data " << new_data << " times.  Total bytes read: " << bytesread;
 
 			if (successes > 0){
 				finalBaud = baud;

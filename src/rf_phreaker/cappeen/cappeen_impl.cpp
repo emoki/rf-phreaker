@@ -308,8 +308,14 @@ long cappeen_impl::close_unit(const char *serial, unsigned int buf_size)
 		// Write gps 1pps calibration to EEPROM if neccessary.
 		auto gps_1pps = scanner_->get_last_valid_gps_1pps_integration().get();
 		auto time_diff = gps_1pps.time_calculated() - hw.frequency_correction_calibration_date_;
-		LOG(LDEBUG) << "Frequency correction value last updated on " << boost::posix_time::to_simple_string(boost::posix_time::from_time_t(hw.frequency_correction_calibration_date_))
-			<< ".  GPS 1PPS calibration last occurred on " << boost::posix_time::to_simple_string(boost::posix_time::from_time_t(gps_1pps.time_calculated())) << ".";
+		LOG(LDEBUG) << "Frequency correction value last updated on " << boost::posix_time::to_simple_string(boost::posix_time::from_time_t(hw.frequency_correction_calibration_date_)) << ".";
+		
+		if(gps_1pps.is_valid()) {
+			LOG(LDEBUG) << "GPS 1PPS calibration last occurred on " << boost::posix_time::to_simple_string(boost::posix_time::from_time_t(gps_1pps.time_calculated())) << ".";
+		}
+		else {
+			LOG(LDEBUG) << "GPS 1PPS calibration did not occur.";
+		}
 		if(gps_1pps.is_valid() && time_diff > config_.eeprom_update_period_for_1pps_calibration_minutes_ * 60) {
 			LOG(LDEBUG) << "Storing latest GPS 1PPS calibration using " << gps_1pps.clock_ticks() << " clock ticks for an error of " << gps_1pps.error_in_hz() << " Hz.";
 			scanner_->calculate_vctcxo_trim_and_update_calibration(gps_1pps.error_in_hz());
