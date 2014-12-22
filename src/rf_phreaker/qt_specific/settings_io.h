@@ -59,6 +59,9 @@ static const std::string output_directory_key = "output_directory";
 static const std::string output_in_binary_key = "output_in_binary";
 static const std::string simultaneous_collection_key = "simultaneous_collection";
 static const std::string eeprom_update_period_for_1pps_calibration_minutes_key = "eeprom_update_period_for_1pps_calibration_minutes";
+static const std::string log_gps_general_key = "log_gps";
+static const std::string log_gps_parsing_key = "log_gps_parsing";
+static const std::string log_collection_key = "log_collection";
 
 class settings_io {
 public:

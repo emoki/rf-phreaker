@@ -51,9 +51,12 @@ long cappeen_impl::initialize(beagle_api::beagle_delegate *del)
 
 		is_initialized_ = false;
 
-		if(logger_)
+		if(logger_) {
 			logger_->change_logging_level(config_.log_level_);
-
+			logger_->enable_collection_log(config_.log_collection_);
+			logger_->enable_gps_general_log(config_.log_gps_general_);
+			logger_->enable_gps_parsing_log(config_.log_gps_parsing_);
+		}
 		// Release all components before changing delegate.
 		if(processing_graph_) {
 			LOG(LDEBUG) << "Found processing graph on heap.  Sending cancel request and releasing it.";

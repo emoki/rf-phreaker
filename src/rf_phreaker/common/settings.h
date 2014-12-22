@@ -34,6 +34,9 @@ static const std::string output_directory_default = "NULL";
 static const bool output_in_binary_default = true;
 static const bool simultaneous_collection_default = false;
 static const int eeprom_update_period_for_1pps_calibration_minutes_default = 60;
+static const bool log_gps_general_default = false;
+static const bool log_gps_parsing_default = false;
+static const bool log_collection_default = false;
 
 class output_settings {
 public:
@@ -99,6 +102,9 @@ class settings {
 public:
 	// TODO - Change these to system settings, general settings or something.
 	int log_level_;
+	bool log_gps_general_;
+	bool log_gps_parsing_;
+	bool log_collection_;
 	int gps_collection_period_ms_;
 	int num_items_in_flight_;
 	bool use_rf_board_adjustment_;

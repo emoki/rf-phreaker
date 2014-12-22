@@ -40,6 +40,18 @@ public:
 		g2::setLogLevel(LERROR, adjusted_level <= LERROR.value);
 		g2::setLogLevel(LFATAL, adjusted_level <= LFATAL.value);
 	}
+	
+	void enable_gps_general_log(bool enable) {
+		g2::setLogLevel(LGPS, enable);
+	}
+
+	void enable_gps_parsing_log(bool enable) {
+		g2::setLogLevel(LGPSPARSE, enable);
+	}
+
+	void enable_collection_log(bool enable) {
+		g2::setLogLevel(LCOLLECTION, enable);
+	}
 
 	std::unique_ptr<g2::DefaultFileLogger> handler_;
 };

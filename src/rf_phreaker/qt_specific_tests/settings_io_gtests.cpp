@@ -22,7 +22,11 @@ TEST(QtSpecific, TestSettingsIO)
 	EXPECT_EQ(output_in_binary_default, set.output_in_binary_);
 	EXPECT_EQ(simultaneous_collection_default, set.simultaneous_collection_);
 	EXPECT_EQ(eeprom_update_period_for_1pps_calibration_minutes_default, set.eeprom_update_period_for_1pps_calibration_minutes_);
-	
+
+	EXPECT_EQ(log_gps_general_default, set.log_gps_general_);
+	EXPECT_EQ(log_gps_parsing_default, set.log_gps_parsing_);
+	EXPECT_EQ(log_collection_default, set.log_collection_);
+
 	EXPECT_EQ(settings_output_default, set.standard_output_.scanner_);
 	EXPECT_EQ(settings_output_default, set.standard_output_.gps_);
 	EXPECT_EQ(settings_output_default, set.standard_output_.umts_sweep_);
@@ -97,10 +101,13 @@ TEST(QtSpecific, TestSettingsIO)
 	// Alter and store new settings. 
 	int tmp = 0;
 	set.log_level_ = tmp++;
+	set.log_gps_general_ = true;
+	set.log_gps_parsing_ = true;
+	set.log_collection_ = true;
 	set.gps_collection_period_ms_ = tmp++;
 	set.num_items_in_flight_ = tmp++;
 	set.use_rf_board_adjustment_ = true;
-	set.output_directory_ = "c:\\";
+	set.output_directory_ = "c:/";
 	set.output_in_binary_ = false;
 	set.simultaneous_collection_ = false;
 	set.eeprom_update_period_for_1pps_calibration_minutes_ = tmp++;
@@ -172,6 +179,10 @@ TEST(QtSpecific, TestSettingsIO)
 	EXPECT_EQ(set.output_in_binary_, set2.output_in_binary_);
 	EXPECT_EQ(set.simultaneous_collection_, set2.simultaneous_collection_);
 	EXPECT_EQ(set.eeprom_update_period_for_1pps_calibration_minutes_, set2.eeprom_update_period_for_1pps_calibration_minutes_);
+
+	EXPECT_EQ(set.log_gps_general_, set2.log_gps_general_);
+	EXPECT_EQ(set.log_gps_parsing_, set2.log_gps_parsing_);
+	EXPECT_EQ(set.log_collection_, set2.log_collection_);
 
 	EXPECT_EQ(set.standard_output_.scanner_, set2.standard_output_.scanner_);
 	EXPECT_EQ(set.standard_output_.gps_, set2.standard_output_.gps_);

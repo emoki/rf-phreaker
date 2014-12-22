@@ -36,6 +36,10 @@ void settings_io::read(settings &settings) {
 	settings.eeprom_update_period_for_1pps_calibration_minutes_ = qsettings_->value(eeprom_update_period_for_1pps_calibration_minutes_key.c_str(),
 		eeprom_update_period_for_1pps_calibration_minutes_default).toInt();
 
+	settings.log_gps_general_ = qsettings_->value(log_gps_general_key.c_str(), log_gps_general_default).toBool();
+	settings.log_gps_parsing_ = qsettings_->value(log_gps_parsing_key.c_str(), log_gps_parsing_default).toBool();
+	settings.log_collection_ = qsettings_->value(log_collection_key.c_str(), log_collection_default).toBool();
+
 	read(settings.standard_output_, standard_output_group_key);
 	read(settings.signal_slots_, signal_slot_output_group_key);
 	read(settings.packet_output_, packet_output_group_key);
@@ -125,7 +129,11 @@ void settings_io::write(const settings &settings) {
 	qsettings_->setValue(output_in_binary_key.c_str(), settings.output_in_binary_);
 	qsettings_->setValue(simultaneous_collection_key.c_str(), settings.simultaneous_collection_);
 	qsettings_->setValue(eeprom_update_period_for_1pps_calibration_minutes_key.c_str(), settings.eeprom_update_period_for_1pps_calibration_minutes_);
-	
+
+	qsettings_->setValue(log_gps_general_key.c_str(), settings.log_gps_general_);
+	qsettings_->setValue(log_gps_parsing_key.c_str(), settings.log_gps_parsing_);
+	qsettings_->setValue(log_collection_key.c_str(), settings.log_collection_);
+
 	write(settings.standard_output_, standard_output_group_key);
 	write(settings.signal_slots_, signal_slot_output_group_key);
 	write(settings.packet_output_, packet_output_group_key);
