@@ -371,7 +371,10 @@ public:
 		beagle_info_.valid_licenses_.num_elements_ = 0;
 		beagle_info_.valid_licenses_.elements_ = 0;
 		valid_licenses_.clear();
-		if(t.license_data_.version_ <= 0) {
+		if(t.license_data_.is_dummy_version()) {
+			; // Dummy version - do nothing.
+		}
+		else if(t.license_data_.version_ <= 0) {
 			LOG(LWARNING) << "License is not initialized.";
 		}
 		else {

@@ -9,6 +9,7 @@ namespace rf_phreaker {
 class license
 {
 public:
+	license(bool is_dummy) : version_(is_dummy ? dummy_version_ : -1) {}
 	license() : version_(-1) {}
 	int32_t version_;
 	std::vector<uint8_t> bytes_;
@@ -18,8 +19,10 @@ public:
 		bytes_ = lic.bytes_;
 		return *this;
 	}
+	bool is_dummy_version() const { return version_ == dummy_version_; }
 
 private:
+	static const int32_t dummy_version_ = -100;
 	friend class boost::serialization::access;
 	template<class Archive>
 	void serialize(Archive &ar, const unsigned int version)

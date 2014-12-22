@@ -247,6 +247,9 @@ long cappeen_impl::open_unit(const char *serial, unsigned int buf_size)
 		if(processing_graph_)
 			processing_graph_->cancel_and_wait();
 
+		// Initialize a fake hw and initialize it.
+		hardware tmp_hw{serial, device_communication::UNKNOWN_SPEED, 0, 0, {}, {true}};
+		delegate_->initialize_beagle_info(tmp_hw);
 		delegate_->change_beagle_state(BEAGLE_USBOPENED);
 
 		scanner_->open_scanner(serial).get();
