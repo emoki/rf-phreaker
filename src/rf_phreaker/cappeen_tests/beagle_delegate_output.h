@@ -37,7 +37,7 @@ public:
 		std::strftime(mbstr, sizeof(mbstr), "%A %c", std::localtime(&info.rf_calibration_date_));
 		std::cout << "rf_calibration_date: " << mbstr << "\n"; //std::put_time(t2, "%Y-%m-%d %X") << "\n";
 
-		std::cout << (info.device_speed_ == beagle_api::USB_SUPER_SPEED ? "USB_SUPER_SPEED" : "USB_HI_SPEED") << "\n";
+		std::cout << (info.device_speed_ == beagle_api::USB_SUPER_SPEED ? "USB_SUPER_SPEED" : info.device_speed_ == beagle_api::USB_SUPER_SPEED ? "USB_HI_SPEED" : "UNKNOWN_SPEED") << "\n";
 
 		switch(info.state_) {
 		case BEAGLESTATE::BEAGLE_USBCLOSED:

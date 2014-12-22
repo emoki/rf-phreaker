@@ -130,7 +130,7 @@ public:
 					cal.nuand_freq_correction_date_ = tmp_cal.nuand_freq_correction_date_;
 				}
 			}
-			catch(const std::exception &err) {
+			catch(const std::exception &) {
 				std::cout << "\nError while reading calibration.  Frequency correction value/date will not be set.\nInitializing EEPROM.\n";
 				controller.initialize_eeprom();
 			}

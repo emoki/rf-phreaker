@@ -103,7 +103,7 @@ TEST(FPGAReliability, DISABLED_TestGeneral) {
 				num_wrong_states++;
 			}
 		}
-		catch (GPSDeviceError& e){
+		catch (GPSDeviceError &){
 			std::cout << "[!] unresponsive";
 		}
 		std::cout << std::endl;

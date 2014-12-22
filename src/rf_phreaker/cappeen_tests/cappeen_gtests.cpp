@@ -18,6 +18,8 @@ TEST(Cappeen, TestMain)
 	std::cout << cappeen_api_version() << std::endl;
 
 	output out;
+	out.output_ = true;
+
 	EXPECT_EQ(0, cappeen_initialize(&out));
 
 	std::array<char, 1024 * 10> serials;
