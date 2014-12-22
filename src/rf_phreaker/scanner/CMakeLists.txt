@@ -50,7 +50,3 @@ target_link_libraries (scanner gps_comm)
 target_link_libraries (scanner libbladerf_shared)
 target_link_libraries (scanner ipp_custom)
 target_link_libraries (scanner ${TBB_LIBRARY})
-
-# For some reason, cmake wasn't adding boost libraries to this project
-# so we're adding them manually.  Revist later after upgrading cmake.
-target_link_libraries (scanner ${Boost_LIBRARIES}) 

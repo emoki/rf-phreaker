@@ -48,3 +48,7 @@ add_library (common STATIC ${common_SRCS})
 target_link_libraries (common ${TBB_LIBRARY})
 target_link_libraries (common ipp_custom)
 target_link_libraries (common g3logger)
+
+# For some reason, cmake wasn't adding boost libraries to this project
+# so we're adding them manually.  Revist later after upgrading cmake.
+target_link_libraries (common ${Boost_LIBRARIES}) 
