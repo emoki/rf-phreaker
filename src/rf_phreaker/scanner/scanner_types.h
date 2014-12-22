@@ -26,8 +26,8 @@ struct iq_sample_type
 };
 
 struct gps_1pps_integration {
-	gps_1pps_integration() : seconds_integrated_(0), clock_ticks_(0), reference_clock_(38400000) {}
-	gps_1pps_integration(int s, int t) : seconds_integrated_(s), clock_ticks_(t), reference_clock_(38400000) {}
+	gps_1pps_integration() : seconds_integrated_(0), clock_ticks_(0), time_calculated_(0), reference_clock_(38400000) {}
+	gps_1pps_integration(int s, int t) : seconds_integrated_(s), clock_ticks_(t), time_calculated_(0), reference_clock_(38400000) {}
 	gps_1pps_integration(int s, int t, int r) : seconds_integrated_(s), clock_ticks_(t), reference_clock_(r) {}
 	int64_t clock_ticks() { return clock_ticks_; }
 	int seconds_integrated() { return seconds_integrated_; }
