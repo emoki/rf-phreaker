@@ -447,6 +447,8 @@ namespace beagle_api
 
 		BEAGLE_COLLECTING,	/// Beagle is collecting data.
 
+		BEAGLE_CALCULATING_FREQUENCY_CORRECTION, /// Beagle is calculating frequency correction
+
 		BEAGLE_ERROR = -1	/// A substantial error occurred within Beagle.  
 
 	};

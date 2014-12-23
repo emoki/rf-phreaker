@@ -561,6 +561,8 @@ long cappeen_impl::start_frequency_correction(const beagle_api::collection_info 
 
 		frequency_correction_graph_->start(scanner_.get(), data_output_.get(), collection_containers, config_);
 
+		delegate_->change_beagle_state(BEAGLE_CALCULATING_FREQUENCY_CORRECTION);
+
 		// Temp sleep to allow graph thread to get going.
 		std::this_thread::sleep_for(std::chrono::seconds(1));
 
@@ -613,6 +615,8 @@ long cappeen_impl::start_frequency_correction(uint32_t *wcdma_frequencies, int n
 			gps_graph_->disable_1pps_calibration();
 
 		frequency_correction_graph_->start(scanner_.get(), data_output_.get(), containers, config_);
+
+		delegate_->change_beagle_state(BEAGLE_CALCULATING_FREQUENCY_CORRECTION);
 
 		// Temp sleep to allow graph thread to get going.
 		std::this_thread::sleep_for(std::chrono::seconds(1));

@@ -292,7 +292,8 @@ public:
 			if(beagle_info_.state_ == beagle_api::BEAGLE_COLLECTING
 				   || beagle_info_.state_ == beagle_api::BEAGLE_USBOPENED
 				   || beagle_info_.state_ == beagle_api::BEAGLE_READY
-				   || beagle_info_.state_ == beagle_api::BEAGLE_WARMINGUP) {
+				   || beagle_info_.state_ == beagle_api::BEAGLE_WARMINGUP
+				   || beagle_info_.state_ == beagle_api::BEAGLE_CALCULATING_FREQUENCY_CORRECTION) {
 				switch(code) {
 				case GENERAL_ERROR:
 				case STD_EXCEPTION_ERROR:
@@ -304,6 +305,7 @@ public:
 					break;
 				case FREQUENCY_CORRECTION_FAILED:
 					if(gps_graph_) gps_graph_->enable_1pps_calibration();
+					change_beagle_state(beagle_api::BEAGLE_READY);
 				default:;
 				}
 			}
@@ -318,6 +320,7 @@ public:
 			delegate_->available_message(beagle_id_, code, s.c_str(), s.size() + 1);
 			switch(code) {
 			case FREQUENCY_CORRECTION_SUCCESSFUL:
+				change_beagle_state(beagle_api::BEAGLE_READY);
 				if(gps_graph_) gps_graph_->enable_1pps_calibration();
 				break;
 			default:;

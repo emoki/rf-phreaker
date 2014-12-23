@@ -58,6 +58,9 @@ public:
 		case BEAGLESTATE::BEAGLE_WARMINGUP:
 			std::cout << "BEAGLE_WARMING_UP" << "\n";
 			break;
+		case BEAGLESTATE::BEAGLE_CALCULATING_FREQUENCY_CORRECTION:
+			std::cout << "BEAGLE_CALCULATING_FREQUENCY_CORRECTION" << "\n";
+			break;
 		default:
 			std::cout << "UNKNOWN_BEAGLE_STATE" << "\n";
 		}
