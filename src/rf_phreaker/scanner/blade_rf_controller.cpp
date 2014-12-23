@@ -178,9 +178,7 @@ void blade_rf_controller::refresh_scanner_info()
 		*scanner_ = scanner_blade_rf_.get();
 	}
 
-	if(scanner_blade_rf_->eeprom_.cal_.nuand_freq_correction_value_ && scanner_blade_rf_->eeprom_.cal_.nuand_freq_correction_value_ != scanner_blade_rf_->vctcxo_trim_value_) {
-		update_vctcxo_trim(scanner_blade_rf_->eeprom_.cal_.nuand_freq_correction_value_);
-	}
+	update_vctcxo_based_on_eeprom();
 
 	LOG(LDEBUG) << "Scanner serial is" << scanner_blade_rf_->serial() << ".";
 	LOG(LDEBUG) << "USB backend is " << usb_backend_to_string(scanner_blade_rf_->back_end()) << ".";
@@ -192,6 +190,13 @@ void blade_rf_controller::refresh_scanner_info()
 	LOG(LDEBUG) << "VCTCXO trim value is " << scanner_blade_rf_->vctcxo_trim() << ".";
 	LOG(LDEBUG) << "Frequency correction performed on " << boost::posix_time::to_simple_string(boost::posix_time::from_time_t(scanner_blade_rf_->get_frequency_correction_date())) << ".";
 	LOG(LDEBUG) << "Frequency correction value is " << scanner_blade_rf_->get_frequency_correction_value() << ".";
+}
+
+void blade_rf_controller::update_vctcxo_based_on_eeprom() {
+	if(scanner_blade_rf_ && std::string(scanner_blade_rf_->fpga_version_.describe).size() && scanner_blade_rf_->eeprom_.cal_.nuand_freq_correction_value_
+		&& scanner_blade_rf_->eeprom_.cal_.nuand_freq_correction_value_ != scanner_blade_rf_->vctcxo_trim_value_) {
+		update_vctcxo_trim(scanner_blade_rf_->eeprom_.cal_.nuand_freq_correction_value_);
+	}
 }
 
 void blade_rf_controller::close_scanner()
@@ -273,12 +278,20 @@ void blade_rf_controller::do_initial_scanner_config(const scanner_settings &sett
 		}
 	}
 
+	// Update scanner fpga version because we loaded the FPGA.
+	if(scanner_blade_rf_) {
+		check_blade_status(bladerf_fpga_version(comm_blade_rf_->blade_rf(), &scanner_blade_rf_->fpga_version_), __FILE__, __LINE__);
+		LOG(LDEBUG) << "Blade fpga version is " << scanner_blade_rf_->fpga_version_description();
+	}
+
 	check_blade_status(bladerf_enable_module(comm_blade_rf_->blade_rf(),
 		BLADERF_MODULE_TX,
 		false), __FILE__, __LINE__);
 
 	// TODO - Change this so that we only alter switch settings.
 	check_blade_status(bladerf_expansion_gpio_dir_write(comm_blade_rf_->blade_rf(), 0xFFFFFFFF), __FILE__, __LINE__);
+
+	update_vctcxo_based_on_eeprom();
 
 	enable_blade_rx();
 

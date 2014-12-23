@@ -119,6 +119,8 @@ private:
 	void check_blade_comm();
 
 	uint16_t calculate_vctcxo_trim_value(double error_in_hz);
+
+	void update_vctcxo_based_on_eeprom();
 		
 	ipp_16sc_aligned_buffer aligned_buffer_;
 
