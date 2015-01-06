@@ -16,35 +16,35 @@ namespace rf_phreaker {
 typedef CORR_RECORD_TYPE LTEProc_CorrRecordType;
 
 
-void sampleRateConv2(Ipp32fc *signal192, Ipp32fc *signal384, unsigned int signalLength, 
-		double* pDelayTime,int sampling_factor);
+void sampleRateConv2(Ipp32fc *signal192, Ipp32fc *signal384, unsigned int signalLength,
+	double* pDelayTime, int sampling_factor);
 
 
 int getSignalPower(const Ipp32fc *signal384, unsigned int signalLength);
 
 
 void getHalfFrameTiming(LTEProc_CorrRecordType *pPSCHCorrRecord,
-		unsigned int *pNumPschPeaks, const Ipp32fc *signal192,
-		unsigned int NumHalfFramesToProcess);
+	unsigned int *pNumPschPeaks, const Ipp32fc *signal192,
+	unsigned int NumHalfFramesToProcess);
 
-void getCPMode(CYCLICPREFIX *pCyclicPrefixMode, Ipp32fc *signal192, unsigned int PSSStartSample, 
-		unsigned int numSamplesToProcess);
+void getCPMode(CYCLICPREFIX *pCyclicPrefixMode, Ipp32fc *signal192, unsigned int PSSStartSample,
+	unsigned int numSamplesToProcess);
 
-void getChannelEstFromPSS(Ipp32fc *H_est, Ipp32fc *signal192, unsigned int PSSStartSample, 
-		unsigned int cellID2, int PSS_No, CYCLICPREFIX cyclicPrefixMode, int freqOffset);
+void getChannelEstFromPSS(Ipp32fc *H_est, Ipp32fc *signal192, unsigned int PSSStartSample,
+	unsigned int cellID2, int PSS_No, CYCLICPREFIX cyclicPrefixMode, int freqOffset);
 
 void getFrameTiming(Ipp32fc *signal192, unsigned int numSamplesToProcess,
-		LTEProc_CorrRecordType *pPSCHCorrRecord, unsigned int NumCellID2,
-		LTEProc_CorrRecordType *pSSCHCorrRecord, unsigned int *pNumCellID,
-		CYCLICPREFIX *pCyclicPrefixMode);
+	LTEProc_CorrRecordType *pPSCHCorrRecord, unsigned int NumCellID2,
+	LTEProc_CorrRecordType *pSSCHCorrRecord, unsigned int *pNumCellID,
+	CYCLICPREFIX *pCyclicPrefixMode);
 
 unsigned char verifyCellIDFromRS(const Ipp32fc *signal384, unsigned int cellIDAll,
-		unsigned int frameStartSample, CYCLICPREFIX cyclicPrefixMode,
-		CORRELATIONTYPE *RSStrength, CORRELATIONTYPE *RSNorm);
+	unsigned int frameStartSample, CYCLICPREFIX cyclicPrefixMode,
+	CORRELATIONTYPE *RSStrength, CORRELATIONTYPE *RSNorm);
 
 int calculateRSValues(const Ipp32fc *signal384, unsigned int cellIDAll,
-		unsigned int frameStartSample, CYCLICPREFIX cyclicPrefixMode,
-		CORRELATIONTYPE *RSStrength, CORRELATIONTYPE *RSNorm, double *AvgDigitalVoltage);
+	unsigned int frameStartSample, CYCLICPREFIX cyclicPrefixMode,
+	CORRELATIONTYPE *RSStrength, CORRELATIONTYPE *RSNorm, double *AvgDigitalVoltage);
 
 
 
