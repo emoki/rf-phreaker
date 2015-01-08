@@ -829,15 +829,15 @@ void blade_rf_controller::start_gps_1pps_integration(int seconds) {
 	if(gps_comm_) {
 		gps_comm_->initiate_pps_clock_counter(seconds);
 	}
-	current_1pps_integration_ = {seconds, 0, 0};
+	current_1pps_integration_.reset(seconds);
 }
 
 bool blade_rf_controller::attempt_gps_1pps_calibration() {
 	bool success = false;
 	if(gps_comm_) {
 		current_1pps_integration_.set_clock_ticks(gps_comm_->read_pps_clock_counter(), gps_comm_->get_latest_gps().coordinated_universal_time_);
-		LOG(LDEBUG) << "Retrieving GPS calibration values:  " << current_1pps_integration_.clock_ticks() << " clock ticks.  Error of "
-			<< current_1pps_integration_.error_in_hz() << " Hz.";
+		LOG(LDEBUG) << "Retrieving GPS clock ticks:  " << current_1pps_integration_.clock_ticks() << ".";
+		LOG_IF(LDEBUG, (current_1pps_integration_.clock_ticks() != 0)) << "Error based on clock ticks: " << current_1pps_integration_.error_in_hz() << " Hz.";
 		if(current_1pps_integration_.is_valid()) {
 			if(current_1pps_integration_.within_tolerance()) {
 				last_1pps_integration_ = current_1pps_integration_;

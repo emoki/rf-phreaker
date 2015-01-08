@@ -27,8 +27,6 @@ struct iq_sample_type
 
 struct gps_1pps_integration {
 	gps_1pps_integration() : seconds_integrated_(0), clock_ticks_(0), time_calculated_(0), reference_clock_(38400000) {}
-	gps_1pps_integration(int s, int t) : seconds_integrated_(s), clock_ticks_(t), time_calculated_(0), reference_clock_(38400000) {}
-	gps_1pps_integration(int s, int t, int r) : seconds_integrated_(s), clock_ticks_(t), reference_clock_(r) {}
 	int64_t clock_ticks() { return clock_ticks_; }
 	int seconds_integrated() { return seconds_integrated_; }
 	bool is_valid() { return clock_ticks_ != 0; }
@@ -37,6 +35,11 @@ struct gps_1pps_integration {
 	void set_clock_ticks(int64_t ticks, time_t current_time) {
 		clock_ticks_ = ticks;
 		time_calculated_ = current_time;
+	}
+	void reset(int seconds_integrated) { 
+		seconds_integrated_ = seconds_integrated; 
+		clock_ticks_ = 0;
+		time_calculated_ = 0;
 	}
 	time_t time_calculated() { return time_calculated_; }
 private:
