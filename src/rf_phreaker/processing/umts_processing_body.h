@@ -61,7 +61,7 @@ public:
 
 		meas.resize(num_meas);
 
-		LOG_IF(LCOLLECTION, meas.size()) << "UMTS processing - Found " << meas.size() << " UMTS measurements.  Frequency: " << info->frequency() / 1e6 
+		LOG_IF(LCOLLECTION, (meas.size() != 0)) << "UMTS processing - Found " << meas.size() << " UMTS measurements.  Frequency: " << info->frequency() / 1e6 
 			<< " mhz. | Scan type: " << (scan_type == full_scan_type ? "full scan" : scan_type == candidate_one_timeslot_scan_type 
 			? "one timeslot scan" : "all timeslots scan");
 		
