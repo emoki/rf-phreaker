@@ -245,6 +245,7 @@ if(!LteData[cell_no].layer_3_.sib1_.decoded_) {
 	LteData[cell_no].layer_3_.lac_ = tmp.lac_;
 	LteData[cell_no].layer_3_.cid_ = tmp.cid_;
 	LteData[cell_no].layer_3_.sib1_ = tmp.sib1_;
+	LteData[cell_no].si_window = tmp.sib1_.si_window_length_ms_ != -1 ? tmp.sib1_.si_window_length_ms_ : LTE_NULL;
 }
 if(!LteData[cell_no].layer_3_.sib3_.decoded_) {
 	LteData[cell_no].layer_3_.sib3_ = tmp.sib3_;

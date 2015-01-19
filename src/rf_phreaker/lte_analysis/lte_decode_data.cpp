@@ -221,6 +221,8 @@ LteData[ii].si_window = LTE_NULL;
 
 frameStartSampleIndex = LteData[ii].RsRecord.StartSampleNum;
 
+LteData[ii].current_frame_number = LteData[ii].frame_number;
+
 	// For debug purposes.
 	auto current_frame_number = LteData[ii].frame_number;
 	auto &current_physical_cell_id = LteData[ii].RsRecord.ID;
@@ -334,7 +336,7 @@ while((frameStartSampleIndex + LteData[ii].frameNumSamples) < (NumHalfFramesToPr
 		 /* Go to the next frame */
 		  frameStartSampleIndex = frameStartSampleIndex +  LteData[ii].frameNumSamples;
 		  current_frame_number++;
-
+		  LteData[ii].current_frame_number++;
 		
 
 		  //std::cout<<"\nTotal frame count ==\n"<<framecount++;
