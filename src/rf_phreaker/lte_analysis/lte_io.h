@@ -16,7 +16,7 @@ static std::string lte_io_spacer = " | ";
 
 inline std::ostream& output_lte_meas_debug_header(std::ostream &os)
 {
-	os	<< "psch_id" << lte_io_delimiter
+	os << "psch_id" << lte_io_delimiter
 		<< "psch_norm_corr" << lte_io_delimiter
 		<< "psch_rms_corr" << lte_io_delimiter
 		<< "psch_start_sample" << lte_io_delimiter
@@ -48,14 +48,8 @@ inline std::ostream& output_lte_meas_debug_header(std::ostream &os)
 		<< "rsrp" << lte_io_delimiter
 		<< "rssi" << lte_io_delimiter
 		<< "rsrq" << lte_io_delimiter
-		<< "sync_quality" << lte_io_delimiter
-		<< "sib1" << lte_io_delimiter
-		<< "sib3" << lte_io_delimiter
-		<< "sib4" << lte_io_delimiter
-		<< "sib5" << lte_io_delimiter
-		<< "sib6" << lte_io_delimiter
-		<< "sib7" << lte_io_delimiter
-		<< "sib8";
+		<< "sync_quality" << lte_io_delimiter;
+	layer_3_information::header(os, layer_3_information::lte_rrc_message_aggregate());
 	return os;
 }
 
