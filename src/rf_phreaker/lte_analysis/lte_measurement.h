@@ -29,7 +29,17 @@ public:
 	unsigned int phich_resources;
 	unsigned int fft_subcarrier_start_index;
 	unsigned int num_bits_dci_1A;
+	unsigned int num_bits_dci_1C;
+	unsigned int n_gap_1;
+	unsigned int n_gap_2;
+	unsigned int num_dl_vrb_gap_1;
+	unsigned int num_dl_vrb_gap_2;
+	unsigned int num_step_rb;
+	unsigned int resource_block_assign_1c_bits;
+	unsigned int rbg_size_p;
 	unsigned int frame_number;
+	unsigned int current_frame_number;
+	unsigned int si_window;
 	double estimated_rsrp;
 	double estimated_rssi;
 	double estimated_rsrq;
@@ -41,14 +51,12 @@ public:
 
 	lte_measurement() { clear(); }
 
-	lte_measurement& operator=(lte_measurement meas)
-	{
+	lte_measurement& operator=(lte_measurement meas) {
 		meas.swap(*this);
 		return *this;
 	}
 
-	void swap(lte_measurement &meas)
-	{
+	void swap(lte_measurement &meas) {
 		std::swap(meas.PschRecord, PschRecord);
 		std::swap(meas.SschRecord, SschRecord);
 		std::swap(meas.RsRecord, RsRecord);
@@ -77,8 +85,7 @@ public:
 		meas.layer_3_.swap(layer_3_);
 	}
 
-	void clear()
-	{
+	void clear() {
 		PschRecord.ID = 0;
 		PschRecord.NormCorr = 0;
 		PschRecord.RMSCorr = 0;
@@ -113,8 +120,8 @@ public:
 		rssi = 0;
 		rsrq = 0;
 		sync_quality = 0;
-		
-		
+
+
 		layer_3_.clear();
 	}
 };

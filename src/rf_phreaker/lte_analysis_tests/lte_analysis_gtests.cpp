@@ -42,7 +42,7 @@ TEST(LteAnalysisTests, TestGeneral)
 
 		lte_analysis analysis(config);
 
-		for(int i = 5; i < num_iterations; ++i) {
+		for(int i = 0; i < num_iterations; ++i) {
 			std::string full_path_and_filename = folder_path + prefix + boost::lexical_cast<std::string>(i)+suffix;
 
 			std::ifstream file(full_path_and_filename, use_boost_archive ? std::ios_base::binary : std::ios_base::in);
@@ -70,14 +70,14 @@ TEST(LteAnalysisTests, TestGeneral)
 				static std::ofstream output_file("lte_measurements.txt");
 				static bool write_header = true;
 				if(write_header) {
-					output_file << "file_num\tfreq\t";
+					output_file << "filename\tfile_num\tfreq\t";
 					output_lte_meas_debug_header(output_file) << "\n";
 					write_header = false;
 				}
 
 				for(auto &lte : lte_meas) {
-					std::cout << i << "\t" << info.frequency() / 1e6 << "\t" << lte << std::endl;
-					output_file << i << "\t" << info.frequency() / 1e6 << "\t" << lte << std::endl;
+					std::cout << full_path_and_filename << "\t" << i << "\t" << info.frequency() / 1e6 << "\t" << lte << std::endl;
+					output_file << full_path_and_filename << "\t" << i << "\t" << info.frequency() / 1e6 << "\t" << lte << std::endl;
 				}
 			}
 		}

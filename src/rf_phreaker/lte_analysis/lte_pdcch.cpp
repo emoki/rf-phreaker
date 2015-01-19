@@ -74,7 +74,8 @@ int lte_decode_pdcch(Ipp32fc* inSignal,
 	dci_format_info.current_idx_dci_format_1c = 0;
 
 	//h_noise_var[0] = h_noise_var[1] = 169800.0;
-	h_noise_var[0] = h_noise_var[1] = 10000.0 / 4;
+	h_noise_var[0] = h_noise_var[1] = 10000.0;
+	//h_noise_var[0] = h_noise_var[1] = 100.0;
 
 	// TODO - ecs removed - if(subFrameIndex==5)
 	temp = 0;
@@ -540,9 +541,11 @@ int lte_pdcch_common_search_space_decode(lte_measurements &LteData,
 
 		for(unsigned int jj = 0; jj < m_l; jj++) {
 
-			//lte_pdcch_decode_dci_1c
+
 			//Decoding DCI FORMAT 1A
 			lte_pdcch_decode_dci_1a(LteData, cell_no, &descrambled_pdcch_llr[jj*bit_size], bit_size);
+			//lte_pdcch_decode_dci_1c
+			lte_pdcch_decode_dci_1c(LteData, cell_no, &descrambled_pdcch_llr[jj*bit_size], bit_size);
 		}
 
 
@@ -563,6 +566,40 @@ int lte_pdcch_decode_dci_1c(lte_measurements &LteData,
 	unsigned int cell_no,
 	Ipp32f *descrambled_pdcch_llr,
 	Ipp32u len_llr) {
+	Ipp32f rate_dematched_llr[512];
+	Ipp32u dci_1c_bitsize, dci_1c_bits[64], temp[64], crc_checksum;
+	unsigned char CRCByteSeq[2], dateByteSeq[64];
+
+	//dci_1c_bitsize = 41;
+	dci_1c_bitsize = LteData[cell_no].num_bits_dci_1C + 16;
+	//Rate Dematching
+	lte_cc_rate_dematching(rate_dematched_llr, 3 * dci_1c_bitsize, descrambled_pdcch_llr, len_llr);
+	//CC Decoding
+	LTE_CC_decoding(dci_1c_bits, rate_dematched_llr, 3 * dci_1c_bitsize);
+
+	for(unsigned int ii = (dci_1c_bitsize - 16); ii < dci_1c_bitsize; ii++) {
+		if(dci_1c_bits[ii])
+			dci_1c_bits[ii] = 0;
+		else
+			dci_1c_bits[ii] = 1;
+
+	}
+
+	//bit2byte(dateByteSeq, dci_1a_bits, 41, 0);
+	bit2byte(dateByteSeq, dci_1c_bits, dci_1c_bitsize, 0);
+
+	//lte_crc_16(&crc_checksum, dateByteSeq, 41);
+	lte_crc_16(&crc_checksum, dateByteSeq, dci_1c_bitsize);
+
+
+	if(crc_checksum == 0) //crc_checksum == 0 for a correctly decoded DCI
+	{
+
+		dci_format_info.num_dci_format_1c = dci_format_info.num_dci_format_1c + 1;
+		dci_format_info.current_idx_dci_format_1c = dci_format_info.num_dci_format_1c - 1;
+		lte_get_info_dci_format_1c(dci_1c_bits, dci_format_info, LteData, cell_no);
+
+	}
 
 
 	return LTE_SUCCESS;
@@ -570,7 +607,7 @@ int lte_pdcch_decode_dci_1c(lte_measurements &LteData,
 
 /*
 *********************************************************************************************************
-* Function:lte_pdcch_decode_dci_1c
+* Function:lte_pdcch_decode_dci_1a
 * Description:
 * Arguments:
 * Return Value:
@@ -646,7 +683,9 @@ int lte_cc_rate_dematching(Ipp32f *output_llr, Ipp32u output_len, Ipp32f *input_
 	k_w = 3 * k_pi;
 	n_null = k_pi - in_lenght;
 
-	for(unsigned ll = 0; ll < 512; ll++) { output_llr[ll] = 0; }
+	for(unsigned ll = 0; ll < 512; ll++) {
+		output_llr[ll] = 0;
+	}
 
 	for(unsigned int kp = 0; kp < 3; kp++) {
 		//Fill the interleaver matrix row-wise
@@ -720,7 +759,7 @@ int lte_get_info_dci_format_1a(Ipp32u *dci_1a_bits, lte_info_dci_format &dci_for
 		numbits_resource_assignment = (unsigned int)fnumbits_resource_assignment;
 
 		dci_format_info.pdcch_info_dci_format_1a[index_dci_1a].resource_block_assignment = 0x0;
-		for(unsigned int ii = 0; ii<numbits_resource_assignment; ii++) {
+		for(unsigned int ii = 0; ii < numbits_resource_assignment; ii++) {
 			dci_format_info.pdcch_info_dci_format_1a[index_dci_1a].resource_block_assignment += dci_1a_bits[2 + ii] << (numbits_resource_assignment - 1 - ii);
 			//temp += dci_1a_bits[2+ii]<<(numbits_resource_assignment-1-ii); 
 		}
@@ -837,4 +876,164 @@ int lte_get_info_dci_format_1a(Ipp32u *dci_1a_bits, lte_info_dci_format &dci_for
 	return LTE_SUCCESS;
 }
 
+
+
+/*
+*********************************************************************************************************
+* Function:lte_get_info_dci_format_1c
+* Description:
+* Arguments:
+* Return Value:
+**********************************************************************************************************
+*/
+//Section 5.3.3.1.4  TS 36.212
+int lte_get_info_dci_format_1c(Ipp32u *dci_1c_bits, lte_info_dci_format &dci_format_info, lte_measurements &LteData, unsigned int cell_no) {
+
+	unsigned char index_dci_1c, bit_position = 0;
+	unsigned int l_crbs = 0, t1 = 0, t2 = 0, n_dl_vrb_dash = 0;
+
+	index_dci_1c = dci_format_info.current_idx_dci_format_1c;
+
+	dci_format_info.pdcch_info_dci_format_1c[index_dci_1c].n_gap = 0; //default Ngap = Ngap1
+
+	if(LteData[cell_no].numResouceBlocks >= 50) {
+		dci_format_info.pdcch_info_dci_format_1c[index_dci_1c].n_gap = dci_1c_bits[bit_position];
+		bit_position++;
+	}
+
+	lte_vrb_to_prb_mapping(dci_format_info, LteData, cell_no, dci_format_info.pdcch_info_dci_format_1c[index_dci_1c].n_gap);
+
+	dci_format_info.pdcch_info_dci_format_1c[index_dci_1c].resource_block_assignment = 0;
+
+	for(unsigned int kk = 0; kk < LteData[cell_no].resource_block_assign_1c_bits; kk++) {
+		dci_format_info.pdcch_info_dci_format_1c[index_dci_1c].resource_block_assignment += dci_1c_bits[bit_position + kk] << (LteData[cell_no].resource_block_assign_1c_bits - 1 - kk);
+	}
+
+	// 7.1.6.3, TS 36.213
+
+	n_dl_vrb_dash = LteData[cell_no].num_dl_vrb_gap_1 / LteData[cell_no].num_step_rb;
+
+	t1 = dci_format_info.pdcch_info_dci_format_1c[index_dci_1c].resource_block_assignment / n_dl_vrb_dash;
+	t2 = dci_format_info.pdcch_info_dci_format_1c[index_dci_1c].resource_block_assignment % n_dl_vrb_dash;
+
+	if(t1 <= n_dl_vrb_dash / 2)				// 7.1.6.3, TS36.213
+	{
+		l_crbs = t1 + 1;
+		dci_format_info.pdcch_info_dci_format_1c[index_dci_1c].start_vrb_idx = t2;
+		if(l_crbs > n_dl_vrb_dash - dci_format_info.pdcch_info_dci_format_1c[index_dci_1c].start_vrb_idx) {
+			l_crbs = n_dl_vrb_dash - t1 + 1;
+			dci_format_info.pdcch_info_dci_format_1c[index_dci_1c].start_vrb_idx = n_dl_vrb_dash - t2 - 1;
+		}
+
+	}
+	else {
+		l_crbs = n_dl_vrb_dash - t1 + 1;
+		dci_format_info.pdcch_info_dci_format_1c[index_dci_1c].start_vrb_idx = n_dl_vrb_dash - t2 - 1;
+	}
+
+
+	l_crbs = l_crbs * LteData[cell_no].num_step_rb;
+
+	dci_format_info.pdcch_info_dci_format_1c[index_dci_1c].start_vrb_idx = dci_format_info.pdcch_info_dci_format_1c[index_dci_1c].start_vrb_idx * LteData[cell_no].num_step_rb;
+
+	dci_format_info.pdcch_info_dci_format_1c[index_dci_1c].end_vrb_idx = dci_format_info.pdcch_info_dci_format_1c[index_dci_1c].start_vrb_idx + l_crbs - 1;
+
+	//Modulation and Coding Scheme
+
+
+	//Modulation and Coding scheme
+	bit_position = bit_position + LteData[cell_no].resource_block_assign_1c_bits;
+
+	dci_format_info.pdcch_info_dci_format_1c[index_dci_1c].mcs = 0;
+
+	for(unsigned int kk = 0; kk < lte_num_bits_mcs_dci_1c; kk++) {
+		dci_format_info.pdcch_info_dci_format_1c[index_dci_1c].mcs += dci_1c_bits[bit_position + kk] << (lte_num_bits_mcs_dci_1c - 1 - kk);
+	}
+
+	dci_format_info.pdcch_info_dci_format_1c[index_dci_1c].tbs_index = dci_format_info.pdcch_info_dci_format_1c[index_dci_1c].mcs;
+	dci_format_info.pdcch_info_dci_format_1c[index_dci_1c].tbs_size = transport_block_size_table_1c[dci_format_info.pdcch_info_dci_format_1c[index_dci_1c].tbs_index];
+
+	return LTE_SUCCESS;
+
+
 }
+
+/*
+*********************************************************************************************************
+* Function:lte_get_info_dci_format_1c
+* Description:
+* Arguments:
+* Return Value:
+**********************************************************************************************************
+*/
+
+int lte_vrb_to_prb_mapping(lte_info_dci_format &dci_format_info, lte_measurements &LteData, unsigned int cell_no, unsigned char n_gap) {
+	unsigned char row_len = 0, column_len = 0, n_dl_vrb_dash = 0, n_null, n_gap_value, col_idx_odd_slot = 0;
+	unsigned char n_null_row_start, interleave_matrix[32][4], row_idx, col_idx, vrb_num = 0, prb_num = 0, null;
+
+	column_len = lte_vrb_prb_mapping_interleaving_column_len;
+	null = LTE_NULL;
+
+	if(n_gap == lte_n_gap_1) {
+		n_dl_vrb_dash = LteData[cell_no].num_dl_vrb_gap_1;
+		n_gap_value = LteData[cell_no].n_gap_1;
+	}
+	else {
+		n_dl_vrb_dash = 2 * LteData[cell_no].n_gap_2;
+		n_gap_value = LteData[cell_no].n_gap_2;
+	}
+
+
+	row_len = ceil((float)n_dl_vrb_dash / (4 * (float)LteData[cell_no].rbg_size_p)) * LteData[cell_no].rbg_size_p;
+
+	n_null = (row_len * column_len) - n_dl_vrb_dash;
+
+	n_null_row_start = row_len - (n_null / 2);
+
+	//Fill the interleaving matrix row wise
+	for(row_idx = 0; row_idx < row_len; row_idx++) {
+		for(col_idx = 0; col_idx < column_len; col_idx++) {
+			if((col_idx == 1 || col_idx == 3) && (row_idx >= n_null_row_start)) {
+				interleave_matrix[row_idx][col_idx] = LTE_NULL;
+				vrb_num++;
+
+			}
+			else {
+				interleave_matrix[row_idx][col_idx] = vrb_num++;
+			}
+
+		}// for - col_idx
+	}//for- row_idx
+
+	//Read the interleaving matrix column wise
+
+	for(col_idx = 0; col_idx < column_len; col_idx++) {
+		col_idx_odd_slot = (col_idx + 2) % column_len;
+
+		for(row_idx = 0; row_idx < row_len; row_idx++) {
+			if(interleave_matrix[row_idx][col_idx] != null) {
+				dci_format_info.vrb_to_prb_mapping_even_slot[prb_num] = interleave_matrix[row_idx][col_idx];
+				dci_format_info.vrb_to_prb_mapping_odd_slot[prb_num] = interleave_matrix[row_idx][col_idx_odd_slot];
+				prb_num++;
+			}
+			else {
+				for(unsigned char rr = 0; rr < (n_gap_value - (n_dl_vrb_dash / 2)); rr++) {
+					dci_format_info.vrb_to_prb_mapping_even_slot[prb_num] = LTE_NULL;
+					dci_format_info.vrb_to_prb_mapping_odd_slot[prb_num] = LTE_NULL;
+					prb_num++;
+				}
+				row_idx = row_len;
+
+			}//else
+
+		}
+
+	}// for - col_idx
+
+
+
+
+	return LTE_SUCCESS;
+}
+
+}//namespace

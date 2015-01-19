@@ -45,6 +45,45 @@ enum lte_dci_format_type
 	lte_dci_format_3a = 9
 };
 
+enum lte_dci_format_1c_const
+{
+	lte_n_gap_1 = 0,
+	lte_n_gap_2 = 1,
+
+	lte_n_gap_1_3mhz = 8,
+	lte_n_gap_1_5mhz = 12,
+	lte_n_gap_1_10mhz = 27,
+	lte_n_gap_1_15mhz = 32,
+	lte_n_gap_1_20mhz = 48,
+
+	lte_n_gap_2_10mhz = 9,
+	lte_n_gap_2_15mhz = 16,
+	lte_n_gap_2_20mhz = 16,
+
+	lte_n_step_rb_3mhz = 2,
+	lte_n_step_rb_5mhz = 2,
+	lte_n_step_rb_10mhz = 4,
+	lte_n_step_rb_15mhz = 4,
+	lte_n_step_rb_20mhz = 4,
+
+	lte_num_bits_mcs_dci_1c = 5,
+
+	lte_num_bits_gap_value_dci_1c_3mhz = 0,
+	lte_num_bits_gap_value_dci_1c_5mhz = 0,
+	lte_num_bits_gap_value_dci_1c_10mhz = 1,
+	lte_num_bits_gap_value_dci_1c_15mhz = 1,
+	lte_num_bits_gap_value_dci_1c_20mhz = 1,
+
+	lte_vrb_prb_mapping_interleaving_column_len = 4,
+
+	lte_rbg_size_p_3mhz = 2,
+	lte_rbg_size_p_5mhz = 2,
+	lte_rbg_size_p_10mhz = 3,
+	lte_rbg_size_p_15mhz = 4,
+	lte_rbg_size_p_20mhz = 4,
+
+};
+
 
 //5.3.3.1.3, TS36.212
 typedef struct
@@ -74,13 +113,13 @@ typedef struct
 {
 	unsigned char dci_info_valid; //non -standard
 
-	unsigned char vrb_type;
+	unsigned char n_gap;
 	unsigned int resource_block_assignment;
 	unsigned char mcs;
-	unsigned char harq_process_num;
-	unsigned char new_data_indicator_bit;
-	unsigned char redundancy_version;
-	unsigned char n_1a_prb;
+	unsigned char tbs_index;
+	unsigned int tbs_size;
+	unsigned char start_vrb_idx;//non -standard
+	unsigned char end_vrb_idx; //non -standard
 }lte_info_dci_format_1c;
 
 typedef struct
@@ -91,6 +130,8 @@ typedef struct
 	unsigned char current_idx_dci_format_1c;
 	lte_info_dci_format_1a pdcch_info_dci_format_1a[6];
 	lte_info_dci_format_1c pdcch_info_dci_format_1c[6];
+	unsigned char vrb_to_prb_mapping_even_slot[128];
+	unsigned char vrb_to_prb_mapping_odd_slot[128];
 }lte_info_dci_format;
 
 
@@ -154,6 +195,9 @@ int lte_cc_rate_dematching(Ipp32f *output_llr, Ipp32u output_len, Ipp32f *input_
 
 int lte_get_info_dci_format_1a(Ipp32u *dci_1a_bits, lte_info_dci_format &dci_format_info, lte_measurements &LteData, unsigned int cell_no);
 
+int lte_get_info_dci_format_1c(Ipp32u *dci_1c_bits, lte_info_dci_format &dci_format_info, lte_measurements &LteData, unsigned int cell_no);
+
+int lte_vrb_to_prb_mapping(lte_info_dci_format &dci_format_info, lte_measurements &LteData, unsigned int cell_no, unsigned char n_gap);
 }
 
 #endif

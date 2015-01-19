@@ -34,7 +34,7 @@ int lte_decode_data(const Ipp32fc* SignalSamples,
 					unsigned int NumHalfFramesToProcess,
 					lte_measurements &LteData)
 {
-unsigned int signalLength384, signalLength768, processSignalLength;
+unsigned int signalLength384,signalLength768, processSignalLength,current_frame_number = 0;
 double delayTime1, delayTime2;
 
 // TODO - Declaring the signal statically is OK for now because the processing functions are protected by a mutex 
@@ -48,7 +48,7 @@ ippsCopy_32fc(SignalSamples, signal_384.get(), NumSamples);
 
 unsigned int num_filter_output =0;
 unsigned int frameStartSampleIndex,subframeStartSampleIndex;
-unsigned int ii;
+unsigned int ii, ratio_dl_vrb_step_rb;
 Ipp32f hNoiseVariance[256];
 
 int status;	
@@ -74,6 +74,22 @@ for(unsigned int ii = 0; ii <LteData.size(); ii++)
 			LteData[ii].fft_subcarrier_start_index = ((LteData[ii].fftSize)
 					                                            - (LteData[ii].numResouceBlocks *NUM_SUBCARRIER_PER_RESOURCE_BLOCK))/2;
 			LteData[ii].num_bits_dci_1A = NUM_BITS_DCI_1A_3MHZ;
+
+			LteData[ii].n_gap_1 = lte_n_gap_1_3mhz;
+			LteData[ii].n_gap_2 = LTE_NULL;
+			LteData[ii].num_dl_vrb_gap_1 = 2 * std::min(LteData[ii].n_gap_1, (LteData[ii].numResouceBlocks - LteData[ii].n_gap_1));
+			LteData[ii].num_dl_vrb_gap_2 = (LteData[ii].numResouceBlocks / (2 * LteData[ii].n_gap_2)) * 2 * LteData[ii].n_gap_2;
+			LteData[ii].num_step_rb = lte_n_step_rb_3mhz;
+
+			ratio_dl_vrb_step_rb = LteData[ii].num_dl_vrb_gap_1 / LteData[ii].num_step_rb;
+
+			LteData[ii].resource_block_assign_1c_bits = ceil(log((float)ratio_dl_vrb_step_rb * (float)(ratio_dl_vrb_step_rb + 1) / 2)*LOG2_BASE_E);
+
+			LteData[ii].num_bits_dci_1C =	  lte_num_bits_gap_value_dci_1c_3mhz
+											+ LteData[ii].resource_block_assign_1c_bits
+											+ lte_num_bits_mcs_dci_1c;
+			LteData[ii].rbg_size_p = lte_rbg_size_p_3mhz;
+
 			break;
 
 		case LteBandwidth_5MHZ:
@@ -86,6 +102,21 @@ for(unsigned int ii = 0; ii <LteData.size(); ii++)
 			LteData[ii].fft_subcarrier_start_index = ((LteData[ii].fftSize)
 					                                            - (LteData[ii].numResouceBlocks *NUM_SUBCARRIER_PER_RESOURCE_BLOCK))/2;
 			LteData[ii].num_bits_dci_1A = NUM_BITS_DCI_1A_5MHZ;
+
+			LteData[ii].n_gap_1 = lte_n_gap_1_5mhz;
+			LteData[ii].n_gap_2 = LTE_NULL;
+			LteData[ii].num_dl_vrb_gap_1 = 2 * std::min(LteData[ii].n_gap_1, (LteData[ii].numResouceBlocks - LteData[ii].n_gap_1));
+			LteData[ii].num_dl_vrb_gap_2 = (LteData[ii].numResouceBlocks / (2 * LteData[ii].n_gap_2)) * 2 * LteData[ii].n_gap_2;
+			LteData[ii].num_step_rb = lte_n_step_rb_5mhz;
+
+			ratio_dl_vrb_step_rb = LteData[ii].num_dl_vrb_gap_1 / LteData[ii].num_step_rb;
+
+			LteData[ii].resource_block_assign_1c_bits = ceil(log((float)ratio_dl_vrb_step_rb * (float)(ratio_dl_vrb_step_rb + 1) / 2)*LOG2_BASE_E);
+
+			LteData[ii].num_bits_dci_1C = lte_num_bits_gap_value_dci_1c_5mhz
+				+ LteData[ii].resource_block_assign_1c_bits
+				+ lte_num_bits_mcs_dci_1c;
+			LteData[ii].rbg_size_p = lte_rbg_size_p_5mhz;
 			break;
 
 		case LteBandwidth_10MHZ:
@@ -98,6 +129,23 @@ for(unsigned int ii = 0; ii <LteData.size(); ii++)
 			LteData[ii].fft_subcarrier_start_index = ((LteData[ii].fftSize)
 					                                            - (LteData[ii].numResouceBlocks *NUM_SUBCARRIER_PER_RESOURCE_BLOCK))/2;
 			LteData[ii].num_bits_dci_1A = NUM_BITS_DCI_1A_10MHZ;
+
+			LteData[ii].n_gap_1 = lte_n_gap_1_10mhz;
+			LteData[ii].n_gap_2 = lte_n_gap_2_10mhz;
+			LteData[ii].num_dl_vrb_gap_1 = 2 * std::min(LteData[ii].n_gap_1, (LteData[ii].numResouceBlocks - LteData[ii].n_gap_1));
+			LteData[ii].num_dl_vrb_gap_2 = (LteData[ii].numResouceBlocks / (2 * LteData[ii].n_gap_2)) * 2 * LteData[ii].n_gap_2;
+			LteData[ii].num_step_rb = lte_n_step_rb_10mhz;
+
+			ratio_dl_vrb_step_rb = LteData[ii].num_dl_vrb_gap_1 / LteData[ii].num_step_rb;
+
+			LteData[ii].resource_block_assign_1c_bits = ceil(log((float)ratio_dl_vrb_step_rb * (float)(ratio_dl_vrb_step_rb + 1) / 2)*LOG2_BASE_E);
+
+			LteData[ii].num_bits_dci_1C = lte_num_bits_gap_value_dci_1c_10mhz
+				+ LteData[ii].resource_block_assign_1c_bits
+				+ lte_num_bits_mcs_dci_1c;
+			LteData[ii].rbg_size_p = lte_rbg_size_p_10mhz;
+
+
 						
 			break;
 
@@ -111,6 +159,21 @@ for(unsigned int ii = 0; ii <LteData.size(); ii++)
 			LteData[ii].fft_subcarrier_start_index = ((LteData[ii].fftSize)
 				- (LteData[ii].numResouceBlocks *NUM_SUBCARRIER_PER_RESOURCE_BLOCK)) / 2;
 			LteData[ii].num_bits_dci_1A = NUM_BITS_DCI_1A_15MHZ;
+
+			LteData[ii].n_gap_1 = lte_n_gap_1_15mhz;
+			LteData[ii].n_gap_2 = lte_n_gap_2_15mhz;
+			LteData[ii].num_dl_vrb_gap_1 = 2 * std::min(LteData[ii].n_gap_1, (LteData[ii].numResouceBlocks - LteData[ii].n_gap_1));
+			LteData[ii].num_dl_vrb_gap_2 = (LteData[ii].numResouceBlocks / (2 * LteData[ii].n_gap_2)) * 2 * LteData[ii].n_gap_2;
+			LteData[ii].num_step_rb = lte_n_step_rb_15mhz;
+
+			ratio_dl_vrb_step_rb = LteData[ii].num_dl_vrb_gap_1 / LteData[ii].num_step_rb;
+
+			LteData[ii].resource_block_assign_1c_bits = ceil(log((float)ratio_dl_vrb_step_rb * (float)(ratio_dl_vrb_step_rb + 1) / 2)*LOG2_BASE_E);
+
+			LteData[ii].num_bits_dci_1C = lte_num_bits_gap_value_dci_1c_15mhz
+				+ LteData[ii].resource_block_assign_1c_bits
+				+ lte_num_bits_mcs_dci_1c;
+			LteData[ii].rbg_size_p = lte_rbg_size_p_15mhz;
 			break;
 
 		case LteBandwidth_20MHZ:
@@ -123,6 +186,21 @@ for(unsigned int ii = 0; ii <LteData.size(); ii++)
 			LteData[ii].fft_subcarrier_start_index = ((LteData[ii].fftSize)
 				- (LteData[ii].numResouceBlocks *NUM_SUBCARRIER_PER_RESOURCE_BLOCK)) / 2;
 			LteData[ii].num_bits_dci_1A = NUM_BITS_DCI_1A_20MHZ;
+
+			LteData[ii].n_gap_1 = lte_n_gap_1_20mhz;
+			LteData[ii].n_gap_2 = lte_n_gap_2_20mhz;
+			LteData[ii].num_dl_vrb_gap_1 = 2 * std::min(LteData[ii].n_gap_1, (LteData[ii].numResouceBlocks - LteData[ii].n_gap_1));
+			LteData[ii].num_dl_vrb_gap_2 = (LteData[ii].numResouceBlocks / (2 * LteData[ii].n_gap_2)) * 2 * LteData[ii].n_gap_2;
+			LteData[ii].num_step_rb = lte_n_step_rb_20mhz;
+
+			ratio_dl_vrb_step_rb = LteData[ii].num_dl_vrb_gap_1 / LteData[ii].num_step_rb;
+
+			LteData[ii].resource_block_assign_1c_bits = ceil(log((float)ratio_dl_vrb_step_rb * (float)(ratio_dl_vrb_step_rb + 1) / 2)*LOG2_BASE_E);
+
+			LteData[ii].num_bits_dci_1C = lte_num_bits_gap_value_dci_1c_20mhz
+				+ LteData[ii].resource_block_assign_1c_bits
+				+ lte_num_bits_mcs_dci_1c;
+			LteData[ii].rbg_size_p = lte_rbg_size_p_20mhz;
 			break;
 
 		default:
@@ -138,6 +216,8 @@ for(unsigned int ii = 0; ii <LteData.size(); ii++)
 
 
 //DisplayLTEData(LteData);
+
+LteData[ii].si_window = LTE_NULL;
 
 frameStartSampleIndex = LteData[ii].RsRecord.StartSampleNum;
 
@@ -173,7 +253,7 @@ while((frameStartSampleIndex + LteData[ii].frameNumSamples) < (NumHalfFramesToPr
 
 
 			/* Process Subframes*/
-			 for (unsigned int subFrameIndex = 0 ; subFrameIndex < NUM_SUBFRAMES_PER_FRAME;++subFrameIndex)
+			 for (unsigned int subFrameIndex =0 ; subFrameIndex < NUM_SUBFRAMES_PER_FRAME;++subFrameIndex)
 			 {
 			      subframeStartSampleIndex = frameStartSampleIndex + subFrameIndex * LteData[ii].frameNumSamples/ NUM_SUBFRAMES_PER_FRAME;
 				
@@ -194,13 +274,13 @@ while((frameStartSampleIndex + LteData[ii].frameNumSamples) < (NumHalfFramesToPr
 				 /* Decode LTE Physical Downlink Control Channel (PDCCH) */
 
 				
-                 lte_decode_pdcch(signal_384.get(),//signal768,
-	                              h_est,
-	                              hNoiseVariance,	
-	                              LteData,
-					              ii,//cell_no
-					              subFrameIndex,
-					              subframeStartSampleIndex);
+					 lte_decode_pdcch(signal_384.get(),//signal768,
+						 h_est,
+						 hNoiseVariance,
+						 LteData,
+						 ii,//cell_no
+						 subFrameIndex,
+						 subframeStartSampleIndex);
 
 				 					
 		       // std::cout << "LteDecodePDCCH Time elapsed: " << lte_diffclock(end,begin) << " ms\n";
@@ -226,6 +306,23 @@ while((frameStartSampleIndex + LteData[ii].frameNumSamples) < (NumHalfFramesToPr
 								  dci_format_info,lte_dci_format_1a,index_dci_1a);
 		        //std::cout << "LteDecodePDSCH Time elapsed: " << lte_diffclock(end,begin) << " ms\n";
 				 
+				 }
+
+				 for (unsigned int index_dci_1c = 0; index_dci_1c<dci_format_info.num_dci_format_1c; index_dci_1c++)
+				 {
+					 
+					 
+						 lte_pdsch_decode(signal_384.get(),//signal768,
+							 h_est,
+							 hNoiseVariance,
+							 LteData,
+							 ii,
+							 subFrameIndex,
+							 subframeStartSampleIndex,
+							 dci_format_info, lte_dci_format_1c, index_dci_1c);
+						 //std::cout << "LteDecodePDSCH Time elapsed: " << lte_diffclock(end,begin) << " ms\n";
+					 
+
 				 }
 
 

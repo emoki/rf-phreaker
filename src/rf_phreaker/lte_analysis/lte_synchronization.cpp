@@ -1,5 +1,5 @@
 #include <stdlib.h>
-#include <cmath>
+#include <math.h>
 #include <memory.h>
 
 #include "lte_synchronization.h"
@@ -15,6 +15,7 @@ namespace rf_phreaker {
 
 // for use for reference signals
 LteFFT FftRS(8, IPP_FFT_DIV_FWD_BY_N);
+//LteFFT FftRS(7, IPP_FFT_DIV_FWD_BY_N);
 
 
 Ipp32f *totalEnergy = NULL, avgPower = 0.f, energy_ss21[128], energy_ss22[128], total_energy_ss21, total_energy_ss22;
@@ -903,6 +904,117 @@ int calculateRSValues(const Ipp32fc *signal384, unsigned int cellID,
 
 	return 0;
 }
+//int calculateRSValues(const Ipp32fc *signal384, unsigned int cellID,
+//	unsigned int frameStartSample, CYCLICPREFIX cyclicPrefixMode,
+//	CORRELATIONTYPE *RSStrength, CORRELATIONTYPE *RSNorm, double *AvgDigitalVoltage) {
+//	int slotNumToProcess = 4;
+//
+//
+//	int slotSampleShift = 0;
+//	int slotNo;
+//
+//	Ipp32fc cell_RS[60], cell_RS_conj[60];
+//	Ipp32fc signal1[256], signal2[256], signal3[180];
+//
+//	unsigned int OFDM_SymbNos[2];
+//	int ii, jj, nn;
+//	Ipp16u frquencyIdx[64];
+//	int symbStart;
+//
+//	unsigned int symbNum, fft_subcarrier_start_index_128, f_index;
+//
+//	fft_subcarrier_start_index_128 = (128 - 6 * 12) / 2;
+//
+//	ippsZero_32fc(signal2, 256);
+//
+//	Ipp32fc DigitalDC;
+//	//Ipp32f rssi = 0, rsrp = 0, rsrq = 0;
+//	Ipp64f rssi = 0, rsrp = 0, rsrq = 0, rssi_t[2], rsrp_t[2];
+//	Ipp64f L2Norm;
+//
+//	rssi_t[0] = rssi_t[1] = 0;
+//	rsrp_t[0] = rsrp_t[1] = 0;
+//	// Calculate over N Resource Blocks
+//	// N = num RBs that encompass the num of subcarriers kept after the FFT
+//	for(slotNo = 0; slotNo < slotNumToProcess; slotNo++) {
+//		// get RS template and RS conjugate for cellID and CP
+//		//generate_cell_RS(cell_RS,OFDM_SymbNos, &symbNum, frquencyIdx, slotNo, cellID, 
+//		//cyclicPrefixMode, 15, 110, 0);
+//		generate_cell_RS(cell_RS, OFDM_SymbNos, &symbNum, frquencyIdx, slotNo, cellID,
+//			cyclicPrefixMode, 6, 110, 0);
+//
+//
+//		// for each RS OFDM symbol in this slot
+//		// =2 for 1 ant port, i.e. slots 0 and 4 for normal CP
+//		for(ii = 0; ii < symbNum; ii++) {
+//			// calculate start of RS in signal based on CP and PSS location
+//			if(cyclicPrefixMode == Normal) {
+//				//symbStart = 20 + OFDM_SymbNos[ii]*(18+256)+frameStartSample+slotSampleShift;
+//				symbStart = 10 + OFDM_SymbNos[ii] * (9 + 128) + frameStartSample + slotSampleShift;
+//			}
+//			else {
+//				//symbStart = 64 + OFDM_SymbNos[ii]*(64+256)+frameStartSample+slotSampleShift;
+//				symbStart = 32 + OFDM_SymbNos[ii] * (32 + 128) + frameStartSample + slotSampleShift;
+//			}
+//
+//
+//			myfft(signal1, signal384 + symbStart, 128);
+//			myfftshift(signal2, signal1, 128);
+//
+//
+//			//Calculate total power in the ofdm symbol
+//			for(jj = 0; jj < 128; jj++) {
+//
+//				rssi_t[ii] += (signal2[jj].re * signal2[jj].re)
+//					+ (signal2[jj].im * signal2[jj].im);
+//			}
+//
+//			//rssi_t[ii] = rssi_t[ii] / 128;
+//
+//
+//			//Calculate reference signal recieved power
+//
+//			for(int kk = 0; kk < 12; kk++) {
+//				f_index = fft_subcarrier_start_index_128 + frquencyIdx[ii * 2 * 6 + kk];
+//				rsrp_t[ii] += (signal2[f_index].re * signal2[f_index].re)
+//					+ (signal2[f_index].im * signal2[f_index].im);
+//			}
+//
+//			rsrp_t[ii] = rsrp_t[ii] / 12;
+//
+//
+//
+//		}
+//
+//		rssi = rssi + (rssi_t[0] + rssi_t[1]) / 2;
+//		rsrp = rsrp + (rsrp_t[0] + rsrp_t[1]) / 2;
+//
+//		rssi_t[0] = rssi_t[1] = 0;
+//		rsrp_t[0] = rsrp_t[1] = 0;
+//
+//
+//		//slotSampleShift += 1920;
+//		slotSampleShift += 960;
+//	}
+//
+//
+//	rssi = rssi / slotNumToProcess;
+//	rsrp = rsrp / slotNumToProcess;
+//
+//	if(rssi != 0) {
+//		rsrq = 10 * log10((Ipp32f)6 * rsrp / rssi);
+//	}
+//
+//	//*RSNorm = (CORRELATIONTYPE)sqrt(rsrq);
+//	//*RSStrength = (CORRELATIONTYPE)sqrt(rsrp);
+//	//*AvgDigitalVoltage = (CORRELATIONTYPE)sqrt(rssi/slotNo);
+//
+//	*RSNorm = (CORRELATIONTYPE)rsrq;
+//	*RSStrength = (CORRELATIONTYPE)rsrp;
+//	*AvgDigitalVoltage = (CORRELATIONTYPE)rssi;
+//
+//	return 0;
+//}
 
 
 

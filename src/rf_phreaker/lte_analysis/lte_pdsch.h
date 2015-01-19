@@ -52,7 +52,18 @@ int lte_pdsch_get_symbols (Ipp32fc* inSignal,
 					       unsigned int sub_frame_index,
 						   unsigned int subframe_start_sample_index,
 						   unsigned int start_rb,
-						   unsigned int end_rd);
+						   unsigned int end_rb);
+
+int lte_pdsch_get_symbols_vrb(Ipp32fc* inSignal,
+	Ipp32fc* h_est,
+	unsigned int &pdsch_re_count,
+	lte_measurements &LteData,
+	unsigned int cell_no,
+	unsigned int sub_frame_index,
+	unsigned int subframe_start_sample_index,
+	unsigned int start_rb_vrb,
+	unsigned int end_rb_vrb,
+	lte_info_dci_format &dci_format_info);
 
 
 }
