@@ -98,11 +98,11 @@ std::vector<int> lte_sib_7_parser::convert_variable_bitmap(const OCTET_STRING_t 
 	v.push_back(start);
 
 	for(int i = 0; i < octets.size; ++i) {
-		for(int j = 7; j > 0; ++j) {
+		for(int j = 7; j >= 0; --j) {
 			uint8_t bit = octets.buf[i] >> j;
 			bit &= 0x1;
 			if(bit)
-				v.push_back((start + ((8 - j) * i)) % 1024);
+				v.push_back((start + ((8 - j) * (i + 1))) % 1024);
 		}
 	}
 
