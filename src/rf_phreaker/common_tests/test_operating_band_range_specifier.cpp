@@ -30,6 +30,6 @@ TEST(OperatingBandRangeSpecifier, TestMain)
 	EXPECT_EQ(1, valid_bands.size());
 	EXPECT_EQ(LTE_OPERATING_BAND_8, valid_bands[0].band_);
 
-	valid_bands = specifier.find_avaliable_lte_operating_bands(mhz(960));
+	valid_bands = specifier.find_avaliable_lte_operating_bands(mhz(961));
 	EXPECT_EQ(0, valid_bands.size());
 }
