@@ -56,7 +56,7 @@ int blade_rf_controller::num_available_scanners()
 
 	bladerf_free_device_list(dev_info);
 
-	return num_devices;
+	return num_devices == BLADERF_ERR_NODEV ? 0 : num_devices;
 }
 
 std::vector<comm_info_ptr> blade_rf_controller::list_available_scanners()
