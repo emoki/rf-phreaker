@@ -120,7 +120,10 @@ inline std::string static_timestamp_string() {
 }
 
 inline std::string to_date_time_string(time_t t) {
-	return boost::posix_time::to_simple_string(boost::posix_time::from_time_t(t));
+	auto str = boost::posix_time::to_simple_string(boost::posix_time::from_time_t(t));
+	boost::replace_all(str, " ", "__");
+	boost::replace_all(str, ":", "_");
+	return str;
 }
 
 inline std::string current_date_time_string() {

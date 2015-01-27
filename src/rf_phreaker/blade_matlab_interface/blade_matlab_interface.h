@@ -13,7 +13,12 @@ extern "C" {
 #endif
 
 
+	/*
+		If using logging, due to a bug in msvc, you must call stop_logging before exiting otherwise the application may hang.
+	*/
 	int DLL_PUBLIC start_logging(int log_level);
+
+	int DLL_PUBLIC stop_logging();
 
 	int DLL_PUBLIC num_blade_devices_connected(int *num_devices);
 
@@ -51,16 +56,17 @@ extern "C" {
 	int DLL_PUBLIC only_get_rf_data(float *iq_data, int num_samples, float *signal_level);
 
 	/*
-		This value may not be saved between power cycles?
+		Updates the trim value but does not save to cappeen's or nuand's portion of the eeprom.
 	*/
 	int DLL_PUBLIC set_vctcxo_trim(int trim);
 
 	/*
-		This may be constant, i.e. it always returns the value written to the EEPROM during calibration?
+		Returns the current trim value.  Does not neccessarily represent what is written on the cappeen's or nuand's portion of the eeprom.
 	*/
 	int DLL_PUBLIC read_vctcxo_trim(int *trim);
 
 	/*
+		Writes trim value to both cappeen's and nuand's portion of the eeprom.
 	*/
 	int DLL_PUBLIC write_frequency_correction_value(int trim, __int64 seconds_since_1970);
 
@@ -89,7 +95,7 @@ extern "C" {
 		to 1 or 2 minutes.  
 	*/
 	int DLL_PUBLIC write_calibration(const int8_t *nuand_calibration_filename, const int8_t *rf_board_calibration_filename, 
-		const int8_t *switch_setting_filename);
+		const int8_t *switch_setting_filename, const int8_t *calibration_output_filename, int hw_id);
 
 	/*
 		Set to false when the blade device is not connected to the RF board.  
@@ -100,23 +106,41 @@ extern "C" {
 	/*
 		Returns the nuand adjustment.  Determines the proper RF path using switch settings portion of the calibration.
 	*/
-	int DLL_PUBLIC get_nuand_adjustment(__int64 frequency_hz, float *adj);
+	int DLL_PUBLIC get_nuand_adjustment(int lna_gain, __int64 frequency_hz, float *adj);
 
 	/*
 		Returns the RF board adjustment.  Determines the proper RF path using switch settings portion of the calibration.
 	*/
-	int DLL_PUBLIC get_rf_board_adjustment(__int64 frequency_hz, float *adj);
+	int DLL_PUBLIC get_rf_board_adjustment(__int64 frequency_hz, int bandwidth_hz, float *adj);
 	
 	/*
-		lna_gain is not currently used.  We assume that it is LNA_GAIN_MAX.
+	
 	*/
-	int DLL_PUBLIC calculate_signal_level(__int64 frequency_hz, int lna_gain, int gain_rxvga1, int gain_rxvga2,
+	int DLL_PUBLIC calculate_signal_level(__int64 frequency_hz, int bandwidth_hz, int lna_gain, int gain_rxvga1, int gain_rxvga2,
 		float digital_voltage, float *signal_level);
 
 	/* 
 		Return value of -999 represents description_size is not large enough to contain entire error message.
 	*/
 	int DLL_PUBLIC get_last_error(int8_t* description, int description_size);
+
+	/*
+		Writes the entire eeprom to text file.  Contains frequency correction, calibration, and licensing.  eeprom meta data is calculated on the fly.
+	*/
+	int DLL_PUBLIC save_eeprom(const int8_t *eeprom_filename);
+
+	/*
+		Loads the entire eeprom from text file.  Contains frequency correction, calibration, and licensing.  eeprom meta data is calculated on the fly.
+	*/
+	int DLL_PUBLIC load_eeprom(const int8_t *eeprom_filename);
+
+	int DLL_PUBLIC get_gps_data(float *latitude, float *longitude, int *tracking_satellties, int *visible_satellties, __int64 *utc_time);
+
+	int DLL_PUBLIC start_gps_1pps_calibration(int seconds_to_integrate);
+
+	int DLL_PUBLIC finish_gps_1pps_calibration(bool *success);
+
+	int DLL_PUBLIC get_last_valid_1pps_calibration(__int64 *clock_ticks, int *seconds_integrated, float *error_in_hz);
 
 
 #ifdef __cplusplus

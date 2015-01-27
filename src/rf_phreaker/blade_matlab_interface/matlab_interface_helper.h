@@ -31,16 +31,20 @@ void check_buf_size(int buf_size, const std::string &str, const std::string &des
 		boost::lexical_cast<std::string>(str_size)+" bytes.", matlab_interface_error_insufficient_buf_size);
 }
 
-void check_null(const char *ptr)
-{
+void check_null(const char *ptr) {
 	if(ptr == nullptr)
 		throw matlab_interface_error("Invalid parameter.  char ptr is NULL.", matlab_interface_error_null_detected);
+}
+
+void check_null(const bool *ptr) {
+	if(ptr == nullptr)
+		throw matlab_interface_error("Invalid parameter.  bool ptr is NULL.", matlab_interface_error_null_detected);
 }
 
 void check_null(const int8_t *ptr)
 {
 	if(ptr == nullptr)
-		throw matlab_interface_error("Invalid parameter.  char ptr is NULL.", matlab_interface_error_null_detected);
+		throw matlab_interface_error("Invalid parameter.  int8_t ptr is NULL.", matlab_interface_error_null_detected);
 }
 
 void check_null(const int *ptr)
@@ -61,10 +65,14 @@ void check_null(const uint16_t *ptr)
 		throw matlab_interface_error("Invalid parameter.  uint32_t ptr is NULL.", matlab_interface_error_null_detected);
 }
 
-void check_null(const float *ptr)
-{
+void check_null(const float *ptr) {
 	if(ptr == nullptr)
 		throw matlab_interface_error("Invalid parameter.  float ptr is NULL.", matlab_interface_error_null_detected);
+}
+
+void check_null(const int64_t *ptr) {
+	if(ptr == nullptr)
+		throw matlab_interface_error("Invalid parameter.  int64_t ptr is NULL.", matlab_interface_error_null_detected);
 }
 
 
