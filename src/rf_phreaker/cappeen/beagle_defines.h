@@ -487,7 +487,7 @@ namespace beagle_api
 
 		/// Seconds since 1970.  Refers to the last time we calculated a DDS clock correction.  This value is used
 		/// when the beagle unit has not had initial GPS lock and is collecting data.  For ideal processing it is good to keep this number 
-		/// under 1 month.
+		/// under 1 week.
 		int64_t dds_clock_correction_calibration_date_;
 
 		/// Specifies the type of communication that has been established with the scanner. 
