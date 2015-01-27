@@ -56,12 +56,15 @@ public:
 			hw.device_communication_ = UNKNOWN_SPEED;
 		}
 		hw.serial_ = serial();
+		hw.hw_id_ = hw_id();
 		hw.frequency_correction_calibration_date_ = get_frequency_correction_date();
 		hw.rf_calibration_date_ = eeprom_.cal_.rf_board_calibration_date_;
 		
-		for(auto rf_switch : eeprom_.cal_.rf_switches_) {
-			if(rf_switch.second.identifier_)
-				hw.frequency_paths_.push_back(rf_switch.second.path_);
+		for(auto rf_bws : eeprom_.cal_.rf_switches_) {
+			for(auto rf_switch : rf_bws.second) {
+				if(rf_switch.second.identifier_)
+					hw.frequency_paths_.push_back(rf_switch.second.path_);
+			}
 		}
 		
 		hw.license_data_ = eeprom_.license_;
@@ -71,21 +74,22 @@ public:
 		return eeprom_.cal_.rf_board_calibration_date_;
 	}
 	uint32_t get_frequency_correction_value() const {
-		return eeprom_.cal_.nuand_freq_correction_value_;
+		return eeprom_.freq_correction_.nuand_freq_correction_value_;
 	}
 	time_t get_frequency_correction_date() const {
-		return eeprom_.cal_.nuand_freq_correction_date_;
+		return eeprom_.freq_correction_.nuand_freq_correction_date_;
 	}
 	void set_frequency_correction_value(uint32_t freq_correction_value) {
-		eeprom_.cal_.nuand_freq_correction_value_ = freq_correction_value;
+		eeprom_.freq_correction_.nuand_freq_correction_value_ = freq_correction_value;
 	}
 	void set_frequency_correction_date(time_t freq_correction_date) {
-		eeprom_.cal_.nuand_freq_correction_date_ = freq_correction_date;
+		eeprom_.freq_correction_.nuand_freq_correction_date_ = freq_correction_date;
 	}
-
-
 	std::string serial() const {
 		return dev_info_.serial;
+	}
+	int32_t hw_id() const {
+		return eeprom_.cal_.hw_id_;
 	}
 	int back_end() const {
 		return dev_info_.backend;

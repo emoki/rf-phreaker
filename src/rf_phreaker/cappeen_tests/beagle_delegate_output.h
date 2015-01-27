@@ -2,6 +2,7 @@
 
 #include <array>
 #include <atomic>
+#include <mutex>
 #include <iomanip>
 #include "rf_phreaker/cappeen/beagle_defines.h"
 #include "rf_phreaker/cappeen/operating_band_conversion.h"
@@ -26,7 +27,12 @@ public:
 	}
 
 	virtual void __stdcall available_beagle_info(long beagle_id, const beagle_info &info) {
+		{
+			std::lock_guard<std::mutex> lock(hw_mutex_);
+			hw_ = info;
+		}
 		std::cout << "serial: " << info.beagle_serial_ << "\n";
+		std::cout << "hw_id: " << info.beagle_id_ << "\n";
 		char mbstr[100];
 
 		auto t1 = localtime(&info.dds_clock_correction_calibration_date_);
@@ -78,14 +84,22 @@ public:
 		new_hw_info_ = true;
 	}
 	virtual void __stdcall available_gps_info(long beagle_id, const gps_info &info) {
+		{
+			std::lock_guard<std::mutex> lock(gps_mutex_);
+			gps_ = info;
+		}
+
+		if(info.gps_locked_)
+			had_gps_lock_ = true;
+
 		if(!output_) return;
-		std::cout << std::boolalpha << info.gps_locked_ << "\t" << info.utc_time_ << "\t" << info.raw_gps_status_ << "\n";
+		std::cout << beagle_id << "\t" << std::boolalpha << info.gps_locked_ << "\t" << info.utc_time_ << "\t" << info.raw_gps_status_ << "\n";
 	}
 	virtual void __stdcall available_gsm_sector_info(long beagle_id, const gsm_sector_info *info, long num_records) {}
 	virtual void __stdcall available_umts_sector_info(long beagle_id, const umts_sector_info *info, long num_records) {
 		if(!output_) return;
 		for(int i = 0; i < num_records; ++i) {
-			std::cout << info[i].carrier_freq_ << "\t" << info[i].carrier_sl_ << "\t" << info[i].cpich_ << "\t" << info[i].ecio_
+			std::cout << beagle_id << "\t" << info[i].carrier_freq_ << "\t" << info[i].carrier_sl_ << "\t" << info[i].cpich_ << "\t" << info[i].ecio_
 				<< "\t" << info[i].mcc_
 				<< "\t" << info[i].mnc_
 				<< "\t" << info[i].lac_
@@ -104,13 +118,14 @@ public:
 	virtual void __stdcall available_umts_sweep_info(long beagle_id, const umts_sweep_info *info, long num_records) {
 		if(!output_) return;
 		for(int i = 0; i < num_records; ++i)
-			std::cout << info[i].frequency_ << "\t" << info[i].rssi_ << "\t" << "umts" << "\n";
+			std::cout << beagle_id << "\t" << info[i].frequency_ << "\t" << info[i].rssi_ << "\t" << "umts" << "\n";
 	}
 	virtual void __stdcall available_lte_sector_info(long beagle_id, const lte_sector_info *info, long num_records) {
 		if(!output_) return;
 		static std::ofstream lte_output("lte_sector_info.txt");
 		for(int i = 0; i < num_records; ++i) {
 			std::string t;
+			t += std::to_string(beagle_id) + "\t";
 			t += std::to_string(info[i].collection_round_) + "\t";
 			t += std::to_string(info[i].carrier_freq_ / 1e6) + "\t";
 			t += std::to_string(info[i].carrier_bandwidth_ / 1e6) + "\t";
@@ -247,19 +262,38 @@ public:
 	virtual void __stdcall available_lte_sweep_info(long beagle_id, const lte_sweep_info *info, long num_records) {
 		if(!output_) return;
 		for(int i = 0; i < num_records; ++i)
-			std::cout << info[i].frequency_ << "\t" << info[i].rssi_ << "\t" << "lte" << "\n";
+			std::cout << beagle_id << "\t" << info[i].frequency_ << "\t" << info[i].rssi_ << "\t" << "lte" << "\n";
 	}
 	virtual void __stdcall available_error(long beagle_id, long error, const char *str, long buf_size) {
-		std::cout << "----------ERROR-------------  CODE: " << error << "  STR: " << str << "\n";
+		std::cout << "----------ERROR-------------  CODE: " << error << "  STR: " << str << "HWID: " << beagle_id << "\t" << "\n";
 		error_occurred_ = true;
 	}
 	virtual void __stdcall available_message(long beagle_id, long possible_message_number, const char *str, long buf_size) {
-		std::cout << "----------MESSAGE-------------  CODE: " << possible_message_number << "  STR : " << str << "\n";
+		std::cout << "----------MESSAGE-------------  CODE: " << possible_message_number << "  STR : " << str << "HWID: " << beagle_id << "\t" << "\n";
 	}
+
+	beagle_info hw() {
+		std::lock_guard<std::mutex> lock(hw_mutex_);
+		return hw_;
+	}
+
+	gps_info gps() {
+		std::lock_guard<std::mutex> lock(gps_mutex_);
+		return gps_;
+	}
+
+	bool had_gps_lock() { return had_gps_lock_; }
 
 	std::atomic_bool output_;
 	std::atomic_bool error_occurred_;
 	std::atomic_bool new_hw_info_;
+	std::atomic_bool had_gps_lock_;
+private:
+
+	std::mutex hw_mutex_;
+	std::mutex gps_mutex_;
+	beagle_info hw_;
+	gps_info gps_;
 };
 
 class bad_output : public beagle_delegate

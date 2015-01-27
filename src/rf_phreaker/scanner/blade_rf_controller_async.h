@@ -54,9 +54,9 @@ public:
 		});
 	}
 
-	virtual std::future<void> calculate_vctcxo_trim_and_update_calibration(double error_hz) {
+	virtual std::future<void> calculate_vctcxo_trim_and_update_eeprom(double error_hz) {
 		return controller_([=](blade_rf_controller &c) {
-			return c.calculate_vctcxo_trim_and_update_calibration(error_hz);
+			return c.calculate_vctcxo_trim_and_update_eeprom(error_hz);
 		});
 	}
 

@@ -29,7 +29,7 @@ public:
 
 	virtual std::future<const scanner*> get_scanner() = 0;
 
-	virtual std::future<void> calculate_vctcxo_trim_and_update_calibration(double error_hz) = 0;
+	virtual std::future<void> calculate_vctcxo_trim_and_update_eeprom(double error_hz) = 0;
 
 	virtual std::future<void> calculate_and_update_vctcxo_trim(double error_hz) = 0;
 

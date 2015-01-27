@@ -40,6 +40,7 @@ set (common_SRCS
 	operating_band_range_specifier.cpp
 	raw_signal.h
 	settings.h
+	serialization_helper.h
 	signal_slot.h
 	singleton.h
 	${SRC_PLATFORM_SPECIFIC}/stdafx.cpp)
@@ -48,6 +49,7 @@ add_library (common STATIC ${common_SRCS})
 target_link_libraries (common ${TBB_LIBRARY})
 target_link_libraries (common ipp_custom)
 target_link_libraries (common g3logger)
+target_link_libraries (common hash_utility)
 
 # For some reason, cmake wasn't adding boost libraries to this project
 # so we're adding them manually.  Revist later after upgrading cmake.

@@ -1,146 +1,189 @@
 #pragma once
-#include <sstream>
 #include <boost/serialization/access.hpp>
-#include <boost/archive/text_oarchive.hpp>
-#include <boost/archive/text_iarchive.hpp>
 #include "rf_phreaker/scanner/calibration.h"
-#include "rf_phreaker/common/common_utility.h"
+#include "rf_phreaker/scanner/freq_correction_container.h"
+#include "rf_phreaker/scanner/eeprom_defines.h"
 #include "rf_phreaker/common/license.h"
+#include "rf_phreaker/common/serialization_helper.h"
+#include "rf_phreaker/common/log.h"
 
 namespace rf_phreaker { namespace scanner {
 
-#define RF_PHREAKER_FLAGE_PAGE_SIZE 256
-#define RF_PHREAKER_FLASH_ADDR 0x00040000
-#define RF_PHREAKER_FLASH_PAGE (RF_PHREAKER_FLASH_ADDR / RF_PHREAKER_FLAGE_PAGE_SIZE)
-#define RF_PHREAKER_FLASH_EB (RF_PHREAKER_FLASH_ADDR / (64 * 1024))
-#define RF_PHREAKER_FLASH_BYTE_LEN 0x00370000
-#define RF_PHREAKER_FLASH_METADATA_BYTE_LEN 256
+class eeprom;
 
-inline uint32_t convert_to_page(uint32_t num) {
-	return add_mod(num, RF_PHREAKER_FLAGE_PAGE_SIZE) / RF_PHREAKER_FLAGE_PAGE_SIZE;
-}
+class eeprom_addressing {
+public:
+	eeprom_addressing()  
+		: byte_address_(0)
+		, byte_length_(0) {}
+	eeprom_addressing(uint32_t byte_address, uint32_t byte_length)
+		: byte_address_(byte_address)
+		, byte_length_(byte_length) {}
+	eeprom_addressing& operator=(const eeprom_addressing &a) {
+		byte_address_ = a.byte_address_;
+		byte_length_ = a.byte_length_;
+		return *this;
+	}
+	bool operator==(const eeprom_addressing &a) {
+		return byte_address_ == a.byte_address_ && byte_length_ == a.byte_length_;
+	}
+	// Relative from the end of the eeprom meta data, including any erase block padding.
+	uint32_t byte_address() const { return byte_address_; }
+	uint32_t page_address() const { return convert_to_page(byte_address_); }
+	uint32_t erase_block_address() const { return convert_to_erase_block(byte_address_); }
+	uint32_t byte_length() const { return byte_length_; }
+	uint32_t byte_length_with_eb_padding() const { return add_eb_padding(byte_length_); }
+	uint32_t page_length() const { return convert_to_page(byte_length_); }
+	uint32_t erase_block_length() const { return convert_to_erase_block(byte_length_); }
+	uint32_t end_byte_address() const { return byte_address_ + byte_length_; }
+	uint32_t end_byte_address_with_eb_padding() const { return add_eb_padding(end_byte_address()); }
+	uint32_t end_page_address() const { return convert_to_page(end_byte_address()); }
+	uint32_t end_erase_block_address() const { return convert_to_erase_block(end_byte_address()); }
+
+	void set_byte_address(uint32_t add) { byte_address_ = add; }
+	void set_byte_length(uint32_t len) { byte_length_ = len; }
+private:
+	uint32_t byte_address_;
+	uint32_t byte_length_;
+	friend class boost::serialization::access;
+	template<class Archive>
+	void serialize(Archive &ar, const unsigned int version) {
+		ar & byte_address_;
+		ar & byte_length_;
+	}
+
+};
+
+
+class eeprom_meta_data
+{
+public:
+	eeprom_meta_data() {
+		set_to_default();
+	}
+	bool operator==(const eeprom_meta_data &a) {
+		return freq_correction_addressing_ == a.freq_correction_addressing_ &&
+			license_addressing_ == a.license_addressing_ &&
+			calibration_addressing_ == a.calibration_addressing_ &&
+			trimmed_eeprom_addressing_ == a.trimmed_eeprom_addressing_;
+	}
+
+	static const eeprom_addressing& addressing() { return meta_addressing_; }
+
+	void clear();
+	void set_to_default();
+	void calculate_eeprom_addresses(const eeprom &ee);
+	
+	void update_frequency_correction_length(uint32_t frequency_correction_length);
+	void update_license_length(uint32_t license_length);
+	void update_calibration_length(uint32_t calibration_length);
+
+	bool is_frequency_correction_boundary_exceeded(uint32_t length) const;
+	bool is_license_boundary_exceeded(uint32_t length) const;
+	bool is_calibration_boundary_exceeded(uint32_t length) const;
+	bool is_trimmed_eeprom_boundary_exceeded(uint32_t length) const;
+
+	bool is_valid() const;
+
+	const eeprom_addressing& freq_correction_addressing() const { return freq_correction_addressing_; }
+	const eeprom_addressing& license_addressing() const { return license_addressing_; }
+	const eeprom_addressing& calibration_addressing() const { return calibration_addressing_; }
+	const eeprom_addressing& trimmed_eeprom_addressing() const { return trimmed_eeprom_addressing_; }
+
+	uint32_t freq_correction_relative_byte_address() const { return freq_correction_addressing_.byte_address() - trimmed_eeprom_addressing().byte_address(); }
+	uint32_t license_relative_byte_address() const { return license_addressing_.byte_address() - trimmed_eeprom_addressing().byte_address(); }
+	uint32_t calibration_relative_byte_address() const { return calibration_addressing_.byte_address() - trimmed_eeprom_addressing().byte_address(); }
+
+	bool init(const std::vector<uint8_t> &bytes) {
+		bool success = serialization_helper::init(bytes, *this, true);
+		LOG_IF(LERROR, !success) << "EEPROM meta data failed verification.  It appears corrupt.";
+		return success;
+	}
+	std::vector<uint8_t> serialize_to_bytes() const {
+		return serialization_helper::serialize_to_bytes(*this, RF_PHREAKER_FLASH_PAGE_SIZE, true);
+	}
+
+private:
+	static eeprom_addressing meta_addressing_;
+	eeprom_addressing freq_correction_addressing_;
+	eeprom_addressing license_addressing_;
+	eeprom_addressing calibration_addressing_;
+	eeprom_addressing trimmed_eeprom_addressing_;
+
+	friend class boost::serialization::access;
+	template<class Archive>
+	void serialize(Archive &ar, const unsigned int version) {
+		ar & freq_correction_addressing_;
+		ar & license_addressing_;
+		ar & calibration_addressing_;
+		ar & trimmed_eeprom_addressing_;
+	}
+};
 
 class eeprom
 {
 public:
 	eeprom() {};
 
-	static uint32_t absolute_byte_address() { return RF_PHREAKER_FLASH_ADDR; }
-	static uint32_t absolute_page_address() { return RF_PHREAKER_FLASH_PAGE; }
-	static uint32_t absolute_erase_block_address() { return RF_PHREAKER_FLASH_EB; }
-	static uint32_t absolute_total_byte_length() { return RF_PHREAKER_FLASH_BYTE_LEN; }
-	static uint32_t absolute_total_page_length() { return convert_to_page(RF_PHREAKER_FLASH_BYTE_LEN); }
-	static uint32_t absolute_erase_block_length() { return RF_PHREAKER_FLASH_BYTE_LEN / (64 * 1024); }
+	static const eeprom_addressing& addressing() { return eeprom_addressing_; }
 
-	void init(const std::vector<uint8_t> &bytes) {
-		std::stringstream ss;
-		std::string str(bytes.begin(), bytes.end());
-		ss << str;
-		boost::archive::text_iarchive ia(ss);
-		ia & *this;
+	bool operator==(const eeprom &a) {
+		return freq_correction_ == a.freq_correction_ &&
+			license_ == a.license_ &&
+			cal_ == a.cal_;
 	}
 
-	std::vector<uint8_t> serialize_to_bytes() const
-	{
-		// Be sure to include any buffer length that may be needed at the end because 
-		// we have to write in pages (256 bytes at a time).
-		std::stringstream ss;
-		boost::archive::text_oarchive oa(ss);
-		oa & *this;
-		std::vector<uint8_t> bytes(add_mod(ss.str().size(), RF_PHREAKER_FLAGE_PAGE_SIZE));
-		std::string tmp(ss.str());
-		std::copy(tmp.begin(), tmp.end(), bytes.begin());
-		return bytes;
+	bool init(const std::vector<uint8_t> &bytes, const eeprom_meta_data &meta) {
+		assert(bytes.size());
+
+		bool valid = true;
+
+		std::vector<uint8_t> freq_bytes(&bytes.at(meta.freq_correction_relative_byte_address()), 
+			&bytes.at(meta.freq_correction_relative_byte_address() + meta.freq_correction_addressing().byte_length()));
+		valid &= freq_correction_.init(freq_bytes);
+
+		std::vector<uint8_t> license_bytes(&bytes.at(meta.license_relative_byte_address()),
+			&bytes.at(meta.license_relative_byte_address() + meta.license_addressing().byte_length()));
+		valid &= license_.init(license_bytes);
+
+		std::vector<uint8_t> cali_bytes(&bytes.at(meta.calibration_relative_byte_address()),
+			&bytes.at(meta.calibration_relative_byte_address() + meta.calibration_addressing().byte_length()));
+		valid &= cal_.init(cali_bytes);
+
+		return valid;
 	}
-	calibration cal_;
+	std::vector<uint8_t> serialize_to_bytes() const {
+		// Serialize all objects making sure that each object starts on a new erase block.
+		auto freq_bytes = freq_correction_.serialize_to_bytes();
+		freq_bytes.resize(add_mod(freq_bytes.size(), RF_PHREAKER_FLASH_EB_SIZE));
+		
+		auto license_bytes = license_.serialize_to_bytes(RF_PHREAKER_FLASH_PAGE_SIZE);
+		license_bytes.resize(add_mod(license_bytes.size(), RF_PHREAKER_FLASH_EB_SIZE));
+		
+		auto cali_bytes = cal_.serialize_to_bytes();
+		cali_bytes.resize(add_mod(cali_bytes.size(), RF_PHREAKER_FLASH_EB_SIZE));
+
+		std::vector<uint8_t> eeprom_bytes(freq_bytes.size() + license_bytes.size() + cali_bytes.size());
+		std::copy(freq_bytes.begin(), freq_bytes.end(), eeprom_bytes.begin());
+		std::copy(license_bytes.begin(), license_bytes.end(), eeprom_bytes.begin() + freq_bytes.size());
+		std::copy(cali_bytes.begin(), cali_bytes.end(), eeprom_bytes.begin() + freq_bytes.size() + license_bytes.size());
+
+		return eeprom_bytes;
+	}
+
+	freq_correction_container freq_correction_;
 	license license_;
-
+	calibration cal_;
 
 private:
+	static eeprom_addressing eeprom_addressing_;
+
 	friend class boost::serialization::access;
 	template<class Archive>
 	void serialize(Archive &ar, const unsigned int version) {
-		ar & cal_;
+		ar & freq_correction_;
 		ar & license_;
-	}
-};
-
-class eeprom_meta_data
-{
-public:
-	eeprom_meta_data() : eeprom_length_(0), eeprom_address_(0) {}
-
-	static uint32_t absolute_byte_address() { return RF_PHREAKER_FLASH_ADDR; }
-	static uint32_t absolute_page_address() { return RF_PHREAKER_FLASH_PAGE; }
-	static uint32_t absolute_total_byte_length() { return RF_PHREAKER_FLASH_METADATA_BYTE_LEN; }
-	static uint32_t absolute_total_page_length() { return convert_to_page(RF_PHREAKER_FLASH_METADATA_BYTE_LEN); }
-
-	bool is_valid()
-	{
-		return eeprom_address_ > absolute_byte_address() && eeprom_address_ + eeprom_length_ < eeprom::absolute_byte_address() + eeprom::absolute_total_byte_length();
-	}
-
-	void set_eeprom_byte_length_and_calculate_address(uint32_t length) { 
-		eeprom_length_ = length; 
-		calculate_eeprom_byte_address();
-	}
-
-	void calculate_eeprom_byte_address()
-	{
-		// Include a flash page for padding
-		auto meta_bytes = serialize_to_bytes();
-		eeprom_address_ = eeprom::absolute_byte_address() + meta_bytes.size() + RF_PHREAKER_FLAGE_PAGE_SIZE;
-		assert(eeprom_address_ == add_mod(eeprom_address_, RF_PHREAKER_FLAGE_PAGE_SIZE)); 
-	}
-
-	uint32_t eeprom_byte_length() const {
-		return eeprom_length_;
-	}
-
-	uint32_t eeprom_page_length() const	{
-		return convert_to_page(eeprom_length_);
-	}
-
-	uint32_t eeprom_byte_address() const {
-		assert(eeprom_address_ == add_mod(eeprom_address_, RF_PHREAKER_FLAGE_PAGE_SIZE));
-		return eeprom_address_;
-	}
-
-	uint32_t eeprom_page_address() const {
-		return convert_to_page(eeprom_address_);
-	}
-
-	void init(const std::vector<uint8_t> &bytes)
-	{
-		std::stringstream ss;
-		std::string str(bytes.begin(), bytes.end());
-		ss << str;
-		boost::archive::text_iarchive ia(ss);
-		ia & *this;
-	}
-
-	std::vector<uint8_t> serialize_to_bytes() const
-	{
-		// Be sure to include any buffer length that may be needed at the end because 
-		// we have to write in pages (256 bytes at a time).
-		std::stringstream ss;
-		boost::archive::text_oarchive oa(ss);
-		oa & *this;
-		std::vector<uint8_t> bytes(add_mod(ss.str().size(), RF_PHREAKER_FLAGE_PAGE_SIZE));
-		std::string tmp(ss.str());
-		std::copy(tmp.begin(), tmp.end(), bytes.begin());
-		return bytes;
-	}
-private:
-	uint32_t eeprom_length_;
-	uint32_t eeprom_address_;
-
-	friend class boost::serialization::access;
-	template<class Archive>
-	void serialize(Archive &ar, const unsigned int version)
-	{
-		ar & eeprom_length_;
-		ar & eeprom_address_;
+		ar & cal_;
 	}
 };
 

@@ -20,8 +20,11 @@ set (scanner_SRCS
 	comm_blade_rf.h
 	comm_info.h
 	eeprom.h
+	eeprom.cpp
+	eeprom_defines.h
 	gain.h
 	gain_manager.h
+	freq_correction_container.h
 	lms_defines.h
 	lms_utilities.h
 	measurement_info.h

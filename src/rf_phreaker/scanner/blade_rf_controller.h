@@ -15,6 +15,7 @@
 #include "rf_phreaker/scanner/scanner_blade_rf.h"
 #include "rf_phreaker/scanner/gain_manager.h"
 #include "rf_phreaker/scanner/eeprom.h"
+#include "rf_phreaker/scanner/freq_correction_container.h"
 #include "rf_phreaker/gps_comm/gps_comm.h"
 
 namespace rf_phreaker { namespace scanner {
@@ -46,7 +47,7 @@ public:
 
 	void write_vctcxo_trim(uint16_t trim);
 
-	void calculate_vctcxo_trim_and_update_calibration(double error_hz);
+	void calculate_vctcxo_trim_and_update_eeprom(double error_hz);
 	
 	void calculate_and_update_vctcxo_trim(double error_hz);
 
@@ -83,11 +84,17 @@ public:
 
 	void initialize_eeprom();
 
+	void write_flash(const std::vector<uint8_t> &bytes, const eeprom_addressing &addressing);
+
+	std::vector<uint8_t> read_flash(const eeprom_addressing &addressing);
+
+	void write_eeprom_meta_data(const eeprom_meta_data &meta_ee);
+
 	eeprom_meta_data read_eeprom_meta_data();
 
 	void write_eeprom(const eeprom &ee);
 
-	eeprom read_eeprom();
+	eeprom read_eeprom(bool quick_read = true);
 
 	void write_calibration(calibration &cal);
 
@@ -96,6 +103,12 @@ public:
 	void update_frequency_correction_value_and_date_in_calibration(uint16_t value, time_t date);
 
 	void write_license(const license &license);
+
+	license read_license();
+
+	void write_frequency_correction(const freq_correction_container &freq_correction);
+
+	freq_correction_container read_frequency_correction_container();
 
 	void set_log_level(int level);
 

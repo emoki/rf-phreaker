@@ -56,7 +56,7 @@ public:
 			throw rf_phreaker::cappeen_api_error("Beagle delegate is NULL.", beagle_api::BEAGLEUNABLETOINITIALIZE);
 
 		beagle_info_.state_ = beagle_api::BEAGLE_USBCLOSED;
-		beagle_info_.beagle_id_ = beagle_id_;
+		beagle_info_.beagle_id_ = 0;
 		memset(beagle_info_.beagle_serial_, 0, sizeof(beagle_info_.beagle_serial_));
 		beagle_info_.dds_clock_correction_calibration_date_ = 0;
 		beagle_info_.rf_calibration_date_ = 0;
@@ -117,7 +117,7 @@ public:
 		g.raw_gps_status_ = (uint16_t)t.raw_status_;
 		g.utc_time_ = t.coordinated_universal_time_;
 
-		delegate_->available_gps_info(beagle_id_, g);
+		delegate_->available_gps_info(beagle_info_.beagle_id_, g);
 	}
 	
 	void output_umts_sweep(const basic_data &t, const std::vector<umts_data> &)
@@ -126,7 +126,7 @@ public:
 		a.frequency_ = t.carrier_frequency_;
 		a.rssi_ = t.carrier_signal_level_;
 
-		delegate_->available_umts_sweep_info(beagle_id_, &a, 1);
+		delegate_->available_umts_sweep_info(beagle_info_.beagle_id_, &a, 1);
 	}
 	
 	void output_umts_layer_3(const std::vector<umts_data> &t, const basic_data &)
@@ -196,7 +196,7 @@ public:
 			++i;
 		}
 
-		delegate_->available_umts_sector_info(beagle_id_, &v[0], v.size());
+		delegate_->available_umts_sector_info(beagle_info_.beagle_id_, &v[0], v.size());
 	}
 	
 	void output_lte_sweep(const basic_data &t, const std::vector<lte_data> &)
@@ -205,7 +205,7 @@ public:
 		a.frequency_ = t.carrier_frequency_;
 		a.rssi_ = t.carrier_signal_level_;
 
-		delegate_->available_lte_sweep_info(beagle_id_, &a, 1);
+		delegate_->available_lte_sweep_info(beagle_info_.beagle_id_, &a, 1);
 	}
 	
 	void output_lte_layer_3(const std::vector<lte_data> &t, const basic_data &)
@@ -265,7 +265,7 @@ public:
 			++i;
 		}
 
-		delegate_->available_lte_sector_info(beagle_id_, &v[0], v.size());
+		delegate_->available_lte_sector_info(beagle_info_.beagle_id_, &v[0], v.size());
 	}
 
 	void output_error_as_message(const std::exception &err)
@@ -282,7 +282,7 @@ public:
 	{
 		LOG(LERROR) << s;
 		if(delegate_ != nullptr)
-			delegate_->available_message(beagle_id_, code, s.c_str(), s.size() + 1);
+			delegate_->available_message(beagle_info_.beagle_id_, code, s.c_str(), s.size() + 1);
 	}
 
 	void output_error(const std::string &s, int code)
@@ -309,7 +309,7 @@ public:
 				default:;
 				}
 			}
-			delegate_->available_error(beagle_id_, convert_message(code), s.c_str(), s.size() + 1);
+			delegate_->available_error(beagle_info_.beagle_id_, convert_message(code), s.c_str(), s.size() + 1);
 		}
 	}
 
@@ -317,7 +317,7 @@ public:
 	{
 		LOG(LINFO) << s;
 		if(delegate_ != nullptr) {
-			delegate_->available_message(beagle_id_, code, s.c_str(), s.size() + 1);
+			delegate_->available_message(beagle_info_.beagle_id_, code, s.c_str(), s.size() + 1);
 			switch(code) {
 			case FREQUENCY_CORRECTION_SUCCESSFUL:
 				change_beagle_state(beagle_api::BEAGLE_READY);
@@ -331,12 +331,12 @@ public:
 	void change_beagle_state(beagle_api::BEAGLESTATE state)
 	{
 		beagle_info_.state_ = state;
-		delegate_->available_beagle_info(beagle_id_, beagle_info_);
+		delegate_->available_beagle_info(beagle_info_.beagle_id_, beagle_info_);
 	}
 
 	void initialize_beagle_info(const hardware &t)
 	{
-		beagle_info_.beagle_id_ = beagle_id_;
+		beagle_info_.beagle_id_ = t.hw_id_;
 		memset(beagle_info_.beagle_serial_, 0, sizeof(beagle_info_.beagle_serial_));
 		memcpy(beagle_info_.beagle_serial_, t.serial_.c_str(), t.serial_.size());
 		beagle_info_.dds_clock_correction_calibration_date_ = t.frequency_correction_calibration_date_;
@@ -431,6 +431,8 @@ public:
 
 	const std::vector<frequency_path>& frequency_paths() { return frequency_paths_; }
 
+	int32_t get_hw_id() const { return beagle_info_.beagle_id_; }
+
 private:
 	beagle_api::beagle_delegate *delegate_;
 
@@ -441,8 +443,6 @@ private:
 	std::vector<frequency_path> frequency_paths_;
 
 	std::vector<beagle_api::TECHNOLOGIES_AND_BANDS> valid_licenses_;
-
-	static const int beagle_id_ = 1;
 
 	processing::processing_graph *processing_graph_;
 	processing::gps_graph *gps_graph_;

@@ -12,7 +12,7 @@
 using namespace rf_phreaker;
 using namespace rf_phreaker::scanner;
 
-TEST(BladeControllerTest, TestBladeControllerGeneral)
+TEST(BladeControllerTest, DISABLED_TestBladeControllerGeneral)
 {
 	try {
 		blade_rf_controller blade;

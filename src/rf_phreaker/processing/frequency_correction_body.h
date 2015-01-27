@@ -99,7 +99,7 @@ public:
 			graph_->root_task()->cancel_group_execution();
 			if(num_shifts_ > 0) {
 				auto avg_error = error_sum_ / (double)num_shifts_;
-				sc_->calculate_vctcxo_trim_and_update_calibration(avg_error).get();
+				sc_->calculate_vctcxo_trim_and_update_eeprom(avg_error).get();
 
 				std::string message("Frequency correction successful.");
 

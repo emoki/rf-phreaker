@@ -5,6 +5,7 @@
 
 #include "rf_phreaker/scanner/scanner_types.h"
 #include "rf_phreaker/common/exception_types.h"
+#include "rf_phreaker/common/common_utility.h"
 
 namespace rf_phreaker { namespace scanner { namespace lms
 {
@@ -177,12 +178,59 @@ enum lna_select_enum {
 } ;
 
 /* LNA gain options */
-enum lna_gain_enum{
-    LNA_UNKNOWN,    /**< Invalid LNA gain */
-    LNA_BYPASS,     /**< LNA bypassed - 0dB gain */
-    LNA_MID,        /**< LNA Mid Gain (MAX-6dB) */
-    LNA_MAX         /**< LNA Max Gain */
+enum lna_gain_enum {
+    LNA_UNKNOWN = 0,    /**< Invalid LNA gain */
+    LNA_BYPASS = 1,     /**< LNA bypassed - 0dB gain */
+    LNA_MID = 2,        /**< LNA Mid Gain (MAX-6dB) */
+    LNA_MAX = 3         /**< LNA Max Gain */
 };
+
+inline lms::lna_gain_enum to_lna_gain(int lna_gain) {
+	switch(lna_gain) {
+	case 1:
+		return lms::LNA_BYPASS;
+	case 2:
+		return lms::LNA_MID;
+	case 3:
+		return lms::LNA_MAX;
+	default:
+		return lms::LNA_UNKNOWN;
+	}
+}
+
+inline lna_gain_enum to_lna_gain(const std::string& lna_gain) {
+	lms::lna_gain_enum lna_gain_tmp;
+	auto lna_gain_str(lna_gain);
+	trim_whitespace(lna_gain_str);
+	if(lna_gain_str.compare("LNA_BYPASS") == 0) {
+		lna_gain_tmp = lms::LNA_BYPASS;
+	}
+	else if(lna_gain_str.compare("LNA_MID") == 0) {
+		lna_gain_tmp = lms::LNA_MID;
+	}
+	else if(lna_gain_str.compare("LNA_MAX") == 0) {
+		lna_gain_tmp = lms::LNA_MAX;
+	}
+	else
+		lna_gain_tmp = lms::LNA_UNKNOWN;
+
+	return lna_gain_tmp;
+}
+
+inline std::string to_string(const lna_gain_enum gain) {
+	switch(gain) {
+	case LNA_BYPASS:
+		return "LNA_BYPASS";
+	case LNA_MID:
+		return "LNA_MID";
+	case LNA_MAX:
+		return "LNA_MAX";
+	case LNA_UNKNOWN:
+	default:
+		return "LNA_UNKNOWN";
+	}
+}
+
 
 static const lms_register_type rx_vga2_voltage_control_register = 0x64;
 static const lms_register_type rx_vga2_gain_control_register = 0x65;

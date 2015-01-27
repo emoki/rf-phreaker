@@ -151,12 +151,7 @@ void blade_rf_controller::refresh_scanner_info()
 	check_blade_status(bladerf_get_vctcxo_trim(comm_blade, &blade.vctcxo_trim_value_), __FILE__, __LINE__);
 
 	try {
-		auto meta_eeprom = read_eeprom_meta_data();
-		if(meta_eeprom.is_valid()) {
-			blade.eeprom_ = read_eeprom();
-		}
-		else
-			throw rf_phreaker_error("EEPROM meta data is invalid.");
+		blade.eeprom_ = read_eeprom();
 	}
 	catch(rf_phreaker_error &err) {
 		LOG(LERROR) << "Error reading EEPROM.  " << err.what();
@@ -193,9 +188,9 @@ void blade_rf_controller::refresh_scanner_info()
 }
 
 void blade_rf_controller::update_vctcxo_based_on_eeprom() {
-	if(scanner_blade_rf_ && std::string(scanner_blade_rf_->fpga_version_.describe).size() && scanner_blade_rf_->eeprom_.cal_.nuand_freq_correction_value_
-		&& scanner_blade_rf_->eeprom_.cal_.nuand_freq_correction_value_ != scanner_blade_rf_->vctcxo_trim_value_) {
-		update_vctcxo_trim(scanner_blade_rf_->eeprom_.cal_.nuand_freq_correction_value_);
+	if(scanner_blade_rf_ && std::string(scanner_blade_rf_->fpga_version_.describe).size() && scanner_blade_rf_->eeprom_.freq_correction_.nuand_freq_correction_value_
+		&& scanner_blade_rf_->eeprom_.freq_correction_.nuand_freq_correction_value_ != scanner_blade_rf_->vctcxo_trim_value_) {
+		update_vctcxo_trim(scanner_blade_rf_->eeprom_.freq_correction_.nuand_freq_correction_value_);
 	}
 }
 
@@ -327,7 +322,7 @@ void blade_rf_controller::disable_blade_rx()
 		false), __FILE__, __LINE__);
 }
 
-void blade_rf_controller::calculate_vctcxo_trim_and_update_calibration(double error_hz)
+void blade_rf_controller::calculate_vctcxo_trim_and_update_eeprom(double error_hz)
 {
 	auto trim = calculate_vctcxo_trim_value(error_hz);
 	update_vctcxo_trim(trim);
@@ -353,7 +348,7 @@ void blade_rf_controller::write_vctcxo_trim(uint16_t trim)
 
 	auto image = bladerf_alloc_cal_image(BLADERF_FPGA_40KLE, trim);
 	if(image == nullptr)
-		throw blade_rf_error("Unable to create calibration image.");
+		throw blade_rf_error("Unable to create BLADERF_FPGA_40KLE image.");
 
 	LOG(LDEBUG) << "Writing vctcxo trim value of " << trim << " to scanner " << comm_blade_rf_->id() << ".";
 
@@ -370,10 +365,10 @@ void blade_rf_controller::write_vctcxo_trim(uint16_t trim)
 
 void blade_rf_controller::update_frequency_correction_value_and_date_in_calibration(uint16_t value, time_t date)
 {
-	auto eeprom = read_eeprom();
-	eeprom.cal_.nuand_freq_correction_value_ = value;
-	eeprom.cal_.nuand_freq_correction_date_ = date;
-	write_eeprom(eeprom);
+	freq_correction_container corr;
+	corr.nuand_freq_correction_value_ = value;
+	corr.nuand_freq_correction_date_ = date;
+	write_frequency_correction(corr);
 }
 
 void blade_rf_controller::calculate_and_update_vctcxo_trim(double error_hz)
@@ -550,7 +545,7 @@ measurement_info blade_rf_controller::get_rf_data(frequency_type frequency, time
 	LOG(LCOLLECTION) << "Current xb gpio:" << gpio_in_hw << ".";
 
 	if(switch_mask == 0) {
-		auto auto_switch_setting = scanner_blade_rf_->eeprom_.cal_.get_rf_switch(frequency);
+		auto auto_switch_setting = scanner_blade_rf_->eeprom_.cal_.get_rf_switch(frequency, blade_bandwidth);
 		switch_setting = auto_switch_setting.switch_setting_;
 		switch_mask = auto_switch_setting.switch_mask_;
 	}
@@ -597,8 +592,8 @@ measurement_info blade_rf_controller::get_rf_data(frequency_type frequency, time
 	parameter_cache_ = measurement_info(0, frequency, blade_bandwidth, blade_sampling_rate , gain);
 
 	measurement_info data(num_samples, frequency, blade_bandwidth, blade_sampling_rate, gain, 
-		scanner_blade_rf_->eeprom_.cal_.get_nuand_adjustment(frequency),
-		scanner_blade_rf_->eeprom_.cal_.get_rf_board_adjustment(frequency),
+		scanner_blade_rf_->eeprom_.cal_.get_nuand_adjustment(gain.lna_gain_, frequency),
+		scanner_blade_rf_->eeprom_.cal_.get_rf_board_adjustment(frequency, blade_bandwidth),
 		collection_count_++, scanner_blade_rf_->eeprom_.cal_.nuand_serial_);
 
 	const auto beginning_of_iq = (Ipp16s*)&(*aligned_buffer_.get_aligned_array()) + (throw_away_samples * 2);
@@ -668,8 +663,8 @@ measurement_info blade_rf_controller::get_rf_data(int num_samples)
 		throw blade_rf_error(std::string("Error collecting data samples.  ") + bladerf_strerror(status));
 
 	measurement_info data(num_samples, frequency, blade_bandwidth, blade_sampling_rate, gain,
-		scanner_blade_rf_->eeprom_.cal_.get_nuand_adjustment(frequency),
-		scanner_blade_rf_->eeprom_.cal_.get_rf_board_adjustment(frequency),
+		scanner_blade_rf_->eeprom_.cal_.get_nuand_adjustment(gain.lna_gain_, frequency),
+		scanner_blade_rf_->eeprom_.cal_.get_rf_board_adjustment(frequency, blade_bandwidth),
 		collection_count_++, scanner_blade_rf_->eeprom_.cal_.nuand_serial_);
 
 	for(int i = 0; i < num_samples * 2; ++i)
@@ -697,97 +692,195 @@ void blade_rf_controller::check_blade_comm()
 		throw rf_phreaker::comm_error("It does not appear there is a valid connection to the device.  Try opening the device.");
 }
 
+void blade_rf_controller::write_flash(const std::vector<uint8_t> &bytes, const eeprom_addressing &addressing) {
+	check_blade_comm();
+	disable_blade_rx();
+	
+	// Erase flash.
+	check_blade_status(bladerf_erase_flash(comm_blade_rf_->blade_rf(),
+		addressing.erase_block_address(), addressing.erase_block_length()));
+
+	// Perform writes.
+	check_blade_status(bladerf_write_flash(comm_blade_rf_->blade_rf(), &bytes[0],
+		addressing.page_address(), addressing.page_length()));
+}
+
+std::vector<uint8_t> blade_rf_controller::read_flash(const eeprom_addressing &addressing) {
+	check_blade_comm();
+	disable_blade_rx();
+
+	std::vector<uint8_t> bytes(addressing.byte_length());
+
+	check_blade_status(bladerf_read_flash(comm_blade_rf_->blade_rf(), &bytes[0],
+		addressing.page_address(), addressing.page_length()));
+
+	return bytes;
+}
+
 void blade_rf_controller::initialize_eeprom()
 {
-	check_blade_comm();
 	eeprom ee;
 	write_eeprom(ee);
 }
 
-eeprom_meta_data blade_rf_controller::read_eeprom_meta_data()
+void blade_rf_controller::write_eeprom_meta_data(const eeprom_meta_data &meta_ee)
 {
-	check_blade_comm();
+	if(!meta_ee.is_valid())
+		throw rf_phreaker_error("Cannot write EEPROM meta data.  It is not valid.", EEPROM_ERROR);
 
-	disable_blade_rx();
+	std::vector<uint8_t> md_bytes(meta_ee.addressing().byte_length(), 0);
+	
+	auto bytes = meta_ee.serialize_to_bytes();
 
-	std::vector<uint8_t> md_bytes(eeprom_meta_data::absolute_total_byte_length(), 0);
+	write_flash(bytes, meta_ee.addressing());
+}
 
-	check_blade_status(bladerf_read_flash(comm_blade_rf_->blade_rf(), &md_bytes[0],
-		eeprom_meta_data::absolute_page_address(), eeprom_meta_data::absolute_total_page_length()));
+eeprom_meta_data blade_rf_controller::read_eeprom_meta_data() {
+	auto bytes = read_flash(eeprom_meta_data::addressing());
 
 	eeprom_meta_data md_eeprom;
-	md_eeprom.init(md_bytes);
-	
+
+	if(!md_eeprom.init(bytes))
+		throw rf_phreaker_error("EEPROM meta data is not valid.", EEPROM_ERROR);
+
 	return md_eeprom;
 }
 
 void blade_rf_controller::write_eeprom(const eeprom &ee)
 {
-	check_blade_comm();
-
-	disable_blade_rx();
-
-	auto new_eeprom_bytes = ee.serialize_to_bytes();
-
 	eeprom_meta_data meta_ee;
-	meta_ee.set_eeprom_byte_length_and_calculate_address(new_eeprom_bytes.size());
-	auto meta_bytes = meta_ee.serialize_to_bytes();
+	meta_ee.calculate_eeprom_addresses(ee);
 
-	if(!meta_ee.is_valid())
-		throw rf_phreaker_error("Cannot write to the EEPROM.  EEPROM meta data is not valid.", EEPROM_ERROR);
+	// Ensure we can serialize before writing anything to the EEPROM.
+	auto bytes = ee.serialize_to_bytes();
 
-	// Erase flash.
-	check_blade_status(bladerf_erase_flash(comm_blade_rf_->blade_rf(),
-		eeprom::absolute_erase_block_address(), eeprom::absolute_erase_block_length()));
+	write_eeprom_meta_data(meta_ee);
 
-	// Perform writes.
-	check_blade_status(bladerf_write_flash(comm_blade_rf_->blade_rf(), &meta_bytes[0],
-		eeprom_meta_data::absolute_page_address(), eeprom_meta_data::absolute_total_page_length()));
-
-	check_blade_status(bladerf_write_flash(comm_blade_rf_->blade_rf(), &new_eeprom_bytes[0],
-		meta_ee.eeprom_page_address(), meta_ee.eeprom_page_length()));
+	write_flash(bytes, meta_ee.trimmed_eeprom_addressing());
 }
 
-eeprom blade_rf_controller::read_eeprom()
+eeprom blade_rf_controller::read_eeprom(bool quick_read)
 {
-	check_blade_comm();
-
-	disable_blade_rx();
-
-	eeprom_meta_data meta_ee = read_eeprom_meta_data();
-
-	if(!meta_ee.is_valid())
-		throw rf_phreaker_error("Cannot read EEPROM.  EEPROM meta data is not valid.", EEPROM_ERROR);
-
-	std::vector<uint8_t> bytes(eeprom::absolute_total_byte_length(), 0);
-
-	check_blade_status(bladerf_read_flash(comm_blade_rf_->blade_rf(), &bytes[0],
-		meta_ee.eeprom_page_address(), meta_ee.eeprom_page_length()));
-
 	eeprom ee;
-	ee.init(bytes);
+
+	if(quick_read) {
+		ee.freq_correction_ = read_frequency_correction_container();
+		ee.license_ = read_license();
+		ee.cal_ = read_calibration();
+	}
+	else {
+		// Initialization gives us the default meta.
+		eeprom_meta_data meta_ee;
+		try {
+			meta_ee = read_eeprom_meta_data();
+		}
+		catch(const rf_phreaker_error &err) {
+			LOG(LERROR) << err.what() << "  Attempting to use default EEPROM meta data.";
+		}
+		auto bytes = read_flash(meta_ee.trimmed_eeprom_addressing());
+		ee.init(bytes, meta_ee);
+	}
 
 	return ee;
 }
 
-void blade_rf_controller::write_calibration(calibration & cal)
+void blade_rf_controller::write_calibration(calibration &cal)
 {
-	eeprom ee = read_eeprom();
-	ee.cal_ = cal;
-	write_eeprom(ee);
+	eeprom_meta_data meta_ee = read_eeprom_meta_data();
+
+	auto cali_bytes = cal.serialize_to_bytes();
+
+	// First check to see if we exceed the erase page boundary.  If ok, make sure eeprom meta data is correct.
+	if(meta_ee.is_calibration_boundary_exceeded(cali_bytes.size())) {
+		LOG(LINFO) << "Calibration size exceeds broundary.  Attempting to reformat EEPROM before writing calibration.";
+		auto eeprom = read_eeprom();
+		eeprom.cal_ = cal;
+		write_eeprom(eeprom);
+	}
+	else{
+		if(meta_ee.calibration_addressing().byte_length() != cali_bytes.size()) {
+			LOG(LINFO) << "Updating EEPROM meta data with new calibration byte size.";
+			meta_ee.update_calibration_length(cali_bytes.size());
+			write_eeprom_meta_data(meta_ee);
+		}
+		write_flash(cali_bytes, meta_ee.calibration_addressing());
+	}
 }
 
 calibration blade_rf_controller::read_calibration()
 {
-	eeprom ee = read_eeprom();
-	return ee.cal_;
+	eeprom_meta_data meta_ee = read_eeprom_meta_data();
+
+	auto bytes = read_flash(meta_ee.calibration_addressing());
+
+	calibration cal;
+	cal.init(bytes);
+	return cal;
 }
 
-void blade_rf_controller::write_license(const license &lic)
+void blade_rf_controller::write_license(const license &license)
 {
-	eeprom ee = read_eeprom();
-	ee.license_ = lic;
-	write_eeprom(ee);
+	eeprom_meta_data meta_ee = read_eeprom_meta_data();
+
+	auto license_bytes = license.serialize_to_bytes(RF_PHREAKER_FLASH_PAGE_SIZE);
+
+	// First check to see if we exceed the erase page boundary.  If ok, make sure eeprom meta data is correct.
+	if(meta_ee.is_license_boundary_exceeded(license_bytes.size())) {
+		LOG(LINFO) << "License size exceeds it's boundary.  Attempting to reformat EEPROM before writing license.";
+		auto eeprom = read_eeprom();
+		eeprom.license_ = license;
+		write_eeprom(eeprom);
+	}
+	else {
+		if(meta_ee.license_addressing().byte_length() != license_bytes.size()) {
+			LOG(LINFO) << "Updating EEPROM meta data with new license byte size.";
+			meta_ee.update_license_length(license_bytes.size());
+			write_eeprom_meta_data(meta_ee);
+		}
+		write_flash(license_bytes, meta_ee.license_addressing());
+	}
+}
+
+license blade_rf_controller::read_license() {
+	eeprom_meta_data meta_ee = read_eeprom_meta_data();
+
+	auto bytes = read_flash(meta_ee.license_addressing());
+
+	license lic;
+	lic.init(bytes);
+	return lic;
+}
+
+void blade_rf_controller::write_frequency_correction(const freq_correction_container &freq_correction) {
+	eeprom_meta_data meta_ee = read_eeprom_meta_data();
+
+	auto corr_bytes = freq_correction.serialize_to_bytes();
+
+	// First check to see if we exceed the erase page boundary.  If ok, make sure eeprom meta data is correct.
+	if(meta_ee.is_license_boundary_exceeded(corr_bytes.size())) {
+		LOG(LINFO) << "Frequency correction size exceeds it's boundary.  Attempting to reformat EEPROM before writing frequency correction.";
+		auto eeprom = read_eeprom();
+		eeprom.freq_correction_ = freq_correction;
+		write_eeprom(eeprom);
+	}
+	else {
+		if(meta_ee.freq_correction_addressing().byte_length() != corr_bytes.size()) {
+			LOG(LINFO) << "Updating EEPROM meta data with new frequency correction byte size.";
+			meta_ee.update_frequency_correction_length(corr_bytes.size());
+			write_eeprom_meta_data(meta_ee);
+		}
+		write_flash(corr_bytes, meta_ee.freq_correction_addressing());
+	}
+}
+
+freq_correction_container blade_rf_controller::read_frequency_correction_container() {
+	eeprom_meta_data meta_ee = read_eeprom_meta_data();
+
+	auto bytes = read_flash(meta_ee.freq_correction_addressing());
+
+	freq_correction_container con;
+	con.init(bytes);
+	return con;
 }
 
 void blade_rf_controller::set_log_level(int level) {

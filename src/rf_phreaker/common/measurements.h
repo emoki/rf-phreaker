@@ -12,6 +12,7 @@ namespace rf_phreaker {
 	struct hardware 
 	{
 		scanner_serial_type serial_;
+		int32_t hw_id_;
 		device_communication device_communication_;
 		int64_t frequency_correction_calibration_date_;
 		int64_t rf_calibration_date_;

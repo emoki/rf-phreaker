@@ -251,7 +251,7 @@ long cappeen_impl::open_unit(const char *serial, unsigned int buf_size)
 			processing_graph_->cancel_and_wait();
 
 		// Initialize a fake hw and initialize it.
-		hardware tmp_hw{serial, device_communication::UNKNOWN_SPEED, 0, 0, {}, {true}};
+		hardware tmp_hw{serial, 0, device_communication::UNKNOWN_SPEED, 0, 0, {}, {true}};
 		delegate_->initialize_beagle_info(tmp_hw);
 		delegate_->change_beagle_state(BEAGLE_USBOPENED);
 
@@ -318,7 +318,7 @@ long cappeen_impl::close_unit(const char *serial, unsigned int buf_size)
 		}
 		if(gps_1pps.is_valid() && time_diff > config_.eeprom_update_period_for_1pps_calibration_minutes_ * 60) {
 			LOG(LDEBUG) << "Storing latest GPS 1PPS calibration using " << gps_1pps.clock_ticks() << " clock ticks for an error of " << gps_1pps.error_in_hz() << " Hz.";
-			scanner_->calculate_vctcxo_trim_and_update_calibration(gps_1pps.error_in_hz());
+			scanner_->calculate_vctcxo_trim_and_update_eeprom(gps_1pps.error_in_hz());
 		}
 
 		// Close scanner.

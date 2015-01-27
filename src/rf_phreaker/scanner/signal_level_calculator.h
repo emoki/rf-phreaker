@@ -11,7 +11,6 @@ public:
 	{
 		if(avg_rms < .0001)
 			return -999;
-		// Assuming the LNA is maxed.
 		return 20.0 * log10(avg_rms) - info.gain().rxvga1_ - (0.96 * info.gain().rxvga2_) + info.blade_adjustment() - (use_rf_board_adj ? info.rf_board_adjustment() : 0);
 	}
 
@@ -19,7 +18,6 @@ public:
 	{
 		if(digital_value < .0001)
 			return -999;
-		// Assuming the LNA is maxed.
 		return 20.0 * log10(digital_value) - rxvga1 - (0.96 * rxvga2) + blade_adj - rf_board_adj;
 	}
 };

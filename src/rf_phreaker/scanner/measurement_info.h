@@ -146,7 +146,7 @@ inline std::istream& operator>>(std::istream &is, rf_phreaker::scanner::measurem
 		if(version >= 1) {
 			t.collection_round_ = stoll(parsed_data[2]);
 			int i = stoi(parsed_data[3]); t.operating_band_ = static_cast<operating_band>(i);
-			i = stoi(parsed_data[4]);  t.gain_.lna_gain_ = static_cast<lms::lna_gain_enum>(i);
+			i = stoi(parsed_data[4]);  t.gain_.lna_gain_ = lms::to_lna_gain(i);
 			t.gain_.rxvga1_ = stoi(parsed_data[5]);
 			t.gain_.rxvga2_ = stoi(parsed_data[6]);
 		}
