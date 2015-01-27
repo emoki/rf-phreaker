@@ -663,6 +663,8 @@ long cappeen_impl::input_new_license(const char *serial, uint32_t serial_buf_siz
 		if(processing_graph_)
 			processing_graph_->cancel_and_wait();
 
+		int32_t hw_id = delegate_->get_hw_id();
+
 		std::string filename(new_license_filename, license_buf_size);
 
 		// Read license.
@@ -670,7 +672,7 @@ long cappeen_impl::input_new_license(const char *serial, uint32_t serial_buf_siz
 		auto raw_license = license.create_new_license_from_file(filename);
 
 		// Verify license is not corrupt.
-		license.initialize_license(raw_license, serial);
+		license.initialize_license(raw_license, hw_id);
 		if(license.corrupt_license())
 			throw cappeen_api_error("License read from file appears corrupt.", CORRUPTLICENSE);
 

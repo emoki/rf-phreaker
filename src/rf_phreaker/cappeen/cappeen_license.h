@@ -133,11 +133,15 @@ public:
 
 	void initialize_license(const license &license, const rf_phreaker::scanner_serial_type &serial);
 
+	void initialize_license(const license &license, uint32_t hw_id);
+
 	bool corrupt_license() { return encryption_.is_corrupt(); }
 
 	const std::set<beagle_api::TECHNOLOGIES_AND_BANDS> & valid_licenses() const { return valid_licenses_; }
 
 	const std::set<software_license> & software_licenses() const { return valid_software_licenses_; }
+
+	uint32_t get_hw_id() const;
 
 	static license create_new_license_from_file(const std::string &filename);
 
@@ -163,6 +167,8 @@ protected:
 	license license_;
 
 	rf_phreaker::scanner_serial_type serial_;
+
+	uint32_t hw_id_;
 };
 
 class cappeen_license_version_1 : public cappeen_license

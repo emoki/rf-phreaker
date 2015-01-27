@@ -383,7 +383,7 @@ public:
 		else {
 			try {
 				std::unique_ptr<cappeen_license> license(new cappeen_license_version_3(cell_analysis_license));
-				license->initialize_license(t.license_data_, t.serial_);
+				license->initialize_license(t.license_data_, t.hw_id_);
 				if(!license->corrupt_license()) {
 					for(int i = 0; i < beagle_api::MAX_TECHNOLOGIES_AND_BANDS; ++i) {
 						auto lic = static_cast<beagle_api::TECHNOLOGIES_AND_BANDS>(i);

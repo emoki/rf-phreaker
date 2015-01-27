@@ -430,7 +430,7 @@ TEST(Cappeen, DISABLED_LicenseCellAnalysisEverything) {
 		soft_licenses.insert(cell_analysis_license);
 
 		std::string license_filename = "v3_everything.bin";
-		auto raw = v3.generate_license(cappeen_license::serial_to_hwid(serial), band_licenses, soft_licenses);
+		auto raw = v3.generate_license(out.hw().beagle_id_, band_licenses, soft_licenses);
 		{
 			std::ofstream f(license_filename.c_str(), std::ios::binary);
 			f.write((char*)&raw[0], raw.size());

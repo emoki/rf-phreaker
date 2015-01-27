@@ -112,6 +112,19 @@ void cappeen_license::initialize_license(const license &license, const rf_phreak
 	initialized_ = true;
 }
 
+void cappeen_license::initialize_license(const license &license, uint32_t hw_id) {
+	encryption_.clear_corruption();
+
+	license_ = license;
+
+	hw_id_ = hw_id;
+
+	initialize_license_();
+
+	initialized_ = true;
+}
+
+
 license cappeen_license::create_new_license_from_file(const std::string &filename) {
 
 	std::ifstream f(filename, std::ios::binary);
@@ -139,7 +152,7 @@ time_t cappeen_license::find_date(license_element_type position) {
 
 	memcpy(&encrypted, &(license_.bytes_[position * sizeof(license_element_type)]), sizeof(license_element_type));
 
-	time_t date = encryption_.decrypt(encrypted, serial_to_hwid(serial_), position);
+	time_t date = encryption_.decrypt(encrypted, get_hw_id(), position);
 
 	if(encryption_.is_corrupt())
 		throw cappeen_api_error("License appears corrupt.", CORRUPTLICENSE);
@@ -151,6 +164,14 @@ void cappeen_license::validate_licenses() {
 	if(valid_software_licenses_.find(required_license_) == valid_software_licenses_.end()) {
 		valid_licenses_.clear();
 	}
+}
+
+uint32_t cappeen_license::get_hw_id() const {
+	if(serial_.size() != 32) {
+		return hw_id_;
+	}
+	else
+		return serial_to_hwid(serial_);
 }
 
 uint32_t cappeen_license::serial_to_hwid(const rf_phreaker::scanner_serial_type &serial) {
