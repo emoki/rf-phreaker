@@ -122,19 +122,6 @@ public:
 				controller.initialize_eeprom();
 			}
 
-			try {
-				// Try to read actual EEPROM - if valid then we use the freq correction value and date. 
-				auto tmp_cal = controller.read_calibration();
-				if(tmp_cal.nuand_freq_correction_value_ > 0 && tmp_cal.nuand_freq_correction_date_ > 0) {
-					cal.nuand_freq_correction_value_ = tmp_cal.nuand_freq_correction_value_;
-					cal.nuand_freq_correction_date_ = tmp_cal.nuand_freq_correction_date_;
-				}
-			}
-			catch(const std::exception &) {
-				std::cout << "\nError while reading calibration.  Frequency correction value/date will not be set.\nInitializing EEPROM.\n";
-				controller.initialize_eeprom();
-			}
-
 			std::cout << "\nWriting calibration to EEPROM.\n";
 			controller.write_calibration(cal);
 
