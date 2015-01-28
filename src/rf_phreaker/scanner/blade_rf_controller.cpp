@@ -175,7 +175,7 @@ void blade_rf_controller::refresh_scanner_info()
 
 	update_vctcxo_based_on_eeprom();
 
-	LOG(LDEBUG) << "Scanner serial is" << scanner_blade_rf_->serial() << ".";
+	LOG(LDEBUG) << "Scanner serial is " << scanner_blade_rf_->serial() << ".";
 	LOG(LDEBUG) << "USB backend is " << usb_backend_to_string(scanner_blade_rf_->back_end()) << ".";
 	LOG(LDEBUG) << "Device speed is " << to_string(scanner_blade_rf_->usb_speed()) << ".";
 	LOG(LDEBUG) << "Blade library version is " << scanner_blade_rf_->blade_rf_version_description();
