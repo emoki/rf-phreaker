@@ -41,16 +41,22 @@ TEST(BladeMatlabInterface, TestMain)
 		int usb_speed;
 		EXPECT_EQ(0, get_connected_device_info((int8_t*)device, buf_size, &usb_speed));
 
-		std::string base_filename = "../../../../rf_phreaker/test_files/calibration_files/two_old_nst+/";
+		std::string base_filename = "../../../../rf_phreaker/test_files/calibration_files/";
 		std::string eeprom_filename = base_filename + "matlab_eeprom_save.txt";
 		std::string nuand_filename = base_filename + "nuand_format_example_v2.txt";
 		std::string rf_board_filename = base_filename + "rf_board_format_example.txt";
 		std::string rf_switch_filename = base_filename + "rf_switch_settings_format_example_v2.txt";
-		std::string eeprom_filename = base_filename + "matlab_eeprom_save.txt";
+		std::string tmp_cali_filename = base_filename + "tmp_cali.txt";
+		int hw_id = 99999;
+
+		//std::string nuand_filename = base_filename + "Nuand_Board_77ecda454d25738ee419f6fd676170d5_141021.txt";
+		//std::string rf_board_filename = base_filename + "RF_Board_77ecda454d25738ee419f6fd676170d5_141021.txt";
+		//std::string rf_switch_filename = base_filename + "RF_Switch_77ecda454d25738ee419f6fd676170d5_141021.txt";
+		//std::string tmp_cali_filename = base_filename + "tmp_77ecda454d25738ee419f6fd676170d5_141021_cali.bin";
 
 		EXPECT_EQ(0, save_eeprom((int8_t*)eeprom_filename.c_str()));
 		EXPECT_EQ(0, write_calibration((int8_t*)nuand_filename.c_str(), (int8_t*)rf_board_filename.c_str(), (int8_t*)rf_switch_filename.c_str(), 
-			0, 99999));
+			0, hw_id));
 		EXPECT_EQ(0, write_calibration((int8_t*)nuand_filename.c_str(), (int8_t*)rf_board_filename.c_str(), (int8_t*)rf_switch_filename.c_str(), 
 			(int8_t*)tmp_cali_filename.c_str(), hw_id));
 
