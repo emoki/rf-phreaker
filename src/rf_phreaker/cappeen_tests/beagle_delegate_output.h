@@ -26,7 +26,7 @@ public:
 		}
 	}
 
-	virtual void __stdcall available_beagle_info(long beagle_id, const beagle_info &info) {
+	virtual void __stdcall available_beagle_info(beagle_id_type beagle_id, const beagle_info &info) {
 		{
 			std::lock_guard<std::mutex> lock(hw_mutex_);
 			hw_ = info;
@@ -83,7 +83,7 @@ public:
 
 		new_hw_info_ = true;
 	}
-	virtual void __stdcall available_gps_info(long beagle_id, const gps_info &info) {
+	virtual void __stdcall available_gps_info(beagle_id_type beagle_id, const gps_info &info) {
 		{
 			std::lock_guard<std::mutex> lock(gps_mutex_);
 			gps_ = info;
@@ -95,8 +95,8 @@ public:
 		if(!output_) return;
 		std::cout << beagle_id << "\t" << std::boolalpha << info.gps_locked_ << "\t" << info.utc_time_ << "\t" << info.raw_gps_status_ << "\n";
 	}
-	virtual void __stdcall available_gsm_sector_info(long beagle_id, const gsm_sector_info *info, long num_records) {}
-	virtual void __stdcall available_umts_sector_info(long beagle_id, const umts_sector_info *info, long num_records) {
+	virtual void __stdcall available_gsm_sector_info(beagle_id_type beagle_id, const gsm_sector_info *info, long num_records) {}
+	virtual void __stdcall available_umts_sector_info(beagle_id_type beagle_id, const umts_sector_info *info, long num_records) {
 		if(!output_) return;
 		for(int i = 0; i < num_records; ++i) {
 			std::cout << beagle_id << "\t" << info[i].carrier_freq_ << "\t" << info[i].carrier_sl_ << "\t" << info[i].cpich_ << "\t" << info[i].ecio_
@@ -115,12 +115,12 @@ public:
 		}
 	}
 	std::set<frequency_type> tmp;
-	virtual void __stdcall available_umts_sweep_info(long beagle_id, const umts_sweep_info *info, long num_records) {
+	virtual void __stdcall available_umts_sweep_info(beagle_id_type beagle_id, const umts_sweep_info *info, long num_records) {
 		if(!output_) return;
 		for(int i = 0; i < num_records; ++i)
 			std::cout << beagle_id << "\t" << info[i].frequency_ << "\t" << info[i].rssi_ << "\t" << "umts" << "\n";
 	}
-	virtual void __stdcall available_lte_sector_info(long beagle_id, const lte_sector_info *info, long num_records) {
+	virtual void __stdcall available_lte_sector_info(beagle_id_type beagle_id, const lte_sector_info *info, long num_records) {
 		if(!output_) return;
 		static std::ofstream lte_output("lte_sector_info.txt");
 		for(int i = 0; i < num_records; ++i) {
@@ -259,16 +259,16 @@ public:
 			lte_output << t << std::endl;
 		}
 	}
-	virtual void __stdcall available_lte_sweep_info(long beagle_id, const lte_sweep_info *info, long num_records) {
+	virtual void __stdcall available_lte_sweep_info(beagle_id_type beagle_id, const lte_sweep_info *info, long num_records) {
 		if(!output_) return;
 		for(int i = 0; i < num_records; ++i)
 			std::cout << beagle_id << "\t" << info[i].frequency_ << "\t" << info[i].rssi_ << "\t" << "lte" << "\n";
 	}
-	virtual void __stdcall available_error(long beagle_id, long error, const char *str, long buf_size) {
+	virtual void __stdcall available_error(beagle_id_type beagle_id, long error, const char *str, long buf_size) {
 		std::cout << "----------ERROR-------------  CODE: " << error << "  STR: " << str << "HWID: " << beagle_id << "\t" << "\n";
 		error_occurred_ = true;
 	}
-	virtual void __stdcall available_message(long beagle_id, long possible_message_number, const char *str, long buf_size) {
+	virtual void __stdcall available_message(beagle_id_type beagle_id, long possible_message_number, const char *str, long buf_size) {
 		std::cout << "----------MESSAGE-------------  CODE: " << possible_message_number << "  STR : " << str << "HWID: " << beagle_id << "\t" << "\n";
 	}
 
@@ -298,13 +298,13 @@ private:
 
 class bad_output : public beagle_delegate
 {
-	virtual void __stdcall available_beagle_info(long beagle_id, const beagle_info &info) {}
-	virtual void __stdcall available_gps_info(long beagle_id, const gps_info &info) {}
-	virtual void __stdcall available_gsm_sector_info(long beagle_id, const gsm_sector_info *info, long num_records) {}
-	virtual void __stdcall available_umts_sector_info(long beagle_id, const umts_sector_info *info, long num_records) {}
-	virtual void __stdcall available_umts_sweep_info(long beagle_id, const umts_sweep_info *info, long num_records) {}
-	virtual void __stdcall available_lte_sector_info(long beagle_id, const lte_sector_info *info, long num_records) {}
-	virtual void __stdcall available_lte_sweep_info(long beagle_id, const lte_sweep_info *info, long num_records) {}
-	virtual void __stdcall available_error(long beagle_id, long error, const char *str, long buf_size) { std::cout << str << "\n"; }
-	virtual void __stdcall available_message(long beagle_id, long possible_message_number, const char *str, long buf_size) { std::cout << str << "\n"; }
+	virtual void __stdcall available_beagle_info(beagle_id_type beagle_id, const beagle_info &info) {}
+	virtual void __stdcall available_gps_info(beagle_id_type beagle_id, const gps_info &info) {}
+	virtual void __stdcall available_gsm_sector_info(beagle_id_type beagle_id, const gsm_sector_info *info, long num_records) {}
+	virtual void __stdcall available_umts_sector_info(beagle_id_type beagle_id, const umts_sector_info *info, long num_records) {}
+	virtual void __stdcall available_umts_sweep_info(beagle_id_type beagle_id, const umts_sweep_info *info, long num_records) {}
+	virtual void __stdcall available_lte_sector_info(beagle_id_type beagle_id, const lte_sector_info *info, long num_records) {}
+	virtual void __stdcall available_lte_sweep_info(beagle_id_type beagle_id, const lte_sweep_info *info, long num_records) {}
+	virtual void __stdcall available_error(beagle_id_type beagle_id, long error, const char *str, long buf_size) { std::cout << str << "\n"; }
+	virtual void __stdcall available_message(beagle_id_type beagle_id, long possible_message_number, const char *str, long buf_size) { std::cout << str << "\n"; }
 };

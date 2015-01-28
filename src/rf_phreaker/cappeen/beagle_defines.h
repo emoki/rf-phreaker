@@ -465,7 +465,7 @@ namespace beagle_api
 	Gives a description of the beagle unit.
 	*/
 	struct beagle_info {
-		/// A unique ID which corresponds to the Beagle serial.  Used in callback class to identify 
+		/// A unique ID which corresponds to the Beagle unit.  Also used in callback class to identify 
 		/// which unit the information originated from.
 		beagle_id_type beagle_id_;
 
@@ -722,56 +722,56 @@ namespace beagle_api
 		/// Called by Beagle when there is a change in Beagle's state.
 		/// @param beagle_id A unique ID which corresponds to the Beagle unit.
 		/// @param info See BeagleInfo.
-		virtual void __stdcall available_beagle_info(long beagle_id, const beagle_info &info) = 0;
+		virtual void __stdcall available_beagle_info(beagle_id_type beagle_id, const beagle_info &info) = 0;
 
 		/// Called by Beagle when several times a second.  Allows access to the GPS information.  
 		/// @param beagle_id A unique ID which corresponds to the Beagle unit.
 		/// @param info See GpsInfo.
-		virtual void __stdcall available_gps_info(long beagle_id, const gps_info &info) = 0;
+		virtual void __stdcall available_gps_info(beagle_id_type beagle_id, const gps_info &info) = 0;
 
 		/// Called by Beagle when there is new GSM data.  
 		/// @param beagle_id A unique ID which corresponds to the Beagle unit.
 		/// @param info Array of gsm_sector_info
 		/// @param num_records Number of gsm_sector_info structs within the info array.
-		virtual void __stdcall available_gsm_sector_info(long beagle_id, const gsm_sector_info *info, long num_records) = 0;
+		virtual void __stdcall available_gsm_sector_info(beagle_id_type beagle_id, const gsm_sector_info *info, long num_records) = 0;
 
 		/// Called by Beagle when there is new UMTS data. 
 		/// @param beagle_id A unique ID which corresponds to the Beagle unit.
 		/// @param info Array of umts_sector_info.
 		/// @param num_records Number of umts_sector_info structs within the info array.
-		virtual void __stdcall available_umts_sector_info(long beagle_id, const umts_sector_info *info, long num_records) = 0;
+		virtual void __stdcall available_umts_sector_info(beagle_id_type beagle_id, const umts_sector_info *info, long num_records) = 0;
 
 		/// Called by Beagle when there is new UMTS sweep data. 
 		/// @param beagle_id A unique ID which corresponds to the Beagle unit.
 		/// @param info Array of umts_sweep_info.
 		/// @param num_records Number of umts_sweep_info structs within the info array.
-		virtual void __stdcall available_umts_sweep_info(long beagle_id, const umts_sweep_info *info, long num_records) = 0;
+		virtual void __stdcall available_umts_sweep_info(beagle_id_type beagle_id, const umts_sweep_info *info, long num_records) = 0;
 
 		/// Called by Beagle when there is new LTE data. 
 		/// @param beagle_id A unique ID which corresponds to the Beagle unit.
 		/// @param info Array of lte_sector_info.
 		/// @param num_records Number of lte_sector_info structs within the info array.
-		virtual void __stdcall available_lte_sector_info(long beagle_id, const lte_sector_info *info, long num_records) = 0;
+		virtual void __stdcall available_lte_sector_info(beagle_id_type beagle_id, const lte_sector_info *info, long num_records) = 0;
 
 		/// Called by Beagle when there is new LTE sweep data. 
 		/// @param beagle_id A unique ID which corresponds to the Beagle unit.
 		/// @param info Array of lte_sweep_info.
 		/// @param num_records Number of lte_sweep_info structs within the info array.
-		virtual void __stdcall available_lte_sweep_info(long beagle_id, const lte_sweep_info *info, long num_records) = 0;
+		virtual void __stdcall available_lte_sweep_info(beagle_id_type beagle_id, const lte_sweep_info *info, long num_records) = 0;
 
 		/// Called by Beagle when an error or warning has occurred.  
 		/// @param beagle_id A unique ID which corresponds to the Beagle unit.
 		/// @param error Error Number
 		/// @param str Error description.
 		/// @param buf_size Size (in bytes) of str.
-		virtual void __stdcall available_error(long beagle_id, long error, const char *str, long buf_size) = 0;
+		virtual void __stdcall available_error(beagle_id_type beagle_id, long error, const char *str, long buf_size) = 0;
 
 		/// Called by Beagle to display log information.
 		/// @param beagle_id A unique ID which corresponds to the Beagle unit.
 		/// @param possible_message_number Message number associated with description.
 		/// @param str The message description.
 		/// @param buf_size Size (in bytes) of str.
-		virtual void __stdcall available_message(long beagle_id, long possible_message_number, const char *str, long buf_size) = 0;
+		virtual void __stdcall available_message(beagle_id_type beagle_id, long possible_message_number, const char *str, long buf_size) = 0;
 	};
 
 	/**
