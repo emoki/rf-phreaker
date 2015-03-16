@@ -15,6 +15,7 @@ static std::string umts_io_spacer = " | ";
 
 inline std::ostream& output_umts_meas_debug_header(std::ostream &os) {
 	os << "cpich" << umts_io_delimiter
+		<< "ecio" << umts_io_delimiter
 		<< "rms_signal" << umts_io_delimiter
 		<< "sample_num" << umts_io_delimiter
 		<< "time" << umts_io_delimiter
