@@ -155,13 +155,11 @@ void blade_rf_controller::refresh_scanner_info()
 	}
 	catch(rf_phreaker_error &err) {
 		LOG(LERROR) << "Error reading EEPROM.  " << err.what();
-		delegate_sink::instance().log_error(std::string("Error reading EEPROM.  ") + err.what(), err.error_code_);
-
+		delegate_sink::instance().log_error(std::string("Error reading EEPROM.  ") + err.what(), EEPROM_ERROR);
 	}
 	catch(std::exception &err) {
 		LOG(LERROR) << "Error reading EEPROM.  " << err.what();
 		delegate_sink::instance().log_error(std::string("Error reading EEPROM.  ") + err.what(), EEPROM_ERROR);
-
 	}
 
 	if(!scanner_blade_rf_) {
