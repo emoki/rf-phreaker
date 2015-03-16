@@ -427,6 +427,8 @@ processing::collection_info_containers cappeen_impl::create_collection_info_cont
 
 	for(uint32_t i = 0, end = collection.tech_and_bands_to_sweep_.num_elements_; i < end; ++i) {
 		auto band = convert_band(collection.tech_and_bands_to_sweep_.elements_[i]);
+		
+		LOG(LVERBOSE) << "Adding operating band: " << to_string(band) << ".";
 
 		if(band >= FIRST_UMTS_OPERATING_BAND && band <= LAST_UMTS_OPERATING_BAND) {
 			auto it = std::find_if(containers.begin(), containers.end(), [&](const collection_info_container &c) {
