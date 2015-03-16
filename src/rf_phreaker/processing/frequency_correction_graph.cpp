@@ -34,6 +34,12 @@ void frequency_correction_graph::start(scanner_controller_interface *sc, data_ou
 			collection_manager_node_.reset();
 			nodes_.clear();
 
+			LOG(LVERBOSE) << "frequency correction settings: " << config.frequency_correction_settings_.initial_frequency_correction_range_start_ << ", "
+				<< config.frequency_correction_settings_.initial_frequency_correction_range_end_ << ", "
+				<< config.frequency_correction_settings_.general_settings_.sensitivity_ << ", "
+				<< config.frequency_correction_settings_.general_settings_.full_scan_interval_ << ", "
+				<< config.frequency_correction_settings_.general_settings_.num_coherent_slots_ << ".";
+
 			graph_ = (std::make_shared<tbb::flow::graph>());
 
 			start_node_ = std::make_shared<start_node>(*graph_, [=](add_remove_collection_info &info) { return true; }, false);

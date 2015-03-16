@@ -8,6 +8,7 @@
 #include "rf_phreaker/processing/lte_processing_body.h"
 #include "rf_phreaker/processing/lte_output_and_feedback_body.h"
 #include "rf_phreaker/common/delegate_sink.h"
+#include "rf_phreaker/common/log.h"
 #include "tbb/task_scheduler_init.h"
 
 using namespace rf_phreaker::scanner;
@@ -35,6 +36,23 @@ void processing_graph::start(scanner_controller_interface *sc, data_output_async
 			collection_manager_node_.reset();
 			nodes_.clear();
 
+			LOG(LVERBOSE) << "umts sweep collection settings: " << config.umts_sweep_collection_.sampling_rate_ << ", " << config.umts_sweep_collection_.bandwidth_ << ", "
+				<< config.umts_sweep_collection_.collection_time_ << ".";
+			LOG(LVERBOSE) << "umts sweep general settings: " << config.umts_sweep_general_.sensitivity_ << ", " << config.umts_sweep_general_.full_scan_interval_ << ", "
+				<< config.umts_sweep_general_.num_coherent_slots_ << ".";
+
+			LOG(LVERBOSE) << "umts layer 3 collection settings: " << config.umts_layer_3_collection_.sampling_rate_ << ", " << config.umts_layer_3_collection_.bandwidth_ << ", "
+				<< config.umts_layer_3_collection_.collection_time_ << ".";
+			LOG(LVERBOSE) << "umts layer 3 general settings: " << config.umts_layer_3_general_.sensitivity_ << ", " << config.umts_layer_3_general_.full_scan_interval_ << ", "
+				<< config.umts_layer_3_general_.num_coherent_slots_ << ".";
+			LOG(LVERBOSE) << "umts layer 3 decode settings: " << config.umts_decode_layer_3_.max_update_threshold_ << ", " << config.umts_decode_layer_3_.minimum_collection_round_ << ", "
+				<< config.umts_decode_layer_3_.decode_threshold_ << ", " << config.umts_decode_layer_3_.decode_minimum_threshold_ << ".";
+
+			LOG(LVERBOSE) << "lte layer 3 collection settings: " << config.lte_layer_3_collection_.sampling_rate_ << ", " << config.lte_layer_3_collection_.bandwidth_ << ", "
+				<< config.lte_layer_3_collection_.collection_time_ << ".";
+			LOG(LVERBOSE) << "lte layer 3 decode settings: " << config.lte_decode_layer_3_.max_update_threshold_ << ", " << config.lte_decode_layer_3_.minimum_collection_round_ << ", "
+				<< config.lte_decode_layer_3_.decode_threshold_ << ", " << config.lte_decode_layer_3_.decode_minimum_threshold_ << ".";
+
 			graph_ = (std::make_shared<tbb::flow::graph>());
 
 			start_node_ = std::make_shared<start_node>(*graph_, [=](add_remove_collection_info &info) { return true; }, false);
@@ -46,7 +64,6 @@ void processing_graph::start(scanner_controller_interface *sc, data_output_async
 				max_limit = config.num_items_in_flight_;
 
 			auto limiter = std::make_shared<limiter_node>(*graph_, max_limit);
-
 
 			auto umts_sweep_cell_search = std::make_shared<umts_cell_search_node>(*graph_, tbb::flow::serial, umts_processing_body(
 				umts_cell_search_settings(config.umts_sweep_collection_, config.umts_decode_layer_3_, config.umts_sweep_general_, 1)));
