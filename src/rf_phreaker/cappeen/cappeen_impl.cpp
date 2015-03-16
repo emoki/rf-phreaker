@@ -5,6 +5,7 @@
 #include "rf_phreaker/qt_specific/file_path_validation.h"
 #include "rf_phreaker/common/exception_types.h"
 #include "rf_phreaker/processing/frequency_range_creation.h"
+#include "rf_phreaker/qt_specific/qt_utility.h"
 #include "boost/date_time/posix_time/posix_time.hpp"
 
 using namespace rf_phreaker;
@@ -127,7 +128,7 @@ long cappeen_impl::initialize(beagle_api::beagle_delegate *del)
 
 void cappeen_impl::read_settings()
 {
-	settings_io io("cappeen_api", "cappeen");
+	settings_io io("cappeen_api", qt_utility::app_name());
 
 	io.read(config_);
 }
