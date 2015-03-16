@@ -826,7 +826,8 @@ calibration blade_rf_controller::read_calibration()
 	auto bytes = read_flash(meta_ee.calibration_addressing());
 
 	calibration cal;
-	cal.init(bytes);
+	if(!cal.init(bytes))
+		throw rf_phreaker_error("Calibration failed verification.", CALIBRATION_ERROR);
 	return cal;
 }
 
