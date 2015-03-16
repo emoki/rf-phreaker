@@ -290,8 +290,7 @@ void blade_rf_controller::do_initial_scanner_config(const scanner_settings &sett
 
 	enable_blade_rx();
 
-	gps_comm_.reset(new gps_comm::gps_comm());
-	gps_comm_->init(comm_blade_rf_->blade_rf(), false);
+	power_on_gps();
 }
 
 void blade_rf_controller::enable_blade_rx()
@@ -320,6 +319,19 @@ void blade_rf_controller::disable_blade_rx()
 	check_blade_status(bladerf_enable_module(comm_blade_rf_->blade_rf(),
 		BLADERF_MODULE_RX,
 		false), __FILE__, __LINE__);
+}
+
+void blade_rf_controller::power_on_gps() {
+	check_blade_comm();
+	gps_comm_.reset(new gps_comm::gps_comm());
+	gps_comm_->init(comm_blade_rf_->blade_rf(), false);
+}
+
+void blade_rf_controller::power_off_gps() {
+	if(gps_comm_) {
+		gps_comm_->power_off();
+		gps_comm_.reset();
+	}
 }
 
 void blade_rf_controller::calculate_vctcxo_trim_and_update_eeprom(double error_hz)

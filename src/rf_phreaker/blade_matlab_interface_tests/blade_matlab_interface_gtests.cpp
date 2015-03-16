@@ -41,6 +41,10 @@ TEST(BladeMatlabInterface, TestMain)
 		int usb_speed;
 		EXPECT_EQ(0, get_connected_device_info((int8_t*)device, buf_size, &usb_speed));
 
+		EXPECT_EQ(0, power_off_gps());
+
+		EXPECT_EQ(0, power_on_gps());
+
 		std::string base_filename = "../../../../rf_phreaker/test_files/calibration_files/";
 		std::string eeprom_filename = base_filename + "matlab_eeprom_save.txt";
 		std::string nuand_filename = base_filename + "nuand_format_example_v2.txt";

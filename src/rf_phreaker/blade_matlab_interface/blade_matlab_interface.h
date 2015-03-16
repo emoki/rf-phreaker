@@ -142,6 +142,9 @@ extern "C" {
 
 	int DLL_PUBLIC get_last_valid_1pps_calibration(__int64 *clock_ticks, int *seconds_integrated, float *error_in_hz);
 
+	int DLL_PUBLIC power_on_gps();
+
+	int DLL_PUBLIC power_off_gps();
 
 #ifdef __cplusplus
 }

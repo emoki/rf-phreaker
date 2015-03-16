@@ -122,6 +122,10 @@ public:
 
 	gps_1pps_integration get_last_valid_gps_1pps_integration();
 
+	void power_on_gps();
+
+	void power_off_gps();
+
 private:
 	void enable_blade_rx();
 

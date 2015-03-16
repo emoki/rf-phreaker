@@ -629,7 +629,7 @@ int finish_gps_1pps_calibration(bool *success) {
 	return matlab_interface_error_general;
 }
 
-int DLL_PUBLIC get_last_valid_1pps_calibration(__int64 *clock_ticks, int *seconds_integrated, float *error_in_hz) {
+int get_last_valid_1pps_calibration(__int64 *clock_ticks, int *seconds_integrated, float *error_in_hz) {
 	try {
 		check_null(clock_ticks);
 		check_null(seconds_integrated);
@@ -640,6 +640,40 @@ int DLL_PUBLIC get_last_valid_1pps_calibration(__int64 *clock_ticks, int *second
 		*clock_ticks = pps.clock_ticks();
 		*seconds_integrated = pps.seconds_integrated();
 		*error_in_hz = (float)pps.error_in_hz();
+
+		return matlab_interface_no_error;
+	}
+	catch(rf_phreaker::rf_phreaker_error &err) {
+		last_error_ = err.what();
+		return (int)err.error_code_;
+	}
+	catch(std::exception &err) {
+		last_error_ = err.what();
+	}
+	return matlab_interface_error_general;
+}
+
+int power_on_gps() {
+	try {
+
+		controller.power_on_gps();
+
+		return matlab_interface_no_error;
+	}
+	catch(rf_phreaker::rf_phreaker_error &err) {
+		last_error_ = err.what();
+		return (int)err.error_code_;
+	}
+	catch(std::exception &err) {
+		last_error_ = err.what();
+	}
+	return matlab_interface_error_general;
+}
+
+int power_off_gps() {
+	try {
+
+		controller.power_off_gps();
 
 		return matlab_interface_no_error;
 	}
