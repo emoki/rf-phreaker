@@ -102,7 +102,12 @@ void blade_rf_controller::open_scanner(const scanner_serial_type &id)
 {
 	parameter_cache_ = measurement_info();
 
-	close_scanner();
+	if(comm_blade_rf_.get()) {
+		close_scanner();
+		// If we close the scanner, we have to list devices.  It somehow release a mutex that
+		// is still being held.  Recheck this behavior after we upgrade bladerf.
+		list_available_scanners();
+	}
 
 	std::string open_str = "*:serial=" + id;
 
