@@ -2,7 +2,10 @@
 
 #include "QtCore/qcoreapplication.h"
 
-class qt_init {
+namespace rf_phreaker {
+
+class qt_init
+{
 public:
 	static void init() {
 		if(QCoreApplication::instance() == nullptr) {
@@ -12,3 +15,5 @@ public:
 		}
 	}
 };
+
+}

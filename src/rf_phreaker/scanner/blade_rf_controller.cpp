@@ -542,7 +542,7 @@ measurement_info blade_rf_controller::get_rf_data(frequency_type frequency, time
 	uint32_t gpio_in_hw = 0;
 	check_blade_status(bladerf_expansion_gpio_read(comm_blade_rf_->blade_rf(),
 		&gpio_in_hw), __FILE__, __LINE__);
-	LOG(LCOLLECTION) << "Current xb gpio:" << gpio_in_hw << ".";
+	LOG(LCOLLECTION) << "Current xb gpio: " << gpio_in_hw << ".";
 
 	if(switch_mask == 0) {
 		auto auto_switch_setting = scanner_blade_rf_->eeprom_.cal_.get_rf_switch(frequency, blade_bandwidth);

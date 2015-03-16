@@ -139,7 +139,6 @@ public:
 			origin_gps_device_->setPower(false);
 	}
 	
-
 	rf_phreaker::gps get_latest_gps() {
 
 		std::vector<NMEASentence::MessageID> types;
