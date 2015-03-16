@@ -148,6 +148,19 @@ enum operating_band
 
 struct channel_freq
 {
+	channel_freq() : channel_(-1), freq_(-1), band_(OPERATING_BAND_UNKNOWN) {}
+	channel_freq(channel_type c, frequency_type f, operating_band b)
+		: channel_(c), freq_(f), band_(b) {}
+	channel_freq& operator=(const channel_freq &cf) {
+		channel_ = cf.channel_;
+		freq_ = cf.freq_;
+		band_ = cf.band_;
+		return *this;
+	}
+	bool operator==(const channel_freq &cf) {
+		return channel_ == cf.channel_ && freq_ == cf.freq_ && band_ == cf.band_;
+	}
+	bool is_valid() const { return channel_ != -1 && freq_ != -1 && band_ != OPERATING_BAND_UNKNOWN; }
 	channel_type channel_;
 	frequency_type freq_;
 	operating_band band_;
