@@ -61,7 +61,7 @@ inline int16_t sign_extend_12_bits(int16_t &var)
 
 template<int nearest, typename num>
 inline frequency_type round_to_nearest(num f) {
-	return static_cast<frequency_type>((f + nearest / 2.0) / nearest * nearest);
+	return static_cast<frequency_type>(std::floor((f + (nearest / 2.0)) / nearest) * nearest);
 }
 
 inline void copy_serial(const std::string &serial, char *s, size_t size) {
