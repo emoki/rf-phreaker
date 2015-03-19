@@ -39,7 +39,7 @@ void umts_psch_with_brute_force::set_config(const umts_config &config)
 	over_sampling_rate_ = config.over_sampling_rate();
 	num_samples_per_cpich_ = static_cast<int>(N_TOTAL_CHIPS_CPICH * over_sampling_rate_);
 	num_samples_per_time_slot_ = static_cast<int>(N_CHIPS_PER_TIMESLOT * over_sampling_rate_);
-	max_processing_length_ = num_samples_per_time_slot_ * num_coherent_psch_slots_ * 20; // somewhat arbitrary right now.. perhaps make it configurable?
+	max_processing_length_ = num_samples_per_time_slot_ * 127 * 2; // somewhat arbitrary right now.. perhaps make it configurable?
 
 }
 
@@ -53,7 +53,6 @@ umts_measurements umts_psch_with_brute_force::process(const ipp_32fc_array &sign
 	}
 #endif
 	length_to_process_ = signal.length() > max_processing_length_ ? max_processing_length_ : signal.length();
-
 
 	adjust_clock_error_rate();
 
@@ -388,6 +387,7 @@ void umts_psch_with_brute_force::do_cpich_correlation_and_add_candidate(uint32_t
 		meas.ecio_ = 20 * log10(cpich_ecio_watts);
 		meas.norm_corr_ = cpich_ecio_watts;
 		meas.rms_signal_ = cpich_cross_correlator_.get_rms(peak_position);
+		meas.time_ = 0;
 		new_measurements.push_back(meas);
 	}
 }
