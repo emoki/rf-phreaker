@@ -396,16 +396,12 @@ void blade_rf_controller::update_vctcxo_trim(uint16_t trim)
 {
 	check_blade_comm();
 
-	disable_blade_rx();
-
 	LOG(LDEBUG) << "Updating VCTCXO trim value to " << trim << ".";
 
 	check_blade_status(bladerf_dac_write(comm_blade_rf_->blade_rf(), trim), __FILE__, __LINE__);
 	
 	if(scanner_blade_rf_)
 		scanner_blade_rf_->vctcxo_trim_value_ = trim;
-
-	enable_blade_rx();
 }
 
 void blade_rf_controller::read_vctcxo_trim(uint16_t &trim)
