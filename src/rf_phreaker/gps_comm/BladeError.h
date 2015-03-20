@@ -23,9 +23,8 @@ public:
 	virtual ~BladeError();
 	std::string toString();
 
-	static std::string getLibErrorMessage(int code);
-	static bool check(int code);
-	static bool check(int code, std::string msg);
+	static bool check(int code, const std::string &file = "", int line = 0);
+	static bool check(int code, std::string &msg);
 };
 
 }}

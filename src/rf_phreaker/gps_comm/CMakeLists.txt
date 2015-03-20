@@ -13,8 +13,8 @@ set (gps_comm_VERSION_TWEAK 0)
 set (gps_comm_SRCS 
 	BladeContext.cpp
 	BladeContext.h
-	BladeDevice.cpp
-	BladeDevice.h
+	GpsComm.cpp
+	GpsComm.h
 	BladeError.cpp
 	BladeError.h
 	BladeRF.hpp

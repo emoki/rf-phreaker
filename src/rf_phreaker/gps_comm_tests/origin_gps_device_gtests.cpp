@@ -94,11 +94,11 @@ TEST(GPSDevice, TestGeneral) {
 	std::cout << " FPGA OK " << std::endl;
 
 
-	std::unique_ptr<BladeDevice> blade_device_;
+	std::unique_ptr<GpsComm> blade_device_;
 	std::unique_ptr<FrontEndBoard> front_end_board_;
 	std::unique_ptr<GPSDevice> origin_gps_device_;
 
-	blade_device_.reset(new BladeDevice(device));
+	blade_device_.reset(new GpsComm(device));
 	front_end_board_.reset(new FrontEndBoard(*blade_device_));
 	origin_gps_device_.reset(new GPSDevice(*front_end_board_));
 

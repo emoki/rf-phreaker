@@ -10,25 +10,25 @@
 namespace rf_phreaker { namespace gps_comm {
 
 
-FrontEndBoard::FrontEndBoard(BladeDevice& blade) : blade(blade) {
+FrontEndBoard::FrontEndBoard(GpsComm& blade) : blade(blade) {
 
-	blade.setXBGPIODir(ControlPin::SW_CHx_V1, BladeDevice::GPIODirection::OUT);	//1 is output
-	blade.setXBGPIODir(ControlPin::SW_CHx_V2, BladeDevice::GPIODirection::OUT);
-	blade.setXBGPIODir(ControlPin::SW_CHx_V3, BladeDevice::GPIODirection::OUT);
-	blade.setXBGPIODir(ControlPin::SW_CHx_V4, BladeDevice::GPIODirection::OUT);
-	blade.setXBGPIODir(ControlPin::CSx_BAND_X1, BladeDevice::GPIODirection::OUT);
-	blade.setXBGPIODir(ControlPin::CSx_BAND_X2, BladeDevice::GPIODirection::OUT);
-	blade.setXBGPIODir(ControlPin::CSx_BAND_X3, BladeDevice::GPIODirection::OUT);
-	blade.setXBGPIODir(ControlPin::SW_HIGH_X1, BladeDevice::GPIODirection::OUT);
-	blade.setXBGPIODir(ControlPin::SW_HIGH_X2, BladeDevice::GPIODirection::OUT);
-	blade.setXBGPIODir(ControlPin::SW_HIGH_X3, BladeDevice::GPIODirection::OUT);
+	blade.setXBGPIODir(ControlPin::SW_CHx_V1, GpsComm::GPIODirection::OUT);	//1 is output
+	blade.setXBGPIODir(ControlPin::SW_CHx_V2, GpsComm::GPIODirection::OUT);
+	blade.setXBGPIODir(ControlPin::SW_CHx_V3, GpsComm::GPIODirection::OUT);
+	blade.setXBGPIODir(ControlPin::SW_CHx_V4, GpsComm::GPIODirection::OUT);
+	blade.setXBGPIODir(ControlPin::CSx_BAND_X1, GpsComm::GPIODirection::OUT);
+	blade.setXBGPIODir(ControlPin::CSx_BAND_X2, GpsComm::GPIODirection::OUT);
+	blade.setXBGPIODir(ControlPin::CSx_BAND_X3, GpsComm::GPIODirection::OUT);
+	blade.setXBGPIODir(ControlPin::SW_HIGH_X1, GpsComm::GPIODirection::OUT);
+	blade.setXBGPIODir(ControlPin::SW_HIGH_X2, GpsComm::GPIODirection::OUT);
+	blade.setXBGPIODir(ControlPin::SW_HIGH_X3, GpsComm::GPIODirection::OUT);
 }
 
 FrontEndBoard::~FrontEndBoard() {
 	// TODO Auto-generated destructor stub
 }
 
-BladeDevice& FrontEndBoard::getBlade()
+GpsComm& FrontEndBoard::getBlade()
 {
 	return blade;
 }

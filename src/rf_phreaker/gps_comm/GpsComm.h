@@ -1,5 +1,5 @@
 //
-//  BladeDevice.h
+//  GpsComm.h
 //  bladeXcode
 //
 //  Created by Cameron on 3/30/14.
@@ -26,7 +26,7 @@
 
 namespace rf_phreaker { namespace gps_comm {
 
-	class BladeDevice
+	class GpsComm
 	{
 	public:
 		enum GPIODirection
@@ -56,11 +56,11 @@ namespace rf_phreaker { namespace gps_comm {
 		uint32_t setbit(uint32_t field, int i, bool val);
 
 	public:
-		BladeDevice();
-		BladeDevice(bladerf* open_device);		// this is really only here because this is a wrapper class
+		GpsComm();
+		GpsComm(bladerf* open_device);		// this is really only here because this is a wrapper class
 		// and wrapping an already open pointer can be really useful
-		~BladeDevice();
-		BladeDevice(const BladeDevice& ref);	//copy
+		~GpsComm();
+		GpsComm(const GpsComm& ref);	//copy
 
 		std::string getSerial();
 		bladerf_devinfo getInfo();

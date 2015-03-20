@@ -52,9 +52,9 @@ public:
 		};
 
 private:
-	BladeDevice& blade;
+	GpsComm& blade;
 public:
-	FrontEndBoard(BladeDevice& blade);
+	FrontEndBoard(GpsComm& blade);
 	virtual ~FrontEndBoard();
 
 	void setPin(ControlPin p, bool state);			// sets gpio pins by name
@@ -67,7 +67,7 @@ public:
 	void setFilterBand(uint32_t x, bool on);
 	void setFilterHigh(uint32_t x, bool on);
 
-	BladeDevice& getBlade();
+	GpsComm& getBlade();
 
 };
 

@@ -12,6 +12,6 @@
 #include <libbladeRF.h>
 #include "BladeContext.h"
 #include "BladeError.h"
-#include "BladeDevice.h"
+#include "GpsComm.h"
 
 #endif

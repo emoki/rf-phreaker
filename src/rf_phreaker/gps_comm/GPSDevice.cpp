@@ -32,15 +32,15 @@ namespace rf_phreaker { namespace gps_comm {
 		setInterface(DataInterface::UART);
 		idleindex = 1;
 
-		BladeDevice& blade = frontend.getBlade();
-		blade.setXBGPIODir(FrontEndBoard::ControlPin::GPS_WAKEUP,	BladeDevice::GPIODirection::IN);
-		blade.setXBGPIODir(FrontEndBoard::ControlPin::GPS_ON_OFF,	BladeDevice::GPIODirection::OUT);
-		blade.setXBGPIODir(FrontEndBoard::ControlPin::GPS_RESET,	BladeDevice::GPIODirection::OUT);
-		blade.setXBGPIODir(FrontEndBoard::ControlPin::GPS_TX,		BladeDevice::GPIODirection::OUT);
-		blade.setXBGPIODir(FrontEndBoard::ControlPin::GPS_RX,		BladeDevice::GPIODirection::IN);
+		GpsComm& blade = frontend.getBlade();
+		blade.setXBGPIODir(FrontEndBoard::ControlPin::GPS_WAKEUP,	GpsComm::GPIODirection::IN);
+		blade.setXBGPIODir(FrontEndBoard::ControlPin::GPS_ON_OFF,	GpsComm::GPIODirection::OUT);
+		blade.setXBGPIODir(FrontEndBoard::ControlPin::GPS_RESET,	GpsComm::GPIODirection::OUT);
+		blade.setXBGPIODir(FrontEndBoard::ControlPin::GPS_TX,		GpsComm::GPIODirection::OUT);
+		blade.setXBGPIODir(FrontEndBoard::ControlPin::GPS_RX,		GpsComm::GPIODirection::IN);
 
-		blade.setXBGPIODir(FrontEndBoard::ControlPin::SPI_CS,		BladeDevice::GPIODirection::OUT);
-		blade.setXBGPIODir(FrontEndBoard::ControlPin::GPS_PPS,		BladeDevice::GPIODirection::IN);
+		blade.setXBGPIODir(FrontEndBoard::ControlPin::SPI_CS,		GpsComm::GPIODirection::OUT);
+		blade.setXBGPIODir(FrontEndBoard::ControlPin::GPS_PPS,		GpsComm::GPIODirection::IN);
 
 
 		frontend.setPin(FrontEndBoard::ControlPin::GPS_ON_OFF, false);
@@ -166,10 +166,10 @@ namespace rf_phreaker { namespace gps_comm {
 	}
 
 	void GPSDevice::requestNewCalibrationCount(uint8_t samples){
-		frontend.getBlade().niosRPC(BladeDevice::NiosRPC::GPS_CALIBRATION_START, samples);
+		frontend.getBlade().niosRPC(GpsComm::NiosRPC::GPS_CALIBRATION_START, samples);
 	}
 	uint32_t GPSDevice::checkCalibrationCount(){
-		return frontend.getBlade().niosRPC(BladeDevice::NiosRPC::GPS_CALIBRATION_READ, 0);
+		return frontend.getBlade().niosRPC(GpsComm::NiosRPC::GPS_CALIBRATION_READ, 0);
 	}
 
 

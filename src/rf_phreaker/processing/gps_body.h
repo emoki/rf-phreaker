@@ -19,10 +19,11 @@ public:
 		, data_output_(out)
 		, sleep_time_ms_(std::chrono::milliseconds(config.gps_collection_period_ms_))
 		, calibration_requested_(false)
-		, min_integration_time_(25)
-		, max_integration_time_(65)
+		, min_integration_time_(5/*25*/)
+		, max_integration_time_(5/*65*/)
 		, current_integration_time_(min_integration_time_)
 		, gps_1pps_calibration_enabled_(true)
+		, error_count_(0)
 	{}
 	
 	gps_body(const gps_body &body)
@@ -34,55 +35,75 @@ public:
 		, max_integration_time_(body.max_integration_time_)
 		, current_integration_time_(body.current_integration_time_)
 		, gps_1pps_calibration_enabled_(body.gps_1pps_calibration_enabled_)
+		, error_count_(0)
 		// Cannot copy std::vector<std::future<>>. Use new one.
 	{}
 		
 	tbb::flow::continue_msg operator()(gps_command cmd)
 	{
-		auto start = std::chrono::steady_clock::now();
+		try {
+			auto start = std::chrono::steady_clock::now();
 
-		if(cmd.cmd_ == gps_command::DISABLE_1PPS) {
-			gps_1pps_calibration_enabled_ = false;
-			LOG(LDEBUG) << "Disabling GPS 1PPS calibration.";
-		}
-		else if(cmd.cmd_ == gps_command::ENABLE_1PPS) {
-			gps_1pps_calibration_enabled_ = true;
-			LOG(LDEBUG) << "Enabling GPS 1PPS calibration.";
-		}
-
-		auto g = scanner_->get_gps_data().get();
-
-		remove_completed_output();
-
-		if(gps_1pps_calibration_enabled_) {
-			if(g.lock_ && !calibration_requested_) {
-				scanner_->start_gps_1pps_integration(current_integration_time_).get();
-				start_1pps_integration_time_ = std::chrono::steady_clock::now();
-				calibration_requested_ = true;
+			if(cmd.cmd_ == gps_command::DISABLE_1PPS) {
+				gps_1pps_calibration_enabled_ = false;
+				LOG(LDEBUG) << "Disabling GPS 1PPS calibration.";
 			}
-			else if(calibration_requested_ && std::chrono::steady_clock::now() - start_1pps_integration_time_ > std::chrono::seconds(current_integration_time_ + 1)) {
-				if(scanner_->attempt_gps_1pps_calibration().get()) {
-					current_integration_time_ = static_cast<int>(current_integration_time_ * 1.5);
-					if(current_integration_time_ > max_integration_time_)
-						current_integration_time_ = max_integration_time_;
+			else if(cmd.cmd_ == gps_command::ENABLE_1PPS) {
+				gps_1pps_calibration_enabled_ = true;
+				LOG(LDEBUG) << "Enabling GPS 1PPS calibration.";
+			}
+
+			auto g = scanner_->get_gps_data().get();
+
+			remove_completed_output();
+
+			if(gps_1pps_calibration_enabled_) {
+				if(g.lock_ && !calibration_requested_) {
+					scanner_->start_gps_1pps_integration(current_integration_time_).get();
+					start_1pps_integration_time_ = std::chrono::steady_clock::now();
+					calibration_requested_ = true;
 				}
-				else {
-					current_integration_time_ = static_cast<int>(current_integration_time_ * .5);
-					if(current_integration_time_ < min_integration_time_)
-						current_integration_time_ = min_integration_time_;
+				else if(calibration_requested_ && std::chrono::steady_clock::now() - start_1pps_integration_time_ > std::chrono::seconds(current_integration_time_ + 1)) {
+					if(scanner_->attempt_gps_1pps_calibration().get()) {
+						current_integration_time_ = static_cast<int>(current_integration_time_ * 1.5);
+						if(current_integration_time_ > max_integration_time_)
+							current_integration_time_ = max_integration_time_;
+					}
+					else {
+						current_integration_time_ = static_cast<int>(current_integration_time_ * .5);
+						if(current_integration_time_ < min_integration_time_)
+							current_integration_time_ = min_integration_time_;
+					}
+					calibration_requested_ = false;
 				}
+			}
+			else
 				calibration_requested_ = false;
+
+			past_output_.push_back(data_output_->output(g));
+
+			auto time_spent = std::chrono::steady_clock::now() - start;
+			if(time_spent < sleep_time_ms_) {
+				auto dur = sleep_time_ms_ - time_spent;
+				std::this_thread::sleep_for(dur);
+			}
+
+			clear_errors();
+		}
+		catch(const std::exception &err) {
+			if(++error_count_ > 7) {
+				throw err;
+			}
+			else {
+				LOG(LERROR) << "Error during GPS communication. " << err.what() << ".  Retrying...";
 			}
 		}
-		else
-			calibration_requested_ = false;
-
-		past_output_.push_back(data_output_->output(g));
-
-		auto time_spent = std::chrono::steady_clock::now() - start;
-		if(time_spent < sleep_time_ms_) {
-			auto dur = sleep_time_ms_ - time_spent;
-			std::this_thread::sleep_for(dur);
+		catch(...) {
+			if(++error_count_ > 7)
+				throw std::current_exception();
+			else {
+				LOG(LERROR) << "Unknown error during GPS communication.  Retrying...";
+			}
 		}
 
 		return tbb::flow::continue_msg();
@@ -100,6 +121,10 @@ private:
 		past_output_.erase(std::begin(past_output_), std::begin(past_output_) + num_completed);
 	}
 
+	void clear_errors() {
+		error_count_ = 0;
+	}
+
 	rf_phreaker::scanner::scanner_controller_interface *scanner_;
 	data_output_async *data_output_;
 	std::chrono::duration<std::chrono::system_clock::rep, std::chrono::system_clock::period> sleep_time_ms_;
@@ -110,6 +135,7 @@ private:
 	int max_integration_time_;
 	int current_integration_time_;
 	bool gps_1pps_calibration_enabled_;
+	int error_count_;
 };
 
 }}

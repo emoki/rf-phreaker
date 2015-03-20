@@ -7,7 +7,7 @@
 #include "boost/archive/basic_text_oarchive.hpp"
 #include "boost/archive/basic_text_iarchive.hpp"
 #include "libbladeRF.h"
-#include "rf_phreaker/gps_comm/BladeDevice.h"
+#include "rf_phreaker/gps_comm/GpsComm.h"
 #include "rf_phreaker/gps_comm_tests/eeprom.h"
 #include "rf_phreaker/gps_comm/gps_comm.h"
 
@@ -30,7 +30,7 @@ inline std::ostream& operator<<(std::ostream &os, const rf_phreaker::gps &t) {
 TEST(ReadWriteEEPROM, DISABLED_TestGeneral) {
 
 	bladerf *device;
-	std::unique_ptr<BladeDevice> blade_device_;
+	std::unique_ptr<GpsComm> blade_device_;
 	int sts;
 
 
@@ -43,7 +43,7 @@ TEST(ReadWriteEEPROM, DISABLED_TestGeneral) {
 	EXPECT_EQ(0, sts);
 	ASSERT_TRUE(device != 0);
 
-	blade_device_.reset(new BladeDevice(device));
+	blade_device_.reset(new GpsComm(device));
 
 	std::cout << " Loading FPGA... " << std::endl;
 	sts = bladerf_load_fpga(device, "fpga_load.rbf");

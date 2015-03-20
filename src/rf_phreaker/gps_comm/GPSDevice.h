@@ -11,7 +11,7 @@
 
 #include <string>
 #include <functional>
-#include "BladeDevice.h"
+#include "GpsComm.h"
 #include "GPSService.h"
 #include "NMEACommand.h"
 #include "FrontEndBoard.h"
