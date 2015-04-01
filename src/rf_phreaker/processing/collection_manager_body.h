@@ -107,7 +107,7 @@ protected:
 	void output(scanner::measurement_info *meas, std::string name, int count)
 	{
 		if(timestamp.empty())
-			timestamp = static_timestamp_string();
+			timestamp = static_timestamp::to_string();
 		std::string ext = settings_.output_in_binary_ ? ".bin" : ".txt";
 		std::ofstream file(settings_.output_directory_ + "\\" + name + timestamp + "_" + std::to_string(count) + ext,
 			settings_.output_in_binary_ ? std::ios::binary : std::ios::app);

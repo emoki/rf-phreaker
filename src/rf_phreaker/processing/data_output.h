@@ -110,7 +110,7 @@ public:
 		, umts_sweep_output_(std::make_shared<umts_sweep_output_type>())
 		, lte_sweep_output_(std::make_shared<lte_sweep_output_type>()) 
 		, sweep_output_(std::make_shared<sweep_output_type>()) {
-		auto time = static_timestamp_string();
+		auto time = static_timestamp::to_string();
 		hardware_output_->set_filename("scanner_" + time + ".txt");
 		gps_output_->set_filename("gps_" + time + ".txt");
 		umts_layer_3_output_->set_filename("umts_layer_3_" + time + ".txt");
@@ -200,7 +200,7 @@ public:
 	}
 
 	void set_output_path(const std::string &path) {
-		auto time = static_timestamp_string();
+		auto time = static_timestamp::to_string();
 		hardware_output_->set_filename(path + "scanner_" + time + ".txt");
 		gps_output_->set_filename(path + "gps_" + time + ".txt");
 		umts_layer_3_output_->set_filename(path + "umts_layer_3_" + time + ".txt");
