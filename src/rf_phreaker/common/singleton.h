@@ -1,5 +1,8 @@
+#pragma once
 #include <mutex>
 #include <memory>
+
+namespace rf_phreaker {
 
 template<typename T>
 class singleton
@@ -17,3 +20,4 @@ private:
 	singleton() {}
 };
 
+}
