@@ -114,10 +114,20 @@ inline std::string timestamp_string() {
 	return std::to_string(std::chrono::system_clock::to_time_t(std::chrono::system_clock::now()));
 }
 
-inline std::string static_timestamp_string() {
-	static std::string static_timestamp = std::to_string(std::chrono::system_clock::to_time_t(std::chrono::system_clock::now()));
-	return static_timestamp;
-}
+class static_timestamp
+{
+public:
+	static std::string to_string() {
+		if(timestamp_.empty())
+			timestamp_ = timestamp_string();
+		return timestamp_;
+	}
+	static void clear() { 
+		timestamp_.clear(); 
+	}
+private:
+	static std::string timestamp_;
+};
 
 inline std::string to_date_time_string(time_t t) {
 	auto str = boost::posix_time::to_simple_string(boost::posix_time::from_time_t(t));

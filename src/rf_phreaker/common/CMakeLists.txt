@@ -16,6 +16,7 @@ set (common_SRCS
 	channel_conversion.h
 	common_serialization.h
 	common_types.h
+	common_utility.cpp
 	common_utility.h
 	concurrent.h
 	config_file.cpp
