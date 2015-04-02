@@ -7,6 +7,7 @@
 #include "rf_phreaker/processing/frequency_range_creation.h"
 #include "rf_phreaker/qt_specific/qt_utility.h"
 #include "boost/date_time/posix_time/posix_time.hpp"
+#include "rf_phreaker/processing/scanner_error_tracker.h"
 
 using namespace rf_phreaker;
 using namespace rf_phreaker::cappeen_api;
@@ -262,6 +263,8 @@ long cappeen_impl::open_unit(const char *serial, unsigned int buf_size)
 
 		auto hw = scanner_->get_scanner().get()->get_hardware();
 		delegate_->initialize_beagle_info(hw);
+
+		processing::g_scanner_error_tracker::instance().reset();
 
 		gps_graph_->start(scanner_.get(), data_output_.get(), config_);
 

@@ -30,6 +30,7 @@ set (processing_SRCS
 	data_output_async.h
 	processing_graph.cpp
 	processing_graph.h
+	scanner_error_tracker.h
 	scanner_io.h
 	switch_body.h
 	umts_output_and_feedback_body.h

@@ -3,6 +3,7 @@
 #include "rf_phreaker/processing/node_defs.h"
 #include "rf_phreaker/scanner/scanner_controller_interface.h"
 #include "rf_phreaker/processing/data_output_async.h"
+#include "rf_phreaker/processing/scanner_error_tracker.h"
 #include "rf_phreaker/common/common_types.h"
 #include "rf_phreaker/common/measurements.h"
 #include "rf_phreaker/common/settings.h"
@@ -65,6 +66,9 @@ public:
 				}
 				else if(calibration_requested_ && std::chrono::steady_clock::now() - start_1pps_integration_time_ > std::chrono::seconds(current_integration_time_ + 1)) {
 					if(scanner_->attempt_gps_1pps_calibration().get()) {
+
+						processing::g_scanner_error_tracker::instance().new_1pps_correction();
+
 						current_integration_time_ = static_cast<int>(current_integration_time_ * 1.5);
 						if(current_integration_time_ > max_integration_time_)
 							current_integration_time_ = max_integration_time_;
