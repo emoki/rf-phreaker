@@ -191,8 +191,7 @@ void blade_rf_controller::refresh_scanner_info()
 }
 
 void blade_rf_controller::update_vctcxo_based_on_eeprom() {
-	if(scanner_blade_rf_ && std::string(scanner_blade_rf_->fpga_version_.describe).size() && scanner_blade_rf_->eeprom_.freq_correction_.nuand_freq_correction_value_
-		&& scanner_blade_rf_->eeprom_.freq_correction_.nuand_freq_correction_value_ != scanner_blade_rf_->vctcxo_trim_value_) {
+	if(scanner_blade_rf_ && std::string(scanner_blade_rf_->fpga_version_.describe).size() && scanner_blade_rf_->eeprom_.freq_correction_.nuand_freq_correction_value_) {
 		update_vctcxo_trim(scanner_blade_rf_->eeprom_.freq_correction_.nuand_freq_correction_value_);
 	}
 }
