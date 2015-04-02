@@ -19,7 +19,7 @@ class umts_config
 public:
 	umts_config()
 		: sampling_rate_(4875000)
-		, clock_rate_(9750000)
+		, clock_rate_(38400000)
 		, max_signal_length_(292864)
 		, num_coherent_psch_slots_(2)
 		, max_num_candidates_(1000)
