@@ -23,6 +23,7 @@ inline std::ostream& output_umts_meas_debug_header(std::ostream &os) {
 		<< "mnc" << umts_io_delimiter
 		<< "lac" << umts_io_delimiter
 		<< "cid" << umts_io_delimiter
+		<< "frame_num" << umts_io_delimiter
 		<< "intra" << umts_io_delimiter
 		<< "inter" << umts_io_delimiter
 		<< "inter_rat";
