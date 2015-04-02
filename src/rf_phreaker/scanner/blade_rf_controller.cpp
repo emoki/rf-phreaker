@@ -349,7 +349,7 @@ uint16_t blade_rf_controller::calculate_vctcxo_trim_value(double error_hz)
 {
 	check_blade_comm();
 
-	auto adjust = boost::math::round(error_hz / dac_trim_hz_per_lsb_coefficient() * .9);
+	auto adjust = boost::math::round(error_hz / dac_trim_hz_per_lsb_coefficient()/* * .9*/);
 
 	return scanner_blade_rf_->vctcxo_trim() - (int16_t)adjust;
 }
