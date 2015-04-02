@@ -18,7 +18,7 @@ umts_analysis_impl::~umts_analysis_impl()
 {
 }
 
-int umts_analysis_impl::cell_search(const rf_phreaker::raw_signal &raw_signal, umts_measurement *umts_meas, int &num_umts_meas, double sensitivity, umts_scan_type scan_type, double *rms)
+int umts_analysis_impl::cell_search(const rf_phreaker::raw_signal &raw_signal, umts_measurement *umts_meas, int &num_umts_meas, double sensitivity, umts_scan_type scan_type, double error, double *rms)
 {
 	int status = 0;
 
@@ -29,12 +29,38 @@ int umts_analysis_impl::cell_search(const rf_phreaker::raw_signal &raw_signal, u
 		if(sensitivity > 0.0)
 			throw rf_phreaker::umts_analysis_error("UMTS sensitivity threshold is invalid.");
 
-		uint32_t num_cpich_chips = umts_utilities::calculate_num_chips_from_ecio_threshold(sensitivity);
-
 		auto &tracking_meas = umts_meas_container_.get_meas(raw_signal.frequency());
 
 		if(!brute_force_)
 			brute_force_.reset(new umts_psch_with_brute_force(config_, brute_force_cpich_table_ptr()->cpich_table_ptr()));
+
+		auto num_cpich_chips = umts_utilities::calculate_num_chips_from_ecio_threshold(sensitivity);
+	
+		int coherent_slots = config_.num_coherent_psch_slots();
+
+		// Use error to determine max processing parameters.
+		if(error != 0) {
+			//std::cout << "Freq error is " << umts_utilities::calculate_error_hz(raw_signal.frequency(), error) << " hz at " << raw_signal.frequency() / 1e6 << ".\n";
+
+			int max_num_cpich_chips = (int)(umts_utilities::calculate_max_cpich_correlation_size(raw_signal.frequency(), error) + 1);
+
+			if(num_cpich_chips > max_num_cpich_chips) {
+				//std::cout << "Changing umts num chips to " << max_num_cpich_chips << ".\n";
+				num_cpich_chips = max_num_cpich_chips;
+			}
+
+			int max_coherent_slots = (int)(umts_utilities::calculate_max_psch_coherent_slots(raw_signal.frequency(), error) + 1);
+
+			if(coherent_slots > max_coherent_slots) {
+				//std::cout << "Changing umts num coherent slots to " << max_coherent_slots << ".\n";
+				coherent_slots = max_coherent_slots;
+			}
+			
+			brute_force_->set_num_coherent_psch_slots_and_reset_iterations(coherent_slots);
+			
+			// Do not set num_iterations.
+		}
+
 
 		auto new_meas = brute_force_->process(raw_signal.get_iq(), tracking_meas, num_cpich_chips, scan_type);
 

@@ -1,6 +1,7 @@
 #pragma once
 #include "rf_phreaker/processing/node_defs.h"
 #include "rf_phreaker/processing/layer_3_tracker.h"
+#include "rf_phreaker/processing/scanner_error_tracker.h"
 #include "rf_phreaker/umts_analysis/umts_analysis.h"
 #include "rf_phreaker/common/settings.h"
 #include "rf_phreaker/common/common_utility.h"
@@ -55,7 +56,8 @@ public:
 			scan_type = full_scan_type;
 		}
 
-		int status = analysis_.cell_search(*info, &meas[0], num_meas, config_.umts_general_.sensitivity_, scan_type, &rms);
+		int status = analysis_.cell_search(*info, &meas[0], num_meas, config_.umts_general_.sensitivity_, scan_type, 
+			g_scanner_error_tracker::instance().current_error(), &rms);
 		if(status != 0)
 			throw umts_analysis_error("Error processing umts.");
 

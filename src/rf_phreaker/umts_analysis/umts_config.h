@@ -23,6 +23,7 @@ public:
 		, max_signal_length_(292864)
 		, num_coherent_psch_slots_(2)
 		, max_num_candidates_(1000)
+		, max_psch_iterations_(125)
 	{}
 
 	umts_config(int sampling_rate, int clock_rate, int max_signal_length, int num_coherent_psch_slots, int max_num_candidates = 1000)
@@ -31,6 +32,7 @@ public:
 		, max_signal_length_(max_signal_length)
 		, num_coherent_psch_slots_(num_coherent_psch_slots)
 		, max_num_candidates_(max_num_candidates)
+		, max_psch_iterations_(125) 
 	{}
 
 	bool benchmark_umts_brute_force() const { return false; }
@@ -43,19 +45,21 @@ public:
 	double over_sampling_rate() const { return (double)sampling_rate_ / UMTS_CHIP_RATE_HZ; }
 	int num_coherent_psch_slots() const { return num_coherent_psch_slots_; }
 	int max_num_candidates() const { return max_num_candidates_; }
+	int max_psch_iterations() const { return max_psch_iterations_; }
 
 	void max_signal_length(int max_signal_length)  { max_signal_length_ = max_signal_length; }
 	void sampling_rate(int sampling_rate) { sampling_rate_ = sampling_rate; }
 	void clock_rate(int clock_rate)  { clock_rate_ = clock_rate; }
 	void num_coherent_psch_slots(int slots) { num_coherent_psch_slots_ = slots; }
 	void max_num_candidates(int cands) { max_num_candidates_ = cands; }
-
+	void max_psch_iterations(int iterations) { max_psch_iterations_ = iterations; }
 private:
 	int max_signal_length_;
 	int sampling_rate_;
 	int clock_rate_;
 	int num_coherent_psch_slots_;
 	int max_num_candidates_;
+	int max_psch_iterations_;
 };
 
 }

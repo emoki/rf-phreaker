@@ -39,8 +39,7 @@ void umts_psch_with_brute_force::set_config(const umts_config &config)
 	over_sampling_rate_ = config.over_sampling_rate();
 	num_samples_per_cpich_ = static_cast<int>(N_TOTAL_CHIPS_CPICH * over_sampling_rate_);
 	num_samples_per_time_slot_ = static_cast<int>(N_CHIPS_PER_TIMESLOT * over_sampling_rate_);
-	max_processing_length_ = num_samples_per_time_slot_ * 127 * 2; // somewhat arbitrary right now.. perhaps make it configurable?
-
+	max_processing_length_ = num_samples_per_time_slot_ * 250 + psch_template_.length(); // Total number of slots is 250.  Somewhat arbitrary.
 }
 
 umts_measurements umts_psch_with_brute_force::process(const ipp_32fc_array &signal, const umts_measurements &tracking_measurements, uint32_t num_cpich_chips, umts_scan_type scanning_method)
