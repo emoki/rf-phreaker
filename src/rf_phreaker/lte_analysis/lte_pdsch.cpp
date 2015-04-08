@@ -418,7 +418,7 @@ int lte_pdsch_get_symbols (Ipp32fc* inSignal,
 						   unsigned int end_rb)
 {
 	// Changed the size of fft_index to match that of h_est_pdsch_temp
-	const int fft_index_size = 6144/*MAX_SUBCARRIERS * OFDM_SYMBOLS_PER_SUBFRAME*//*4096*/;
+	const int fft_index_size = MAX_SUBCARRIERS * OFDM_SYMBOLS_PER_SUBFRAME;
 	unsigned int fft_index[fft_index_size], temp;
 
 for(unsigned int symbol_idx = LteData[cell_no].lteControlSysmbolLenght;symbol_idx<OFDM_SYMBOLS_PER_SUBFRAME;symbol_idx++)
@@ -474,12 +474,11 @@ for(unsigned int symbol_idx = LteData[cell_no].lteControlSysmbolLenght;symbol_id
 			}
 
 			pdsch_re_count++;
-			
+			// Temporary bug fix: pdsch_re_count can overstep the fft_index.  Is pdsch_re_count supposed to be reset to 0 in the outer loop?
+			if(pdsch_re_count >= fft_index_size)
+				break;
+		}
 	  }
-	// Temporary bug fix: pdsch_re_count can overstep the fft_index.  Is pdsch_re_count supposed to be reset to 0 in the outer loop?
-	if(pdsch_re_count >= fft_index_size)
-		break;
-	}
 	// Temporary bug fix: pdsch_re_count can overstep the fft_index.  Is pdsch_re_count supposed to be reset to 0 in the outer loop?
 	if(pdsch_re_count >= fft_index_size)
 		break;
@@ -511,7 +510,7 @@ int lte_pdsch_get_symbols_vrb(Ipp32fc* inSignal,
 	lte_info_dci_format &dci_format_info)
 {
 	// Changed the size of fft_index to match that of h_est_pdsch_temp
-	const int fft_index_size = 6144/*4096*/;
+	const int fft_index_size = MAX_SUBCARRIERS * OFDM_SYMBOLS_PER_SUBFRAME;
 	unsigned int fft_index[fft_index_size], temp, vrb_idx, start_rb, end_rb, odd_rb = LTE_NULL, even_rb = LTE_NULL;
 	unsigned int vrb_prb_slot_map[128][2];
 
@@ -659,15 +658,15 @@ int lte_pdsch_get_symbols_vrb(Ipp32fc* inSignal,
 
 						pdsch_re_count++;
 
+						// Temporary bug fix: pdsch_re_count can overstep the fft_index.  Is pdsch_re_count supposed to be reset to 0 in the outer loop?
+						if (pdsch_re_count >= fft_index_size)
+							break;
 					}
-					// Temporary bug fix: pdsch_re_count can overstep the fft_index.  Is pdsch_re_count supposed to be reset to 0 in the outer loop?
-					if (pdsch_re_count >= fft_index_size)
-						break;
 				}//kk
 			}//vrb_idx_in
-				// Temporary bug fix: pdsch_re_count can overstep the fft_index.  Is pdsch_re_count supposed to be reset to 0 in the outer loop?
-				if (pdsch_re_count >= fft_index_size)
-					break;
+			// Temporary bug fix: pdsch_re_count can overstep the fft_index.  Is pdsch_re_count supposed to be reset to 0 in the outer loop?
+			if (pdsch_re_count >= fft_index_size)
+				break;
 			//}
 		} // symbol_idx
 	}//vrb_idx
