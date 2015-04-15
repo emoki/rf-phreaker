@@ -31,6 +31,7 @@ public:
 			std::lock_guard<std::mutex> lock(hw_mutex_);
 			hw_ = info;
 		}
+		std::lock_guard<std::mutex> lock(std_mutex_);
 		std::cout << "serial: " << info.beagle_serial_ << "\n";
 		std::cout << "hw_id: " << info.beagle_id_ << "\n";
 		char mbstr[100];
@@ -93,11 +94,13 @@ public:
 			had_gps_lock_ = true;
 
 		if(!output_) return;
+		std::lock_guard<std::mutex> lock(std_mutex_);
 		std::cout << beagle_id << "\t" << std::boolalpha << info.gps_locked_ << "\t" << info.utc_time_ << "\t" << info.raw_gps_status_ << "\n";
 	}
 	virtual void __stdcall available_gsm_sector_info(beagle_id_type beagle_id, const gsm_sector_info *info, long num_records) {}
 	virtual void __stdcall available_umts_sector_info(beagle_id_type beagle_id, const umts_sector_info *info, long num_records) {
 		if(!output_) return;
+		std::lock_guard<std::mutex> lock(std_mutex_);
 		for(int i = 0; i < num_records; ++i) {
 			std::cout << beagle_id << "\t" << info[i].carrier_freq_ << "\t" << info[i].carrier_sl_ << "\t" << info[i].cpich_ << "\t" << info[i].ecio_
 				<< "\t" << info[i].mcc_
@@ -117,6 +120,7 @@ public:
 	std::set<frequency_type> tmp;
 	virtual void __stdcall available_umts_sweep_info(beagle_id_type beagle_id, const umts_sweep_info *info, long num_records) {
 		if(!output_) return;
+		std::lock_guard<std::mutex> lock(std_mutex_);
 		for(int i = 0; i < num_records; ++i)
 			std::cout << beagle_id << "\t" << info[i].frequency_ << "\t" << info[i].rssi_ << "\t" << "umts" << "\n";
 	}
@@ -255,21 +259,25 @@ public:
 				}
 			}
 
-			std::cout << t << std::endl;
 			lte_output << t << std::endl;
+			std::lock_guard<std::mutex> lock(std_mutex_);
+			std::cout << t << std::endl;
 		}
 	}
 	virtual void __stdcall available_lte_sweep_info(beagle_id_type beagle_id, const lte_sweep_info *info, long num_records) {
 		if(!output_) return;
+		std::lock_guard<std::mutex> lock(std_mutex_);
 		for(int i = 0; i < num_records; ++i)
 			std::cout << beagle_id << "\t" << info[i].frequency_ << "\t" << info[i].rssi_ << "\t" << "lte" << "\n";
 	}
 	virtual void __stdcall available_error(beagle_id_type beagle_id, long error, const char *str, long buf_size) {
-		std::cout << "----------ERROR-------------  CODE: " << error << "  STR: " << str << "HWID: " << beagle_id << "\t" << "\n";
+		std::lock_guard<std::mutex> lock(std_mutex_);
+		std::cout << "----------ERROR-------------  \nCODE: " << error << "\nSTR: " << str << "\nHWID: " << beagle_id << "\t" << "\n";
 		error_occurred_ = true;
 	}
 	virtual void __stdcall available_message(beagle_id_type beagle_id, long possible_message_number, const char *str, long buf_size) {
-		std::cout << "----------MESSAGE-------------  CODE: " << possible_message_number << "  STR : " << str << "HWID: " << beagle_id << "\t" << "\n";
+		std::lock_guard<std::mutex> lock(std_mutex_);
+		std::cout << "----------MESSAGE-------------  \nCODE: " << possible_message_number << "\nSTR : " << str << "\nHWID: " << beagle_id << "\t" << "\n";
 	}
 
 	beagle_info hw() {
@@ -292,6 +300,7 @@ private:
 
 	std::mutex hw_mutex_;
 	std::mutex gps_mutex_;
+	std::mutex std_mutex_;
 	beagle_info hw_;
 	gps_info gps_;
 };
