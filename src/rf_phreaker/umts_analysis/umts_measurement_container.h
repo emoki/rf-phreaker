@@ -46,6 +46,12 @@ public:
 		}
 	}
 
+	void clear_meas(rf_phreaker::frequency_type freq) {
+		auto tracking = meas_map_.find(freq);
+		if(tracking != meas_map_.end())
+			meas_map_.erase(tracking);
+	}
+
 private:
 	measurement_map meas_map_;
 };

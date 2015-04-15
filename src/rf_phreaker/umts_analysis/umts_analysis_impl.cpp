@@ -29,7 +29,8 @@ int umts_analysis_impl::cell_search(const rf_phreaker::raw_signal &raw_signal, u
 		if(sensitivity > 0.0)
 			throw rf_phreaker::umts_analysis_error("UMTS sensitivity threshold is invalid.");
 
-		auto &tracking_meas = umts_meas_container_.get_meas(raw_signal.frequency());
+		if(scan_type == full_scan_type)
+			umts_meas_container_.clear_meas(raw_signal.frequency());
 
 		if(!brute_force_)
 			brute_force_.reset(new umts_psch_with_brute_force(config_, brute_force_cpich_table_ptr()->cpich_table_ptr()));
@@ -61,8 +62,7 @@ int umts_analysis_impl::cell_search(const rf_phreaker::raw_signal &raw_signal, u
 			// Do not set num_iterations.
 		}
 
-
-		auto new_meas = brute_force_->process(raw_signal.get_iq(), tracking_meas, num_cpich_chips, scan_type);
+		auto new_meas = brute_force_->process(raw_signal.get_iq(), umts_meas_container_.get_meas(raw_signal.frequency()), num_cpich_chips, scan_type);
 
 		consolidate_measurements(new_meas);
 
