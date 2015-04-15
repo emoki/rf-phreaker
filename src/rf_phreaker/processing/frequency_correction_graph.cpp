@@ -53,7 +53,7 @@ void frequency_correction_graph::start(scanner_controller_interface *sc, data_ou
 			auto limiter = std::make_shared<limiter_node>(*graph_, max_limit);
 
 			auto umts_sweep_cell_search = std::make_shared<umts_cell_search_node>(*graph_, tbb::flow::serial, umts_processing_body(
-				umts_cell_search_settings(config.umts_sweep_collection_, config.umts_decode_layer_3_, config.frequency_correction_settings_.general_settings_, 5)));
+				umts_cell_search_settings(config.umts_sweep_collection_, config.umts_decode_layer_3_, config.frequency_correction_settings_.general_settings_, 5), sc));
 			auto umts_sweep_output_feedback = std::make_shared<umts_output_and_feedback_node>(*graph_, tbb::flow::serial, umts_sweep_output_and_feedback_body(&tmp_data_output));
 			auto umts_freq_correction = std::make_shared<frequency_correction_node>(*graph_, tbb::flow::serial, frequency_correction_body(graph_.get(), sc, out,
 				config.umts_sweep_collection_, config.frequency_correction_settings_, config.umts_layer_3_general_));

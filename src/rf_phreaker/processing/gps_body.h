@@ -47,6 +47,7 @@ public:
 
 			if(cmd.cmd_ == gps_command::DISABLE_1PPS) {
 				gps_1pps_calibration_enabled_ = false;
+				gps_1pps_calibration_stopped();
 				LOG(LDEBUG) << "Disabling GPS 1PPS calibration.";
 			}
 			else if(cmd.cmd_ == gps_command::ENABLE_1PPS) {
@@ -60,9 +61,9 @@ public:
 
 			if(gps_1pps_calibration_enabled_) {
 				if(g.lock_ && !calibration_requested_) {
+					gps_1pps_calibration_started();
 					scanner_->start_gps_1pps_integration(current_integration_time_).get();
 					start_1pps_integration_time_ = std::chrono::steady_clock::now();
-					calibration_requested_ = true;
 				}
 				else if(calibration_requested_ && std::chrono::steady_clock::now() - start_1pps_integration_time_ > std::chrono::seconds(current_integration_time_ + 1)) {
 					if(scanner_->attempt_gps_1pps_calibration().get()) {
@@ -78,11 +79,10 @@ public:
 						if(current_integration_time_ < min_integration_time_)
 							current_integration_time_ = min_integration_time_;
 					}
-					calibration_requested_ = false;
+
+					gps_1pps_calibration_stopped();
 				}
 			}
-			else
-				calibration_requested_ = false;
 
 			past_output_.push_back(data_output_->output(g));
 
@@ -127,6 +127,16 @@ private:
 
 	void clear_errors() {
 		error_count_ = 0;
+	}
+
+	void gps_1pps_calibration_started() {
+		calibration_requested_ = true;
+		processing::g_scanner_error_tracker::instance().gps_1pps_calibration_started();
+	}
+
+	void gps_1pps_calibration_stopped() {
+		calibration_requested_ = false;
+		processing::g_scanner_error_tracker::instance().gps_1pps_calibration_stopped();
 	}
 
 	rf_phreaker::scanner::scanner_controller_interface *scanner_;

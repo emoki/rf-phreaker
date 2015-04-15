@@ -2,6 +2,7 @@
 #include "rf_phreaker/processing/node_defs.h"
 #include "rf_phreaker/processing/layer_3_tracker.h"
 #include "rf_phreaker/processing/scanner_error_tracker.h"
+#include "rf_phreaker/processing/frequency_correction_calculator.h"
 #include "rf_phreaker/umts_analysis/umts_analysis.h"
 #include "rf_phreaker/common/settings.h"
 #include "rf_phreaker/common/common_utility.h"
@@ -26,11 +27,13 @@ public:
 class umts_processing_body
 {
 public:
-	umts_processing_body(const umts_cell_search_settings &config)
+	umts_processing_body(const umts_cell_search_settings &config, scanner::scanner_controller_interface *sc)
 		: analysis_(config.umts_config_)
 		, tracker_(config.layer_3_.max_update_threshold_)
 		, config_(config)
 		, current_collection_round_(-1)
+		, calculator_(config.umts_config_.sampling_rate())
+		, sc_(sc)
 	{}
 	
 	umts_processing_body(const umts_processing_body &body)
@@ -38,6 +41,8 @@ public:
 		, tracker_(body.tracker_.max_update_)
 		, config_(body.config_)
 		, current_collection_round_(body.current_collection_round_)
+		, calculator_(body.config_.umts_config_.sampling_rate()) 
+		, sc_(body.sc_) 
 	{}
 
 	//umts_processing_body(umts_processing_body &&body)
@@ -66,8 +71,37 @@ public:
 		LOG_IF(LCOLLECTION, (meas.size() != 0)) << "UMTS processing - Found " << meas.size() << " UMTS measurements.  Frequency: " << info->frequency() / 1e6 
 			<< " mhz. | Scan type: " << (scan_type == full_scan_type ? "full scan" : scan_type == candidate_one_timeslot_scan_type 
 			? "one timeslot scan" : "all timeslots scan");
+
+		if(meas.size() && do_we_need_new_correction()) {
+			auto error = g_scanner_error_tracker::instance().current_error();
+			freq_correction_param param;
+			param.scan_type_ = candidate_all_timeslots_scan_type;
+			param.sensitivity_ = -28;
+			param.num_coherent_slots_ = 10;
+			param.start_freq_ = (int)(-error * info->frequency() * 1.5);
+			param.end_freq_ = (int)(error * info->frequency() * 1.5);
+			param.increment_ = (int)(10 * info->frequency() / mhz(2600));
+
+			auto correction = calculator_.determine_freq_correction(info.get(), analysis_, param);
+			if(correction.has_insertions()) {
+				auto best_shift = correction.find_best_freq_shift();
+
+				if(do_we_need_new_correction())
+					update_frequency_correction(calculator_.calculate_error(best_shift, info->frequency()));
+			}
+		}
 		
 		return umts_info(info, std::move(meas), rms);
+	}
+
+	bool do_we_need_new_correction() {
+		return !g_scanner_error_tracker::instance().has_started_1pps_calibration() && g_scanner_error_tracker::instance().do_we_need_new_correction();
+	}
+
+	void update_frequency_correction(double error_hz) {
+		LOG(LDEBUG) << "Error based on UMTS cells: " << error_hz << " Hz.";
+		sc_->calculate_and_update_vctcxo_trim(error_hz);
+		g_scanner_error_tracker::instance().new_freq_correction();
 	}
 
 	umts_info operator()(umts_info info)
@@ -112,6 +146,8 @@ private:
 	umts_layer_3_tracker tracker_;
 	umts_cell_search_settings config_;
 	int64_t current_collection_round_;
+	frequency_correction_calculator calculator_;
+	scanner::scanner_controller_interface *sc_;
 };
 
 }}

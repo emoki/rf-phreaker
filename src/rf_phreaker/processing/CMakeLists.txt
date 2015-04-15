@@ -18,6 +18,7 @@ set (processing_SRCS
 	gps_body.h
 	gps_graph.h
 	frequency_correction_body.h
+	frequency_correction_calculator.h
 	frequency_correction_graph.cpp
 	frequency_correction_graph.h
 	frequency_range_creation.h
