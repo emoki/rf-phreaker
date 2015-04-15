@@ -114,6 +114,10 @@ public:
 		});
 	}
 
+	void clear_queue() {
+		controller_.clear_queue();
+	}
+
 private:
 	rf_phreaker::concurrent<blade_rf_controller> controller_;
 };

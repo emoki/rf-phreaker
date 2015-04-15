@@ -61,6 +61,14 @@ template <typename T> class concurrent {
 			return ret;
 		}
 
+	void clear_queue() {
+		queue_.clear();
+	}
+
+	int approximate_size() {
+		return queue_.size();
+	}
+
 	private:
 		bool done_;
 

@@ -91,6 +91,10 @@ public:
 		});
 	}
 
+	void clear_queue() {
+		out_.clear_queue();
+	}
+
 private:
 	concurrent<data_output> out_;
 };

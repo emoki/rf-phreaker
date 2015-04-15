@@ -25,7 +25,11 @@ cappeen_impl::~cappeen_impl()
 		gps_graph_.reset();
 		processing_graph_.reset();
 		frequency_correction_graph_.reset();
+		if(data_output_)
+			data_output_->clear_queue();
 		data_output_.reset();
+		if(scanner_)
+			scanner_->clear_queue();
 		scanner_.reset();
 		delegate_.reset();
 		logger_.reset();
@@ -70,14 +74,17 @@ long cappeen_impl::initialize(beagle_api::beagle_delegate *del)
 			gps_graph_->cancel_and_wait();
 			gps_graph_.reset();
 		}
-
 		if(frequency_correction_graph_) {
 			LOG(LDEBUG) << "Found frequency correction graph on heap.  Sending cancel request and releasing it.";
 			frequency_correction_graph_->cancel_and_wait();
 			frequency_correction_graph_.reset();
 		}
+		if(data_output_)
+			data_output_->clear_queue();
 		data_output_.reset();
 		delegate_.reset();
+		if(scanner_)
+			scanner_->clear_queue();
 		scanner_.reset();
 
 		LOG(LVERBOSE) << "Constructing cappeen_delegate.";
@@ -161,10 +168,15 @@ long cappeen_impl::clean_up()
 		LOG(LVERBOSE) << "Deleting frequency correction graph...";
 		frequency_correction_graph_.reset();
 		LOG(LVERBOSE) << "Deleting data output async...";
+		// We clear the data_output queue to reduce the time necessary for clean_up.  Users should be aware calling clean_up can remove valid data.
+		if(data_output_)
+			data_output_->clear_queue();
 		data_output_.reset();
 		LOG(LVERBOSE) << "Deleting cappeen delegate...";
 		delegate_.reset();
 		LOG(LVERBOSE) << "Deleting bladerf controller async...";
+		if(scanner_)
+			scanner_->clear_queue();
 		scanner_.reset();
 		LOG(LINFO) << "Cleaned up successfully.";
 	}
