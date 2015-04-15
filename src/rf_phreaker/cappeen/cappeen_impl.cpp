@@ -332,7 +332,7 @@ long cappeen_impl::close_unit(const char *serial, unsigned int buf_size)
 		else {
 			LOG(LDEBUG) << "GPS 1PPS calibration did not occur.";
 		}
-		if(gps_1pps.is_valid() && time_diff > config_.eeprom_update_period_for_1pps_calibration_minutes_ * 60) {
+		if(gps_1pps.is_valid() && processing::g_scanner_error_tracker::instance().has_passed_settling_time() && time_diff > config_.eeprom_update_period_for_1pps_calibration_minutes_ * 60) {
 			LOG(LDEBUG) << "Storing latest GPS 1PPS calibration using " << gps_1pps.clock_ticks() << " clock ticks for an error of " << gps_1pps.error_in_hz() << " Hz.";
 			scanner_->calculate_vctcxo_trim_and_update_eeprom(gps_1pps.error_in_hz());
 		}
