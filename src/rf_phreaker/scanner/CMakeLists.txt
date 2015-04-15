@@ -27,6 +27,7 @@ set (scanner_SRCS
 	freq_correction_container.h
 	lms_defines.h
 	lms_utilities.h
+	nr_interface.h
 	measurement_info.h
 	measurement_info_serialization.h
     rf_switch_conversion.h
