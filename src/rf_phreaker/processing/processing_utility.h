@@ -170,5 +170,4 @@ private:
 	std::map<frequency_type, lte_watch> strongest_measurements_;
 };
 
-
 }}
