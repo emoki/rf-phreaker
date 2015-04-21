@@ -23,8 +23,10 @@ public:
 	~log_handler() { int i = 0; }
 
 	void receive_log_message(std::string message) {
-		if(callbacks_ && callbacks_->rp_log_update)
-			callbacks_->rp_log_update(message.c_str());
+		if(callbacks_ && callbacks_->rp_log_update) {
+			// We remove the first element in the string because it's a '\n'.
+			callbacks_->rp_log_update(message.substr(1, message.size()).c_str());
+		}
 	}
 	rp_callbacks *callbacks_;
 };

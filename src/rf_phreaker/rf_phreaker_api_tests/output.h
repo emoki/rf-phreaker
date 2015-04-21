@@ -16,11 +16,13 @@ void RP_CALLCONV rp_gps_update(const rp_gps *gps) {}
 
 void RP_CALLCONV rp_gsm_update(const rp_base *base, const rp_gsm *gsm, int num_gsm) {}
 
-void RP_CALLCONV rp_umts_update(const rp_base *base, const rp_umts *umts, int num_umts) {}
+void RP_CALLCONV rp_wcdma_update(const rp_base *base, const rp_wcdma *umts, int num_umts) {}
 
 void RP_CALLCONV rp_lte_update(const rp_base *base, const rp_lte *lte, int num_lte) {}
 
-void RP_CALLCONV rp_sweep_update(const rp_base *base, const rp_gsm *gsm, int num_gsm, const rp_umts *umts, int num_umts, const rp_lte *lte, int num_lte) {}
+void RP_CALLCONV rp_sweep_update(const rp_base *base, const rp_gsm *gsm, int num_gsm, const rp_wcdma *wcdma, int num_wcdma, const rp_lte *lte, int num_lte) {}
+
+void RP_CALLCONV rp_raw_data_update(const rp_raw_data, int num_raw_data) {}
 
 class api_output {
 public:
@@ -30,9 +32,10 @@ public:
 		cbs_.rp_device_info_update = &rp_device_info_update;
 		cbs_.rp_gps_update = &rp_gps_update;
 		cbs_.rp_gsm_update = &rp_gsm_update;
-		cbs_.rp_umts_update = &rp_umts_update;
+		cbs_.rp_wcdma_update = &rp_wcdma_update;
 		cbs_.rp_lte_update = &rp_lte_update;
 		cbs_.rp_sweep_update = &rp_sweep_update;
+		cbs_.rp_raw_data_update = &rp_raw_data_update;
 	}
 	rp_callbacks cbs_;
 };	

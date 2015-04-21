@@ -61,7 +61,9 @@ public:
 
 	rp_status remove_sweep_operating_band(rp_device *device, rp_operating_band band);
 
-	rp_status start_collection(rp_device *device);
+	rp_status remove_collection_frequencies_and_bands(rp_device *device);
+
+	rp_status start_collection(rp_device *device, const rp_collection_info *info);
 
 	rp_status stop_collection(rp_device *device);
 
@@ -86,7 +88,6 @@ private:
 
 	bool is_within_freq_paths(frequency_type f);
 
-
 	void read_settings();
 
 	bool check_rp_device(rp_device* d) {
@@ -96,6 +97,10 @@ private:
 		};
 		return false;
 	}
+
+	void message_handling(const std::string &str, int code);
+
+	void error_handling(const std::string &str, int code);
 
 	bool is_initialized_;
 
@@ -124,6 +129,8 @@ private:
 	std::recursive_mutex mutex_;
 
 	tbb::task_scheduler_init tbb_task_scheduler_;
+
+	rp_callbacks *callbacks_;
 };
 
 }}

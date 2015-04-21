@@ -55,7 +55,7 @@ typedef enum rp_status {
 typedef enum rp_technology {
 	GSM,
 	CDMA,
-    WCDMA,
+	WCDMA,
 	LTE,
 	RAW_DATA
 } rp_technology;
@@ -79,11 +79,11 @@ typedef enum rp_operating_band {
 	GSM_PCS_1900, //	1900	1,850.2–1,909.8	1,930.2–1,989.8	512–810
 
 	UMTS_OPERATING_BAND_1,	//  2100	IMT	1920 - 1980	2110 – 2170
-	UMTS_OPERATING_BAND_2,	//  1900	PCS A-F	1850 – 1910	1930 – 1990
+	UMTS_OPERATING_BAND_2,	//  1900	PCS A-F	1850 – 1910	1930 – 1990
 	UMTS_OPERATING_BAND_3,	//	1800	DCS	1710 – 1785	1805 – 1880
-	UMTS_OPERATING_BAND_4,	//	1700	AWS A-F	1710 – 1755	2110 – 2155			
-	UMTS_OPERATING_BAND_5,	//	850	CLR	824 – 849	869 – 894				
-	UMTS_OPERATING_BAND_6,	//	800		830 – 840	875 – 885				
+	UMTS_OPERATING_BAND_4,	//	1700	AWS A-F	1710 – 1755	2110 – 2155
+	UMTS_OPERATING_BAND_5,	//	850	CLR	824 – 849	869 – 894
+	UMTS_OPERATING_BAND_6,	//	800		830 – 840	875 – 885
 	UMTS_OPERATING_BAND_7,	//	2600	IMT-E	2500 – 2570	2620 – 2690
 	UMTS_OPERATING_BAND_8,	//	900	E-GSM	880 – 915	925 – 960
 	UMTS_OPERATING_BAND_9,	//	1700		1749.9 – 1784.9	1844.9 – 1879.9
@@ -99,46 +99,46 @@ typedef enum rp_operating_band {
 	UMTS_OPERATING_BAND_25,	//	1900	EPCS A-G	1850 – 1915	1930 – 1995
 	UMTS_OPERATING_BAND_26,	//	850	ECLR	814 – 849	859 – 894
 
-	LTE_OPERATING_BAND_1,	//	1920 - 1980	2110 - 2170	FDD
-	LTE_OPERATING_BAND_2,	//	1850 - 1910	1930 - 1990	FDD
-	LTE_OPERATING_BAND_3,	//	1710 - 1785	1805 - 1880	FDD
-	LTE_OPERATING_BAND_4,	//	1710 - 1755	2110 - 2155	FDD
-	LTE_OPERATING_BAND_5,	//	824 - 849	869 - 894	FDD
-	LTE_OPERATING_BAND_6,	//	830 - 840	875 - 885	FDD			
-	LTE_OPERATING_BAND_7,	//	2500 - 2570	2620 - 2690	FDD
-	LTE_OPERATING_BAND_8,	//	880 - 915	925 - 960	FDD
-	LTE_OPERATING_BAND_9,	//	1749.9 - 1784.9	1844.9 - 1879.9	FDD
-	LTE_OPERATING_BAND_10,	//	1710 - 1770	2110 - 2170	FDD			
-	LTE_OPERATING_BAND_11,	//	1427.9 - 1447.9	1475.9 - 1495.9	FDD
-	LTE_OPERATING_BAND_12,	//	699 - 716	729 - 746	FDD
-	LTE_OPERATING_BAND_13,	//	777 - 787	746 - 756	FDD
-	LTE_OPERATING_BAND_14,	//	788 - 798	758 - 768	FDD
-	LTE_OPERATING_BAND_17,	//	704 - 716	734 - 746	FDD			
-	LTE_OPERATING_BAND_18,	//	815 - 830	860 - 875	FDD
-	LTE_OPERATING_BAND_19,	//	830 - 845	875 - 890	FDD			
-	LTE_OPERATING_BAND_20,	//	832 - 862	791 - 821	FDD
-	LTE_OPERATING_BAND_21,	//	1447.9 - 1462.9	1495.9 - 1510.9	FDD
-	LTE_OPERATING_BAND_22,	//	3410 - 3490	3510 - 3590	FDD
-	LTE_OPERATING_BAND_23,	//	2000 - 2020	2180 - 2200	FDD			
-	LTE_OPERATING_BAND_24,	//	1626.5 - 1660.5	1525 - 1559	FDD
-	LTE_OPERATING_BAND_25,	//	1850 - 1915	1930 - 1995	FDD			
-	LTE_OPERATING_BAND_26,	//	814 - 849	859 - 894	FDD			
-	LTE_OPERATING_BAND_27,	//	807 - 824	852 - 869	FDD
-	LTE_OPERATING_BAND_28,	//	703 - 748	758 - 803	FDD
-	LTE_OPERATING_BAND_29,	//	N/A	716 - 728	FDD	
+	LTE_OPERATING_BAND_1,	//	1920 - 1980	2110 - 2170	FDD
+	LTE_OPERATING_BAND_2,	//	1850 - 1910	1930 - 1990	FDD
+	LTE_OPERATING_BAND_3,	//	1710 - 1785	1805 - 1880	FDD
+	LTE_OPERATING_BAND_4,	//	1710 - 1755	2110 - 2155	FDD
+	LTE_OPERATING_BAND_5,	//	824 - 849	869 - 894	FDD
+	LTE_OPERATING_BAND_6,	//	830 - 840	875 - 885	FDD
+	LTE_OPERATING_BAND_7,	//	2500 - 2570	2620 - 2690	FDD
+	LTE_OPERATING_BAND_8,	//	880 - 915	925 - 960	FDD
+	LTE_OPERATING_BAND_9,	//	1749.9 - 1784.9	1844.9 - 1879.9	FDD
+	LTE_OPERATING_BAND_10,	//	1710 - 1770	2110 - 2170	FDD
+	LTE_OPERATING_BAND_11,	//	1427.9 - 1447.9	1475.9 - 1495.9	FDD
+	LTE_OPERATING_BAND_12,	//	699 - 716	729 - 746	FDD
+	LTE_OPERATING_BAND_13,	//	777 - 787	746 - 756	FDD
+	LTE_OPERATING_BAND_14,	//	788 - 798	758 - 768	FDD
+	LTE_OPERATING_BAND_17,	//	704 - 716	734 - 746	FDD
+	LTE_OPERATING_BAND_18,	//	815 - 830	860 - 875	FDD
+	LTE_OPERATING_BAND_19,	//	830 - 845	875 - 890	FDD
+	LTE_OPERATING_BAND_20,	//	832 - 862	791 - 821	FDD
+	LTE_OPERATING_BAND_21,	//	1447.9 - 1462.9	1495.9 - 1510.9	FDD
+	LTE_OPERATING_BAND_22,	//	3410 - 3490	3510 - 3590	FDD
+	LTE_OPERATING_BAND_23,	//	2000 - 2020	2180 - 2200	FDD
+	LTE_OPERATING_BAND_24,	//	1626.5 - 1660.5	1525 - 1559	FDD
+	LTE_OPERATING_BAND_25,	//	1850 - 1915	1930 - 1995	FDD
+	LTE_OPERATING_BAND_26,	//	814 - 849	859 - 894	FDD
+	LTE_OPERATING_BAND_27,	//	807 - 824	852 - 869	FDD
+	LTE_OPERATING_BAND_28,	//	703 - 748	758 - 803	FDD
+	LTE_OPERATING_BAND_29,	//	N/A	716 - 728	FDD
 	LTE_OPERATING_BAND_30,	//	2305 - 2315	 2350 - 2360 FDD
-	LTE_OPERATING_BAND_33,	//	1900 - 1920		TDD
-	LTE_OPERATING_BAND_34,	//	2010 - 2025		TDD
-	LTE_OPERATING_BAND_35,	//	1850 - 1910		TDD
-	LTE_OPERATING_BAND_36,	//	1930 - 1990		TDD
-	LTE_OPERATING_BAND_37,	//	1910 - 1930		TDD
-	LTE_OPERATING_BAND_38,	//	2570 - 2620		TDD
-	LTE_OPERATING_BAND_39,	//	1880 - 1920		TDD
-	LTE_OPERATING_BAND_40,	//	2300 - 2400		TDD
-	LTE_OPERATING_BAND_41,	//	2496 - 2690		TDD
-	LTE_OPERATING_BAND_42,	//	3400 - 3600		TDD
-	LTE_OPERATING_BAND_43,	//	3600 - 3800		TDD
-	LTE_OPERATING_BAND_44,	//	703 - 803		TDD
+	LTE_OPERATING_BAND_33,	//	1900 - 1920		TDD
+	LTE_OPERATING_BAND_34,	//	2010 - 2025		TDD
+	LTE_OPERATING_BAND_35,	//	1850 - 1910		TDD
+	LTE_OPERATING_BAND_36,	//	1930 - 1990		TDD
+	LTE_OPERATING_BAND_37,	//	1910 - 1930		TDD
+	LTE_OPERATING_BAND_38,	//	2570 - 2620		TDD
+	LTE_OPERATING_BAND_39,	//	1880 - 1920		TDD
+	LTE_OPERATING_BAND_40,	//	2300 - 2400		TDD
+	LTE_OPERATING_BAND_41,	//	2496 - 2690		TDD
+	LTE_OPERATING_BAND_42,	//	3400 - 3600		TDD
+	LTE_OPERATING_BAND_43,	//	3600 - 3800		TDD
+	LTE_OPERATING_BAND_44,	//	703 - 803		TDD
 
 	FIRST_GSM_OPERATING_BAND = GSM_T_380,
 	LAST_GSM_OPERATING_BAND = GSM_PCS_1900,
@@ -163,6 +163,34 @@ typedef struct rp_frequency_path {
 	rp_frequency_type high_freq_;
 } rp_frequency_path;
 
+typedef struct rp_frequency_band {
+	rp_frequency_type freq_;
+	rp_operating_band band_;
+} rp_frequency_band;
+
+typedef struct rp_frequency_group {
+	rp_frequency_type *e_;
+	int32_t size_;
+} rp_frequency_group;
+
+typedef struct rp_operating_band_group {
+	rp_operating_band *e_;
+	int32_t size_;
+} rp_operating_band_group;
+
+typedef struct rp_frequency_band_group {
+	rp_frequency_band *e_;
+	int32_t size_;
+} rp_frequency_band_group;
+
+typedef struct rp_collection_info {
+	rp_frequency_band_group gsm_;
+	rp_frequency_band_group wcdma_;
+	rp_frequency_band_group lte_;
+	rp_frequency_group raw_data_;
+	rp_operating_band_group sweep_;
+} rp_collection_info;
+
 typedef struct rp_device_info {
 	rp_serial serial_;
 	rp_device_communication device_communication_;
@@ -177,7 +205,7 @@ typedef struct rp_device_info {
 typedef struct rp_gps {
 	rp_serial serial_;
 	bool lock_;
-	int64_t coordinated_universal_time_;
+	rp_time_type coordinated_universal_time_;
 	int32_t visible_satellites_;
 	int32_t tracking_satellites_;
 	double latitude_;
@@ -203,7 +231,7 @@ typedef struct rp_gsm {
 	// TODO - expose layer 3
 } rp_gsm;
 
-typedef struct rp_umts {
+typedef struct rp_wcdma {
 	rp_base base_;
 	rp_channel_type uarfcn_;
 	rp_operating_band operating_band_;
@@ -211,7 +239,7 @@ typedef struct rp_umts {
 	double ecio_;
 	double rscp_;
 	// TODO - expose layer 3
-} rp_umts;
+} rp_wcdma;
 
 typedef struct rp_lte {
 	rp_base base_;
@@ -226,9 +254,9 @@ typedef struct rp_lte {
 	int32_t ssch_id_;
 	double ssch_quality_;
 	double sync_quality_;
-	int cyclic_prefix_;
-	int num_antenna_ports_;
-	int downlink_bandwidth_;
+	int32_t cyclic_prefix_;
+	int32_t num_antenna_ports_;
+	int32_t downlink_bandwidth_;
 	int32_t frame_number_;
 	// TODO - expose layer 3
 } rp_lte;
@@ -242,7 +270,7 @@ typedef struct rp_raw_data {
 	double power_adjustment_;
 	rp_sample_format sample_format_;
 	int64_t num_samples_;
-	void *samples_; 
+	void *samples_;
 } rp_raw_data;
 
 typedef struct rp_callbacks {
@@ -257,12 +285,13 @@ typedef struct rp_callbacks {
 
 	void (RP_CALLCONV *rp_gsm_update)(const rp_base *base, const rp_gsm *gsm, int num_gsm);
 
-	void (RP_CALLCONV *rp_umts_update)(const rp_base *base, const rp_umts *umts, int num_umts);
+	void (RP_CALLCONV *rp_wcdma_update)(const rp_base *base, const rp_wcdma *wcdma, int num_wcdma);
 
 	void (RP_CALLCONV *rp_lte_update)(const rp_base *base, const rp_lte *lte, int num_lte);
 
-	void (RP_CALLCONV *rp_sweep_update)(const rp_base *base, const rp_gsm *gsm, int num_gsm, const rp_umts *umts, int num_umts, const rp_lte *lte, int num_lte);
+	void (RP_CALLCONV *rp_sweep_update)(const rp_base *base, const rp_gsm *gsm, int num_gsm, const rp_wcdma *umts, int num_umts, const rp_lte *lte, int num_lte);
 
+	void (RP_CALLCONV *rp_raw_data_update)(const rp_raw_data, int num_raw_data);
 } rp_callbacks;
 
 RP_LIBEXPORT(rp_status) rp_initialize(rp_callbacks *callbacks);
@@ -279,15 +308,21 @@ RP_LIBEXPORT(bool) rp_is_device_open(rp_device *device);
 
 RP_LIBEXPORT(rp_status) rp_get_device_info(rp_device *device, rp_device_info *device_info);
 
-RP_LIBEXPORT(rp_status) rp_add_collection_frequency(rp_device *device, rp_technology data, rp_frequency_type freq, rp_operating_band band);
+//RP_LIBEXPORT(rp_status) rp_add_collection_frequency(rp_device *device, rp_technology data, rp_frequency_type freq, rp_operating_band band);
+//
+////RP_LIBEXPORT(rp_status) rp_add_collection_channel(rp_device *device, rp_technology data, rp_channel_type channel);
+//
+//RP_LIBEXPORT(rp_status) rp_remove_collection_frequency(rp_device *device, rp_technology data, rp_frequency_type freq, rp_operating_band band);
+//
+//RP_LIBEXPORT(rp_status) rp_add_sweep_operating_band(rp_device *device, rp_operating_band band);
+//
+//RP_LIBEXPORT(rp_status) rp_remove_sweep_operating_band(rp_device *device, rp_operating_band band);
+//
+//RP_LIBEXPORT(rp_status) rp_remove_collection_frequencies_and_bands(rp_device *device);
 
-//RP_LIBEXPORT(rp_status) rp_add_collection_channel(rp_device *device, rp_technology data, rp_channel_type channel);
+RP_LIBEXPORT(rp_status) rp_start_collection(rp_device *device, const rp_collection_info *info);
 
-RP_LIBEXPORT(rp_status) rp_remove_collection_frequency(rp_device *device, rp_technology data, rp_frequency_type freq, rp_operating_band band);
-
-RP_LIBEXPORT(rp_status) rp_add_sweep_operating_band(rp_device *device, rp_operating_band band);
-
-RP_LIBEXPORT(rp_status) rp_remove_sweep_operating_band(rp_device *device, rp_operating_band band);
+RP_LIBEXPORT(rp_status) rp_stop_collection(rp_device *device);
 
 RP_LIBEXPORT(rp_status) rp_get_gps_data(rp_device *device, rp_gps gps);
 

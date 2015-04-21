@@ -10,7 +10,7 @@
 #include "rf_phreaker/qt_specific/file_path_validation.h"
 #include "tbb/task_scheduler_init.h"
 
-namespace rf_phreaker { namespace api { 
+namespace rf_phreaker { namespace api {
 
 
 rf_phreaker_impl& rf_phreaker_impl::instance() {
@@ -18,9 +18,10 @@ rf_phreaker_impl& rf_phreaker_impl::instance() {
 	return impl;
 }
 
-rf_phreaker_impl::rf_phreaker_impl() 
-	: is_initialized_(false) {
-}
+rf_phreaker_impl::rf_phreaker_impl()
+	: is_initialized_(false)
+	, callbacks_(nullptr) 
+{}
 
 rf_phreaker_impl::~rf_phreaker_impl() {
 	try {
@@ -38,6 +39,7 @@ rf_phreaker_impl::~rf_phreaker_impl() {
 
 rp_status rf_phreaker_impl::initialize(rp_callbacks *callbacks) {
 	rp_status s = RP_STATUS_OK;
+	callbacks_ = nullptr;
 	try {
 		std::lock_guard<std::recursive_mutex> lock(mutex_);
 
@@ -54,7 +56,13 @@ rp_status rf_phreaker_impl::initialize(rp_callbacks *callbacks) {
 
 		if(logger_) {
 			logger_->change_logging_level(config_.log_level_);
-			logger_->handler_->worker->addSink(std2::make_unique<log_handler>(callbacks), &log_handler::receive_log_message);
+			logger_->enable_collection_log(config_.log_collection_);
+			logger_->enable_gps_general_log(config_.log_gps_general_);
+			logger_->enable_gps_parsing_log(config_.log_gps_parsing_);
+			if(callbacks->rp_log_update) {
+				auto tmp = std2::make_unique<log_handler>(callbacks);
+				logger_->handler_->worker->addSink(std::move(tmp), &log_handler::receive_log_message);
+			}
 		}
 
 		LOG(LINFO) << "Initializing rf phreaker api version " << build_version() << ".";
@@ -63,22 +71,27 @@ rp_status rf_phreaker_impl::initialize(rp_callbacks *callbacks) {
 		if(processing_graph_) {
 			LOG(LDEBUG) << "Found processing graph on heap.  Sending cancel request and releasing it.";
 			processing_graph_->cancel_and_wait();
-			processing_graph_.release();
+			processing_graph_.reset();
 		}
 		if(gps_graph_) {
 			LOG(LDEBUG) << "Found gps graph on heap.  Sending cancel request and releasing it.";
 			gps_graph_->cancel_and_wait();
-			gps_graph_.release();
+			gps_graph_.reset();
 		}
 
 		if(frequency_correction_graph_) {
 			LOG(LDEBUG) << "Found frequency correction graph on heap.  Sending cancel request and releasing it.";
 			frequency_correction_graph_->cancel_and_wait();
-			frequency_correction_graph_.release();
+			frequency_correction_graph_.reset();
 		}
-		data_output_.release();
-		handler_.release();
+		data_output_.reset();
+		handler_.reset();
 		scanners_.clear();
+
+		callbacks_ = callbacks;
+		delegate_sink::instance().connect_message(boost::bind(&rf_phreaker_impl::message_handling, this, _1, _2)).get();
+		delegate_sink::instance().connect_error(boost::bind(&rf_phreaker_impl::error_handling, this, _1, _2)).get();
+
 
 		data_output_.reset(new processing::data_output_async());
 		handler_.reset(new rf_phreaker_handler(data_output_.get(), callbacks));
@@ -198,7 +211,7 @@ rp_status rf_phreaker_impl::list_devices(rp_serial *serials, int *num_serials) {
 		*num_serials = scanner_list.size();
 
 		int i = 0;
-		for(auto &device : scanner_list) 
+		for(auto &device : scanner_list)
 			copy_serial(device->id(), serials[i++]);
 
 		LOG(LINFO) << "Listed units successfully.";
@@ -219,7 +232,7 @@ rp_status rf_phreaker_impl::connect_device(rp_serial serial, rp_device **device_
 	rp_status s = RP_STATUS_OK;
 	try {
 		std::lock_guard<std::recursive_mutex> lock(mutex_);
-	
+
 		LOG(LINFO) << "Opening device " << serial.serial_ << "...";
 
 		if(!is_initialized_)
@@ -228,6 +241,8 @@ rp_status rf_phreaker_impl::connect_device(rp_serial serial, rp_device **device_
 			throw rf_phreaker_api_error("NULL serial.", RP_STATUS_INVALID_PARAMETER);
 		else if(device_ptr == nullptr)
 			throw rf_phreaker_api_error("NULL rp_device.", RP_STATUS_INVALID_PARAMETER);
+
+		*device_ptr = 0;
 
 		std::string serial_str(serial.serial_);
 		for(auto &i : scanners_) {
@@ -249,18 +264,18 @@ rp_status rf_phreaker_impl::connect_device(rp_serial serial, rp_device **device_
 		device->async_.do_initial_scanner_config(config_.blade_settings_).get();
 
 		auto hw = device->async_.get_scanner().get()->get_hardware();
-		
+
 		handler_->output_device_info(hw);
 
 		gps_graph_->start(&device->async_, data_output_.get(), config_);
-		
+
 		*device_ptr = device;
 
 		LOG(LINFO) << "Opened device " << serial.serial_ << " successfully.";
 	}
 	catch(const rf_phreaker_error &err) {
 		s = to_rp_status(err);
-	} 
+	}
 	catch(const std::exception &) {
 		s = RP_STATUS_GENERIC_ERROR;
 	}
@@ -269,7 +284,7 @@ rp_status rf_phreaker_impl::connect_device(rp_serial serial, rp_device **device_
 	}
 	return s;
 }
-	
+
 rp_status rf_phreaker_impl::disconnect_device(rp_device *device) {
 	rp_status s = RP_STATUS_OK;
 	try {
@@ -326,7 +341,7 @@ bool rf_phreaker_impl::is_device_open(rp_device *device) {
 		auto scanner = device->async_.get_scanner().get();
 		if(!scanner)
 			s = RP_STATUS_INVALID_PARAMETER;
-		
+
 		// If we get here then the scanner is valid and considered open.
 	}
 	catch(const rf_phreaker_error &err) {
@@ -412,7 +427,7 @@ rp_status rf_phreaker_impl::add_collection_frequency(rp_device *device, rp_techn
 
 void rf_phreaker_impl::check_calibration(hardware hw, frequency_type freq) {
 	// Check for calibration.
-	if(rf_phreaker::is_within_freq_paths(hw.frequency_paths_, freq))
+	if(!rf_phreaker::is_within_freq_paths(hw.frequency_paths_, freq))
 		throw rf_phreaker_api_error("Frequency (" + std::to_string(freq / 1e6) + " mhz) is not within calibration limits.");
 }
 
@@ -459,8 +474,8 @@ rp_status rf_phreaker_impl::remove_collection_frequency(rp_device *device, rp_te
 //			throw rf_phreaker_api_error("Invalid rp_technology - RAW_DATA does not have associated channels.", RP_STATUS_INVALID_PARAMETER);
 //
 //		auto specifier = to_layer_3_specifier(data);
-//		
-//		
+//
+//
 //	}
 //	catch(const rf_phreaker_error &err) {
 //		s = to_rp_status(err);
@@ -599,7 +614,30 @@ void rf_phreaker_impl::remove_sweep(operating_band band, specifier sweep) {
 	}
 }
 
-rp_status rf_phreaker_impl::start_collection(rp_device *device) {
+rp_status rf_phreaker_impl::remove_collection_frequencies_and_bands(rp_device *device) {
+	rp_status s = RP_STATUS_OK;
+	try {
+		std::lock_guard<std::recursive_mutex> lock(mutex_);
+
+		LOG(LINFO) << "Removing all collection frequencies and bands.";
+
+		general_checks(device);
+
+		containers_.clear();
+	}
+	catch(const rf_phreaker_error &err) {
+		s = to_rp_status(err);
+	}
+	catch(const std::exception &) {
+		s = RP_STATUS_GENERIC_ERROR;
+	}
+	catch(...) {
+		s = RP_STATUS_UNKNOWN_ERROR;
+	}
+	return s;
+}
+
+rp_status rf_phreaker_impl::start_collection(rp_device *device, const rp_collection_info *info) {
 	rp_status s = RP_STATUS_OK;
 	try {
 		std::lock_guard<std::recursive_mutex> lock(mutex_);
@@ -607,11 +645,42 @@ rp_status rf_phreaker_impl::start_collection(rp_device *device) {
 		LOG(LINFO) << "Starting collection.";
 
 		general_checks(device);
-	
+		if(info == nullptr)
+			throw rf_phreaker_api_error("rp_collection_info is null", RP_STATUS_INVALID_PARAMETER);
+
 		if(frequency_correction_graph_)
 			frequency_correction_graph_->cancel_and_wait();
 		if(processing_graph_)
 			processing_graph_->cancel_and_wait();
+
+		remove_collection_frequencies_and_bands(device);
+
+		for(int i = 0; i < info->gsm_.size_; ++i) {
+			rp_status status = add_collection_frequency(device, rp_technology::GSM, info->gsm_.e_[i].freq_, info->gsm_.e_[i].band_);
+			if(status != RP_STATUS_OK)
+				return status;
+		}
+		for(int i = 0; i < info->wcdma_.size_; ++i) {
+			rp_status status = add_collection_frequency(device, rp_technology::WCDMA, info->wcdma_.e_[i].freq_, info->wcdma_.e_[i].band_);
+			if(status != RP_STATUS_OK)
+				return status;
+		}
+		for(int i = 0; i < info->lte_.size_; ++i) {
+			rp_status status = add_collection_frequency(device, rp_technology::LTE, info->lte_.e_[i].freq_, info->lte_.e_[i].band_);
+			if(status != RP_STATUS_OK)
+				return status;
+		}
+		for(int i = 0; i < info->raw_data_.size_; ++i) {
+			throw rf_phreaker_api_error("RAW_DATA not yet supported.");
+			rp_status status = add_collection_frequency(device, rp_technology::RAW_DATA, info->raw_data_.e_[i], rp_operating_band::OPERATING_BAND_UNKNOWN);
+			if(status != RP_STATUS_OK)
+				return status;
+		}
+		for(int i = 0; i < info->sweep_.size_; ++i) {
+			rp_status status = add_sweep_operating_band(device, info->sweep_.e_[i]);
+			if(status != RP_STATUS_OK)
+				return status;
+		}
 
 		processing_graph_->start(&device->async_, data_output_.get(), containers_, config_);
 	}
@@ -633,7 +702,7 @@ rp_status rf_phreaker_impl::stop_collection(rp_device *device) {
 		std::lock_guard<std::recursive_mutex> lock(mutex_);
 
 		general_checks(device);
-	
+
 		LOG(LINFO) << "Stopping collection.";
 
 		if(processing_graph_)
@@ -676,7 +745,7 @@ rp_status rf_phreaker_impl::get_gps_data(rp_device *device, rp_gps gps) {
 	return s;
 }
 
-rp_status rf_phreaker_impl::get_iq_data_using_auto_gain(rp_device *device, rp_frequency_type frequency, rp_time_type time_ns, 
+rp_status rf_phreaker_impl::get_iq_data_using_auto_gain(rp_device *device, rp_frequency_type frequency, rp_time_type time_ns,
 	rp_bandwidth_type bandwidth, rp_frequency_type sampling_rate, rp_raw_data *raw_data) {
 	rp_status s = RP_STATUS_OK;
 	try {
@@ -729,7 +798,7 @@ rp_status rf_phreaker_impl::get_iq_data_using_auto_gain(rp_device *device, rp_fr
 	return s;
 }
 
-rp_status rf_phreaker_impl::get_iq_data(rp_device *device, rp_frequency_type frequency, rp_time_type time_ns, 
+rp_status rf_phreaker_impl::get_iq_data(rp_device *device, rp_frequency_type frequency, rp_time_type time_ns,
 	rp_bandwidth_type bandwidth, rp_frequency_type sampling_rate, int32_t gain_db, rp_raw_data *raw_data) {
 	rp_status s = RP_STATUS_OK;
 	try {
@@ -810,6 +879,10 @@ const char* rf_phreaker_impl::build_version() {
 	return "0.0.0.1";
 }
 
+void rf_phreaker_impl::message_handling(const std::string &str, int code) {
+}
+void rf_phreaker_impl::error_handling(const std::string &str, int code) {
+}
 
 
 }}

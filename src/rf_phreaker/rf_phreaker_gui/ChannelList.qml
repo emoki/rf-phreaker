@@ -1,98 +1,90 @@
-import QtQuick 2.0
-import QtQuick.Controls 1.2
+import QtQuick 2.3
+import QtQuick.Controls 1.3
 import QtQuick.Layouts 1.1
 import RfPhreaker 1.0
 
-Rectangle {
-    id: channelList
-    implicitHeight: 100
-    implicitWidth: rowLayout.implicitWidth
-    height: implicitHeight
-    width: implicitWidth
 
+Item {
+    implicitWidth: 300
+    implicitHeight: 240
     ColumnLayout {
         id: columnLayout
         anchors.fill: parent
-
-        RowLayout {
-            id: rowLayout
-            implicitWidth: comboBox.implicitWidth + userInput.implicitWidth
-
-            ComboBox {
-                id: comboBox
-                implicitWidth: 75
-                model: ["WCDMA", "LTE", "RawIQ"]
-            }
-                TextField {
-                    implicitWidth: 150
-                    Layout.fillWidth: true
-                    id: userInput
-                    placeholderText: "Input channel(s) or frequencies here."
-                    Keys.onPressed: suggestionBox.visible = true
-                }
-        }
+        spacing: 0
 
         TableView {
-            id: freqChannels
+            id: collectionList
             Layout.fillHeight: true
             Layout.fillWidth: true
             alternatingRowColors: true
+            horizontalScrollBarPolicy: Qt.ScrollBarAlwaysOff
 
             TableViewColumn {
-                title: "Tech"
-                width: comboBox.width
-                role: model.tech
+                id: techBandColumn
+                horizontalAlignment: Text.AlignHCenter
+                title: "Tech/Band"
+                role: "techBand"
+                width: 80
             }
             TableViewColumn {
-                title: "Channel Range"
-            }
-            TableViewColumn {
+                horizontalAlignment: Text.AlignHCenter
                 title: "Frequency Range"
+                role: "freqs"
+                width: (collectionList.viewport.width - techBandColumn.width)  * 0.5
+            }
+            TableViewColumn {
+                horizontalAlignment: Text.AlignHCenter
+                title: "Channel Range"
+                role:  "channels"
+                width: (collectionList.viewport.width - techBandColumn.width) * 0.5
             }
 
-            //model: ["0", "1", "3"]
-            model: rpChannelFreqList.channelFreqList
+            model: Api.collectionList.list
         }
-    }
-    TableView {
-        id: suggestionBox
-        visible: false
-        headerVisible: false
-        height: 150
-        anchors.top: columnLayout.top
-        anchors.topMargin: userInput.height
-        anchors.left: columnLayout.left
-        anchors.leftMargin: comboBox.width + rowLayout.spacing
-        //anchors.right: columnLayout.right
-        TableViewColumn {
-            //role: channel
-            title: "Channel Range"
-        }
-        TableViewColumn {
-            //role: freq
-            title: "Frequency Range"
-        }
-        model: ["0","1","2"]
-        //model: rpChannelFreqList.channelFreqList
-    }
+        SuggestionTextField {
+            id: collectionInfoSuggestionText
 
-    RpChannelFreqList {
-        id: rpChannelFreqList
-//        channelFreqList: [
-//            RpChannelFreq {
-//                id: rp3
-//                channel: "2"
-////                freq: "1962"
-////                band: "UMTS_OPERATING_BAND_1"
-////                tech: "WCDMA"
-//            },
-//            RpChannelFreq {
-//                id: rp4
-//                channel: "2"
-////                freq: "1962"
-////                band: "UMTS_OPERATING_BAND_1"
-////                tech: "WCDMA"
-//            }
-//        ]
+            Layout.fillWidth: true
+            placeholderText: "Input band, channel, or frequency here."
+
+            sSearch: search
+            sView: collectionInfoSuggestions
+
+
+            function doSelectionAction(item) {
+                console.debug("Updating rpCollectionInfoList with ", selectedItem);
+                Api.collectionList.append(selectedItem);
+            }
+        }
+    }
+    SuggestionView {
+        id: collectionInfoSuggestions
+
+        suggestionModel: search.results
+        sTextField: collectionInfoSuggestionText
+
+        anchors.bottom: columnLayout.bottom
+        anchors.bottomMargin: collectionInfoSuggestionText.height
+        Layout.fillWidth: true
+
+        TableViewColumn {
+            horizontalAlignment: Text.AlignHCenter
+            title: "Tech/Band"
+            role: "techBand"
+            width: 100
+        }
+        TableViewColumn {
+            horizontalAlignment: Text.AlignHCenter
+            title: "Frequency Range"
+            role: "freqs"
+        }
+        TableViewColumn {
+            horizontalAlignment: Text.AlignHCenter
+            title: "Channel Range"
+            role:  "channels"
+        }
+    }
+    CollectionInfoSearch {
+        id: search
     }
 }

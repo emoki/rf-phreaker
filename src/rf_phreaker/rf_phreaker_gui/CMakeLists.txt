@@ -11,26 +11,45 @@ set (rf_phreaker_gui_VERSION_TWEAK 0)
 
 # Set the source files.
 set (rf_phreaker_gui_SRCS
-        main.cpp
-        Rp.h
-        RpChannelFreq.h
-        RpChannelFreqConversion.h
-        RpChannelFreqList.cpp
-        RpChannelFreqList.h
-        RpConversion.h
-        RpPlugin.h
-        main.qml
-        ChannelList.qml
+	main.cpp
+	ApiThreadWorker.h
+	ApiTypes.h
+	Api.cpp
+	Api.h
+	ApiPlugin.h
+	Base.h
+	ChannelFreq.h
+	CollectionInfo.h
+	CollectionInfoList.cpp
+	CollectionInfoList.h
+	CollectionInfoSearch.cpp
+	CollectionInfoSearch.h
+	Device.h
+	Events.h
+	Gps.h
+	Gsm.h
+	Lte.h
+	Sweep.h
+	Utility.h
+	Wcdma.h
+
 	${SRC_PLATFORM_SPECIFIC}/stdafx.cpp)
 
+set (rf_phreaker_gui_QMLS
+	ChannelList.qml
+	DevicePage.qml
+	main.qml
+	SuggestionTextField.qml
+	SuggestionView.qml)
+
 set (rf_phreaker_gui_QRCS
-        qml.qrc)
+	qml.qrc)
 
 set (CMAKE_AUTOMOC ON)
 set (CMAKE_AUTORCC ON)
 set (CMAKE_AUTOUIC ON)
 
-add_executable (rf_phreaker_gui  ${rf_phreaker_gui_SRCS} ${rf_phreaker_gui_QRCS})
+add_executable (rf_phreaker_gui  ${rf_phreaker_gui_SRCS} ${rf_phreaker_gui_QMLS} ${rf_phreaker_gui_QRCS})
 
 target_link_libraries (rf_phreaker_gui Qt5::Core)
 target_link_libraries (rf_phreaker_gui Qt5::Widgets)

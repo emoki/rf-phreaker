@@ -107,8 +107,8 @@ public:
 		buf_.ecio_ = t.ecio_;
 		buf_.rscp_ = t.rscp_;
 	}
-	rp_umts buf_;
-	typedef rp_umts buf_type;
+	rp_wcdma buf_;
+	typedef rp_wcdma buf_type;
 };
 
 class lte_wrap {

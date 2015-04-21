@@ -24,7 +24,7 @@ public:
 			output->connect_sweep(boost::bind(&rf_phreaker_handler::output_sweep, this, _1, _2, _3, _4)).get();
 		//if(callbacks_ && callbacks_->rp_gsm_update)
 			//output->connect_hardware(boost::bind(&rf_phreaker_handler::output_gsm, this, _1, _2)).get();
-		if(callbacks_ && callbacks_->rp_umts_update)
+		if(callbacks_ && callbacks_->rp_wcdma_update)
 			output->connect_umts_layer_3(boost::bind(&rf_phreaker_handler::output_umts, this, _1, _2)).get();
 		if(callbacks_ && callbacks_->rp_lte_update)
 			output->connect_lte_layer_3(boost::bind(&rf_phreaker_handler::output_lte, this, _1, _2)).get();
@@ -57,7 +57,7 @@ public:
 	void output_umts(const std::vector<umts_data> &t, const basic_data &b) {
 		vector_wrap<umts_wrap, umts_data> wrap(t);
 		basic_wrap base(b);
-		callbacks_->rp_umts_update(&base.buf_, wrap.get(), wrap.size());
+		callbacks_->rp_wcdma_update(&base.buf_, wrap.get(), wrap.size());
 	}
 
 	void output_lte(const std::vector<lte_data> &t, const basic_data &b) {

@@ -1,6 +1,9 @@
 <RCC>
     <qresource prefix="/">
-        <file>ChannelList.qml</file>
         <file>main.qml</file>
+        <file>SuggestionView.qml</file>
+        <file>SuggestionTextField.qml</file>
+        <file>ChannelList.qml</file>
+        <file>DevicePage.qml</file>
     </qresource>
 </RCC>

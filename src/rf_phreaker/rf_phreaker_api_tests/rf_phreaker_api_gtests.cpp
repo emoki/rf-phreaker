@@ -1,8 +1,12 @@
 #include "gtest/gtest.h"
+#include <thread>
 #include "rf_phreaker/rf_phreaker_api/rf_phreaker_api.h"
 #include "rf_phreaker/rf_phreaker_api_tests/output.h"
 
 TEST(RfPhreakerApi, GeneralTest) {
+
+	rp_clean_up();
+
 	api_output output;
 
 	auto status = rp_initialize(&output.cbs_);

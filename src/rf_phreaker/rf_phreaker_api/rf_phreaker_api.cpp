@@ -31,24 +31,36 @@ RP_LIBEXPORT(rp_status) rp_get_device_info(rp_device *device, rp_device_info *de
 	return rf_phreaker_impl::instance().get_device_info(device, device_info);
 }
 
-RP_LIBEXPORT(rp_status) rp_add_collection_frequency(rp_device *device, rp_technology data, rp_frequency_type freq, rp_operating_band band) {
-	return rf_phreaker_impl::instance().add_collection_frequency(device, data, freq, band);
-}
-
-RP_LIBEXPORT(rp_status) rp_remove_collection_frequency(rp_device *device, rp_technology data, rp_frequency_type freq, rp_operating_band band) {
-	return rf_phreaker_impl::instance().remove_collection_frequency(device, data, freq, band);
-}
-
-//RP_LIBEXPORT(rp_status) rp_add_collection_channel(rp_device *device, rp_technology data, rp_channel_type channel) {
-//	return rf_phreaker_impl::instance().add_collection_channel(device, data, channel);
+//RP_LIBEXPORT(rp_status) rp_add_collection_frequency(rp_device *device, rp_technology data, rp_frequency_type freq, rp_operating_band band) {
+//	return rf_phreaker_impl::instance().add_collection_frequency(device, data, freq, band);
+//}
+//
+//RP_LIBEXPORT(rp_status) rp_remove_collection_frequency(rp_device *device, rp_technology data, rp_frequency_type freq, rp_operating_band band) {
+//	return rf_phreaker_impl::instance().remove_collection_frequency(device, data, freq, band);
+//}
+//
+////RP_LIBEXPORT(rp_status) rp_add_collection_channel(rp_device *device, rp_technology data, rp_channel_type channel) {
+////	return rf_phreaker_impl::instance().add_collection_channel(device, data, channel);
+////}
+//
+//RP_LIBEXPORT(rp_status) rp_add_sweep_operating_band(rp_device *device, rp_operating_band band) {
+//	return rf_phreaker_impl::instance().add_sweep_operating_band(device, band);
+//}
+//
+//RP_LIBEXPORT(rp_status) rp_remove_sweep_operating_band(rp_device *device, rp_operating_band band) {
+//	return rf_phreaker_impl::instance().remove_sweep_operating_band(device, band);
+//}
+//
+//RP_LIBEXPORT(rp_status) rp_remove_collection_frequencies_and_bands(rp_device *device) {
+//	return rf_phreaker_impl::instance().remove_collection_frequencies_and_bands(device);
 //}
 
-RP_LIBEXPORT(rp_status) rp_add_sweep_operating_band(rp_device *device, rp_operating_band band) {
-	return rf_phreaker_impl::instance().add_sweep_operating_band(device, band);
+RP_LIBEXPORT(rp_status) rp_start_collection(rp_device *device, const rp_collection_info *info) {
+	return rf_phreaker_impl::instance().start_collection(device, info);
 }
 
-RP_LIBEXPORT(rp_status) rp_remove_sweep_operating_band(rp_device *device, rp_operating_band band) {
-	return rf_phreaker_impl::instance().remove_sweep_operating_band(device, band);
+RP_LIBEXPORT(rp_status) rp_stop_collection(rp_device *device) {
+	return rf_phreaker_impl::instance().stop_collection(device);
 }
 
 RP_LIBEXPORT(rp_status) rp_get_gps_data(rp_device *device, rp_gps gps) {
