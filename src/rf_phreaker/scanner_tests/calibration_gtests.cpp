@@ -2,6 +2,8 @@
 #include <fstream>
 #include <boost/archive/text_oarchive.hpp>
 #include <boost/archive/text_iarchive.hpp>
+#include <boost/archive/binary_oarchive.hpp>
+#include <boost/archive/binary_iarchive.hpp>
 #include "rf_phreaker/scanner/calibration.h"
 #include "rf_phreaker/common/common_utility.h"
 #include "rf_phreaker/scanner_tests/cali_holder.h"
@@ -117,4 +119,27 @@ TEST(CalibrationTest, DISABLED_MatlabReadTest)
 	}
 
 	EXPECT_TRUE(cal == cal2);
+}
+
+TEST(CalibrationTest, MatlabReadTest) {
+	std::string base_filename = "../../../../rf_phreaker/test_files/calibration_files/two_old_nst+/";
+	std::string nuand_filename = base_filename + "Nuand_Board_77ecda454d25738ee419f6fd676170d5_141021.txt";
+	std::string rf_board_filename = base_filename + "RF_Board_77ecda454d25738ee419f6fd676170d5_141021.txt";
+	std::string rf_switch_filename = base_filename + "RF_Switch_77ecda454d25738ee419f6fd676170d5_141021.txt";
+//	std::string tmp_cali_filename = base_filename + "tmp_77ecda454d25738ee419f6fd676170d5_141021_cali.bin";
+
+	std::string tmp_cali_filename = base_filename + "fad9939798da46e9f4271a9451f8b647_cali.bin";
+	calibration cal;
+	{
+		std::ifstream f(tmp_cali_filename, std::ios::binary);
+		boost::archive::binary_iarchive a(f);
+		a & cal;
+	}
+	//{
+	//	std::ofstream f(tmp_cali_filename, std::ios::binary);
+	//	boost::archive::binary_oarchive a(f);
+	//	cal.hw_id_ = 39999;
+	//	a & cal;
+	//}
+
 }
