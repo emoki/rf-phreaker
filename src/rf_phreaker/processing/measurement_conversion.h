@@ -18,9 +18,7 @@ inline void convert_to_basic_data(basic_data &data, const scanner::measurement_i
 	data.carrier_frequency_ = info.frequency();
 	data.collection_round_ = info.collection_round();
 	data.status_flags_ = 0;
-	//data.time_ = info.time_ns();
-	static auto start_time = std::chrono::high_resolution_clock::now();
-	data.time_ = std::chrono::duration_cast<std::chrono::milliseconds>(std::chrono::high_resolution_clock::now() - start_time).count();
+	data.time_ = info.origin_time_pc().count();
 }
 	
 inline basic_data convert_to_basic_data(const scanner::measurement_info &info, double avg_rms)

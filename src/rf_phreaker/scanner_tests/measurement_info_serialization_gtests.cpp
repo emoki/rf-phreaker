@@ -11,7 +11,7 @@ using namespace rf_phreaker::scanner;
 TEST(MeasurementInfoSerialization, TestMain) {
 	const int signal_size = 1000;
 	gain_type g(lms::LNA_MAX, 30, 10);
-	measurement_info test(signal_size, 1001, 1002, 1003, g, 1, 2, 1004, "1234567891234567891234");
+	measurement_info test(signal_size, 1001, 1002, 1003, g, std::chrono::milliseconds(1004), 1, 2, 1004, "1234567891234567891234");
 	test.set_operating_band(rf_phreaker::UMTS_OPERATING_BAND_1);
 	test.rf_board_adjustment(-53);
 	test.blade_adjustment(33);

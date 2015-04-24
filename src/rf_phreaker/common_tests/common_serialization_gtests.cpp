@@ -13,6 +13,7 @@ TEST(Serialization, TestMain) {
 	sig.bandwidth(mhz(2));
 	sig.sampling_rate(mhz(4));
 	sig.frequency(mhz(1960));
+	sig.origin_time_pc(std::chrono::milliseconds(1000));
 
 	int sig_length = 100;
 	sig.get_iq().reset(sig_length);

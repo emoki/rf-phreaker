@@ -17,7 +17,7 @@ class measurement_info : public rf_phreaker::raw_signal
 {
 public:
 	measurement_info()
-		:raw_signal(0, -1, -1, -1)
+		:raw_signal(0, -1, -1, -1, std::chrono::milliseconds(0))
 		, gain_(lms::LNA_UNKNOWN, -1, -1)
 		, collection_round_(-1)
 		, operating_band_(OPERATING_BAND_UNKNOWN)
@@ -27,9 +27,9 @@ public:
 	{}
 
 	measurement_info(int num_samples, rf_phreaker::frequency_type frequency, rf_phreaker::bandwidth_type bandwidth,
-					 rf_phreaker::frequency_type sampling_rate, const gain_type &gain, double blade_adj = 0, 
+		rf_phreaker::frequency_type sampling_rate, const gain_type &gain, std::chrono::milliseconds orgin_time_pc = std::chrono::milliseconds(0), double blade_adj = 0,
 					 double band_adj = 0, int64_t cr = 0, const std::string &serial = "00000000000000000000000000000000")
-					 : raw_signal(num_samples, frequency, bandwidth, sampling_rate)
+					 : raw_signal(num_samples, frequency, bandwidth, sampling_rate, orgin_time_pc)
 					 , gain_(gain)
 					 , collection_round_(cr)
 					 , operating_band_(OPERATING_BAND_UNKNOWN)
@@ -96,7 +96,7 @@ public:
 	void blade_adjustment(double adj) { blade_adjustment_ = adj; }
 	double rf_board_adjustment() const { return rf_board_adjustment_; }
 	void rf_board_adjustment(double adj) { rf_board_adjustment_ = adj; }
-	std::string serial() const{ return serial_; }
+	std::string serial() const { return serial_; }
 	void serial(std::string serial) { serial_ = serial; }
 
 	friend inline std::ostream& operator<<(std::ostream &os, const rf_phreaker::scanner::measurement_info &t);

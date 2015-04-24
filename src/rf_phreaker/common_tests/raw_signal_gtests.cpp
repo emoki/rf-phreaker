@@ -7,7 +7,7 @@ using namespace rf_phreaker;
 TEST(RawSignal, TestMain)
 {
 	const int signal_size = 1000;
-	raw_signal test(signal_size, 1001, 1002, 1003);
+	raw_signal test(signal_size, 1001, 1002, 1003, std::chrono::milliseconds(1004));
 
 	for(int i = 0; i < signal_size; ++i) {
 		test.get_iq()[i].re = (float)i;
@@ -35,6 +35,7 @@ TEST(RawSignal, TestMain)
 		EXPECT_EQ(new_sig.frequency(), 1001);
 		EXPECT_EQ(new_sig.bandwidth(), 1002);
 		EXPECT_EQ(new_sig.sampling_rate(), 1003);
+		EXPECT_EQ(new_sig.origin_time_pc(), std::chrono::milliseconds(1004));
 	}
 	std::string filename1("test_raw_signal.bin", std::ios::binary);
 	{
@@ -55,7 +56,7 @@ TEST(RawSignal, TestMain)
 TEST(RawSignal, WithMeasurementInfo)
 {
 	const int signal_size = 1000;
-	raw_signal test(signal_size, 1001, 1002, 1003);
+	raw_signal test(signal_size, 1001, 1002, 1003, std::chrono::milliseconds(1004));
 
 	for(int i = 0; i < signal_size; ++i) {
 		test.get_iq()[i].re = (float)i;
@@ -84,6 +85,7 @@ TEST(RawSignal, WithMeasurementInfo)
 		EXPECT_EQ(new_sig.frequency(), 1001);
 		EXPECT_EQ(new_sig.bandwidth(), 1002);
 		EXPECT_EQ(new_sig.sampling_rate(), 1003);
+		EXPECT_EQ(new_sig.origin_time_pc(), std::chrono::milliseconds(1004));
 	}
 }
 

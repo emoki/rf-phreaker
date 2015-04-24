@@ -21,7 +21,7 @@ protected:
 	
 	void reset_lte_meas() 
 	{
-		lte_info.meas_.reset(new measurement_info(0, start_freq_, mhz(2.5), mhz(3.84), gain_type(), 0));
+		lte_info.meas_.reset(new measurement_info(0, start_freq_, mhz(2.5), mhz(3.84), gain_type(), std::chrono::milliseconds(0), 0));
 		lte_info.avg_rms_ = 400;
 		lte_info.remove_ = false;
 		lte_measurements meas_group;

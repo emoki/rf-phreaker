@@ -601,9 +601,13 @@ measurement_info blade_rf_controller::get_rf_data(frequency_type frequency, time
 	if(status)
 		throw blade_rf_error(std::string("Error collecting data samples.  ") + nr_strerror(status));
 
-	parameter_cache_ = measurement_info(0, frequency, blade_bandwidth, blade_sampling_rate , gain);
+	parameter_cache_ = measurement_info(0, frequency, blade_bandwidth, blade_sampling_rate, gain);
+
+	// For now we use the computer time.  In the future perhaps we can use timestamp coming from the hardware.
+	static auto start_time = std::chrono::high_resolution_clock::now();
 
 	measurement_info data(num_samples, frequency, blade_bandwidth, blade_sampling_rate, gain, 
+		std::chrono::duration_cast<std::chrono::milliseconds>(std::chrono::high_resolution_clock::now() - start_time),
 		scanner_blade_rf_->eeprom_.cal_.get_nuand_adjustment(gain.lna_gain_, frequency),
 		scanner_blade_rf_->eeprom_.cal_.get_rf_board_adjustment(frequency, blade_bandwidth),
 		collection_count_++, scanner_blade_rf_->eeprom_.cal_.nuand_serial_);
@@ -674,7 +678,8 @@ measurement_info blade_rf_controller::get_rf_data(int num_samples)
 	if(status)
 		throw blade_rf_error(std::string("Error collecting data samples.  ") + nr_strerror(status));
 
-	measurement_info data(num_samples, frequency, blade_bandwidth, blade_sampling_rate, gain,
+	// TODO - make origin time
+	measurement_info data(num_samples, frequency, blade_bandwidth, blade_sampling_rate, gain, std::chrono::milliseconds(0),
 		scanner_blade_rf_->eeprom_.cal_.get_nuand_adjustment(gain.lna_gain_, frequency),
 		scanner_blade_rf_->eeprom_.cal_.get_rf_board_adjustment(frequency, blade_bandwidth),
 		collection_count_++, scanner_blade_rf_->eeprom_.cal_.nuand_serial_);

@@ -8,7 +8,7 @@ TEST(MeasurementInfo, TestMain)
 {
 	const int signal_size = 1000;
 	gain_type g(lms::LNA_MAX, 30, 10);
-	measurement_info test(signal_size, 1001, 1002, 1003, g, 1, 2, 1004, "1234567891234567891234");
+	measurement_info test(signal_size, 1001, 1002, 1003, g, std::chrono::milliseconds(1004), 1, 2, 1004, "1234567891234567891234");
 	test.set_operating_band(rf_phreaker::UMTS_OPERATING_BAND_1);
 
 	for(int i = 0; i < signal_size; ++i) {
@@ -37,6 +37,7 @@ TEST(MeasurementInfo, TestMain)
 		EXPECT_EQ(new_sig.frequency(), 1001);
 		EXPECT_EQ(new_sig.bandwidth(), 1002);
 		EXPECT_EQ(new_sig.sampling_rate(), 1003);
+		EXPECT_EQ(new_sig.origin_time_pc(), std::chrono::milliseconds(1004));
 		EXPECT_EQ(new_sig.gain().lna_gain_, lms::LNA_MAX);
 		EXPECT_EQ(new_sig.gain().rxvga1_, 30);
 		EXPECT_EQ(new_sig.gain().rxvga2_, 10);
