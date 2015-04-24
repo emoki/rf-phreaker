@@ -39,7 +39,7 @@ public:
 		return *this;
 	}
 
-	bool operator ==(const gain_type &g)
+	bool operator ==(const gain_type &g) const
 	{
 		return lna_gain_ == g.lna_gain_ && rxvga1_ == g.rxvga1_ && rxvga2_ == g.rxvga2_;
 	}

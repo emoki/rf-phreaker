@@ -65,7 +65,7 @@ public:
 		return *this;
 	}
 
-	bool operator ==(const measurement_info &a) {
+	bool operator ==(const measurement_info &a) const {
 		return gain_ == a.gain() &&
 			collection_round_ == a.collection_round() &&
 			operating_band_ == a.operating_band_ &&

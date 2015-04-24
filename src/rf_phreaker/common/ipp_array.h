@@ -43,7 +43,7 @@ public:
 
 	ipp_array& operator=(ipp_array other);
 
-	bool operator==(const ipp_array &a);
+	bool operator==(const ipp_array &a) const;
 
 	void swap(ipp_array &other);
 
@@ -141,7 +141,7 @@ template<typename DataType>	ipp_array<DataType>& ipp_array<DataType>::operator =
 	return *this;
 }
 
-template<typename DataType>	bool ipp_array<DataType>::operator == (const ipp_array &a) {
+template<typename DataType>	bool ipp_array<DataType>::operator == (const ipp_array &a) const {
 	for(int i = 0; i < length_; ++i) {
 		if(array_[i] != a.array_[i])
 			return false;
@@ -149,7 +149,7 @@ template<typename DataType>	bool ipp_array<DataType>::operator == (const ipp_arr
 	return true;
 }
 
-template<> inline bool ipp_array<Ipp32f>::operator == (const ipp_array &a) {
+template<> inline bool ipp_array<Ipp32f>::operator == (const ipp_array &a) const {
 	for(int i = 0; i < length_; ++i) {
 		if(abs(array_[i] - a.array_[i]) > 0.00000001)
 			return false;
@@ -157,7 +157,7 @@ template<> inline bool ipp_array<Ipp32f>::operator == (const ipp_array &a) {
 	return true;
 }
 
-template<>	inline bool ipp_array<Ipp32fc>::operator == (const ipp_array &a) {
+template<>	inline bool ipp_array<Ipp32fc>::operator == (const ipp_array &a) const {
 	for(int i = 0; i < length_; ++i) {
 		if(abs(array_[i].re - a.array_[i].re) > 0.00000001 || abs(array_[i].im != a.array_[i].im) > 0.00000001)
 			return false;

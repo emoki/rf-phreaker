@@ -51,7 +51,7 @@ public:
 		return *this;
 	}
 
-	bool operator == (const raw_signal &a) {
+	bool operator == (const raw_signal &a) const {
 		return bandwidth_ == a.bandwidth() &&
 			sampling_rate_ == a.sampling_rate() &&
 			frequency_ == a.frequency() &&
