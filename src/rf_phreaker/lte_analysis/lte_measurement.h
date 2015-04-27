@@ -28,6 +28,7 @@ public:
 	unsigned int phich_duration;
 	unsigned int phich_resources;
 	unsigned int fft_subcarrier_start_index;
+	lte_dci_format_type dci_format;
 	unsigned int num_bits_dci_1A;
 	unsigned int num_bits_dci_1C;
 	unsigned int n_gap_1;
@@ -75,6 +76,7 @@ public:
 		std::swap(meas.fft_subcarrier_start_index, fft_subcarrier_start_index);
 		std::swap(meas.num_bits_dci_1A, num_bits_dci_1A);
 		std::swap(meas.frame_number, frame_number);
+		std::swap(meas.current_frame_number, current_frame_number);
 		std::swap(meas.estimated_rsrp, estimated_rsrp);
 		std::swap(meas.estimated_rssi, estimated_rssi);
 		std::swap(meas.estimated_rsrq, estimated_rsrq);
@@ -113,6 +115,7 @@ public:
 		fft_subcarrier_start_index = 0;
 		num_bits_dci_1A = 0;
 		frame_number = 0;
+		current_frame_number = 0;
 		estimated_rsrp = 0;
 		estimated_rssi = 0;
 		estimated_rsrq = 0;
@@ -120,6 +123,8 @@ public:
 		rssi = 0;
 		rsrq = 0;
 		sync_quality = 0;
+		si_window = LTE_NULL; // Needs to be LTE_NULL for decoding purposes.
+		dci_format = lte_dci_format_unknown;
 
 
 		layer_3_.clear();

@@ -42,6 +42,7 @@ inline std::ostream& output_lte_meas_debug_header(std::ostream &os)
 		<< "fft_sub_carrier_start_index" << lte_io_delimiter
 		<< "num_bits_dci_1a" << lte_io_delimiter
 		<< "frame_number" << lte_io_delimiter
+		<< "last_frame_number" << lte_io_delimiter
 		<< "estimated_rsrp" << lte_io_delimiter
 		<< "estimated_rssi" << lte_io_delimiter
 		<< "estimated_rsrq" << lte_io_delimiter
@@ -279,6 +280,7 @@ inline std::ostream& operator<<( std::ostream &os, const lte_measurement &t)
 		<< t.fft_subcarrier_start_index << lte_io_delimiter
 		<< t.num_bits_dci_1A << lte_io_delimiter
 		<< t.frame_number << lte_io_delimiter
+		<< t.current_frame_number << lte_io_delimiter
 		<< t.estimated_rsrp << lte_io_delimiter
 		<< t.estimated_rssi << lte_io_delimiter
 		<< t.estimated_rsrq << lte_io_delimiter
