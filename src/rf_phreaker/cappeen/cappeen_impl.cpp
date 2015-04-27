@@ -369,6 +369,11 @@ long cappeen_impl::stop_collection()
 			throw cappeen_api_error("Cannot stop collection.  Wrong beagle state.", WRONGBEAGLESTATE);
 
 		processing_graph_->cancel_and_wait();
+
+		// We clear the data_output queue after stopping. As per Cobham's request.
+		if(data_output_)
+			data_output_->clear_queue();
+
 		delegate_->change_beagle_state(BEAGLE_READY);
 		LOG(LINFO) << "Stopped collection successfully.";
 	}
