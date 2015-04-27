@@ -38,12 +38,14 @@ public:
 	lte_info operator()(measurement_package info)
 	{
 		lte_measurements meas;
+		double avg_rms = 0;
 
 		int status = analysis_.cell_search(*info, meas, calculate_num_half_frames(info->time_ns() > milli_to_nano(50) ? milli_to_nano(50) : info->time_ns()));
 		if(status != 0)
 			throw lte_analysis_error("Error processing lte.");
 
-		double avg_rms = ipp_helper::calculate_average_rms(info->get_iq().get(), info->get_iq().length());
+		avg_rms = ipp_helper::calculate_average_rms(info->get_iq().get(), info->get_iq().length());
+
 
 		LOG_IF(LCOLLECTION, (meas.size() != 0)) << "LTE processing - Found " << meas.size() << " possible LTE measurements.  Frequency: " << info->frequency() / 1e6
 				<< "mhz | Bandwidth: " << info->bandwidth() / 1e6 << "mhz | Sampling rate: " << info->sampling_rate() / 1e6 << "mhz.";
