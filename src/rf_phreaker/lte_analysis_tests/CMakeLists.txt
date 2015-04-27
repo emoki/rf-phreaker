@@ -13,6 +13,7 @@ set (lte_analysis_tests_VERSION_TWEAK 0)
 set (lte_analysis_tests_SRCS 
 	lte_analysis_tests.cpp
 	lte_analysis_gtests.cpp
+	lte_si_tracker_gtests.cpp
 	${SRC_PLATFORM_SPECIFIC}/stdafx.cpp)
 
 

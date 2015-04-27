@@ -42,9 +42,13 @@ public:
 
 	~lte_analysis();
 
-	int cell_search(const rf_phreaker::raw_signal &raw_signal, lte_measurements &lte_meas, int num_half_frames);
+	int cell_search(const rf_phreaker::raw_signal &raw_signal, lte_measurements &lte_meas, int num_half_frames, double *avg_rms = nullptr);
 
-	int decode_layer_3(const rf_phreaker::raw_signal &raw_signal, lte_measurements &lte_meas, int num_half_frames);
+	int decode_layer_3(const rf_phreaker::raw_signal &raw_signal, lte_measurements &lte_meas, int num_half_frames, int meas_to_process);
+
+	void clear_tracking_si(frequency_type freq);
+
+	void clear_all_tracking_si();
 
 	//void set_config(const lte_config &config);
 

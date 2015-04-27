@@ -12,14 +12,15 @@ namespace rf_phreaker { namespace processing {
 class lte_processing_settings
 {
 public:
-	lte_processing_settings(const collection_settings &s, const layer_3_settings &l/*, const umts_general_settings &g*/)
-		: layer_3_(l)/*, umts_general_(g)*/
+	lte_processing_settings(const collection_settings &s, const layer_3_settings &l)
+		: layer_3_(l)
+		, full_scan_interval_(l.max_update_threshold_)
 	{
 		lte_config_.sampling_rate((int)s.sampling_rate_);
 		lte_config_.clock_rate((int)s.sampling_rate_);
 		lte_config_.max_signal_length(rf_phreaker::convert_to_samples(s.collection_time_, s.sampling_rate_));
 	}
-
+	int full_scan_interval_;
 	lte_config lte_config_;
 	layer_3_settings layer_3_;
 };
@@ -55,30 +56,29 @@ public:
 		// If the collection round is 0 it means we need to start decoding from scratch.
 		if(info.meas_->collection_round() == 0 && current_collection_round_ != 0) {
 			tracker_.clear();
+			analysis_.clear_all_tracking_si();
 		}
 		current_collection_round_ = info.meas_->collection_round();
 
 		auto freq = info.meas_->frequency();
+		if(info.meas_->collection_round() % config_.full_scan_interval_ == 0) {
+			analysis_.clear_tracking_si(freq);
+		}
 
 		if(info.processed_data_.size()) {
 			//output(info);
 			
-			//// Reduce the time (num half frames) that we process if we are less than the minimum collection round.  This will
-			//// help speed up the process of removing the false detections.
-			//auto time_ns = info.meas_->time_ns();
-			//if(info.meas_->collection_round() < config_.layer_3_.minimum_collection_round_ && info.meas_->time_ns() > milli_to_nano(20))
-			//	time_ns =  milli_to_nano(20);
-
-			int status = analysis_.decode_layer_3(*info.meas_, info.processed_data_, calculate_num_half_frames(info.meas_->time_ns()));
-			if(status != 0)
-				throw lte_analysis_error("Error decoding lte layer 3.");
-
+			int data_element = 0;
 			for(auto &data : info.processed_data_) {
-				if(is_valid_measurement(data) || tracker_.in_history(freq, data)) {
+				if(is_valid_measurement(data)) {
 					if((!tracker_.is_fully_decoded(freq, data) && (data.sync_quality > config_.layer_3_.decode_threshold_ || tracker_.in_history(freq, data)))) {
+						int status = analysis_.decode_layer_3(*info.meas_, info.processed_data_, calculate_num_half_frames(info.meas_->time_ns()), data_element);
+						if(status != 0)
+							throw lte_analysis_error("Error decoding lte layer 3.");
 						tracker_.update(freq, data);
 					}
 				}
+				++data_element;
 			}
 
 			// If no measurements were greater than the decode_threshold and we are not tracking any cells on this freq, add the cell with the greatest ecio if

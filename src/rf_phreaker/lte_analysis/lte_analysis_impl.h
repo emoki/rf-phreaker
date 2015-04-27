@@ -1,11 +1,13 @@
+#include <stdint.h>
+#include <map>
+#include <mutex>
 #include "rf_phreaker/lte_analysis/lte_measurement.h"
 #include "rf_phreaker/lte_analysis/lte_config.h"
 #include "rf_phreaker/common/raw_signal.h"
 #include "rf_phreaker/fir_filter/fir_filter.h"
 #include "rf_phreaker/common/ipp_array.h"
 #include "rf_phreaker/common/common_utility.h"
-#include <map>
-#include <mutex>
+#include "rf_phreaker/lte_analysis/lte_si_tracker.h"
 
 namespace rf_phreaker {
 
@@ -17,7 +19,9 @@ int lte_cell_search(const Ipp32fc* SignalSamples,
 int lte_decode_data(const Ipp32fc* SignalSamples,
 					unsigned int NumSamples,
 					unsigned int NumHalfFramesToProcess,
-					lte_measurements &LteData);
+					lte_measurements &LteData,
+					int meas_to_process,
+					lte_si_info_group *scheduling_info = nullptr);
 
 #define LTE_ANALYSIS_IF_STEPSIZE_KHZ			100
 #define LTE_ANALYSIS_PSS_SEARCH_MAX_IF_KHZ		1500
@@ -30,9 +34,13 @@ public:
 
 	~lte_analysis_impl();
 
-	int cell_search(const rf_phreaker::raw_signal &raw_signal, lte_measurements &lte_meas, int num_half_frames);
+	int cell_search(const rf_phreaker::raw_signal &raw_signal, lte_measurements &lte_meas, int num_half_frames, double *avg_rms = nullptr);
 
-	int decode_layer_3(const rf_phreaker::raw_signal &raw_signal, lte_measurements &lte_meas, int num_half_frames);
+	int decode_layer_3(const rf_phreaker::raw_signal &raw_signal, lte_measurements &lte_meas, int num_half_frames, int meas_to_process);
+
+	void clear_tracking_si(frequency_type freq);
+
+	void clear_all_tracking_si();
 
 	//void set_config(const lte_config &config);
 
@@ -76,6 +84,8 @@ private:
 
 	// This is necessary until the lte cell search and decode are multithreaded.
 	static std::mutex processing_mutex;
+
+	si_tracker si_tracker_;
 };
 
 }

@@ -64,9 +64,12 @@ TEST(LteAnalysisTests, TestGeneral)
 				int status = analysis.cell_search(info, lte_meas, 10/*int(info.time_ns() / 1e6 / 5)*/);
 				EXPECT_EQ(0, status);
 
-				status = analysis.decode_layer_3(info, lte_meas, int(info.time_ns() / 1e6 / 5));
-				EXPECT_EQ(0, status);
-				
+				for(int j = 0; j < (int)lte_meas.size(); ++j) {
+					if(lte_meas[j].NumAntennaPorts != LteNumAntennaPorts::LteAntPorts_Unknown) {
+						status = analysis.decode_layer_3(info, lte_meas, int(info.time_ns() / 1e6 / 5), j);
+						EXPECT_EQ(0, status);
+					}
+				}
 				static std::ofstream output_file("lte_measurements.txt");
 				static bool write_header = true;
 				if(write_header) {

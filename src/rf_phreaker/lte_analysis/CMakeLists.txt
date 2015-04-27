@@ -44,6 +44,7 @@ set (lte_analysis_SRCS
 	lte_pdsch.h
 	lte_pss.cpp
 	lte_pss.h
+	lte_si_tracker.h
 	lte_synchronization.cpp
 	lte_synchronization.h
 	lte_turbo_code.cpp

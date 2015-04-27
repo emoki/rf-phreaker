@@ -116,11 +116,14 @@ void lte_analysis_impl::clear_lte_measurements()
 	}
 }
 
-int lte_analysis_impl::decode_layer_3(const rf_phreaker::raw_signal &raw_signal, lte_measurements &lte_meas, int num_half_frames)
+int lte_analysis_impl::decode_layer_3(const rf_phreaker::raw_signal &raw_signal, lte_measurements &lte_meas, int num_half_frames, int meas_to_process)
 {
 	int status = 0;
 
 	try {
+		if(meas_to_process >= (int)lte_meas.size())
+			throw lte_analysis_error("LTE measurement is not within vector range.");
+
 		if(num_half_frames < 2)
 			throw lte_analysis_error("Number of LTE half frames to process must be at least 2 half frames long.");
 
@@ -129,8 +132,10 @@ int lte_analysis_impl::decode_layer_3(const rf_phreaker::raw_signal &raw_signal,
 			status = 0;
 		}
 		else if(needed_sampling_rate == raw_signal.sampling_rate()) {
+			auto hint = si_tracker_.get_needed_scheduling_info(raw_signal.frequency(), lte_meas[meas_to_process]);
 			std::lock_guard<std::mutex> lock(processing_mutex);
-			status = lte_decode_data(raw_signal.get_iq().get(), raw_signal.get_iq().length(), num_half_frames, lte_meas);
+			status = lte_decode_data(raw_signal.get_iq().get(), raw_signal.get_iq().length(), num_half_frames, lte_meas, meas_to_process, hint.g_.size() ? &hint : nullptr);
+			si_tracker_.update(raw_signal.frequency(), lte_meas[meas_to_process]);
 		}
 		// Currently LTE will report the wrong bandwidth.  Because of this we never try resampling to a lower bandwidth.
 		//else if(needed_sampling_rate < raw_signal.sampling_rate())
@@ -190,5 +195,14 @@ rf_phreaker::frequency_type lte_analysis_impl::determine_sampling_rate(const rf_
 
 	return sampling_rate;
 }
+
+void lte_analysis_impl::clear_tracking_si(frequency_type freq) {
+	si_tracker_.clear(freq);
+}
+
+void lte_analysis_impl::clear_all_tracking_si() {
+	si_tracker_.clear();
+}
+
 
 }
