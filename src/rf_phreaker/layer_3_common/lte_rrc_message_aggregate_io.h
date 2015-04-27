@@ -52,7 +52,7 @@ inline std::ostream& header(std::ostream &os, const lte_sib_base &t) {
 }
 
 inline std::ostream& operator<<(std::ostream &os, const lte_sib_base &t) {
-	os << begin_delim << (t.decoded_ ? "decoded" : "NOT decoded") << end_delim;
+	os << (t.decoded_ ? "YES" : "NO");
 	return os;
 }
 
@@ -113,8 +113,10 @@ inline std::ostream& operator<<(std::ostream &os, const lte_sib_type &t) {
 }
 
 inline std::ostream& operator<<(std::ostream &os, const scheduling_info &t) {
+	os << begin_delim << t.periodicity_in_frames_ << "f";
 	for(auto &i : t.sib_mapping_info_)
-		os << begin_delim << i << spacer3 << t.periodicity_in_frames_ << "f" << end_delim << spacer3;
+		os << spacer3 << i;
+	os << end_delim << spacer3;
 	return os;
 }
 
@@ -125,6 +127,7 @@ inline std::ostream& operator<<(std::ostream &os, const std::vector<scheduling_i
 }
 
 inline std::ostream& header(std::ostream &os, const lte_sib1_type &t) {
+	os << "sib1" << spacer;
 	header(os, (lte_sib_base&)t) << spacer
 		<< "tracking_area_code" << spacer
 		<< "cell_id" << spacer
@@ -135,7 +138,7 @@ inline std::ostream& header(std::ostream &os, const lte_sib1_type &t) {
 }
 
 inline std::ostream& operator<<(std::ostream &os, const lte_sib1_type &t) {
-	os << "sib1 " << static_cast<const lte_sib_base&>(t) << spacer
+	os  << static_cast<const lte_sib_base&>(t) << spacer
 		<< t.tracking_area_code_ << spacer
 		<< t.cell_id_ << spacer
 		<< t.multiple_plmn_ << spacer
@@ -167,6 +170,7 @@ inline std::ostream& operator<<(std::ostream &os, const s_search_v920 &t) {
 }
 
 inline std::ostream& header(std::ostream &os, const lte_sib3_type &t) {
+	os << "sib3" << spacer;
 	header(os, (lte_sib_base&)t) << spacer
 		<< "cell_reselection_serving_freq_info[s_non_intra_search thres_serving_low cell_reselect_priority" << spacer
 		<< "intra_freq_cell_reselection_info[s_intra_search]" << spacer
@@ -177,7 +181,7 @@ inline std::ostream& header(std::ostream &os, const lte_sib3_type &t) {
 }
 
 inline std::ostream& operator<<(std::ostream &os, const lte_sib3_type &t) {
-	os << "sib3 " << static_cast<const lte_sib_base&>(t) << spacer
+	os  << static_cast<const lte_sib_base&>(t) << spacer
 		<< t.cell_reselection_serving_freq_info_ << spacer
 		<< t.intra_freq_cell_reselection_info_ << spacer
 		<< t.s_intra_search_v920_ << spacer
@@ -209,6 +213,7 @@ inline std::ostream& operator<<(std::ostream &os, const std::vector<neighbor_cel
 }
 
 inline std::ostream& header(std::ostream &os, const lte_sib4_type &t) {
+	os << "sib4" << spacer;
 	header(os, (lte_sib_base&)t) << spacer
 		<< "csg_phys_cellid_range[phys_cid q_offset_cell]" << spacer
 		<< "intra_freq_neighbor_cell_list[start range]" << spacer
@@ -217,7 +222,7 @@ inline std::ostream& header(std::ostream &os, const lte_sib4_type &t) {
 }
 
 inline std::ostream& operator<<(std::ostream &os, const lte_sib4_type &t) {
-	os << "sib4 " << static_cast<const lte_sib_base&>(t) << spacer
+	os  << static_cast<const lte_sib_base&>(t) << spacer
 		<< t.csg_physical_cellid_range_ << spacer
 		<< t.intra_freq_neighbor_cell_list_ << spacer
 		<< t.intra_freq_black_cell_list_;
@@ -247,6 +252,7 @@ inline std::ostream& operator<<(std::ostream &os, const std::vector<inter_freq_c
 }
 
 inline std::ostream& header(std::ostream &os, const lte_sib5_type &t) {
+	os << "sib5" << spacer;
 	header(os, (lte_sib_base&)t) << spacer
 		<< "inter_freq_carrier_info_list [dl_eutra q_rx_lev_min q_offset_freq meas_bw ant_1_present thres_x_high "
 		"thres_x_low thres_x_high_q_r9 thres_x_low_q_r9 cell_reselect_priority "
@@ -255,7 +261,7 @@ inline std::ostream& header(std::ostream &os, const lte_sib5_type &t) {
 }
 
 inline std::ostream& operator<<(std::ostream &os, const lte_sib5_type &t) {
-	os << "sib5 " << static_cast<const lte_sib_base&>(t) << spacer
+	os  << static_cast<const lte_sib_base&>(t) << spacer
 		<< t.inter_freq_carrier_info_list_;
 	return os;
 }
@@ -277,6 +283,7 @@ inline std::ostream& operator<<(std::ostream &os, const std::vector<carrier_freq
 }
 
 inline std::ostream& header(std::ostream &os, const lte_sib6_type &t) {
+	os << "sib6" << spacer;
 	header(os, (lte_sib_base&)t) << spacer
 		<< "carrier_freq_list_utra_fdd[arfcn_utra thres_x_high thres_x_low thres_x_high_q_r9 thres_x_low_q_r9 cell_reselect]" << spacer
 		<< "carrier_freq_list_utra_tdd[arfcn_utra thres_x_high thres_x_low thres_x_high_q_r9 thres_x_low_q_r9 cell_reselect]";
@@ -284,7 +291,7 @@ inline std::ostream& header(std::ostream &os, const lte_sib6_type &t) {
 }
 
 inline std::ostream& operator<<(std::ostream &os, const lte_sib6_type &t) {
-	os << "sib6 " << static_cast<const lte_sib_base&>(t) << spacer
+	os  << static_cast<const lte_sib_base&>(t) << spacer
 		<< begin_delim << t.carrier_freq_list_utra_fdd_ << end_delim << spacer
 		<< begin_delim << t.carrier_freq_list_utra_tdd_ << end_delim;
 	return os;
@@ -319,6 +326,7 @@ inline std::ostream& operator<<(std::ostream &os, const std::vector<carrier_freq
 }
 
 inline std::ostream& header(std::ostream &os, const lte_sib7_type &t) {
+	os << "sib7" << spacer;
 	header(os, (lte_sib_base&)t) << spacer
 		<< "carrier_freqs_info_list_geran[carrier_freqs_geran[band_indicator start_arfcn following_arfcns]] "
 		"common_info[thres_x_high thres_x_low cell_reselect_priority]]";
@@ -326,7 +334,7 @@ inline std::ostream& header(std::ostream &os, const lte_sib7_type &t) {
 }
 
 inline std::ostream& operator<<(std::ostream &os, const lte_sib7_type &t) {
-	os << "sib7 " << static_cast<const lte_sib_base&>(t) << spacer
+	os  << static_cast<const lte_sib_base&>(t) << spacer
 		<< t.carrier_freqs_info_list_geran_;
 	return os;
 }
@@ -467,6 +475,7 @@ inline std::ostream& operator<<(std::ostream &os, const cell_reselection_paramet
 }
 
 inline std::ostream& header(std::ostream &os, const lte_sib8_type &t) {
+	os << "sib8" << spacer;
 	header(os, (lte_sib_base&)t) << spacer
 		<< "parameters_hrpd" << spacer
 		<< "parameters_1xrtt";
@@ -474,7 +483,7 @@ inline std::ostream& header(std::ostream &os, const lte_sib8_type &t) {
 }
 
 inline std::ostream& operator<<(std::ostream &os, const lte_sib8_type &t) {
-	os << "sib8 " << static_cast<const lte_sib_base&>(t) << spacer
+	os  << static_cast<const lte_sib_base&>(t) << spacer
 		<< t.parameters_hrpd_ << spacer
 		<< t.parameters_1xrtt_;
 	return os;
