@@ -135,7 +135,9 @@ public:
 				tracker_.update(freq, meas);
 		}
 
-		if(tracker_.is_all_decoded_on_freq(freq) && info.meas_->collection_round() > config_.layer_3_.minimum_collection_round_)
+		tracker_.update_freq(freq);
+
+		if((tracker_.has_freq_exceeded_max_updates(freq) || tracker_.is_all_decoded_on_freq(freq)) && info.meas_->collection_round() > config_.layer_3_.minimum_collection_round_)
 			info.remove_ = true;
 
 		return info;

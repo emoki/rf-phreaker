@@ -186,7 +186,7 @@ public:
 	bool is_all_decoded() {
 		for (auto freq : wanted_layer_3_) {
 			for (auto layer_3 : freq.second) {
-				if (!layer_3.is_fully_decoded() && !layer_3.has_exceeded_max_updates())
+				if (!layer_3.is_fully_decoded())
 					return false;
 			}
 		}
@@ -197,7 +197,7 @@ public:
 		auto freq = wanted_layer_3_.find(f);
 		if (freq != wanted_layer_3_.end()) {
 			for (auto layer_3 : freq->second) {
-				if (!layer_3.is_fully_decoded() && !layer_3.has_exceeded_max_updates())
+				if (!layer_3.is_fully_decoded())
 					return false;
 			}
 		}
@@ -254,6 +254,23 @@ public:
 
 	void clear() {
 		wanted_layer_3_.clear();
+		freq_max_updates_.clear();
+	}
+
+	void update_freq(rf_phreaker::frequency_type f) {
+		auto it = freq_max_updates_.find(f);
+		if(it == freq_max_updates_.end()) {
+			it = freq_max_updates_.insert(std::make_pair(f, 0)).first;
+		}
+		++it->second;
+	}
+
+	bool has_freq_exceeded_max_updates(rf_phreaker::frequency_type f) const {
+		auto it = freq_max_updates_.find(f);
+		if(it != freq_max_updates_.end())
+			return it->second > max_update_;
+		else
+			return false;
 	}
 
 protected:
@@ -272,8 +289,7 @@ protected:
 
    std::map<rf_phreaker::frequency_type, freq_layer_3_history> wanted_layer_3_;
 
-
-
+   std::map<rf_phreaker::frequency_type, int> freq_max_updates_;
 };
 
 }
