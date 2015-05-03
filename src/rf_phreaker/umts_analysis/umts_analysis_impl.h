@@ -14,7 +14,7 @@ namespace rf_phreaker {
 class umts_analysis_impl
 {
 public:
-	umts_analysis_impl(const umts_config &config);
+	umts_analysis_impl(const umts_config &config, std::atomic_bool *is_cancelled = nullptr);
 
 	~umts_analysis_impl();
 
@@ -26,9 +26,9 @@ public:
 
 	int set_num_coherent_slots_for_psch(int num_coherent_slots);
 
-	void cancel_processing();
-
 	umts_config get_umts_config() { return config_; }
+
+	std::atomic_bool* get_cancellation_bool() { return is_cancelled_; }
 
 private:
 	void consolidate_measurements(umts_measurements &group);
@@ -50,6 +50,8 @@ private:
 	static std::shared_ptr<cpich_table_container> bch_decoder_cpich_table_;
 
 	static std::mutex mutex_;
+
+	std::atomic_bool *is_cancelled_;
 };
 
 }

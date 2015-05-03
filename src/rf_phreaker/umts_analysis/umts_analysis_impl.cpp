@@ -8,10 +8,11 @@ std::shared_ptr<cpich_table_container> umts_analysis_impl::brute_force_cpich_tab
 std::shared_ptr<cpich_table_container> umts_analysis_impl::bch_decoder_cpich_table_;
 std::mutex umts_analysis_impl::mutex_;
 
-umts_analysis_impl::umts_analysis_impl(const umts_config &config)
+umts_analysis_impl::umts_analysis_impl(const umts_config &config, std::atomic_bool *is_cancelled)
 	: config_(config)
+	, is_cancelled_(is_cancelled)
 {
-	brute_force_.reset(new umts_psch_with_brute_force(config_, brute_force_cpich_table_ptr()->cpich_table_ptr()));
+	brute_force_.reset(new umts_psch_with_brute_force(config_, brute_force_cpich_table_ptr()->cpich_table_ptr(), is_cancelled));
 }
 
 umts_analysis_impl::~umts_analysis_impl()
@@ -132,12 +133,6 @@ int umts_analysis_impl::set_num_coherent_slots_for_psch(int num_coherent_slots)
 {
 	brute_force_->set_num_coherent_psch_slots_and_reset_iterations(num_coherent_slots);
 	return 0;
-}
-
-void umts_analysis_impl::cancel_processing()
-{
-	if(brute_force_.get() != nullptr)
-		brute_force_->cancel_processing();
 }
 
 const cpich_table_container* umts_analysis_impl::brute_force_cpich_table_ptr()

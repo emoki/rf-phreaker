@@ -3,8 +3,8 @@
 
 namespace rf_phreaker {
 
-lte_analysis::lte_analysis(const lte_config &config)
-	: impl_(new lte_analysis_impl(config)) {}
+lte_analysis::lte_analysis(const lte_config &config, std::atomic_bool *is_cancelled)
+	: impl_(new lte_analysis_impl(config, is_cancelled)) {}
 
 lte_analysis::lte_analysis(const lte_analysis &analysis)
 	: impl_(new lte_analysis_impl(analysis.impl_->get_lte_config())) {}

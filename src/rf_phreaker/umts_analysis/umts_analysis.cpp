@@ -6,11 +6,11 @@ namespace rf_phreaker {
 
 std::mutex umts_analysis_mutex;
 
-umts_analysis::umts_analysis(const umts_config &config)
+umts_analysis::umts_analysis(const umts_config &config, std::atomic_bool *is_cancelled)
 //: impl_(new umts_analysis_impl(config))
 {
 	std::lock_guard<std::mutex> lock(umts_analysis_mutex);
-	impl_ = (new umts_analysis_impl(config));
+	impl_ = (new umts_analysis_impl(config, is_cancelled));
 
 }
 
@@ -18,7 +18,7 @@ umts_analysis::umts_analysis(umts_analysis &analysis)
 //: impl_(new umts_analysis_impl(analysis.impl_->get_umts_config()))
 {
 	std::lock_guard<std::mutex> lock(umts_analysis_mutex);
-	impl_ = (new umts_analysis_impl(analysis.impl_->get_umts_config()));
+	impl_ = (new umts_analysis_impl(analysis.impl_->get_umts_config(), analysis.impl_->get_cancellation_bool()));
 }
 
 
@@ -48,9 +48,5 @@ int umts_analysis::set_num_coherent_slots_for_psch(int num_coherent_slots)
 //	return impl_->set_config(config);
 //}
 
-void umts_analysis::cancel_processing()
-{
-	return impl_->cancel_processing();
-}
 
 }

@@ -42,6 +42,8 @@ private:
 	std::recursive_mutex mutex_;
 
 	std::atomic_bool is_initialized_;
+
+	std::atomic_bool is_cancelled_;
 };
 
 

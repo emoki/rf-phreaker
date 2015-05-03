@@ -28,10 +28,10 @@ public:
 class lte_processing_body
 {
 public:
-	lte_processing_body(const lte_processing_settings &config)
+	lte_processing_body(const lte_processing_settings &config, std::atomic_bool *is_cancelled = nullptr)
 		: config_(config)
 		, tracker_(config.layer_3_.max_update_threshold_)
-		, analysis_(config.lte_config_)
+		, analysis_(config.lte_config_, is_cancelled)
 		, current_collection_round_(-1)
 	{}
 

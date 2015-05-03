@@ -25,6 +25,7 @@
 #endif
 #endif
 
+#include <atomic>
 #include "rf_phreaker/umts_analysis/umts_measurement.h"
 #include "rf_phreaker/umts_analysis/umts_config.h"
 #include "rf_phreaker/common/raw_signal.h"
@@ -37,7 +38,7 @@ class umts_analysis_impl;
 class DLL_PUBLIC umts_analysis
 {
 public:
-	umts_analysis(const umts_config &config);
+	umts_analysis(const umts_config &config, std::atomic_bool *is_cancelled = nullptr);
 	
 	umts_analysis(umts_analysis &analysis);
 
@@ -50,8 +51,6 @@ public:
 	int set_num_coherent_slots_for_psch(int num_coherent_slots);
 	
 	//void set_config(const umts_config &config);
-
-	void cancel_processing();
 
 private:
 	umts_analysis_impl *impl_;

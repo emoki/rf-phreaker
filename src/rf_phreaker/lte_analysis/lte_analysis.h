@@ -25,6 +25,7 @@
 #endif
 #endif
 
+#include <atomic>
 #include "rf_phreaker/lte_analysis/lte_measurement.h"
 #include "rf_phreaker/lte_analysis/lte_config.h"
 #include "rf_phreaker/common/raw_signal.h"
@@ -36,7 +37,7 @@ class lte_analysis_impl;
 class DLL_PUBLIC lte_analysis
 {
 public:
-	lte_analysis(const lte_config &config);
+	lte_analysis(const lte_config &config, std::atomic_bool *is_cancelled = nullptr);
 
 	lte_analysis(const lte_analysis &analysis);
 

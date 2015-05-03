@@ -7,14 +7,13 @@
 
 namespace rf_phreaker {
 
-umts_psch_with_brute_force::umts_psch_with_brute_force(const umts_config &config, const /*cpich_table_container&*/Ipp32fc* resampled_cpich_table)
+	umts_psch_with_brute_force::umts_psch_with_brute_force(const umts_config &config, const /*cpich_table_container&*/Ipp32fc* resampled_cpich_table, std::atomic_bool *is_cancelled)
 : pause_(-1)
 , max_num_psch_peaks_(25)
 , psch_confidence_threshold_(11)
 , cpich_confidence_threshold_(13)
+, is_cancelled_(is_cancelled)
 {
-	cancel_processing_ = false;
-	
 	set_config(config);
 		
 	resampled_cpich_table_ = resampled_cpich_table;
@@ -196,7 +195,7 @@ umts_measurements umts_psch_with_brute_force::process(const ipp_32fc_array &sign
 		{
 			for(int i = 0; i < 512; i++)
 			{	
-				if(cancel_processing_ || new_measurements.size() >= max_num_candidates_)
+				if((is_cancelled_ && *is_cancelled_)|| new_measurements.size() >= max_num_candidates_)
 					break;
 	
 				for(int j = 0; j < 15; j++)

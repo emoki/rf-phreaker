@@ -19,7 +19,7 @@ namespace rf_phreaker {
 class umts_psch_with_brute_force 
 {
 public:
-	umts_psch_with_brute_force(const umts_config &config, const /*cpich_table_container &*/Ipp32fc* cpich_table);
+	umts_psch_with_brute_force(const umts_config &config, const /*cpich_table_container &*/Ipp32fc* cpich_table, std::atomic_bool *is_cancelled = nullptr);
 	
 	umts_measurements process(const ipp_32fc_array &signal, const umts_measurements &tracking_measurements, uint32_t num_cpich_chips, umts_scan_type scanning_method = full_scan_type);
 
@@ -42,10 +42,6 @@ public:
 	int num_psch_iterations() const { return psch_cross_correlator_.num_iterations(); }
 
 	int num_coherent_psch_slots() const { return num_coherent_psch_slots_; }
-
-	void cancel_processing() { cancel_processing_ = true; }
-
-	void allow_processing() { cancel_processing_ = false; }
 
 private:
 
@@ -107,7 +103,7 @@ private:
 
 	int length_to_process_;
 
-	std::atomic_bool cancel_processing_;
+	std::atomic_bool *is_cancelled_;
 
 	bool do_we_benchmark_;
 

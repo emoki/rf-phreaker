@@ -1,6 +1,7 @@
 #include <stdint.h>
 #include <map>
 #include <mutex>
+#include <atomic>
 #include "rf_phreaker/lte_analysis/lte_measurement.h"
 #include "rf_phreaker/lte_analysis/lte_config.h"
 #include "rf_phreaker/common/raw_signal.h"
@@ -21,7 +22,8 @@ int lte_decode_data(const Ipp32fc* SignalSamples,
 					unsigned int NumHalfFramesToProcess,
 					lte_measurements &LteData,
 					int meas_to_process,
-					lte_si_info_group *scheduling_info = nullptr);
+					lte_si_info_group *scheduling_info = nullptr,
+					std::atomic_bool *is_cancelled = nullptr);
 
 #define LTE_ANALYSIS_IF_STEPSIZE_KHZ			100
 #define LTE_ANALYSIS_PSS_SEARCH_MAX_IF_KHZ		1500
@@ -30,7 +32,7 @@ int lte_decode_data(const Ipp32fc* SignalSamples,
 class lte_analysis_impl
 {
 public:
-	lte_analysis_impl(const lte_config &config);
+	lte_analysis_impl(const lte_config &config, std::atomic_bool *is_cancelled = nullptr);
 
 	~lte_analysis_impl();
 
@@ -86,6 +88,8 @@ private:
 	static std::mutex processing_mutex;
 
 	si_tracker si_tracker_;
+
+	std::atomic_bool *is_cancelled_;
 };
 
 }

@@ -24,6 +24,7 @@ void processing_graph::start(scanner_controller_interface *sc, data_output_async
 	std::lock_guard<std::recursive_mutex> lock(mutex_);
 
 	is_initialized_ = false;
+	is_cancelled_ = false;
 
 	if(thread_ && thread_->joinable()) {
 		cancel();
@@ -69,7 +70,7 @@ void processing_graph::start(scanner_controller_interface *sc, data_output_async
 				umts_cell_search_settings(config.umts_sweep_collection_, config.umts_decode_layer_3_, config.umts_sweep_general_, 5), sc));
 			auto umts_sweep_output_feedback = std::make_shared<umts_output_and_feedback_node>(*graph_, tbb::flow::serial, umts_sweep_output_and_feedback_body(out));
 			auto umts_layer_3_cell_search = std::make_shared<umts_cell_search_node>(*graph_, tbb::flow::serial, umts_processing_body(
-				umts_cell_search_settings(config.umts_layer_3_collection_, config.umts_decode_layer_3_, config.umts_layer_3_general_, 100), sc));
+				umts_cell_search_settings(config.umts_layer_3_collection_, config.umts_decode_layer_3_, config.umts_layer_3_general_, 100), sc, &is_cancelled_));
 			auto umts_layer_3_decode = std::make_shared<umts_layer_3_decode_node>(*graph_, tbb::flow::serial, umts_processing_body(
 				umts_cell_search_settings(config.umts_layer_3_collection_, config.umts_decode_layer_3_, config.umts_layer_3_general_, 100), sc));
 			auto umts_layer_3_output_feedback = std::make_shared<umts_output_and_feedback_node>(*graph_, tbb::flow::serial, umts_layer_3_output_and_feedback_body(out));
@@ -80,7 +81,7 @@ void processing_graph::start(scanner_controller_interface *sc, data_output_async
 			auto lte_layer_3_cell_search = std::make_shared<lte_cell_search_node>(*graph_, tbb::flow::serial, lte_processing_body(
 				lte_processing_settings(config.lte_layer_3_collection_, config.lte_decode_layer_3_)));
 			auto lte_layer_3_decode = std::make_shared<lte_layer_3_decode_node>(*graph_, tbb::flow::serial, lte_processing_body(
-				lte_processing_settings(config.lte_layer_3_collection_, config.lte_decode_layer_3_)));
+				lte_processing_settings(config.lte_layer_3_collection_, config.lte_decode_layer_3_), &is_cancelled_));
 			auto lte_layer_3_output_feedback = std::make_shared<lte_output_and_feedback_node>(*graph_, tbb::flow::serial, lte_layer_3_output_and_feedback_body(out, config.lte_decode_layer_3_.minimum_collection_round_));
 
 			auto collection_queue = std::make_shared<queue_node>(*graph_);
@@ -159,6 +160,7 @@ void processing_graph::wait()
 
 void processing_graph::cancel()
 {
+	is_cancelled_ = true;
 	std::lock_guard<std::recursive_mutex> lock(mutex_);
 	if(thread_ && thread_->joinable()) {
 		int count = 0;

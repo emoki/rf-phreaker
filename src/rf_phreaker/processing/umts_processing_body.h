@@ -27,8 +27,8 @@ public:
 class umts_processing_body
 {
 public:
-	umts_processing_body(const umts_cell_search_settings &config, scanner::scanner_controller_interface *sc)
-		: analysis_(config.umts_config_)
+	umts_processing_body(const umts_cell_search_settings &config, scanner::scanner_controller_interface *sc, std::atomic_bool *is_cancelled = nullptr)
+		: analysis_(config.umts_config_, is_cancelled)
 		, tracker_(config.layer_3_.max_update_threshold_)
 		, config_(config)
 		, current_collection_round_(-1)

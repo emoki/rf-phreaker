@@ -35,7 +35,8 @@ int lte_decode_data(const Ipp32fc* SignalSamples,
 	unsigned int NumHalfFramesToProcess,
 	lte_measurements &LteData,
 	int meas_to_process,
-	lte_si_info_group *si_scheduling_hints) {
+	lte_si_info_group *si_scheduling_hints,
+	std::atomic_bool *is_cancelled = nullptr) {
 	//unsigned int current_frame_number = 0;
 
 	// TODO - Declaring the signal statically is OK for now because the processing functions are protected by a mutex 
@@ -257,6 +258,9 @@ int lte_decode_data(const Ipp32fc* SignalSamples,
 		else
 			looking_for_sib1 = true;
 
+		if(is_cancelled && is_cancelled)
+			break;
+
 		if((looking_for_sib1 && current_frame_number % 2 == 0) || (relevant_si_info && !relevant_si_info->decoded_)) {
 
 			memset(h_est, 0, OFDM_SYMBOLS_PER_FRAME * NUM_FRAMES * MAX_FFT_SIZE * NUM_ANTENNA_MAX * 8);
@@ -290,7 +294,9 @@ int lte_decode_data(const Ipp32fc* SignalSamples,
 				// Skip SIB1 decoding if we have scheduling info.
 				else if(si_scheduling_hints && subFrameIndex == 5 && current_frame_number % 2 == 0)
 					continue;
-
+				else if(is_cancelled && is_cancelled)
+					break;
+				
 				subframeStartSampleIndex = frameStartSampleIndex + subFrameIndex * LteData[ii].frameNumSamples / NUM_SUBFRAMES_PER_FRAME;
 
 				/*Decode Physical Confrol Format Indicator Channel (PCFICH) */
