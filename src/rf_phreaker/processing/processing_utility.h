@@ -98,8 +98,9 @@ public:
 	{
 		const auto it = strongest_measurements_.find(freq);
 		for(auto &watch : strongest_measurements_) {
-			if(it->first != watch.first) {
-				if(abs(it->first - watch.first) < convert_bandwidth(watch.second.bw_) / 2 && it->second.sync_quality_ < watch.second.sync_quality_)
+			if(freq != watch.first) {
+				if(abs(freq - watch.first) < convert_bandwidth(watch.second.bw_) / 2 
+					&& (it == strongest_measurements_.end() || it->second.sync_quality_ < watch.second.sync_quality_))
 					return true;
 			}
 		}
@@ -120,23 +121,26 @@ public:
 	{
 		if(lte_group.size()) {
 			auto bw = look_for_valid_bandwidth(lte_group);
+			auto has_decoded_pbch = bw != LteBandwidth_Unknown;
 			auto sync_quality = get_strongest_sync(lte_group);
 			auto it = strongest_measurements_.find(freq);
 
+			if(has_decoded_pbch) {
+				if(it == strongest_measurements_.end()) 
+					it = strongest_measurements_.insert(std::make_pair(freq, lte_watch(bw, sync_quality))).first;
 
-			if(it == strongest_measurements_.end()) {
-				it = strongest_measurements_.insert(std::make_pair(freq, lte_watch(bw, sync_quality))).first;
-			}
+				++it->second.num_pbch_decoded_;
 
-			if(sync_quality > it->second.sync_quality_) {
-				if(bw != LteBandwidth_Unknown) 
-					it->second.bw_ = bw;
-				it->second.sync_quality_ = sync_quality;
+				if(sync_quality > it->second.sync_quality_) {
+					if(bw != LteBandwidth_Unknown)
+						it->second.bw_ = bw;
+					it->second.sync_quality_ = sync_quality;
+				}
 			}
 		}
 	}
 
-	double get_strongest_sync(const lte_measurements &lte_group)
+	double get_strongest_sync(const lte_measurements &lte_group) const
 	{
 		double best_sync = -9999;
 		for(auto &lte : lte_group) {
@@ -146,14 +150,26 @@ public:
 		return best_sync;
 	}
 
-	bool has_decoded_layer_3(const lte_measurements &lte_group)
+	bool has_decoded_layer_3(const lte_measurements &lte_group) const
 	{
 		for(auto &lte : lte_group) {
-			if(lte.layer_3_.sib1_.decoded_ || lte.layer_3_.sib4_.decoded_ || lte.layer_3_.sib5_.decoded_ || lte.layer_3_.sib6_.decoded_
-				|| lte.layer_3_.sib7_.decoded_ || lte.layer_3_.sib8_.decoded_)
+			if(has_decoded_layer_3(lte))
 				return true;
 		}
 		return false;
+	}
+
+	bool has_decoded_layer_3 (const lte_measurement &lte) const {
+		return lte.layer_3_.sib1_.decoded_ || lte.layer_3_.sib4_.decoded_ || lte.layer_3_.sib5_.decoded_ || lte.layer_3_.sib6_.decoded_
+			|| lte.layer_3_.sib7_.decoded_ || lte.layer_3_.sib8_.decoded_;
+	}
+
+	bool is_considered_valid_channel(frequency_type freq) const {
+		auto it = strongest_measurements_.find(freq);
+		if(it != strongest_measurements_.end())
+			return it->second.num_pbch_decoded_ >= 1;
+		else
+			return false;
 	}
 
 private:
@@ -162,9 +178,11 @@ private:
 		lte_watch(LteChannelBandwidth bw, double sync_quality)
 			: bw_(bw)
 			, sync_quality_(sync_quality)
+			, num_pbch_decoded_(0)
 		{}
 		LteChannelBandwidth bw_;
 		double sync_quality_;
+		int num_pbch_decoded_;
 	};
 
 	std::map<frequency_type, lte_watch> strongest_measurements_;

@@ -141,12 +141,14 @@ public:
 	lte_layer_3_output_and_feedback_body(data_output_async *io, int minimum_collection_round)
 		: io_(io)
 		, minimum_collection_round_(minimum_collection_round)
+		, pbchs_decoded_minimum_collection_round_(3 * minimum_collection_round)
 		, current_collection_round_(-1) 
 	{}
 
 	lte_layer_3_output_and_feedback_body(const lte_layer_3_output_and_feedback_body &body)
 		: io_(body.io_)
 		, minimum_collection_round_(body.minimum_collection_round_)
+		, pbchs_decoded_minimum_collection_round_(body.pbchs_decoded_minimum_collection_round_)
 		, current_collection_round_(body.current_collection_round_)
 		, tracker_(body.tracker_)
 		// Cannot copy std::vector<std::future<>>. Use new one.
@@ -173,17 +175,23 @@ public:
 			//output_debug_info(info);
 
 			auto decoded_bw = tracker_.find_decoded_bandwidth(info.meas_->frequency());
-				
-			// Until we get the LTE dll sorted out only output measurements with known bandwidths.
-			for(auto &data : info.processed_data_) {
-				if(data.NumAntennaPorts != LteAntPorts_Unknown && (decoded_bw == LteBandwidth_Unknown || data.Bandwidth == decoded_bw)) {
-					auto tmp = convert_to_lte_data(*info.meas_, data, info.avg_rms_);
-					lte.push_back(std::move(tmp));
+			// Until we get the LTE dll sorted out only output measurements with known bandwidths that match what we think to be the correct bandwidth.
+			// Also only output them after we have decoded two pbchs on that channel.  Lowers the likeihood of outputting a false pbch.
+			if(tracker_.is_considered_valid_channel(info.meas_->frequency()) || tracker_.has_decoded_layer_3(info.processed_data_)) {
+				for(auto &data : info.processed_data_) {
+					if(data.NumAntennaPorts != LteAntPorts_Unknown && (tracker_.has_decoded_layer_3(data) || data.Bandwidth == decoded_bw)) {
+						auto tmp = convert_to_lte_data(*info.meas_, data, info.avg_rms_);
+						lte.push_back(std::move(tmp));
+					}
 				}
 			}
-			if(lte.size()) {
-				tracker_.update_measurements(info.processed_data_, info.meas_->frequency());
+
+			tracker_.update_measurements(info.processed_data_, info.meas_->frequency());
 			
+			if(lte.size()) {
+				// Look up bandwidth to see if it's changed after the update.
+				decoded_bw = tracker_.find_decoded_bandwidth(info.meas_->frequency());
+
 				if(decoded_bw != LteBandwidth_Unknown) {
 					auto sampling_rate = determine_sampling_rate(decoded_bw);
 
@@ -224,9 +232,10 @@ private:
 	bool do_we_remove_collection_info(lte_info info)
 	{
 		const auto freq = info.meas_->frequency();
+		const auto cr = info.meas_->collection_round();
 		return info.remove_ ||
-			(info.meas_->collection_round() > minimum_collection_round_ &&
-			(!tracker_.is_tracking(freq) || tracker_.is_within_stronger_measurement_bandwidth(freq)));
+			(cr > minimum_collection_round_ && (!tracker_.is_tracking(freq) || tracker_.is_within_stronger_measurement_bandwidth(freq)) ||
+			!tracker_.is_considered_valid_channel(freq) && cr > pbchs_decoded_minimum_collection_round_);
 	}
 
 	void remove_completed_output() {
@@ -243,6 +252,8 @@ private:
 	data_output_async *io_;
 
 	int minimum_collection_round_;
+
+	int pbchs_decoded_minimum_collection_round_;
 
 	int64_t current_collection_round_;
 
