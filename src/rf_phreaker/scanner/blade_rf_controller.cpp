@@ -562,15 +562,19 @@ measurement_info blade_rf_controller::get_rf_data(frequency_type frequency, time
 		switch_mask = auto_switch_setting.switch_mask_;
 	}
 	if((gpio_in_hw & switch_mask) != switch_setting) {
-		gpio_in_hw &= ~switch_mask;
-		uint32_t new_gpio = gpio_in_hw | switch_setting;
-		check_blade_status(nr_expansion_gpio_write(comm_blade_rf_->blade_rf(),
-			new_gpio, __FILE__, __LINE__), __FILE__, __LINE__);
-		LOG(LCOLLECTION) << "Setting xb gpio to " << new_gpio << ".";
-		uint32_t tmp = 0;
-		check_blade_status(nr_expansion_gpio_read(comm_blade_rf_->blade_rf(),
-			&tmp, __FILE__, __LINE__), __FILE__, __LINE__);
-		if(switch_setting != (tmp & switch_mask))
+		uint32_t check = 0;
+		for(int i = 0; i < 3; ++i) {
+			gpio_in_hw &= ~switch_mask;
+			uint32_t new_gpio = gpio_in_hw | switch_setting;
+			check_blade_status(nr_expansion_gpio_write(comm_blade_rf_->blade_rf(),
+				new_gpio, __FILE__, __LINE__), __FILE__, __LINE__);
+			LOG(LCOLLECTION) << "Setting xb gpio to " << new_gpio << ".";
+			check_blade_status(nr_expansion_gpio_read(comm_blade_rf_->blade_rf(),
+				&check, __FILE__, __LINE__), __FILE__, __LINE__);
+			if(switch_setting == (check & switch_mask))
+				break;
+		}
+		if(switch_setting != (check & switch_mask))
 			throw hardware_error("Unable to set xb gpio pins.");
 	}
 	// BladeRF only accepts data num_samples that are a multiple of 1024.
