@@ -78,8 +78,6 @@ public:
 	measurement_info get_rf_data(frequency_type freq, time_type time_ns, bandwidth_type bandwidth, const gain_type &gain, frequency_type sampling_rate = 0,
 		uint32_t switch_setting = 0, uint32_t switch_mask = 0);
 
-	measurement_info get_rf_data(int num_samples);
-
 	gain_type get_auto_gain(frequency_type freq, bandwidth_type bandwidth, time_type time_ns = 0, frequency_type sampling_rate = 0);
 
 	void initialize_eeprom();

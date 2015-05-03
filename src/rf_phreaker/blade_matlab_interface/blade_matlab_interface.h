@@ -49,11 +49,11 @@ extern "C" {
 	int DLL_PUBLIC get_rf_data(__int64 frequency_hz, int bandwidth_hz, __int64 sampling_rate_hz, int lna_gain, 
 		int rx_gain_vga1, int rx_gain_vga2, float *iq_data, int num_samples, float *signal_level,
 		unsigned int switch_setting, unsigned int switch_mask);
-
+	
 	/*
-	Does not change any lms parameters.  Only transfers IQ data.
+		Automatically sets gain and switch settings.
 	*/
-	int DLL_PUBLIC only_get_rf_data(float *iq_data, int num_samples, float *signal_level);
+	int DLL_PUBLIC auto_get_rf_data(int64_t frequency_hz, int bandwidth_hz, int64_t sampling_rate_hz, float *iq_data, int num_samples, float *sl);
 
 	/*
 		Updates the trim value but does not save to cappeen's or nuand's portion of the eeprom.

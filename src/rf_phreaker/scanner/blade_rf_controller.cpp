@@ -621,78 +621,7 @@ measurement_info blade_rf_controller::get_rf_data(frequency_type frequency, time
 	ipp_helper::check_status(ippsConvert_16s32f(beginning_of_iq,
 		(Ipp32f*)data.get_iq().get(), data.get_iq().length() * 2));
 
-	gain_manager_.update_gain(data);
-
-	ipp_helper::subtract_dc(data.get_iq().get(), data.get_iq().length());
-
-	return data;
-}
-
-measurement_info blade_rf_controller::get_rf_data(int num_samples)
-{
-	uint32_t frequency;
-	uint32_t blade_bandwidth;
-	uint32_t blade_sampling_rate;
-	bladerf_lna_gain tmp_lna_gain;
-	gain_type gain;
-
-	check_blade_comm();
-
-	check_blade_status(nr_get_lna_gain(comm_blade_rf_->blade_rf(), &tmp_lna_gain, __FILE__, __LINE__), __FILE__, __LINE__);
-	gain.lna_gain_ = convert(tmp_lna_gain);
-
-	check_blade_status(nr_get_rxvga1(comm_blade_rf_->blade_rf(), &gain.rxvga1_, __FILE__, __LINE__), __FILE__, __LINE__);
-
-	check_blade_status(nr_get_rxvga2(comm_blade_rf_->blade_rf(), &gain.rxvga2_, __FILE__, __LINE__), __FILE__, __LINE__);
-
-	check_blade_status(nr_get_sample_rate(comm_blade_rf_->blade_rf(), BLADERF_MODULE_RX,
-		&blade_sampling_rate, __FILE__, __LINE__), __FILE__, __LINE__);
-
-	check_blade_status(nr_get_bandwidth(comm_blade_rf_->blade_rf(), BLADERF_MODULE_RX,
-		&blade_bandwidth, __FILE__, __LINE__), __FILE__, __LINE__);
-
-	check_blade_status(nr_get_frequency(comm_blade_rf_->blade_rf(), BLADERF_MODULE_RX,
-		&frequency, __FILE__, __LINE__), __FILE__, __LINE__);
-
-	// BladeRF only accepts data num_samples that are a multiple of 1024.
-	num_samples = add_mod(num_samples, 1024);
-
-	const auto return_bytes = num_samples * 2 * sizeof(int16_t);
-
-	aligned_buffer_.align_array(return_bytes);
-	auto aligned_buffer = aligned_buffer_.get_aligned_array();
-
-	bladerf_metadata metadata;
-
-	int status = 0;
-	for(int i = 0; i < 10; ++i) {
-#ifdef _DEBUG
-		status = nr_sync_rx(comm_blade_rf_->blade_rf(), aligned_buffer,
-			num_samples, &metadata, 0, __FILE__, __LINE__);
-#else
-		status = nr_sync_rx(comm_blade_rf_->blade_rf(), aligned_buffer,
-			num_samples, &metadata, 2500, __FILE__, __LINE__);
-#endif
-		if(status == 0) 
-			break;
-		LOG(LDEBUG) << "Collecting " << return_bytes << " samples failed. Retrying...";
-		disable_blade_rx();
-		enable_blade_rx();
-	}
-	if(status)
-		throw blade_rf_error(std::string("Error collecting data samples.  ") + nr_strerror(status));
-
-	// TODO - make origin time
-	measurement_info data(num_samples, frequency, blade_bandwidth, blade_sampling_rate, gain, std::chrono::milliseconds(0),
-		scanner_blade_rf_->eeprom_.cal_.get_nuand_adjustment(gain.lna_gain_, frequency),
-		scanner_blade_rf_->eeprom_.cal_.get_rf_board_adjustment(frequency, blade_bandwidth),
-		collection_count_++, scanner_blade_rf_->eeprom_.cal_.nuand_serial_);
-
-	for(int i = 0; i < num_samples * 2; ++i)
-		sign_extend_12_bits(reinterpret_cast<int16_t*>(aligned_buffer)[i]);
-
-	ipp_helper::check_status(ippsConvert_16s32f((Ipp16s*)&(*aligned_buffer_.get_aligned_array()),
-		(Ipp32f*)data.get_iq().get(), data.get_iq().length() * 2));
+	gain_manager_.update_gain(data, lna_bypass, lna_mid, lna_max);
 
 	ipp_helper::subtract_dc(data.get_iq().get(), data.get_iq().length());
 

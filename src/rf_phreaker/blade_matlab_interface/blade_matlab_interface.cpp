@@ -217,12 +217,13 @@ int get_rf_data(int64_t frequency_hz, int bandwidth_hz, int64_t sampling_rate_hz
 	return matlab_interface_error_general;
 }
 
-int only_get_rf_data(float *iq_data, int num_samples, float *sl) {
+int auto_get_rf_data(int64_t frequency_hz, int bandwidth_hz, int64_t sampling_rate_hz, float *iq_data, int num_samples, float *sl) {
 	try {
 		check_null(iq_data);
 		// sl is optional.
 
-		auto meas = controller.get_rf_data(num_samples);
+		// Add additional millisecond to num samples to ensure we have enough data.
+		auto meas = controller.get_rf_data_use_auto_gain(frequency_hz, rf_phreaker::convert_to_time(num_samples, sampling_rate_hz) + milli_to_nano(1), bandwidth_hz, sampling_rate_hz);
 
 		memcpy(iq_data, &meas.get_iq()[0], num_samples * sizeof(ipp_32fc_array::data_type_));
 

@@ -87,11 +87,7 @@ TEST(BladeMatlabInterface, TestMain)
 			uint32_t s_mask = 0xffff;
 			EXPECT_EQ(0, get_rf_data(mhz(886), mhz(5), khz(30720), 3, 30, 30, (float*)iq_data.get(), iq_data.length(), &sl, s_setting, s_mask));
 
-			EXPECT_EQ(0, only_get_rf_data((float*)iq_data.get(), iq_data.length(), &sl));
-
 			EXPECT_EQ(0, get_rf_data(mhz(900), mhz(5), khz(30720), 3, 30, 0, (float*)iq_data.get(), iq_data.length(), 0, 0, 0));
-
-			EXPECT_EQ(0, only_get_rf_data((float*)iq_data.get(), iq_data.length(), 0));
 		}
 		int lms_add = 0x23;
 		int lms_value = 0;
