@@ -53,7 +53,8 @@ extern "C" {
 	/*
 		Automatically sets gain and switch settings.
 	*/
-	int DLL_PUBLIC auto_get_rf_data(int64_t frequency_hz, int bandwidth_hz, int64_t sampling_rate_hz, float *iq_data, int num_samples, float *sl);
+	int DLL_PUBLIC auto_get_rf_data(int64_t frequency_hz, int bandwidth_hz, int64_t sampling_rate_hz, float *iq_data, int num_samples, float *sl,
+		int *lna_gain, int *rx_gain_vga1, int *rx_gain_vga2);
 
 	/*
 		Updates the trim value but does not save to cappeen's or nuand's portion of the eeprom.

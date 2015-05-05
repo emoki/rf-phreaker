@@ -217,7 +217,8 @@ int get_rf_data(int64_t frequency_hz, int bandwidth_hz, int64_t sampling_rate_hz
 	return matlab_interface_error_general;
 }
 
-int auto_get_rf_data(int64_t frequency_hz, int bandwidth_hz, int64_t sampling_rate_hz, float *iq_data, int num_samples, float *sl) {
+int auto_get_rf_data(int64_t frequency_hz, int bandwidth_hz, int64_t sampling_rate_hz, float *iq_data, int num_samples, float *sl,
+	int *lna_gain, int *rx_gain_vga1, int *rx_gain_vga2) {
 	try {
 		check_null(iq_data);
 		// sl is optional.
@@ -229,6 +230,14 @@ int auto_get_rf_data(int64_t frequency_hz, int bandwidth_hz, int64_t sampling_ra
 
 		if(sl != nullptr)
 			*sl = calculate_sl(meas);
+
+		auto gain = meas.gain();
+		if(lna_gain != nullptr) 
+			*lna_gain = gain.lna_gain_ == lms::LNA_MAX ? 3 : (gain.lna_gain_ == lms::LNA_MID ? 2 : 1);
+		if(rx_gain_vga1 != nullptr)
+			*rx_gain_vga1 = gain.rxvga1_;
+		if(rx_gain_vga2 != nullptr)
+			*rx_gain_vga2 = gain.rxvga2_;
 
 		return matlab_interface_no_error;
 	}
