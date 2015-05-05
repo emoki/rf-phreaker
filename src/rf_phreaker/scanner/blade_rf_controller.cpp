@@ -482,7 +482,7 @@ measurement_info blade_rf_controller::get_rf_data_use_auto_gain(frequency_type f
 gain_type blade_rf_controller::get_auto_gain(frequency_type freq, bandwidth_type bandwidth, time_type time_ns,
 										frequency_type sampling_rate)
 {
-	if(gain_manager_.in_history(freq, bandwidth))
+	if(gain_manager_.is_gain_valid(freq, bandwidth))
 		return gain_manager_.calculate_new_gain(freq, bandwidth);
 
 	if(time_ns == 0)
@@ -621,6 +621,9 @@ measurement_info blade_rf_controller::get_rf_data(frequency_type frequency, time
 	ipp_helper::check_status(ippsConvert_16s32f(beginning_of_iq,
 		(Ipp32f*)data.get_iq().get(), data.get_iq().length() * 2));
 
+	auto lna_bypass = scanner_blade_rf_->eeprom_.cal_.get_nuand_adjustment(lms::LNA_BYPASS, frequency);
+	auto lna_mid = scanner_blade_rf_->eeprom_.cal_.get_nuand_adjustment(lms::LNA_MID, frequency);
+	auto lna_max = scanner_blade_rf_->eeprom_.cal_.get_nuand_adjustment(lms::LNA_MAX, frequency);
 	gain_manager_.update_gain(data, lna_bypass, lna_mid, lna_max);
 
 	ipp_helper::subtract_dc(data.get_iq().get(), data.get_iq().length());

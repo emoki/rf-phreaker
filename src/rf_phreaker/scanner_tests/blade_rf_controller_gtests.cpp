@@ -85,7 +85,7 @@ TEST(BladeControllerTest, DISABLED_TestBladeControllerGeneral)
 				data = blade.get_rf_data(i, time_ns, bandwidth, gain, sampling_rate);
 				//data = blade.get_rf_data_use_auto_gain(i, time_ns, bandwidth, sampling_rate);
 				auto avg_rms = ipp_helper::calculate_average_rms(data.get_iq().get(), data.get_iq().length());
-				gain_manager::gain_history g_history(data);
+				gain_manager::gain_history g_history(data, 0, 0, 0);
 
 				std::ofstream file("gain_test_nst_plus.txt", std::ios::app);
 				file << i / 1e6 << "\t" << data.gain().rxvga1_ << "\t" << data.gain().rxvga2_ << "\t" << data.gain().rxvga1_ + data.gain().rxvga2_ << "\t"
@@ -97,7 +97,7 @@ TEST(BladeControllerTest, DISABLED_TestBladeControllerGeneral)
 				data = blade.get_rf_data(i, time_ns, bandwidth, gain, sampling_rate);
 				//data = blade.get_rf_data_use_auto_gain(i, time_ns, bandwidth, sampling_rate);
 				auto avg_rms = ipp_helper::calculate_average_rms(data.get_iq().get(), data.get_iq().length());
-				gain_manager::gain_history g_history(data);
+				gain_manager::gain_history g_history(data, 0, 0, 0);
 
 				std::ofstream file("gain_test_nst_plus.txt", std::ios::app);
 				file << i / 1e6 << "\t" << data.gain().rxvga1_ << "\t" << data.gain().rxvga2_ << "\t" << data.gain().rxvga1_ + data.gain().rxvga2_ << "\t"
