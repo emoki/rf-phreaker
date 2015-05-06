@@ -95,6 +95,10 @@ int lte_pdsch_decode(Ipp32fc* inSignal,
 	descrambled_pdcch_llr_buf.zero_out();
 	deinterleaved_llr_buf.zero_out();
 
+	auto debug_lte_pdsch_re = lte_pdsch_re;
+	auto debug_deinterleaved_llr = deinterleaved_llr;
+	auto debug_descrambled_pdcch_llr = descrambled_pdcch_llr;
+
 	unsigned int pdsch_re_count, start_rb_index, end_rb_index, transport_block_size, redundancy_version, k, i;
 	LTEMODULATION modulation_type;
 	unsigned char modulation_order;
@@ -115,15 +119,28 @@ int lte_pdsch_decode(Ipp32fc* inSignal,
 		modulation_order = dci_format_info.pdcch_info_dci_format_1a[dci_index].modulation_order;
 		redundancy_version = dci_format_info.pdcch_info_dci_format_1a[dci_index].redundancy_version;
 		transport_block_size = dci_format_info.pdcch_info_dci_format_1a[dci_index].tbs_size;
-
-		lte_pdsch_get_symbols(inSignal,
-			h_est,
-			pdsch_re_count,
-			LteData,
-			cell_no,
-			sub_frame_index,
-			subframe_start_sample_index,
-			start_rb_index, end_rb_index);
+		int vrb_type = dci_format_info.pdcch_info_dci_format_1a[dci_index].vrb_type;
+		if(vrb_type == LOCALISED_VRB) {
+			lte_pdsch_get_symbols(inSignal,
+				h_est,
+				pdsch_re_count,
+				LteData,
+				cell_no,
+				sub_frame_index,
+				subframe_start_sample_index,
+				start_rb_index, end_rb_index);
+		}
+		else if(vrb_type == DISTRIBUTED_VRB) {
+			lte_pdsch_get_symbols_vrb(inSignal,
+				h_est,
+				pdsch_re_count,
+				LteData,
+				cell_no,
+				sub_frame_index,
+				subframe_start_sample_index,
+				start_rb_index, end_rb_index,
+				dci_format_info);
+		}
 	}
 	else if(dci_type == lte_dci_format_1c) {
 		start_rb_index = dci_format_info.pdcch_info_dci_format_1c[dci_index].start_vrb_idx;
@@ -401,6 +418,7 @@ int lte_pdsch_get_symbols(Ipp32fc* inSignal,
 	unsigned int end_rb) {
 	// Changed the size of fft_index to match that of h_est_pdsch_temp
 	const int fft_index_size = MAX_SUBCARRIERS * OFDM_SYMBOLS_PER_SUBFRAME;
+	const int max_num_symbols = 6144;
 	unsigned int fft_index[fft_index_size], temp;
 
 	for(unsigned int symbol_idx = LteData[cell_no].lteControlSysmbolLenght; symbol_idx < OFDM_SYMBOLS_PER_SUBFRAME; symbol_idx++) {
@@ -450,12 +468,12 @@ int lte_pdsch_get_symbols(Ipp32fc* inSignal,
 
 				pdsch_re_count++;
 				// Temporary bug fix: pdsch_re_count can overstep the fft_index.  Is pdsch_re_count supposed to be reset to 0 in the outer loop?
-				if(pdsch_re_count >= fft_index_size)
+				if(pdsch_re_count > max_num_symbols)
 					break;
 			}
 		}
 		// Temporary bug fix: pdsch_re_count can overstep the fft_index.  Is pdsch_re_count supposed to be reset to 0 in the outer loop?
-		if(pdsch_re_count >= fft_index_size)
+		if(pdsch_re_count > max_num_symbols)
 			break;
 	}
 
@@ -485,6 +503,7 @@ int lte_pdsch_get_symbols_vrb(Ipp32fc* inSignal,
 	const int fft_index_size = MAX_SUBCARRIERS * OFDM_SYMBOLS_PER_SUBFRAME;
 	unsigned int fft_index[fft_index_size], temp, vrb_idx, start_rb, end_rb, odd_rb = LTE_NULL, even_rb = LTE_NULL;
 	unsigned int vrb_prb_slot_map[128][2];
+	const int max_num_symbols = 6144;
 
 	memset(vrb_prb_slot_map, 0, 128 * 2 * sizeof(unsigned int));
 	memset(lte_pdsch_fft_shifted, 0, OFDM_SYMBOLS_PER_SUBFRAME * MAX_FFT_SIZE * sizeof(Ipp32fc));
@@ -620,13 +639,13 @@ int lte_pdsch_get_symbols_vrb(Ipp32fc* inSignal,
 						pdsch_re_count++;
 
 						// Temporary bug fix: pdsch_re_count can overstep the fft_index.  Is pdsch_re_count supposed to be reset to 0 in the outer loop?
-						if(pdsch_re_count >= fft_index_size)
+						if(pdsch_re_count > max_num_symbols)
 							break;
 					}
 				}//kk
 			}//vrb_idx_in
 			// Temporary bug fix: pdsch_re_count can overstep the fft_index.  Is pdsch_re_count supposed to be reset to 0 in the outer loop?
-			if(pdsch_re_count >= fft_index_size)
+			if(pdsch_re_count > max_num_symbols)
 				break;
 			//}
 		} // symbol_idx

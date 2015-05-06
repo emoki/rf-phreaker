@@ -743,7 +743,7 @@ int lte_cc_rate_dematching(Ipp32f *output_llr, Ipp32u output_len, Ipp32f *input_
 **********************************************************************************************************
 */
 int lte_get_info_dci_format_1a(Ipp32u *dci_1a_bits, lte_info_dci_format &dci_format_info, lte_measurements &LteData, unsigned int cell_no) {
-	unsigned char index_dci_1a, bit_position, temp = 0;
+	unsigned char index_dci_1a, bit_position = 0, temp = 0;
 	unsigned int l_crbs = 0, t1 = 0, t2 = 0, numbits_resource_assignment = 0;
 	float fnumbits_resource_assignment = 0;
 
@@ -752,39 +752,40 @@ int lte_get_info_dci_format_1a(Ipp32u *dci_1a_bits, lte_info_dci_format &dci_for
 	dci_format_info.pdcch_info_dci_format_1a[index_dci_1a].dci_format_type = dci_1a_bits[0];
 	dci_format_info.pdcch_info_dci_format_1a[index_dci_1a].vrb_type = dci_1a_bits[1];
 
-	if(dci_format_info.pdcch_info_dci_format_1a[index_dci_1a].vrb_type == LOCALISED_VRB) {
-		fnumbits_resource_assignment = ceil(log((float)LteData[cell_no].numResouceBlocks
-			*(float)(LteData[cell_no].numResouceBlocks + 1) / 2) * LOG2_BASE_E);
+	fnumbits_resource_assignment = ceil(log((float)LteData[cell_no].numResouceBlocks
+		*(float)(LteData[cell_no].numResouceBlocks + 1) / 2) * LOG2_BASE_E);
 
-		numbits_resource_assignment = (unsigned int)fnumbits_resource_assignment;
+	numbits_resource_assignment = (unsigned int)fnumbits_resource_assignment;
 
-		dci_format_info.pdcch_info_dci_format_1a[index_dci_1a].resource_block_assignment = 0x0;
-		for(unsigned int ii = 0; ii < numbits_resource_assignment; ii++) {
-			dci_format_info.pdcch_info_dci_format_1a[index_dci_1a].resource_block_assignment += dci_1a_bits[2 + ii] << (numbits_resource_assignment - 1 - ii);
-			//temp += dci_1a_bits[2+ii]<<(numbits_resource_assignment-1-ii); 
-		}
+	dci_format_info.pdcch_info_dci_format_1a[index_dci_1a].resource_block_assignment = 0x0;
+	for(unsigned int ii = 0; ii < numbits_resource_assignment; ii++) {
+		dci_format_info.pdcch_info_dci_format_1a[index_dci_1a].resource_block_assignment += dci_1a_bits[2 + ii] << (numbits_resource_assignment - 1 - ii);
+		//temp += dci_1a_bits[2+ii]<<(numbits_resource_assignment-1-ii); 
+	}
 
-		t1 = dci_format_info.pdcch_info_dci_format_1a[index_dci_1a].resource_block_assignment / LteData[cell_no].numResouceBlocks;
-		t2 = dci_format_info.pdcch_info_dci_format_1a[index_dci_1a].resource_block_assignment % LteData[cell_no].numResouceBlocks;
+	t1 = dci_format_info.pdcch_info_dci_format_1a[index_dci_1a].resource_block_assignment / LteData[cell_no].numResouceBlocks;
+	t2 = dci_format_info.pdcch_info_dci_format_1a[index_dci_1a].resource_block_assignment % LteData[cell_no].numResouceBlocks;
 
-		if(t1 <= LteData[cell_no].numResouceBlocks / 2) //7.1.6.3,TS36.213
-		{
-			l_crbs = t1 + 1;
-			dci_format_info.pdcch_info_dci_format_1a[index_dci_1a].start_rb_idx = t2;
-			if(l_crbs > LteData[cell_no].numResouceBlocks - dci_format_info.pdcch_info_dci_format_1a[index_dci_1a].start_rb_idx) {
-				l_crbs = LteData[cell_no].numResouceBlocks - t1 + 1;
-				dci_format_info.pdcch_info_dci_format_1a[index_dci_1a].start_rb_idx = LteData[cell_no].numResouceBlocks - t2 - 1;
-			}
-
-		}
-		else {
+	if(t1 <= LteData[cell_no].numResouceBlocks / 2) //7.1.6.3,TS36.213
+	{
+		l_crbs = t1 + 1;
+		dci_format_info.pdcch_info_dci_format_1a[index_dci_1a].start_rb_idx = t2;
+		if(l_crbs > LteData[cell_no].numResouceBlocks - dci_format_info.pdcch_info_dci_format_1a[index_dci_1a].start_rb_idx) {
 			l_crbs = LteData[cell_no].numResouceBlocks - t1 + 1;
 			dci_format_info.pdcch_info_dci_format_1a[index_dci_1a].start_rb_idx = LteData[cell_no].numResouceBlocks - t2 - 1;
 		}
 
 	}
-
+	else {
+		l_crbs = LteData[cell_no].numResouceBlocks - t1 + 1;
+		dci_format_info.pdcch_info_dci_format_1a[index_dci_1a].start_rb_idx = LteData[cell_no].numResouceBlocks - t2 - 1;
+	}
+	
 	dci_format_info.pdcch_info_dci_format_1a[index_dci_1a].end_rb_idx = dci_format_info.pdcch_info_dci_format_1a[index_dci_1a].start_rb_idx + l_crbs - 1;
+
+	if(dci_format_info.pdcch_info_dci_format_1a[index_dci_1a].vrb_type == DISTRIBUTED_VRB) {
+		lte_vrb_to_prb_mapping(dci_format_info, LteData, cell_no, LteData[cell_no].numResouceBlocks >= 50 ? 1 : 0);
+	}
 
 	//Modulation and Coding Scheme
 
@@ -970,6 +971,10 @@ int lte_get_info_dci_format_1c(Ipp32u *dci_1c_bits, lte_info_dci_format &dci_for
 int lte_vrb_to_prb_mapping(lte_info_dci_format &dci_format_info, lte_measurements &LteData, unsigned int cell_no, unsigned char n_gap) {
 	unsigned char row_len = 0, column_len = 0, n_dl_vrb_dash = 0, n_null, n_gap_value, col_idx_odd_slot = 0;
 	unsigned char n_null_row_start, interleave_matrix[32][4], row_idx, col_idx, vrb_num = 0, prb_num = 0, null;
+
+	// Initialize the vrb_to_prb to LTE_NULL.  This ensures we do not accidently use uninitialized zeros when getting the prbs (lte_pdsch_get_symbols_vrb).
+	memset(dci_format_info.vrb_to_prb_mapping_even_slot, LTE_NULL, 128);
+	memset(dci_format_info.vrb_to_prb_mapping_odd_slot, LTE_NULL, 128);
 
 	column_len = lte_vrb_prb_mapping_interleaving_column_len;
 	null = LTE_NULL;
