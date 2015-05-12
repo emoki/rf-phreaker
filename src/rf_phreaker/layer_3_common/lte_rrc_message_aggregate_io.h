@@ -501,13 +501,32 @@ inline std::ostream& header(std::ostream &os, const lte_rrc_message_aggregate &t
 }
 
 inline std::ostream& operator<<(std::ostream &os, const lte_rrc_message_aggregate &t) {
-	os << t.sib1_ << main_delim
-		<< t.sib3_ << main_delim
-		<< t.sib4_ << main_delim
-		<< t.sib5_ << main_delim
-		<< t.sib6_ << main_delim
-		<< t.sib7_ << main_delim
-		<< t.sib8_;
+	if(t.sib1_.decoded_)
+		os << t.sib1_ << main_delim;
+	else
+		os << main_delim;
+	if(t.sib3_.decoded_)
+		os << t.sib3_ << main_delim;
+	else
+		os << main_delim;
+	if(t.sib4_.decoded_)
+		os << t.sib4_ << main_delim;
+	else
+		os << main_delim;
+	if(t.sib5_.decoded_)
+		os << t.sib5_ << main_delim;
+	else
+		os << main_delim;
+	if(t.sib6_.decoded_)
+		os << t.sib6_ << main_delim;
+	else
+		os << main_delim;
+	if(t.sib7_.decoded_)
+		os << t.sib7_ << main_delim;
+	else
+		os << main_delim;
+	if(t.sib8_.decoded_)
+		os << t.sib8_;
 	return os;
 }
 
