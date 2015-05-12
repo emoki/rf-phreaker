@@ -15,7 +15,8 @@
 #include <cstring>
 #include <string>
 
-#include "windows.h"
+#include <algorithm>
+#include <map>
 
 #include "lte_common.h"
 #include "lte_analysis.h"
@@ -58,8 +59,6 @@ Ipp32fc *lte_pdsch_re = lte_pdsch_re_buf.get();
 Ipp32f *lte_pdsch_demod_llr = lte_pdsch_demod_llr_buf.get();
 Ipp32f *descrambled_pdcch_llr = descrambled_pdcch_llr_buf.get();
 Ipp32f *deinterleaved_llr = deinterleaved_llr_buf.get();
-
-extern HANDLE  hConsole;
 
 
 
@@ -120,6 +119,7 @@ int lte_pdsch_decode(Ipp32fc* inSignal,
 		redundancy_version = dci_format_info.pdcch_info_dci_format_1a[dci_index].redundancy_version;
 		transport_block_size = dci_format_info.pdcch_info_dci_format_1a[dci_index].tbs_size;
 		int vrb_type = dci_format_info.pdcch_info_dci_format_1a[dci_index].vrb_type;
+		int gap = dci_format_info.pdcch_info_dci_format_1a[dci_index].n_gap;
 		if(vrb_type == LOCALISED_VRB) {
 			lte_pdsch_get_symbols(inSignal,
 				h_est,
@@ -147,6 +147,7 @@ int lte_pdsch_decode(Ipp32fc* inSignal,
 		end_rb_index = dci_format_info.pdcch_info_dci_format_1c[dci_index].end_vrb_idx;
 		modulation_type = MQPSK;
 		modulation_order = 2;
+		int gap = dci_format_info.pdcch_info_dci_format_1c[dci_index].n_gap;
 
 		transport_block_size = dci_format_info.pdcch_info_dci_format_1c[dci_index].tbs_size;
 
@@ -175,23 +176,6 @@ int lte_pdsch_decode(Ipp32fc* inSignal,
 
 	}
 	//////////////// temp - ecs - testing  
-	else
-		std::cout << "wrong dci format.";
-	//if(modulation_type != MQPSK)
-	//	return 1;
-
-#if 0
-	//lte_get_pdsch_symbols
-	lte_pdsch_get_symbols (inSignal,
-		h_est,
-		pdsch_re_count,
-		LteData,
-		cell_no,
-		sub_frame_index,
-		subframe_start_sample_index,
-		start_rb_index,end_rb_index);
-#endif
-
 
 	/* MIMO Detection - Transmit Diversity */
 	stDiversityDet(lte_pdsch_demod_llr,
@@ -201,6 +185,8 @@ int lte_pdsch_decode(Ipp32fc* inSignal,
 		LteData[cell_no].NumAntennaPorts, // Number of Antennas 
 		modulation_type,//MQPSK,//Modulation Type == QPSK
 		h_noise_var);
+
+	auto debug_h_est_pdsch = h_est_pdsch;
 
 	//Soft desrambling
 	c_init = (n_rnti)*(1 << 14) + q*(1 << 13) + ((sub_frame_index) << 9) + LteData[cell_no].RsRecord.ID;
@@ -232,12 +218,13 @@ int lte_pdsch_decode(Ipp32fc* inSignal,
 	// TODO - ecs removed - if(sub_frame_index==5)
 	{
 
-		temp = 0;
+		auto debug_turbo_decoded_bits = turbo_decoded_bits;
 		//lte_debug_filewrite("CTurboInput.txt",deinterleaved_llr, 612);
 		//lte_debug_filewrite("CTurboOut.txt",turbo_decoded_bits, 200);
 		//turbo_decoded_bits[11] = turbo_decoded_bits[26] = 0;
 		bit2byte(lte_pdsch_byte_seq, turbo_decoded_bits, transport_block_size + LTE_PDSCH_CRC_LEN, 0);
 
+		auto debug_lte_pdsch_byte_seq = lte_pdsch_byte_seq;
 
 		lte_crc_24(&lte_pdsch_crc, lte_pdsch_byte_seq, (transport_block_size + LTE_PDSCH_CRC_LEN) / 8);
 
@@ -316,6 +303,8 @@ int lte_pdsch_get_subframe_map(lte_measurements &LteData,
 	unsigned int cell_no,
 	unsigned int sub_frame_index) {
 	unsigned int v_shift, v_0, v_1, k_0, k_1, kk;
+
+	auto debug_lte_subframe_map = lte_subframe_map;
 
 	memset(lte_subframe_map, ZEROS, OFDM_SYMBOLS_PER_SUBFRAME * MAX_FFT_SIZE * sizeof(unsigned int));
 
@@ -505,6 +494,9 @@ int lte_pdsch_get_symbols_vrb(Ipp32fc* inSignal,
 	unsigned int vrb_prb_slot_map[128][2];
 	const int max_num_symbols = 6144;
 
+	const auto debug_lte_pdsch_fft = lte_pdsch_fft;
+	const auto debug_lte_pdsch_fft_shifted = lte_pdsch_fft_shifted;
+	const auto debug_dci_format_info = dci_format_info;
 	memset(vrb_prb_slot_map, 0, 128 * 2 * sizeof(unsigned int));
 	memset(lte_pdsch_fft_shifted, 0, OFDM_SYMBOLS_PER_SUBFRAME * MAX_FFT_SIZE * sizeof(Ipp32fc));
 
@@ -597,27 +589,37 @@ int lte_pdsch_get_symbols_vrb(Ipp32fc* inSignal,
 	pdsch_re_count = 0; // Should this be moved into the loop?
 	//for (vrb_idx = start_rb_vrb; vrb_idx <= end_rb_vrb; vrb_idx++)
 	{
+		auto lowest_odd = UINT_MAX;
+		auto lowest_odd_idx = 0;
+		auto lowest_even = UINT_MAX;
+		auto lowest_even_idx = 0;
+		for(vrb_idx = start_rb_vrb; vrb_idx <= end_rb_vrb; vrb_idx++) {
+			if(vrb_prb_slot_map[vrb_idx][1] < lowest_odd) {
+				lowest_odd = vrb_prb_slot_map[vrb_idx][1];
+				lowest_odd_idx = vrb_idx;
+			}
+			if(vrb_prb_slot_map[vrb_idx][0] < lowest_even) {
+				lowest_even = vrb_prb_slot_map[vrb_idx][0];
+				lowest_even_idx = vrb_idx;
+			}
+		}
+		int odd_start_idx = lowest_odd_idx;
+		int even_start_idx = lowest_even_idx;
 
 		for(unsigned int symbol_idx = LteData[cell_no].lteControlSysmbolLenght; symbol_idx < OFDM_SYMBOLS_PER_SUBFRAME; symbol_idx++) {
 			for(vrb_idx = start_rb_vrb; vrb_idx <= end_rb_vrb; vrb_idx++) {
 
 
 #if 1
-				if(symbol_idx < 7) // even slot
-				{
-
-					start_rb = end_rb = vrb_prb_slot_map[vrb_idx][0];
+				if(symbol_idx < OFDM_SYMBOLS_PER_SLOT) { // even slot		
+					start_rb = end_rb = vrb_prb_slot_map[(even_start_idx + vrb_idx) % (end_rb_vrb - start_rb_vrb + 1) + start_rb_vrb][0];
 				}
-				else // odd slot
-				{
-					start_rb = end_rb = vrb_prb_slot_map[vrb_idx][0];
-					//start_rb = end_rb = vrb_prb_slot_map[vrb_idx][1];
-
+				else { // odd slot 
+					start_rb = end_rb = vrb_prb_slot_map[(odd_start_idx + vrb_idx) % (end_rb_vrb - start_rb_vrb + 1) + start_rb_vrb][1];
 				}
 #endif
 
-
-				for(unsigned int kk = (start_rb*NUM_SUBCARRIER_PER_RESOURCE_BLOCK); kk<(end_rb + 1)*NUM_SUBCARRIER_PER_RESOURCE_BLOCK; kk++) {
+				for(unsigned int kk = (start_rb * NUM_SUBCARRIER_PER_RESOURCE_BLOCK); kk < (end_rb + 1)*NUM_SUBCARRIER_PER_RESOURCE_BLOCK; kk++) {
 					if(lte_subframe_map[symbol_idx][kk] == lte_re_unused) {
 						if(kk>(LteData[cell_no].numResouceBlocks *NUM_SUBCARRIER_PER_RESOURCE_BLOCK / 2))
 							fft_index[pdsch_re_count] = kk + LteData[cell_no].fft_subcarrier_start_index + 1;
@@ -627,7 +629,6 @@ int lte_pdsch_get_symbols_vrb(Ipp32fc* inSignal,
 							fft_index[pdsch_re_count] = kk + LteData[cell_no].fft_subcarrier_start_index;
 						//fft_index[pdsch_re_count] = 1200 + kk + 1;
 
-
 						lte_pdsch_re[pdsch_re_count] = lte_pdsch_fft_shifted[symbol_idx][fft_index[pdsch_re_count]];
 						for(unsigned int antNum = 0; antNum < LteData[cell_no].NumAntennaPorts; antNum++) {
 							h_est_pdsch_temp[antNum * MAX_SUBCARRIER_MODULATION_SIZE + pdsch_re_count] = h_est[antNum * LteData[cell_no].fftSize * OFDM_SYMBOLS_PER_FRAME
@@ -636,15 +637,20 @@ int lte_pdsch_get_symbols_vrb(Ipp32fc* inSignal,
 								+ fft_index[pdsch_re_count]];
 						}
 
+#ifdef _DEBUG
+						// Debug output to compare against matlab.
+						std::cout << symbol_idx * LteData[cell_no].numResouceBlocks * NUM_SUBCARRIER_PER_RESOURCE_BLOCK + kk + 1 << std::endl;
+#endif
 						pdsch_re_count++;
 
-						// Temporary bug fix: pdsch_re_count can overstep the fft_index.  Is pdsch_re_count supposed to be reset to 0 in the outer loop?
 						if(pdsch_re_count > max_num_symbols)
 							break;
 					}
+					else
+						int i = 0; // Compiled out in release mode - only used for debugging.
 				}//kk
 			}//vrb_idx_in
-			// Temporary bug fix: pdsch_re_count can overstep the fft_index.  Is pdsch_re_count supposed to be reset to 0 in the outer loop?
+
 			if(pdsch_re_count > max_num_symbols)
 				break;
 			//}
@@ -659,6 +665,10 @@ int lte_pdsch_get_symbols_vrb(Ipp32fc* inSignal,
 		}
 	}
 
+#ifdef _DEBUG
+	// Debug output to compare against matlab.
+	std::cout << "\n\n" << std::endl;
+#endif
 
 	return LTE_SUCCESS;
 

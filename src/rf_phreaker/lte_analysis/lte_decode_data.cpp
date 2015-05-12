@@ -248,9 +248,6 @@ int lte_decode_data(const Ipp32fc* SignalSamples,
 				if(!info.decoded_ && info.is_relevant_frame(current_frame_number)) {
 					relevant_si_info = &info;
 					starting_subframe = info.starting_subframe();
-					//si_window_in_subframe = si_scheduling_hints->si_window_length_ms();
-					//looking_for_si = true;
-					//starting_frame = current_frame_number;
 					break;
 				}
 			}

@@ -59,6 +59,10 @@ int lte_turbocoded_sublock_interleaver(Ipp32f* output_sequence,Ipp32f* input_seq
 unsigned int lenght_count=0,total_null_elements=0,num_null_elements_subblock,rr,tt=0,mm=0,xx=0,seq_index=0,k_pi_idx;
 unsigned int k_0,r_subblock,c_subblock = 32,index;
 
+auto debug_output_sequence_0 = output_sequence_0;
+auto debug_output_sequence_1 = output_sequence_1;
+auto debug_output_sequence_2 = output_sequence_2;
+
 r_subblock = num_bits_generated/c_subblock + 1;
 
 k_0 = r_subblock*(2*rv_idx*((3*c_subblock)/8 )+2);

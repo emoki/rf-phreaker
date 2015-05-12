@@ -783,10 +783,6 @@ int lte_get_info_dci_format_1a(Ipp32u *dci_1a_bits, lte_info_dci_format &dci_for
 	
 	dci_format_info.pdcch_info_dci_format_1a[index_dci_1a].end_rb_idx = dci_format_info.pdcch_info_dci_format_1a[index_dci_1a].start_rb_idx + l_crbs - 1;
 
-	if(dci_format_info.pdcch_info_dci_format_1a[index_dci_1a].vrb_type == DISTRIBUTED_VRB) {
-		lte_vrb_to_prb_mapping(dci_format_info, LteData, cell_no, LteData[cell_no].numResouceBlocks >= 50 ? 1 : 0);
-	}
-
 	//Modulation and Coding Scheme
 
 	dci_format_info.pdcch_info_dci_format_1a[index_dci_1a].mcs = 0x0;
@@ -807,17 +803,23 @@ int lte_get_info_dci_format_1a(Ipp32u *dci_1a_bits, lte_info_dci_format &dci_for
 
 	//New Data Indicator
 
+	// If numResourceBlocks is >= 50 then the gap size if dynamicaly chosen below.  If < 50 then always gap1.
+	auto is_gap_size_1 = true;
 	//Checking the N_GAP Values always assuming FORMAT 1A is scrambled by SI-RNTI,P-RNTI,RA-RNTI
 	if(LteData[cell_no].numResouceBlocks >= 50) {
-		if(dci_1a_bits[bit_position])
-			dci_format_info.pdcch_info_dci_format_1a[index_dci_1a].n_gap = 0xFFFF;//TODO -- N_gap2
-		else
-			dci_format_info.pdcch_info_dci_format_1a[index_dci_1a].n_gap = 0xEEEE;//TODO -- N_gap1
-
+		is_gap_size_1 = dci_1a_bits[bit_position] == 0;
 	}
 	else {
 		dci_format_info.pdcch_info_dci_format_1a[index_dci_1a].new_data_indicator_bit = dci_1a_bits[bit_position];
 	}
+
+	if(dci_format_info.pdcch_info_dci_format_1a[index_dci_1a].vrb_type == DISTRIBUTED_VRB) {
+		lte_vrb_to_prb_mapping(dci_format_info, LteData, cell_no, is_gap_size_1 ? 0 : 1);
+	}
+
+	// Populate n_gap for lte_pdsch_get_symbols_vrb.
+	dci_format_info.pdcch_info_dci_format_1a[index_dci_1a].n_gap = is_gap_size_1 ? LteData[cell_no].n_gap_1 : LteData[cell_no].n_gap_2;
+
 
 	bit_position = bit_position + 1;
 
@@ -839,18 +841,19 @@ int lte_get_info_dci_format_1a(Ipp32u *dci_1a_bits, lte_info_dci_format &dci_for
 	//Downlink Assignment Index - for TDD only
 
 	//Consulting Table 7.1.7.1-1,TS36.213
+	// Because we assume DCI 1A is scrambled with SI-RNTI the Qm (modulation order) should always be 2 (QPSK).
+	dci_format_info.pdcch_info_dci_format_1a[index_dci_1a].lte_moduation_type = MQPSK;
+	//dci_format_info.pdcch_info_dci_format_1a[index_dci_1a].modulation_order = 2;
 	dci_format_info.pdcch_info_dci_format_1a[index_dci_1a].modulation_order =
 		modulation_tbs_index[dci_format_info.pdcch_info_dci_format_1a[index_dci_1a].mcs][0];
 	dci_format_info.pdcch_info_dci_format_1a[index_dci_1a].tbs_index = dci_format_info.pdcch_info_dci_format_1a[index_dci_1a].mcs;
-
-	//modulation_tbs_index[dci_format_info.pdcch_info_dci_format_1a[index_dci_1a].mcs][1];
+	//dci_format_info.pdcch_info_dci_format_1a[index_dci_1a].tbs_index = modulation_tbs_index[dci_format_info.pdcch_info_dci_format_1a[index_dci_1a].mcs][1];
 
 
 	dci_format_info.pdcch_info_dci_format_1a[index_dci_1a].tbs_size =
 		transport_block_size_table[dci_format_info.pdcch_info_dci_format_1a[index_dci_1a].tbs_index][dci_format_info.pdcch_info_dci_format_1a[index_dci_1a].n_1a_prb - 1];
 
 	// We assume that format 1A is using SI-RNTI.  Therefore it always has a modulation type of MQPSK.
-	dci_format_info.pdcch_info_dci_format_1a[index_dci_1a].lte_moduation_type = MQPSK;
 	//switch(dci_format_info.pdcch_info_dci_format_1a[index_dci_1a].modulation_order)
 	//{
 	//	case(lte_modulation_qpsk):
@@ -903,6 +906,9 @@ int lte_get_info_dci_format_1c(Ipp32u *dci_1c_bits, lte_info_dci_format &dci_for
 	}
 
 	lte_vrb_to_prb_mapping(dci_format_info, LteData, cell_no, dci_format_info.pdcch_info_dci_format_1c[index_dci_1c].n_gap);
+
+	// Populate n_gap for lte_pdsch_get_symbols_vrb.
+	dci_format_info.pdcch_info_dci_format_1c[index_dci_1c].n_gap = dci_format_info.pdcch_info_dci_format_1c[index_dci_1c].n_gap == 0 ? LteData[cell_no].n_gap_1 : LteData[cell_no].n_gap_2;
 
 	dci_format_info.pdcch_info_dci_format_1c[index_dci_1c].resource_block_assignment = 0;
 
