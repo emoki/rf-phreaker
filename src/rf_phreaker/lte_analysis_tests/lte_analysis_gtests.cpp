@@ -55,9 +55,15 @@ TEST(LteAnalysisTests, TestGeneral)
 				else
 					file >> info;
 
-				//std::ofstream t(folder_path + "old_format_" + prefix + boost::lexical_cast<std::string>(i)+suffix);
-				//t << info;
-				//continue;
+				{
+					//std::ofstream t(folder_path + "old_format_" + prefix + boost::lexical_cast<std::string>(i)+suffix);
+					//t << info;
+					//continue;
+					//std::ofstream t(folder_path + "new_format_" + prefix + boost::lexical_cast<std::string>(i)+suffix, std::ios::binary);
+					//boost::archive::binary_oarchive oa(t);
+					//oa & info;
+					//continue;
+				}
 
 				lte_measurements lte_meas;
 				
