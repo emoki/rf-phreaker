@@ -57,6 +57,16 @@ public:
 		return *this;
 	}
 
+	// Change these so it handles extended cyclic prefix.
+	int ofdm_symbols_per_slot() {
+		return OFDM_SYMBOLS_PER_SLOT;
+	}
+
+	// Change these so it handles extended cyclic prefix.
+	int ofdm_symbols_per_subframe() {
+		return OFDM_SYMBOLS_PER_SUBFRAME;
+	}
+
 	void swap(lte_measurement &meas) {
 		std::swap(meas.PschRecord, PschRecord);
 		std::swap(meas.SschRecord, SschRecord);

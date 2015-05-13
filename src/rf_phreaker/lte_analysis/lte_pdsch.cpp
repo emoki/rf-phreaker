@@ -94,10 +94,6 @@ int lte_pdsch_decode(Ipp32fc* inSignal,
 	descrambled_pdcch_llr_buf.zero_out();
 	deinterleaved_llr_buf.zero_out();
 
-	auto debug_lte_pdsch_re = lte_pdsch_re;
-	auto debug_deinterleaved_llr = deinterleaved_llr;
-	auto debug_descrambled_pdcch_llr = descrambled_pdcch_llr;
-
 	unsigned int pdsch_re_count, start_rb_index, end_rb_index, transport_block_size, redundancy_version, k, i;
 	LTEMODULATION modulation_type;
 	unsigned char modulation_order;
@@ -177,6 +173,9 @@ int lte_pdsch_decode(Ipp32fc* inSignal,
 	}
 	//////////////// temp - ecs - testing  
 
+	auto lte_pdsch_demod_llr_debug = lte_pdsch_demod_llr;
+	auto h_est_pdsch_debug = h_est_pdsch;
+	auto lte_pdsch_re_debug = lte_pdsch_re;
 	/* MIMO Detection - Transmit Diversity */
 	stDiversityDet(lte_pdsch_demod_llr,
 		lte_pdsch_re, // PDSCH Modulation Symbols - Resource Elements
@@ -186,27 +185,30 @@ int lte_pdsch_decode(Ipp32fc* inSignal,
 		modulation_type,//MQPSK,//Modulation Type == QPSK
 		h_noise_var);
 
-	auto debug_h_est_pdsch = h_est_pdsch;
 
 	//Soft desrambling
 	c_init = (n_rnti)*(1 << 14) + q*(1 << 13) + ((sub_frame_index) << 9) + LteData[cell_no].RsRecord.ID;
 	//c_init = 1073728051;
 
+	auto scrambling_seq_pdsch_debug = scrambling_seq_pdsch;
 	generate_PN_seq(scrambling_seq_pdsch, //PDCCH Scambling Sequence
 		c_init, //c_init
 		pdsch_re_count*modulation_order);
 
+	auto descrambled_pdcch_llr_debug = descrambled_pdcch_llr;
 	softDeSrambling(descrambled_pdcch_llr,  // Output Descrambled LLR Data
 		lte_pdsch_demod_llr,    //Input LLR data
 		pdsch_re_count*modulation_order,      //lenght of the sequence
 		scrambling_seq_pdsch);   //Scrambling bits
 
 
+	auto deinterleaved_llr_debug = deinterleaved_llr;
 	//Turbo coded subblock deinterleaver
 	lte_turbocoded_sublock_interleaver(deinterleaved_llr, descrambled_pdcch_llr, pdsch_re_count*modulation_order,
 		transport_block_size + LTE_PDSCH_CRC_LEN + LTE_PDSCH_TURBO_TAIL_BITS,
 		redundancy_version);
 	//Turbo decoder
+	auto turbo_decoded_bits_debug = turbo_decoded_bits;
 	clock_t begin_turbo = clock();
 	lte_turbo_code_decoder(deinterleaved_llr, turbo_decoded_bits, transport_block_size + LTE_PDSCH_CRC_LEN, LTE_TURBO_CODE_NUM_ITERATION);
 	//lte_turbo_code_decoder(deinterleaved_llr, turbo_decoded_bits, transport_block_size + LTE_PDSCH_CRC_LEN, 5);
@@ -218,13 +220,12 @@ int lte_pdsch_decode(Ipp32fc* inSignal,
 	// TODO - ecs removed - if(sub_frame_index==5)
 	{
 
-		auto debug_turbo_decoded_bits = turbo_decoded_bits;
 		//lte_debug_filewrite("CTurboInput.txt",deinterleaved_llr, 612);
 		//lte_debug_filewrite("CTurboOut.txt",turbo_decoded_bits, 200);
 		//turbo_decoded_bits[11] = turbo_decoded_bits[26] = 0;
 		bit2byte(lte_pdsch_byte_seq, turbo_decoded_bits, transport_block_size + LTE_PDSCH_CRC_LEN, 0);
 
-		auto debug_lte_pdsch_byte_seq = lte_pdsch_byte_seq;
+		auto lte_pdsch_byte_seq_debug = lte_pdsch_byte_seq;
 
 		lte_crc_24(&lte_pdsch_crc, lte_pdsch_byte_seq, (transport_block_size + LTE_PDSCH_CRC_LEN) / 8);
 
@@ -306,41 +307,62 @@ int lte_pdsch_get_subframe_map(lte_measurements &LteData,
 
 	auto debug_lte_subframe_map = lte_subframe_map;
 
+	auto n_symb = LteData[cell_no].ofdm_symbols_per_slot();
+
 	memset(lte_subframe_map, ZEROS, OFDM_SYMBOLS_PER_SUBFRAME * MAX_FFT_SIZE * sizeof(unsigned int));
 
-	//Determine synchronisaton symbol locations
-	{
-		for(int nn = -5; nn < 67; nn++) {
-			kk = nn - 31 + (LteData[cell_no].numResouceBlocks *NUM_SUBCARRIER_PER_RESOURCE_BLOCK) / 2;
+	// Determine primary sync signal locations - refer to 136.211 6.11.1
+	// Only handles FDD.  
+	// Note - it looks like the reserve subcarriers are only for frame structure 2 but it appears in
+	// matlab that they are reserved for frame structure 1 as well - so we do it.
+	if(sub_frame_index == 0 || sub_frame_index == 5) {
+		for(int nn = -5; nn <= 66; nn++) {
+			kk = nn - 31 + (LteData[cell_no].numResouceBlocks * NUM_SUBCARRIER_PER_RESOURCE_BLOCK) / 2;
 			if((nn < 0) || (nn>61)) {
-				lte_subframe_map[5][kk] = lte_re_reserved;
-				lte_subframe_map[6][kk] = lte_re_reserved;
+				lte_subframe_map[n_symb - 1][kk] = lte_re_reserved; // last OFDM symbol in slots 0 and 10
 			}
 			else {
-				lte_subframe_map[5][kk] = lte_re_sync_signal;
-				lte_subframe_map[6][kk] = lte_re_sync_signal;
+				lte_subframe_map[n_symb - 1][kk] = lte_re_sync_signal; // last OFDM symbol in slots 0 and 10
 			}
 		}
-
-
+	}
+	// Determine secondary sync signal locations - 136.211 6.11.2
+	// Only handles FDD.  
+	if(sub_frame_index == 0 || sub_frame_index == 5) {
+		for(int nn = -5; nn <= 66; nn++) {
+			kk = nn - 31 + (LteData[cell_no].numResouceBlocks * NUM_SUBCARRIER_PER_RESOURCE_BLOCK) / 2;
+			if((nn < 0) || (nn>61)) {
+				lte_subframe_map[n_symb - 2][kk] = lte_re_reserved;
+			}
+			else {
+				lte_subframe_map[n_symb - 2][kk] = lte_re_sync_signal;
+			}
+		}
 	}
 
-	//Determine reference signal symbol locations - 6.10.1.2, TS36.211
-
+	////Determine reference signal symbol locations - 6.10.1.2, TS36.211
+	// Antenna port 0
 	v_shift = LteData[cell_no].RsRecord.ID % 6;
 
-	v_0 = 0;
-	v_1 = 3;
+	// Antenna port 0
+	if((LteData[cell_no].NumAntennaPorts - 1) >= 0) {
+		v_0 = 0;
+		v_1 = 3;
 
-	k_0 = (v_shift + v_0) % 6;
-	k_1 = (v_shift + v_1) % 6;
+		k_0 = (v_shift + v_0) % 6;
+		k_1 = (v_shift + v_1) % 6;
 
-	for(unsigned int mm = 0; mm < 2 * LteData[cell_no].numResouceBlocks; mm++) {
-		lte_subframe_map[0][6 * mm + k_0] = lte_subframe_map[7][6 * mm + k_0] = lte_re_reference_signal;
-		lte_subframe_map[4][6 * mm + k_1] = lte_subframe_map[11][6 * mm + k_1] = lte_re_reference_signal;
+		for(unsigned int mm = 0; mm < 2 * LteData[cell_no].numResouceBlocks; mm++) {
+			// slot n0
+			lte_subframe_map[0][6 * mm + k_0] = lte_re_reference_signal;
+			lte_subframe_map[n_symb - 3][6 * mm + k_1] = lte_re_reference_signal;
+			// slot n1
+			lte_subframe_map[n_symb][6 * mm + k_0] = lte_re_reference_signal;
+			lte_subframe_map[n_symb * 2 - 3][6 * mm + k_1] = lte_re_reference_signal;
+		}
 	}
-
-	if((LteData[cell_no].NumAntennaPorts) >= 2) {
+	// Antenna port 1
+	if((LteData[cell_no].NumAntennaPorts - 1) >= 1) {
 		v_0 = 3;
 		v_1 = 0;
 
@@ -348,43 +370,63 @@ int lte_pdsch_get_subframe_map(lte_measurements &LteData,
 		k_1 = (v_shift + v_1) % 6;
 
 		for(unsigned int mm = 0; mm < 2 * LteData[cell_no].numResouceBlocks; mm++) {
-			lte_subframe_map[0][6 * mm + k_0] = lte_subframe_map[7][6 * mm + k_0] = lte_re_reference_signal;
-			lte_subframe_map[4][6 * mm + k_1] = lte_subframe_map[11][6 * mm + k_1] = lte_re_reference_signal;
+			// slot n0
+			lte_subframe_map[0][6 * mm + k_0] = lte_re_reference_signal;
+			lte_subframe_map[n_symb - 3][6 * mm + k_1] = lte_re_reference_signal;
+			// slot n1
+			lte_subframe_map[n_symb][6 * mm + k_0] = lte_re_reference_signal;
+			lte_subframe_map[n_symb * 2 - 3][6 * mm + k_1] = lte_re_reference_signal;
 		}
 
 	}
 
-	if((LteData[cell_no].NumAntennaPorts) >= 3) {
+	// Antenna port 2
+	if((LteData[cell_no].NumAntennaPorts - 1) >= 2) {
 
-		v_0 = 3 * ((2 * sub_frame_index) % 2);
+		v_0 = 3 * ((2 * sub_frame_index) % 2); // slot n0 
+		v_1 = 3 * ((2 * sub_frame_index + 1) % 2); // slot n1 
 		k_0 = (v_shift + v_0) % 6;
+		k_1 = (v_shift + v_1) % 6;
 		for(unsigned int mm = 0; mm < 2 * LteData[cell_no].numResouceBlocks; mm++) {
-			lte_subframe_map[1][6 * mm + k_0] = lte_subframe_map[8][6 * mm + k_0] = lte_re_reference_signal;
+			lte_subframe_map[1][6 * mm + k_0] = lte_re_reference_signal;
+			lte_subframe_map[n_symb + 1][6 * mm + k_1] = lte_re_reference_signal;
 		}
 
 	}
 
+	// Antenna port 3
+	if((LteData[cell_no].NumAntennaPorts - 1) >= 3) {
 
-	if((LteData[cell_no].NumAntennaPorts) >= 3) {
-
-		v_0 = 3 + 3 * ((2 * sub_frame_index) % 2);
+		v_0 = 3 + 3 * ((2 * sub_frame_index) % 2); // slot 0 of subframe
+		v_1 = 3 + 3 * ((2 * sub_frame_index + 1) % 2); // slot 1 of subframe
 		k_0 = (v_shift + v_0) % 6;
+		k_1 = (v_shift + v_1) % 6;
 		for(unsigned int mm = 0; mm < 2 * LteData[cell_no].numResouceBlocks; mm++) {
-			lte_subframe_map[1][6 * mm + k_0] = lte_subframe_map[8][6 * mm + k_0] = lte_re_reference_signal;
+			lte_subframe_map[1][6 * mm + k_0] = lte_re_reference_signal;
+			lte_subframe_map[n_symb + 1][6 * mm + k_1] = lte_re_reference_signal;
 		}
-
 	}
 
 	//Determine PBCH symbol locations
 	if(sub_frame_index == 0) {
 		k_0 = (LteData[cell_no].numResouceBlocks *NUM_SUBCARRIER_PER_RESOURCE_BLOCK) / 2 - 36; //6.6.4, TS36.211
-		for(unsigned int kk = 0; kk < 72; kk++) {
-			lte_subframe_map[7][k_0 + kk] = lte_subframe_map[8][k_0 + kk] = lte_re_pbch;
-			lte_subframe_map[9][k_0 + kk] = lte_subframe_map[10][k_0 + kk] = lte_re_pbch;
+		for(unsigned int kk = 0; kk <= 71; kk++) {
+			lte_subframe_map[n_symb][k_0 + kk] = lte_subframe_map[n_symb + 1][k_0 + kk] = lte_re_pbch;
+			lte_subframe_map[n_symb + 2][k_0 + kk] = lte_subframe_map[n_symb + 3][k_0 + kk] = lte_re_pbch;
 		}
-
 	}
 
+#ifdef _DEBUG
+	std::ofstream lte_map("lte_map.txt");
+	lte_map << "matlab_idx\tsym_0\tsym_1\tsym_2\tsym_3\tsym_4\tsym_5\tsym_6\tsym_7\tsym_8\tsym_9\tsym_10\tsym_11\tsym_12\tsym_13\n";
+	for(auto j = 0; j < MAX_FFT_SIZE; ++j) {
+		lte_map << (j + 1) << "\t";
+		for(auto i = 0; i < OFDM_SYMBOLS_PER_SUBFRAME; ++i) {
+			lte_map << lte_subframe_map[i][j] << "\t";
+		}
+		lte_map << "\n";
+	}
+#endif
 	return LTE_SUCCESS;
 }
 
@@ -585,6 +627,10 @@ int lte_pdsch_get_symbols_vrb(Ipp32fc* inSignal,
 	}
 #endif
 
+#ifdef _DEBUG
+	// Debug output to compare against matlab.
+	static std::ofstream vrb_debug("vrb_debug.txt");
+#endif
 
 	pdsch_re_count = 0; // Should this be moved into the loop?
 	//for (vrb_idx = start_rb_vrb; vrb_idx <= end_rb_vrb; vrb_idx++)
@@ -638,8 +684,7 @@ int lte_pdsch_get_symbols_vrb(Ipp32fc* inSignal,
 						}
 
 #ifdef _DEBUG
-						// Debug output to compare against matlab.
-						std::cout << symbol_idx * LteData[cell_no].numResouceBlocks * NUM_SUBCARRIER_PER_RESOURCE_BLOCK + kk + 1 << std::endl;
+						vrb_debug << symbol_idx * LteData[cell_no].numResouceBlocks * NUM_SUBCARRIER_PER_RESOURCE_BLOCK + kk + 1 << std::endl;
 #endif
 						pdsch_re_count++;
 
@@ -667,7 +712,7 @@ int lte_pdsch_get_symbols_vrb(Ipp32fc* inSignal,
 
 #ifdef _DEBUG
 	// Debug output to compare against matlab.
-	std::cout << "\n\n" << std::endl;
+	vrb_debug << "\n\n" << std::endl;
 #endif
 
 	return LTE_SUCCESS;
