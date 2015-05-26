@@ -20,8 +20,8 @@
 
 namespace rf_phreaker {
 
-/* Static Allocation of  memory for Channel Estimates per frame for all the antennas */
-Ipp32fc h_est[OFDM_SYMBOLS_PER_FRAME * NUM_FRAMES * MAX_FFT_SIZE * NUM_ANTENNA_MAX];
+/* Static pointer to Channel Estimates per frame for all the antennas */
+Ipp32fc *h_est;
 
 // TODO - signal_max_size should be dynamic.
 static int signal_max_size = 655345;
@@ -38,6 +38,10 @@ int lte_decode_data(const Ipp32fc* SignalSamples,
 	lte_si_info_group *si_scheduling_hints,
 	std::atomic_bool *is_cancelled = nullptr) {
 	//unsigned int current_frame_number = 0;
+
+	// Static allocation of h_est - helps with debugging.  
+	static ipp_32fc_array h_est_buf(OFDM_SYMBOLS_PER_FRAME * NUM_FRAMES * MAX_FFT_SIZE * NUM_ANTENNA_MAX);
+	h_est = h_est_buf.get();
 
 	// TODO - Declaring the signal statically is OK for now because the processing functions are protected by a mutex 
 	// so only one thread will enter this function at a time.  However once multhreading is implmented we should switch it to 
@@ -277,8 +281,9 @@ int lte_decode_data(const Ipp32fc* SignalSamples,
 				//exit(0);
 			}
 
-
-
+#ifdef OUTPUT_LTE_DEBUG
+			h_est_buf.output_matlab_compatible_array("h_est.txt");
+#endif
 			/* Process Subframes*/
 			for(unsigned int subFrameIndex = starting_frame == current_frame_number ? starting_subframe : 0; subFrameIndex < NUM_SUBFRAMES_PER_FRAME; ++subFrameIndex) {
 				

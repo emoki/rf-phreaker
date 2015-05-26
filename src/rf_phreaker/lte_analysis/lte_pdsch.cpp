@@ -35,6 +35,8 @@
 #include "rf_phreaker/layer_3_common/lte_rrc_message_aggregate.h"
 #include "rf_phreaker/lte_analysis/lte_io.h"
 
+//#define OUTPUT_LTE_DEBUG
+
 namespace rf_phreaker {
 
 unsigned int lte_subframe_map[OFDM_SYMBOLS_PER_SUBFRAME][MAX_FFT_SIZE];
@@ -93,13 +95,21 @@ int lte_pdsch_decode(Ipp32fc* inSignal,
 	lte_pdsch_demod_llr_buf.zero_out();
 	descrambled_pdcch_llr_buf.zero_out();
 	deinterleaved_llr_buf.zero_out();
+	auto turbo_decoded_bits_debug = turbo_decoded_bits;
+	auto deinterleaved_llr_debug = deinterleaved_llr;
+	auto descrambled_pdcch_llr_debug = descrambled_pdcch_llr;
+	auto scrambling_seq_pdsch_debug = scrambling_seq_pdsch;
+	auto lte_pdsch_demod_llr_debug = lte_pdsch_demod_llr;
+	auto h_est_pdsch_debug = h_est_pdsch;
+	auto lte_pdsch_re_debug = lte_pdsch_re;
+	auto lte_pdsch_byte_seq_debug = lte_pdsch_byte_seq;
 
 	unsigned int pdsch_re_count, start_rb_index, end_rb_index, transport_block_size, redundancy_version, k, i;
 	LTEMODULATION modulation_type;
 	unsigned char modulation_order;
 	int c_init;
-	unsigned int n_rnti = 0xFFFF, q = 0, temp, lte_pdsch_crc;
-
+	unsigned int n_rnti = 0xFFFF, temp, lte_pdsch_crc;
+	unsigned int q = 0; // For single port and transmit diversity only 1 codeword is allowed hence q = 0.
 	h_noise_var[0] = h_noise_var[1] = 10000.0;//raj: 4th Oct 2014
 	//h_noise_var[0] = h_noise_var[1] = 100.0;
 	//h_noise_var[0] = h_noise_var[1] = 169800.0;
@@ -173,9 +183,7 @@ int lte_pdsch_decode(Ipp32fc* inSignal,
 	}
 	//////////////// temp - ecs - testing  
 
-	auto lte_pdsch_demod_llr_debug = lte_pdsch_demod_llr;
-	auto h_est_pdsch_debug = h_est_pdsch;
-	auto lte_pdsch_re_debug = lte_pdsch_re;
+
 	/* MIMO Detection - Transmit Diversity */
 	stDiversityDet(lte_pdsch_demod_llr,
 		lte_pdsch_re, // PDSCH Modulation Symbols - Resource Elements
@@ -186,29 +194,25 @@ int lte_pdsch_decode(Ipp32fc* inSignal,
 		h_noise_var);
 
 
-	//Soft desrambling
+	//Soft desrambling 
 	c_init = (n_rnti)*(1 << 14) + q*(1 << 13) + ((sub_frame_index) << 9) + LteData[cell_no].RsRecord.ID;
-	//c_init = 1073728051;
 
-	auto scrambling_seq_pdsch_debug = scrambling_seq_pdsch;
 	generate_PN_seq(scrambling_seq_pdsch, //PDCCH Scambling Sequence
 		c_init, //c_init
 		pdsch_re_count*modulation_order);
 
-	auto descrambled_pdcch_llr_debug = descrambled_pdcch_llr;
 	softDeSrambling(descrambled_pdcch_llr,  // Output Descrambled LLR Data
 		lte_pdsch_demod_llr,    //Input LLR data
 		pdsch_re_count*modulation_order,      //lenght of the sequence
 		scrambling_seq_pdsch);   //Scrambling bits
 
 
-	auto deinterleaved_llr_debug = deinterleaved_llr;
 	//Turbo coded subblock deinterleaver
 	lte_turbocoded_sublock_interleaver(deinterleaved_llr, descrambled_pdcch_llr, pdsch_re_count*modulation_order,
 		transport_block_size + LTE_PDSCH_CRC_LEN + LTE_PDSCH_TURBO_TAIL_BITS,
 		redundancy_version);
+
 	//Turbo decoder
-	auto turbo_decoded_bits_debug = turbo_decoded_bits;
 	clock_t begin_turbo = clock();
 	lte_turbo_code_decoder(deinterleaved_llr, turbo_decoded_bits, transport_block_size + LTE_PDSCH_CRC_LEN, LTE_TURBO_CODE_NUM_ITERATION);
 	//lte_turbo_code_decoder(deinterleaved_llr, turbo_decoded_bits, transport_block_size + LTE_PDSCH_CRC_LEN, 5);
@@ -217,74 +221,78 @@ int lte_pdsch_decode(Ipp32fc* inSignal,
 	//CRC Check
 	//lte_debug_filewrite("CDeinterleaved_3MHZ.txt",deinterleaved_llr, 552);
 
-	// TODO - ecs removed - if(sub_frame_index==5)
-	{
 
-		//lte_debug_filewrite("CTurboInput.txt",deinterleaved_llr, 612);
-		//lte_debug_filewrite("CTurboOut.txt",turbo_decoded_bits, 200);
-		//turbo_decoded_bits[11] = turbo_decoded_bits[26] = 0;
-		bit2byte(lte_pdsch_byte_seq, turbo_decoded_bits, transport_block_size + LTE_PDSCH_CRC_LEN, 0);
+	//lte_debug_filewrite("CTurboInput.txt",deinterleaved_llr, 612);
+	//lte_debug_filewrite("CTurboOut.txt",turbo_decoded_bits, 200);
+	//turbo_decoded_bits[11] = turbo_decoded_bits[26] = 0;
+	bit2byte(lte_pdsch_byte_seq, turbo_decoded_bits, transport_block_size + LTE_PDSCH_CRC_LEN, 0);
 
-		auto lte_pdsch_byte_seq_debug = lte_pdsch_byte_seq;
 
-		lte_crc_24(&lte_pdsch_crc, lte_pdsch_byte_seq, (transport_block_size + LTE_PDSCH_CRC_LEN) / 8);
+	lte_crc_24(&lte_pdsch_crc, lte_pdsch_byte_seq, (transport_block_size + LTE_PDSCH_CRC_LEN) / 8);
 
-		if(lte_pdsch_crc == 0) {
+#ifdef OUTPUT_LTE_DEBUG
+	descrambled_pdcch_llr_buf.output_matlab_compatible_array("descrambled_pdcch_llr.txt");
+	lte_pdsch_demod_llr_buf.output_matlab_compatible_array("pdsch_demod_llr.txt");
+	lte_pdsch_re_buf.output_matlab_compatible_array("lte_pdsch_re.txt");
+	h_est_pdsch_buf.output_matlab_compatible_array("h_est_pdsch.txt");
+	descrambled_pdcch_llr_buf.output_matlab_compatible_array("descrambled_pdcch_llr.txt");
+	deinterleaved_llr_buf.output_matlab_compatible_array("deinterleaved_llr.txt");
+#endif
 
-			clock_t begin_asn = clock();
+	if(lte_pdsch_crc == 0) {
 
-			lte_asn1_decoder decoder;
+		clock_t begin_asn = clock();
 
-			layer_3_information::lte_rrc_message_aggregate tmp;
-			decoder.decode_bcch_bch_message(lte_pdsch_byte_seq, 512, 0, tmp);
+		lte_asn1_decoder decoder;
 
-			// Only update sibs.
-			if(tmp.sib1_.decoded_) {
-				LteData[cell_no].layer_3_.mcc_ = tmp.mcc_;
-				LteData[cell_no].layer_3_.mnc_ = tmp.mnc_;
-				LteData[cell_no].layer_3_.lac_ = tmp.lac_;
-				LteData[cell_no].layer_3_.cid_ = tmp.cid_;
-				LteData[cell_no].layer_3_.sib1_ = tmp.sib1_;
-				LteData[cell_no].si_window = tmp.sib1_.si_window_length_ms_ != -1 ? tmp.sib1_.si_window_length_ms_ : LTE_NULL;
-			}
-			if(tmp.sib3_.decoded_) {
-				LteData[cell_no].layer_3_.sib3_ = tmp.sib3_;
-			}
-			if(tmp.sib4_.decoded_) {
-				LteData[cell_no].layer_3_.sib4_ = tmp.sib4_;
-			}
-			if(tmp.sib5_.decoded_) {
-				LteData[cell_no].layer_3_.sib5_ = tmp.sib5_;
-			}
-			if(tmp.sib6_.decoded_) {
-				LteData[cell_no].layer_3_.sib6_ = tmp.sib6_;
-			}
-			if(tmp.sib7_.decoded_) {
-				LteData[cell_no].layer_3_.sib7_ = tmp.sib7_;
-			}
-			if(tmp.sib8_.decoded_) {
-				LteData[cell_no].layer_3_.sib8_ = tmp.sib8_;
-			}
+		layer_3_information::lte_rrc_message_aggregate tmp;
+		decoder.decode_bcch_bch_message(lte_pdsch_byte_seq, 512, 0, tmp);
 
-			clock_t end_asn = clock();
-			//std::cout << "Lte ASN Time elapsed: " << lte_diffclock(end_asn,begin_asn) << " ms\n";
-
-			//std::cout<<"\n Decoded PDSCH \n";
-
-			//static std::ofstream file("debug_lte_layer_3_bitstream.txt");
-			//static bool write_header = true;
-			//if(write_header) {
-			//	write_header = false;
-			//	file << "sub_frame_index\tsubframe_start_sample_index\t";
-			//	output_lte_meas_debug_header(file);
-			//}
-			//file << sub_frame_index << "\t" << subframe_start_sample_index << "\t" << LteData[cell_no] << "\t";
-			//for(uint32_t i = 0, end = 512; i < end; ++i)
-			//	file << std::hex << std::setw(2) << std::setfill('0') << (int)lte_pdsch_byte_seq[i] << " ";
-			//file << std::dec << "\t" << tmp << std::endl;
-			return LTE_SUCCESS;
+		// Only update sibs.
+		if(tmp.sib1_.decoded_) {
+			LteData[cell_no].layer_3_.mcc_ = tmp.mcc_;
+			LteData[cell_no].layer_3_.mnc_ = tmp.mnc_;
+			LteData[cell_no].layer_3_.lac_ = tmp.lac_;
+			LteData[cell_no].layer_3_.cid_ = tmp.cid_;
+			LteData[cell_no].layer_3_.sib1_ = tmp.sib1_;
+			LteData[cell_no].si_window = tmp.sib1_.si_window_length_ms_ != -1 ? tmp.sib1_.si_window_length_ms_ : LTE_NULL;
+		}
+		if(tmp.sib3_.decoded_) {
+			LteData[cell_no].layer_3_.sib3_ = tmp.sib3_;
+		}
+		if(tmp.sib4_.decoded_) {
+			LteData[cell_no].layer_3_.sib4_ = tmp.sib4_;
+		}
+		if(tmp.sib5_.decoded_) {
+			LteData[cell_no].layer_3_.sib5_ = tmp.sib5_;
+		}
+		if(tmp.sib6_.decoded_) {
+			LteData[cell_no].layer_3_.sib6_ = tmp.sib6_;
+		}
+		if(tmp.sib7_.decoded_) {
+			LteData[cell_no].layer_3_.sib7_ = tmp.sib7_;
+		}
+		if(tmp.sib8_.decoded_) {
+			LteData[cell_no].layer_3_.sib8_ = tmp.sib8_;
 		}
 
+		clock_t end_asn = clock();
+		//std::cout << "Lte ASN Time elapsed: " << lte_diffclock(end_asn,begin_asn) << " ms\n";
+
+		//std::cout<<"\n Decoded PDSCH \n";
+
+		//static std::ofstream file("debug_lte_layer_3_bitstream.txt");
+		//static bool write_header = true;
+		//if(write_header) {
+		//	write_header = false;
+		//	file << "sub_frame_index\tsubframe_start_sample_index\t";
+		//	output_lte_meas_debug_header(file);
+		//}
+		//file << sub_frame_index << "\t" << subframe_start_sample_index << "\t" << LteData[cell_no] << "\t";
+		//for(uint32_t i = 0, end = 512; i < end; ++i)
+		//	file << std::hex << std::setw(2) << std::setfill('0') << (int)lte_pdsch_byte_seq[i] << " ";
+		//file << std::dec << "\t" << tmp << std::endl;
+		return LTE_SUCCESS;
 	}
 
 	return -1;
@@ -416,7 +424,7 @@ int lte_pdsch_get_subframe_map(lte_measurements &LteData,
 		}
 	}
 
-#ifdef _DEBUG
+#ifdef OUTPUT_LTE_DEBUG
 	std::ofstream lte_map("lte_map.txt");
 	lte_map << "matlab_idx\tsym_0\tsym_1\tsym_2\tsym_3\tsym_4\tsym_5\tsym_6\tsym_7\tsym_8\tsym_9\tsym_10\tsym_11\tsym_12\tsym_13\n";
 	for(auto j = 0; j < MAX_FFT_SIZE; ++j) {
@@ -477,6 +485,10 @@ int lte_pdsch_get_symbols(Ipp32fc* inSignal,
 	}
 
 
+#ifdef OUTPUT_LTE_DEBUG
+	// Debug output to compare against matlab.
+	static std::ofstream vrb_debug("local_vrb_debug.txt");
+#endif
 
 	pdsch_re_count = 0; // Should this be moved into the loop?
 	for(unsigned int symbol_idx = LteData[cell_no].lteControlSysmbolLenght; symbol_idx < OFDM_SYMBOLS_PER_SUBFRAME; symbol_idx++) {
@@ -497,6 +509,9 @@ int lte_pdsch_get_symbols(Ipp32fc* inSignal,
 						+ fft_index[pdsch_re_count]];
 				}
 
+#ifdef OUTPUT_LTE_DEBUG
+				vrb_debug << symbol_idx * LteData[cell_no].numResouceBlocks * NUM_SUBCARRIER_PER_RESOURCE_BLOCK + kk + 1 << std::endl;
+#endif
 				pdsch_re_count++;
 				// Temporary bug fix: pdsch_re_count can overstep the fft_index.  Is pdsch_re_count supposed to be reset to 0 in the outer loop?
 				if(pdsch_re_count > max_num_symbols)
@@ -516,6 +531,10 @@ int lte_pdsch_get_symbols(Ipp32fc* inSignal,
 		}
 	}
 
+#ifdef OUTPUT_LTE_DEBUG
+	// Debug output to compare against matlab.
+	vrb_debug << "\n\n" << std::endl;
+#endif
 
 	return LTE_SUCCESS;
 }
@@ -613,7 +632,6 @@ int lte_pdsch_get_symbols_vrb(Ipp32fc* inSignal,
 
 		}
 
-
 		for(unsigned char zz = 0; zz < LteData[cell_no].numResouceBlocks; zz++) // odd slot
 		{
 			if(dci_format_info.vrb_to_prb_mapping_odd_slot[zz] == vrb_idx) {
@@ -621,15 +639,12 @@ int lte_pdsch_get_symbols_vrb(Ipp32fc* inSignal,
 			}
 
 		}
-
-
-
 	}
 #endif
 
-#ifdef _DEBUG
+#ifdef OUTPUT_LTE_DEBUG
 	// Debug output to compare against matlab.
-	static std::ofstream vrb_debug("vrb_debug.txt");
+	static std::ofstream vrb_debug("dis_vrb_debug.txt");
 #endif
 
 	pdsch_re_count = 0; // Should this be moved into the loop?
@@ -652,6 +667,7 @@ int lte_pdsch_get_symbols_vrb(Ipp32fc* inSignal,
 		int odd_start_idx = lowest_odd_idx;
 		int even_start_idx = lowest_even_idx;
 
+		auto &lte_subframe_map_debug = lte_subframe_map;
 		for(unsigned int symbol_idx = LteData[cell_no].lteControlSysmbolLenght; symbol_idx < OFDM_SYMBOLS_PER_SUBFRAME; symbol_idx++) {
 			for(vrb_idx = start_rb_vrb; vrb_idx <= end_rb_vrb; vrb_idx++) {
 
@@ -683,7 +699,7 @@ int lte_pdsch_get_symbols_vrb(Ipp32fc* inSignal,
 								+ fft_index[pdsch_re_count]];
 						}
 
-#ifdef _DEBUG
+#ifdef OUTPUT_LTE_DEBUG
 						vrb_debug << symbol_idx * LteData[cell_no].numResouceBlocks * NUM_SUBCARRIER_PER_RESOURCE_BLOCK + kk + 1 << std::endl;
 #endif
 						pdsch_re_count++;
@@ -710,7 +726,7 @@ int lte_pdsch_get_symbols_vrb(Ipp32fc* inSignal,
 		}
 	}
 
-#ifdef _DEBUG
+#ifdef OUTPUT_LTE_DEBUG
 	// Debug output to compare against matlab.
 	vrb_debug << "\n\n" << std::endl;
 #endif
