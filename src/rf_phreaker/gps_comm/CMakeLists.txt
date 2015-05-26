@@ -44,7 +44,7 @@ if (WIN32)
 include_directories(${bladeRF_SOURCE_DIR}/common/include/windows)	
 endif ()
 
-add_library (gps_comm ${gps_comm_SRCS})
+add_library (gps_comm STATIC ${gps_comm_SRCS})
 
 target_link_libraries (gps_comm common)
 target_link_libraries (gps_comm libbladerf_shared)
