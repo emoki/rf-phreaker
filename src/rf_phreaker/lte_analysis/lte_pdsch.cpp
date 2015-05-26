@@ -122,6 +122,8 @@ int lte_pdsch_decode(Ipp32fc* inSignal,
 		end_rb_index = dci_format_info.pdcch_info_dci_format_1a[dci_index].end_rb_idx;
 		modulation_type = dci_format_info.pdcch_info_dci_format_1a[dci_index].lte_moduation_type;
 		modulation_order = dci_format_info.pdcch_info_dci_format_1a[dci_index].modulation_order;
+		if(modulation_order < 6)
+			modulation_order = 6; // hardset to 6 (the highest mod order?)
 		redundancy_version = dci_format_info.pdcch_info_dci_format_1a[dci_index].redundancy_version;
 		transport_block_size = dci_format_info.pdcch_info_dci_format_1a[dci_index].tbs_size;
 		int vrb_type = dci_format_info.pdcch_info_dci_format_1a[dci_index].vrb_type;
@@ -153,6 +155,7 @@ int lte_pdsch_decode(Ipp32fc* inSignal,
 		end_rb_index = dci_format_info.pdcch_info_dci_format_1c[dci_index].end_vrb_idx;
 		modulation_type = MQPSK;
 		modulation_order = 2;
+		//modulation_order = 6; // hardset to 6 (the highest mod order?)
 		int gap = dci_format_info.pdcch_info_dci_format_1c[dci_index].n_gap;
 
 		transport_block_size = dci_format_info.pdcch_info_dci_format_1c[dci_index].tbs_size;
