@@ -78,6 +78,10 @@ public:
 
 	void output_binary(const std::string &filename = "ipp_array.txt") const;
 
+	void output_matlab_compatible_array(const std::string &filename, int columns = 1, int rows = 0) const;
+
+	std::ofstream& output_matlab_compatible_element(std::ofstream& os, const DataType &d) const;
+
 	void zero_out();
 
 private:
@@ -252,7 +256,6 @@ template<typename DataType> DataType ipp_array<DataType>::get_value(int position
 	return array_[position];
 }
 
-
 template<typename DataType>	int ipp_array<DataType>::length() const {
 	return length_;
 }
@@ -340,6 +343,40 @@ template<typename DataType> void ipp_array<DataType>::output_binary(const std::s
 		throw std::runtime_error("Unable to open file for ipp_array output binary.");
 }
 
+template<typename DataType> void ipp_array<DataType>::output_matlab_compatible_array(const std::string &filename, int columns, int rows) const {
+	if(rows == 0 && columns == 1) rows = length_;
+	if(columns * rows < length_)
+		throw rf_phreaker_error("Unable to output matlab compatible array with giving columns and rows");
+
+	std::ofstream file(filename);
+	if(file.is_open()) {
+		for(int i = 0; i < rows; ++i) {
+			output_matlab_compatible_element(file, array_[i]);
+			for(int j = 1; j < columns; ++j) {
+				file << "\t";
+				output_matlab_compatible_element(file, array_[rows * j + i]);
+			}
+			file << "\n";
+		}
+	}
+	else
+		throw std::runtime_error("Unable to open file for ipp_array matlab compatible array.");
+}
+
+template<typename DataType> std::ofstream& ipp_array<DataType>::output_matlab_compatible_element(std::ofstream& os, const DataType &d) const {
+	os << d;
+	return os;
+}
+
+template<> inline std::ofstream& ipp_array<Ipp32fc>::output_matlab_compatible_element(std::ofstream& os, const Ipp32fc &d) const {
+	os << d.re << (d.im >= 0 ? "+" : "") << d.im << "i";
+	return os;
+}
+
+template<> inline std::ofstream& ipp_array<Ipp16sc>::output_matlab_compatible_element(std::ofstream& os, const Ipp16sc &d) const {
+	os << d.re << (d.im >= 0 ? "+" : "") << d.im << "i";
+	return os;
+}
 
 inline std::ostream& operator <<(std::ostream &os, const Ipp32fc &t) {
 	os << t.re << "\t" << t.im;
@@ -362,7 +399,6 @@ inline std::istream& operator >>(std::istream &is, Ipp16sc &t) {
 	is >> t.im;
 	return is;
 }
-
 
 template<typename DataType>
 inline std::ostream& operator <<(std::ostream &os, const ipp_array<DataType> &t) {
