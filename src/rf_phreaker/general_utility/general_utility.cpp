@@ -2,6 +2,7 @@
 #include <boost/program_options.hpp>
 #include "rf_phreaker/general_utility/calibration_utility.h"
 #include "rf_phreaker/general_utility/sync_rx_benchmark_utility.h"
+#include "rf_phreaker/general_utility/scanner_stress_test.h"
 
 int handle_calibration(int argc, char* argv[]) {
 	namespace po = boost::program_options;
@@ -153,10 +154,70 @@ int handle_sync_rx_benchmark(int argc, char* argv[]) {
 	return 0;
 }
 
+int handle_scanner_stress_test(int argc, char* argv[]) {
+	namespace po = boost::program_options;
+
+	try {
+		// Option variables.
+		std::vector<int64_t> snapshots;
+		rf_phreaker::stress_test_settings settings;
+
+		po::options_description desc("Allowed options");
+
+		desc.add_options()
+			("help,h", "Produce help message.")
+			("test_duration,t", po::value<int>(&settings.duration_mins_)->default_value(10), "Test duration (minutes)")
+			("snapshots,s", po::value<std::vector<int64_t>>(&snapshots)->multitoken(), "start_freq_hz end_freq_hz freq_increment_hz sampling_rate_hz bandwidth_hz time_nanoseconds.... repeating\n")
+			("update_vctcxo,u", po::value<int>(&settings.update_vctcx_trim_duration_s_)->default_value(50), "Update VCTCXO interval (seconds)\n")
+			("write_vctcxo,w", po::value<int>(&settings.write_vctcx_trim_duration_s_)->default_value(60), "Write VCTCXO interval (seconds)\n")
+			("get_gps_message,g", po::value<int>(&settings.get_gps_message_duration_s_)->default_value(1), "Get GPS message interval (seconds)\n")
+			("1pps_cali,c", po::value<int>(&settings.perform_1pps_calibration_s_)->default_value(25), "Perform 1PPS calibration interval (seconds)\n")
+			("read_eeprom,r", po::value<int>(&settings.read_eeprom_duration_s_)->default_value(64), "Read EEPROM interval (seconds)\n")
+			("log_level,l", po::value<int>(&settings.log_level_)->default_value(0), "Log level.  0 - 5 with 0 being the most verbose\n");
+
+		// Read command line.
+		po::variables_map vm;
+		po::store(po::parse_command_line(argc, argv, desc), vm);
+		if(vm.count("help")) {
+			std::cout << desc << std::endl;
+			return 1;
+		}
+		vm.notify();
+
+		if(snapshots.empty() || snapshots.size() % 6 != 0) {
+			throw std::exception("Wrong number of parameters for snapshots.  Please input all the necessary parameters: start_freq_hz end_freq_hz freq_increment_hz sampling_rate_hz bandwidth_hz time_nanoseconds");
+		}
+			 
+		for(size_t i = 0; i < snapshots.size();) {
+			rf_phreaker::snapshot_setting snap;
+			snap.start_freq_ = snapshots[i++];
+			snap.end_freq_ = snapshots[i++];
+			snap.freq_increment_ = snapshots[i++];
+			snap.sampling_rate_ = snapshots[i++];
+			snap.bandwidth_ = (rf_phreaker::bandwidth_type)snapshots[i++];
+			snap.time_ = snapshots[i++];
+			settings.snapshots_.push_back(snap);
+		}
+
+		rf_phreaker::scanner_stress_test::run(settings);
+	}
+	catch(std::exception &err) {
+		std::cout << "Error: " << err.what() << std::endl;
+	}
+	catch(...) {
+		std::cout << "Unknown error has occurred." << std::endl;
+	}
+
+	std::cout << std::endl;
+
+	return 0;
+}
+
 int main(int argc, char* argv[]) {
 	//-c 77ecda454d25738ee419f6fd676170d5 13cadd7137a3ef4d18dcfcc179667998 47d54d57db30c9169c98c53e30c08d9a d01d12c0dc5c71c8a081e0c25f27b6fd d7db1c90fd06a5a6d950615ea7fa6164
 	//int status = handle_calibration(argc, argv);
-	int status = handle_sync_rx_benchmark(argc, argv);
+	//int status = handle_sync_rx_benchmark(argc, argv);
+	int status = handle_scanner_stress_test(argc, argv);
 	system("pause");
 	return status;
 }

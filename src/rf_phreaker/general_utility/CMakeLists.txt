@@ -13,6 +13,7 @@ set (general_utility_VERSION_TWEAK 0)
 set (general_utility_SRCS 
 	general_utility.cpp
 	calibration_utility.h
+	scanner_stress_test.h
 	sync_rx_benchmark_utility.h
 	${SRC_PLATFORM_SPECIFIC}/stdafx.cpp)
 
