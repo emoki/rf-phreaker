@@ -1,6 +1,7 @@
 #pragma once
 
 #include <stdint.h>
+#include <vector>
 #include "rf_phreaker/common/common_types.h"
 
 namespace rf_phreaker
@@ -19,6 +20,8 @@ static const int settings_layer_3_min_decode_threshold_default = -21;
 static const int settings_umts_general_sensitivity_default = -23;
 static const int settings_umts_general_full_scan_interval_default = 1;
 static const int settings_umts_general_num_coherent_slots_default = 2;
+static const double settings_lte_general_sync_quality_confidence_threshold_default = -10.5;
+static const int settings_lte_general_full_scan_interval_default = 100;
 static const bool settings_output_default = false;
 static const int gps_collection_period_ms_default = 800;
 static const int num_items_in_flight_default = 0;
@@ -37,11 +40,17 @@ static const int eeprom_update_period_for_1pps_calibration_minutes_default = 60;
 static const bool log_gps_general_default = false;
 static const bool log_gps_parsing_default = false;
 static const bool log_collection_default = false;
+static const int settings_gsm_general_side_power_threshold_default = 5;
+static const int settings_gsm_general_band_power_threshold_default = 25;
+static const bool settings_gsm_general_perform_sync_correlations_default = true;
+static const double settings_gsm_general_sync_corr_confidence_threshold_default = .7;
 
 class output_settings {
 public:
 	bool scanner_;
 	bool gps_;
+	bool gsm_sweep_;
+	bool gsm_layer_3_;
 	bool umts_sweep_;
 	bool umts_layer_3_;
 	bool lte_sweep_;
@@ -62,14 +71,28 @@ public:
 	int32_t minimum_collection_round_;
 	double decode_threshold_;
 	double decode_minimum_threshold_;
+	std::vector<int> wanted_layer_3_;
 };
 
-class umts_general_settings /* Find a better description? */
-{
+class umts_general_settings {
 public:
 	double sensitivity_;
 	int32_t full_scan_interval_;
 	int32_t num_coherent_slots_;
+};
+
+class lte_general_settings {
+public:
+	double sync_quality_confidence_threshold_;
+	int full_scan_interval_;
+};
+
+class gsm_general_settings {
+public:
+	double side_power_threshold_;
+	double band_power_threshold_;
+	bool perform_sync_correlations_;
+	double sync_corr_confidence_threshold_;
 };
 
 class frequency_correction_settings {
@@ -120,26 +143,30 @@ public:
 	output_settings file_output_;
 	output_settings signal_slots_;
 
+	collection_settings gsm_sweep_collection_;
+	collection_settings gsm_layer_3_collection_;
 	collection_settings umts_sweep_collection_;
 	collection_settings umts_layer_3_collection_;
 	collection_settings lte_sweep_collection_;
 	collection_settings lte_layer_3_collection_;
 	collection_settings sweep_collection_;
 
-	layer_3_settings umts_decode_layer_3_;
-	layer_3_settings lte_decode_layer_3_;
+	layer_3_settings gsm_layer_3_decode_;
+	layer_3_settings umts_layer_3_decode_;
+	layer_3_settings lte_layer_3_decode_;
+
+	gsm_general_settings gsm_sweep_general_;
+	gsm_general_settings gsm_layer_3_general_;
 
 	umts_general_settings umts_sweep_general_;
 	umts_general_settings umts_layer_3_general_;
 
+	lte_general_settings lte_sweep_general_;
+	lte_general_settings lte_layer_3_general_;
+	
 	frequency_correction_settings frequency_correction_settings_;
 
 
-	//double umts_fast_sweep_threshold_;
-	//double umts_deep_sweep_threshold_;
-	//double umts_sweep_threshold_;
-	//double umts_scan_threshold_;
-	//int32_t umts_full_scan_interval_;
 };
 
 }

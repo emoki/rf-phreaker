@@ -18,16 +18,26 @@ static const std::string umts_layer_3_collection_group_key = "umts_layer_3_colle
 static const std::string lte_sweep_collection_group_key = "lte_sweep_collection";
 static const std::string lte_layer_3_collection_group_key = "lte_layer_3_collection";
 static const std::string sweep_collection_group_key = "sweep_collection";
+static const std::string gsm_decode_thresholds_group_key = "gsm_decode_thresholds";
 static const std::string umts_decode_thresholds_group_key = "umts_decode_thresholds";
 static const std::string lte_decode_thresholds_group_key = "lte_decode_thresholds";
+static const std::string lte_sweep_general_group_key = "lte_sweep_general";
+static const std::string lte_layer_3_general_group_key = "lte_layer_3_general";
 static const std::string umts_sweep_general_group_key = "umts_sweep_general";
 static const std::string umts_layer_3_general_group_key = "umts_layer_3_general";
 static const std::string frequency_correction_group_key = "frequency_correction";
 static const std::string nuand_group_key = "nuand";
+static const std::string gsm_sweep_collection_group_key = "gsm_sweep_collection";
+static const std::string gsm_layer_3_collection_group_key = "gsm_layer_3_collection";
+static const std::string gsm_sweep_general_group_key = "gsm_sweep_general";
+static const std::string gsm_layer_3_general_group_key = "gsm_layer_3_general";
+
 
 // Value keys
 static const std::string scanner_output_key = "scanner_output";
 static const std::string gps_output_key = "gps_output";
+static const std::string gsm_sweep_output_key = "gsm_sweep_output";
+static const std::string gsm_layer_3_output_key = "gsm_layer_3_output";
 static const std::string umts_sweep_output_key = "umts_sweep_output";
 static const std::string umts_layer_3_output_key = "umts_layer_3_output";
 static const std::string lte_sweep_output_key = "lte_sweep_output";
@@ -42,6 +52,8 @@ static const std::string max_update_threshold_key = "max_update_threshold";
 static const std::string min_collection_round_key = "min_collection_round";
 static const std::string decode_threshold_key = "decode_threshold";
 static const std::string min_decode_threshold_key = "min_decode_threshold";
+static const std::string layer_3_wanted_key = "layer_3";
+static const std::string sync_quality_confidence_threshold_key = "sync_quality_confidence_threshold";
 static const std::string sensitivity_key = "sensitivity";
 static const std::string full_scan_interval_key = "full_scan_interval";
 static const std::string num_coherent_slots_key = "num_coherent_slots";
@@ -62,6 +74,10 @@ static const std::string eeprom_update_period_for_1pps_calibration_minutes_key =
 static const std::string log_gps_general_key = "log_gps";
 static const std::string log_gps_parsing_key = "log_gps_parsing";
 static const std::string log_collection_key = "log_collection";
+static const std::string gsm_band_power_threshold_key = "band_power_threshold";
+static const std::string gsm_side_power_threshold_key = "side_power_threshold";
+static const std::string gsm_perform_sync_correlations_key = "perform_sync_correlations";
+static const std::string gsm_sync_corr_confidence_threshold_key = "sync_corr_confidence_threshold";
 
 class settings_io {
 public:
@@ -81,6 +97,10 @@ public:
 
 	void read(umts_general_settings &settings, const std::string &group_key);
 
+	void read(lte_general_settings &settings, const std::string &group_key);
+
+	void read(gsm_general_settings &settings, const std::string &group_key);
+
 	void read(frequency_correction_settings &settings, const std::string &group_key);
 
 	void read(blade_settings &settings);
@@ -94,6 +114,10 @@ public:
 	void write(const layer_3_settings &settings, const std::string &group_key);
 
 	void write(const umts_general_settings &settings, const std::string &group_key);
+
+	void write(const lte_general_settings &settings, const std::string &group_key);
+
+	void write(const gsm_general_settings &settings, const std::string &group_key);
 
 	void write(const frequency_correction_settings &settings, const std::string &group_key);
 

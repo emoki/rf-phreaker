@@ -29,24 +29,41 @@ TEST(QtSpecific, TestSettingsIO)
 
 	EXPECT_EQ(settings_output_default, set.standard_output_.scanner_);
 	EXPECT_EQ(settings_output_default, set.standard_output_.gps_);
+	EXPECT_EQ(settings_output_default, set.standard_output_.gsm_sweep_);
+	EXPECT_EQ(settings_output_default, set.standard_output_.gsm_layer_3_);
 	EXPECT_EQ(settings_output_default, set.standard_output_.umts_sweep_);
 	EXPECT_EQ(settings_output_default, set.standard_output_.umts_layer_3_);
 	EXPECT_EQ(settings_output_default, set.standard_output_.lte_sweep_);
 	EXPECT_EQ(settings_output_default, set.standard_output_.lte_layer_3_);
+	EXPECT_EQ(settings_output_default, set.standard_output_.sweep_);
 
 	EXPECT_EQ(settings_output_default, set.signal_slots_.scanner_);
 	EXPECT_EQ(settings_output_default, set.signal_slots_.gps_);
+	EXPECT_EQ(settings_output_default, set.signal_slots_.gsm_sweep_);
+	EXPECT_EQ(settings_output_default, set.signal_slots_.gsm_layer_3_);
 	EXPECT_EQ(settings_output_default, set.signal_slots_.umts_sweep_);
 	EXPECT_EQ(settings_output_default, set.signal_slots_.umts_layer_3_);
 	EXPECT_EQ(settings_output_default, set.signal_slots_.lte_sweep_);
 	EXPECT_EQ(settings_output_default, set.signal_slots_.lte_layer_3_);
+	EXPECT_EQ(settings_output_default, set.signal_slots_.sweep_);
 
 	EXPECT_EQ(settings_output_default, set.packet_output_.scanner_);
 	EXPECT_EQ(settings_output_default, set.packet_output_.gps_);
+	EXPECT_EQ(settings_output_default, set.packet_output_.gsm_sweep_);
+	EXPECT_EQ(settings_output_default, set.packet_output_.gsm_layer_3_);
 	EXPECT_EQ(settings_output_default, set.packet_output_.umts_sweep_);
 	EXPECT_EQ(settings_output_default, set.packet_output_.umts_layer_3_);
 	EXPECT_EQ(settings_output_default, set.packet_output_.lte_sweep_);
 	EXPECT_EQ(settings_output_default, set.packet_output_.lte_layer_3_);
+	EXPECT_EQ(settings_output_default, set.packet_output_.sweep_);
+
+	EXPECT_EQ(settings_sampling_rate_default, set.gsm_sweep_collection_.sampling_rate_);
+	EXPECT_EQ(settings_bandwidth_default, set.gsm_sweep_collection_.bandwidth_);
+	EXPECT_EQ(settings_collection_time_default, set.gsm_sweep_collection_.collection_time_);
+
+	EXPECT_EQ(settings_sampling_rate_default, set.gsm_layer_3_collection_.sampling_rate_);
+	EXPECT_EQ(settings_bandwidth_default, set.gsm_layer_3_collection_.bandwidth_);
+	EXPECT_EQ(settings_collection_time_default, set.gsm_layer_3_collection_.collection_time_);
 
 	EXPECT_EQ(settings_sampling_rate_default, set.umts_sweep_collection_.sampling_rate_);
 	EXPECT_EQ(settings_bandwidth_default, set.umts_sweep_collection_.bandwidth_);
@@ -68,15 +85,27 @@ TEST(QtSpecific, TestSettingsIO)
 	EXPECT_EQ(settings_bandwidth_default, set.sweep_collection_.bandwidth_);
 	EXPECT_EQ(settings_collection_time_default, set.sweep_collection_.collection_time_);
 
-	EXPECT_EQ(settings_layer_3_max_update_threshold_default, set.umts_decode_layer_3_.max_update_threshold_);
-	EXPECT_EQ(settings_layer_3_min_collection_round_default, set.umts_decode_layer_3_.minimum_collection_round_);
-	EXPECT_EQ(settings_layer_3_decode_threshold_default, set.umts_decode_layer_3_.decode_threshold_);
-	EXPECT_EQ(settings_layer_3_min_decode_threshold_default, set.umts_decode_layer_3_.decode_minimum_threshold_);
+	EXPECT_EQ(settings_layer_3_max_update_threshold_default, set.umts_layer_3_decode_.max_update_threshold_);
+	EXPECT_EQ(settings_layer_3_min_collection_round_default, set.umts_layer_3_decode_.minimum_collection_round_);
+	EXPECT_EQ(settings_layer_3_decode_threshold_default, set.umts_layer_3_decode_.decode_threshold_);
+	EXPECT_EQ(settings_layer_3_min_decode_threshold_default, set.umts_layer_3_decode_.decode_minimum_threshold_);
+	EXPECT_EQ(0, set.umts_layer_3_decode_.wanted_layer_3_.size());
 
-	EXPECT_EQ(settings_layer_3_max_update_threshold_default, set.lte_decode_layer_3_.max_update_threshold_);
-	EXPECT_EQ(settings_layer_3_min_collection_round_default, set.lte_decode_layer_3_.minimum_collection_round_);
-	EXPECT_EQ(settings_layer_3_decode_threshold_default, set.lte_decode_layer_3_.decode_threshold_);
-	EXPECT_EQ(settings_layer_3_min_decode_threshold_default, set.lte_decode_layer_3_.decode_minimum_threshold_);
+	EXPECT_EQ(settings_layer_3_max_update_threshold_default, set.lte_layer_3_decode_.max_update_threshold_);
+	EXPECT_EQ(settings_layer_3_min_collection_round_default, set.lte_layer_3_decode_.minimum_collection_round_);
+	EXPECT_EQ(settings_layer_3_decode_threshold_default, set.lte_layer_3_decode_.decode_threshold_);
+	EXPECT_EQ(settings_layer_3_min_decode_threshold_default, set.lte_layer_3_decode_.decode_minimum_threshold_);
+	EXPECT_EQ(0, set.lte_layer_3_decode_.wanted_layer_3_.size());
+
+	EXPECT_EQ(settings_gsm_general_side_power_threshold_default, set.gsm_sweep_general_.side_power_threshold_);
+	EXPECT_EQ(settings_gsm_general_band_power_threshold_default, set.gsm_sweep_general_.band_power_threshold_);
+	EXPECT_EQ(settings_gsm_general_perform_sync_correlations_default, set.gsm_sweep_general_.perform_sync_correlations_);
+	EXPECT_EQ(settings_gsm_general_sync_corr_confidence_threshold_default, set.gsm_sweep_general_.sync_corr_confidence_threshold_);
+
+	EXPECT_EQ(settings_gsm_general_side_power_threshold_default, set.gsm_layer_3_general_.side_power_threshold_);
+	EXPECT_EQ(settings_gsm_general_band_power_threshold_default, set.gsm_layer_3_general_.band_power_threshold_);
+	EXPECT_EQ(settings_gsm_general_perform_sync_correlations_default, set.gsm_layer_3_general_.perform_sync_correlations_);
+	EXPECT_EQ(settings_gsm_general_sync_corr_confidence_threshold_default, set.gsm_layer_3_general_.sync_corr_confidence_threshold_);
 
 	EXPECT_EQ(settings_umts_general_sensitivity_default, set.umts_sweep_general_.sensitivity_);
 	EXPECT_EQ(settings_umts_general_full_scan_interval_default, set.umts_sweep_general_.full_scan_interval_);
@@ -85,6 +114,12 @@ TEST(QtSpecific, TestSettingsIO)
 	EXPECT_EQ(settings_umts_general_sensitivity_default, set.umts_layer_3_general_.sensitivity_);
 	EXPECT_EQ(settings_umts_general_full_scan_interval_default, set.umts_layer_3_general_.full_scan_interval_);
 	EXPECT_EQ(settings_umts_general_num_coherent_slots_default, set.umts_layer_3_general_.num_coherent_slots_);
+
+	EXPECT_EQ(settings_lte_general_full_scan_interval_default, set.lte_sweep_general_.full_scan_interval_);
+	EXPECT_EQ(settings_lte_general_sync_quality_confidence_threshold_default, set.lte_sweep_general_.sync_quality_confidence_threshold_);
+
+	EXPECT_EQ(settings_lte_general_full_scan_interval_default, set.lte_layer_3_general_.full_scan_interval_);
+	EXPECT_EQ(settings_lte_general_sync_quality_confidence_threshold_default, set.lte_layer_3_general_.sync_quality_confidence_threshold_);
 
 	EXPECT_EQ(initial_frequency_correction_offset_start_default, set.frequency_correction_settings_.initial_frequency_correction_range_start_);
 	EXPECT_EQ(initial_frequency_correction_offset_end_default, set.frequency_correction_settings_.initial_frequency_correction_range_end_);
@@ -113,22 +148,37 @@ TEST(QtSpecific, TestSettingsIO)
 	set.eeprom_update_period_for_1pps_calibration_minutes_ = tmp++;
 	set.standard_output_.scanner_ = true;
 	set.standard_output_.gps_ = true;
+	set.standard_output_.gsm_sweep_ = true;
+	set.standard_output_.gsm_layer_3_ = true;
 	set.standard_output_.umts_sweep_ = true;
 	set.standard_output_.umts_layer_3_ = true;
 	set.standard_output_.lte_sweep_ = true;
 	set.standard_output_.lte_layer_3_ = true;
+	set.standard_output_.sweep_ = true;
 	set.signal_slots_.scanner_ = true;
 	set.signal_slots_.gps_ = true;
+	set.signal_slots_.gsm_sweep_ = true;
+	set.signal_slots_.gsm_layer_3_ = true;
 	set.signal_slots_.umts_sweep_ = true;
 	set.signal_slots_.umts_layer_3_ = true;
 	set.signal_slots_.lte_sweep_ = true;
 	set.signal_slots_.lte_layer_3_ = true;
+	set.signal_slots_.sweep_ = true;
 	set.packet_output_.scanner_ = true;
 	set.packet_output_.gps_ = false;
+	set.packet_output_.gsm_sweep_ = true;
+	set.packet_output_.gsm_layer_3_ = false;
 	set.packet_output_.umts_sweep_ = true;
 	set.packet_output_.umts_layer_3_ = false;
 	set.packet_output_.lte_sweep_ = false;
 	set.packet_output_.lte_layer_3_ = true;
+	set.packet_output_.sweep_ = true;
+	set.gsm_sweep_collection_.sampling_rate_ = tmp++;
+	set.gsm_sweep_collection_.bandwidth_ = tmp++;
+	set.gsm_sweep_collection_.collection_time_ = tmp++;
+	set.gsm_layer_3_collection_.sampling_rate_ = tmp++;
+	set.gsm_layer_3_collection_.bandwidth_ = tmp++;
+	set.gsm_layer_3_collection_.collection_time_ = tmp++;
 	set.umts_sweep_collection_.sampling_rate_ = tmp++;
 	set.umts_sweep_collection_.bandwidth_ = tmp++;
 	set.umts_sweep_collection_.collection_time_ = tmp++;
@@ -144,19 +194,38 @@ TEST(QtSpecific, TestSettingsIO)
 	set.sweep_collection_.sampling_rate_ = tmp++;
 	set.sweep_collection_.bandwidth_ = tmp++;
 	set.sweep_collection_.collection_time_ = tmp++;
-	set.umts_decode_layer_3_.max_update_threshold_ = tmp++;
-	set.umts_decode_layer_3_.minimum_collection_round_= tmp++;
-	set.umts_decode_layer_3_.decode_threshold_ = tmp++;
-	set.umts_decode_layer_3_.decode_minimum_threshold_ = tmp++;
-	set.lte_decode_layer_3_.max_update_threshold_ = tmp++;
-	set.lte_decode_layer_3_.minimum_collection_round_ = tmp++;
-	set.lte_decode_layer_3_.decode_threshold_ = tmp++;
-	set.lte_decode_layer_3_.decode_minimum_threshold_ = tmp++;
+	set.umts_layer_3_decode_.max_update_threshold_ = tmp++;
+	set.umts_layer_3_decode_.minimum_collection_round_= tmp++;
+	set.umts_layer_3_decode_.decode_threshold_ = tmp++;
+	set.umts_layer_3_decode_.decode_minimum_threshold_ = tmp++;
+	set.umts_layer_3_decode_.wanted_layer_3_.push_back(tmp++);
+	set.umts_layer_3_decode_.wanted_layer_3_.push_back(tmp++);
+	set.umts_layer_3_decode_.wanted_layer_3_.push_back(tmp++);
+	set.lte_layer_3_decode_.max_update_threshold_ = tmp++;
+	set.lte_layer_3_decode_.minimum_collection_round_ = tmp++;
+	set.lte_layer_3_decode_.decode_threshold_ = tmp++;
+	set.lte_layer_3_decode_.decode_minimum_threshold_ = tmp++;
+	set.lte_layer_3_decode_.wanted_layer_3_.push_back(tmp++);
+	set.lte_layer_3_decode_.wanted_layer_3_.push_back(tmp++);
+	set.lte_layer_3_decode_.wanted_layer_3_.push_back(tmp++);
+	set.lte_layer_3_decode_.wanted_layer_3_.push_back(tmp++);
+	set.gsm_sweep_general_.side_power_threshold_ = tmp++;
+	set.gsm_sweep_general_.band_power_threshold_ = tmp++;
+	set.gsm_sweep_general_.perform_sync_correlations_ = false;
+	set.gsm_sweep_general_.sync_corr_confidence_threshold_ = tmp++;
+	set.gsm_layer_3_general_.side_power_threshold_ = tmp++;
+	set.gsm_layer_3_general_.band_power_threshold_ = tmp++;
+	set.gsm_layer_3_general_.perform_sync_correlations_ = false;
+	set.gsm_layer_3_general_.sync_corr_confidence_threshold_ = tmp++;
 	set.umts_sweep_general_.sensitivity_ = tmp++;
 	set.umts_sweep_general_.full_scan_interval_ = tmp++;
 	set.umts_sweep_general_.num_coherent_slots_ = tmp++;
 	set.umts_layer_3_general_.sensitivity_ = tmp++;
 	set.umts_layer_3_general_.full_scan_interval_ = tmp++;
+	set.lte_sweep_general_.sync_quality_confidence_threshold_ = tmp++;
+	set.lte_sweep_general_.full_scan_interval_ = tmp++;
+	set.lte_layer_3_general_.sync_quality_confidence_threshold_ = tmp++;
+	set.lte_layer_3_general_.full_scan_interval_ = tmp++;
 	set.frequency_correction_settings_.initial_frequency_correction_range_start_ = tmp++;
 	set.frequency_correction_settings_.initial_frequency_correction_range_end_ = tmp++;
 	set.frequency_correction_settings_.general_settings_.full_scan_interval_ = tmp++;
@@ -168,7 +237,7 @@ TEST(QtSpecific, TestSettingsIO)
 	set.blade_settings_.rx_sync_num_transfers_ = tmp++;
 	set.blade_settings_.rx_sync_timeout_ = tmp++;
 	set_io.write(set);
-	
+
 	settings set2;
 	set_io.read(set2);
 	EXPECT_EQ(set.log_level_, set2.log_level_);
@@ -186,17 +255,41 @@ TEST(QtSpecific, TestSettingsIO)
 
 	EXPECT_EQ(set.standard_output_.scanner_, set2.standard_output_.scanner_);
 	EXPECT_EQ(set.standard_output_.gps_, set2.standard_output_.gps_);
+	EXPECT_EQ(set.standard_output_.gsm_sweep_, set2.standard_output_.gsm_sweep_);
+	EXPECT_EQ(set.standard_output_.gsm_layer_3_, set2.standard_output_.gsm_layer_3_);
 	EXPECT_EQ(set.standard_output_.umts_sweep_, set2.standard_output_.umts_sweep_);
 	EXPECT_EQ(set.standard_output_.umts_layer_3_, set2.standard_output_.umts_layer_3_);
 	EXPECT_EQ(set.standard_output_.lte_sweep_, set2.standard_output_.lte_sweep_);
 	EXPECT_EQ(set.standard_output_.lte_layer_3_, set2.standard_output_.lte_layer_3_);
+	EXPECT_EQ(set.standard_output_.sweep_, set2.standard_output_.sweep_);
 
 	EXPECT_EQ(set.signal_slots_.scanner_, set2.signal_slots_.scanner_);
 	EXPECT_EQ(set.signal_slots_.gps_, set2.signal_slots_.gps_);
+	EXPECT_EQ(set.signal_slots_.gsm_sweep_, set2.signal_slots_.gsm_sweep_);
+	EXPECT_EQ(set.signal_slots_.gsm_layer_3_, set2.signal_slots_.gsm_layer_3_);
 	EXPECT_EQ(set.signal_slots_.umts_sweep_, set2.signal_slots_.umts_sweep_);
 	EXPECT_EQ(set.signal_slots_.umts_layer_3_, set2.signal_slots_.umts_layer_3_);
 	EXPECT_EQ(set.signal_slots_.lte_sweep_, set2.signal_slots_.lte_sweep_);
 	EXPECT_EQ(set.signal_slots_.lte_layer_3_, set2.signal_slots_.lte_layer_3_);
+	EXPECT_EQ(set.signal_slots_.sweep_, set2.signal_slots_.sweep_);
+
+	EXPECT_EQ(set.packet_output_.scanner_, set2.packet_output_.scanner_);
+	EXPECT_EQ(set.packet_output_.gps_, set2.packet_output_.gps_);
+	EXPECT_EQ(set.packet_output_.gsm_sweep_, set2.packet_output_.gsm_sweep_);
+	EXPECT_EQ(set.packet_output_.gsm_layer_3_, set2.packet_output_.gsm_layer_3_);
+	EXPECT_EQ(set.packet_output_.umts_sweep_, set2.packet_output_.umts_sweep_);
+	EXPECT_EQ(set.packet_output_.umts_layer_3_, set2.packet_output_.umts_layer_3_);
+	EXPECT_EQ(set.packet_output_.lte_sweep_, set2.packet_output_.lte_sweep_);
+	EXPECT_EQ(set.packet_output_.lte_layer_3_, set2.packet_output_.lte_layer_3_);
+	EXPECT_EQ(set.packet_output_.sweep_, set2.packet_output_.sweep_);
+
+	EXPECT_EQ(set.gsm_sweep_collection_.sampling_rate_, set2.gsm_sweep_collection_.sampling_rate_);
+	EXPECT_EQ(set.gsm_sweep_collection_.bandwidth_, set2.gsm_sweep_collection_.bandwidth_);
+	EXPECT_EQ(set.gsm_sweep_collection_.collection_time_, set2.gsm_sweep_collection_.collection_time_);
+
+	EXPECT_EQ(set.gsm_layer_3_collection_.sampling_rate_, set2.gsm_layer_3_collection_.sampling_rate_);
+	EXPECT_EQ(set.gsm_layer_3_collection_.bandwidth_, set2.gsm_layer_3_collection_.bandwidth_);
+	EXPECT_EQ(set.gsm_layer_3_collection_.collection_time_, set2.gsm_layer_3_collection_.collection_time_);
 
 	EXPECT_EQ(set.umts_sweep_collection_.sampling_rate_, set2.umts_sweep_collection_.sampling_rate_);
 	EXPECT_EQ(set.umts_sweep_collection_.bandwidth_, set2.umts_sweep_collection_.bandwidth_);
@@ -218,15 +311,37 @@ TEST(QtSpecific, TestSettingsIO)
 	EXPECT_EQ(set.sweep_collection_.bandwidth_, set2.sweep_collection_.bandwidth_);
 	EXPECT_EQ(set.sweep_collection_.collection_time_, set2.sweep_collection_.collection_time_);
 
-	EXPECT_EQ(set.umts_decode_layer_3_.max_update_threshold_, set2.umts_decode_layer_3_.max_update_threshold_);
-	EXPECT_EQ(set.umts_decode_layer_3_.minimum_collection_round_, set2.umts_decode_layer_3_.minimum_collection_round_);
-	EXPECT_EQ(set.umts_decode_layer_3_.decode_threshold_, set2.umts_decode_layer_3_.decode_threshold_);
-	EXPECT_EQ(set.umts_decode_layer_3_.decode_minimum_threshold_, set2.umts_decode_layer_3_.decode_minimum_threshold_);
+	EXPECT_EQ(set.umts_layer_3_decode_.max_update_threshold_, set2.umts_layer_3_decode_.max_update_threshold_);
+	EXPECT_EQ(set.umts_layer_3_decode_.minimum_collection_round_, set2.umts_layer_3_decode_.minimum_collection_round_);
+	EXPECT_EQ(set.umts_layer_3_decode_.decode_threshold_, set2.umts_layer_3_decode_.decode_threshold_);
+	EXPECT_EQ(set.umts_layer_3_decode_.decode_minimum_threshold_, set2.umts_layer_3_decode_.decode_minimum_threshold_);
+	{
+		EXPECT_EQ(set.umts_layer_3_decode_.wanted_layer_3_.size(), set2.umts_layer_3_decode_.wanted_layer_3_.size());
+		auto j = set2.umts_layer_3_decode_.wanted_layer_3_.begin();
+		for(auto i : set.umts_layer_3_decode_.wanted_layer_3_)
+			EXPECT_EQ(i, *j++);
+	}
 
-	EXPECT_EQ(set.lte_decode_layer_3_.max_update_threshold_, set2.lte_decode_layer_3_.max_update_threshold_);
-	EXPECT_EQ(set.lte_decode_layer_3_.minimum_collection_round_, set2.lte_decode_layer_3_.minimum_collection_round_);
-	EXPECT_EQ(set.lte_decode_layer_3_.decode_threshold_, set2.lte_decode_layer_3_.decode_threshold_);
-	EXPECT_EQ(set.lte_decode_layer_3_.decode_minimum_threshold_, set2.lte_decode_layer_3_.decode_minimum_threshold_);
+	EXPECT_EQ(set.lte_layer_3_decode_.max_update_threshold_, set2.lte_layer_3_decode_.max_update_threshold_);
+	EXPECT_EQ(set.lte_layer_3_decode_.minimum_collection_round_, set2.lte_layer_3_decode_.minimum_collection_round_);
+	EXPECT_EQ(set.lte_layer_3_decode_.decode_threshold_, set2.lte_layer_3_decode_.decode_threshold_);
+	EXPECT_EQ(set.lte_layer_3_decode_.decode_minimum_threshold_, set2.lte_layer_3_decode_.decode_minimum_threshold_);
+	{
+		EXPECT_EQ(set.lte_layer_3_decode_.wanted_layer_3_.size(), set2.lte_layer_3_decode_.wanted_layer_3_.size());
+		auto j = set2.lte_layer_3_decode_.wanted_layer_3_.begin();
+		for(auto i : set.lte_layer_3_decode_.wanted_layer_3_)
+			EXPECT_EQ(i, *j++);
+	}
+
+	EXPECT_EQ(set.gsm_sweep_general_.side_power_threshold_, set2.gsm_sweep_general_.side_power_threshold_);
+	EXPECT_EQ(set.gsm_sweep_general_.band_power_threshold_, set2.gsm_sweep_general_.band_power_threshold_);
+	EXPECT_EQ(set.gsm_sweep_general_.perform_sync_correlations_, set2.gsm_sweep_general_.perform_sync_correlations_);
+	EXPECT_EQ(set.gsm_sweep_general_.sync_corr_confidence_threshold_, set2.gsm_sweep_general_.sync_corr_confidence_threshold_);
+
+	EXPECT_EQ(set.gsm_layer_3_general_.side_power_threshold_, set2.gsm_layer_3_general_.side_power_threshold_);
+	EXPECT_EQ(set.gsm_layer_3_general_.band_power_threshold_, set2.gsm_layer_3_general_.band_power_threshold_);
+	EXPECT_EQ(set.gsm_layer_3_general_.perform_sync_correlations_, set2.gsm_layer_3_general_.perform_sync_correlations_);
+	EXPECT_EQ(set.gsm_layer_3_general_.sync_corr_confidence_threshold_, set2.gsm_layer_3_general_.sync_corr_confidence_threshold_);
 
 	EXPECT_EQ(set.umts_sweep_general_.sensitivity_, set2.umts_sweep_general_.sensitivity_);
 	EXPECT_EQ(set.umts_sweep_general_.full_scan_interval_, set2.umts_sweep_general_.full_scan_interval_);
@@ -235,6 +350,12 @@ TEST(QtSpecific, TestSettingsIO)
 	EXPECT_EQ(set.umts_layer_3_general_.sensitivity_, set2.umts_layer_3_general_.sensitivity_);
 	EXPECT_EQ(set.umts_layer_3_general_.full_scan_interval_, set2.umts_layer_3_general_.full_scan_interval_);
 	EXPECT_EQ(set.umts_layer_3_general_.num_coherent_slots_, set2.umts_layer_3_general_.num_coherent_slots_);
+
+	EXPECT_EQ(set.lte_sweep_general_.sync_quality_confidence_threshold_, set2.lte_sweep_general_.sync_quality_confidence_threshold_);
+	EXPECT_EQ(set.lte_sweep_general_.full_scan_interval_, set2.lte_sweep_general_.full_scan_interval_);
+
+	EXPECT_EQ(set.lte_layer_3_general_.sync_quality_confidence_threshold_, set2.lte_layer_3_general_.sync_quality_confidence_threshold_);
+	EXPECT_EQ(set.lte_layer_3_general_.full_scan_interval_, set2.lte_layer_3_general_.full_scan_interval_);
 
 	EXPECT_EQ(set.frequency_correction_settings_.initial_frequency_correction_range_start_, set2.frequency_correction_settings_.initial_frequency_correction_range_start_);
 	EXPECT_EQ(set.frequency_correction_settings_.initial_frequency_correction_range_end_, set2.frequency_correction_settings_.initial_frequency_correction_range_end_);

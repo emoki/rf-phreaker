@@ -45,17 +45,26 @@ void settings_io::read(settings &settings) {
 	read(settings.packet_output_, packet_output_group_key);
 	read(settings.file_output_, file_output_group_key);
 
+	read(settings.gsm_sweep_collection_, gsm_sweep_collection_group_key);
+	read(settings.gsm_layer_3_collection_, gsm_layer_3_collection_group_key);
 	read(settings.umts_sweep_collection_, umts_sweep_collection_group_key);
 	read(settings.umts_layer_3_collection_, umts_layer_3_collection_group_key);
 	read(settings.lte_sweep_collection_, lte_sweep_collection_group_key);
 	read(settings.lte_layer_3_collection_, lte_layer_3_collection_group_key);
 	read(settings.sweep_collection_, sweep_collection_group_key);
 
-	read(settings.umts_decode_layer_3_, umts_decode_thresholds_group_key);
-	read(settings.lte_decode_layer_3_, lte_decode_thresholds_group_key);
+	read(settings.gsm_layer_3_decode_, gsm_decode_thresholds_group_key);
+	read(settings.umts_layer_3_decode_, umts_decode_thresholds_group_key);
+	read(settings.lte_layer_3_decode_, lte_decode_thresholds_group_key);
+
+	read(settings.gsm_sweep_general_, gsm_sweep_general_group_key);
+	read(settings.gsm_layer_3_general_, gsm_layer_3_general_group_key);
 
 	read(settings.umts_sweep_general_, umts_sweep_general_group_key);
 	read(settings.umts_layer_3_general_, umts_layer_3_general_group_key);
+
+	read(settings.lte_sweep_general_, lte_sweep_general_group_key);
+	read(settings.lte_layer_3_general_, lte_layer_3_general_group_key);
 
 	read(settings.frequency_correction_settings_, frequency_correction_group_key);
 
@@ -66,6 +75,8 @@ void settings_io::read(output_settings &settings, const std::string &group_key) 
 	qsettings_->beginGroup(group_key.c_str());
 	settings.scanner_ = qsettings_->value(scanner_output_key.c_str(), settings_output_default).toBool();
 	settings.gps_ = qsettings_->value(gps_output_key.c_str(), settings_output_default).toBool();
+	settings.gsm_sweep_ = qsettings_->value(gsm_sweep_output_key.c_str(), settings_output_default).toBool();
+	settings.gsm_layer_3_ = qsettings_->value(gsm_layer_3_output_key.c_str(), settings_output_default).toBool();
 	settings.umts_sweep_ = qsettings_->value(umts_sweep_output_key.c_str(), settings_output_default).toBool();
 	settings.umts_layer_3_ = qsettings_->value(umts_layer_3_output_key.c_str(), settings_output_default).toBool();
 	settings.lte_sweep_ = qsettings_->value(lte_sweep_output_key.c_str(), settings_output_default).toBool();
@@ -89,6 +100,20 @@ void settings_io::read(layer_3_settings &settings, const std::string &group_key)
 	settings.minimum_collection_round_ = qsettings_->value(min_collection_round_key.c_str(), settings_layer_3_min_collection_round_default).toInt();
 	settings.decode_threshold_ = qsettings_->value(decode_threshold_key.c_str(), settings_layer_3_decode_threshold_default).toDouble();
 	settings.decode_minimum_threshold_ = qsettings_->value(min_decode_threshold_key.c_str(), settings_layer_3_min_decode_threshold_default).toDouble();
+	auto list = qsettings_->value(layer_3_wanted_key.c_str());
+	auto string_list = list.toStringList();
+	settings.wanted_layer_3_.clear();
+	for(auto i : string_list)
+		settings.wanted_layer_3_.push_back(i.toInt());
+	qsettings_->endGroup();
+}
+
+void settings_io::read(gsm_general_settings &settings, const std::string &group_key) {
+	qsettings_->beginGroup(group_key.c_str());
+	settings.side_power_threshold_ = qsettings_->value(gsm_side_power_threshold_key.c_str(), settings_gsm_general_side_power_threshold_default).toDouble();
+	settings.band_power_threshold_ = qsettings_->value(gsm_band_power_threshold_key.c_str(), settings_gsm_general_band_power_threshold_default).toDouble();
+	settings.perform_sync_correlations_ = qsettings_->value(gsm_perform_sync_correlations_key.c_str(), settings_gsm_general_perform_sync_correlations_default).toBool();
+	settings.sync_corr_confidence_threshold_ = qsettings_->value(gsm_sync_corr_confidence_threshold_key.c_str(), settings_gsm_general_sync_corr_confidence_threshold_default).toDouble();
 	qsettings_->endGroup();
 }
 
@@ -97,6 +122,13 @@ void settings_io::read(umts_general_settings &settings, const std::string &group
 	settings.sensitivity_ = qsettings_->value(sensitivity_key.c_str(), settings_umts_general_sensitivity_default).toDouble();
 	settings.full_scan_interval_ = qsettings_->value(full_scan_interval_key.c_str(), settings_umts_general_full_scan_interval_default).toInt();
 	settings.num_coherent_slots_ = qsettings_->value(num_coherent_slots_key.c_str(), settings_umts_general_num_coherent_slots_default).toInt();
+	qsettings_->endGroup();
+}
+
+void settings_io::read(lte_general_settings &settings, const std::string &group_key) {
+	qsettings_->beginGroup(group_key.c_str());
+	settings.sync_quality_confidence_threshold_ = qsettings_->value(sync_quality_confidence_threshold_key.c_str(), settings_lte_general_sync_quality_confidence_threshold_default).toDouble();
+	settings.full_scan_interval_ = qsettings_->value(full_scan_interval_key.c_str(), settings_lte_general_full_scan_interval_default).toInt();
 	qsettings_->endGroup();
 }
 
@@ -139,17 +171,26 @@ void settings_io::write(const settings &settings) {
 	write(settings.packet_output_, packet_output_group_key);
 	write(settings.file_output_, file_output_group_key);
 
+	write(settings.gsm_sweep_collection_, gsm_sweep_collection_group_key);
+	write(settings.gsm_layer_3_collection_, gsm_layer_3_collection_group_key);
 	write(settings.umts_sweep_collection_, umts_sweep_collection_group_key);
 	write(settings.umts_layer_3_collection_, umts_layer_3_collection_group_key);
 	write(settings.lte_sweep_collection_, lte_sweep_collection_group_key);
 	write(settings.lte_layer_3_collection_, lte_layer_3_collection_group_key);
 	write(settings.sweep_collection_, sweep_collection_group_key);
 
-	write(settings.umts_decode_layer_3_, umts_decode_thresholds_group_key);
-	write(settings.lte_decode_layer_3_, lte_decode_thresholds_group_key);
+	write(settings.gsm_layer_3_decode_, gsm_decode_thresholds_group_key);
+	write(settings.umts_layer_3_decode_, umts_decode_thresholds_group_key);
+	write(settings.lte_layer_3_decode_, lte_decode_thresholds_group_key);
+
+	write(settings.gsm_sweep_general_, gsm_sweep_general_group_key);
+	write(settings.gsm_layer_3_general_, gsm_layer_3_general_group_key);
 
 	write(settings.umts_sweep_general_, umts_sweep_general_group_key);
 	write(settings.umts_layer_3_general_, umts_layer_3_general_group_key);
+
+	write(settings.lte_sweep_general_, lte_sweep_general_group_key);
+	write(settings.lte_layer_3_general_, lte_layer_3_general_group_key);
 
 	write(settings.frequency_correction_settings_, frequency_correction_group_key);
 
@@ -160,6 +201,8 @@ void settings_io::write(const output_settings &settings, const std::string &grou
 	qsettings_->beginGroup(group_key.c_str());
 	qsettings_->setValue(scanner_output_key.c_str(), settings.scanner_);
 	qsettings_->setValue(gps_output_key.c_str(), settings.gps_);
+	qsettings_->setValue(gsm_sweep_output_key.c_str(), settings.gsm_sweep_);
+	qsettings_->setValue(gsm_layer_3_output_key.c_str(), settings.gsm_layer_3_);
 	qsettings_->setValue(umts_sweep_output_key.c_str(), settings.umts_sweep_);
 	qsettings_->setValue(umts_layer_3_output_key.c_str(), settings.umts_layer_3_);
 	qsettings_->setValue(lte_sweep_output_key.c_str(), settings.lte_sweep_);
@@ -182,6 +225,19 @@ void settings_io::write(const layer_3_settings &settings, const std::string &gro
 	qsettings_->setValue(min_collection_round_key.c_str(), settings.minimum_collection_round_);
 	qsettings_->setValue(decode_threshold_key.c_str(), settings.decode_threshold_);
 	qsettings_->setValue(min_decode_threshold_key.c_str(), settings.decode_minimum_threshold_);
+	QStringList list;
+	for(auto i : settings.wanted_layer_3_)
+		list.append(QString::number((int)i));
+	qsettings_->setValue(layer_3_wanted_key.c_str(), list);
+	qsettings_->endGroup();
+}
+
+void settings_io::write(const gsm_general_settings &settings, const std::string &group_key) {
+	qsettings_->beginGroup(group_key.c_str());
+	qsettings_->setValue(gsm_side_power_threshold_key.c_str(), settings.side_power_threshold_);
+	qsettings_->setValue(gsm_band_power_threshold_key.c_str(), settings.band_power_threshold_);
+	qsettings_->setValue(gsm_perform_sync_correlations_key.c_str(), settings.perform_sync_correlations_);
+	qsettings_->setValue(gsm_sync_corr_confidence_threshold_key.c_str(), settings.sync_corr_confidence_threshold_);
 	qsettings_->endGroup();
 }
 
@@ -190,6 +246,13 @@ void settings_io::write(const umts_general_settings &settings, const std::string
 	qsettings_->setValue(sensitivity_key.c_str(), settings.sensitivity_);
 	qsettings_->setValue(full_scan_interval_key.c_str(), settings.full_scan_interval_);
 	qsettings_->setValue(num_coherent_slots_key.c_str(), settings.num_coherent_slots_);
+	qsettings_->endGroup();
+}
+
+void settings_io::write(const lte_general_settings &settings, const std::string &group_key) {
+	qsettings_->beginGroup(group_key.c_str());
+	qsettings_->setValue(sync_quality_confidence_threshold_key.c_str(), settings.sync_quality_confidence_threshold_);
+	qsettings_->setValue(full_scan_interval_key.c_str(), settings.full_scan_interval_);
 	qsettings_->endGroup();
 }
 
