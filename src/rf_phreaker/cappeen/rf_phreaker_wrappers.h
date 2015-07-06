@@ -17,7 +17,7 @@ public:
 	{}
 	lte_sib1_wrapper(const layer_3_information::lte_sib1_type &s)
 	{
-		s_.decoded_ = s.decoded_;
+		s_.decoded_ = s.is_decoded_;
 		s_.cid_ = s.cell_id_;
 		s_.tac_ = s.tracking_area_code_;
 
@@ -55,7 +55,7 @@ public:
 		: s_(std::move(s.s_))
 		{}
 	lte_sib3_wrapper(const layer_3_information::lte_sib3_type &s) {
-		s_.decoded_ = s.decoded_;
+		s_.decoded_ = s.is_decoded_;
 		s_.cell_reselection_serving_freq_info_.cell_reselection_priority_ = s.cell_reselection_serving_freq_info_.cell_reselection_priority_;
 		s_.cell_reselection_serving_freq_info_.s_non_intra_search_ = s.cell_reselection_serving_freq_info_.s_non_intra_search_.reselection_threshold();
 		s_.cell_reselection_serving_freq_info_.threshold_serving_low_ = s.cell_reselection_serving_freq_info_.threshold_serving_low_.reselection_threshold();
@@ -78,7 +78,7 @@ public:
 		, intra_cells_(std::move(s.intra_cells_))
 		, intra_blacks_(std::move(s.intra_blacks_)) {}
 	lte_sib4_wrapper(const layer_3_information::lte_sib4_type &s) {
-		s_.decoded_ = s.decoded_;
+		s_.decoded_ = s.is_decoded_;
 
 		for(auto &i : s.intra_freq_neighbor_cell_list_) {
 			beagle_api::lte_neighbor_cell t;
@@ -119,7 +119,7 @@ public:
 	{}
 	lte_sib5_wrapper(const layer_3_information::lte_sib5_type &s)
 	{
-		s_.decoded_ = s.decoded_;
+		s_.decoded_ = s.is_decoded_;
 
 		for(auto &i : s.inter_freq_carrier_info_list_) {
 			beagle_api::lte_neighbor_inter t;
@@ -180,7 +180,7 @@ public:
 	{}
 	lte_sib6_wrapper(const layer_3_information::lte_sib6_type &s)
 	{
-		s_.decoded_ = s.decoded_;
+		s_.decoded_ = s.is_decoded_;
 
 		for(auto &i : s.carrier_freq_list_utra_fdd_) {
 			beagle_api::carrier_freq_utra t;
@@ -225,7 +225,7 @@ public:
 	{}
  	lte_sib7_wrapper(const layer_3_information::lte_sib7_type &s)
 	{
-		s_.decoded_ = s.decoded_;
+		s_.decoded_ = s.is_decoded_;
 
 		for(auto &i : s.carrier_freqs_info_list_geran_) {
 			beagle_api::lte_neighbor_inter_rat_geran t;
@@ -267,7 +267,7 @@ public:
 	{}
 	lte_sib8_wrapper(const layer_3_information::lte_sib8_type &s)
 	{
-		s_.decoded_ = s.decoded_;
+		s_.decoded_ = s.is_decoded_;
 
 		for(auto &i : s.parameters_hrpd_.neighbor_cell_list_) {
 			beagle_api::lte_neighbor_inter_rat_cdma_2000 t;

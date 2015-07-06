@@ -7,7 +7,7 @@ TEST(RfPhreakerWrappers, Sib1)
 	using namespace layer_3_information;
 	using namespace rf_phreaker::cappeen_api;
 	lte_sib1_type sib1;
-	sib1.decoded_ = true;
+	sib1.is_decoded_ = true;
 	sib1.cell_id_ = 1000;
 	sib1.tracking_area_code_ = 2000;
 	for(int i = 0; i < 4; ++i) {
@@ -24,6 +24,9 @@ TEST(RfPhreakerWrappers, Sib1)
 	lte_sib_1 b_sib1;
 	b_sib1 = sib1s.back().s_;
 
+	EXPECT_EQ(sib1.is_decoded(),
+		b_sib1.decoded_);
+
 	for(uint32_t i = 0; i < b_sib1.plmns_.num_elements_; ++i) {
 		EXPECT_STREQ("310", b_sib1.plmns_.elements_[i].mcc_);
 		EXPECT_STREQ(std::to_string(i).c_str(), b_sib1.plmns_.elements_[i].mnc_);
@@ -37,6 +40,7 @@ TEST(RfPhreakerWrappers, Sib3) {
 	
 	int var = 0;
 	lte_sib3_type sib;
+	sib.is_decoded_ = true;
 	sib.cell_reselection_serving_freq_info_.cell_reselection_priority_ = var++;
 	sib.cell_reselection_serving_freq_info_.s_non_intra_search_ = var++;
 	sib.cell_reselection_serving_freq_info_.threshold_serving_low_ = var++;
@@ -52,7 +56,7 @@ TEST(RfPhreakerWrappers, Sib3) {
 	sib_wrappers.push_back(lte_sib3_wrapper(sib));
 	auto test = sib_wrappers[0];
 
-	EXPECT_EQ(sib.decoded_,
+	EXPECT_EQ(sib.is_decoded(),
 		test.s_.decoded_);
 
 	EXPECT_EQ(sib.cell_reselection_serving_freq_info_.cell_reselection_priority_,
@@ -86,7 +90,7 @@ TEST(RfPhreakerWrappers, Sib4) {
 	
 	int var = 0;
 	lte_sib4_type sib;
-	sib.decoded_ = true;
+	sib.is_decoded_ = true;
 	sib.csg_physical_cellid_range_.range_ = var++;
 	sib.csg_physical_cellid_range_.start_ = var++;
 	physical_cellid_range tmp;
@@ -105,7 +109,7 @@ TEST(RfPhreakerWrappers, Sib4) {
 	sib_wrappers.push_back(lte_sib4_wrapper(sib));
 	auto test = sib_wrappers[0];
 
-	EXPECT_EQ(sib.decoded_,
+	EXPECT_EQ(sib.is_decoded(),
 		test.s_.decoded_);
 
 	EXPECT_EQ(sib.csg_physical_cellid_range_.range_,
@@ -131,7 +135,7 @@ TEST(RfPhreakerWrappers, Sib5) {
 
 	int var = 0;
 	lte_sib5_type sib;
-	sib.decoded_ = true;
+	sib.is_decoded_ = true;
 	inter_freq_carrier_freq_info tmp;
 	tmp.allowed_measurement_bandwidth_ = var++;
 	tmp.cell_reselection_priority_ = var++;
@@ -161,7 +165,7 @@ TEST(RfPhreakerWrappers, Sib5) {
 	sib_wrappers.push_back(lte_sib5_wrapper(sib));
 	auto test = sib_wrappers[0];
 
-	EXPECT_EQ(sib.decoded_,
+	EXPECT_EQ(sib.is_decoded(),
 		test.s_.decoded_);
 
 	EXPECT_EQ(sib.inter_freq_carrier_info_list_[0].allowed_measurement_bandwidth_,
@@ -203,7 +207,7 @@ TEST(RfPhreakerWrappers, Sib6) {
 
 	int var = 0;
 	lte_sib6_type sib;
-	sib.decoded_ = true;
+	sib.is_decoded_ = true;
 	layer_3_information::carrier_freq_utra tmp;
 	tmp.arfcn_value_utra_ = var++;
 	tmp.cell_reselection_priority_ = var++;
@@ -226,7 +230,7 @@ TEST(RfPhreakerWrappers, Sib6) {
 	sib_wrappers.push_back(lte_sib6_wrapper(sib));
 	auto test = sib_wrappers[0];
 
-	EXPECT_EQ(sib.decoded_,
+	EXPECT_EQ(sib.is_decoded(),
 		test.s_.decoded_);
 
 	EXPECT_EQ(sib.carrier_freq_list_utra_fdd_[0].arfcn_value_utra_,
@@ -263,7 +267,7 @@ TEST(RfPhreakerWrappers, Sib7) {
 
 	int var = 0;
 	lte_sib7_type sib;
-	sib.decoded_ = true;
+	sib.is_decoded_ = true;
 	carrier_freqs_info_geran tmp;
 	tmp.carrier_freqs_.band_indicator_ = dcs_1800_was_used;
 	tmp.carrier_freqs_.following_arfcns_.push_back(var);
@@ -279,7 +283,7 @@ TEST(RfPhreakerWrappers, Sib7) {
 	sib_wrappers.push_back(lte_sib7_wrapper(sib));
 	auto test = sib_wrappers[0];
 
-	EXPECT_EQ(sib.decoded_,
+	EXPECT_EQ(sib.is_decoded(),
 		test.s_.decoded_);
 
 	EXPECT_EQ(sib.carrier_freqs_info_list_geran_[0].carrier_freqs_.band_indicator_,
@@ -304,7 +308,7 @@ TEST(RfPhreakerWrappers, Sib8) {
 
 	int var = 0;
 	lte_sib8_type sib;
-	sib.decoded_ = true;
+	sib.is_decoded_ = true;
 
 	neighbor_cell_cdma_2000 tmp;
 	tmp.band_ = bc4;
@@ -329,7 +333,7 @@ TEST(RfPhreakerWrappers, Sib8) {
 	sib_wrappers.push_back(lte_sib8_wrapper(sib));
 	auto test = sib_wrappers[0];
 
-	EXPECT_EQ(sib.decoded_,
+	EXPECT_EQ(sib.is_decoded(),
 		test.s_.decoded_);
 
 	EXPECT_EQ(sib.parameters_1xrtt_.neighbor_cell_list_[0].band_,
