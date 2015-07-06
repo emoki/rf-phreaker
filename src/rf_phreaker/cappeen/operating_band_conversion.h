@@ -14,6 +14,18 @@ static rf_phreaker::operating_band convert_band(beagle_api::TECHNOLOGIES_AND_BAN
 	rf_phreaker::operating_band b;
 
 	switch(band) {
+	case GSM_BAND_850:
+		b = rf_phreaker::GSM_850;
+		break;
+	case GSM_BAND_900:
+		b = rf_phreaker::GSM_R_900;
+		break;
+	case GSM_BAND_1800:
+		b = rf_phreaker::GSM_DCS_1800;
+		break;
+	case GSM_BAND_1900:
+		b = rf_phreaker::GSM_PCS_1900;
+		break;
 	case WCDMA_BAND_850:
 		b = rf_phreaker::UMTS_OPERATING_BAND_5;
 		break;
@@ -324,6 +336,18 @@ static beagle_api::TECHNOLOGIES_AND_BANDS convert_band_to_tech_band(rf_phreaker:
 	beagle_api::TECHNOLOGIES_AND_BANDS b;
 
 	switch(band) {
+	case rf_phreaker::GSM_850:
+		b = GSM_BAND_850;
+		break;
+	case rf_phreaker::GSM_R_900:
+		b = GSM_BAND_900;
+		break;
+	case rf_phreaker::GSM_DCS_1800:
+		b = GSM_BAND_1800;
+		break;
+	case rf_phreaker::GSM_PCS_1900:
+		b = GSM_BAND_1900;
+		break;
 	case rf_phreaker::UMTS_OPERATING_BAND_5:
 		b = WCDMA_BAND_850;
 		break;
@@ -472,6 +496,18 @@ static beagle_api::BANDS convert_band_to_hw_band(rf_phreaker::operating_band ban
 	beagle_api::BANDS b;
 
 	switch(band) {
+	case rf_phreaker::GSM_850:
+		b = BAND_850;
+		break;
+	case rf_phreaker::GSM_R_900:
+		b = BAND_900;
+		break;
+	case rf_phreaker::GSM_DCS_1800:
+		b = BAND_1800;
+		break;
+	case rf_phreaker::GSM_PCS_1900:
+		b = BAND_1900;
+		break;
 	case rf_phreaker::UMTS_OPERATING_BAND_5:
 		b = BAND_850;
 		break;

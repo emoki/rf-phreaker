@@ -450,7 +450,23 @@ processing::collection_info_containers cappeen_impl::create_collection_info_cont
 		
 		LOG(LVERBOSE) << "Adding operating band: " << to_string(band) << ".";
 
-		if(band >= FIRST_UMTS_OPERATING_BAND && band <= LAST_UMTS_OPERATING_BAND) {
+		if(band >= FIRST_GSM_OPERATING_BAND && band <= LAST_GSM_OPERATING_BAND) {
+			auto it = std::find_if(containers.begin(), containers.end(), [&](const collection_info_container &c) {
+				return c.tech_ == GSM_SWEEP;
+			});
+
+			if(it == containers.end()) {
+				containers.push_back(collection_info_container(GSM_SWEEP, true));
+				containers.push_back(collection_info_container(GSM_LAYER_3_DECODE, false));
+				it = std::find_if(containers.begin(), containers.end(), [&](const collection_info_container &c) {
+					return c.tech_ == GSM_SWEEP;
+				});
+			}
+
+			auto range = operating_bands_.get_band_freq_range(band);
+			frequency_range_creation::adjust_gsm_sweep_collection_info_with_adjustment(range, *it);
+		}
+		else if(band >= FIRST_UMTS_OPERATING_BAND && band <= LAST_UMTS_OPERATING_BAND) {
 			auto it = std::find_if(containers.begin(), containers.end(), [&](const collection_info_container &c) {
 				return c.tech_ == UMTS_SWEEP;
 			});

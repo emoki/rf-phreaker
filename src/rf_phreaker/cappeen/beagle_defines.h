@@ -191,7 +191,7 @@ namespace beagle_api
 	};
 
 	/**
-	Can represent CDMA/GSM/UMTS/LTE channels.
+	Can represent GSM/UMTS/LTE channels.
 	*/
 	struct channel_group {
 		uint32_t num_elements_;
@@ -472,7 +472,7 @@ namespace beagle_api
 		/// Current state of the beagle unit.
 		BEAGLESTATE state_;
 
-		/// A five digit or 32 hex character string plus NULL representing the serial.
+		/// A 32 hex character string plus NULL representing the serial.
 		char beagle_serial_[33];
 
 		/// List of the valid licenses installed on the beagle unit.  
@@ -532,40 +532,39 @@ namespace beagle_api
 		/// Specifies a complete set of measurments.
 		uint32_t collection_round_;
 
-		/// Broadcast control channel.  Always valid.
-		channel_type bcch_;
+		/// Carrier frequency in Hz.
+		frequency_type carrier_freq_;
 
-		/// Base station identity code.  0x99 if not successfully decoded.
-		uint8_t bsic_;
+		/// Received signal strength indicator in dBm.
+		double rssi_;
 
-		/// Decoded Mobile Country Code.  0xFFFF if not successfully decoded.
-		uint16_t mcc_;
+		/// GSM channel.
+		channel_type arfcn_;
 
-		/// Decoded Mobile Network Code.  0xFFFF if not successfully decoded.
-		uint16_t  mnc_;
+		/// Corresponds to the GSM operating band.
+		TECHNOLOGIES_AND_BANDS operating_band_;
 
-		/// Decoded Location Area Code.  0xFFFF if not successfully decoded.
-		uint16_t  lac_;
+		/// Base station identity code.  -1 if not decoded.
+		int32_t bsic_;
 
-		/// Decoded Cellular Identity.  0xFFFFFFFF if not successfully decoded.
-		uint32_t cell_id_;
+		/// Signal level of GSM cell in dBm.
+		double cell_sl_;
 
-		/// Signal level in dBm.  Always valid.
-		double sl_;
-
-		/// Carrier to Interference ratio in dB.  Always valid.
+		/// Carrier to Interference ratio in dB.
 		double ctoi_;
-
-		//// Corresponds to the hardware band the info was measured on.
-		BANDS band_;
-
-		// True if mcc was decoded with three digits.  Allows for leading zero.
-		bool mcc_three_digits_;
-
-		// True if mnc was decoded with three digits.  Allows for leading zero.
-		bool mnc_three_digits_;
-
 	};
+
+	/**
+	Encapsulates a GSM sweep measurement.
+	*/
+	struct gsm_sweep_info {
+		/// Center frequency in Hz.
+		frequency_type frequency_;
+
+		/// Power (dBm) of a 200 KHz bin that is centered around the frequency.  
+		double rssi_;
+	};
+
 
 	/**
 	Encapsulates a UMTS measurement.
@@ -581,22 +580,22 @@ namespace beagle_api
 		double carrier_sl_;
 
 		/// UMTS channel.  Always valid.
-		uint16_t  uarfcn_;
+		uint16_t uarfcn_;
 
 		/// Decoded Mobile Country Code.  0xFFFF if not successfully decoded.
-		uint16_t  mcc_;
+		uint16_t mcc_;
 
 		/// Decoded Mobile Network Code.  0xFFFF if not successfully decoded.
-		uint16_t  mnc_;
+		uint16_t mnc_;
 
 		/// Decoded Location Area Code.  0xFFFF if not successfully decoded.
-		uint16_t  lac_;
+		uint16_t lac_;
 
 		/// Decoded Cellular Identity.  0xFFFFFFFF if not successfully decoded.
 		uint32_t cell_id_;
 
 		/// Common pilot channel.  Always valid. 
-		uint16_t  cpich_;
+		uint16_t cpich_;
 
 		/// Received energy per chip to the interference level in dB.  Always valid.
 		double ecio_;
@@ -607,30 +606,34 @@ namespace beagle_api
 		//// Corresponds to the hardware band the info was measured on.
 		BANDS band_;
 
-		// True if mcc was decoded with three digits.  Allows for leading zero.
+		/// True if mcc was decoded with three digits.  Allows for leading zero.
 		bool mcc_three_digits_;
 
-		// True if mnc was decoded with three digits.  Allows for leading zero.
+		/// True if mnc was decoded with three digits.  Allows for leading zero.
 		bool mnc_three_digits_;
 
-		// Neighbor intra frequency list.  Decoded from SIB 11 or SIB 11bis.
+		/// Neighbor intra frequency list.  Decoded from SIB 11 or SIB 11bis.
 		umts_neighbor_intra_group neighbor_intra_group_;
 
-		// Neighbor inter frequency list.  Decoded from SIB 11 or SIB 11bis.
+		/// Neighbor inter frequency list.  Decoded from SIB 11 or SIB 11bis.
 		umts_neighbor_inter_group neighbor_inter_group_;
 
-		// Neighbor inter frequency RAT list.  Decoded from SIB 11 or SIB 11bis.
+		/// Neighbor inter frequency RAT list.  Decoded from SIB 11 or SIB 11bis.
 		umts_neighbor_inter_rat_gsm_group neighbor_inter_rat_gsm_group_;
 
-		// Contains the PLMN of the inter frequency list.  Currently not decoded.
+		/// Contains the PLMN of the inter frequency list.  Currently not decoded.
 		umts_sib_18 sib_18_group_;
 	};
 
-	struct umts_sweep_info {
-		// Frequency in Hz
+	/**
+	Encapsulates a UMTS sweep measurement.
+	*/
+	struct umts_sweep_info
+	{
+		/// Frequency in Hz
 		frequency_type frequency_;
 
-		// Power within a 4 MHz bin centered around the frequency of the uarfcn_.
+		/// Power within a 4 MHz bin centered around the frequency.
 		double rssi_;
 	};
 
@@ -693,7 +696,7 @@ namespace beagle_api
 		/// System frame number.
 		int32_t system_frame_number_;
 
-		// TODO - Description.
+		/// System information.
 		lte_sib_1 sib_1_;
 		lte_sib_3 sib_3_;
 		lte_sib_4 sib_4_;
@@ -703,11 +706,15 @@ namespace beagle_api
 		lte_sib_8 sib_8_;
 	};
 
-	struct lte_sweep_info {
-		// Center frequency in Hz.
+	/**
+	Encapsulates a LTE sweep measurement.
+	*/
+	struct lte_sweep_info
+	{
+		/// Center frequency in Hz.
 		frequency_type frequency_;
 
-		// Power within a bin size (based on the configuration file) that is centered around the frequency of the EARFCN.  
+		/// Power within a bin size (based on the configuration file) that is centered around the frequency.
 		double rssi_;
 	};
 
@@ -734,6 +741,12 @@ namespace beagle_api
 		/// @param info Array of gsm_sector_info
 		/// @param num_records Number of gsm_sector_info structs within the info array.
 		virtual void __stdcall available_gsm_sector_info(beagle_id_type beagle_id, const gsm_sector_info *info, long num_records) = 0;
+
+		/// Called by Beagle when there is new GSM data.  
+		/// @param beagle_id A unique ID which corresponds to the Beagle unit.
+		/// @param info Array of gsm_sweep_info
+		/// @param num_records Number of gsm_sweep_info structs within the info array.
+		virtual void __stdcall available_gsm_sweep_info(beagle_id_type beagle_id, const gsm_sweep_info *info, long num_records) = 0;
 
 		/// Called by Beagle when there is new UMTS data. 
 		/// @param beagle_id A unique ID which corresponds to the Beagle unit.

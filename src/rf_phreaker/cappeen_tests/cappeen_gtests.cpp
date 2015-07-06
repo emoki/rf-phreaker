@@ -35,6 +35,12 @@ TEST(Cappeen, TestMain)
 		std::vector<TECHNOLOGIES_AND_BANDS> tech_bands;
 		info.tech_and_bands_to_sweep_.elements_ = 0;
 		info.tech_and_bands_to_sweep_.num_elements_ = 0;;
+	
+		tech_bands.push_back(GSM_BAND_850);
+		tech_bands.push_back(GSM_BAND_1900);
+		tech_bands.push_back(GSM_BAND_900);
+		tech_bands.push_back(GSM_BAND_1800);
+
 		tech_bands.push_back(WCDMA_BAND_850);
 		tech_bands.push_back(WCDMA_BAND_1900);
 		tech_bands.push_back(WCDMA_BAND_2100);

@@ -78,6 +78,10 @@ public:
 		data_output->connect_hardware(boost::bind(&cappeen_delegate::output_hardware, this, _1)).get();
 		LOG(LVERBOSE) << "Connecting gps.";
 		data_output->connect_gps(boost::bind(&cappeen_delegate::output_gps, this, _1)).get();
+		LOG(LVERBOSE) << "Connecting gsm_sweep.";
+		data_output->connect_gsm_sweep(boost::bind(&cappeen_delegate::output_gsm_sweep, this, _1, _2)).get();
+		LOG(LVERBOSE) << "Connecting gsm_layer_3.";
+		data_output->connect_gsm_layer_3(boost::bind(&cappeen_delegate::output_gsm_layer_3, this, _1, _2)).get();
 		LOG(LVERBOSE) << "Connecting umts_sweep.";
 		data_output->connect_umts_sweep(boost::bind(&cappeen_delegate::output_umts_sweep, this, _1, _2)).get();
 		LOG(LVERBOSE) << "Connecting umts_layer_3.";
@@ -120,25 +124,53 @@ public:
 		delegate_->available_gps_info(beagle_info_.beagle_id_, g);
 	}
 	
-	void output_umts_sweep(const basic_data &t, const std::vector<umts_data> &)
-	{
+	void output_gsm_sweep(const basic_data &t, const std::vector<gsm_data> &) {
+		beagle_api::gsm_sweep_info a;
+		a.frequency_ = t.carrier_frequency_;
+		a.rssi_ = t.carrier_signal_level_;
+
+		delegate_->available_gsm_sweep_info(beagle_info_.beagle_id_, &a, 1);
+	}
+
+	void output_gsm_layer_3(const std::vector<gsm_data> &t, const basic_data &) {
+		if(t.empty()) return;
+
+		std::vector<beagle_api::gsm_sector_info> v(t.size());
+
+		int i = 0;
+		for(auto &gsm : t) {
+			v[i].operating_band_ = convert_band_to_tech_band(gsm.operating_band_);
+			v[i].carrier_freq_ = gsm.carrier_frequency_;
+			v[i].rssi_ = gsm.carrier_signal_level_;
+			v[i].collection_round_ = static_cast<uint32_t>(gsm.collection_round_);
+			v[i].arfcn_ = gsm.arfcn_;
+			v[i].bsic_ = gsm.bsic_;
+			v[i].cell_sl_ = gsm.cell_signal_level_;
+			v[i].ctoi_ = gsm.ctoi_;
+
+			++i;
+		}
+
+		delegate_->available_gsm_sector_info(beagle_info_.beagle_id_, &v[0], v.size());
+	}
+
+	void output_umts_sweep(const basic_data &t, const std::vector<umts_data> &) {
 		beagle_api::umts_sweep_info a;
 		a.frequency_ = t.carrier_frequency_;
 		a.rssi_ = t.carrier_signal_level_;
 
 		delegate_->available_umts_sweep_info(beagle_info_.beagle_id_, &a, 1);
 	}
-	
-	void output_umts_layer_3(const std::vector<umts_data> &t, const basic_data &)
-	{
+
+	void output_umts_layer_3(const std::vector<umts_data> &t, const basic_data &) {
 		if(t.empty()) return;
-		
+
 		std::vector<beagle_api::umts_sector_info> v(t.size());
 
 		// Determine total amount of inter_rat_bufs needed.
 		std::vector<beagle_api::umts_neighbor_inter_rat_gsm> inter_rat_buf;
 		int total_inter_rat_bufs_needed = 0;
-		for(auto &umts: t) {
+		for(auto &umts : t) {
 			total_inter_rat_bufs_needed += umts.layer_3_.neighbor_inter_rat_group_.size();
 		}
 		inter_rat_buf.reserve(total_inter_rat_bufs_needed);
@@ -159,21 +191,21 @@ public:
 			v[i].mcc_three_digits_ = umts.layer_3_.mnc_.num_characters() == 3 ? true : false;
 			v[i].lac_ = umts.layer_3_.lac_;
 			v[i].cell_id_ = umts.layer_3_.cid_;
-			
+
 
 			v[i].neighbor_intra_group_.num_elements_ = umts.layer_3_.neighbor_intra_group_.size();
 			v[i].neighbor_intra_group_.elements_ = 0;
 			if(v[i].neighbor_intra_group_.num_elements_) {
 				v[i].neighbor_intra_group_.elements_ = (beagle_api::cpich_type*)&umts.layer_3_.neighbor_intra_group_[0];
 			}
-		
+
 
 			v[i].neighbor_inter_group_.num_elements_ = umts.layer_3_.neighbor_inter_group_.size();
 			v[i].neighbor_inter_group_.elements_ = 0;
 			if(v[i].neighbor_inter_group_.num_elements_) {
 				v[i].neighbor_inter_group_.elements_ = (beagle_api::umts_neighbor_inter*)&umts.layer_3_.neighbor_inter_group_[0];
 			}
-			
+
 
 			v[i].neighbor_inter_rat_gsm_group_.num_elements_ = umts.layer_3_.neighbor_inter_rat_group_.size();
 			v[i].neighbor_inter_rat_gsm_group_.elements_ = 0;
@@ -198,7 +230,7 @@ public:
 
 		delegate_->available_umts_sector_info(beagle_info_.beagle_id_, &v[0], v.size());
 	}
-	
+
 	void output_lte_sweep(const basic_data &t, const std::vector<lte_data> &)
 	{
 		beagle_api::lte_sweep_info a;

@@ -97,7 +97,20 @@ public:
 		std::lock_guard<std::mutex> lock(std_mutex_);
 		std::cout << beagle_id << "\t" << std::boolalpha << info.gps_locked_ << "\t" << info.utc_time_ << "\t" << info.raw_gps_status_ << "\n";
 	}
-	virtual void __stdcall available_gsm_sector_info(beagle_id_type beagle_id, const gsm_sector_info *info, long num_records) {}
+	virtual void __stdcall available_gsm_sector_info(beagle_id_type beagle_id, const gsm_sector_info *info, long num_records) {
+		if(!output_) return;
+		std::lock_guard<std::mutex> lock(std_mutex_);
+		for(int i = 0; i < num_records; ++i) {
+			std::cout << beagle_id << "\t" << info[i].collection_round_ << "\t" << info[i].carrier_freq_ << "\t" << info[i].rssi_ << "\t" << info[i].arfcn_ << "\t" << info[i].bsic_
+				<< "\t" << info[i].cell_sl_ << "\t" << info[i].ctoi_ << std::endl;
+		}
+	}
+	virtual void __stdcall available_gsm_sweep_info(beagle_id_type beagle_id, const gsm_sweep_info *info, long num_records) {
+		if(!output_) return;
+		std::lock_guard<std::mutex> lock(std_mutex_);
+		for(int i = 0; i < num_records; ++i)
+			std::cout << beagle_id << "\t" << info[i].frequency_ << "\t" << info[i].rssi_ << "\t" << "gsm" << "\n";
+	}
 	virtual void __stdcall available_umts_sector_info(beagle_id_type beagle_id, const umts_sector_info *info, long num_records) {
 		if(!output_) return;
 		std::lock_guard<std::mutex> lock(std_mutex_);
