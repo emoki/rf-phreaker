@@ -46,8 +46,9 @@ void processing_graph::start(scanner_controller_interface *sc, data_output_async
 				<< config.umts_layer_3_collection_.collection_time_ << ".";
 			LOG(LVERBOSE) << "umts layer 3 general settings: " << config.umts_layer_3_general_.sensitivity_ << ", " << config.umts_layer_3_general_.full_scan_interval_ << ", "
 				<< config.umts_layer_3_general_.num_coherent_slots_ << ".";
-			LOG(LVERBOSE) << "umts layer 3 decode settings: " << config.umts_decode_layer_3_.max_update_threshold_ << ", " << config.umts_decode_layer_3_.minimum_collection_round_ << ", "
-				<< config.umts_decode_layer_3_.decode_threshold_ << ", " << config.umts_decode_layer_3_.decode_minimum_threshold_ << ".";
+			LOG(LVERBOSE) << "umts layer 3 decode settings: " << config.umts_layer_3_decode_.max_update_threshold_ << ", " << config.umts_layer_3_decode_.minimum_collection_round_ << ", "
+				<< config.umts_layer_3_decode_.decode_threshold_ << ", " << config.umts_layer_3_decode_.decode_minimum_threshold_ << ".";
+
 
 			LOG(LVERBOSE) << "lte layer 3 collection settings: " << config.lte_layer_3_collection_.sampling_rate_ << ", " << config.lte_layer_3_collection_.bandwidth_ << ", "
 				<< config.lte_layer_3_collection_.collection_time_ << ".";
