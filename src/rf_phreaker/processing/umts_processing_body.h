@@ -61,8 +61,7 @@ public:
 
 	umts_info operator()(measurement_package info)
 	{
-		int num_meas = 100;
-		umts_measurements meas(num_meas);
+		umts_measurements group;
 		double rms = 0;
 		
 		// Change scan_type to candidate_one_timeslot_scan_type once we have tracking.
@@ -71,18 +70,16 @@ public:
 			scan_type = full_scan_type;
 		}
 
-		int status = analysis_.cell_search(*info, &meas[0], num_meas, config_.umts_general_.sensitivity_, scan_type, 
+		int status = analysis_.cell_search(*info, group, config_.umts_general_.sensitivity_, scan_type, 
 			g_scanner_error_tracker::instance().current_error(), &rms);
 		if(status != 0)
 			throw umts_analysis_error("Error processing umts.");
 
-		meas.resize(num_meas);
-
-		LOG_IF(LCOLLECTION, (meas.size() != 0)) << "UMTS processing - Found " << meas.size() << " UMTS measurements.  Frequency: " << info->frequency() / 1e6 
-			<< " mhz. | Scan type: " << (scan_type == full_scan_type ? "full scan" : scan_type == candidate_one_timeslot_scan_type 
+		LOG_IF(LCOLLECTION, (group.size() != 0)) << "UMTS processing - Found " << group.size() << " UMTS measurements.  Frequency: " << info->frequency() / 1e6 
+			<< "mhz. | Scan type: " << (scan_type == full_scan_type ? "full scan" : scan_type == candidate_one_timeslot_scan_type 
 			? "one timeslot scan" : "all timeslots scan");
 
-		if(meas.size() && do_we_need_new_correction()) {
+		if(group.size() && do_we_need_new_correction()) {
 			auto error = g_scanner_error_tracker::instance().current_error();
 			freq_correction_param param;
 			param.scan_type_ = candidate_all_timeslots_scan_type;

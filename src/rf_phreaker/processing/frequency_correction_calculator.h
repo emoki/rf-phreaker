@@ -68,22 +68,20 @@ public:
 	correction_lookup determine_freq_correction(raw_signal *info, umts_analysis &analysis, const freq_correction_param &param) {
 		correction_lookup correction;
 
-		int num_meas = 100;
-		umts_measurements meas(num_meas);
+		umts_measurements group;
 
 		analysis.set_num_coherent_slots_for_psch(param.num_coherent_slots_);
 
 		LOG(LDEBUG) << "Starting frequency correction for " << info->frequency() / 1e6 << " MHz. Start offset = " << param.start_freq_ << " Hz. End offset = " << param.end_freq_ << " Hz. Increment = " << param.increment_ << " Hz.";
 		for(int i = param.start_freq_; i <= param.end_freq_; i += param.increment_) {
-			num_meas = 100;
 			raw_signal shifted_signal(*info);
 			shifter_.shift_frequency(shifted_signal.get_iq(), shifted_signal.get_iq().length(), i);
-			auto status = analysis.cell_search(shifted_signal, &meas[0], num_meas, param.sensitivity_, param.scan_type_);
+			auto status = analysis.cell_search(shifted_signal, group, param.sensitivity_, param.scan_type_);
 			if(status != 0)
 				throw umts_analysis_error("Error processing umts.");
 
-			for(int j = 0; j < num_meas; ++j) {
-				correction.insert(meas[j].cpich_, meas[j].ecio_, i);
+			for(const auto &meas : group) {
+				correction.insert(meas.cpich_, meas.ecio_, i);
 			}
 		}
 
