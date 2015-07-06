@@ -73,11 +73,11 @@ if (MSVC)
 	set (SRC_PLATFORM_SPECIFIC "${PROJECT_SOURCE_DIR}/src/rf_phreaker/arch/win")
 	add_definitions (/D_CRT_SECURE_NO_WARNINGS)
 	add_definitions (/D_SCL_SECURE_NO_WARNINGS)
+	add_definitions (/D_VARIADIC_MAX=10)
 	if(MSVC_VERSION LESS 1800)
 		# VC11 bug: http://code.google.com/p/googletest/issues/detail?id=408
 		#          add_definition(-D_VARIADIC_MAX=10)
 		#          https://github.com/anhstudios/swganh/pull/186/files
-		add_definitions (/D_VARIADIC_MAX=10)
 		add_definitions (/wd4996)
 	endif()
 endif()
