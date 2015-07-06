@@ -13,6 +13,7 @@ set (common_tests_SRCS
 	common_tests.cpp
 	common_serialization_gtests.cpp
 	common_utility_gtests.cpp
+	frequency_bin_calculator_gtests.cpp
 	test_operating_band_range_specifier.cpp
 	channel_conversion_gtests.cpp
 	raw_signal_gtests.cpp

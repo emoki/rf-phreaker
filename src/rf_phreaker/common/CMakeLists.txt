@@ -28,6 +28,7 @@ set (common_SRCS
 	fft_helper.cpp
 	fft_helper.h
 	frequency_shifter.h
+	frequency_bin_calculator.h
 	ipp_array.h
 	ipp_helper.h
 	license.h
