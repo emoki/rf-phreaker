@@ -12,8 +12,7 @@ using namespace rf_phreaker;
 using namespace rf_phreaker::scanner;
 
 
-TEST(CalibrationTest, GeneralTest)
-{
+TEST(CalibrationTest, GeneralTest) {
 	cali_holder cal_holder;
 	calibration &cal1 = cal_holder.cal_;
 
@@ -50,44 +49,45 @@ TEST(CalibrationTest, GeneralTest)
 	}
 
 	EXPECT_DOUBLE_EQ(cal1.get_nuand_adjustment(lms::LNA_MAX, mhz(199)), 0);
-	EXPECT_DOUBLE_EQ(cal1.get_nuand_adjustment(lms::LNA_MAX, mhz(200)), 10.1);
-	EXPECT_DOUBLE_EQ(cal1.get_nuand_adjustment(lms::LNA_MAX, mhz(204)), 10.1);
-	EXPECT_DOUBLE_EQ(cal1.get_nuand_adjustment(lms::LNA_MAX, mhz(205)), 20.2);
-	EXPECT_DOUBLE_EQ(cal1.get_nuand_adjustment(lms::LNA_MAX, mhz(210)), 20.2);
-	EXPECT_DOUBLE_EQ(cal1.get_nuand_adjustment(lms::LNA_MAX, mhz(211)), 20.2);
-	EXPECT_DOUBLE_EQ(cal1.get_nuand_adjustment(lms::LNA_MAX, mhz(216)), 30.3);
+	EXPECT_DOUBLE_EQ(cal1.get_nuand_adjustment(lms::LNA_MAX, mhz(200)), 10);
+	EXPECT_DOUBLE_EQ(cal1.get_nuand_adjustment(lms::LNA_MAX, mhz(225)), 15);
+	EXPECT_DOUBLE_EQ(cal1.get_nuand_adjustment(lms::LNA_MAX, mhz(250)), 20);
+	EXPECT_DOUBLE_EQ(cal1.get_nuand_adjustment(lms::LNA_MAX, mhz(275)), 25);
+	EXPECT_DOUBLE_EQ(cal1.get_nuand_adjustment(lms::LNA_MAX, mhz(300)), 30);
+	EXPECT_DOUBLE_EQ(cal1.get_nuand_adjustment(lms::LNA_MAX, mhz(301)), 0);
 
 	EXPECT_DOUBLE_EQ(cal1.get_nuand_adjustment(lms::LNA_MID, mhz(199)), 0);
-	EXPECT_DOUBLE_EQ(cal1.get_nuand_adjustment(lms::LNA_MID, mhz(200)), 10.1 - offset_lna);
-	EXPECT_DOUBLE_EQ(cal1.get_nuand_adjustment(lms::LNA_MID, mhz(204)), 10.1 - offset_lna);
-	EXPECT_DOUBLE_EQ(cal1.get_nuand_adjustment(lms::LNA_MID, mhz(205)), 20.2 - offset_lna);
-	EXPECT_DOUBLE_EQ(cal1.get_nuand_adjustment(lms::LNA_MID, mhz(210)), 20.2 - offset_lna);
-	EXPECT_DOUBLE_EQ(cal1.get_nuand_adjustment(lms::LNA_MID, mhz(211)), 20.2 - offset_lna);
-	EXPECT_DOUBLE_EQ(cal1.get_nuand_adjustment(lms::LNA_MID, mhz(216)), 30.3 - offset_lna);
+	EXPECT_DOUBLE_EQ(cal1.get_nuand_adjustment(lms::LNA_MID, mhz(200)), 10 - offset_lna);
+	EXPECT_DOUBLE_EQ(cal1.get_nuand_adjustment(lms::LNA_MID, mhz(225)), 15 - offset_lna);
+	EXPECT_DOUBLE_EQ(cal1.get_nuand_adjustment(lms::LNA_MID, mhz(250)), 20 - offset_lna);
+	EXPECT_DOUBLE_EQ(cal1.get_nuand_adjustment(lms::LNA_MID, mhz(275)), 25 - offset_lna);
+	EXPECT_DOUBLE_EQ(cal1.get_nuand_adjustment(lms::LNA_MID, mhz(300)), 30 - offset_lna);
+	EXPECT_DOUBLE_EQ(cal1.get_nuand_adjustment(lms::LNA_MID, mhz(301)), 0);
 
 	EXPECT_DOUBLE_EQ(cal1.get_nuand_adjustment(lms::LNA_BYPASS, mhz(199)), 0);
-	EXPECT_DOUBLE_EQ(cal1.get_nuand_adjustment(lms::LNA_BYPASS, mhz(200)), 10.1 - 2 * offset_lna);
-	EXPECT_DOUBLE_EQ(cal1.get_nuand_adjustment(lms::LNA_BYPASS, mhz(204)), 10.1 - 2 * offset_lna);
-	EXPECT_DOUBLE_EQ(cal1.get_nuand_adjustment(lms::LNA_BYPASS, mhz(205)), 20.2 - 2 * offset_lna);
-	EXPECT_DOUBLE_EQ(cal1.get_nuand_adjustment(lms::LNA_BYPASS, mhz(210)), 20.2 - 2 * offset_lna);
-	EXPECT_DOUBLE_EQ(cal1.get_nuand_adjustment(lms::LNA_BYPASS, mhz(211)), 20.2 - 2 * offset_lna);
-	EXPECT_DOUBLE_EQ(cal1.get_nuand_adjustment(lms::LNA_BYPASS, mhz(216)), 30.3 - 2 * offset_lna);
+	EXPECT_DOUBLE_EQ(cal1.get_nuand_adjustment(lms::LNA_BYPASS, mhz(200)), 10 - 2 * offset_lna);
+	EXPECT_DOUBLE_EQ(cal1.get_nuand_adjustment(lms::LNA_BYPASS, mhz(225)), 15 - 2 * offset_lna);
+	EXPECT_DOUBLE_EQ(cal1.get_nuand_adjustment(lms::LNA_BYPASS, mhz(250)), 20 - 2 * offset_lna);
+	EXPECT_DOUBLE_EQ(cal1.get_nuand_adjustment(lms::LNA_BYPASS, mhz(275)), 25 - 2 * offset_lna);
+	EXPECT_DOUBLE_EQ(cal1.get_nuand_adjustment(lms::LNA_BYPASS, mhz(300)), 30 - 2 * offset_lna);
+	EXPECT_DOUBLE_EQ(cal1.get_nuand_adjustment(lms::LNA_BYPASS, mhz(301)), 0);
 
-	EXPECT_DOUBLE_EQ(cal1.get_rf_board_adjustment(mhz(199), 100000), 0);
-	EXPECT_DOUBLE_EQ(cal1.get_rf_board_adjustment(mhz(200), 100000), 10.1);
-	EXPECT_DOUBLE_EQ(cal1.get_rf_board_adjustment(mhz(204), 100000), 10.1);
-	EXPECT_DOUBLE_EQ(cal1.get_rf_board_adjustment(mhz(205), 100000), 20.2);
-	EXPECT_DOUBLE_EQ(cal1.get_rf_board_adjustment(mhz(210), 100000), 20.2);
-	EXPECT_DOUBLE_EQ(cal1.get_rf_board_adjustment(mhz(211), 100000), 20.2);
-	EXPECT_DOUBLE_EQ(cal1.get_rf_board_adjustment(mhz(216), 100000), 30.3);
 
-	EXPECT_DOUBLE_EQ(cal1.get_rf_board_adjustment(mhz(199), 500000), 0);
-	EXPECT_DOUBLE_EQ(cal1.get_rf_board_adjustment(mhz(200), 500000), 10.1);
-	EXPECT_DOUBLE_EQ(cal1.get_rf_board_adjustment(mhz(204), 500000), 10.1);
-	EXPECT_DOUBLE_EQ(cal1.get_rf_board_adjustment(mhz(205), 500000), 20.2);
-	EXPECT_DOUBLE_EQ(cal1.get_rf_board_adjustment(mhz(210), 500000), 20.2);
-	EXPECT_DOUBLE_EQ(cal1.get_rf_board_adjustment(mhz(211), 500000), 20.2);
-	EXPECT_DOUBLE_EQ(cal1.get_rf_board_adjustment(mhz(216), 500000), 30.3);
+	EXPECT_DOUBLE_EQ(cal1.get_rf_board_adjustment(mhz(199), 10000), 0);
+	EXPECT_DOUBLE_EQ(cal1.get_rf_board_adjustment(mhz(200), 10000), 10);
+	EXPECT_DOUBLE_EQ(cal1.get_rf_board_adjustment(mhz(225), 10000), 15);
+	EXPECT_DOUBLE_EQ(cal1.get_rf_board_adjustment(mhz(250), 10000), 20);
+	EXPECT_DOUBLE_EQ(cal1.get_rf_board_adjustment(mhz(275), 10000), 25);
+	EXPECT_DOUBLE_EQ(cal1.get_rf_board_adjustment(mhz(300), 10000), 30);
+	EXPECT_DOUBLE_EQ(cal1.get_rf_board_adjustment(mhz(301), 10000), 0);
+
+	EXPECT_DOUBLE_EQ(cal1.get_rf_board_adjustment(mhz(199), 5000), 0);
+	EXPECT_DOUBLE_EQ(cal1.get_rf_board_adjustment(mhz(200), 5000), 10);
+	EXPECT_DOUBLE_EQ(cal1.get_rf_board_adjustment(mhz(225), 5000), 15);
+	EXPECT_DOUBLE_EQ(cal1.get_rf_board_adjustment(mhz(250), 5000), 20);
+	EXPECT_DOUBLE_EQ(cal1.get_rf_board_adjustment(mhz(275), 5000), 25);
+	EXPECT_DOUBLE_EQ(cal1.get_rf_board_adjustment(mhz(300), 5000), 30);
+	EXPECT_DOUBLE_EQ(cal1.get_rf_board_adjustment(mhz(301), 5000), 0);
 }
 
 TEST(CalibrationTest, DISABLED_MatlabReadTest)
@@ -99,7 +99,7 @@ TEST(CalibrationTest, DISABLED_MatlabReadTest)
 	std::string rf_switch_filename = base_filename + "rf_switch_settings_format_example_v2.txt";
 
 	calibration cal;
-
+	 
 	cal.read_nuand_calibration_file(nuand_filename_v1);
 	cal.read_nuand_calibration_file(nuand_filename_v2);
 	cal.read_rf_board_calibration_file(rf_board_filename);

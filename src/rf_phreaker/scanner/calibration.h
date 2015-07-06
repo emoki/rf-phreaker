@@ -217,6 +217,8 @@ public:
 	}
 
 private:
+	double interpolate_adjustment(double position, const rf_adjustment &adj) const;
+
 	std::vector<std::string> parse_line(std::istream &is, const std::string &filename = "unknown file");
 
 	friend class boost::serialization::access;

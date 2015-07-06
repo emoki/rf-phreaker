@@ -50,13 +50,13 @@ double calibration::get_rf_board_adjustment(frequency_type freq, bandwidth_type 
 				LOG(LDEBUG) << "Frequency (" << freq / 1e6 << " mhz) is below lower limit within RF board calibration table.";
 				return 0;
 			}
-			auto pos = (size_t)(boost::math::round(diff / (double)adj_it->second.adj_.spacing_));
-			if(pos > adj_it->second.adj_.rf_adjustments_.size()) {
+			auto pos = diff / (double)adj_it->second.adj_.spacing_;
+			if(std::ceil(pos) > adj_it->second.adj_.rf_adjustments_.size() - 1) {
 				LOG(LDEBUG) << "Frequency (" << freq / 1e6 << " mhz) is above upper limit within RF board calibration table.";
 				return 0;
 			}
 			else
-				return adj_it->second.adj_.rf_adjustments_[pos];
+				return interpolate_adjustment(pos, adj_it->second.adj_);
 		}
 		else
 			return 0;
@@ -75,13 +75,25 @@ double calibration::get_nuand_adjustment(lms::lna_gain_enum gain, frequency_type
 		LOG(LDEBUG) << "Frequency (" << freq / 1e6 << " mhz) is below lower limit within LNA gain adjustment table.";
 		return 0;
 	}
-	auto pos = (size_t)boost::math::round(diff / (double)adj.spacing_);
-	if(pos > (int)adj.rf_adjustments_.size()) {
+	auto pos = diff / (double)adj.spacing_;
+	if(std::ceil(pos) > (int)adj.rf_adjustments_.size() - 1) {
 		LOG(LDEBUG) << "Frequency (" << freq / 1e6 << " mhz) is above upper limit within LNA gain adjustment table.";
 		return 0;
 	}
 	else
-		return adj.rf_adjustments_[pos];
+		return interpolate_adjustment(pos, adj);
+}
+
+double calibration::interpolate_adjustment(double position, const rf_adjustment &adj) const {
+	auto before = std::floor(position);
+	auto after = std::ceil(position);
+	if(after > adj.rf_adjustments_.size()) {
+		LOG(LDEBUG) << "Unable to interpolate because the position is beyond the bounds of the adjustment table.";
+		return 0;
+	}
+	auto ratio = position - before;
+	auto interpolation = adj.rf_adjustments_[before] + (adj.rf_adjustments_[after] - adj.rf_adjustments_[before]) * ratio;
+	return interpolation;
 }
 
 void calibration::read_rf_switch_file(const std::string &filename) {
