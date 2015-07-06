@@ -33,34 +33,37 @@ public:
 		std::vector<channel_freq> freqs;
 
 		if(c >= 128 && c <= 251) { // gsm850 = 869.2 + .2(c-128)
-			freqs.push_back({c, round_to_nearest<khz(100)>(mhz(869.2 + .2 * (c - 128))), GSM_850});
+			freqs.push_back({c, round_to_nearest<khz(100)>(1e6 * (869.2 + .2 * (c - 128))), GSM_850});
 		}
 		else if(c >= 0 && c <= 124) {
-			frequency_type f = round_to_nearest<khz(100)>(mhz(935 + c * .2));
+			frequency_type f = round_to_nearest<khz(100)>(1e6 * (935 + c * .2));
 			freqs.push_back({c, f, GSM_E_900}); //e-gsm900 = 935 + c *.2
 			freqs.push_back({c, f, GSM_R_900}); //r-gsm900 = 935 + c *.2
+			freqs.push_back({c, f, GSM_ER_900}); //r-gsm900 = 935 + c *.2
 			if(c >= 1 && c <= 124)
 				freqs.push_back({c, f, GSM_P_900}); // p-gsm900 = 935 + c*.2
 		}
-		else if(c >= 955 && c <= 1023) { // gsm 900
-			frequency_type f = round_to_nearest<khz(100)>(mhz(935 + (c - 1024) * .2));
-			freqs.push_back({c, f, GSM_R_900}); //r-gsm900 = 935 + c *.2
+		else if(c >= 940 && c <= 1023) { // gsm 900
+			frequency_type f = round_to_nearest<khz(100)>(1e6 * (935 + (c - 1024) * .2));
+			freqs.push_back({c, f, GSM_ER_900}); //r-gsm900 = 935 + c *.2
+			if(c >= 955 && c <= 1023)
+				freqs.push_back({c, f, GSM_R_900}); //r-gsm900 = 935 + c *.2
 			if(c >= 975 && c <= 1023)
 				freqs.push_back({c, f, GSM_E_900}); //e-gsm900 = 935 + c *.2
 		}
 		else if(c >= 512 && c <= 885) { // gsm 1800
-			freqs.push_back({c, round_to_nearest<khz(100)>(mhz(1805.2 + (c - 512) * .2)), GSM_DCS_1800});
+			freqs.push_back({c, round_to_nearest<khz(100)>(1e6 * (1805.2 + (c - 512) * .2)), GSM_DCS_1800});
 			if(c >= 512 && c <= 810)  // gsm 1900
-				freqs.push_back({c, round_to_nearest<khz(100)>(mhz(1930.2 + (c - 512) * .2)), GSM_PCS_1900});
+				freqs.push_back({c, round_to_nearest<khz(100)>(1e6 * (1930.2 + (c - 512) * .2)), GSM_PCS_1900});
 		}
 		else if(c >= 259 && c <= 293) { // gsm 450
-			freqs.push_back({c, round_to_nearest<khz(100)>(mhz(460.6 + (c - 259) * .2)), GSM_450});
+			freqs.push_back({c, round_to_nearest<khz(100)>(1e6 * (460.6 + (c - 259) * .2)), GSM_450});
 		}
 		else if(c >= 306 && c <= 340) { // gsm 480
-			freqs.push_back({c, round_to_nearest<khz(100)>(mhz(489 + (c - 306) * .2)), GSM_480});
+			freqs.push_back({c, round_to_nearest<khz(100)>(1e6 * (489 + (c - 306) * .2)), GSM_480});
 		}
 		else if(c >= 438 && c <= 511) { // gsm 750
-			freqs.push_back({c, round_to_nearest<khz(100)>(mhz(777.2 + (c - 438) * .2)), GSM_750});
+			freqs.push_back({c, round_to_nearest<khz(100)>(1e6 * (777.2 + (c - 438) * .2)), GSM_750});
 		}
 		else {
 			//LOG(LVERBOSE) << "Unknown GSM channel.";
@@ -373,10 +376,99 @@ public:
 			throw misc_error("Error converting frequency to channel. Unknown operating band (" + std::to_string((int)band) + ").", CONVERSION_ERROR);
 	}
 
-	channel_freq frequency_to_arfcn(frequency_type /*freq*/, operating_band /*band*/) {
-		channel_freq cf;
-		throw misc_error("Converting ARFCN is not supported.", CONVERSION_ERROR);
+	channel_freq frequency_to_arfcn(frequency_type freq, operating_band band) {
+		channel_freq cf(-1, freq, band);
+		
+		switch(band) {
+		case GSM_T_380: {
+			// Dynamic channels.
+		} break;
+		case GSM_T_410: {
+			// Dynamic channels.
+		} break;
+		case GSM_450: {
+			static auto range = ranges_.get_band_freq_range(GSM_450);
+			if(freq >= range.low_freq_hz_ && freq <= range.high_freq_hz_)
+				cf.channel_ = calc_arfcn(freq, 450.6, 259, 10);
+		} break;
+		case GSM_480: {
+			static auto range = ranges_.get_band_freq_range(GSM_480);
+			if(freq >= range.low_freq_hz_ && freq <= range.high_freq_hz_)
+				cf.channel_ = calc_arfcn(freq, 479, 306, 10);
+		} break;
+		case GSM_710: {
+			// Dynamic channels.
+		} break;
+		case GSM_750: {
+			// Dynamic channels?
+			//static auto range = ranges_.get_band_freq_range(GSM_750);
+			//if(freq >= range.low_freq_hz_ && freq <= range.high_freq_hz_)
+			//	cf.channel_ = calc_arfcn(freq, 747.2, 438, 30);
+		} break;
+		case GSM_T_810: {
+			// dynamic channels
+		} break;
+		case GSM_850: {
+			static auto range = ranges_.get_band_freq_range(GSM_850);
+			if(freq >= range.low_freq_hz_ && freq <= range.high_freq_hz_)
+				cf.channel_ = calc_arfcn(freq, 824.2, 128, 45);
+		} break;
+		case GSM_P_900: {
+			static auto range = ranges_.get_band_freq_range(GSM_P_900);
+			if(freq >= range.low_freq_hz_ && freq <= range.high_freq_hz_) {
+				cf.channel_ = calc_arfcn(freq, 890, 0, 45);
+			}
+		} break;
+		case GSM_E_900: {
+			static auto range = ranges_.get_band_freq_range(GSM_E_900);
+			if(freq >= range.low_freq_hz_ && freq <= range.high_freq_hz_) {
+				if(freq < mhz(935))
+					cf.channel_ = calc_arfcn(freq, 890, 1024, 45);
+				else
+					cf.channel_ = calc_arfcn(freq, 890, 0, 45);
+			}
+		} break;
+		case GSM_R_900: {
+			static auto range = ranges_.get_band_freq_range(GSM_R_900);
+			if(freq >= range.low_freq_hz_ && freq <= range.high_freq_hz_) {
+				if(freq < mhz(935))
+					cf.channel_ = calc_arfcn(freq, 890, 1024, 45);
+				else
+					cf.channel_ = calc_arfcn(freq, 890, 0, 45);
+			}
+		} break;
+		case GSM_ER_900: {
+			static auto range = ranges_.get_band_freq_range(GSM_ER_900);
+			if(freq >= range.low_freq_hz_ && freq <= range.high_freq_hz_) {
+				if(freq < mhz(935))
+					cf.channel_ = calc_arfcn(freq, 890, 1024, 45);
+				else
+					cf.channel_ = calc_arfcn(freq, 890, 0, 45);
+			}
+		} break;
+		case GSM_T_900: {
+			// Dynamic channels.
+		} break;
+
+		case GSM_DCS_1800: {
+			static auto range = ranges_.get_band_freq_range(GSM_DCS_1800);
+			if(freq >= range.low_freq_hz_ && freq <= range.high_freq_hz_)
+				cf.channel_ = calc_arfcn(freq, 1710.2, 512, 95);
+		} break;
+		case GSM_PCS_1900: {
+			static auto range = ranges_.get_band_freq_range(GSM_PCS_1900);
+			if(freq >= range.low_freq_hz_ && freq <= range.high_freq_hz_)
+				cf.channel_ = calc_arfcn(freq, 1850.2, 512, 80);
+		} break;
+		default:
+			;//LOG(LVERBOSE) << "Error converting to ARFCN.  Frequency and band are not supported.";
+		};
+
 		return cf;
+	}
+
+	channel_type calc_arfcn(frequency_type freq, double f1, double channel_sub, double freq_add) {
+		return (channel_type)rf_phreaker::round_to_nearest<1>((((freq / 1e6) - f1 - freq_add) / .2) + channel_sub);
 	}
 
 	channel_freq frequency_to_uarfcn(frequency_type freq, operating_band band) {

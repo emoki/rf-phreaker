@@ -202,6 +202,9 @@ inline std::string to_string(const operating_band &b) {
 	case GSM_R_900: //	900	876.0–915.0	921.0–960.0	955–1023: 0-124
 		s = "gsm_operating_band_r_900";
 		break;
+	case GSM_ER_900: //	900	872.0–915.0	917.0–960.0	955–1023: 0-124
+		s = "gsm_operating_band_er_900";
+		break;
 	case GSM_T_900: //	900	870.4–876.0	915.4–921.0	dynamic^
 		s = "gsm_operating_band_t_900";
 		break;

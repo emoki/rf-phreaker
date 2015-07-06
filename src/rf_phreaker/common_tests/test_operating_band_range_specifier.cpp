@@ -15,10 +15,11 @@ TEST(OperatingBandRangeSpecifier, TestMain)
 	EXPECT_EQ(-1, unknown.high_freq_hz_);
 
 	auto valid_bands = specifier.find_avaliable_gsm_operating_bands(mhz(936));
-	EXPECT_EQ(3, valid_bands.size());
+	EXPECT_EQ(4, valid_bands.size());
 	EXPECT_EQ(GSM_P_900, valid_bands[0].band_);
 	EXPECT_EQ(GSM_E_900, valid_bands[1].band_);
 	EXPECT_EQ(GSM_R_900, valid_bands[2].band_);
+	EXPECT_EQ(GSM_ER_900, valid_bands[3].band_);
 
 	valid_bands = specifier.find_avaliable_umts_operating_bands(mhz(2140));
 	EXPECT_EQ(3, valid_bands.size());

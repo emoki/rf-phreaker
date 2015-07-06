@@ -11,20 +11,21 @@ operating_band_range_specifier::operating_band_range_specifier(void) {
 	// and end at the center frequency of the last channel - no point scanning outside them.
 	operating_bands_.push_back(operating_band_range(OPERATING_BAND_UNKNOWN, -1, -1));
 
-	operating_bands_.push_back(operating_band_range(GSM_T_380, khz(390200), khz(399800)));
-	operating_bands_.push_back(operating_band_range(GSM_T_410, khz(420200), khz(429800)));
-	operating_bands_.push_back(operating_band_range(GSM_450, khz(460600), khz(467600)));
-	operating_bands_.push_back(operating_band_range(GSM_480, mhz(489), mhz(496)));
-	operating_bands_.push_back(operating_band_range(GSM_710, khz(728200), khz(746200)));
-	operating_bands_.push_back(operating_band_range(GSM_750, khz(777200), khz(792200)));
-	operating_bands_.push_back(operating_band_range(GSM_T_810, khz(851200), khz(866200)));
-	operating_bands_.push_back(operating_band_range(GSM_850, khz(869200), khz(894200)));
-	operating_bands_.push_back(operating_band_range(GSM_P_900, mhz(935), mhz(960)));
-	operating_bands_.push_back(operating_band_range(GSM_E_900, mhz(925), mhz(960)));
-	operating_bands_.push_back(operating_band_range(GSM_R_900, mhz(921), mhz(960)));
-	operating_bands_.push_back(operating_band_range(GSM_T_900, khz(915400), khz(921000)));
-	operating_bands_.push_back(operating_band_range(GSM_DCS_1800, khz(1805200), khz(1879800)));
-	operating_bands_.push_back(operating_band_range(GSM_PCS_1900, khz(1930200), khz(1989800)));
+	operating_bands_.push_back(operating_band_range(GSM_T_380, khz(390200) + khz(200), khz(399800) - khz(200)));
+	operating_bands_.push_back(operating_band_range(GSM_T_410, khz(420200) + khz(200), khz(429800) - khz(200)));
+	operating_bands_.push_back(operating_band_range(GSM_450, khz(460400) + khz(200), khz(467600) - khz(200)));
+	operating_bands_.push_back(operating_band_range(GSM_480, khz(488800) + khz(200), mhz(496) - khz(200)));
+	operating_bands_.push_back(operating_band_range(GSM_710, khz(728000) + khz(200), khz(746000) - khz(200)));
+	operating_bands_.push_back(operating_band_range(GSM_750, khz(747000) + khz(200), khz(763000) - khz(200)));
+	operating_bands_.push_back(operating_band_range(GSM_T_810, khz(851000) + khz(200), khz(866000) - khz(200)));
+	operating_bands_.push_back(operating_band_range(GSM_850, khz(869000) + khz(200), khz(894000) - khz(200)));
+	operating_bands_.push_back(operating_band_range(GSM_P_900, mhz(935) + khz(200), mhz(960) - khz(200)));
+	operating_bands_.push_back(operating_band_range(GSM_E_900, mhz(925) + khz(200), mhz(960) - khz(200)));
+	operating_bands_.push_back(operating_band_range(GSM_R_900, mhz(921) + khz(200), mhz(960) - khz(200)));
+	operating_bands_.push_back(operating_band_range(GSM_ER_900, mhz(918) + khz(200), mhz(960) - khz(200)));
+	operating_bands_.push_back(operating_band_range(GSM_T_900, khz(915400) + khz(200), khz(921000) - khz(200)));
+	operating_bands_.push_back(operating_band_range(GSM_DCS_1800, khz(1805000) + khz(200), khz(1880000) - khz(200)));
+	operating_bands_.push_back(operating_band_range(GSM_PCS_1900, khz(1930000) + khz(200), khz(1990000) - khz(200)));
 
 	// Channels are only valid to +- 2.4khz from the end of the band.
 	operating_bands_.push_back(operating_band_range(UMTS_OPERATING_BAND_1, khz(2112400LL), khz(2167600LL)));	//  2100	IMT	1920 - 1980	2110 – 2170

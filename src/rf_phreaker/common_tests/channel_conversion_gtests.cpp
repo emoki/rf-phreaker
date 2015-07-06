@@ -5,6 +5,32 @@
 
 using namespace rf_phreaker;
 
+TEST(ChannelConversion, TestArfcnConversion) {
+	operating_band_range_specifier ranges;
+	channel_conversion conv;
+
+	for(auto band = FIRST_GSM_OPERATING_BAND; band <= LAST_GSM_OPERATING_BAND; band = (operating_band)((int)band + 1)) {
+		auto range = ranges.get_band_freq_range(band);
+
+		// skip dynamic channels.
+		if(band == GSM_T_380 || band == GSM_T_410 || band == GSM_T_810 || band == GSM_T_900 || band == GSM_710 || band == GSM_750)
+			continue;
+
+		for(auto freq = range.low_freq_hz_; freq < range.high_freq_hz_; freq += khz(200)) {
+			auto freqs = conv.arfcn_to_frequency(conv.frequency_to_channel(freq, band).channel_);
+			bool match = false;
+			for(const auto &i : freqs) {
+				if(i.freq_ == freq)
+					match = true;
+			}
+			if(!match)
+				int i = 0;
+			EXPECT_TRUE(match);
+		}
+
+	}
+}
+
 TEST(ChannelConversion, TestUarfcnConversion) {
 	operating_band_range_specifier ranges;
 	channel_conversion conv;
