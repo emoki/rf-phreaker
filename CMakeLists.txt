@@ -146,4 +146,6 @@ add_subdirectory (src/rf_phreaker/rf_phreaker_gui)
 add_subdirectory (src/rf_phreaker/general_utility)
 add_subdirectory (src/rf_phreaker/gps_comm)
 add_subdirectory (src/rf_phreaker/gps_comm_tests)
+add_subdirectory (src/rf_phreaker/gsm_analysis)
+add_subdirectory (src/rf_phreaker/gsm_analysis_tests)
 
