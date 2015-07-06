@@ -6,6 +6,7 @@
 #include "rf_phreaker/processing/collection_info_container.h"
 #include "rf_phreaker/scanner/measurement_info.h"
 #include "rf_phreaker/common/measurements.h"
+#include "rf_phreaker/gsm_analysis/gsm_measurement.h"
 #include "rf_phreaker/umts_analysis/umts_measurement.h"
 #include "rf_phreaker/lte_analysis/lte_measurement.h"
 
@@ -48,6 +49,7 @@ public:
 	power_info_group power_info_group_;
 };
 
+typedef analysis_data<gsm_measurements> gsm_info;
 typedef analysis_data<umts_measurements> umts_info;
 typedef analysis_data<lte_measurements> lte_info;
 
@@ -61,16 +63,22 @@ typedef tbb::flow::queue_node<add_remove_collection_info> queue_node;
 #define UMTS_LAYER3_PORT 1
 #define LTE_SWEEP_PORT 2
 #define LTE_LAYER3_PORT 3
-#define LIMITER_PORT 4
-typedef std::tuple<measurement_package, measurement_package, measurement_package, measurement_package, tbb::flow::continue_msg> tech_measurement_ports;
+#define GSM_SWEEP_PORT 4
+#define GSM_LAYER3_PORT 5
+#define LIMITER_PORT 6
+
+typedef tbb::flow::tuple<measurement_package, measurement_package, measurement_package, measurement_package, measurement_package, measurement_package, tbb::flow::continue_msg> tech_measurement_ports;
 typedef tbb::flow::multifunction_node<add_remove_collection_info, tech_measurement_ports, tbb::flow::rejecting> collection_manager_node;
 
+typedef tbb::flow::function_node<measurement_package, gsm_info> gsm_cell_search_node;
 typedef tbb::flow::function_node<measurement_package, umts_info> umts_cell_search_node;
 typedef tbb::flow::function_node<measurement_package, lte_info> lte_cell_search_node;
 
+typedef tbb::flow::function_node<gsm_info, gsm_info> gsm_layer_3_decode_node;
 typedef tbb::flow::function_node<umts_info, umts_info> umts_layer_3_decode_node;
 typedef tbb::flow::function_node<lte_info, lte_info> lte_layer_3_decode_node;
 
+typedef tbb::flow::multifunction_node<gsm_info, std::tuple<add_remove_collection_info, tbb::flow::continue_msg>> gsm_output_and_feedback_node;
 typedef tbb::flow::multifunction_node<umts_info, std::tuple<add_remove_collection_info, tbb::flow::continue_msg>> umts_output_and_feedback_node;
 typedef tbb::flow::multifunction_node<lte_info, std::tuple<add_remove_collection_info, tbb::flow::continue_msg>> lte_output_and_feedback_node;
 typedef tbb::flow::multifunction_node<measurement_package, std::tuple<add_remove_collection_info, tbb::flow::continue_msg>> frequency_correction_node;

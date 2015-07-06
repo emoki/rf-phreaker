@@ -7,6 +7,8 @@
 namespace rf_phreaker { namespace processing {
 
 class collection_info;
+class gsm_sweep_collection_info;
+class gsm_layer_collection_info;
 class umts_sweep_collection_info;
 class umts_layer_collection_info;
 class lte_sweep_collection_info;
@@ -59,6 +61,26 @@ public:
 	static frequency_type sampling_rate__;
 };
 
+class gsm_sweep_collection_info : public collection_info
+{
+public:
+	gsm_sweep_collection_info(frequency_type freq, operating_band band = OPERATING_BAND_UNKNOWN)
+		: collection_info(freq, time_ns__, bandwidth__, sampling_rate__, band) {}
+	static time_type time_ns__;
+	static bandwidth_type bandwidth__;
+	static frequency_type sampling_rate__;
+};
+
+class gsm_layer_3_collection_info : public collection_info
+{
+public:
+	gsm_layer_3_collection_info(frequency_type freq, operating_band band = OPERATING_BAND_UNKNOWN)
+		: collection_info(freq, time_ns__, bandwidth__, sampling_rate__, band) {}
+	static time_type time_ns__;
+	static bandwidth_type bandwidth__;
+	static frequency_type sampling_rate__;
+};
+
 class umts_sweep_collection_info : public collection_info
 {
 public:
@@ -72,7 +94,7 @@ public:
 class umts_layer_3_collection_info : public collection_info
 {
 public:
-	umts_layer_3_collection_info(frequency_type freq, operating_band band = OPERATING_BAND_UNKNOWN) 
+	umts_layer_3_collection_info(frequency_type freq, operating_band band = OPERATING_BAND_UNKNOWN)
 		: collection_info(freq, time_ns__, bandwidth__, sampling_rate__, band) {}
 	static time_type time_ns__;
 	static bandwidth_type bandwidth__;

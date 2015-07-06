@@ -18,12 +18,14 @@ static std::string spacer = " | ";
 inline std::ostream& operator<<(std::ostream &os, const hardware &t);
 inline std::ostream& operator<<(std::ostream &os, const gps &t);
 inline std::ostream& operator<<(std::ostream &os, const basic_data &t);
+inline std::ostream& operator<<(std::ostream &os, const gsm_data &t);
 inline std::ostream& operator<<(std::ostream &os, const umts_data &t);
 inline std::ostream& operator<<(std::ostream &os, const lte_data &t);
 
 inline std::string file_base(const hardware &) { return "scanner_"; }
 inline std::string file_base(const gps &) { return "gps_"; }
 inline std::string file_base(const basic_data &) { return "basic_"; }
+inline std::string file_base(const gsm_data &) { return "gsm_"; }
 inline std::string file_base(const umts_data &) { return "umts_"; }
 inline std::string file_base(const lte_data &) { return "lte_"; }
 
@@ -117,6 +119,30 @@ inline std::ostream& operator<<(std::ostream &os, const basic_data &t) {
 		<< t.carrier_signal_level_ << delimiter
 		<< t.time_ << delimiter
 		<< t.status_flags_;
+	return os;
+}
+
+inline std::ostream& header(std::ostream &os, const gsm_data &t) {
+	header(os, static_cast<basic_data>(t)) << delimiter
+		<< "arfcn" << delimiter
+		<< "operating_band" << delimiter
+		<< "bsic" << delimiter
+		<< "cell_signal_level" << delimiter
+		<< "c/i" << delimiter
+		<< "tdma_frame_number";// << delimiter;
+	//layer_3_information::header(os, t.layer_3_);
+	return os;
+}
+
+inline std::ostream& operator<<(std::ostream &os, const gsm_data &t) {
+	os << static_cast<basic_data>(t) << delimiter
+		<< t.arfcn_ << delimiter
+		<< to_string(t.operating_band_) << delimiter
+		<< t.bsic_ << delimiter
+		<< t.cell_signal_level_ << delimiter
+		<< t.ctoi_ << delimiter
+		<< t.tdma_frame_number_; // << delimiter
+		//<< t.layer_3_;
 	return os;
 }
 

@@ -26,6 +26,8 @@ public:
 		, do_multiple_scans_(true)
 		, packet_output_settings_(p_output)
 		, settings_(s_settings)
+		, gsm_sweep_(0)
+		, gsm_layer_3_(0)
 		, umts_sweep_(0)
 		, umts_layer_3_(0)
 		, lte_sweep_(0)
@@ -64,6 +66,14 @@ public:
 						meas->rf_board_adjustment(0);
 
 					switch(c.get_technology()) {
+					case GSM_SWEEP:
+						if(packet_output_settings_.gsm_sweep_) { output(meas.get(), "gsm_sweep_", gsm_sweep_++); }
+						std::get<GSM_SWEEP_PORT>(out).try_put(meas);
+						break;
+					case GSM_LAYER_3_DECODE:
+						if(packet_output_settings_.gsm_layer_3_) { output(meas.get(), "gsm_layer_3_", gsm_layer_3_++); }
+						std::get<GSM_LAYER3_PORT>(out).try_put(meas);
+						break;
 					case UMTS_SWEEP:
 						if(packet_output_settings_.umts_sweep_) { output(meas.get(), "umts_sweep_", umts_sweep_++); }
 						std::get<UMTS_SWEEP_PORT>(out).try_put(meas);
@@ -137,6 +147,8 @@ protected:
 
 	output_settings packet_output_settings_;
 	settings settings_;
+	int gsm_sweep_;
+	int gsm_layer_3_;
 	int umts_sweep_;
 	int umts_layer_3_;
 	int lte_sweep_;

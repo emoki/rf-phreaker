@@ -3,6 +3,8 @@
 #include "rf_phreaker/processing/node_defs.h"
 #include "rf_phreaker/processing/switch_body.h"
 #include "rf_phreaker/processing/collection_manager_body.h"
+#include "rf_phreaker/processing/gsm_processing_body.h"
+#include "rf_phreaker/processing/gsm_output_and_feedback_body.h"
 #include "rf_phreaker/processing/umts_processing_body.h"
 #include "rf_phreaker/processing/umts_output_and_feedback_body.h"
 #include "rf_phreaker/processing/lte_processing_body.h"
@@ -36,6 +38,17 @@ void processing_graph::start(scanner_controller_interface *sc, data_output_async
 			start_node_.reset();
 			collection_manager_node_.reset();
 			nodes_.clear();
+
+			LOG(LVERBOSE) << "gsm sweep collection settings: " << config.gsm_sweep_collection_.sampling_rate_ << ", " << config.gsm_sweep_collection_.bandwidth_ << ", "
+				<< config.gsm_sweep_collection_.collection_time_ << ".";
+			LOG(LVERBOSE) << "gsm sweep general settings: " << config.gsm_sweep_general_.band_power_threshold_ << ", " << config.gsm_sweep_general_.side_power_threshold_ << ", "
+				<< config.gsm_sweep_general_.perform_sync_correlations_ << ", " << config.gsm_sweep_general_.sync_corr_confidence_threshold_ << ".";
+
+			LOG(LVERBOSE) << "gsm layer 3 collection settings: " << config.gsm_layer_3_collection_.sampling_rate_ << ", " << config.gsm_layer_3_collection_.bandwidth_ << ", "
+				<< config.gsm_layer_3_collection_.collection_time_ << ".";
+			LOG(LVERBOSE) << "gsm layer 3 general settings: " << config.gsm_layer_3_general_.band_power_threshold_ << ", " << config.gsm_layer_3_general_.side_power_threshold_ << ", "
+				<< config.gsm_layer_3_general_.perform_sync_correlations_ << ", " << config.gsm_layer_3_general_.sync_corr_confidence_threshold_ << ".";
+
 
 			LOG(LVERBOSE) << "umts sweep collection settings: " << config.umts_sweep_collection_.sampling_rate_ << ", " << config.umts_sweep_collection_.bandwidth_ << ", "
 				<< config.umts_sweep_collection_.collection_time_ << ".";
@@ -71,6 +84,15 @@ void processing_graph::start(scanner_controller_interface *sc, data_output_async
 
 			auto limiter = std::make_shared<limiter_node>(*graph_, max_limit);
 
+			auto gsm_sweep_cell_search = std::make_shared<gsm_cell_search_node>(*graph_, tbb::flow::serial, gsm_processing_body(
+				gsm_cell_search_settings(config.gsm_sweep_collection_, config.gsm_sweep_general_)));
+			auto gsm_sweep_output_feedback = std::make_shared<gsm_output_and_feedback_node>(*graph_, tbb::flow::serial, gsm_sweep_output_and_feedback_body(out));
+			auto gsm_layer_3_cell_search = std::make_shared<gsm_cell_search_node>(*graph_, tbb::flow::serial, gsm_processing_body(
+				gsm_cell_search_settings(config.gsm_layer_3_collection_, config.gsm_layer_3_general_)));
+			auto gsm_layer_3_decode = std::make_shared<gsm_layer_3_decode_node>(*graph_, tbb::flow::serial, gsm_processing_body(
+				gsm_cell_search_settings(config.gsm_layer_3_collection_, config.gsm_layer_3_general_)));
+			auto gsm_layer_3_output_feedback = std::make_shared<gsm_output_and_feedback_node>(*graph_, tbb::flow::serial, gsm_layer_3_output_and_feedback_body(out));
+
 			auto umts_sweep_cell_search = std::make_shared<umts_cell_search_node>(*graph_, tbb::flow::serial, umts_processing_body(
 				umts_cell_search_settings(config.umts_sweep_collection_, config.umts_layer_3_decode_, config.umts_sweep_general_, 5), sc));
 			auto umts_sweep_output_feedback = std::make_shared<umts_output_and_feedback_node>(*graph_, tbb::flow::serial, umts_sweep_output_and_feedback_body(out));
@@ -97,6 +119,17 @@ void processing_graph::start(scanner_controller_interface *sc, data_output_async
 
 			limiter->register_successor(*collection_manager_node_);
 			limiter_queue->register_successor(limiter->decrement);
+
+			tbb::flow::output_port<GSM_SWEEP_PORT>(*collection_manager_node_).register_successor(*gsm_sweep_cell_search);
+			gsm_sweep_cell_search->register_successor(*gsm_sweep_output_feedback);
+			tbb::flow::output_port<0>(*gsm_sweep_output_feedback).register_successor(*collection_queue);
+			tbb::flow::output_port<1>(*gsm_sweep_output_feedback).register_successor(*limiter_queue);
+
+			tbb::flow::output_port<GSM_LAYER3_PORT>(*collection_manager_node_).register_successor(*gsm_layer_3_cell_search);
+			gsm_layer_3_cell_search->register_successor(*gsm_layer_3_decode);
+			gsm_layer_3_decode->register_successor(*gsm_layer_3_output_feedback);
+			tbb::flow::output_port<0>(*gsm_layer_3_output_feedback).register_successor(*collection_queue);
+			tbb::flow::output_port<1>(*gsm_layer_3_output_feedback).register_successor(*limiter_queue);
 
 			tbb::flow::output_port<UMTS_SWEEP_PORT>(*collection_manager_node_).register_successor(*umts_sweep_cell_search);
 			umts_sweep_cell_search->register_successor(*umts_sweep_output_feedback);
@@ -126,6 +159,11 @@ void processing_graph::start(scanner_controller_interface *sc, data_output_async
 			nodes_.push_back(limiter);
 			nodes_.push_back(limiter_queue);
 			nodes_.push_back(collection_queue);
+			nodes_.push_back(gsm_sweep_cell_search);
+			nodes_.push_back(gsm_sweep_output_feedback);
+			nodes_.push_back(gsm_layer_3_cell_search);
+			nodes_.push_back(gsm_layer_3_decode);
+			nodes_.push_back(gsm_layer_3_output_feedback);
 			nodes_.push_back(umts_sweep_cell_search);
 			nodes_.push_back(umts_sweep_output_feedback);
 			nodes_.push_back(umts_layer_3_cell_search);

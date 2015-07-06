@@ -13,6 +13,7 @@ typedef boost::signals2::signal<void(const basic_data&)> basic_signal_type;
 typedef boost::signals2::signal<void(const std::vector<gsm_data>&, const basic_data&)> gsm_signal_type;
 typedef boost::signals2::signal<void(const std::vector<umts_data>&, const basic_data&)> umts_signal_type;
 typedef boost::signals2::signal<void(const std::vector<lte_data>&, const basic_data&)> lte_signal_type;
+typedef boost::signals2::signal<void(const basic_data&, const std::vector<gsm_data>&)> gsm_sweep_signal_type;
 typedef boost::signals2::signal<void(const basic_data&, const std::vector<umts_data>&)> umts_sweep_signal_type;
 typedef boost::signals2::signal<void(const basic_data&, const std::vector<lte_data>&)> lte_sweep_signal_type;
 typedef boost::signals2::signal<void(const basic_data&, const std::vector<gsm_data>&,

@@ -15,8 +15,12 @@ set (processing_SRCS
 	collection_info.h
 	collection_info_container.h
 	collection_manager_body.h
+	data_output.h
+	data_output_async.h
 	gps_body.h
 	gps_graph.h
+	gsm_output_and_feedback_body.h
+	gsm_processing_body.h
 	frequency_correction_body.h
 	frequency_correction_calculator.h
 	frequency_correction_graph.cpp
@@ -28,16 +32,14 @@ set (processing_SRCS
 	measurement_conversion.h
 	node_defs.h
 	output_and_feedback_helper.h
-	data_output.h
-	data_output_async.h
 	processing_graph.cpp
 	processing_graph.h
+	processing_utility.h
 	scanner_error_tracker.h
 	scanner_io.h
 	switch_body.h
 	umts_output_and_feedback_body.h
 	umts_processing_body.h
-	processing_utility.h
 	${SRC_PLATFORM_SPECIFIC}/stdafx.cpp)
 
 add_definitions (/DTBB_PREVIEW_GRAPH_NODES)
@@ -45,5 +47,6 @@ add_definitions (/DTBB_PREVIEW_GRAPH_NODES)
 add_library (processing STATIC ${processing_SRCS})
 
 target_link_libraries (processing scanner)
+target_link_libraries (processing gsm_analysis)
 target_link_libraries (processing umts_analysis)
 target_link_libraries (processing lte_analysis)

@@ -28,8 +28,56 @@ inline basic_data convert_to_basic_data(const scanner::measurement_info &info, d
 	return data;
 }
 
-inline void convert_to_umts_data(umts_data &data, const scanner::measurement_info &info, const umts_measurement &umts)
-{
+inline void convert_to_basic_data(basic_data &data, const scanner::measurement_info &info, const power_info &p_info) {
+	data.serial_ = info.serial();
+	data.carrier_signal_level_ = scanner::signal_level_calculator::calculate_sl(p_info.avg_rms_, info);
+	data.carrier_bandwidth_ = p_info.bandwidth_;
+	data.carrier_frequency_ = p_info.freq_;
+	data.collection_round_ = info.collection_round();
+	data.status_flags_ = 0;
+	data.time_ = info.origin_time_pc().count();
+}
+
+inline basic_data convert_to_basic_data(const scanner::measurement_info &info, const power_info &p_info) {
+	basic_data data;
+	convert_to_basic_data(data, info, p_info);
+	return data;
+}
+
+inline void convert_to_basic_data(basic_data &data, const scanner::measurement_info &info, const gsm_measurement &gsm) {
+	data.serial_ = info.serial();
+	data.carrier_signal_level_ = scanner::signal_level_calculator::calculate_sl(gsm.channel_power_, info);
+	data.carrier_bandwidth_ = khz(200);
+	data.carrier_frequency_ = gsm.center_frequency_;
+	data.collection_round_ = info.collection_round();
+	data.status_flags_ = 0;
+	data.time_ = info.origin_time_pc().count();
+}
+
+inline basic_data convert_to_basic_data(const scanner::measurement_info &info, const gsm_measurement &gsm) {
+	basic_data data;
+	convert_to_basic_data(data, info, gsm);
+	return data;
+}
+
+inline void convert_to_gsm_data(gsm_data &data, const scanner::measurement_info &info, const gsm_measurement &gsm) {
+	convert_to_basic_data(data, info, gsm);
+	data.bsic_ = gsm.bsic_;
+	data.tdma_frame_number_ = gsm.tdma_frame_number_;
+	data.ctoi_ = 10 * log10(gsm.c_i_ratio_);
+	data.operating_band_ = info.get_operating_band();
+	data.cell_signal_level_ = scanner::signal_level_calculator::calculate_sl(gsm.rms_corr_power_, info);
+	static channel_conversion conversion;
+	data.arfcn_ = conversion.frequency_to_arfcn(gsm.center_frequency_, info.get_operating_band()).channel_;
+}
+
+inline gsm_data convert_to_gsm_data(const scanner::measurement_info &info, const gsm_measurement &gsm) {
+	gsm_data data;
+	convert_to_gsm_data(data, info, gsm);
+	return data;
+}
+
+inline void convert_to_umts_data(umts_data &data, const scanner::measurement_info &info, const umts_measurement &umts) {
 	convert_to_basic_data(data, info, umts.rms_signal_);
 	data.cpich_ = umts.cpich_;
 	data.ecio_ = umts.ecio_;
@@ -40,8 +88,7 @@ inline void convert_to_umts_data(umts_data &data, const scanner::measurement_inf
 	data.uarfcn_ = conversion.frequency_to_uarfcn(info.frequency(), info.get_operating_band()).channel_;
 }
 
-inline umts_data convert_to_umts_data(const scanner::measurement_info &info, const umts_measurement &umts)
-{
+inline umts_data convert_to_umts_data(const scanner::measurement_info &info, const umts_measurement &umts) {
 	umts_data data;
 	convert_to_umts_data(data, info, umts);
 	return data;

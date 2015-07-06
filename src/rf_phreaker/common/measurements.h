@@ -48,6 +48,9 @@ namespace rf_phreaker {
 	struct gsm_data : public basic_data {
 		channel_type arfcn_;
 		operating_band operating_band_;
+		int32_t bsic_;
+		int32_t tdma_frame_number_;
+		double cell_signal_level_;
 		double ctoi_;
 	};
 

@@ -57,6 +57,13 @@ public:
 	}
 
 	template<typename Func>
+	std::future<void> connect_gsm_layer_3(Func &f) {
+		return out_([=](data_output out) {
+			out.connect_gsm_layer_3(f);
+		});
+	}
+
+	template<typename Func>
 	std::future<void> connect_umts_layer_3(Func &f) {
 		return out_([=](data_output out) {
 			out.connect_umts_layer_3(f);
@@ -67,6 +74,13 @@ public:
 	std::future<void> connect_lte_layer_3(Func &f) {
 		return out_([=](data_output out) {
 			out.connect_lte_layer_3(f);
+		});
+	}
+
+	template<typename Func>
+	std::future<void> connect_gsm_sweep(Func &f) {
+		return out_([=](data_output out) {
+			out.connect_gsm_sweep(f);
 		});
 	}
 
