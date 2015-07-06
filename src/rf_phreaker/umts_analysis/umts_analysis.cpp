@@ -27,9 +27,9 @@ umts_analysis::~umts_analysis()
 	delete impl_;
 }
 
-int umts_analysis::cell_search(const rf_phreaker::raw_signal &raw_signal, umts_measurement *umts_meas, int &num_umts_meas, double sensitivity, umts_scan_type scan_type, double error, double *rms)
+int umts_analysis::cell_search(const rf_phreaker::raw_signal &raw_signal, umts_measurements &umts_meas, double sensitivity, umts_scan_type scan_type, double error, double *rms)
 {
-	return impl_->cell_search(raw_signal, umts_meas, num_umts_meas, sensitivity, scan_type, error, rms);
+	return impl_->cell_search(raw_signal, umts_meas, sensitivity, scan_type, error, rms);
 }
 
 

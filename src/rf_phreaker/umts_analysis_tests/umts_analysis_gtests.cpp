@@ -33,10 +33,9 @@ TEST(UmtsAnalysisTests, TestGeneral)
 
 				umts_analysis analysis(config);
 
-				umts_measurements umts_meas(100);
-				int num_meas = umts_meas.size();
+				umts_measurements group;
 				
-				int status = analysis.cell_search(info, &umts_meas.at(0), num_meas, -25, umts_scan_type::full_scan_type);
+				int status = analysis.cell_search(info, group, -25, umts_scan_type::full_scan_type);
 				EXPECT_EQ(0, status);
 
 
@@ -48,18 +47,18 @@ TEST(UmtsAnalysisTests, TestGeneral)
 					write_header = false;
 				}
 
-				for(int j = 0; j < num_meas; ++j) {
-					status = analysis.decode_layer_3(info, umts_meas[j]);
+				for(auto &j : group) {
+					status = analysis.decode_layer_3(info, j);
 					EXPECT_EQ(0, status);
 
 					std::cout <<
 						i << "\t" <<
 						info.frequency() / 1e6 << "\t" <<
-						umts_meas[j] << "\n";
+						j << "\n";
 					out <<
 						i << "\t" <<
 						info.frequency() / 1e6 << "\t" <<
-						umts_meas[j] << "\n";
+						j << "\n";
 				}
 			}
 		}
@@ -110,9 +109,8 @@ TEST(UmtsAnalysisTests, TestMultithreaded)
 			for(auto &analysis : analyzers) {
 				threads.push_back(std::thread([&](umts_analysis &anl, rf_phreaker::scanner::measurement_info &info) {
 					for(int i = 0; i < num_iterations; ++i) {
-						umts_measurements umts_meas(100);
-						int num_meas = umts_meas.size();
-						int status = anl.cell_search(info, &umts_meas.at(0), num_meas, /*14952*//*8000*/-25, umts_scan_type::full_scan_type);
+						umts_measurements group;
+						int status = anl.cell_search(info, group, /*14952*//*8000*/-25, umts_scan_type::full_scan_type);
 						EXPECT_EQ(0, status);
 					}
 				}, analysis, *p_it++));

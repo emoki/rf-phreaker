@@ -19,7 +19,7 @@ umts_analysis_impl::~umts_analysis_impl()
 {
 }
 
-int umts_analysis_impl::cell_search(const rf_phreaker::raw_signal &raw_signal, umts_measurement *umts_meas, int &num_umts_meas, double sensitivity, umts_scan_type scan_type, double error, double *rms)
+int umts_analysis_impl::cell_search(const rf_phreaker::raw_signal &raw_signal, umts_measurements &umts_meas, double sensitivity, umts_scan_type scan_type, double error, double *rms)
 {
 	int status = 0;
 
@@ -63,23 +63,12 @@ int umts_analysis_impl::cell_search(const rf_phreaker::raw_signal &raw_signal, u
 			// Do not set num_iterations.
 		}
 
-		auto new_meas = brute_force_->process(raw_signal.get_iq(), umts_meas_container_.get_meas(raw_signal.frequency()), num_cpich_chips, scan_type);
+		umts_meas = brute_force_->process(raw_signal.get_iq(), umts_meas_container_.get_meas(raw_signal.frequency()), num_cpich_chips, scan_type);
 
-		consolidate_measurements(new_meas);
+		consolidate_measurements(umts_meas);
 
-		umts_meas_container_.update_meas(raw_signal.frequency(), new_meas);
+		umts_meas_container_.update_meas(raw_signal.frequency(), umts_meas);
 		
-		int i = 0;
-		for(auto it = new_meas.begin(), end = new_meas.end(); it != end; ++it) {
-			if(i >= num_umts_meas) {
-				status = -1;
-				break;
-			}
-			umts_meas[i++] = *it;
-		}
-
-		num_umts_meas = new_meas.size();
-
 		if(rms != nullptr)
 			*rms = brute_force_->average_rms();
 
