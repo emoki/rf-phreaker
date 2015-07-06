@@ -8,7 +8,7 @@ TEST(LteFrameInfo, TestGeneral)
 {
 	layer_3_information::scheduling_info s;
 	s.periodicity_in_frames_ = 64;
-	s.sib_mapping_info_.push_back(lte_sib_type::sib_3);
+	s.sib_mapping_info_.push_back(lte_sib_type::SIB_3);
 	{
 		lte_si_info info1(s, 2, 20);
 		EXPECT_EQ(0, info1.starting_subframe());
@@ -63,11 +63,11 @@ TEST(CellsOnChannel, TestAllScheduling) {
 	for(int i = 0; i < 5; ++i) {
 		lte_measurement meas;
 		meas.RsRecord.ID = i;
-		meas.layer_3_.sib1_.decoded_ = std::rand() % 2 == 0;
-		if(meas.layer_3_.sib1_.decoded_) {
+		meas.layer_3_.sib1_.is_decoded_ = std::rand() % 2 == 0;
+		if(meas.layer_3_.sib1_.is_decoded_) {
 			meas.layer_3_.sib1_.si_window_length_ms_ = 20;
-			meas.layer_3_.sib1_.scheduling_info_list_.push_back(scheduling_info{16, {sib_3, sib_4}});
-			meas.layer_3_.sib1_.scheduling_info_list_.push_back(scheduling_info{64, {sib_5, sib_6}});
+			meas.layer_3_.sib1_.scheduling_info_list_.push_back(scheduling_info{16, {SIB_3, SIB_4}});
+			meas.layer_3_.sib1_.scheduling_info_list_.push_back(scheduling_info{64, {SIB_5, SIB_6}});
 		}
 		measurements.push_back(meas);
 	}
@@ -75,7 +75,7 @@ TEST(CellsOnChannel, TestAllScheduling) {
 
 	for(auto &meas : measurements) {
 		auto group = s.get_all_scheduling_info(f, meas);
-		if(meas.layer_3_.sib1_.decoded_)
+		if(meas.layer_3_.sib1_.is_decoded_)
 			EXPECT_EQ(2, group.g_.size());
 		else
 			EXPECT_EQ(0, group.g_.size());
@@ -92,32 +92,32 @@ TEST(CellsOnChannel, TestNeededScheduling) {
 	for(int i = 0; i < 5; ++i) {
 		lte_measurement meas;
 		meas.RsRecord.ID = i;
-		meas.layer_3_.sib1_.decoded_ = i % 2 == 0;
-		if(meas.layer_3_.sib1_.decoded_) {
+		meas.layer_3_.sib1_.is_decoded_ = i % 2 == 0;
+		if(meas.layer_3_.sib1_.is_decoded_) {
 			meas.layer_3_.sib1_.si_window_length_ms_ = 20;
-			meas.layer_3_.sib1_.scheduling_info_list_.push_back(scheduling_info{16, {sib_3, sib_4}});
-			meas.layer_3_.sib1_.scheduling_info_list_.push_back(scheduling_info{64, {sib_5, sib_6}});
+			meas.layer_3_.sib1_.scheduling_info_list_.push_back(scheduling_info{16, {SIB_3, SIB_4}});
+			meas.layer_3_.sib1_.scheduling_info_list_.push_back(scheduling_info{64, {SIB_5, SIB_6}});
 		}
 		measurements.push_back(meas);
 	}
 	s.update(f, measurements);
 
-	measurements[0].layer_3_.sib3_.decoded_ = true;
-	measurements[0].layer_3_.sib4_.decoded_ = true;
-	measurements[0].layer_3_.sib5_.decoded_ = true;
-	measurements[0].layer_3_.sib6_.decoded_ = true;
+	measurements[0].layer_3_.sib3_.is_decoded_ = true;
+	measurements[0].layer_3_.sib4_.is_decoded_ = true;
+	measurements[0].layer_3_.sib5_.is_decoded_ = true;
+	measurements[0].layer_3_.sib6_.is_decoded_ = true;
 
-	measurements[2].layer_3_.sib3_.decoded_ = true;
-	measurements[2].layer_3_.sib4_.decoded_ = true;
-	measurements[2].layer_3_.sib5_.decoded_ = false;
-	measurements[2].layer_3_.sib6_.decoded_ = false;
+	measurements[2].layer_3_.sib3_.is_decoded_ = true;
+	measurements[2].layer_3_.sib4_.is_decoded_ = true;
+	measurements[2].layer_3_.sib5_.is_decoded_ = false;
+	measurements[2].layer_3_.sib6_.is_decoded_ = false;
 
 	s.update(f, measurements);
 
 	int i = 0;
 	for(auto &meas : measurements) {
 		auto group = s.get_all_scheduling_info(f, meas);
-		if(meas.layer_3_.sib1_.decoded_) {
+		if(meas.layer_3_.sib1_.is_decoded_) {
 			EXPECT_EQ(2, group.g_.size());
 			EXPECT_EQ(true, s.has_scheduling_info(f, meas));
 		}
@@ -136,7 +136,7 @@ TEST(CellsOnChannel, TestNeededScheduling) {
 		}
 		else {
 			auto g = s.get_needed_scheduling_info(f, meas);
-			if(meas.layer_3_.sib1_.decoded_)
+			if(meas.layer_3_.sib1_.is_decoded_)
 				EXPECT_EQ(2, g.g_.size());
 			else
 				EXPECT_EQ(0, g.g_.size());

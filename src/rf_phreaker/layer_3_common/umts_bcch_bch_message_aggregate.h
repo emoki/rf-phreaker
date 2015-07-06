@@ -9,6 +9,13 @@
 namespace layer_3_information
 {
 
+enum umts_sib_type
+{
+	MIB,
+	SIB1,
+	SIB3_SIB4,
+	SIB11,
+};
 	
 typedef uint16_t system_frame_number_type;
 typedef uint16_t cpich_type;

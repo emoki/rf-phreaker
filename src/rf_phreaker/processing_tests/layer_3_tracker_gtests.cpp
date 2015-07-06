@@ -37,7 +37,7 @@ TEST(Layer3Tracker, TestGeneral) {
 		frequency_type f2 = 1000;
 
 		int max_update = 150;
-		layer_3_tracker<test_layer_3_enum> tracker(max_update);
+		layer_3_tracker<test_layer_3_enum> tracker(max_update, std::vector<test_layer_3_enum>{ TEST_SIB });
 		
 		// No entries so everything is considered decoded.
         EXPECT_TRUE(tracker.is_all_decoded());
@@ -53,18 +53,21 @@ TEST(Layer3Tracker, TestGeneral) {
 
         EXPECT_TRUE(tracker.in_history(f, t));
 
-		for (int i = 0; i < max_update - 1; ++i)
+		for(int i = 0; i < max_update; ++i) {
 			tracker.update(f, t);
+			tracker.update_freq(f);
+		}
 
 		// Should still be not decoded.
         EXPECT_FALSE(tracker.is_all_decoded());
         EXPECT_FALSE(tracker.is_all_decoded_on_freq(f));
 
 		tracker.update(f, t);
+		tracker.update_freq(f);
 
 		// Max update exceeded.
-        EXPECT_TRUE(tracker.is_all_decoded());
-        EXPECT_TRUE(tracker.is_all_decoded_on_freq(f));
+        EXPECT_TRUE(tracker.has_freq_exceeded_max_updates(f));
+        EXPECT_TRUE(tracker.has_data_exceeded_max_updates(f, t));
 
 		tracker.clear();
 

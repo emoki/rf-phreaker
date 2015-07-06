@@ -15,7 +15,7 @@ void lte_sib_8_parser::parse_data(const SystemInformationBlockType8_t &data, lte
 {
 //	std::cout << "lte_sib8!" << std::endl;
 
-	message.sib8_.decoded_ = true;
+	message.sib8_.is_decoded_ = true;
 
 	if(data.parametersHRPD) {
 		if(data.parametersHRPD->cellReselectionParametersHRPD) {

@@ -29,4 +29,9 @@ void lte_analysis::clear_all_tracking_si() {
 	impl_->clear_all_tracking_si();
 }
 
+void lte_analysis::set_config(const lte_config &config) {
+	impl_->set_config(config);
+}
+
+
 }

@@ -160,8 +160,8 @@ public:
 	}
 
 	bool has_decoded_layer_3 (const lte_measurement &lte) const {
-		return lte.layer_3_.sib1_.decoded_ || lte.layer_3_.sib4_.decoded_ || lte.layer_3_.sib5_.decoded_ || lte.layer_3_.sib6_.decoded_
-			|| lte.layer_3_.sib7_.decoded_ || lte.layer_3_.sib8_.decoded_;
+		return lte.layer_3_.sib1_.is_decoded() || lte.layer_3_.sib4_.is_decoded() || lte.layer_3_.sib5_.is_decoded() || lte.layer_3_.sib6_.is_decoded()
+			|| lte.layer_3_.sib7_.is_decoded() || lte.layer_3_.sib8_.is_decoded();
 	}
 
 	bool is_considered_valid_channel(frequency_type freq) const {

@@ -15,7 +15,7 @@ void lte_sib_6_parser::parse_data(const SystemInformationBlockType6_t &data, lte
 {
 //	std::cout << "lte_sib6!" << std::endl;
 
-	message.sib6_.decoded_ = true;
+	message.sib6_.is_decoded_ = true;
 
 	if(data.carrierFreqListUTRA_FDD) {
 		auto &fdd = data.carrierFreqListUTRA_FDD->list;

@@ -41,7 +41,7 @@ public:
 
 	int32_t decode_bcch_message(const uint8_t *bit_stream, uint32_t num_of_bytes, uint32_t unused_bits, layer_3_information::gsm_layer_3_message_aggregate &message);
 
-	void update_message_decode_list(layer_3_information::bcch_message_t message_t);
+	void update_message_decode_list(layer_3_information::gsm_bcch_si_type message_t);
 
 private:
 	gsm_layer_3_container *gsm_layer_3_container_;

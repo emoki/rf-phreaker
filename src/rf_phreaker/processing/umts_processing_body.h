@@ -33,12 +33,22 @@ public:
 		, config_(config)
 		, current_collection_round_(-1)
 		, calculator_(config.umts_config_.sampling_rate())
-		, sc_(sc)
-	{}
+		, sc_(sc) {
+		if(config.layer_3_.wanted_layer_3_.empty()) {
+			//LOG(LVERBOSE) << "Defaulting to decoding all UMTS SIBs.";
+			std::vector<layer_3_information::umts_sib_type> wanted;
+			wanted.push_back(layer_3_information::umts_sib_type::SIB1);
+			wanted.push_back(layer_3_information::umts_sib_type::SIB3_SIB4);
+			wanted.push_back(layer_3_information::umts_sib_type::SIB11);
+			tracker_.set_wanted_layer_3(wanted);
+		}
+		else
+			tracker_.set_wanted_layer_3((std::vector<layer_3_information::umts_sib_type>&)config.layer_3_.wanted_layer_3_);
+	}
 	
 	umts_processing_body(const umts_processing_body &body)
 		: analysis_(body.config_.umts_config_)
-		, tracker_(body.tracker_.max_update_)
+		, tracker_(body.tracker_.max_update_, body.tracker_.wanted_layer_3())
 		, config_(body.config_)
 		, current_collection_round_(body.current_collection_round_)
 		, calculator_(body.config_.umts_config_.sampling_rate()) 

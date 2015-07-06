@@ -25,7 +25,7 @@ lte_sib_3_parser::~lte_sib_3_parser(void) {}
 void lte_sib_3_parser::parse_data(const SystemInformationBlockType3_t &data, lte_rrc_message_aggregate &message) {
 	//	std::cout << "lte_sib3!";
 
-	message.sib3_.decoded_ = true;
+	message.sib3_.is_decoded_ = true;
 
 	message.sib3_.cell_reselection_serving_freq_info_.s_non_intra_search_ = data.cellReselectionServingFreqInfo.s_NonIntraSearch != nullptr
 		? *data.cellReselectionServingFreqInfo.s_NonIntraSearch : -1;

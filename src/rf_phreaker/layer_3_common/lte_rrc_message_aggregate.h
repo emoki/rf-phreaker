@@ -8,28 +8,31 @@ namespace layer_3_information
 
 struct lte_sib_base {
 public:
-	lte_sib_base() : decoded_(false) {}
+	lte_sib_base() : is_decoded_(false) {}
 	virtual void clear() = 0;
-	bool decoded_;
+	bool is_decoded() const { return is_decoded_; }
+	bool is_decoded_;
 };
 
 enum lte_sib_type {
-	sib_3,
-	sib_4,
-	sib_5,
-	sib_6,
-	sib_7,
-	sib_8,
-	sib_9,
-	sib_10,
-	sib_11,
-	sib_12_v920,
-	sib_13_v920,
-	sib_14_v1130,
-	sib_15_v1130,
-	sib_16_v1130,
-	spare_2,
-	spare_1
+	SIB_1,
+	SIB_2,
+	SIB_3,
+	SIB_4,
+	SIB_5,
+	SIB_6,
+	SIB_7,
+	SIB_8,
+	SIB_9,
+	SIB_10,
+	SIB_11,
+	SIB_12_V920,
+	SIB_13_V920,
+	SIB_14_V1130,
+	SIB_15_V1130,
+	SIB_16_V1130,
+	SPARE_2,
+	SPARE_1
 };
 struct scheduling_info {
 	int periodicity_in_frames_;
@@ -298,6 +301,27 @@ public:
 		sib6_.swap(a.sib6_);
 		sib7_.swap(a.sib7_);
 		sib8_.swap(a.sib8_);
+	}
+
+	bool is_decoded(lte_sib_type sib_type) {
+		switch(sib_type) {
+		case SIB_1:
+			return sib1_.is_decoded();
+		case SIB_3:
+			return sib3_.is_decoded();
+		case SIB_4:
+			return sib4_.is_decoded();
+		case SIB_5:
+			return sib5_.is_decoded();
+		case SIB_6:
+			return sib6_.is_decoded();
+		case SIB_7:
+			return sib7_.is_decoded();
+		case SIB_8:
+			return sib8_.is_decoded();
+		default:
+			return false;
+		}
 	}
 
 	lte_sib1_type sib1_;

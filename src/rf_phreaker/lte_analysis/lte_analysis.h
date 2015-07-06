@@ -51,7 +51,7 @@ public:
 
 	void clear_all_tracking_si();
 
-	//void set_config(const lte_config &config);
+	void set_config(const lte_config &config);
 
 private:
 	lte_analysis_impl *impl_;

@@ -34,7 +34,7 @@ int32_t gsm_layer_3_decoder::decode_bcch_message(const uint8_t *bit_stream, uint
 
 }
 
-void gsm_layer_3_decoder::update_message_decode_list(layer_3_information::bcch_message_t message_t)
+void gsm_layer_3_decoder::update_message_decode_list(layer_3_information::gsm_bcch_si_type message_t)
 {
 	gsm_layer_3_container_->update_message_container_list(message_t);
 }

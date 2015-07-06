@@ -46,7 +46,7 @@ bool gsm_layer_3_container::is_standard_message(gsm_bit_stream &bs)
 	return false;
 }
 
-void gsm_layer_3_container::update_message_container_list(layer_3_information::bcch_message_t message_t)
+void gsm_layer_3_container::update_message_container_list(layer_3_information::gsm_bcch_si_type message_t)
 {
 	switch(message_t) 
 	{

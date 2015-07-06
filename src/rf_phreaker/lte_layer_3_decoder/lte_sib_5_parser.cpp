@@ -15,7 +15,7 @@ void lte_sib_5_parser::parse_data(const SystemInformationBlockType5_t &data, lte
 {
 //	std::cout << "lte_sib5!";
 
-	message.sib5_.decoded_ = true;
+	message.sib5_.is_decoded_ = true;
 
 	auto &inter_list = data.interFreqCarrierFreqList.list;
 

@@ -16,7 +16,7 @@ void lte_sib_1_parser::parse_data(const SystemInformationBlockType1_t &data, lte
 {
 //	std::cout << "lte_sib1!";
 
-	message.sib1_.decoded_ = true;
+	message.sib1_.is_decoded_ = true;
 
 	auto &plmn_list = data.cellAccessRelatedInfo.plmn_IdentityList.list;
 	for(int i = 0; i < plmn_list.count; ++i) {
@@ -88,53 +88,53 @@ lte_sib_type lte_sib_1_parser::convert(SIB_Type_t sib)
 {
 	switch((SIB_Type)sib) {
 	case SIB_Type_sibType3:
-		return (sib_3);
+		return (SIB_3);
 		break;
 	case SIB_Type_sibType4:
-		return (sib_4);
+		return (SIB_4);
 		break;
 	case SIB_Type_sibType5:
-		return (sib_5);
+		return (SIB_5);
 		break;
 	case SIB_Type_sibType6:
-		return (sib_6);
+		return (SIB_6);
 		break;
 	case SIB_Type_sibType7:
-		return (sib_7);
+		return (SIB_7);
 		break;
 	case SIB_Type_sibType8:
-		return (sib_8);
+		return (SIB_8);
 		break;
 	case SIB_Type_sibType9:
-		return (sib_9);
+		return (SIB_9);
 		break;
 	case SIB_Type_sibType10:
-		return (sib_10);
+		return (SIB_10);
 		break;
 	case SIB_Type_sibType11:
-		return (sib_11);
+		return (SIB_11);
 		break;
 	case SIB_Type_sibType12_v920:
-		return (sib_12_v920);
+		return (SIB_12_V920);
 		break;
 	case SIB_Type_sibType13_v920:
-		return (sib_13_v920);
+		return (SIB_13_V920);
 		break;
 	case SIB_Type_sibType14_v1130:
-		return (sib_14_v1130);
+		return (SIB_14_V1130);
 		break;
 	case SIB_Type_sibType15_v1130:
-		return (sib_15_v1130);
+		return (SIB_15_V1130);
 		break;
 	case SIB_Type_sibType16_v1130:
-		return (sib_16_v1130);
+		return (SIB_16_V1130);
 		break;
 	case SIB_Type_spare2:
-		return (spare_2);
+		return (SPARE_2);
 		break;
 	case SIB_Type_spare1:
 	default:
-		return (spare_1);
+		return (SPARE_1);
 	}
 }
 

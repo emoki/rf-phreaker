@@ -52,58 +52,64 @@ inline std::ostream& header(std::ostream &os, const lte_sib_base &t) {
 }
 
 inline std::ostream& operator<<(std::ostream &os, const lte_sib_base &t) {
-	os << (t.decoded_ ? "YES" : "NO");
+	os << (t.is_decoded() ? "YES" : "NO");
 	return os;
 }
 
 inline std::ostream& operator<<(std::ostream &os, const lte_sib_type &t) {
 	switch(t) {
-	case sib_3:
+	case SIB_1:
+		os << "sib_1";
+		break;
+	case SIB_2:
+		os << "sib_2";
+		break;
+	case SIB_3:
 		os << "sib_3";
 		break;
-	case sib_4:
+	case SIB_4:
 		os << "sib_4";
 		break;
-	case sib_5:
+	case SIB_5:
 		os << "sib_5";
 		break;
-	case sib_6:
+	case SIB_6:
 		os << "sib_6";
 		break;
-	case sib_7:
+	case SIB_7:
 		os << "sib_7";
 		break;
-	case sib_8:
+	case SIB_8:
 		os << "sib_8";
 		break;
-	case sib_9:
+	case SIB_9:
 		os << "sib_9";
 		break;
-	case sib_10:
+	case SIB_10:
 		os << "sib_10";
 		break;
-	case sib_11:
+	case SIB_11:
 		os << "sib_11";
 		break;
-	case sib_12_v920:
+	case SIB_12_V920:
 		os << "sib_12_v920";
 		break;
-	case sib_13_v920:
+	case SIB_13_V920:
 		os << "sib_13_v920";
 		break;
-	case sib_14_v1130:
+	case SIB_14_V1130:
 		os << "sib_14_v1130";
 		break;
-	case sib_15_v1130:
+	case SIB_15_V1130:
 		os << "sib_15_v1130";
 		break;
-	case sib_16_v1130:
+	case SIB_16_V1130:
 		os << "sib_16_v1130";
 		break;
-	case spare_2:
+	case SPARE_2:
 		os << "spare_2";
 		break;
-	case spare_1:
+	case SPARE_1:
 		os << "spare_1";
 		break;
 	default:
@@ -501,31 +507,31 @@ inline std::ostream& header(std::ostream &os, const lte_rrc_message_aggregate &t
 }
 
 inline std::ostream& operator<<(std::ostream &os, const lte_rrc_message_aggregate &t) {
-	if(t.sib1_.decoded_)
+	if(t.sib1_.is_decoded())
 		os << t.sib1_ << main_delim;
 	else
 		os << main_delim;
-	if(t.sib3_.decoded_)
+	if(t.sib3_.is_decoded())
 		os << t.sib3_ << main_delim;
 	else
 		os << main_delim;
-	if(t.sib4_.decoded_)
+	if(t.sib4_.is_decoded())
 		os << t.sib4_ << main_delim;
 	else
 		os << main_delim;
-	if(t.sib5_.decoded_)
+	if(t.sib5_.is_decoded())
 		os << t.sib5_ << main_delim;
 	else
 		os << main_delim;
-	if(t.sib6_.decoded_)
+	if(t.sib6_.is_decoded())
 		os << t.sib6_ << main_delim;
 	else
 		os << main_delim;
-	if(t.sib7_.decoded_)
+	if(t.sib7_.is_decoded())
 		os << t.sib7_ << main_delim;
 	else
 		os << main_delim;
-	if(t.sib8_.decoded_)
+	if(t.sib8_.is_decoded())
 		os << t.sib8_;
 	return os;
 }

@@ -44,11 +44,13 @@ public:
 
 	void clear_all_tracking_si();
 
-	//void set_config(const lte_config &config);
+	void set_config(const lte_config &config);
 
 	lte_config get_lte_config() const { return config_; }
 
 private:
+	int decode_layer_3_using_hint(const rf_phreaker::raw_signal &raw_signal, lte_measurements &lte_meas, int num_half_frames, int meas_to_process);
+
 	rf_phreaker::frequency_type determine_sampling_rate(const rf_phreaker::raw_signal &raw_signal, lte_measurements &lte_meas);
 
 	rf_phreaker::fir_filter& get_filter_and_set_resampled_length(rf_phreaker::frequency_type input_sampling_rate, rf_phreaker::frequency_type output_sampling_rate, int num_resampled_samples);
@@ -90,6 +92,8 @@ private:
 	si_tracker si_tracker_;
 
 	std::atomic_bool *is_cancelled_;
+
+	std::vector<layer_3_information::lte_sib_type> wanted_si_;
 };
 
 }

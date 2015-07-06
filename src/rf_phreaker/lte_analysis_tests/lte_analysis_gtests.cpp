@@ -39,7 +39,15 @@ TEST(LteAnalysisTests, TestGeneral)
  		//rf_phreaker::raw_signal info;
 		rf_phreaker::scanner::measurement_info info;
 
-
+		std::vector<layer_3_information::lte_sib_type> wanted;
+		wanted.push_back(layer_3_information::SIB_1);
+		wanted.push_back(layer_3_information::SIB_3);
+		wanted.push_back(layer_3_information::SIB_4);
+		wanted.push_back(layer_3_information::SIB_5);
+		wanted.push_back(layer_3_information::SIB_6);
+		wanted.push_back(layer_3_information::SIB_7);
+		wanted.push_back(layer_3_information::SIB_8);
+		config.wanted_si(wanted);
 		lte_analysis analysis(config);
 
 		for(int i = 0; i < num_iterations; ++i) {

@@ -15,7 +15,7 @@ void lte_sib_7_parser::parse_data(const SystemInformationBlockType7_t &data, lte
 {
 //	std::cout << "lte_sib7!" << std::endl;
 
-	message.sib7_.decoded_ = true;
+	message.sib7_.is_decoded_ = true;
 
 	if(data.carrierFreqsInfoList) {
 

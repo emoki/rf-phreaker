@@ -10,6 +10,7 @@ lte_analysis_impl::lte_analysis_impl(const lte_config &config, std::atomic_bool 
 	: config_(config)
 	, is_cancelled_(is_cancelled)
 {
+	si_tracker_.set_wanted_si(config.wanted_si());
 }
 
 lte_analysis_impl::~lte_analysis_impl()
@@ -141,10 +142,17 @@ int lte_analysis_impl::decode_layer_3(const rf_phreaker::raw_signal &raw_signal,
 			status = 0;
 		}
 		else if(needed_sampling_rate == raw_signal.sampling_rate()) {
-			auto hint = si_tracker_.get_needed_scheduling_info(raw_signal.frequency(), lte_meas[meas_to_process]);
-			std::lock_guard<std::mutex> lock(processing_mutex);
-			status = lte_decode_data(raw_signal.get_iq().get(), raw_signal.get_iq().length(), num_half_frames, lte_meas, meas_to_process, hint.g_.size() ? &hint : nullptr, is_cancelled_);
-			si_tracker_.update(raw_signal.frequency(), lte_meas[meas_to_process]);
+			// If we have the scheduling_info use it immediately, otherwise pass in nullptr for hint so that we only try to decode sib1 and then decode using hint.
+			if(si_tracker_.has_scheduling_info(raw_signal.frequency(), lte_meas[meas_to_process])) {
+				status = decode_layer_3_using_hint(raw_signal, lte_meas, num_half_frames, meas_to_process);
+			}
+			else {
+				std::lock_guard<std::mutex> lock(processing_mutex);
+				status = lte_decode_data(raw_signal.get_iq().get(), raw_signal.get_iq().length(), num_half_frames, lte_meas, meas_to_process, nullptr, is_cancelled_);
+				si_tracker_.update(raw_signal.frequency(), lte_meas[meas_to_process]);
+				// Try again in case we were able to find scheduling info.
+				status = decode_layer_3_using_hint(raw_signal, lte_meas, num_half_frames, meas_to_process);
+			}
 		}
 		// Currently LTE will report the wrong bandwidth.  Because of this we never try resampling to a lower bandwidth.
 		//else if(needed_sampling_rate < raw_signal.sampling_rate())
@@ -205,6 +213,16 @@ rf_phreaker::frequency_type lte_analysis_impl::determine_sampling_rate(const rf_
 	return sampling_rate;
 }
 
+int lte_analysis_impl::decode_layer_3_using_hint(const rf_phreaker::raw_signal &raw_signal, lte_measurements &lte_meas, int num_half_frames, int meas_to_process) {
+	int status = 0;
+	auto hint = si_tracker_.get_needed_scheduling_info(raw_signal.frequency(), lte_meas[meas_to_process]);
+	if(hint.g_.size()) {
+		status = lte_decode_data(raw_signal.get_iq().get(), raw_signal.get_iq().length(), num_half_frames, lte_meas, meas_to_process, &hint, is_cancelled_);
+		si_tracker_.update(raw_signal.frequency(), lte_meas[meas_to_process]);
+	}
+	return status;
+}
+
 void lte_analysis_impl::clear_tracking_si(frequency_type freq) {
 	si_tracker_.clear(freq);
 }
@@ -213,5 +231,7 @@ void lte_analysis_impl::clear_all_tracking_si() {
 	si_tracker_.clear();
 }
 
-
+void lte_analysis_impl::set_config(const lte_config &config) {
+	config_ = config;
+}
 }

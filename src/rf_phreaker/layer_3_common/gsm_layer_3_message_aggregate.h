@@ -10,7 +10,7 @@ namespace layer_3_information
 // For now placeholders are put in to compile the code.
 
 // placeholder
-enum bcch_message_t
+enum gsm_bcch_si_type
 {
 	msg_type_si_2,
 	msg_type_si_2bis,

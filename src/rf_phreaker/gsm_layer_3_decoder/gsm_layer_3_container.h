@@ -15,7 +15,7 @@ public:
 
 	void populate_data(gsm_bit_stream &bit_stream, layer_3_information::gsm_layer_3_message_aggregate &message);
 
-	void update_message_container_list(layer_3_information::bcch_message_t message_t);
+	void update_message_container_list(layer_3_information::gsm_bcch_si_type message_t);
 
 private:
 	bool is_standard_message(gsm_bit_stream &bit_stream);

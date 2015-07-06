@@ -12,15 +12,15 @@ namespace rf_phreaker { namespace processing {
 class lte_processing_settings
 {
 public:
-	lte_processing_settings(const collection_settings &s, const layer_3_settings &l)
+	lte_processing_settings(const collection_settings &s, const layer_3_settings &l, const lte_general_settings &g)
 		: layer_3_(l)
-		, full_scan_interval_(l.max_update_threshold_)
+		, general_(g)
 	{
 		lte_config_.sampling_rate((int)s.sampling_rate_);
 		lte_config_.clock_rate((int)s.sampling_rate_);
 		lte_config_.max_signal_length(rf_phreaker::convert_to_samples(s.collection_time_, s.sampling_rate_));
 	}
-	int full_scan_interval_;
+	lte_general_settings general_;
 	lte_config lte_config_;
 	layer_3_settings layer_3_;
 };
@@ -32,8 +32,26 @@ public:
 		: config_(config)
 		, tracker_(config.layer_3_.max_update_threshold_)
 		, analysis_(config.lte_config_, is_cancelled)
-		, current_collection_round_(-1)
-	{}
+		, current_collection_round_(-1) {
+		// If empty, default to decoding all sibs.
+		if(config.layer_3_.wanted_layer_3_.empty()) {
+			//LOG(LVERBOSE) << "Defaulting to decoding all LTE SIBs.";
+			std::vector<layer_3_information::lte_sib_type> wanted;
+			wanted.push_back(layer_3_information::SIB_1);
+			wanted.push_back(layer_3_information::SIB_3);
+			wanted.push_back(layer_3_information::SIB_4);
+			wanted.push_back(layer_3_information::SIB_5);
+			wanted.push_back(layer_3_information::SIB_6);
+			wanted.push_back(layer_3_information::SIB_7);
+			wanted.push_back(layer_3_information::SIB_8);
+			tracker_.set_wanted_layer_3(wanted);
+		}
+		else
+			tracker_.set_wanted_layer_3((std::vector<layer_3_information::lte_sib_type>&)config.layer_3_.wanted_layer_3_);
+		
+		config_.lte_config_.wanted_si(tracker_.wanted_layer_3());
+		analysis_.set_config(config_.lte_config_);
+	}
 
 	lte_info operator()(measurement_package info)
 	{
@@ -63,7 +81,7 @@ public:
 		current_collection_round_ = info.meas_->collection_round();
 
 		auto freq = info.meas_->frequency();
-		if(info.meas_->collection_round() % config_.full_scan_interval_ == 0) {
+		if(info.meas_->collection_round() % config_.general_.full_scan_interval_ == 0) {
 			analysis_.clear_tracking_si(freq);
 		}
 

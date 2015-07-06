@@ -15,7 +15,7 @@ void lte_sib_4_parser::parse_data(const SystemInformationBlockType4_t &data, lte
 {
 //	std::cout << "lte_sib4!";
 
-	message.sib4_.decoded_ = true;
+	message.sib4_.is_decoded_ = true;
 
 	if(data.csg_PhysCellIdRange) {
 		message.sib4_.csg_physical_cellid_range_.start_ = data.csg_PhysCellIdRange->start;

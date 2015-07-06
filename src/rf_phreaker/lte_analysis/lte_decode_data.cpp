@@ -35,9 +35,8 @@ int lte_decode_data(const Ipp32fc* SignalSamples,
 	unsigned int NumHalfFramesToProcess,
 	lte_measurements &LteData,
 	int meas_to_process,
-	lte_si_info_group *si_scheduling_hints,
+	lte_si_info_group *si_scheduling_hints = nullptr,
 	std::atomic_bool *is_cancelled = nullptr) {
-	//unsigned int current_frame_number = 0;
 
 	// Static allocation of h_est - helps with debugging.  
 	static ipp_32fc_array h_est_buf(OFDM_SYMBOLS_PER_FRAME * NUM_FRAMES * MAX_FFT_SIZE * NUM_ANTENNA_MAX);
@@ -249,7 +248,7 @@ int lte_decode_data(const Ipp32fc* SignalSamples,
 		if(si_scheduling_hints) {
 			looking_for_sib1 = false;
 			for(auto &info : si_scheduling_hints->g_) {
-				if(!info.decoded_ && info.is_relevant_frame(current_frame_number)) {
+				if(!info.is_decoded_ && info.is_relevant_frame(current_frame_number)) {
 					relevant_si_info = &info;
 					starting_subframe = info.starting_subframe();
 					break;
@@ -262,7 +261,7 @@ int lte_decode_data(const Ipp32fc* SignalSamples,
 		if(is_cancelled && is_cancelled)
 			break;
 
-		if((looking_for_sib1 && current_frame_number % 2 == 0) || (relevant_si_info && !relevant_si_info->decoded_)) {
+		if((looking_for_sib1 && current_frame_number % 2 == 0) || (relevant_si_info && !relevant_si_info->is_decoded_)) {
 
 			memset(h_est, 0, OFDM_SYMBOLS_PER_FRAME * NUM_FRAMES * MAX_FFT_SIZE * NUM_ANTENNA_MAX * 8);
 			/* Channel Estimation per Frame per Antenna */
@@ -291,7 +290,7 @@ int lte_decode_data(const Ipp32fc* SignalSamples,
 				if(looking_for_sib1 && subFrameIndex != 5 && current_frame_number % 2 == 0)
 					continue;
 				// Skip frame once we've decoded the relevant SI.
-				else if(relevant_si_info && relevant_si_info->decoded_)
+				else if(relevant_si_info && relevant_si_info->is_decoded_)
 					break;
 				// Skip SIB1 decoding if we have scheduling info.
 				else if(si_scheduling_hints && subFrameIndex == 5 && current_frame_number % 2 == 0)
@@ -349,7 +348,7 @@ int lte_decode_data(const Ipp32fc* SignalSamples,
 
 					if(status == LTE_SUCCESS) {
 						meas.dci_format = lte_dci_format_1a;
-						if(relevant_si_info) relevant_si_info->decoded_ = true;
+						if(relevant_si_info) relevant_si_info->is_decoded_ = true;
 						break;
 					}
 				}
@@ -368,15 +367,16 @@ int lte_decode_data(const Ipp32fc* SignalSamples,
 
 					if(status == LTE_SUCCESS) {
 						meas.dci_format = lte_dci_format_1c;
-						if(relevant_si_info) relevant_si_info->decoded_ = true;
+						if(relevant_si_info) relevant_si_info->is_decoded_ = true;
 						break;
 					}
 				}
 
 				// If no hints check to see if we decoded sib 1, if so use the scheduling info for current measurement.
-				if(si_scheduling_hints == nullptr && meas.layer_3_.sib1_.decoded_) {
-					internal_scheduling_hints = lte_si_info_group::create_lte_si_info_group(meas);
-					si_scheduling_hints = &internal_scheduling_hints;
+				if(si_scheduling_hints == nullptr && meas.layer_3_.sib1_.is_decoded_) {
+					//internal_scheduling_hints = lte_si_info_group::create_lte_si_info_group(meas);
+					//si_scheduling_hints = &internal_scheduling_hints;
+					
 					break;
 				}
 
