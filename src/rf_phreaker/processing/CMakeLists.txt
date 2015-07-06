@@ -27,6 +27,7 @@ set (processing_SRCS
 	lte_processing_body.h
 	measurement_conversion.h
 	node_defs.h
+	output_and_feedback_helper.h
 	data_output.h
 	data_output_async.h
 	processing_graph.cpp

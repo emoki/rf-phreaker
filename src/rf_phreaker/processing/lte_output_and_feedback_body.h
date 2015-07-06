@@ -5,6 +5,7 @@
 #include "rf_phreaker/processing/data_output_async.h"
 #include "rf_phreaker/processing/measurement_conversion.h"
 #include "rf_phreaker/processing/processing_utility.h"
+#include "rf_phreaker/processing/output_and_feedback_helper.h"
 #include "rf_phreaker/common/common_utility.h"
 #include "rf_phreaker/common/settings.h"
 #include "rf_phreaker/lte_analysis/lte_types.h"
@@ -17,13 +18,11 @@ class lte_sweep_output_and_feedback_body
 public:
 	lte_sweep_output_and_feedback_body(data_output_async *io)
 		: io_(io)
-		, confidence_threshold_(-10.5)
-		, current_collection_round_(-1) {}
+		, confidence_threshold_(-10.5) {}
 
 	lte_sweep_output_and_feedback_body(const lte_sweep_output_and_feedback_body &body)
 		: io_(body.io_)
 		, confidence_threshold_(body.confidence_threshold_)
-		, current_collection_round_(body.current_collection_round_) 
 		, tracker_(body.tracker_)
 		, freqs_currently_added_(body.freqs_currently_added_)
 		// Cannot copy std::vector<std::future<>>. Use new one.
@@ -31,17 +30,16 @@ public:
 
 	void operator()(lte_info info, lte_output_and_feedback_node::output_ports_type &out)
 	{
-		if(info.meas_->collection_round() == 0 && current_collection_round_ != 0) {
+		if(helper_.has_sweep_restarted(info.meas_)) {
 			tracker_.clear();
 		}
-		current_collection_round_ = info.meas_->collection_round();
 
-		remove_completed_output();
+		helper_.remove_futures();
 
 		//output_debug_info(info);
 
 		// Output basic tech.
-		past_output_.push_back(io_->output(convert_to_basic_data(*info.meas_, info.avg_rms_), std::vector<lte_data>()));
+		helper_.track_future(io_->output(convert_to_basic_data(*info.meas_, info.power_info_group_[0].avg_rms_), std::vector<lte_data>()));
 
 		bool valid_lte = false;
 		for(auto &lte : info.processed_data_) {
@@ -111,28 +109,16 @@ private:
 		}
 	}
 	
-	void remove_completed_output() {
-		int num_completed = 0;
-		for(auto &fut : past_output_) {
-			if(fut.wait_for(std::chrono::seconds(0)) == std::future_status::ready)
-				++num_completed;
-			else
-				break;
-		}
-		past_output_.erase(std::begin(past_output_), std::begin(past_output_) + num_completed);
-	}
 
 	data_output_async *io_;
 
 	double confidence_threshold_;
 
-	int64_t current_collection_round_;
-
 	lte_measurement_tracker tracker_;
 
 	std::vector<lte_layer_3_collection_info> freqs_currently_added_;
-	
-	std::vector<std::future<void>> past_output_;
+
+	output_and_feedback_helper<void> helper_;
 };
 
 class lte_layer_3_output_and_feedback_body
@@ -142,26 +128,23 @@ public:
 		: io_(io)
 		, minimum_collection_round_(minimum_collection_round)
 		, pbchs_decoded_minimum_collection_round_(3 * minimum_collection_round)
-		, current_collection_round_(-1) 
 	{}
 
 	lte_layer_3_output_and_feedback_body(const lte_layer_3_output_and_feedback_body &body)
 		: io_(body.io_)
 		, minimum_collection_round_(body.minimum_collection_round_)
 		, pbchs_decoded_minimum_collection_round_(body.pbchs_decoded_minimum_collection_round_)
-		, current_collection_round_(body.current_collection_round_)
 		, tracker_(body.tracker_)
 		// Cannot copy std::vector<std::future<>>. Use new one.
 	{}
 
 	void operator()(lte_info info, lte_output_and_feedback_node::output_ports_type &out)
 	{
-		if(info.meas_->collection_round() == 0 && current_collection_round_ != 0) {
+		if(helper_.has_layer_3_restarted(info.meas_)) {
 			tracker_.clear();
 		}
-		current_collection_round_ = info.meas_->collection_round();
 
-		remove_completed_output();
+		helper_.remove_futures();
 
 		// Remove freq if indicated.
 		if(do_we_remove_collection_info(info)) {
@@ -169,7 +152,7 @@ public:
 				info.meas_->bandwidth(), info.meas_->get_operating_band()), LTE_LAYER_3_DECODE));
 		}
 		
-		std::vector<lte_data> lte;
+		std::vector<lte_data> lte_group;
 
 		if(!info.processed_data_.empty()) {
 			//output_debug_info(info);
@@ -180,15 +163,15 @@ public:
 			if(tracker_.is_considered_valid_channel(info.meas_->frequency()) || tracker_.has_decoded_layer_3(info.processed_data_)) {
 				for(auto &data : info.processed_data_) {
 					if(data.NumAntennaPorts != LteAntPorts_Unknown && (tracker_.has_decoded_layer_3(data) || data.Bandwidth == decoded_bw)) {
-						auto tmp = convert_to_lte_data(*info.meas_, data, info.avg_rms_);
-						lte.push_back(std::move(tmp));
+						auto tmp = convert_to_lte_data(*info.meas_, data, info.power_info_group_[0].avg_rms_);
+						lte_group.push_back(std::move(tmp));
 					}
 				}
 			}
 
 			tracker_.update_measurements(info.processed_data_, info.meas_->frequency());
 			
-			if(lte.size()) {
+			if(lte_group.size()) {
 				// Look up bandwidth to see if it's changed after the update.
 				decoded_bw = tracker_.find_decoded_bandwidth(info.meas_->frequency());
 
@@ -210,7 +193,7 @@ public:
 				}
 			}
 		}
-		past_output_.push_back(io_->output(std::move(lte), convert_to_basic_data(*info.meas_, info.avg_rms_)));
+		helper_.track_future(io_->output(std::move(lte_group), convert_to_basic_data(*info.meas_, info.power_info_group_[0].avg_rms_)));
 
 		std::get<1>(out).try_put(tbb::flow::continue_msg());
 	}
@@ -238,28 +221,15 @@ private:
 			!tracker_.is_considered_valid_channel(freq) && cr > pbchs_decoded_minimum_collection_round_);
 	}
 
-	void remove_completed_output() {
-		int num_completed = 0;
-		for(auto &fut : past_output_) {
-			if(fut.wait_for(std::chrono::seconds(0)) == std::future_status::ready)
-				++num_completed;
-			else
-				break;
-		}
-		past_output_.erase(std::begin(past_output_), std::begin(past_output_) + num_completed);
-	}
-
 	data_output_async *io_;
 
 	int minimum_collection_round_;
 
 	int pbchs_decoded_minimum_collection_round_;
 
-	int64_t current_collection_round_;
-
 	lte_measurement_tracker tracker_;
 
-	std::vector<std::future<void>> past_output_;
+	output_and_feedback_helper<void> helper_;
 };
 
 }}

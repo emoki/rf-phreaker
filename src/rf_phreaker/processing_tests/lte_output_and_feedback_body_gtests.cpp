@@ -22,7 +22,8 @@ protected:
 	void reset_lte_meas() 
 	{
 		lte_info.meas_.reset(new measurement_info(0, start_freq_, mhz(2.5), mhz(3.84), gain_type(), std::chrono::milliseconds(0), 0));
-		lte_info.avg_rms_ = 400;
+		power_info_group a{power_info(start_freq_, mhz(2.5), mhz(3.84))};
+		lte_info.power_info_group_ = a;
 		lte_info.remove_ = false;
 		lte_measurements meas_group;
 		lte_measurement meas;
@@ -65,3 +66,4 @@ TEST_F(LteOutputAndFeedbackBodyTest, TestSweepBandwidth)
 	lte_info.processed_data_[0].sync_quality += 1;
 	body_(lte_info, out_);
 }
+ 

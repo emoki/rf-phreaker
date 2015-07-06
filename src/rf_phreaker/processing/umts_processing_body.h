@@ -101,7 +101,7 @@ public:
 			}
 		}
 		
-		return umts_info(info, std::move(meas), rms);
+		return umts_info(info, std::move(group), power_info_group{{info->frequency(), info->bandwidth(), rms}});
 	}
 
 	bool do_we_need_new_correction() {

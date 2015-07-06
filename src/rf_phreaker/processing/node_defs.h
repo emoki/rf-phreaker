@@ -1,41 +1,51 @@
 #pragma once
-
+#include <tuple>
+#include <memory>
+#include <vector>
+#include "tbb/flow_graph.h"
 #include "rf_phreaker/processing/collection_info_container.h"
 #include "rf_phreaker/scanner/measurement_info.h"
 #include "rf_phreaker/common/measurements.h"
 #include "rf_phreaker/umts_analysis/umts_measurement.h"
 #include "rf_phreaker/lte_analysis/lte_measurement.h"
-#include "tbb/flow_graph.h"
-#include <tuple>
-#include <memory>
 
 namespace rf_phreaker { namespace processing {
 
 typedef std::shared_ptr<scanner::measurement_info> measurement_package;
 
+class power_info {
+public:
+	power_info()
+		: freq_(-1)
+		, bandwidth_(-1)
+		, avg_rms_(0) {}
+	power_info(frequency_type freq, bandwidth_type bw, double rms)
+		: freq_(freq)
+		, bandwidth_(bw)
+		, avg_rms_(rms) {}
+	frequency_type freq_;
+	bandwidth_type bandwidth_;
+	double avg_rms_;
+};
+typedef std::vector<power_info> power_info_group;
+
 template<typename Data>
 class analysis_data
 {
 public:
-	analysis_data() : avg_rms_(0), remove_(false)
+	analysis_data() : /*avg_rms_(0),*/ remove_(false)
 	{}
-	//analysis_data(scanner::measurement_info meas, Data data, double rms = 0, bool remove = false)
-	//	: meas_(meas)
-	//	, processed_data_(data)
-	//	, avg_rms_(rms)
-	//	, remove_(remove)
-	//{}
-	analysis_data(measurement_package meas, Data &&data, double rms = 0, bool remove = false)
+	analysis_data(measurement_package meas, Data &&data, power_info_group &&p_info = {}, bool remove = false)
 		: meas_(std::move(meas))
 		, processed_data_(std::move(data))
-		, avg_rms_(rms)
+		, power_info_group_(std::move(p_info))
 		, remove_(remove)
 	{}
 
 	measurement_package meas_;
 	Data processed_data_;
-	double avg_rms_;
 	bool remove_;
+	power_info_group power_info_group_;
 };
 
 typedef analysis_data<umts_measurements> umts_info;
