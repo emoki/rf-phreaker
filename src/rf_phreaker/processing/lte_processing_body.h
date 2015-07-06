@@ -86,8 +86,9 @@ public:
 		}
 
 		if(info.processed_data_.size()) {
-			//output(info);
-			
+			if(0)
+				output(info);
+
 			int data_element = 0;
 			for(auto &data : info.processed_data_) {
 				if(is_valid_measurement(data)) {
