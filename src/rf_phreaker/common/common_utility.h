@@ -425,4 +425,22 @@ public:
 	}
 };
 
+template<typename Map> typename Map::const_iterator
+greatest_less(Map const& m, typename Map::key_type const& k) {
+	typename Map::const_iterator it = m.lower_bound(k);
+	if(it != m.begin()) {
+		return --it;
+	}
+	return m.end();
+}
+
+template<typename Map> typename Map::iterator
+greatest_less(Map & m, typename Map::key_type const& k) {
+	typename Map::iterator it = m.lower_bound(k);
+	if(it != m.begin()) {
+		return --it;
+	}
+	return m.end();
+}
+
 }
