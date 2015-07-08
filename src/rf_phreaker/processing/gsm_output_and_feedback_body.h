@@ -49,8 +49,6 @@ public:
 					freq -= khz(100);
 				added_freqs_.insert(freq);
 				std::get<0>(out).try_put(add_collection_info(gsm_layer_3_collection_info(freq, info.meas_->get_operating_band()), GSM_LAYER_3_DECODE));
-				static std::ofstream f("debug_gsm_channel.txt");
-				f << freq << std::endl;
 			}
 		}
 		std::get<1>(out).try_put(tbb::flow::continue_msg());
