@@ -81,6 +81,13 @@ int lte_analysis_impl::cell_search(const rf_phreaker::raw_signal &raw_signal, lt
 				lte_meas.push_back(lte_measurements_[i]);
 			}
 		}
+		// Convert values to dB.
+		for(auto &i : lte_meas) {
+			i.PschRecord.NormCorr = 20 * log10(i.PschRecord.NormCorr);
+			i.SschRecord.NormCorr = 20 * log10(i.SschRecord.NormCorr);
+			i.sync_quality = 20 * log10(i.sync_quality);
+			i.estimated_rsrq = 20 * log10(i.estimated_rsrq);
+		}
 	}
 	catch(const std::exception &err) {
 		rf_phreaker::delegate_sink::instance().log_error(err.what(), GENERAL_ERROR);

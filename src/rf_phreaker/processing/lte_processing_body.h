@@ -92,7 +92,7 @@ public:
 			int data_element = 0;
 			for(auto &data : info.processed_data_) {
 				if(is_valid_measurement(data)) {
-					if((!tracker_.is_fully_decoded(freq, data) && (20 * log10(data.sync_quality) > config_.layer_3_.decode_threshold_ || tracker_.in_history(freq, data)))) {
+					if((!tracker_.is_fully_decoded(freq, data) && (data.sync_quality > config_.layer_3_.decode_threshold_ || tracker_.in_history(freq, data)))) {
 						int status = analysis_.decode_layer_3(*info.meas_, info.processed_data_, calculate_num_half_frames(info.meas_->time_ns()), data_element);
 						if(status != 0)
 							throw lte_analysis_error("Error decoding lte layer 3.");
