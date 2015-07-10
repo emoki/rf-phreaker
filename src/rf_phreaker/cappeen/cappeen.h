@@ -19,9 +19,13 @@ extern "C" {
 */
 /**
 @mainpage
-The cappeen api is a multithreaded C++ software layer that handles the collection of WCDMA and LTE data allowing the client 
-to view data collection from a high level. It interfaces with the client application through synchronous function calls 
-and callback routines (see beagle_delegate). 
+Cappeen API is a 32-bit compiled Microsoft Visual Studio C++ DLL that allows users to remotely control the cappeen unit and access its signal measurements.  
+Communication occurs via API functions and callback mechanisms and uses plain old data structures to pass information.\n\n Once connection to a cappeen unit 
+has been established, GPS information is outputted continuously.  Scanner information is outputted when a change to the beagle state has occurred.  For 
+instance, when opening and closing the unit or starting and stopping the collection.\n\n At the start of collection the user specifies specific bands to 
+sweep.  During collection all valid cells are outputted continuously.  Any layer 3 information is outputted when it is decoded.  Output ceases when 
+user stops collection.  The user cannot adjust specified bands during collection.\n\n Errors are communicated via API return values and the 
+cappeen_delegate::available_error callback mechanism.
 */
 	
 /**
@@ -45,7 +49,6 @@ For further info please see ERRORCODES.
 @remarks Should be called before exiting app.
 */
 CAPPEEN_API long cappeen_clean_up();
-
 
 /**
 Retrieves a character string which lists the serial numbers for all units connected but not opened.
