@@ -35,7 +35,7 @@ public:
 		, calculator_(config.umts_config_.sampling_rate())
 		, sc_(sc) {
 		if(config.layer_3_.wanted_layer_3_.empty()) {
-			//LOG(LVERBOSE) << "Defaulting to decoding all UMTS SIBs.";
+			LOG(LVERBOSE) << "Defaulting to decoding all UMTS SIBs.";
 			std::vector<layer_3_information::umts_sib_type> wanted;
 			wanted.push_back(layer_3_information::umts_sib_type::SIB1);
 			wanted.push_back(layer_3_information::umts_sib_type::SIB3_SIB4);

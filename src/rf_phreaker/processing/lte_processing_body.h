@@ -35,7 +35,7 @@ public:
 		, current_collection_round_(-1) {
 		// If empty, default to decoding all sibs.
 		if(config.layer_3_.wanted_layer_3_.empty()) {
-			//LOG(LVERBOSE) << "Defaulting to decoding all LTE SIBs.";
+			LOG(LVERBOSE) << "Defaulting to decoding all LTE SIBs.";
 			std::vector<layer_3_information::lte_sib_type> wanted;
 			wanted.push_back(layer_3_information::SIB_1);
 			wanted.push_back(layer_3_information::SIB_3);

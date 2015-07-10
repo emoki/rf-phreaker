@@ -139,6 +139,23 @@ void cappeen_impl::read_settings()
 	settings_io io("cappeen_api", qt_utility::app_name());
 
 	io.read(config_);
+
+	// Manually adjust parameters that are not in the cappeen_api.ini.
+	config_.lte_sweep_general_.sync_quality_confidence_threshold_ = -11.5;
+	config_.lte_sweep_general_.full_scan_interval_ = config_.lte_layer_3_decode_.max_update_threshold_;
+	config_.lte_layer_3_general_.sync_quality_confidence_threshold_ = 10; // Set so that only measurements with decoded pbchs are outputted.
+	config_.lte_layer_3_general_.full_scan_interval_ = config_.lte_layer_3_decode_.max_update_threshold_;
+	config_.umts_layer_3_decode_.wanted_layer_3_.push_back(layer_3_information::umts_sib_type::SIB1);
+	config_.umts_layer_3_decode_.wanted_layer_3_.push_back(layer_3_information::umts_sib_type::SIB3_SIB4);
+	config_.umts_layer_3_decode_.wanted_layer_3_.push_back(layer_3_information::umts_sib_type::SIB11);
+	config_.lte_layer_3_decode_.wanted_layer_3_.push_back(layer_3_information::SIB_1);
+	config_.lte_layer_3_decode_.wanted_layer_3_.push_back(layer_3_information::SIB_3);
+	config_.lte_layer_3_decode_.wanted_layer_3_.push_back(layer_3_information::SIB_4);
+	config_.lte_layer_3_decode_.wanted_layer_3_.push_back(layer_3_information::SIB_5);
+	config_.lte_layer_3_decode_.wanted_layer_3_.push_back(layer_3_information::SIB_6);
+	config_.lte_layer_3_decode_.wanted_layer_3_.push_back(layer_3_information::SIB_7);
+	config_.lte_layer_3_decode_.wanted_layer_3_.push_back(layer_3_information::SIB_8);
+
 }
 
 long cappeen_impl::clean_up()
