@@ -4,6 +4,20 @@
 using namespace rf_phreaker;
 using namespace layer_3_information;
 
+class wanted_si {
+public:
+	wanted_si() {
+		si_.push_back(layer_3_information::SIB_1);
+		si_.push_back(layer_3_information::SIB_3);
+		si_.push_back(layer_3_information::SIB_4);
+		si_.push_back(layer_3_information::SIB_5);
+		si_.push_back(layer_3_information::SIB_6);
+		si_.push_back(layer_3_information::SIB_7);
+		si_.push_back(layer_3_information::SIB_8);
+	}
+	std::vector<layer_3_information::lte_sib_type> si_;
+};
+
 TEST(LteFrameInfo, TestGeneral)
 {
 	layer_3_information::scheduling_info s;
@@ -58,6 +72,8 @@ TEST(LteFrameInfo, TestGeneral)
 
 TEST(CellsOnChannel, TestAllScheduling) {
 	si_tracker s;
+	wanted_si wanted;
+	s.set_wanted_si(wanted.si_);
 	lte_measurements measurements;
 	frequency_type f = 1;
 	for(int i = 0; i < 5; ++i) {
@@ -87,6 +103,8 @@ TEST(CellsOnChannel, TestAllScheduling) {
 
 TEST(CellsOnChannel, TestNeededScheduling) {
 	si_tracker s;
+	wanted_si wanted;
+	s.set_wanted_si(wanted.si_);
 	lte_measurements measurements;
 	frequency_type f = 1;
 	for(int i = 0; i < 5; ++i) {
