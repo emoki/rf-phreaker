@@ -517,12 +517,12 @@ int lte_pdsch_get_symbols(Ipp32fc* inSignal,
 #endif
 				pdsch_re_count++;
 				// Temporary bug fix: pdsch_re_count can overstep the fft_index.  Is pdsch_re_count supposed to be reset to 0 in the outer loop?
-				if(pdsch_re_count > max_num_symbols)
+				if(pdsch_re_count >= max_num_symbols)
 					break;
 			}
 		}
 		// Temporary bug fix: pdsch_re_count can overstep the fft_index.  Is pdsch_re_count supposed to be reset to 0 in the outer loop?
-		if(pdsch_re_count > max_num_symbols)
+		if(pdsch_re_count >= max_num_symbols)
 			break;
 	}
 
@@ -555,8 +555,11 @@ int lte_pdsch_get_symbols_vrb(Ipp32fc* inSignal,
 	// Changed the size of fft_index to match that of h_est_pdsch_temp
 	const int fft_index_size = MAX_SUBCARRIERS * OFDM_SYMBOLS_PER_SUBFRAME;
 	unsigned int fft_index[fft_index_size], temp, vrb_idx, start_rb, end_rb, odd_rb = LTE_NULL, even_rb = LTE_NULL;
-	unsigned int vrb_prb_slot_map[128][2];
+	const int max_vrb_prb_slot_num = 128;
+	unsigned int vrb_prb_slot_map[max_vrb_prb_slot_num][2];
 	const int max_num_symbols = 6144;
+	
+	pdsch_re_count = 0;
 
 	const auto debug_lte_pdsch_fft = lte_pdsch_fft;
 	const auto debug_lte_pdsch_fft_shifted = lte_pdsch_fft_shifted;
@@ -624,6 +627,8 @@ int lte_pdsch_get_symbols_vrb(Ipp32fc* inSignal,
 	}
 #endif
 
+	if(end_rb_vrb >= max_vrb_prb_slot_num)
+		return -1;
 #if 1
 	for(vrb_idx = start_rb_vrb; vrb_idx <= end_rb_vrb; vrb_idx++) {
 
@@ -650,7 +655,6 @@ int lte_pdsch_get_symbols_vrb(Ipp32fc* inSignal,
 	static std::ofstream vrb_debug("dis_vrb_debug.txt");
 #endif
 
-	pdsch_re_count = 0; // Should this be moved into the loop?
 	//for (vrb_idx = start_rb_vrb; vrb_idx <= end_rb_vrb; vrb_idx++)
 	{
 		auto lowest_odd = UINT_MAX;
@@ -676,11 +680,17 @@ int lte_pdsch_get_symbols_vrb(Ipp32fc* inSignal,
 
 
 #if 1
-				if(symbol_idx < OFDM_SYMBOLS_PER_SLOT) { // even slot		
-					start_rb = end_rb = vrb_prb_slot_map[(even_start_idx + vrb_idx) % (end_rb_vrb - start_rb_vrb + 1) + start_rb_vrb][0];
+				if(symbol_idx < OFDM_SYMBOLS_PER_SLOT) { // even slot	
+					auto tmp_idx = (even_start_idx + vrb_idx) % (end_rb_vrb - start_rb_vrb + 1) + start_rb_vrb;
+					if(tmp_idx >= max_vrb_prb_slot_num)
+						return -1;
+					start_rb = end_rb = vrb_prb_slot_map[tmp_idx][0];
 				}
 				else { // odd slot 
-					start_rb = end_rb = vrb_prb_slot_map[(odd_start_idx + vrb_idx) % (end_rb_vrb - start_rb_vrb + 1) + start_rb_vrb][1];
+					auto tmp_idx = (odd_start_idx + vrb_idx) % (end_rb_vrb - start_rb_vrb + 1) + start_rb_vrb;
+					if(tmp_idx >= max_vrb_prb_slot_num)
+						return -1;
+					start_rb = end_rb = vrb_prb_slot_map[tmp_idx][1];
 				}
 #endif
 
@@ -707,7 +717,8 @@ int lte_pdsch_get_symbols_vrb(Ipp32fc* inSignal,
 #endif
 						pdsch_re_count++;
 
-						if(pdsch_re_count > max_num_symbols)
+						// Temporary bug fix: pdsch_re_count can overstep the fft_index.  Is pdsch_re_count supposed to be reset to 0 in the outer loop?
+						if(pdsch_re_count >= max_num_symbols)
 							break;
 					}
 					else
@@ -715,7 +726,8 @@ int lte_pdsch_get_symbols_vrb(Ipp32fc* inSignal,
 				}//kk
 			}//vrb_idx_in
 
-			if(pdsch_re_count > max_num_symbols)
+			// Temporary bug fix: pdsch_re_count can overstep the fft_index.  Is pdsch_re_count supposed to be reset to 0 in the outer loop?
+			if(pdsch_re_count >= max_num_symbols)
 				break;
 			//}
 		} // symbol_idx
