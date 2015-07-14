@@ -22,13 +22,13 @@ rf_switch_setting calibration::get_rf_switch(frequency_type freq, bandwidth_type
 	auto it = rf_switches_.lower_bound(bw);
 	if(it == rf_switches_.end()) {
 		LOG(LDEBUG) << "Bandwidth (" << bw / 1e6 << " mhz) or higher not found within RF switch settings.  Using default switch setting.";
-		return rf_switch_setting();
+		return rf_switch_setting{};
 	}
 	else {
 		auto freq_it = it->second.lower_bound(freq);
 		if(freq_it == it->second.end()) {
 			LOG(LDEBUG) << "Frequency (" << freq / 1e6 << " mhz) not found within RF switch settings.  Using default switch setting.";
-			return rf_switch_setting();
+			return rf_switch_setting{};
 		}
 		else {
 			return freq_it->second;
@@ -45,21 +45,12 @@ double calibration::get_rf_board_adjustment(frequency_type freq, bandwidth_type 
 	else {
 		auto adj_it = rf_board_adjustments_.find(sw.identifier_);
 		if(adj_it != rf_board_adjustments_.end()) {
-			auto diff = freq - adj_it->second.adj_.path_.low_freq_;
-			if(diff < 0) {
-				LOG(LDEBUG) << "Frequency (" << freq / 1e6 << " mhz) is below lower limit within RF board calibration table.";
-				return 0;
-			}
-			auto pos = diff / (double)adj_it->second.adj_.spacing_;
-			if(std::ceil(pos) > adj_it->second.adj_.rf_adjustments_.size() - 1) {
-				LOG(LDEBUG) << "Frequency (" << freq / 1e6 << " mhz) is above upper limit within RF board calibration table.";
-				return 0;
-			}
-			else
-				return interpolate_adjustment(pos, adj_it->second.adj_);
+			return adj_it->second.adj_.find_adjustment(freq);
 		}
-		else
+		else {
+			LOG(LDEBUG) << "RF board adjustment value not found for frequency (" << freq / 1e6 << " mhz and bandwidth (" << bw / 1e6 << ").";
 			return 0;
+		}
 	}
 }
 
@@ -69,31 +60,34 @@ double calibration::get_nuand_adjustment(lms::lna_gain_enum gain, frequency_type
 		LOG(LDEBUG) << "LNA gain adjustment (" << lms::to_string(gain) << ") not found within adjustment table.";
 		return 0;
 	}
-	auto adj = it->second.adj_;
-	auto diff = freq - adj.path_.low_freq_;
-	if(diff < 0) {
-		LOG(LDEBUG) << "Frequency (" << freq / 1e6 << " mhz) is below lower limit within LNA gain adjustment table.";
-		return 0;
-	}
-	auto pos = diff / (double)adj.spacing_;
-	if(std::ceil(pos) > (int)adj.rf_adjustments_.size() - 1) {
-		LOG(LDEBUG) << "Frequency (" << freq / 1e6 << " mhz) is above upper limit within LNA gain adjustment table.";
-		return 0;
-	}
-	else
-		return interpolate_adjustment(pos, adj);
+	return it->second.adj_.find_adjustment(freq);
 }
 
-double calibration::interpolate_adjustment(double position, const rf_adjustment &adj) const {
-	auto before = std::floor(position);
-	auto after = std::ceil(position);
-	if(after > adj.rf_adjustments_.size()) {
-		LOG(LDEBUG) << "Unable to interpolate because the position is beyond the bounds of the adjustment table.";
-		return 0;
+rf_adjustment calibration::get_rf_board_adjustments(frequency_type freq, bandwidth_type bw, bandwidth_type calibration_width) const {
+	auto sw = get_rf_switch(freq, bw);
+	if(sw.identifier_ == 0) {
+		LOG(LDEBUG) << "RF switch setting's identifer is zero.";
+		return rf_adjustment{};
 	}
-	auto ratio = position - before;
-	auto interpolation = adj.rf_adjustments_[before] + (adj.rf_adjustments_[after] - adj.rf_adjustments_[before]) * ratio;
-	return interpolation;
+	else {
+		auto adj_it = rf_board_adjustments_.find(sw.identifier_);
+		if(adj_it != rf_board_adjustments_.end()) {
+			return adj_it->second.adj_.create_rf_adjustment(freq, calibration_width);
+		}
+		else {
+			LOG(LDEBUG) << "RF board adjustments not found for frequency (" << freq / 1e6 << " mhz and bandwidth (" << bw / 1e6 << ").";
+			return rf_adjustment{};
+		}
+	}
+}
+
+rf_adjustment calibration::get_nuand_adjustments(lms::lna_gain_enum gain, frequency_type freq, bandwidth_type calibration_width) const {
+	auto it = nuand_adjustments_.find(gain);
+	if(it == nuand_adjustments_.end()) {
+		LOG(LDEBUG) << "LNA gain adjustment (" << lms::to_string(gain) << ") not found within adjustment table.";
+		return rf_adjustment{};
+	}
+	return it->second.adj_.create_rf_adjustment(freq, calibration_width);
 }
 
 void calibration::read_rf_switch_file(const std::string &filename) {

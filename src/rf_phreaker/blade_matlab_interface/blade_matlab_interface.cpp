@@ -17,7 +17,7 @@ std::unique_ptr<rf_phreaker::logger> loggerz;
 
 float calculate_sl(measurement_info &meas) {
 	auto rms = ipp_helper::calculate_average_rms(meas.get_iq().get(), meas.get_iq().length());
-	return (float)signal_level_calculator::calculate_sl(rms, meas, use_rf_board_adjustment);
+	return (float)signal_level_calculator::calculate_sl(rms, meas, 0, use_rf_board_adjustment);
 }
 
 int start_logging(int log_level) {

@@ -63,7 +63,7 @@ public:
 					meas->collection_round(c.collection_round());
 					meas->set_operating_band(ci.operating_band_);
 					if(!settings_.use_rf_board_adjustment_)
-						meas->rf_board_adjustment(0);
+						meas->rf_board_adjustments(scanner::rf_adjustment{});
 
 					switch(c.get_technology()) {
 					case GSM_SWEEP:

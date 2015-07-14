@@ -30,6 +30,7 @@ set (scanner_SRCS
 	nr_interface.h
 	measurement_info.h
 	measurement_info_serialization.h
+	rf_adjustment.h
     rf_switch_conversion.h
 	scanner.h
 	scanner_blade_rf.cpp

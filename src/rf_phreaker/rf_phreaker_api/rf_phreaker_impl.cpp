@@ -780,7 +780,8 @@ rp_status rf_phreaker_impl::get_iq_data_using_auto_gain(rp_device *device, rp_fr
 		copy_serial(meas.serial(), raw_data->base_.serial_);
 		raw_data->base_.status_flags_ = 0;
 		raw_data->base_.time_ = 0;
-		raw_data->power_adjustment_ = meas.blade_adjustment() - config_.use_rf_board_adjustment_ ? meas.rf_board_adjustment() : 0;
+		throw rf_phreaker_error("raw_data not supported!");
+		//raw_data->power_adjustment_ = meas.blade_adjustment() - config_.use_rf_board_adjustment_ ? meas.rf_board_adjustment() : 0;
 		raw_data->sample_format_ = LITTLE_ENDIAN_FLOAT_REAL_IMAGINARY;
 		if(meas.get_iq().length() < raw_data->num_samples_)
 			raw_data->num_samples_ = meas.get_iq().length();

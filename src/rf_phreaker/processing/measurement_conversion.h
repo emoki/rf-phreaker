@@ -46,7 +46,7 @@ inline basic_data convert_to_basic_data(const scanner::measurement_info &info, c
 
 inline void convert_to_basic_data(basic_data &data, const scanner::measurement_info &info, const gsm_measurement &gsm) {
 	data.serial_ = info.serial();
-	data.carrier_signal_level_ = scanner::signal_level_calculator::calculate_sl(gsm.channel_power_, info);
+	data.carrier_signal_level_ = scanner::signal_level_calculator::calculate_sl(gsm.channel_power_, info, gsm.center_frequency_);
 	data.carrier_bandwidth_ = khz(200);
 	data.carrier_frequency_ = gsm.center_frequency_;
 	data.collection_round_ = info.collection_round();
@@ -66,7 +66,7 @@ inline void convert_to_gsm_data(gsm_data &data, const scanner::measurement_info 
 	data.tdma_frame_number_ = gsm.tdma_frame_number_;
 	data.ctoi_ = 10 * log10(gsm.c_i_ratio_);
 	data.operating_band_ = info.get_operating_band();
-	data.cell_signal_level_ = scanner::signal_level_calculator::calculate_sl(gsm.rms_corr_power_, info);
+	data.cell_signal_level_ = scanner::signal_level_calculator::calculate_sl(gsm.rms_corr_power_, info, gsm.center_frequency_);
 	static channel_conversion conversion;
 	data.arfcn_ = conversion.frequency_to_arfcn(gsm.center_frequency_, info.get_operating_band()).channel_;
 }

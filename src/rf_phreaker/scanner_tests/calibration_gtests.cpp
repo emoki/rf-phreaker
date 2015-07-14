@@ -90,6 +90,39 @@ TEST(CalibrationTest, GeneralTest) {
 	EXPECT_DOUBLE_EQ(cal1.get_rf_board_adjustment(mhz(301), 5000), 0);
 }
 
+TEST(CalibrationTest, AdjustmentTest) {
+	cali_holder cal_holder;
+	calibration &cal1 = cal_holder.cal_;
+
+	auto bypass_nuand = cal1.get_nuand_adjustments(lms::LNA_MAX, mhz(250), mhz(100));
+	EXPECT_DOUBLE_EQ(bypass_nuand.find_adjustment(mhz(199)), 0);
+	EXPECT_DOUBLE_EQ(bypass_nuand.find_adjustment(mhz(200)), 10);
+	EXPECT_DOUBLE_EQ(bypass_nuand.find_adjustment(mhz(225)), 15);
+	EXPECT_DOUBLE_EQ(bypass_nuand.find_adjustment(mhz(250)), 20);
+	EXPECT_DOUBLE_EQ(bypass_nuand.find_adjustment(mhz(275)), 25);
+	EXPECT_DOUBLE_EQ(bypass_nuand.find_adjustment(mhz(300)), 30);
+	EXPECT_DOUBLE_EQ(bypass_nuand.find_adjustment(mhz(301)), 0);
+
+	auto tmp_rf = cal1.get_rf_board_adjustments(mhz(250), 10000, mhz(100));
+	EXPECT_DOUBLE_EQ(tmp_rf.find_adjustment(mhz(199)), 0);
+	EXPECT_DOUBLE_EQ(tmp_rf.find_adjustment(mhz(200)), 10);
+	EXPECT_DOUBLE_EQ(tmp_rf.find_adjustment(mhz(225)), 15);
+	EXPECT_DOUBLE_EQ(tmp_rf.find_adjustment(mhz(250)), 20);
+	EXPECT_DOUBLE_EQ(tmp_rf.find_adjustment(mhz(275)), 25);
+	EXPECT_DOUBLE_EQ(tmp_rf.find_adjustment(mhz(300)), 30);
+	EXPECT_DOUBLE_EQ(tmp_rf.find_adjustment(mhz(301)), 0);
+
+	tmp_rf = cal1.get_rf_board_adjustments(mhz(250), 10000, mhz(50));
+	EXPECT_DOUBLE_EQ(tmp_rf.find_adjustment(mhz(225)), 15);
+	EXPECT_DOUBLE_EQ(tmp_rf.find_adjustment(mhz(250)), 20);
+	EXPECT_DOUBLE_EQ(tmp_rf.find_adjustment(mhz(275)), 25);
+
+	tmp_rf = cal1.get_rf_board_adjustments(mhz(225), 10000, mhz(25));
+	EXPECT_DOUBLE_EQ(tmp_rf.find_adjustment(mhz(200)), 10);
+	EXPECT_DOUBLE_EQ(tmp_rf.find_adjustment(mhz(225)), 15);
+	EXPECT_DOUBLE_EQ(tmp_rf.find_adjustment(mhz(250)), 20);
+}
+
 TEST(CalibrationTest, DISABLED_MatlabReadTest)
 {
 	std::string base_filename = "../../../../rf_phreaker/test_files/calibration_files/";

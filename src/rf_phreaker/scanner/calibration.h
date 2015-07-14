@@ -9,18 +9,11 @@
 #include "rf_phreaker/scanner/gain.h"
 #include "rf_phreaker/scanner/eeprom_defines.h"
 #include "rf_phreaker/scanner/lms_defines.h"
+#include "rf_phreaker/scanner/rf_adjustment.h"
 #include "rf_phreaker/common/measurements.h"
 #include "rf_phreaker/common/common_utility.h"
 #include "rf_phreaker/common/serialization_helper.h"
-
-namespace boost { namespace serialization {
-	template<class Archive>
-	void serialize(Archive & ar, rf_phreaker::frequency_path &path, const unsigned int version)
-	{
-		ar & path.low_freq_;
-		ar & path.high_freq_;
-	}
-}}
+#include "rf_phreaker/common/log.h"
 
 namespace rf_phreaker { namespace scanner {
 
@@ -69,43 +62,6 @@ private:
 		ar & switch_setting_;
 		ar & switch_mask_;
 	}
-};
-
-class rf_adjustment
-{
-public:
-	rf_adjustment() : path_(-1, -1), spacing_(-1) {}
-	rf_adjustment(const rf_adjustment &s)
-		: path_(s.path_.low_freq_, s.path_.high_freq_)
-		, spacing_(s.spacing_)
-		, rf_adjustments_(s.rf_adjustments_)
-	{}
-	rf_adjustment& operator=(const rf_adjustment &s)
-	{
-		path_.low_freq_ = s.path_.low_freq_;
-		path_.high_freq_ = s.path_.high_freq_;
-		spacing_ = s.spacing_;
-		rf_adjustments_ = s.rf_adjustments_;
-		return *this;
-	}
-	void clear() { path_.low_freq_ = -1; path_.high_freq_ = -1; spacing_ = -1; rf_adjustments_.clear(); }
-	bool operator==(const rf_adjustment &s) const {
-		return path_.low_freq_ == s.path_.low_freq_ && path_.high_freq_ == s.path_.high_freq_ &&
-			spacing_ == s.spacing_ && rf_adjustments_ == s.rf_adjustments_;
-	}
-
-	frequency_path path_;
-	frequency_type spacing_;
-	std::vector<double> rf_adjustments_;
-private:
-	friend class boost::serialization::access;
-	template<class Archive>
-	void serialize(Archive &ar, const unsigned int version) {
-		ar & path_;
-		ar & spacing_;
-		ar & rf_adjustments_;
-	}
-
 };
 
 class rf_path_adjustment
@@ -162,6 +118,9 @@ public:
 	rf_switch_setting get_rf_switch(frequency_type freq, bandwidth_type bw) const;
 	double get_rf_board_adjustment(frequency_type freq, bandwidth_type bw)  const;
 	double get_nuand_adjustment(lms::lna_gain_enum gain, frequency_type freq)  const;
+	rf_adjustment get_rf_board_adjustments(frequency_type freq, bandwidth_type bw, bandwidth_type calibration_width)  const;
+	rf_adjustment get_nuand_adjustments(lms::lna_gain_enum gain, frequency_type freq, bandwidth_type calibration_width)  const;
+
 	void read_rf_switch_file(const std::string &file);
 	void read_rf_board_calibration_file(const std::string &file);
 	void read_nuand_calibration_file(const std::string &file);
@@ -217,8 +176,6 @@ public:
 	}
 
 private:
-	double interpolate_adjustment(double position, const rf_adjustment &adj) const;
-
 	std::vector<std::string> parse_line(std::istream &is, const std::string &filename = "unknown file");
 
 	friend class boost::serialization::access;

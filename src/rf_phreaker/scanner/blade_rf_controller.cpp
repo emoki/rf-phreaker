@@ -612,8 +612,8 @@ measurement_info blade_rf_controller::get_rf_data(frequency_type frequency, time
 
 	measurement_info data(num_samples, frequency, blade_bandwidth, blade_sampling_rate, gain, 
 		std::chrono::duration_cast<std::chrono::milliseconds>(std::chrono::high_resolution_clock::now() - start_time),
-		scanner_blade_rf_->eeprom_.cal_.get_nuand_adjustment(gain.lna_gain_, frequency),
-		scanner_blade_rf_->eeprom_.cal_.get_rf_board_adjustment(frequency, blade_bandwidth),
+		scanner_blade_rf_->eeprom_.cal_.get_nuand_adjustments(gain.lna_gain_, frequency, blade_bandwidth),
+		scanner_blade_rf_->eeprom_.cal_.get_rf_board_adjustments(frequency, blade_bandwidth, blade_bandwidth),
 		collection_count_++, scanner_blade_rf_->eeprom_.cal_.nuand_serial_);
 
 	const auto beginning_of_iq = (Ipp16s*)&(*aligned_buffer_.get_aligned_array()) + (throw_away_samples * 2);

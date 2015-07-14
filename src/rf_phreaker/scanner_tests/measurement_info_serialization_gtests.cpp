@@ -11,10 +11,11 @@ using namespace rf_phreaker::scanner;
 TEST(MeasurementInfoSerialization, TestMain) {
 	const int signal_size = 1000;
 	gain_type g(lms::LNA_MAX, 30, 10);
-	measurement_info test(signal_size, 1001, 1002, 1003, g, std::chrono::milliseconds(1004), 1, 2, 1004, "1234567891234567891234");
+	rf_phreaker::frequency_type freq = 1001;
+	measurement_info test(signal_size, freq, 1002, 1003, g, std::chrono::milliseconds(1004), rf_adjustment{{freq, freq}, 1}, rf_adjustment{{freq, freq}, 2}, 1004, "1234567891234567891234");
 	test.set_operating_band(rf_phreaker::UMTS_OPERATING_BAND_1);
-	test.rf_board_adjustment(-53);
-	test.blade_adjustment(33);
+	test.rf_board_adjustments(rf_adjustment{{freq, freq}, -53});
+	test.blade_adjustments(rf_adjustment{{freq, freq}, 33});
 
 	for(int i = 0; i < signal_size; ++i) {
 		test.get_iq()[i].re = (float)i;
