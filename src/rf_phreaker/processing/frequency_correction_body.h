@@ -46,9 +46,10 @@ public:
 		, min_collection_round_(b.min_collection_round_)
 	{}
 
-	void operator()(measurement_package info, umts_output_and_feedback_node::output_ports_type &out)
+	void operator()(measurement_package package, umts_output_and_feedback_node::output_ports_type &out)
 	{
-		if(info->collection_round() > min_collection_round_ && num_shifts_ > 10 || (info->collection_round() > 8)) {
+		auto meas = *package.measurement_info_.get();
+		if(meas.collection_round() > min_collection_round_ && num_shifts_ > 10 || (meas.collection_round() > 8)) {
 			graph_->root_task()->cancel_group_execution();
 			if(num_shifts_ > 0) {
 				auto avg_error = error_sum_ / (double)num_shifts_;
@@ -76,7 +77,7 @@ public:
 		param.end_freq_ = (has_corrected_freq_error_ && frequency_correction_settings_.initial_frequency_correction_range_end_ > 250) ? 250 : frequency_correction_settings_.initial_frequency_correction_range_end_;
 		param.increment_ = (has_corrected_freq_error_) ? 10 : 50;
 	
-		if(has_corrected_freq_error_ && info->collection_round() > 0) {
+		if(has_corrected_freq_error_ && meas.collection_round() > 0) {
 			param.scan_type_ = candidate_all_timeslots_scan_type;
 			param.sensitivity_ = layer_3_settings_.sensitivity_;
 			param.start_freq_ = (frequency_correction_settings_.initial_frequency_correction_range_start_ < -70) ? -70 : frequency_correction_settings_.initial_frequency_correction_range_start_;
@@ -85,7 +86,7 @@ public:
 			param.increment_ = 2;
 		}
 
-		auto correction = calculator_.determine_freq_correction(info.get(), analysis_, param);
+		auto correction = calculator_.determine_freq_correction(meas, analysis_, param);
 
 		// If no insertions change parameters and try again.
 		if(!correction.has_insertions()) {
@@ -95,12 +96,12 @@ public:
 			param.num_coherent_slots_ = layer_3_settings_.num_coherent_slots_;
 			param.increment_ = 20;
 
-			correction = calculator_.determine_freq_correction(info.get(), analysis_, param);
+			correction = calculator_.determine_freq_correction(meas, analysis_, param);
 			if(!correction.has_insertions()) {
 				LOG(LDEBUG) << "Unable to find cells.  Expanding frequency range...";
 				param.start_freq_ = frequency_correction_settings_.initial_frequency_correction_range_start_;
 				param.end_freq_ = frequency_correction_settings_.initial_frequency_correction_range_end_;
-				correction = calculator_.determine_freq_correction(info.get(), analysis_, param);
+				correction = calculator_.determine_freq_correction(meas, analysis_, param);
 			}
 		}
 
@@ -109,12 +110,12 @@ public:
 
 			LOG(LDEBUG) << correction.cpichs_.size() << " cells found. Best shifts averaged = " << best_shift << "hz.";
 			
-			if(info->collection_round() > min_collection_round_) {
+			if(meas.collection_round() > min_collection_round_) {
 				++num_shifts_;
-				error_sum_ += calculator_.calculate_error(best_shift, info->frequency());
+				error_sum_ += calculator_.calculate_error(best_shift, meas.frequency());
 			}
 			else {
-				update_frequency_correction(calculator_.calculate_error(best_shift, info->frequency()));
+				update_frequency_correction(calculator_.calculate_error(best_shift, meas.frequency()));
 			}
 		}
 		else {

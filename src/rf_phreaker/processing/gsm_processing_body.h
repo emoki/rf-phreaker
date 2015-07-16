@@ -4,6 +4,7 @@
 #include "rf_phreaker/processing/layer_3_tracker.h"
 #include "rf_phreaker/processing/scanner_error_tracker.h"
 #include "rf_phreaker/processing/frequency_correction_calculator.h"
+#include "rf_phreaker/processing/output_and_feedback_helper.h"
 #include "rf_phreaker/gsm_analysis/gsm_analysis.h"
 #include "rf_phreaker/gsm_analysis/gsm_config.h"
 #include "rf_phreaker/common/settings.h"
@@ -30,8 +31,7 @@ public:
 	gsm_processing_body(const gsm_cell_search_settings &config, std::atomic_bool *is_cancelled = nullptr)
 		: analysis_(config.gsm_config_, is_cancelled)
 		, tracker_(70/*config.layer_3_.max_update_threshold_*/)
-		, config_(config)
-		, current_collection_round_(-1) {
+		, config_(config) {
 		//if(config.layer_3_.wanted_layer_3_.empty()) {
 		//	LOG(LVERBOSE) << "Defaulting to decoding all GSM SIBs.";
 		//	std::vector<layer_3_information::gsm_sib_type> wanted;
@@ -47,32 +47,32 @@ public:
 	gsm_processing_body(const gsm_processing_body &body)
 		: analysis_(body.config_.gsm_config_)
 		, tracker_(body.tracker_.max_update_, body.tracker_.wanted_layer_3())
-		, config_(body.config_)
-		, current_collection_round_(body.current_collection_round_) {}
+		, config_(body.config_) {}
 
 	//gsm_processing_body(gsm_processing_body &&body)
 	//	: gsm_analysis_(std::move(body.gsm_analysis_))
 	//{}
 
-	gsm_info operator()(measurement_package info) {
+	gsm_info operator()(measurement_package package) {
+		auto meas = *package.measurement_info_.get();
 		gsm_measurements gsm_group;
 
-		int status = analysis_.cell_search(*info, gsm_group, config_.gsm_general_.perform_sync_correlations_);
+		int status = analysis_.cell_search(meas, gsm_group, config_.gsm_general_.perform_sync_correlations_);
 		if(status != 0)
 			throw gsm_analysis_error("Error processing gsm.");
 
 		// Remove any measurements that are lower than are confidence threshold.  Note we should always keep measurements
 		// that have a BSIC decoded.
-		gsm_group.erase(std::remove_if(gsm_group.begin(), gsm_group.end(), [&](const gsm_measurement& meas) {
-			return meas.norm_sync_corr_ < config_.gsm_general_.sync_corr_confidence_threshold_ && meas.bsic_ == -1;
+		gsm_group.erase(std::remove_if(gsm_group.begin(), gsm_group.end(), [&](const gsm_measurement& m) {
+			return m.norm_sync_corr_ < config_.gsm_general_.sync_corr_confidence_threshold_ && m.bsic_ == -1;
 		}), gsm_group.end());
 
 		LOG_IF(LCOLLECTION, (gsm_group.size() != 0)) << "GSM processing - Found " << gsm_group.size() << " GSM measurements using a center frequency of " 
-			<< info->frequency() / 1e6 << "mhz and a bandwidth of " << info->bandwidth() / 1e6 << "mhz";
+			<< meas.frequency() / 1e6 << "mhz and a bandwidth of " << meas.bandwidth() / 1e6 << "mhz";
 
-		freq_bin_calculator_.calculate_power_in_bins(info->get_iq(), info->sampling_rate(), gsm_channel_bandwidth_, 131072);
+		freq_bin_calculator_.calculate_power_in_bins(meas.get_iq(), meas.sampling_rate(), gsm_channel_bandwidth_, 131072);
 
-		auto center_freq = info->frequency();
+		auto center_freq = meas.frequency();
 		if(center_freq % khz(200) == 0)
 			center_freq -= khz(100);
 
@@ -81,20 +81,20 @@ public:
 			p_info_group.push_back(power_info(center_freq + freq, gsm_channel_bandwidth_, freq_bin_calculator_.get_power_in_bin(freq)));
 		}
 
-		return gsm_info(info, std::move(gsm_group), std::move(p_info_group));
+		return gsm_info(std::move(package), std::move(gsm_group), std::move(p_info_group));
 	}
 
 	gsm_info operator()(gsm_info info) {
+		auto meas = *info.measurement_package_.measurement_info_.get();
 		// If the collection round is 0 it means we need to start decoding from scratch.
-		if(info.meas_->collection_round() == 0 && current_collection_round_ != 0) {
+		if(helper_.has_layer_3_restarted(meas)) {
 			tracker_.clear();
 		}
-		current_collection_round_ = info.meas_->collection_round();
 
-		auto freq = info.meas_->frequency();
+		auto freq = meas.frequency();
 		for(auto &data : info.processed_data_) {
 			//if(!tracker_.is_fully_decoded(freq, data) && (data.c_i_ratio_ > config_.layer_3_.decode_threshold_ || tracker_.in_history(freq, data))) {
-			//	int status = analysis_.decode_layer_3(*info.meas_, data);
+			//	int status = analysis_.decode_layer_3(meas, data);
 			//	if(status != 0)
 			//		throw gsm_analysis_error("Error decoding gsm layer 3.");
 			//	tracker_.update(freq, data);
@@ -104,14 +104,14 @@ public:
 		//// If no measurements were greater than the decode_threshold and we are not tracking any cells on this freq, add the cell with the greatest ecio if
 		//// it meets the min decode threshold.
 		//if(!tracker_.is_freq_in_history(freq)) {
-		//	gsm_measurement meas;
-		//	meas.ecio_ = -99;
-		//	for(auto &data : info.processed_data_) {
-		//		if(data.ecio_ > meas.ecio_)
-		//			meas = data;
+		//	gsm_measurement data;
+		//	data.ecio_ = -99;
+		//	for(auto &tmp_data : info.processed_data_) {
+		//		if(tmp_data.ecio_ > data.ecio_)
+		//			data = tmp_data;
 		//	}
-		//	if(meas.ecio_ > config_.layer_3_.decode_minimum_threshold_)
-		//		tracker_.update(freq, meas);
+		//	if(data.ecio_ > config_.layer_3_.decode_minimum_threshold_)
+		//		tracker_.update(freq, data);
 		//}
 
 		tracker_.update_freq(freq);
@@ -127,7 +127,7 @@ private:
 	gsm_analysis analysis_;
 	gsm_layer_3_tracker tracker_;
 	gsm_cell_search_settings config_;
-	int64_t current_collection_round_;
+	output_and_feedback_helper<void> helper_;
 	frequency_bin_calculator freq_bin_calculator_;
 };
 

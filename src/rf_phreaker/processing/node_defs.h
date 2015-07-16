@@ -12,7 +12,16 @@
 
 namespace rf_phreaker { namespace processing {
 
-typedef std::shared_ptr<scanner::measurement_info> measurement_package;
+//typedef std::shared_ptr<scanner::measurement_info> measurement_package;
+class measurement_package {
+public:
+	measurement_package(bool can_remove = true) : can_remove_(can_remove) {}
+	measurement_package(std::shared_ptr<scanner::measurement_info> &info, bool can_remove = true)
+		: measurement_info_(info)
+		, can_remove_(can_remove) {}
+	std::shared_ptr<scanner::measurement_info> measurement_info_;
+	bool can_remove_;
+};
 
 class power_info {
 public:
@@ -36,14 +45,19 @@ class analysis_data
 public:
 	analysis_data() : /*avg_rms_(0),*/ remove_(false)
 	{}
-	analysis_data(measurement_package meas, Data &&data, power_info_group &&p_info = {}, bool remove = false)
-		: meas_(std::move(meas))
+	analysis_data(measurement_package &&meas, Data &&data, power_info_group &&p_info = {}, bool remove = false)
+		: measurement_package_(std::move(meas))
 		, processed_data_(std::move(data))
 		, power_info_group_(std::move(p_info))
 		, remove_(remove)
 	{}
+	analysis_data(analysis_data &&a)
+		: measurement_package_(std::move(a.measurement_package_))
+		, processed_data_(std::move(a.processed_data_))
+		, power_info_group_(std::move(a.power_info_group_))
+		, remove_(a.remove_) {}
 
-	measurement_package meas_;
+	measurement_package measurement_package_;
 	Data processed_data_;
 	bool remove_;
 	power_info_group power_info_group_;

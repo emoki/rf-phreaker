@@ -57,7 +57,8 @@ public:
 				else {
 					scanning_finished_for_all_containers = false;
 
-					auto meas = std::make_shared<scanner::measurement_info>(scanner_io_(ci));
+					measurement_package package(std::make_shared<scanner::measurement_info>(scanner_io_(ci)), ci.can_remove_);
+					auto &meas = package.measurement_info_;
 
 					// Make necessary changes to the packet.
 					meas->collection_round(c.collection_round());
@@ -68,27 +69,27 @@ public:
 					switch(c.get_technology()) {
 					case GSM_SWEEP:
 						if(packet_output_settings_.gsm_sweep_) { output(meas.get(), "gsm_sweep_", gsm_sweep_++); }
-						std::get<GSM_SWEEP_PORT>(out).try_put(meas);
+						std::get<GSM_SWEEP_PORT>(out).try_put(package);
 						break;
 					case GSM_LAYER_3_DECODE:
 						if(packet_output_settings_.gsm_layer_3_) { output(meas.get(), "gsm_layer_3_", gsm_layer_3_++); }
-						std::get<GSM_LAYER3_PORT>(out).try_put(meas);
+						std::get<GSM_LAYER3_PORT>(out).try_put(package);
 						break;
 					case UMTS_SWEEP:
 						if(packet_output_settings_.umts_sweep_) { output(meas.get(), "umts_sweep_", umts_sweep_++); }
-						std::get<UMTS_SWEEP_PORT>(out).try_put(meas);
+						std::get<UMTS_SWEEP_PORT>(out).try_put(package);
 						break;
 					case UMTS_LAYER_3_DECODE:
 						if(packet_output_settings_.umts_layer_3_) { output(meas.get(), "umts_layer_3_", umts_layer_3_++); }
-						std::get<UMTS_LAYER3_PORT>(out).try_put(meas);
+						std::get<UMTS_LAYER3_PORT>(out).try_put(package);
 						break;
 					case LTE_SWEEP:
 						if(packet_output_settings_.lte_sweep_) { output(meas.get(), "lte_sweep_", lte_sweep_++); }
-						std::get<LTE_SWEEP_PORT>(out).try_put(meas);
+						std::get<LTE_SWEEP_PORT>(out).try_put(package);
 						break;
 					case LTE_LAYER_3_DECODE:
 						if(packet_output_settings_.lte_layer_3_) { output(meas.get(), "lte_layer_3_", lte_layer_3_++); }
-						std::get<LTE_LAYER3_PORT>(out).try_put(meas);
+						std::get<LTE_LAYER3_PORT>(out).try_put(package);
 						break;
 					default:
 						throw processing_error("Unknown specifier while trying to put meas in output port."); // Do nothing.

@@ -2,6 +2,7 @@
 #include <tuple>
 #include <future>
 #include <vector>
+#include "rf_phreaker/scanner/measurement_info.h"
 
 namespace rf_phreaker { namespace processing {
 
@@ -10,8 +11,12 @@ class output_and_feedback_helper {
 public:
 	output_and_feedback_helper() : current_collection_round_(-1) {}
 
-	bool has_sweep_restarted(const measurement_package& meas) {
-		if(sweep_freq_history_.insert(meas->frequency()).second) 
+	output_and_feedback_helper(const output_and_feedback_helper &helper) 
+		: current_collection_round_(helper.current_collection_round_) 
+		, sweep_freq_history_(helper.sweep_freq_history_) {}
+
+	bool has_sweep_restarted(const scanner::measurement_info &meas) {
+		if(sweep_freq_history_.insert(meas.frequency()).second) 
 			return false;
 		else {
 			sweep_freq_history_.clear();
@@ -19,12 +24,12 @@ public:
 		}
 	}
 
-	bool has_layer_3_restarted(const measurement_package& meas) {
+	bool has_layer_3_restarted(const scanner::measurement_info &meas) {
 		bool has_restarted = false;
-		if(meas->collection_round() == 0 && current_collection_round_ != 0) {
+		if(meas.collection_round() == 0 && current_collection_round_ != 0) {
 			has_restarted = true;
 		}
-		current_collection_round_ = meas->collection_round();
+		current_collection_round_ = meas.collection_round();
 		return has_restarted;
 	}
 

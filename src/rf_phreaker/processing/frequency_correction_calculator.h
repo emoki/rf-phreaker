@@ -65,16 +65,16 @@ public:
 		return shift * (38.4e6 / carrier_freq);
 	}
 
-	correction_lookup determine_freq_correction(raw_signal *info, umts_analysis &analysis, const freq_correction_param &param) {
+	correction_lookup determine_freq_correction(raw_signal &sig, umts_analysis &analysis, const freq_correction_param &param) {
 		correction_lookup correction;
 
 		umts_measurements group;
 
 		analysis.set_num_coherent_slots_for_psch(param.num_coherent_slots_);
 
-		LOG(LDEBUG) << "Starting frequency correction for " << info->frequency() / 1e6 << " MHz. Start offset = " << param.start_freq_ << " Hz. End offset = " << param.end_freq_ << " Hz. Increment = " << param.increment_ << " Hz.";
+		LOG(LDEBUG) << "Starting frequency correction for " << sig.frequency() / 1e6 << " MHz. Start offset = " << param.start_freq_ << " Hz. End offset = " << param.end_freq_ << " Hz. Increment = " << param.increment_ << " Hz.";
 		for(int i = param.start_freq_; i <= param.end_freq_; i += param.increment_) {
-			raw_signal shifted_signal(*info);
+			raw_signal shifted_signal(sig);
 			shifter_.shift_frequency(shifted_signal.get_iq(), shifted_signal.get_iq().length(), i);
 			auto status = analysis.cell_search(shifted_signal, group, param.sensitivity_, param.scan_type_);
 			if(status != 0)

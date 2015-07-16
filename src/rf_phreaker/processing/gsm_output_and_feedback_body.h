@@ -24,7 +24,8 @@ public:
 	{}
 
 	void operator()(gsm_info info, gsm_output_and_feedback_node::output_ports_type &out) {
-		if(helper_.has_sweep_restarted(info.meas_)) {
+		auto meas = *info.measurement_package_.measurement_info_.get();
+		if(helper_.has_sweep_restarted(meas)) {
 			added_freqs_.clear();
 			freq_history_.clear();
 		}
@@ -36,7 +37,7 @@ public:
 			// Output the freqs if we haven't already.
 			auto it = std::find(freq_history_.begin(), freq_history_.end(), i.freq_);
 			if(it == freq_history_.end()) {
-				helper_.track_future(io_->output(convert_to_basic_data(*info.meas_, i), std::vector<gsm_data>()));
+				helper_.track_future(io_->output(convert_to_basic_data(meas, i), std::vector<gsm_data>()));
 				freq_history_.push_back(i.freq_);
 			}
 		}
@@ -48,7 +49,7 @@ public:
 				if(freq % khz(200) == 0)
 					freq -= khz(100);
 				added_freqs_.insert(freq);
-				std::get<0>(out).try_put(add_collection_info(gsm_layer_3_collection_info(freq, info.meas_->get_operating_band()), GSM_LAYER_3_DECODE));
+				std::get<0>(out).try_put(add_collection_info(gsm_layer_3_collection_info(freq, meas.get_operating_band()), GSM_LAYER_3_DECODE));
 			}
 		}
 		std::get<1>(out).try_put(tbb::flow::continue_msg());
@@ -93,17 +94,18 @@ public:
 	{}
 
 	void operator()(gsm_info info, gsm_output_and_feedback_node::output_ports_type &out) {
+		auto meas = *info.measurement_package_.measurement_info_.get();
 		helper_.remove_futures();
 
 		// Add the freq to the layer_3_decoder.
 		if(info.remove_) {
-			std::get<0>(out).try_put(remove_collection_info(gsm_layer_3_collection_info(info.meas_->frequency(), info.meas_->get_operating_band()), GSM_LAYER_3_DECODE));
+			std::get<0>(out).try_put(remove_collection_info(gsm_layer_3_collection_info(meas.frequency(), meas.get_operating_band()), GSM_LAYER_3_DECODE));
 		}
 
 		std::vector<gsm_data> gsm_group;
 
 		for(const auto &dat : info.processed_data_)
-			gsm_group.push_back(convert_to_gsm_data(*info.meas_, dat));
+			gsm_group.push_back(convert_to_gsm_data(meas, dat));
 
 		helper_.track_future(io_->output(std::move(gsm_group), basic_data{}));
 

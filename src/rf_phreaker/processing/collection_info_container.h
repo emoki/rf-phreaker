@@ -83,7 +83,6 @@ public:
 			// If we add freqs then restart collection by saying we're not finished.
 			finished_ = false;
 
-
 			collection_info_group_.reserve(collection_info_group_.size() + param.add_.size());
 			std::for_each(std::begin(param.add_), std::end(param.add_), [&](const collection_info &p) {
 				if(std::find(std::begin(collection_info_group_), std::end(collection_info_group_), p) == collection_info_group_.end())

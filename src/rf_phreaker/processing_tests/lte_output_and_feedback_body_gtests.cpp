@@ -21,7 +21,7 @@ protected:
 	
 	void reset_lte_meas() 
 	{
-		lte_info.meas_.reset(new measurement_info(0, start_freq_, mhz(2.5), mhz(3.84), gain_type(), std::chrono::milliseconds(0)));
+		lte_info.measurement_package_.measurement_info_.reset(new measurement_info(0, start_freq_, mhz(2.5), mhz(3.84), gain_type(), std::chrono::milliseconds(0)));
 		power_info_group a{power_info(start_freq_, mhz(2.5), mhz(3.84))};
 		lte_info.power_info_group_ = a;
 		lte_info.remove_ = false;
@@ -45,23 +45,24 @@ protected:
 
 TEST_F(LteOutputAndFeedbackBodyTest, TestSweepBandwidth)
 {
+	auto meas = lte_info.measurement_package_.measurement_info_.get();
 	for(int i = start_freq_; i < start_freq_ + mhz(9); i += khz(200)) {
-		lte_info.meas_->frequency(i);
+		meas->frequency(i);
 		body_(lte_info, out_);
 	}
 
-	lte_info.meas_->frequency(start_freq_ + mhz(10));
+	meas->frequency(start_freq_ + mhz(10));
 	lte_info.processed_data_[0].Bandwidth = LteBandwidth_20MHZ;
 	lte_info.processed_data_[0].sync_quality -= 1;
 	body_(lte_info, out_);
 
 	lte_info.processed_data_[0].sync_quality += 1;
 	for(int i = start_freq_ + mhz(11); i <= start_freq_ + mhz(20); i += khz(200)) {
-		lte_info.meas_->frequency(i);
+		meas->frequency(i);
 		body_(lte_info, out_);
 	}
 
-	lte_info.meas_->frequency(start_freq_ + mhz(10));
+	meas->frequency(start_freq_ + mhz(10));
 	lte_info.processed_data_[0].Bandwidth = LteBandwidth_20MHZ;
 	lte_info.processed_data_[0].sync_quality += 1;
 	body_(lte_info, out_);
