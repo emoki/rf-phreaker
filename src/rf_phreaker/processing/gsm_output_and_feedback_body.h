@@ -5,7 +5,7 @@
 #include "rf_phreaker/processing/node_defs.h"
 #include "rf_phreaker/processing/data_output_async.h"
 #include "rf_phreaker/processing/measurement_conversion.h"
-#include "rf_phreaker/processing/output_and_feedback_helper.h"
+#include "rf_phreaker/processing/processing_and_feedback_helper.h"
 #include "rf_phreaker/common/common_utility.h"
 
 namespace rf_phreaker { namespace processing {
@@ -73,7 +73,7 @@ private:
 	
 	data_output_async *io_;
 
-	output_and_feedback_helper<void> helper_;
+	processing_and_feedback_helper helper_;
 
 	std::set<frequency_type> added_freqs_;
 	static const bandwidth_type bandwidth_range_ = khz(1500);
@@ -115,7 +115,7 @@ public:
 private:
 	data_output_async *io_;
 
-	output_and_feedback_helper<void> helper_;
+	processing_and_feedback_helper helper_;
 };
 
 

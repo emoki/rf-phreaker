@@ -12,7 +12,6 @@
 
 namespace rf_phreaker { namespace processing {
 
-//typedef std::shared_ptr<scanner::measurement_info> measurement_package;
 class measurement_package {
 public:
 	measurement_package(bool can_remove = true) : can_remove_(can_remove) {}
@@ -43,7 +42,7 @@ template<typename Data>
 class analysis_data
 {
 public:
-	analysis_data() : /*avg_rms_(0),*/ remove_(false)
+	analysis_data() : remove_(false)
 	{}
 	analysis_data(measurement_package &&meas, Data &&data, power_info_group &&p_info = {}, bool remove = false)
 		: measurement_package_(std::move(meas))

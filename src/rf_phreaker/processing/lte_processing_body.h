@@ -1,7 +1,7 @@
 #pragma once
 #include "rf_phreaker/processing/node_defs.h"
 #include "rf_phreaker/processing/layer_3_tracker.h"
-#include "rf_phreaker/processing/output_and_feedback_helper.h"
+#include "rf_phreaker/processing/processing_and_feedback_helper.h"
 #include "rf_phreaker/lte_analysis/lte_analysis.h"
 #include "rf_phreaker/common/settings.h"
 #include "rf_phreaker/common/log.h"
@@ -227,7 +227,7 @@ protected:
 	lte_processing_settings config_;
 	lte_layer_3_tracker tracker_;
 	lte_analysis analysis_;
-	output_and_feedback_helper<void> helper_;
+	processing_and_feedback_helper helper_;
 };
 
 

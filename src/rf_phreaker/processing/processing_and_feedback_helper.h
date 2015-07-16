@@ -7,11 +7,11 @@
 namespace rf_phreaker { namespace processing {
 
 template<typename T>
-class output_and_feedback_helper {
+class processing_and_feedback_helper {
 public:
-	output_and_feedback_helper() : current_collection_round_(-1) {}
+	processing_and_feedback_helper() : current_collection_round_(-1) {}
 
-	output_and_feedback_helper(const output_and_feedback_helper &helper) 
+	processing_and_feedback_helper(const processing_and_feedback_helper &helper) 
 		: current_collection_round_(helper.current_collection_round_) 
 		, sweep_freq_history_(helper.sweep_freq_history_) {}
 

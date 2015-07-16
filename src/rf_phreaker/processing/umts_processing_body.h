@@ -3,7 +3,7 @@
 #include "rf_phreaker/processing/layer_3_tracker.h"
 #include "rf_phreaker/processing/scanner_error_tracker.h"
 #include "rf_phreaker/processing/frequency_correction_calculator.h"
-#include "rf_phreaker/processing/output_and_feedback_helper.h"
+#include "rf_phreaker/processing/processing_and_feedback_helper.h"
 #include "rf_phreaker/umts_analysis/umts_analysis.h"
 #include "rf_phreaker/common/settings.h"
 #include "rf_phreaker/common/common_utility.h"
@@ -156,7 +156,7 @@ private:
 	umts_cell_search_settings config_;
 	frequency_correction_calculator calculator_;
 	scanner::scanner_controller_interface *sc_;
-	output_and_feedback_helper<void> helper_;
+	processing_and_feedback_helper helper_;
 };
 
 }}

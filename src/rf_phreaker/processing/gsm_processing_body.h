@@ -4,7 +4,7 @@
 #include "rf_phreaker/processing/layer_3_tracker.h"
 #include "rf_phreaker/processing/scanner_error_tracker.h"
 #include "rf_phreaker/processing/frequency_correction_calculator.h"
-#include "rf_phreaker/processing/output_and_feedback_helper.h"
+#include "rf_phreaker/processing/processing_and_feedback_helper.h"
 #include "rf_phreaker/gsm_analysis/gsm_analysis.h"
 #include "rf_phreaker/gsm_analysis/gsm_config.h"
 #include "rf_phreaker/common/settings.h"
@@ -127,7 +127,7 @@ private:
 	gsm_analysis analysis_;
 	gsm_layer_3_tracker tracker_;
 	gsm_cell_search_settings config_;
-	output_and_feedback_helper<void> helper_;
+	processing_and_feedback_helper helper_;
 	frequency_bin_calculator freq_bin_calculator_;
 };
 

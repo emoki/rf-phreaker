@@ -5,7 +5,7 @@
 #include "rf_phreaker/processing/data_output_async.h"
 #include "rf_phreaker/processing/measurement_conversion.h"
 #include "rf_phreaker/processing/processing_utility.h"
-#include "rf_phreaker/processing/output_and_feedback_helper.h"
+#include "rf_phreaker/processing/processing_and_feedback_helper.h"
 #include "rf_phreaker/common/common_utility.h"
 #include "rf_phreaker/common/settings.h"
 #include "rf_phreaker/lte_analysis/lte_types.h"
@@ -110,7 +110,7 @@ private:
 
 	std::vector<lte_layer_3_collection_info> freqs_currently_added_;
 
-	output_and_feedback_helper<void> helper_;
+	processing_and_feedback_helper helper_;
 };
 
 class lte_layer_3_output_and_feedback_body
@@ -223,7 +223,7 @@ private:
 
 	lte_measurement_tracker tracker_;
 
-	output_and_feedback_helper<void> helper_;
+	processing_and_feedback_helper helper_;
 };
 
 }}

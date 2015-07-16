@@ -2,7 +2,7 @@
 #include "rf_phreaker/processing/node_defs.h"
 #include "rf_phreaker/processing/data_output_async.h"
 #include "rf_phreaker/processing/measurement_conversion.h"
-#include "rf_phreaker/processing/output_and_feedback_helper.h"
+#include "rf_phreaker/processing/processing_and_feedback_helper.h"
 #include "rf_phreaker/common/common_utility.h"
 #include "tbb/flow_graph.h"
 #include <tuple>
@@ -38,7 +38,7 @@ public:
 private:
 	data_output_async *io_;
 
-	output_and_feedback_helper<void> helper_;
+	processing_and_feedback_helper helper_;
 };
 
 class umts_layer_3_output_and_feedback_body
@@ -76,7 +76,7 @@ public:
 private:
 	data_output_async *io_;
 
-	output_and_feedback_helper<void> helper_;
+	processing_and_feedback_helper helper_;
 };
 
 }}
