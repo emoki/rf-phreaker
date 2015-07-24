@@ -520,6 +520,8 @@ int lte_pdsch_get_symbols(Ipp32fc* inSignal,
 				if(pdsch_re_count >= max_num_symbols)
 					break;
 			}
+			else 
+				int i = 0; // Compiled out in release mode - only used for debugging.
 		}
 		// Temporary bug fix: pdsch_re_count can overstep the fft_index.  Is pdsch_re_count supposed to be reset to 0 in the outer loop?
 		if(pdsch_re_count >= max_num_symbols)
