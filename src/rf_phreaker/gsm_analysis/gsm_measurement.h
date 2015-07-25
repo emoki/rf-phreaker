@@ -12,6 +12,28 @@ typedef std::vector<gsm_measurement> gsm_measurements;
 class gsm_measurement
 {
 public:
+	gsm_measurement() 
+		: channel_index_(-1)
+		, intermediate_frequency_(-LLONG_MAX)
+		, center_frequency_(-1)
+		, channel_power_(-DBL_MAX)
+		, fcch_freq_index_(-1)
+		, fcch_peak_freq_(-1)
+		, fcch_peak_power_(-DBL_MAX)
+		, band_power_(-DBL_MAX)
+		, side_power_(-DBL_MAX)
+		, rms_corr_power_(-DBL_MAX)
+		, norm_sync_corr_(-DBL_MAX)
+		, c_i_ratio_(-DBL_MAX)
+		, sync_sample_num_(-1)
+		, bsic_(-1)
+		, tdma_frame_number_(-1)
+		, sync_burst_decoded_(false)
+		, cgi_decoded_(false)
+		, bcch_burst_decoded_(false) {
+		memset(bcch_octets_, 0, sizeof(bcch_octets_[0]) * bcch_octet_size_);
+	}
+
 	static const int bcch_octet_size_ = 23;
 	int32_t channel_index_;
 	frequency_type intermediate_frequency_;
