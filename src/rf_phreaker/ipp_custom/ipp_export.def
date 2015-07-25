@@ -16,6 +16,7 @@ EXPORTS
 	ippsConj_32fc	
 	ippsConvert_16s32f	
 	ippsConvert_16s32f	
+	ippsConvert_32f16s_Sfs	
 	ippsConvert_32f32s_Sfs	
 	ippsConvert_32f8u_Sfs	
 	ippsConvert_8u32f	
