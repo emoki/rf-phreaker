@@ -20,7 +20,13 @@ public:
 	int64_t time_;
 	layer_3_information::umts_bcch_bch_message_aggregate layer_3_;
 
-	umts_measurement() {}
+	umts_measurement() 
+		: cpich_(-1)
+		, norm_corr_(-DBL_MAX)
+		, rms_signal_(-DBL_MAX)
+		, ecio_(-DBL_MAX)
+		, sample_num_(-1)
+		, time_(-1) {}
 
 	umts_measurement(umts_measurement&& meas)
 		//: umts_measurement()
