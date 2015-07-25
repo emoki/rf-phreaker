@@ -126,13 +126,13 @@ public:
 		num_bits_dci_1A = 0;
 		frame_number = 0;
 		current_frame_number = 0;
-		estimated_rsrp = 0;
-		estimated_rssi = 0;
-		estimated_rsrq = 0;
-		rsrp = 0;
-		rssi = 0;
-		rsrq = 0;
-		sync_quality = 0;
+		estimated_rsrp = -DBL_MAX;
+		estimated_rssi = -DBL_MAX;
+		estimated_rsrq = -DBL_MAX;
+		rsrp = -DBL_MAX;
+		rssi = -DBL_MAX;
+		rsrq = -DBL_MAX;
+		sync_quality = -DBL_MAX;
 		si_window = LTE_NULL; // Needs to be LTE_NULL for decoding purposes.
 		dci_format = lte_dci_format_unknown;
 
