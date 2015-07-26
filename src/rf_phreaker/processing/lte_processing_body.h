@@ -109,16 +109,7 @@ public:
 
 			// If no measurements were greater than the decode_threshold and we are not tracking any cells on this freq, add the cell with the greatest ecio if
 			// it meets the min decode threshold.
-			if(!tracker_.is_freq_in_history(freq)) {
-				lte_measurement data;
-				double tmp_sync_quality = -99;
-				for(auto &tmp_data : info.processed_data_) {
-					if(tmp_data.sync_quality > tmp_sync_quality)
-						data = tmp_data;
-				} // Temp checks.
-				if(data.sync_quality > config_.layer_3_.decode_minimum_threshold_ && is_valid_measurement(data))
-					tracker_.update(freq, data);
-			}
+			helper_.update_tracker_if_necessary(tracker_, freq, info.processed_data_, config_.layer_3_.decode_minimum_threshold_);
 		}
 
 		tracker_.update_freq(freq);

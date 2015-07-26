@@ -131,16 +131,7 @@ public:
 
 		// If no measurements were greater than the decode_threshold and we are not tracking any cells on this freq, add the cell with the greatest ecio if
 		// it meets the min decode threshold.
-		if(!tracker_.is_freq_in_history(freq)) {
-			umts_measurement data;
-			data.ecio_ = -99;
-			for(auto &tmp_data : info.processed_data_) {
-				if(tmp_data.ecio_ > data.ecio_)
-					data = data;
-			}
-			if(data.ecio_ > config_.layer_3_.decode_minimum_threshold_)
-				tracker_.update(freq, data);
-		}
+		helper_.update_tracker_if_necessary(tracker_, freq, info.processed_data_, config_.layer_3_.decode_minimum_threshold_);
 
 		tracker_.update_freq(freq);
 
