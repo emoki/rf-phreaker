@@ -17,6 +17,8 @@ static const int settings_layer_3_max_update_threshold_default = 150;
 static const int settings_layer_3_min_collection_round_default = 5;
 static const int settings_layer_3_decode_threshold_default = -13;
 static const int settings_layer_3_min_decode_threshold_default = -21;
+static const bool settings_layer_3_should_prioritize_layer_3_default = true;
+static const int settings_layer_3_minimum_decode_count_default = 10;
 static const int settings_umts_general_sensitivity_default = -23;
 static const int settings_umts_general_full_scan_interval_default = 1;
 static const int settings_umts_general_num_coherent_slots_default = 2;
@@ -71,6 +73,8 @@ public:
 	int32_t minimum_collection_round_;
 	double decode_threshold_;
 	double decode_minimum_threshold_;
+	bool should_prioritize_layer_3_;
+	int32_t minimum_decode_count_;
 	std::vector<int> wanted_layer_3_;
 };
 

@@ -100,6 +100,8 @@ void settings_io::read(layer_3_settings &settings, const std::string &group_key)
 	settings.minimum_collection_round_ = qsettings_->value(min_collection_round_key.c_str(), settings_layer_3_min_collection_round_default).toInt();
 	settings.decode_threshold_ = qsettings_->value(decode_threshold_key.c_str(), settings_layer_3_decode_threshold_default).toDouble();
 	settings.decode_minimum_threshold_ = qsettings_->value(min_decode_threshold_key.c_str(), settings_layer_3_min_decode_threshold_default).toDouble();
+	settings.should_prioritize_layer_3_ = qsettings_->value(should_prioritize_layer_3_key.c_str(), settings_layer_3_should_prioritize_layer_3_default).toBool();
+	settings.minimum_decode_count_ = qsettings_->value(minimum_decode_count_key.c_str(), settings_layer_3_minimum_decode_count_default).toDouble();
 	auto list = qsettings_->value(layer_3_wanted_key.c_str());
 	auto string_list = list.toStringList();
 	settings.wanted_layer_3_.clear();
@@ -225,6 +227,8 @@ void settings_io::write(const layer_3_settings &settings, const std::string &gro
 	qsettings_->setValue(min_collection_round_key.c_str(), settings.minimum_collection_round_);
 	qsettings_->setValue(decode_threshold_key.c_str(), settings.decode_threshold_);
 	qsettings_->setValue(min_decode_threshold_key.c_str(), settings.decode_minimum_threshold_);
+	qsettings_->setValue(should_prioritize_layer_3_key.c_str(), settings.should_prioritize_layer_3_);
+	qsettings_->setValue(minimum_decode_count_key.c_str(), settings.minimum_decode_count_);
 	QStringList list;
 	for(auto i : settings.wanted_layer_3_)
 		list.append(QString::number((int)i));
