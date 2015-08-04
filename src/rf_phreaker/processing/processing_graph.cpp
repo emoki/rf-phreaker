@@ -39,38 +39,44 @@ void processing_graph::start(scanner_controller_interface *sc, data_output_async
 			collection_manager_node_.reset();
 			nodes_.clear();
 
-			LOG(LVERBOSE) << "gsm sweep collection settings: " << config.gsm_sweep_collection_.sampling_rate_ << ", " << config.gsm_sweep_collection_.bandwidth_ << ", "
+			LOG(LINFO) << "gsm sweep collection settings: " << config.gsm_sweep_collection_.sampling_rate_ << ", " << config.gsm_sweep_collection_.bandwidth_ << ", "
 				<< config.gsm_sweep_collection_.collection_time_ << ".";
-			LOG(LVERBOSE) << "gsm sweep general settings: " << config.gsm_sweep_general_.band_power_threshold_ << ", " << config.gsm_sweep_general_.side_power_threshold_ << ", "
+			LOG(LINFO) << "gsm sweep general settings: " << config.gsm_sweep_general_.band_power_threshold_ << ", " << config.gsm_sweep_general_.side_power_threshold_ << ", "
 				<< config.gsm_sweep_general_.perform_sync_correlations_ << ", " << config.gsm_sweep_general_.sync_corr_confidence_threshold_ << ".";
 
-			LOG(LVERBOSE) << "gsm layer 3 collection settings: " << config.gsm_layer_3_collection_.sampling_rate_ << ", " << config.gsm_layer_3_collection_.bandwidth_ << ", "
+			LOG(LINFO) << "gsm layer 3 collection settings: " << config.gsm_layer_3_collection_.sampling_rate_ << ", " << config.gsm_layer_3_collection_.bandwidth_ << ", "
 				<< config.gsm_layer_3_collection_.collection_time_ << ".";
-			LOG(LVERBOSE) << "gsm layer 3 general settings: " << config.gsm_layer_3_general_.band_power_threshold_ << ", " << config.gsm_layer_3_general_.side_power_threshold_ << ", "
+			LOG(LINFO) << "gsm layer 3 general settings: " << config.gsm_layer_3_general_.band_power_threshold_ << ", " << config.gsm_layer_3_general_.side_power_threshold_ << ", "
 				<< config.gsm_layer_3_general_.perform_sync_correlations_ << ", " << config.gsm_layer_3_general_.sync_corr_confidence_threshold_ << ".";
+			LOG(LINFO) << "gsm layer 3 decode settings: " << config.gsm_layer_3_decode_.max_update_threshold_ << ", " << config.gsm_layer_3_decode_.minimum_collection_round_ << ", "
+				<< config.gsm_layer_3_decode_.decode_threshold_ << ", " << config.gsm_layer_3_decode_.decode_minimum_threshold_ << config.gsm_layer_3_decode_.minimum_decode_count_ << ", "
+				<< config.gsm_layer_3_decode_.should_prioritize_layer_3_ << ".";
 
 
-			LOG(LVERBOSE) << "umts sweep collection settings: " << config.umts_sweep_collection_.sampling_rate_ << ", " << config.umts_sweep_collection_.bandwidth_ << ", "
+			LOG(LINFO) << "umts sweep collection settings: " << config.umts_sweep_collection_.sampling_rate_ << ", " << config.umts_sweep_collection_.bandwidth_ << ", "
 				<< config.umts_sweep_collection_.collection_time_ << ".";
-			LOG(LVERBOSE) << "umts sweep general settings: " << config.umts_sweep_general_.sensitivity_ << ", " << config.umts_sweep_general_.full_scan_interval_ << ", "
+			LOG(LINFO) << "umts sweep general settings: " << config.umts_sweep_general_.sensitivity_ << ", " << config.umts_sweep_general_.full_scan_interval_ << ", "
 				<< config.umts_sweep_general_.num_coherent_slots_ << ".";
 
-			LOG(LVERBOSE) << "umts layer 3 collection settings: " << config.umts_layer_3_collection_.sampling_rate_ << ", " << config.umts_layer_3_collection_.bandwidth_ << ", "
+			LOG(LINFO) << "umts layer 3 collection settings: " << config.umts_layer_3_collection_.sampling_rate_ << ", " << config.umts_layer_3_collection_.bandwidth_ << ", "
 				<< config.umts_layer_3_collection_.collection_time_ << ".";
-			LOG(LVERBOSE) << "umts layer 3 general settings: " << config.umts_layer_3_general_.sensitivity_ << ", " << config.umts_layer_3_general_.full_scan_interval_ << ", "
+			LOG(LINFO) << "umts layer 3 general settings: " << config.umts_layer_3_general_.sensitivity_ << ", " << config.umts_layer_3_general_.full_scan_interval_ << ", "
 				<< config.umts_layer_3_general_.num_coherent_slots_ << ".";
-			LOG(LVERBOSE) << "umts layer 3 decode settings: " << config.umts_layer_3_decode_.max_update_threshold_ << ", " << config.umts_layer_3_decode_.minimum_collection_round_ << ", "
-				<< config.umts_layer_3_decode_.decode_threshold_ << ", " << config.umts_layer_3_decode_.decode_minimum_threshold_ << ".";
+			LOG(LINFO) << "umts layer 3 decode settings: " << config.umts_layer_3_decode_.max_update_threshold_ << ", " << config.umts_layer_3_decode_.minimum_collection_round_ << ", "
+				<< config.umts_layer_3_decode_.decode_threshold_ << ", " << config.umts_layer_3_decode_.decode_minimum_threshold_ << config.umts_layer_3_decode_.minimum_decode_count_ << ", "
+				<< config.umts_layer_3_decode_.should_prioritize_layer_3_ << ".";
 
-			LOG(LVERBOSE) << "lte sweep collection settings: " << config.lte_sweep_collection_.sampling_rate_ << ", " << config.lte_sweep_collection_.bandwidth_ << ", "
+
+			LOG(LINFO) << "lte sweep collection settings: " << config.lte_sweep_collection_.sampling_rate_ << ", " << config.lte_sweep_collection_.bandwidth_ << ", "
 				<< config.lte_sweep_collection_.collection_time_ << ".";
-			LOG(LVERBOSE) << "lte sweep general settings: " << config.lte_sweep_general_.sync_quality_confidence_threshold_ << ", " << config.lte_sweep_general_.full_scan_interval_ << ".";
+			LOG(LINFO) << "lte sweep general settings: " << config.lte_sweep_general_.sync_quality_confidence_threshold_ << ", " << config.lte_sweep_general_.full_scan_interval_ << ".";
 
-			LOG(LVERBOSE) << "lte layer 3 collection settings: " << config.lte_layer_3_collection_.sampling_rate_ << ", " << config.lte_layer_3_collection_.bandwidth_ << ", "
+			LOG(LINFO) << "lte layer 3 collection settings: " << config.lte_layer_3_collection_.sampling_rate_ << ", " << config.lte_layer_3_collection_.bandwidth_ << ", "
 				<< config.lte_layer_3_collection_.collection_time_ << ".";
-			LOG(LVERBOSE) << "lte layer 3 general settings: " << config.lte_layer_3_general_.sync_quality_confidence_threshold_ << ", " << config.lte_layer_3_general_.full_scan_interval_ << ".";
-			LOG(LVERBOSE) << "lte layer 3 decode settings: " << config.lte_layer_3_decode_.max_update_threshold_ << ", " << config.lte_layer_3_decode_.minimum_collection_round_ << ", "
-				<< config.lte_layer_3_decode_.decode_threshold_ << ", " << config.lte_layer_3_decode_.decode_minimum_threshold_ << ".";
+			LOG(LINFO) << "lte layer 3 general settings: " << config.lte_layer_3_general_.sync_quality_confidence_threshold_ << ", " << config.lte_layer_3_general_.full_scan_interval_ << ".";
+			LOG(LINFO) << "lte layer 3 decode settings: " << config.lte_layer_3_decode_.max_update_threshold_ << ", " << config.lte_layer_3_decode_.minimum_collection_round_ << ", "
+				<< config.lte_layer_3_decode_.decode_threshold_ << ", " << config.lte_layer_3_decode_.decode_minimum_threshold_ << config.lte_layer_3_decode_.minimum_decode_count_ << ", "
+				<< config.lte_layer_3_decode_.should_prioritize_layer_3_ << ".";
 
 			graph_ = (std::make_shared<tbb::flow::graph>());
 
