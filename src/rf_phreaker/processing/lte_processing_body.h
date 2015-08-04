@@ -31,7 +31,7 @@ class lte_processing_body
 public:
 	lte_processing_body(const lte_processing_settings &config, std::atomic_bool *is_cancelled = nullptr)
 		: config_(config)
-		, tracker_(config.layer_3_.max_update_threshold_)
+		, tracker_(config.layer_3_.max_update_threshold_, config.layer_3_.minimum_collection_round_, config.layer_3_.minimum_decode_count_)
 		, analysis_(config.lte_config_, is_cancelled) {
 		// If empty, default to decoding all sibs.
 		if(config.layer_3_.wanted_layer_3_.empty()) {
@@ -112,10 +112,18 @@ public:
 			helper_.update_tracker_if_necessary(tracker_, freq, info.processed_data_, config_.layer_3_.decode_minimum_threshold_);
 		}
 
-		tracker_.update_freq(freq);
-
-		if((tracker_.has_freq_exceeded_max_updates(freq) || tracker_.is_all_decoded_on_freq(freq)) && meas.collection_round() > config_.layer_3_.minimum_collection_round_)
-			info.remove_ = true;
+		if(config_.layer_3_.should_prioritize_layer_3_) {
+			tracker_.update_freq(freq);
+			if((tracker_.has_freq_exceeded_max_updates(freq) || tracker_.is_all_decoded_on_freq(freq)) && meas.collection_round() > config_.layer_3_.minimum_collection_round_)
+				info.remove_ = true;
+		}
+		else {
+			tracker_.update_decodes(freq, !info.processed_data_.empty());
+			if(tracker_.has_freq_exceeded_max_no_decodes(freq)) {
+				info.remove_ = true;
+				tracker_.clear_decodes(freq);
+			}
+		}
 
 		return info;
 	}

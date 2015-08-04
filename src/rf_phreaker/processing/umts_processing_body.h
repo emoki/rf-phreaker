@@ -30,7 +30,7 @@ class umts_processing_body
 public:
 	umts_processing_body(const umts_cell_search_settings &config, scanner::scanner_controller_interface *sc, std::atomic_bool *is_cancelled = nullptr)
 		: analysis_(config.umts_config_, is_cancelled)
-		, tracker_(config.layer_3_.max_update_threshold_)
+		, tracker_(config.layer_3_.max_update_threshold_, config.layer_3_.minimum_collection_round_, config.layer_3_.minimum_decode_count_)
 		, config_(config)
 		, calculator_(config.umts_config_.sampling_rate())
 		, sc_(sc) {
@@ -48,7 +48,7 @@ public:
 	
 	umts_processing_body(const umts_processing_body &body)
 		: analysis_(body.config_.umts_config_)
-		, tracker_(body.tracker_.max_update_, body.tracker_.wanted_layer_3())
+		, tracker_(body.tracker_.max_update_, body.tracker_.min_collection_round_, body.tracker_.min_decode_count_, body.tracker_.wanted_layer_3())
 		, config_(body.config_)
 		, calculator_(body.config_.umts_config_.sampling_rate()) 
 		, sc_(body.sc_) 
@@ -135,9 +135,12 @@ public:
 
 		tracker_.update_freq(freq);
 
-		if((tracker_.has_freq_exceeded_max_updates(freq) || tracker_.is_all_decoded_on_freq(freq)) && meas.collection_round() > config_.layer_3_.minimum_collection_round_)
-			info.remove_ = true;
-
+		// With UMTS processing false detections are removed within the umts processing dll therefore we only want to remove frequencies when we are prioritizing layer 3.
+		// When layer 3 is not prioritized we are constantly scanning of all detected freqs.
+		if(config_.layer_3_.should_prioritize_layer_3_) {
+			if((tracker_.has_freq_exceeded_max_updates(freq) || tracker_.is_all_decoded_on_freq(freq)) && meas.collection_round() > config_.layer_3_.minimum_collection_round_)
+				info.remove_ = true;
+		}
 		return info;
 	}
 

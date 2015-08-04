@@ -140,17 +140,15 @@ template<typename Layer_3_type>
 class layer_3_tracker
 {
 public:
-
-    int max_update_;
-
-	layer_3_tracker(int max_update, const std::vector<Layer_3_type> &wanted_layer_3 = {})
-		: max_update_(max_update) {
+	layer_3_tracker(int max_update, int min_collection_round, int min_decode_count, const std::vector<Layer_3_type> &wanted_layer_3 = {})
+		: max_update_(max_update)
+		, min_collection_round_(min_collection_round)
+		, min_decode_count_(min_decode_count) {
 		wanted_layer_3_ = wanted_layer_3;
 	}
 
 	template<typename Data>
-	bool is_fully_decoded(rf_phreaker::frequency_type f, const Data &data)
-	{
+	bool is_fully_decoded(rf_phreaker::frequency_type f, const Data &data) {
 		auto freq_history = all_layer_3_history_.find(f);
 
 		if(freq_history != all_layer_3_history_.end()) {
@@ -163,9 +161,9 @@ public:
 	}
 
 	bool is_all_decoded() {
-		for (auto freq : all_layer_3_history_) {
-			for (auto layer_3 : freq.second) {
-				if (!layer_3.is_fully_decoded())
+		for(auto freq : all_layer_3_history_) {
+			for(auto layer_3 : freq.second) {
+				if(!layer_3.is_fully_decoded())
 					return false;
 			}
 		}
@@ -174,17 +172,16 @@ public:
 
 	bool is_all_decoded_on_freq(rf_phreaker::frequency_type f) {
 		auto freq = all_layer_3_history_.find(f);
-		if (freq != all_layer_3_history_.end()) {
-			for (auto layer_3 : freq->second) {
-				if (!layer_3.is_fully_decoded())
+		if(freq != all_layer_3_history_.end()) {
+			for(auto layer_3 : freq->second) {
+				if(!layer_3.is_fully_decoded())
 					return false;
 			}
 		}
 		return true;
 	}
 
-	bool is_freq_in_history(rf_phreaker::frequency_type f)
-	{
+	bool is_freq_in_history(rf_phreaker::frequency_type f) {
 		return all_layer_3_history_.find(f) != all_layer_3_history_.end();
 	}
 
@@ -194,20 +191,20 @@ public:
 		auto freq_history = all_layer_3_history_.find(f);
 
 		// Use initializer list?
-        if (freq_history == all_layer_3_history_.end()) {
-            freq_layer_3_history tmp; // gcc doesn't allow for inplace construction?
-            all_layer_3_history_.insert(std::make_pair(f, push_back(tmp, data)));
+		if(freq_history == all_layer_3_history_.end()) {
+			freq_layer_3_history tmp; // gcc doesn't allow for inplace construction?
+			all_layer_3_history_.insert(std::make_pair(f, push_back(tmp, data)));
 		}
 		else {
-            bool found_cell = false;
-			for (auto &cell_layer_3 : freq_history->second) {
-				if (cell_layer_3.is_equal(data)) {
+			bool found_cell = false;
+			for(auto &cell_layer_3 : freq_history->second) {
+				if(cell_layer_3.is_equal(data)) {
 					cell_layer_3.update(data);
 					found_cell = true;
 					break;
 				}
 			}
-			if (!found_cell) {
+			if(!found_cell) {
 				push_back(freq_history->second, data);
 			}
 		}
@@ -218,10 +215,10 @@ public:
 		bool found_cell = false;
 
 		auto freq_history = all_layer_3_history_.find(f);
-		
-		if (freq_history != all_layer_3_history_.end()) {
-			for (auto &cell_layer_3 : freq_history->second) {
-				if (cell_layer_3.is_equal(data)) {
+
+		if(freq_history != all_layer_3_history_.end()) {
+			for(auto &cell_layer_3 : freq_history->second) {
+				if(cell_layer_3.is_equal(data)) {
 					found_cell = true;
 					break;
 				}
@@ -234,6 +231,13 @@ public:
 	void clear() {
 		all_layer_3_history_.clear();
 		freq_max_updates_.clear();
+		freq_decode_count_.clear();
+	}
+
+	void clear_freq(rf_phreaker::frequency_type f) {
+		auto it = freq_max_updates_.find(f);
+		if(it != freq_max_updates_.end())
+			it->second = 0;
 	}
 
 	void update_freq(rf_phreaker::frequency_type f) {
@@ -248,6 +252,30 @@ public:
 		auto it = freq_max_updates_.find(f);
 		if(it != freq_max_updates_.end())
 			return it->second > max_update_;
+		else
+			return false;
+	}
+
+	void clear_decodes(rf_phreaker::frequency_type f) {
+		auto it = freq_decode_count_.find(f);
+		if(it != freq_decode_count_.end())
+			it->second.first = 0;
+			it->second.second = 0;
+	}
+	
+	void update_decodes(rf_phreaker::frequency_type f, bool is_decoded) {
+		auto it = freq_decode_count_.find(f);
+		if(it == freq_decode_count_.end()) {
+			it = freq_decode_count_.insert(std::make_pair(f, std::make_pair(0, 0))).first;
+		}
+		++it->second.first;
+		it->second.second += is_decoded ? 1 : 0;
+	}
+
+	bool has_freq_exceeded_max_no_decodes(rf_phreaker::frequency_type f) const {
+		auto it = freq_decode_count_.find(f);
+		if(it != freq_decode_count_.end())
+			return it->second.first > min_collection_round_ && it->second.second < min_decode_count_;
 		else
 			return false;
 	}
@@ -270,6 +298,12 @@ public:
 
 	void set_wanted_layer_3(const std::vector<Layer_3_type> &wanted) { wanted_layer_3_ = wanted; }
 
+	int max_update_;
+
+	int min_collection_round_;
+
+	int min_decode_count_;
+
 protected:
 	template<typename Data>
     std::vector<all_layer_3_decoded<Layer_3_type>> push_back(std::vector<all_layer_3_decoded<Layer_3_type>> &freq_history, const Data &data) {
@@ -286,6 +320,8 @@ protected:
    std::map<rf_phreaker::frequency_type, freq_layer_3_history> all_layer_3_history_;
 
    std::map<rf_phreaker::frequency_type, int> freq_max_updates_;
+
+   std::map<rf_phreaker::frequency_type, std::pair<int, int>> freq_decode_count_;
 
    std::vector<Layer_3_type> wanted_layer_3_;
 };

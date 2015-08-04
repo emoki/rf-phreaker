@@ -85,12 +85,12 @@ void processing_graph::start(scanner_controller_interface *sc, data_output_async
 			auto limiter = std::make_shared<limiter_node>(*graph_, max_limit);
 
 			auto gsm_sweep_cell_search = std::make_shared<gsm_cell_search_node>(*graph_, tbb::flow::serial, gsm_processing_body(
-				gsm_cell_search_settings(config.gsm_sweep_collection_, config.gsm_sweep_general_)));
+				gsm_cell_search_settings(config.gsm_sweep_collection_, config.gsm_sweep_general_, config.gsm_layer_3_decode_)));
 			auto gsm_sweep_output_feedback = std::make_shared<gsm_output_and_feedback_node>(*graph_, tbb::flow::serial, gsm_sweep_output_and_feedback_body(out));
 			auto gsm_layer_3_cell_search = std::make_shared<gsm_cell_search_node>(*graph_, tbb::flow::serial, gsm_processing_body(
-				gsm_cell_search_settings(config.gsm_layer_3_collection_, config.gsm_layer_3_general_)));
+				gsm_cell_search_settings(config.gsm_layer_3_collection_, config.gsm_layer_3_general_, config.gsm_layer_3_decode_)));
 			auto gsm_layer_3_decode = std::make_shared<gsm_layer_3_decode_node>(*graph_, tbb::flow::serial, gsm_processing_body(
-				gsm_cell_search_settings(config.gsm_layer_3_collection_, config.gsm_layer_3_general_)));
+				gsm_cell_search_settings(config.gsm_layer_3_collection_, config.gsm_layer_3_general_, config.gsm_layer_3_decode_)));
 			auto gsm_layer_3_output_feedback = std::make_shared<gsm_output_and_feedback_node>(*graph_, tbb::flow::serial, gsm_layer_3_output_and_feedback_body(out));
 
 			auto umts_sweep_cell_search = std::make_shared<umts_cell_search_node>(*graph_, tbb::flow::serial, umts_processing_body(

@@ -37,7 +37,9 @@ TEST(Layer3Tracker, TestGeneral) {
 		frequency_type f2 = 1000;
 
 		int max_update = 150;
-		layer_3_tracker<test_layer_3_enum> tracker(max_update, std::vector<test_layer_3_enum>{ TEST_SIB });
+		int min_collection_round = 10;
+		int min_decode_count_ = 5;
+		layer_3_tracker<test_layer_3_enum> tracker(max_update, min_collection_round, min_decode_count_, std::vector<test_layer_3_enum>{ TEST_SIB });
 		
 		// No entries so everything is considered decoded.
         EXPECT_TRUE(tracker.is_all_decoded());
@@ -106,4 +108,44 @@ TEST(Layer3Tracker, TestGeneral) {
 		std::cout << err.what() << std::endl;
 		EXPECT_TRUE(0);
 	}
+}
+
+TEST(Layer3Tracker, TestDecodeCount) {
+	using namespace rf_phreaker;
+	using namespace rf_phreaker::processing;
+
+	::t_data t(1, 0xFFFFFFFF);
+
+	frequency_type f = 100;
+	frequency_type f2 = 1000;
+
+	int max_update = 150;
+	int min_collection_round = 10;
+	int min_decode_count_ = 5;
+	layer_3_tracker<test_layer_3_enum> tracker(max_update, min_collection_round, min_decode_count_, std::vector<test_layer_3_enum>{ TEST_SIB });
+
+	EXPECT_FALSE(tracker.has_freq_exceeded_max_no_decodes(f));
+
+	for(int i = 0; i < min_collection_round; ++i) {
+		tracker.update_decodes(f, false);
+	}
+	EXPECT_FALSE(tracker.has_freq_exceeded_max_no_decodes(f));
+	tracker.update_decodes(f, false);
+	EXPECT_TRUE(tracker.has_freq_exceeded_max_no_decodes(f));
+
+	tracker.clear_decodes(f);
+	for(int i = 0; i < min_decode_count_; ++i) {
+		tracker.update_decodes(f, true);
+	}
+	EXPECT_FALSE(tracker.has_freq_exceeded_max_no_decodes(f));
+	for(int i = 0; i < min_collection_round; ++i) {
+		tracker.update_decodes(f, false);
+	}
+	EXPECT_FALSE(tracker.has_freq_exceeded_max_no_decodes(f));
+
+	tracker.clear();
+	for(int i = 0; i < min_collection_round + 1; ++i) {
+		tracker.update_decodes(f, false);
+	}
+	EXPECT_TRUE(tracker.has_freq_exceeded_max_no_decodes(f));
 }
