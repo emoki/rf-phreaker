@@ -77,9 +77,9 @@ TEST(MetaEepromTest, GeneralTest)
 	EXPECT_NO_THROW(meta1.update_license_length(RF_PHREAKER_FLASH_EB_SIZE));
 	EXPECT_NO_THROW(meta1.update_calibration_length(RF_PHREAKER_FLASH_EB_SIZE));
 
-	EXPECT_THROW(meta1.update_frequency_correction_length(RF_PHREAKER_FLASH_EB_SIZE + 1), rf_phreaker_error);
-	EXPECT_THROW(meta1.update_license_length(RF_PHREAKER_FLASH_EB_SIZE + 1), rf_phreaker_error);
-	EXPECT_THROW(meta1.update_calibration_length(RF_PHREAKER_FLASH_EB_SIZE + 1), rf_phreaker_error);
+	EXPECT_THROW(meta1.update_frequency_correction_length(RF_PHREAKER_FLASH_EB_SIZE + 1), hardware_info_error);
+	EXPECT_THROW(meta1.update_license_length(RF_PHREAKER_FLASH_EB_SIZE + 1), hardware_info_error);
+	EXPECT_THROW(meta1.update_calibration_length(RF_PHREAKER_FLASH_EB_SIZE + 1), hardware_info_error);
 
 
 	{

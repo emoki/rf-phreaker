@@ -71,8 +71,13 @@ public:
 			processor_.GsmClearOutput(head);
 
 		}
+		catch(const rf_phreaker_error &err) {
+			rf_phreaker::delegate_sink::instance().log_error(err);
+			std::cout << err.what() << std::endl;
+			status = -1;
+		}
 		catch(const std::exception &err) {
-			delegate_sink::instance().log_error(err.what(), GENERAL_ERROR);
+			delegate_sink::instance().log_error(err.what(), generic_error_type, STD_EXCEPTION_ERROR);
 			std::cout << err.what() << std::endl;
 			status = -2;
 		}

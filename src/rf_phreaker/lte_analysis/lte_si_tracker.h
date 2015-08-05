@@ -213,7 +213,7 @@ public:
 		for(auto &i : wanted_si)
 			wanted_si_.insert(i);
 		if(wanted_si_.size() && wanted_si_.find(layer_3_information::lte_sib_type::SIB_1) == wanted_si_.end())
-			throw rf_phreaker_error("To decode and track LTE SI SIB_1 decoding/tracking is required.");
+			throw lte_analysis_error("To decode and track LTE SI SIB_1 decoding/tracking is required.");
 	}
 
 	std::vector<layer_3_information::lte_sib_type> wanted_si() {

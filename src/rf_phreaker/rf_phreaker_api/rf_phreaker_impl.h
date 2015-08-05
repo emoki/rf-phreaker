@@ -98,9 +98,9 @@ private:
 		return false;
 	}
 
-	void message_handling(const std::string &str, int code);
+	void message_handling(const std::string &str, int type, int code);
 
-	void error_handling(const std::string &str, int code);
+	void error_handling(const std::string &str, int type, int code);
 
 	bool is_initialized_;
 

@@ -40,7 +40,7 @@ public:
 		float normalized_freq = static_cast<float>(frequency_hz_to_shift / sample_rate_);
 
 		if(abs(normalized_freq) > .5)
-			throw rf_phreaker_error("Error generating tone for frequency shift.");
+			throw misc_error("Error generating tone for frequency shift.");
 
 		if(normalized_freq < 0)
 			normalized_freq = 1 + normalized_freq;

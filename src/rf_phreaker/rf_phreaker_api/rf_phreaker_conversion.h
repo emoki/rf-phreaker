@@ -14,11 +14,11 @@ inline rp_status to_rp_status(const rf_phreaker_error &err) {
 		break;
 	case scanner_init_error_type:
 		break;
-	case hardware_error_type:
+	case hardware_info_error_type:
 		break;
 	case misc_error_type:
 		break;
-	case file_error_type:
+	case io_error_type:
 		break;
 	case blade_rf_error_type:
 		break;

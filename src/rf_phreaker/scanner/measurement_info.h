@@ -197,7 +197,7 @@ inline std::istream& operator>>(std::istream &is, rf_phreaker::scanner::measurem
 		}
 	}
 	else
-		throw rf_phreaker_error("Error reading measurement_info.");
+		throw io_error("Error reading measurement_info.");
 
 	return is;
 

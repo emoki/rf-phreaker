@@ -353,7 +353,7 @@ template<typename DataType> void ipp_array<DataType>::output_binary(const std::s
 template<typename DataType> void ipp_array<DataType>::output_matlab_compatible_array(const std::string &filename, int columns, int rows) const {
 	if(rows == 0 && columns == 1) rows = length_;
 	if(columns * rows < length_)
-		throw rf_phreaker_error("Unable to output matlab compatible array with giving columns and rows");
+		throw io_error("Unable to output matlab compatible array with giving columns and rows");
 
 	std::ofstream file(filename);
 	if(file.is_open()) {
@@ -367,7 +367,7 @@ template<typename DataType> void ipp_array<DataType>::output_matlab_compatible_a
 		}
 	}
 	else
-		throw std::runtime_error("Unable to open file for ipp_array matlab compatible array.");
+		throw io_error("Unable to open file for ipp_array matlab compatible array.");
 }
 
 template<typename DataType> std::ofstream& ipp_array<DataType>::output_matlab_compatible_element(std::ofstream& os, const DataType &d) const {

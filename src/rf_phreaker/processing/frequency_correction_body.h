@@ -57,12 +57,12 @@ public:
 
 				std::string message("Frequency correction successful.");
 
-				delegate_sink::instance().log_message(message, FREQUENCY_CORRECTION_SUCCESSFUL);
+				delegate_sink::instance().log_message(message, no_error_type, FREQUENCY_CORRECTION_SUCCESSFUL);
 
 				io_->output(sc_->get_scanner().get()->get_hardware());
 			}
 			else {
-				delegate_sink::instance().log_error("Frequency correction failed.", FREQUENCY_CORRECTION_FAILED);
+				delegate_sink::instance().log_error("Frequency correction failed.", processing_error_type, FREQUENCY_CORRECTION_FAILED);
 			}
 
 			return;

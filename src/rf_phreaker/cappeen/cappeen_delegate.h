@@ -93,9 +93,9 @@ public:
 
 		LOG(LVERBOSE) << "Creating log sinks...";
 		LOG(LVERBOSE) << "Connecting error.";
-		delegate_sink::instance().connect_error(boost::bind(&cappeen_delegate::output_error, this, _1, _2)).get();
+		delegate_sink::instance().connect_error(boost::bind(&cappeen_delegate::output_error, this, _1, _2, _3)).get();
 		LOG(LVERBOSE) << "Connecting message.";
-		delegate_sink::instance().connect_message(boost::bind(&cappeen_delegate::output_message, this, _1, _2)).get();
+		delegate_sink::instance().connect_message(boost::bind(&cappeen_delegate::output_message, this, _1, _2, _3)).get();
 
 		processing_graph_ = pro;
 		gps_graph_ = gps;
@@ -317,8 +317,12 @@ public:
 			delegate_->available_message(beagle_info_.beagle_id_, code, s.c_str(), s.size() + 1);
 	}
 
-	void output_error(const std::string &s, int code)
+	void output_error(const std::string &s, int type, int code)
 	{
+		// Manually set the code to generic error for any code other than the ones below.
+		if(code != STD_EXCEPTION_ERROR || code != UNKNOWN_ERROR || code != FREQUENCY_CORRECTION_FAILED 
+			|| code != beagle_api::WRONG_SPEED_DETECTED || code != CALIBRATION_ERROR || code != EEPROM_ERROR)
+			code = GENERAL_ERROR;
 		LOG(LERROR) << s;
 		if(delegate_ != nullptr) {
 			if(beagle_info_.state_ == beagle_api::BEAGLE_COLLECTING
@@ -339,15 +343,17 @@ public:
 					if(gps_graph_) gps_graph_->enable_1pps_calibration();
 					change_beagle_state(beagle_api::BEAGLE_READY);
 				case beagle_api::WRONG_SPEED_DETECTED:
-					// Do nothing.
+				case CALIBRATION_ERROR:
+				case EEPROM_ERROR:
 				default:;
+					// Do nothing.
 				}
 			}
 			delegate_->available_error(beagle_info_.beagle_id_, convert_message(code), s.c_str(), s.size() + 1);
 		}
 	}
 
-	void output_message(const std::string &s, int code)
+	void output_message(const std::string &s, int type, int code)
 	{
 		LOG(LINFO) << s;
 		if(delegate_ != nullptr) {
@@ -427,7 +433,7 @@ public:
 				}
 			}
 			catch(const rf_phreaker_error &err) {
-				output_message(err.what(), 0);
+				output_message(err.what(), 0, 0);
 				valid_licenses_.clear();
 			}
 			if(valid_licenses_.size()) {

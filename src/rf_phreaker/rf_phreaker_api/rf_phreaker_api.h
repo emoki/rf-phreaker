@@ -274,7 +274,6 @@ typedef struct rp_raw_data {
 } rp_raw_data;
 
 typedef struct rp_callbacks {
-
 	void (RP_CALLCONV *rp_log_update)(const char *message);
 
 	void (RP_CALLCONV *rp_message_update)(rp_status status, const char *message);

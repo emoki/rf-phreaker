@@ -22,7 +22,7 @@ public:
 				std::string cali_filename = cal.nuand_serial_ + "_cali.bin";
 				std::ofstream f(cali_filename, std::ios::binary);
 				if(!f)
-					throw rf_phreaker::rf_phreaker_error("Unable to open calibration file (" + cali_filename + ").");
+					throw rf_phreaker::io_error("Unable to open calibration file (" + cali_filename + ").");
 				boost::archive::binary_oarchive ia(f);
 				ia & cal;
 			}

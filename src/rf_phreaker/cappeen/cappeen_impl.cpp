@@ -297,7 +297,7 @@ long cappeen_impl::open_unit(const char *serial, unsigned int buf_size)
 		delegate_->initialize_beagle_info(hw);
 
 		if(hw.device_communication_ == device_communication::USB_HI_SPEED) {
-			if(delegate_) delegate_->output_error("The device speed is NOT USB_SUPER_SPEED.  This can adversely affect processing.", WRONG_SPEED_DETECTED);
+			if(delegate_) delegate_->output_error("The device speed is NOT USB_SUPER_SPEED.  This can adversely affect processing.", 0, WRONG_SPEED_DETECTED);
 		}
 
 		processing::g_scanner_error_tracker::instance().reset();

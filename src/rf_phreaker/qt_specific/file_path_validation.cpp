@@ -11,7 +11,7 @@ std::string file_path_validation::get_writable_file_path() {
 	qt_init::init();
 	auto paths = QStandardPaths::standardLocations(QStandardPaths::AppDataLocation);
 	if(paths.empty()) {
-		throw rf_phreaker::file_error("Unable to find writable path.");
+		throw rf_phreaker::io_error("Unable to find writable path.");
 	}
 	auto path = paths.first().toStdString();
 	auto it = path.rbegin();
@@ -31,7 +31,7 @@ void file_path_validation::make_path(const std::string &path) {
 	qt_init::init();
 	QDir info;
 	if(!info.mkpath(path.c_str()))
-		throw rf_phreaker::file_error("Unable to make path.");
+		throw rf_phreaker::io_error("Unable to make path.");
 }
 
 }

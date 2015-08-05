@@ -8,12 +8,13 @@ namespace rf_phreaker
 
 enum error_type
 {
+	no_error_type,
 	generic_error_type,
 	comm_error_type,
 	scanner_init_error_type,
-	hardware_error_type,
+	hardware_info_error_type,
 	misc_error_type,
-	file_error_type,
+	io_error_type,
 	blade_rf_error_type,
 	ipp_error_type,
 	filter_error_type,
@@ -29,16 +30,20 @@ enum error_type
 
 inline const char* error_to_str(error_type err) {
 	switch(err) {
+	case no_error_type:
+		return "no error";
+	case generic_error_type:
+		return "generic error";
 	case comm_error_type:
 		return "comm error";
 	case scanner_init_error_type:
 		return "scanner initialization error";
-	case hardware_error_type:
-		return "hardware error";
+	case hardware_info_error_type:
+		return "hardware_info error";
 	case misc_error_type:
 		return "miscellaneous error";
-	case file_error_type:
-		return "file error";
+	case io_error_type:
+		return "io error";
 	case blade_rf_error_type:
 		return "blade rf error";
 	case ipp_error_type:
@@ -89,9 +94,9 @@ public:
 
 typedef specific_error<comm_error_type> comm_error;
 typedef specific_error<scanner_init_error_type> scanner_init_error;
-typedef specific_error<hardware_error_type> hardware_error;
+typedef specific_error<hardware_info_error_type> hardware_info_error;
 typedef specific_error<misc_error_type> misc_error;
-typedef specific_error<file_error_type> file_error;
+typedef specific_error<io_error_type> io_error;
 typedef specific_error<blade_rf_error_type> blade_rf_error;
 typedef specific_error<ipp_error_type> ipp_error;
 typedef specific_error<filter_error_type> filter_error;

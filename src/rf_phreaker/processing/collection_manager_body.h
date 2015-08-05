@@ -171,7 +171,7 @@ public:
 protected:
 	void finished_scanning() 
 	{
-		delegate_sink::instance().log_error("Frequency correction failed.", FREQUENCY_CORRECTION_FAILED);
+		delegate_sink::instance().log_error("Frequency correction failed.", processing_error_type, FREQUENCY_CORRECTION_FAILED);
 		graph_->root_task()->cancel_group_execution();
 	}
 };

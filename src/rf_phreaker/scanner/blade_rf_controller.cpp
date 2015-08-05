@@ -161,11 +161,11 @@ void blade_rf_controller::refresh_scanner_info()
 	}
 	catch(rf_phreaker_error &err) {
 		LOG(LERROR) << "Error reading EEPROM.  " << err.what();
-		delegate_sink::instance().log_error(std::string("Error reading EEPROM.  ") + err.what(), EEPROM_ERROR);
+		delegate_sink::instance().log_error(std::string("Error reading EEPROM.  ") + err.what(), err.error_type_, EEPROM_ERROR);
 	}
 	catch(std::exception &err) {
 		LOG(LERROR) << "Error reading EEPROM.  " << err.what();
-		delegate_sink::instance().log_error(std::string("Error reading EEPROM.  ") + err.what(), EEPROM_ERROR);
+		delegate_sink::instance().log_error(std::string("Error reading EEPROM.  ") + err.what(), generic_error_type, EEPROM_ERROR);
 	}
 
 	if(!scanner_blade_rf_) {
@@ -575,7 +575,7 @@ measurement_info blade_rf_controller::get_rf_data(frequency_type frequency, time
 				break;
 		}
 		if(switch_setting != (check & switch_mask))
-			throw hardware_error("Unable to set xb gpio pins.");
+			throw blade_rf_error("Unable to set xb gpio pins.");
 	}
 	// BladeRF only accepts data num_samples that are a multiple of 1024.
 	// Because the blade rx sync parameters are configurable we want to make sure we 
@@ -679,7 +679,7 @@ void blade_rf_controller::initialize_eeprom()
 void blade_rf_controller::write_eeprom_meta_data(const eeprom_meta_data &meta_ee)
 {
 	if(!meta_ee.is_valid())
-		throw rf_phreaker_error("Cannot write EEPROM meta data.  It is not valid.", EEPROM_ERROR);
+		throw hardware_info_error("Cannot write EEPROM meta data.  It is not valid.");
 
 	std::vector<uint8_t> md_bytes(meta_ee.addressing().byte_length(), 0);
 	
@@ -694,7 +694,7 @@ eeprom_meta_data blade_rf_controller::read_eeprom_meta_data() {
 	eeprom_meta_data md_eeprom;
 
 	if(!md_eeprom.init(bytes))
-		throw rf_phreaker_error("EEPROM meta data is not valid.", EEPROM_ERROR);
+		throw hardware_info_error("EEPROM meta data is not valid.");
 
 	return md_eeprom;
 }
@@ -768,7 +768,7 @@ calibration blade_rf_controller::read_calibration()
 
 	calibration cal;
 	if(!cal.init(bytes))
-		throw rf_phreaker_error("Calibration failed verification.", CALIBRATION_ERROR);
+		throw hardware_info_error("Calibration failed verification.", CALIBRATION_ERROR);
 	return cal;
 }
 

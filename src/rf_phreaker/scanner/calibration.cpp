@@ -97,15 +97,15 @@ void calibration::read_rf_switch_file(const std::string &filename) {
 	std::ifstream f(filename);
 	auto header_group = parse_line(f, desc);
 	if(header_group.empty() || header_group[0] != rf_switch_header)
-		throw rf_phreaker_error(desc + " header does not match.", CALIBRATION_ERROR);
+		throw hardware_info_error(desc + " header does not match.", CALIBRATION_ERROR);
 
 	header_group = parse_line(f, desc);
 	if(header_group.empty())
-		throw rf_phreaker_error("Wrong " + desc + " format.  2nd line should be \"version\".", CALIBRATION_ERROR);
+		throw hardware_info_error("Wrong " + desc + " format.  2nd line should be \"version\".", CALIBRATION_ERROR);
 
 	int version = std::stoi(header_group[0]);
 	if(version != 2) {
-		throw rf_phreaker_error("Wrong " + desc + " version.  Only version 2 is currently supported.", CALIBRATION_ERROR);
+		throw hardware_info_error("Wrong " + desc + " version.  Only version 2 is currently supported.", CALIBRATION_ERROR);
 	}
 
 	do {
@@ -130,11 +130,11 @@ void calibration::read_rf_board_calibration_file(const std::string &filename) {
 	std::ifstream f(filename);
 	auto header_group = parse_line(f, desc);
 	if(header_group.empty() || header_group[0] != rf_board_calibration_header)
-		throw rf_phreaker_error(desc + " header does not match.", CALIBRATION_ERROR);
+		throw hardware_info_error(desc + " header does not match.", CALIBRATION_ERROR);
 
 	header_group = parse_line(f, desc);
 	if(header_group.empty())
-		throw rf_phreaker_error("Wrong " + desc + " format.  2nd line should be \"version, rf_board_serial, seconds_since_1970_jan_1\".", CALIBRATION_ERROR);
+		throw hardware_info_error("Wrong " + desc + " format.  2nd line should be \"version, rf_board_serial, seconds_since_1970_jan_1\".", CALIBRATION_ERROR);
 
 	int version = std::stoi(header_group[0]);
 	if(version >= 1) {
@@ -161,11 +161,11 @@ void calibration::read_nuand_calibration_file(const std::string &filename) {
 	std::ifstream f(filename);
 	auto header_group = parse_line(f, desc);
 	if(header_group.empty() || header_group[0] != nuand_calibration_header)
-		throw rf_phreaker_error(desc + " header does not match.", CALIBRATION_ERROR);
+		throw hardware_info_error(desc + " header does not match.", CALIBRATION_ERROR);
 
 	header_group = parse_line(f, desc);
 	if(header_group.empty())
-		throw rf_phreaker_error("Wrong " + desc + " format.  2nd line should be \"version, nuand_serial, seconds_since_1970_jan_1\".", CALIBRATION_ERROR);
+		throw hardware_info_error("Wrong " + desc + " format.  2nd line should be \"version, nuand_serial, seconds_since_1970_jan_1\".", CALIBRATION_ERROR);
 
 	int version = std::stoi(header_group[0]);
 	if(version >= 1) {
@@ -197,14 +197,14 @@ void calibration::read_nuand_calibration_file(const std::string &filename) {
 		while(!f.eof());
 	}
 	else
-		throw rf_phreaker_error("Unknown version within Nuand calibration file.");
+		throw hardware_info_error("Unknown version within Nuand calibration file.");
 }
 
 std::vector<std::string> calibration::parse_line(std::istream &is, const std::string &filename) {
 	std::string line;
 	std::getline(is, line);
 	if(is.fail() && !is.eof())
-		throw rf_phreaker_error("Error reading " + filename + ".", CALIBRATION_ERROR);
+		throw hardware_info_error("Error reading " + filename + ".", CALIBRATION_ERROR);
 
 	return tokenize(line, std::regex(","));
 }
@@ -235,7 +235,7 @@ rf_adjustment calibration::parse_rf_adjustment(const std::vector<std::string>::i
 	auto count = (adj.path_.high_freq_ - adj.path_.low_freq_) / adj.spacing_ + 1;
 	for(int i = 0; i < count; ++i) {
 		if(it == end)
-			throw rf_phreaker_error("Error parsing rf adjustment.", CALIBRATION_ERROR);
+			throw hardware_info_error("Error parsing rf adjustment.", CALIBRATION_ERROR);
 		adj.rf_adjustments_.push_back(std::stod(*it++));
 	}
 

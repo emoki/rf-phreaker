@@ -89,10 +89,15 @@ int lte_analysis_impl::cell_search(const rf_phreaker::raw_signal &raw_signal, lt
 			i.estimated_rsrq = 20 * log10(i.estimated_rsrq);
 		}
 	}
-	catch(const std::exception &err) {
-		rf_phreaker::delegate_sink::instance().log_error(err.what(), GENERAL_ERROR);
+	catch(const rf_phreaker_error &err) {
+		rf_phreaker::delegate_sink::instance().log_error(err);
 		std::cout << err.what() << std::endl;
 		status = -1;
+	}
+	catch(const std::exception &err) {
+		rf_phreaker::delegate_sink::instance().log_error(err.what(), generic_error_type, STD_EXCEPTION_ERROR);
+		std::cout << err.what() << std::endl;
+		status = -2;
 	}
 
 	return status;
@@ -178,10 +183,15 @@ int lte_analysis_impl::decode_layer_3(const rf_phreaker::raw_signal &raw_signal,
 		//else
 		//	assert(0 && "Error when determining LTE sampling rate.  We reach an invalid branch!");
 	}
-	catch(const std::exception &err) {
-		rf_phreaker::delegate_sink::instance().log_error(err.what(), GENERAL_ERROR);
+	catch(const rf_phreaker_error &err) {
+		rf_phreaker::delegate_sink::instance().log_error(err);
 		std::cout << err.what() << std::endl;
 		status = -1;
+	}
+	catch(const std::exception &err) {
+		rf_phreaker::delegate_sink::instance().log_error(err.what(), generic_error_type, STD_EXCEPTION_ERROR);
+		std::cout << err.what() << std::endl;
+		status = -2;
 	}
 
 	return status;

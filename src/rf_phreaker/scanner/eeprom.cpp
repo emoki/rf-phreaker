@@ -51,19 +51,19 @@ void eeprom_meta_data::calculate_eeprom_addresses(const eeprom &ee) {
 
 void eeprom_meta_data::update_frequency_correction_length(uint32_t length) {
 	if(is_frequency_correction_boundary_exceeded(length))
-		throw rf_phreaker_error("Frequency correction size exceeds it's boundary.");
+		throw hardware_info_error("Frequency correction size exceeds it's boundary.");
 	freq_correction_addressing_.set_byte_length(length);
 }
 
 void eeprom_meta_data::update_license_length(uint32_t length) {
 	if(is_license_boundary_exceeded(length))
-		throw rf_phreaker_error("License size exceeds it's boundary.");
+		throw hardware_info_error("License size exceeds it's boundary.");
 	license_addressing_.set_byte_length(length);
 }
 
 void eeprom_meta_data::update_calibration_length(uint32_t length) {
 	if(is_calibration_boundary_exceeded(length))
-		throw rf_phreaker_error("Calibration size exceeds it's boundary.");
+		throw hardware_info_error("Calibration size exceeds it's boundary.");
 	calibration_addressing_.set_byte_length(length);
 	
 	// For trimmed eeprom we need the padded freq corr and license but cali can be unpadded since 

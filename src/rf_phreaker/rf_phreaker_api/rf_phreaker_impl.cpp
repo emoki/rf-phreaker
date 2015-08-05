@@ -89,8 +89,8 @@ rp_status rf_phreaker_impl::initialize(rp_callbacks *callbacks) {
 		scanners_.clear();
 
 		callbacks_ = callbacks;
-		delegate_sink::instance().connect_message(boost::bind(&rf_phreaker_impl::message_handling, this, _1, _2)).get();
-		delegate_sink::instance().connect_error(boost::bind(&rf_phreaker_impl::error_handling, this, _1, _2)).get();
+		delegate_sink::instance().connect_message(boost::bind(&rf_phreaker_impl::message_handling, this, _1, _2, _3)).get();
+		delegate_sink::instance().connect_error(boost::bind(&rf_phreaker_impl::error_handling, this, _1, _2, _3)).get();
 
 
 		data_output_.reset(new processing::data_output_async());
@@ -880,9 +880,15 @@ const char* rf_phreaker_impl::build_version() {
 	return "0.0.0.1";
 }
 
-void rf_phreaker_impl::message_handling(const std::string &str, int code) {
+void rf_phreaker_impl::message_handling(const std::string &str, int type, int code) {
+	if(callbacks_ && callbacks_->rp_message_update) {
+
+	}
 }
-void rf_phreaker_impl::error_handling(const std::string &str, int code) {
+
+void rf_phreaker_impl::error_handling(const std::string &str, int type, int code) {
+	if(callbacks_ && callbacks_->rp_message_update) {
+	}
 }
 
 
