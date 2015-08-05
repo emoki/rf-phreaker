@@ -112,16 +112,18 @@ public:
 			helper_.update_tracker_if_necessary(tracker_, freq, info.processed_data_, config_.layer_3_.decode_minimum_threshold_);
 		}
 
-		if(config_.layer_3_.should_prioritize_layer_3_) {
-			tracker_.update_freq(freq);
-			if((tracker_.has_freq_exceeded_max_updates(freq) || tracker_.is_all_decoded_on_freq(freq)) && meas.collection_round() > config_.layer_3_.minimum_collection_round_)
-				info.remove_ = true;
-		}
-		else {
-			tracker_.update_decodes(freq, !info.processed_data_.empty());
-			if(tracker_.has_freq_exceeded_max_no_decodes(freq)) {
-				info.remove_ = true;
-				tracker_.clear_decodes(freq);
+		if(info.measurement_package_.can_remove_) {
+			if(config_.layer_3_.should_prioritize_layer_3_) {
+				tracker_.update_freq(freq);
+				if((tracker_.has_freq_exceeded_max_updates(freq) || tracker_.is_all_decoded_on_freq(freq)) && meas.collection_round() > config_.layer_3_.minimum_collection_round_)
+					info.remove_ = true;
+			}
+			else {
+				tracker_.update_decodes(freq, !info.processed_data_.empty());
+				if(tracker_.has_freq_exceeded_max_no_decodes(freq)) {
+					info.remove_ = true;
+					tracker_.clear_decodes(freq);
+				}
 			}
 		}
 

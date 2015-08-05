@@ -137,10 +137,11 @@ public:
 
 		// With UMTS processing false detections are removed within the umts processing dll therefore we only want to remove frequencies when we are prioritizing layer 3.
 		// When layer 3 is not prioritized we are constantly scanning of all detected freqs.
-		if(config_.layer_3_.should_prioritize_layer_3_) {
+		if(info.measurement_package_.can_remove_ && config_.layer_3_.should_prioritize_layer_3_) {
 			if((tracker_.has_freq_exceeded_max_updates(freq) || tracker_.is_all_decoded_on_freq(freq)) && meas.collection_round() > config_.layer_3_.minimum_collection_round_)
 				info.remove_ = true;
 		}
+
 		return info;
 	}
 
