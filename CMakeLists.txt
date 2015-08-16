@@ -24,6 +24,9 @@ include(ExternalProject)
 
 project (rf_phreaker)
 
+cmake_policy(SET CMP0054 NEW) # Variables/keywords should be unquoted.
+cmake_policy(SET CMP0020 NEW) # This should also be specified in any project that uses QT.
+
 set (CMAKE_MODULE_PATH "${PROJECT_SOURCE_DIR}/cmake" ${CMAKE_MODULE_PATH})
 set (CMAKE_RUNTIME_OUTPUT_DIRECTORY "${PROJECT_SOURCE_DIR}/output")
 set (CMAKE_LIBRARY_OUTPUT_DIRECTORY ${PROJECT_SOURCE_DIR}/output)
@@ -58,7 +61,6 @@ find_package (Boost 1.56.0 COMPONENTS system filesystem thread date_time timer c
 	
 	
 # Set QT
-cmake_policy(SET CMP0020 NEW) # This should also be specified in any project that uses QT.
 set (CMAKE_INCLUDE_CURRENT_DIR ON)
 set (qt_INSTALL_PATH "c:/bin/qt/5.3/msvc2013_opengl" CACHE STRING "Path to QT.")
 set (CMAKE_PREFIX_PATH ${qt_INSTALL_PATH} ${CMAKE_PREFIX_PATH})
