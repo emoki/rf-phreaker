@@ -1,0 +1,126 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<Project ToolsVersion="4.0" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
+  <ItemGroup>
+    <Filter Include="Source Files">
+      <UniqueIdentifier>{4FC737F1-C7A5-4376-A066-2A32D752A2FF}</UniqueIdentifier>
+      <Extensions>cpp;c;cxx;def;odl;idl;hpj;bat;asm;asmx</Extensions>
+    </Filter>
+    <Filter Include="Header Files">
+      <UniqueIdentifier>{93995380-89BD-4b04-88EB-625FBE52EBFB}</UniqueIdentifier>
+      <Extensions>h;hpp;hxx;hm;inl;inc;xsd</Extensions>
+    </Filter>
+    <Filter Include="Resource Files">
+      <UniqueIdentifier>{67DA6AB6-F800-4c08-8B7A-83BB121AAD01}</UniqueIdentifier>
+      <Extensions>rc;ico;cur;bmp;dlg;rc2;rct;bin;rgs;gif;jpg;jpeg;jpe;resx</Extensions>
+    </Filter>
+    <Filter Include="Generated">
+      <UniqueIdentifier>{d2529b03-78ed-4b4c-ba38-139e61e660d5}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Encodix Lib">
+      <UniqueIdentifier>{7688dc5f-fad4-4cce-9b88-d7a85fa60578}</UniqueIdentifier>
+    </Filter>
+  </ItemGroup>
+  <ItemGroup>
+    <ClCompile Include="main.c">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="..\ts44.018_support.c">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="..\gen_Rel12\CSN1DataTypes_RR.c">
+      <Filter>Generated</Filter>
+    </ClCompile>
+    <ClCompile Include="..\gen_Rel12\ed_c_known_ie_RR.c">
+      <Filter>Generated</Filter>
+    </ClCompile>
+    <ClCompile Include="..\gen_Rel12\ed_c_recog_RR.c">
+      <Filter>Generated</Filter>
+    </ClCompile>
+    <ClCompile Include="..\gen_Rel12\ed_c_RR.c">
+      <Filter>Generated</Filter>
+    </ClCompile>
+    <ClCompile Include="..\gen_Rel12\RRDownlink_RR.c">
+      <Filter>Generated</Filter>
+    </ClCompile>
+    <ClCompile Include="..\gen_Rel12\RRPLENDownlink_RR.c">
+      <Filter>Generated</Filter>
+    </ClCompile>
+    <ClCompile Include="..\gen_Rel12\RRShortPD_RR.c">
+      <Filter>Generated</Filter>
+    </ClCompile>
+    <ClCompile Include="..\gen_Rel12\RRUplink_RR.c">
+      <Filter>Generated</Filter>
+    </ClCompile>
+    <ClCompile Include="..\gen_Rel12\UserDefinedDataTypes_RR.c">
+      <Filter>Generated</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\Common\bitencode.c">
+      <Filter>Encodix Lib</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\Common\csn1clib.c">
+      <Filter>Encodix Lib</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\Common\ed_dynamic.c">
+      <Filter>Encodix Lib</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\Common\ed_lib.c">
+      <Filter>Encodix Lib</Filter>
+    </ClCompile>
+  </ItemGroup>
+  <ItemGroup>
+    <ClInclude Include="..\ts44.018_support.h">
+      <Filter>Source Files</Filter>
+    </ClInclude>
+    <ClInclude Include="ed_user.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="..\gen_Rel12\CSN1DataTypes_RR.h">
+      <Filter>Generated</Filter>
+    </ClInclude>
+    <ClInclude Include="..\gen_Rel12\ed_c_known_ie_RR.h">
+      <Filter>Generated</Filter>
+    </ClInclude>
+    <ClInclude Include="..\gen_Rel12\ed_c_recog_RR.h">
+      <Filter>Generated</Filter>
+    </ClInclude>
+    <ClInclude Include="..\gen_Rel12\ed_c_RR.h">
+      <Filter>Generated</Filter>
+    </ClInclude>
+    <ClInclude Include="..\gen_Rel12\endec_configs_RR.h">
+      <Filter>Generated</Filter>
+    </ClInclude>
+    <ClInclude Include="..\gen_Rel12\RRDownlink_RR.h">
+      <Filter>Generated</Filter>
+    </ClInclude>
+    <ClInclude Include="..\gen_Rel12\RRPLENDownlink_RR.h">
+      <Filter>Generated</Filter>
+    </ClInclude>
+    <ClInclude Include="..\gen_Rel12\RRShortPD_RR.h">
+      <Filter>Generated</Filter>
+    </ClInclude>
+    <ClInclude Include="..\gen_Rel12\RRUplink_RR.h">
+      <Filter>Generated</Filter>
+    </ClInclude>
+    <ClInclude Include="..\gen_Rel12\UserDefinedDataTypes_RR.h">
+      <Filter>Generated</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\Common\bitencode.h">
+      <Filter>Encodix Lib</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\Common\csn1clib.h">
+      <Filter>Encodix Lib</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\Common\ed_data.h">
+      <Filter>Encodix Lib</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\Common\ed_dynamic.h">
+      <Filter>Encodix Lib</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\Common\ed_lib.h">
+      <Filter>Encodix Lib</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\Common\ed_tlv.h">
+      <Filter>Encodix Lib</Filter>
+    </ClInclude>
+  </ItemGroup>
+</Project>

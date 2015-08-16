@@ -1,0 +1,167 @@
+#------------------------------------------------------
+# Declare uplink and downlink message sets to separate
+# messages
+#------------------------------------------------------
+declare gsm-0407 message set Uplink;
+declare gsm-0407 message set Downlink;
+
+
+/*==========================================================================
+	ETSI 24.008 - CHAPTER 9
+==========================================================================*/
+#------------------------------
+# ETSI 24.008, 9.4.1
+#------------------------------
+gsm-0407 ATTACH_REQUEST {
+		 in message set Uplink;
+     ProtocolDiscriminator = 1000;
+     MessageType           = 00000001;
+     
+     MSNetworkCapability          M   LV    2  MS_network_capability_value_part; # Note 1
+     AttachType                   M   V    1/2 AttachType;
+     GPRSCipheringKeySeqNum       M   V    1/2 CipheringKeySequenceNumber;
+  19 OldPTMSISignature            O  TV     4;
+}
+
+/*
+	Note 1 - Please note that we are using "MS_network_capability_value_part"
+	as data type, while csn.1 declaration was	"<MS network capability value part>".
+	Underscores are inserted by EnDec to make that name a valid C/SDL name.
+*/
+
+#------------------------------
+# ETSI 24.008, 9.4.9
+#------------------------------
+gsm-0407 AUTHENTICATION_AND_CIPHERING_REQUEST {
+		 in message set Downlink, Uplink;
+     ProtocolDiscriminator = 1000;
+     MessageType           = 00010010;
+     
+		 CipheringAlgorithm          M    V    1/2 CipheringAlgorithm;
+		 IMEISVRequest               M    V    1/2 IMEISVRequest;
+	21 AuthenticationParameterRAND O   TV     17;
+	
+	# The following one is a conditional field. This field is present
+	# if AuthenticationParameterRAND is also present.
+	# The condition is tested at the end of the line with
+	# an inline C expression.
+	8- GPRSCipheringKeySequence    C   TV     1  CipheringKeySequenceNumber %{PRESENT(DATA.AuthenticationParameterRAND)}%;
+}
+
+/*==========================================================================
+	ETSI 24.008 - CHAPTER 10
+==========================================================================*/
+#------------------------------------
+# ETSI 24.008, 10.5.1.2
+#------------------------------------
+bit-field CipheringKeySequenceNumber {
+	size: 4 bits;
+	bit    4: spare void default=0;
+	bits 1-3: KeySequence integer dump %{
+			/* Example of a full custom implementation of the dump feature */
+			char Buffer [18];
+			if (DATA == 3) {DUMPSTR ("No key available");}
+			else {
+				sprintf (Buffer, "Key %d", (int)DATA);
+				DUMPSTR (Buffer);
+			}
+		}%;
+}
+
+#------------------------------------
+# ETSI 24.008, 10.5.5.2
+#------------------------------------
+bit-field AttachType {
+	size: 4 bits;
+	bit    4: FORx boolean;
+	bits 1-3: TypeOfAttach integer enum {
+			b001 = "GPRS Attach"
+			b010 = "GPRS Attach while IMSI attached"
+			b011 = "Combined GPRS/IMSI attach"
+			default = "Undefined value"
+		};
+}
+
+#------------------------------------
+# ETSI 24.008, 10.5.5.3
+#------------------------------------
+bit-field CipheringAlgorithm {
+	size: 4 bits;
+	bit    4: spare void default=0;
+	bits 1-3: TypeOfAlgorithm integer;
+}
+
+#------------------------------------
+# ETSI 24.008, 10.5.5.10
+#------------------------------------
+bit-field IMEISVRequest {
+	size: 4 bits;
+	bit    4: spare void default=0;
+	bits 1-3: IMEISVRequestValue integer;
+}
+
+#------------------------------------
+# ETSI 24.008, 10.5.5.12
+#------------------------------------
+csn.1 {
+  <MS network capability value part> ::=
+    <GEA bits>
+    <SM capabilities via dedicated channels: bit>
+    <SM capabilities via GPRS channels: bit>
+    <UCS2 support: bit>
+    <SS Screening Indicator: bit(2)>
+    <bit>
+    <spare L>;
+    
+    <GEA bits> ::= < GEA/1 :bit>;
+}
+
+#
+# BASIC CSN.1 LIBRARY - Needed by most ETSI CSN.1 declarations
+#
+csn.1 {
+	<bit> ::= 0|1;
+	<octet>  ::= <bit>*8;
+	<spare L> ::= L;
+	<spare bits> ::= L|H;
+	-- <spare padding >::= <spare L> {null | <spare padding>};
+	<spare padding >::= L**;
+
+	<A5 bits> ::= <A5/7: bit> <A5/6: bit> <A5/5: bit> <A5/4: bit>;
+}
+
+
+/*==========================================================================
+	ETSI 08.18 - CHAPTER 10
+==========================================================================*/
+#------------------------------------
+# ETSI 08.18, 10.3.6
+#------------------------------------
+gsm-0816 SUSPEND {
+  PDUType x0b;
+	
+	1F  TLLI             M TLV 6 integer;  # 11.3.33
+	1B  RouteingArea     M TLV 8 TRouteingArea; # 11.3.29
+}
+
+#------------------------------------
+# ETSI 08.18, 11.3.29
+#------------------------------------
+bit-field TRouteingArea {
+	size: 6 octets;
+	octet 1 {
+		bits 5-8: MCC2 integer;
+		bits 1-4: MCC1 integer;
+	};
+	octet 2 {
+		bits 5-8: spare void default = 15;
+		bits 1-4: MCC3 integer;
+	};
+	octet 3 {
+		bits 5-8: MNC2 integer;
+		bits 1-4: MNC1 integer;
+	};	
+	octet 5 bits 1-16: LAC integer;
+	octet 6 bits 1-8:  RAC integer;
+}
+	

@@ -1,0 +1,144 @@
+Dafocus Encodix TERMS AND CONDITIONS
+
+THESE GENERAL TERMS AND CONDITIONS APPLY TO THE PROGRAM 
+NAMED "Encodix v. 1.0.xx", FROM
+NOW ON CALLED "Encodix", LICENSED BY Dafocus.
+
+
+1. GRANT OF LICENSE
+
+Dafocus grants you the right to use Encodix on one computer
+or in one local computer network during the term of this License.
+Under this License you may:
+
+i.   copy Encodix for backup; and
+ii.  transfer Encodix and accompanying written materials on a
+     permanent basis provided you retain no copies and the
+     recipient agrees to the terms of this License; and
+iii. to the extent Encodix is specified to include source
+     code, modify such source code for the purpose of adapting to
+     your environment.
+
+
+2. RESTRICTIONS
+
+Encodix is owned by Dafocus and is protected by national
+copyright laws and international copyright treaties. This License
+does not convey to you an interest in or to Encodix, but only
+a limited right of use in accordance with the terms of this
+License. You must reproduce and include any copyright and
+trademark notices on all copies of Encodix and maintain an
+accurate record of the location of all copies at all times. You
+may not:
+
+i.   use, copy, merge, modify or transfer Encodix except as
+     provided in this License;
+ii.  reverse assemble, decompile or otherwise translate the
+     Program except as specifically permitted by law without the
+     possibility of contractual waiver;
+iii. sub-license, rent or lease Encodix; or
+iv.  copy the written materials accompanying Encodix.
+
+
+3. TERM
+
+The License is effective upon your opening of this package and
+shall remain in effect until terminated. You may terminate the
+License at any time by destroying Encodix together with all
+copies, modifications, and merged portions in any form. The
+License will also terminate if you fail to comply with any term
+or condition of the License. Upon such termination you shall
+destroy Encodix together with all copies, modifications and
+merged portions in any form.
+
+4. GENERATED CODE
+
+Encodix is a source code generator. All source code generated 
+by Encodix and the included C libraries can be modified and/or
+compiled and linked to your applications freely.
+No royalty fees are required.
+
+
+5. CONFIDENTIALITY
+
+Encodix is confidential and proprietary information of
+Dafocus. You agree to take adequate steps to protect the
+Program from unauthorised disclosure or use.
+
+
+6. LIMITED WARRANTY
+
+Dafocus warrants that the media on which Encodix is
+furnished will be free from defects in materials and workmanship
+under normal use for a period of ninety (90) days from the date
+of delivery to you as evidenced by a copy of your sales receipt.
+
+Dafocus does not warrant that Encodix will meet your
+requirements or that the operation of Encodix will be
+uninterrupted and error free. You are solely responsible for the
+selection of Encodix to achieve your intended results and for
+the results actually obtained.
+
+Dafocus's entire liability and your exclusive remedy under this
+limited warranty shall be, at Dafocus's option, to replace the
+defective media, or to refund the price paid for Encodix,
+provided you return the defective product promptly to Dafocus
+with a copy of your sales receipt.
+
+
+7. EXCLUSION OF WARRANTY
+
+EXCEPT AS EXPRESSLY SET FORTH IN THIS LICENSE, Dafocus
+DISCLAIMS ANY AND ALL REPRESENTATIONS AND WARRANTIES WITH RESPECT
+TO Encodix AND MAINTENANCE OR OTHER SERVICES, INCLUDING
+WITHOUT LIMITATION THE IMPLIED WARRANTIES OF MERCHANTABILITY AND
+FITNESS FOR A PARTICULAR PURPOSE.
+
+
+8. LIMITATION OF LIABILITY
+
+IN NO EVENT SHALL Dafocus BE LIABLE FOR ANY DAMAGES WHATSOEVER
+(INCLUDING, WITHOUT LIMITATION, DAMAGES FOR LOSS OF BUSINESS
+PROFITS, BUSINESS INTERRUPTION, LOSS OF BUSINESS INFORMATION, OR
+OTHER PECUNIARY LOSS) ARISING OUT OF THE USE OR INABILITY TO USE
+Encodix OR OF ANY ACTION OR OMISSION OF Dafocus OR ITS
+EMPLOYEES, AGENTS OR OTHER REPRESENTATIVES OR ANY NON-PERFORMANCE
+OF THE MAINTENANCE OR OTHER SERVICES, EVEN IF Dafocus HAS BEEN
+ADVISED OF THE POSSIBILITY OF SUCH DAMAGES AND EVEN IF THE
+PROGRAM FAILS OF ITS ESSENTIAL PURPOSE. This limitation of
+liability shall not apply to claims for bodily injury or damages
+to real or tangible personal property for which Dafocus is
+legally liable.
+
+
+9. EXPORT REGULATIONS
+
+Software, including technical data, may be subject to export or
+import regulations in other countries including the United States
+Export Administration Act. You agree to comply with all such laws
+and regulations.
+
+
+10. GENERAL
+
+You agree that the License is granted on the condition that the
+applicable price for your copy of Encodix is duly paid.
+
+The invalidity or unenforceability of any one or more of the
+provisions of this General Terms and Conditions shall not affect
+the validity or enforceability of the remaining provisions.
+However, if in Dafocus's opinion such deletion of any provision
+of this General Terms and Conditions unreasonably compromises the
+rights or liabilities of Dafocus, Dafocus reserves the right
+to terminate the License and/or the maintenance service and
+refund the License fee paid by you as your sole and exclusive
+remedy.
+
+In the event special terms have been agreed in writing between
+you and Dafocus, then such terms take precedence over this
+General Terms and Conditions in case of inconsistency.
+
+Should you have any questions concerning this General Terms and
+Conditions, this License, or maintenance or other services, or if
+you desire to contact Dafocus for any reason, please write
+to Dafocus, via Dei Mandorli, 6 - 20090 Cesano Boscone (MI) - Italy

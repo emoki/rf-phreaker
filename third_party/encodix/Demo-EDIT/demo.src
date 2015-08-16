@@ -1,0 +1,609 @@
+/****************************************************************************
+	Dafocus EnDec Source File
+****************************************************************************/
+declare gsm-0407-plen message set Uplink;
+
+/*-----------------------------------------------------------------------
+    MESSAGE: IMMEDIATE ASSIGNMENT
+    CHAPTER: TS 04.18 9.1.18
+  DIRECTION: UPLINK
+-----------------------------------------------------------------------*/
+gsm-0407-plen IMMEDIATE_ASSIGNMENT_UP {
+  in message set Uplink;
+  ProtocolDiscriminator = 0110;
+  MessageType           = 00111111;
+
+     PageMode                             M V   1/2     PageMode            ; # 10.5.2.26
+     DedicatedModeOrTbf                   M V   1/2     DedicatedModeOrTBF  ; # 10.5.2.25b
+     ChannelDescription                   C V   3       TChDesc             ; # 10.5.2.5
+     PacketChannelDescription             C V   3       PacketChannelDescription; # 10.5.2.25a
+     ReqRef                               M V   3       RequestReference    ; # 10.5.2.30
+     TimingAdvance                        M V   1       TimingAdvance       ; # 10.5.2.40
+     MobileAllocation                     M LV  1-9     MobileAllocation    ; # 10.5.2.21
+  7C StartingTime                         O TV  3       StartingTime        ; # 10.5.2.38
+  **EndOfL2Length**;
+#     IaRestOctets                         M V   0-11    IARestOctets        ; # 10.5.2.16
+};
+
+/*-----------------------------------------------------------------------
+    MESSAGE: IMMEDIATE ASSIGNMENT REJECT
+    CHAPTER: TS 04.18 9.1.20
+  DIRECTION: UPLINK
+-----------------------------------------------------------------------*/
+gsm-0407-plen IMMEDIATE_ASSIGNMENT_REJECT_UP {
+  in message set Uplink;
+  ProtocolDiscriminator = 0110;
+  MessageType           = 00111010;
+  L2PseudoLength        = 19;
+
+     PageMode                             M V   1/2     PageMode            ; # 10.5.2.26
+     SpareHalfOctet                       M V   1/2     force void default=0; # 10.5.1.8
+     ReqRef1                              M V   3       RequestReference    ; # 10.5.2.30
+     WaitIndication1                      M V   1       integer             ; # 10.5.2.43
+     ReqRef2                              M V   3       RequestReference    ; # 10.5.2.30
+     WaitIndication2                      M V   1       integer             ; # 10.5.2.43
+     ReqRef3                              M V   3       RequestReference    ; # 10.5.2.30
+     WaitIndication3                      M V   1       integer             ; # 10.5.2.43
+     ReqRef4                              M V   3       RequestReference    ; # 10.5.2.30
+     WaitIndication4                      M V   1       integer             ; # 10.5.2.43
+
+     IarRestOctets                        M V   3       force IARRestOctets ; # 10.5.2.17
+};
+
+/*-----------------------------------------------------------------------
+    MESSAGE: SYSTEM INFORMATION TYPE 13
+    CHAPTER: TS 04.18 9.1.43a
+  DIRECTION: UPLINK
+-----------------------------------------------------------------------*/
+gsm-0407-plen SYSTEM_INFORMATION_TYPE_13_UP {
+  in message set Uplink;
+  ProtocolDiscriminator = 0110;
+  MessageType           = 00000000;
+  L2PseudoLength        = 0;
+
+     Si13RestOctets                       M V   20      SI13RestOctets   ; # 10.5.2.37b
+};
+
+#------------------------------------
+# TS 04.18, 10.5.2.5
+#------------------------------------
+bit-field TChDesc {
+	size: 3 octets;
+	octet 1 bits 4-8: ChType integer;
+	octet 1 bits 1-3: TN integer;
+	octet 2 bits 6-8: TSC integer;
+	octet 2 bit  5  : H boolean enum {
+		0 = "Single RF channel"
+		1	= "RF hopping channel"
+		default = "unknown"
+	};
+
+	octet 3 conditional %{DATA.H}% {
+		bits 7-12: MAIO integer;
+		bits 1-6: HSN integer;
+	};
+	octet 3 conditional %{!DATA.H}% {
+		bit 11-12: spare void default=0;
+		bits 1-10: ARFCN integer;
+	};
+}
+
+#NAME IARestOctets
+#------------------------------------
+# TS 04.18, 10.5.2.16
+#------------------------------------
+
+
+csn.1 {
+	<IARestOctets> ::=
+		{ LL
+		 | LH
+			{ 00 	<egprsPkt: EGPRS Packet Uplink Assignment >
+			 | 01 	-- reserved for future use
+			 | 1 	-- reserved for future use (however the value 7C for the first octet shall not be used)
+			}
+		 | HL <freqParams: {
+			< Length of frequency parameters : bit string (6) >
+				{ null 												
+									-- Length of frequency parameters = 0
+				|	0 0
+					< MAIO : bit (6) >
+					< Mobile Allocation : octet (val(Length of frequency parameters) -1) >
+				}
+			}>
+		 | HH
+			{ 00 	< pktUlAss: Packet Uplink Assignment >
+			 | 01 	< pktDlAss: Packet Downlink Assignment >
+			 | 1 	< secondPart: Second Part Packet Assignment  > }
+		}
+		<spare padding> ;
+	
+	slave < EGPRS Packet Uplink Assignment > ::=
+		< Extended RA : bit (5) >
+		{ 0 | 1 < Access Technologies Request : Access Technologies Request struct > }
+		{ 1
+			< TFI_ASSIGNMENT : bit (5) >
+			< POLLING {boolean enum {
+				0 = "no action is required from MS"
+				1 = "MS shall send a PACKET CONTROL ACKNOWLEDGEMENT"
+			}} : bit >
+			{ 0 				-- Dynamic Allocation
+				< USF: bit (3) >
+				< USF_GRANULARITY : bit >
+				{ 0 | 1 < P0 : bit (4) >
+				< PR_MODE : bit (1) >}
+			| 1					-- Fixed Allocation
+				< ALLOCATION_BITMAP_LENGTH : bit (5) >
+				< ALLOCATION_BITMAP : bit (val(ALLOCATION_BITMAP_LENGTH)) >
+				{ 0 | 1 < P0 : bit (4) >
+					< BTS_PWR_CTRL_MODE : bit (1) >
+					< PR_MODE : bit (1) > }
+			}
+			< EGPRS CHANNEL_CODING_COMMAND : < EGPRS Modulation and Coding IE>>
+			< TLLI_BLOCK_CHANNEL_CODING : bit (1) >
+			{ 0 | 1 < BEP_PERIOD2 : bit (4) > }
+			< RESEGMENT : bit (1) >
+			< EGPRS Window Size : < EGPRS Window Size IE>>
+			{ 0 | 1 < ALPHA : bit (4) >}
+			< GAMMA : bit (5) >
+			{ 0 | 1 < TIMING_ADVANCE_INDEX : bit (4) > }
+			{ 0 | 1 < TBF_STARTING_TIME : bit (16) > }
+		| 0			-- Multi Block Allocation
+			{ 0 | 1 < ALPHA : bit (4) > }
+			< GAMMA : bit (5) >
+			< TBF_STARTING_TIME : bit (16) >
+			< NUMBER OF RADIO BLOCKS ALLOCATED : bit (2) >
+			{ 0 | 1 < P0 : bit (4) >
+					< BTS_PWR_CTRL_MODE : bit (1) >
+					< PR_MODE : bit (1) > }
+		} ;
+	
+	slave <Access Technologies Request struct> ::= -- recursive structure allows any combination of Access technologies
+		<Access Technology Type : bit (4)>
+		{ 0 | 1 <Access Technologies Request struct> } ;
+	
+	slave < Packet Uplink Assignment > ::=
+		{ 1
+			< TFI_ASSIGNMENT : bit (5) >
+			< POLLING : bit >
+			{ 0 											
+								-- Dynamic Allocation
+				< USF: bit (3) >
+				< USF_GRANULARITY : bit >
+				{ 0 | 1 < P0 : bit (4) >
+				< PR_MODE : bit (1) > }
+			| 1											
+								-- Fixed Allocation
+				< ALLOCATION_BITMAP_LENGTH : bit (5) >
+				< ALLOCATION_BITMAP : bit (val(ALLOCATION_BITMAP_LENGTH)) >
+				{ 0 | 1 < P0 : bit (4) >
+					< BTS_PWR_CTRL_MODE : bit (1) >
+					< PR_MODE : bit (1) > }
+			}
+				< CHANNEL_CODING_COMMAND : bit (2) >
+				< TLLI_BLOCK_CHANNEL_CODING : bit >
+			{ 0 | 1 < ALPHA : bit (4) > }
+			< GAMMA : bit (5) >
+			{ 0 | 1 < TIMING_ADVANCE_INDEX : bit (4) > }
+			{ 0 | 1 < TBF_STARTING_TIME : bit (16) > }
+		| 0												
+								-- Single Block Allocation
+			{ 0 | 1 < ALPHA : bit (4) >}
+			< GAMMA : bit (5) >
+			0 1 											
+							-- See Note
+			< TBF_STARTING_TIME : bit (16) >
+			{ L | H < P0 : bit (4) >
+					< BTS_PWR_CTRL_MODE : bit (1) >
+					< PR_MODE : bit (1) >}
+		}
+		{ null | L 												
+						-- Receiver compatible with earlier release
+		| H 												
+								-- Additions for R99
+			{ 0 | 1 < Extended RA : bit (5) > }
+		} ;
+	
+	slave < Packet Downlink Assignment > ::=
+		< TLLI : bit (32) >
+		{ 0 | 1
+			< TFI_ASSIGNMENT : bit (5) >
+			< RLC_MODE : bit >
+			{ 0 | 1 < ALPHA : bit (4) > }
+			< GAMMA : bit (5) >
+			< POLLING : bit >
+			< TA_VALID : bit (1) > }
+		{ 0 | 1 < TIMING_ADVANCE_INDEX : bit (4) > }
+		{ 0 | 1 < TBF_STARTING_TIME : bit (16) > }
+		{ 0 | 1 < P0 : bit (4) >
+				< BTS_PWR_CRTL_MODE : bit (1) >
+				< PR_MODE : bit (1) > }
+		{ null | L 												
+						-- Receiver compatible with earlier release
+		| H 												
+								-- Additions for R99
+														
+								-- indicates EGPRS TBF mode, see 
+														
+								-- 3GPP TS 04.60
+			< EGPRS Window Size : < EGPRS Window Size IE >>
+			< LINK_QUALITY_MEASUREMENT_MODE : bit (2) >
+			{ 0 | 1 < BEP_PERIOD2 : bit (4) > }
+		} ;
+	
+	slave < Second Part Packet Assignment > ::=
+		{ null | L 												
+						-- Receiver compatible with earlier release
+		| H 												
+								-- Additions for R99
+			{ 0 | 1	< Extended RA : bit (5) > }
+		} ;
+}
+#------------------------------------
+# TS 04.18, 10.5.2.17
+#------------------------------------
+csn.1 {
+	<IARRestOctets> ::=		
+		-- Save the position where the message begins: we'll need it
+		-- later to pad exactly to 3 octets
+		ENCODECO: %{PUSH_TAG (1, CURPOS);}%
+		{ 0 | 1 < Extended RA 1 : bit (5) > }		
+		{ 0 | 1 < Extended RA 2 : bit (5) > }		
+		{ 0 | 1 < Extended RA 3 : bit (5) > }		
+		{ 0 | 1 < Extended RA 4 : bit (5) > }		
+		L * ENCODECO_EXPR: %{24 - (CURPOS - TAG(1))}%;
+}
+
+#NAME MobileAllocation
+#------------------------------------
+# TS 04.18, 10.5.2.21
+#------------------------------------
+sequence MobileAllocation [64] integer size 1 bit;
+
+#------------------------------------
+# TS 04.18, 10.5.2.26
+#------------------------------------
+bit-field PageMode {
+	size: 4 bits;
+	bits 1-2: PM integer;
+	bits 3-4: spare void default = 0;
+}
+#------------------------------------
+# TS 04.18, 10.5.2.30
+#------------------------------------
+bit-field RequestReference {
+	size: 3 octets;
+	bits 17-24: RA integer;
+	bits 12-16: T1 integer;
+	bits  8-11: T3 integer;
+	bits  1-5:  T2 integer;
+}
+#NAME SI1RestOctets
+#------------------------------------
+# TS 04.18, 10.5.2.32
+#------------------------------------
+csn.1 {
+	<SI1RestOctets> ::=	 {
+		L 
+		|
+		H  <NCH Position : bit (5)> }
+		< Band indicator >				
+		<spare padding>;
+		
+	slave < Band indicator > ::= < BAND_INDICATOR : bit>;
+}
+#------------------------------------
+# TS 04.18, 10.5.2.38
+#------------------------------------
+bit-field StartingTime {
+	size: 2 octets;
+	bits 12-16: T1 integer;
+	bits  8-11: T3 integer;
+	bits  1-5:  T2 integer;
+}
+#------------------------------------
+# TS 04.18, 10.5.2.40
+#------------------------------------
+bit-field TimingAdvance {
+	size: 1 octet;
+	bits 7-8: spare void default=0;
+	bits 1-6: value integer;
+}
+#NAME PacketChannelDescription
+#------------------------------------
+# TS 04.18, 10.5.2.25a
+#------------------------------------
+csn.1 {
+	< PacketChannelDescription > ::=
+		< Channel type : bit (5) >	
+		< TN : bit (3) >	
+		< TSC : bit (3) >	
+		{ 
+			0		
+			{ 
+				0 < spare bit >			
+				< ARFCN : bit (10) >						-- non-hopping RF channel configuraion		 
+				| 
+				1 
+				< spare bit >			
+				< MAIO : bit (6) >							-- indirect encoding of hopping RF channel configuration			
+				< MA_NUMBER_IND : bit >			
+				{ 
+					0	< spare bits : bit (2) >			
+					| 
+					1	< CHANGE_MARK_1 : bit (2) >
+				}
+			}	
+			| 
+			1		
+			< MAIO : bit (6) >	-- direct encoding of hopping RF channel configuration		
+			< HSN : bit (6) >
+		};
+}
+#------------------------------------
+# TS 04.18, 10.5.2.25b
+#------------------------------------
+bit-field DedicatedModeOrTBF {
+	size: 4 bits;
+	bit 1: TD boolean;
+	bit 2: Downlink boolean;
+	bit 3: TMA boolean;
+	bit 4: spare void default = 0;
+}
+
+#NAME SI13RestOctets
+#------------------------------------
+# TS 04.18, 10.5.2.37b
+#------------------------------------
+csn.1 {
+	< SI13RestOctets > ::=	
+		-- Save the position where the message begins: we'll need it
+		-- later to pad exactly to 20 octets
+		ENCODECO: %{PUSH_TAG (5, CURPOS);}%
+		{ 
+			L 
+			| 
+			H	< BCCH_CHANGE_MARK : bit (3) >		
+				< SI_CHANGE_FIELD {
+						octet enum {
+							0 = "Update of unspecified SI message or SI messages"
+							1 = "Update of SI1 message"
+							2 = "Update of SI2, SI2 bis or SI2 ter message or any instance of SI2quater messages"
+							3 = "Update of SI3, SI4, SI7 or SI8 message"
+							4 = "Update of SI9 message;"
+							5 = "Update of SI18 or SI20 message"
+							6 = "Update of SI19 message"
+							default = "update of unknown SI message type"
+						}
+					}: bit (4) >
+				{ 
+					0 
+					| 
+					1	< SI13_CHANGE_MARK : bit (2) >
+						< GPRS Mobile Allocation : GPRS Mobile Allocation IE > 
+				}			-- Defined in 3GPP TS 04.60		
+				{ 
+					0	-- PBCCH not present in cell :
+					<NoPBCCH:
+						< RAC : bit (8) >			
+						< SPGC_CCCH_SUP {
+							boolean enum {
+								0 = "SPLIT_PG_CYCLE is not supported on CCCH in this cell"
+								1 = "SPLIT_PG_CYCLE is supported on CCCH in this cell"
+							}
+						}: bit >
+						< PRIORITY_ACCESS_THR {
+							octet enum {
+								b000 = "packet access is not allowed in the cell"
+								b001 = "spare, shall be interpreted as '000' (packet access not allowed)"
+								b010 = "spare, shall be interpreted as '000' (packet access not allowed)"
+								b011 = "packet access is allowed for priority level 1"
+								b100 = "packet access is allowed for priority level 1 to 2"
+								b101 = "packet access is allowed for priority level 1 to 3"
+								b110 = "packet access is allowed for priority level 1 to 4"
+								b111 = "spare, shall be interpreted as '110' (packet access allowed)"
+							}
+						}: bit (3) >
+						< NETWORK_CONTROL_ORDER {
+							octet enum {
+								b00 = "NC0: MS controlled cell re-selection, no measurement reporting"
+								b01 = "NC1: MS controlled cell re-selection, MS sends measurement reports"
+								b10 = "NC2: Network controlled cell re-selection, MS sends measurement reports"
+								b11 = "Reserved for future use, interpreted as NC0 by mobile station"
+							}
+						}: bit (2) >
+						< GPRS Cell Options : GPRS Cell Options IE >	-- Defined in 3GPP TS 04.60			
+						< GPRS Power Control Parameters : GPRS Power Control Parameters struct >	
+					>
+				| 1						-- PBCCH present in cell :			
+					< PSI1_REPEAT_PERIOD : bit (4) >			
+					< PBCCH Description : PBCCH Description struct >		
+				}		
+				{ 
+					null 
+					| 
+					L 	-- Receiver compatible with ealier release		 
+					| 
+					H 	-- Additions in release 99 :			
+						< SGSNR : bit > 
+				}	
+		}	{ bit = L } * ENCODECO_EXPR: %{160 - (CURPOS - TAG(5))}%;
+
+};
+
+#=================================================================
+# PARTS FROM 04.60 HERE REFERENCED
+#=================================================================
+/* From 04.60 [ETSI TS 101 349 V8.17.0 (2002-12)], chapter 11.2.25 */
+csn.1 {
+	slave < PBCCH Description struct > ::=
+		< Pb : bit (4) >
+		< TSC : bit (3) >
+		< TN : bit (3) >
+		{ 0	-- default to BCCH carrier
+		| 10	< ARFCN : bit (10) >
+		| 11	< MAIO : bit (6) > } ;
+		
+	slave < GPRS Power Control Parameters struct > ::=	
+		< ALPHA : bit (4) >	
+		< T_AVG_W : bit (5) >	
+		< T_AVG_T : bit (5) >	
+		< PC_MEAS_CHAN : bit >	
+		< N_AVG_I : bit (4) >;
+}
+		
+/* From 04.60 [ETSI TS 101 349 V8.17.0 (2002-12)], chapter 12.5.2 */
+csn.1 {
+	slave < EGPRS Modulation and Coding IE > ::= <EGPRS MCS: bit (4)>;
+}
+
+/* From 04.60 [ETSI TS 101 349 V8.17.0 (2002-12)], chapter 12.10a */
+csn.1 {
+	slave < GPRS Mobile Allocation IE > ::=
+		< HSN : bit (6) >
+		{ 0 | 1 < RFL number list : < RFL number list struct > > }
+		{ 0 
+			< MA_LENGTH : bit (6) >
+			< MA_BITMAP : bit (val(MA_LENGTH) + 1) >
+			| 
+			1 
+			{ 
+				0 
+				<marker{void}: null> -- Added to avoid encoding ambiguity
+				| 
+				1 < ARFCN index list : < ARFCN index list struct > > 
+			} 
+		};
+		
+	slave < RFL number list struct > ::= 
+		< RFL_NUMBER : bit (4) >
+		{ 0 | 1 < RFL number list struct > };
+	
+	slave < ARFCN index list struct > ::=
+		< ARFCN_INDEX : bit (6) >
+		{ 0 | 1 < ARFCN index list struct > };
+}
+
+/* From 04.60 [ETSI TS 101 349 V8.17.0 (2002-12)], chapter 12.10a */
+csn.1 {
+	slave < GPRS Cell Options IE > ::=
+		< NMO {octet enum {
+				b00 = "Network Mode of Operation I"
+				b01 = "Network Mode of Operation II"
+				b10 = "Network Mode of Operation III"
+				b11 = "Reserved."
+
+			}} : bit (2) >
+		< T3168 : bit (3) >
+		< T3192 {octet enum {
+				b000 = "500 ms"
+				b001 = "1000 ms"
+				b010 = "1500 ms"
+				b011 = "0 ms"
+				b100 = "80 ms"
+				b101 = "120 ms"
+				b110 = "160 ms"
+				b111 = "200 ms"
+
+			}} : bit (3) >
+		< DRX_TIMER_MAX : bit (3) >
+		< ACCESS_BURST_TYPE {boolean enum {
+				b0 = "8-bit format shall be used"
+				b1 = "11-bit format shall be used"
+
+			}} : bit >
+		< CONTROL_ACK_TYPE {boolean enum {
+				b0 = "default format is four access bursts"
+				b1 = "default format is RLC/MAC control block."
+
+			}} : bit >
+		< BS_CV_MAX : bit (4) >
+		{ 0 
+			| 
+			1 < PAN_DEC : bit (3) >
+			< PAN_INC : bit (3) >
+			< PAN_MAX : bit (3) > 
+		}
+
+		-- Optional extension information:
+		{ 
+			0 
+			| 
+			1 <ext:
+				ENCODECO: %{
+					/* Save the position of the length. This allows us to
+					   write it back when encoding */
+					PUSH_TAG (1, CURPOS);
+				}%
+				<bit>*6 -- Extension Length: we removed the label because we manage it automatically
+					{ 
+						<Extension Information>
+					} 
+					ENCODE: %{
+						/* We save the effective length-1 in the "Extension Length" field */
+						EDIntToBits (BUFFER, TAG(1), CURPOS-TAG(1)-7, 6);
+					}% 
+					DECODE: %{CURPOS = TAG(1)+EDBitsToInt (BUFFER, TAG(1), 6)+6;}% 
+			>
+		} ;
+
+	slave < Extension Information> ::=
+		{{ -- R99 Extension
+		{ 0 | 1 -- EGPRS supported by the cell if the choice bit is set to '1'
+			<EGPRS_PACKET_ CHANNEL_REQUEST {boolean enum {
+				b0 = "EGPRS capable MSs shall use EGPRS PACKET CHANNEL REQUEST message for uplink TBF establishment on the PRACH when there is a PBCCH in the cell or on the RACH when there is no PBCCH in the cell."
+				b1 = "EGPRS capable MSs shall use two phase packet access with PACKET CHANNEL REQUEST message on the PRACH for uplink TBF establishment when there is a PBCCH in the cell. EGPRS capable MSs shall use two phase packet access with CHANNEL REQUEST message on the RACH when there is no PBCCH in the cell."
+
+			}} : bit>
+			< BEP_PERIOD : bit (4) > 
+		}
+		<PFC_FEATURE_MODE {boolean enum {
+				b0 = "The network does not support packet flow context procedures."
+				b1 = "The network supports packet flow context procedures."
+
+			}}: bit>
+		<DTM_SUPPORT {boolean enum {
+				b0 = "The cell does not support DTM procedures."
+				b1 = "The cell supports DTM procedures."
+
+			}}: bit>
+		<BSS_PAGING_COORDINATION {boolean enum {
+				b0 = "The cell does not support Circuit-Switched paging coordination"
+				b1 = "The cell supports Circuit-Switched paging coordination"
+
+			}}: bit>}
+		{	-- REL-4 extension:
+			< CCN_ACTIVE {boolean enum {
+				b0 = "CCN is disabled in the cell."
+				b1 = "CCN is enabled in the cell."
+
+			}} : bit >
+			< NW_EXT_UTBF {boolean enum {
+				b0 = "The extended uplink TBF mode is not supported by the network."
+				b1 = "The extended uplink TBF mode is supported by the network."
+
+			}} : bit > }
+		< spare bit > ** } // ;		-- Extension information may be truncated between released versions of the protocol.
+										-- The receiver shall assume the value zero for any truncated bit.
+
+}
+
+/* From 04.60 [ETSI TS 101 349 V8.17.0 (2002-12)], chapter 12.10d */
+csn.1 {
+	slave < EGPRS Window Size IE > ::= <EGPRS Window Size: bit (5)>;
+}
+
+#=================================================================
+# BASIC CSN.1 LIBRARY - Needed by most ETSI CSN.1 declarations
+#=================================================================
+csn.1 {
+	<bit> ::= 0|1;
+	<bit string> ::= 0|1;
+	<spare L> ::= L;
+	<spare bits> ::= L|H;
+	<spare bit> ::= <bit>;
+	<octet> ::= bit*(8);
+	<spare padding>::= L* ENCODE_EXPR: %{(8 - (CURPOS & 7)) & 7}% DECODE_INFINITE;
+
+	<A5 bits> ::= <A5/7: bit> <A5/6: bit> <A5/5: bit> <A5/4: bit>;
+}

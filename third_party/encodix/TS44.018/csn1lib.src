@@ -1,0 +1,20 @@
+#=================================================================
+# BASIC CSN.1 LIBRARY - Needed by most ETSI CSN.1 declarations
+#=================================================================
+csn.1 {
+	<bit> ::= 0|1;
+	<bit string> ::= 0|1;
+	<spare L> ::= L;
+	<spare bits> ::= {L|H}**;
+	<spare bit> ::= <bit>;
+	<octet> ::= bit*(8);
+	<no string> ::= null;
+	-- <spare padding>::= L* ENCODE_EXPR: %{(8 - (CURPOS & 7)) & 7}% DECODE_INFINITE;
+	-- Relaxed version of the spare padding:
+	<spare padding>::= {bit = L} * ENCODE_EXPR: %{(8 - (CURPOS & 7)) & 7}% DECODE_INFINITE;
+	<padding bits> ::= <bit>**;
+	<zero padding>::= {bit = 0} * ENCODE_EXPR: %{(8 - (CURPOS & 7)) & 7}% DECODE_INFINITE;
+
+	slave <A5 bits> ::= <A5/7: bit> <A5/6: bit> <A5/5: bit> <A5/4: bit>;
+}
+

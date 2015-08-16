@@ -1,0 +1,18 @@
+#!/bin/sh
+os=$(uname)
+cpu=$(uname -i)
+case $os in
+	Linux)
+		case $cpu in
+			x86_64)
+				$0.x86_64 $@
+				;;
+			*)
+				$0.linux $@
+				;;
+		esac
+		;;
+	*)
+		echo "Can't run CODEGENIX: unsupported OS '$os'\n";
+		;;
+esac

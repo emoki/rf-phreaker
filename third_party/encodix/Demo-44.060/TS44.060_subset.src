@@ -1,0 +1,1060 @@
+/****************************************************************************
+	DAFOCUS ENCODIX
+****************************************************************************/
+declare gsm-0460 message set Downlink_RLC_MAC;
+declare gsm-0460 message set Uplink_RLC_MAC;
+
+
+
+#=================================================================
+# BASIC CSN.1 LIBRARY - Needed by most ETSI CSN.1 declarations
+#=================================================================
+csn.1 {
+	<bit> ::= 0|1;
+	<bit string> ::= 0|1;
+	<spare L> ::= L;
+	<spare bits> ::= L|H;
+	<spare bit> ::= <bit>;
+	<octet> ::= bit*(8);
+	<spare padding>::= L* ENCODE_EXPR: %{(8 - (CURPOS & 7)) & 7}% DECODE_INFINITE;
+	<no string> ::= null;
+	<padding bits> ::= <bit>**;
+	slave <A5 bits> ::= <A5/7: bit> <A5/6: bit> <A5/5: bit> <A5/4: bit>;
+}
+
+
+gsm-0460 Packet_Uplink_Ack_Nack {
+	in message set Downlink_RLC_MAC;
+	MessageType = 001001;
+	contents M V >=0 Packet_Uplink_Ack_Nack_message_content;
+}
+
+gsm-0460 Packet_Downlink_Ack_Nack {
+	in message set Uplink_RLC_MAC;
+	MessageType = 000010;
+	contents M V >=0 Packet_Downlink_Ack_Nack_message_content;
+}
+
+gsm-0460 Packet_Uplink_Assignment {
+	in message set Downlink_RLC_MAC;
+	MessageType = 001010;
+	contents M V >=0 Packet_Uplink_Assignment_message_content;
+}
+
+gsm-0460 Packet_Downlink_Assignment {
+	in message set Downlink_RLC_MAC;
+	MessageType = 000010;
+	contents M V >=0 Packet_Downlink_Assignment_message_content;
+}
+
+gsm-0460 Packet_Resource_Request {
+	in message set Uplink_RLC_MAC;
+	MessageType = 000101;
+	contents M V >=0 Packet_Resource_Request_message_content;
+}
+
+gsm-0460 Packet_Timeslot_Reconfigure {
+	in message set Downlink_RLC_MAC;
+	MessageType = 000111;
+	contents M V >=0 Packet_Timeslot_Reconfigure_message_content;
+}
+
+gsm-0460 Packet_Paging_Request {
+	in message set Downlink_RLC_MAC;
+	MessageType = 100010;
+	contents M V >=0 Packet_Paging_Request_message_content;
+}
+
+gsm-0460 Packet_TBF_Release {
+	in message set Downlink_RLC_MAC;
+	MessageType = 001000;
+	contents M V >=0 Packet_TBF_Release_message_content;
+}
+
+#------------------------------------
+# TS 44.060, 11.2.6
+# Packet Downlink Ack/Nack
+#------------------------------------
+csn.1 {
+	< Packet Downlink Ack/Nack message content > ::=
+		< DOWNLINK_TFI : bit (5) >
+		< Ack/Nack Description : < Ack/Nack Description IE > >
+		{ 0 | 1 < Channel Request Description : < Channel Request Description IE > > }
+		< Channel Quality Report : < Channel Quality Report struct > >
+		{ null | {0 bit** = <no string>} 					-- Receiver backward compatible with earlier version
+			| 1											-- Additional contents for Release 1999
+			{ 0 | 1 < PFI : bit(7) > }
+			{ null | {0 bit** = < no string >} 	-- Receiver backward compatible with earlier version
+				| 1						-- Additions for REL-5
+				{ 0 | 1 < Iu mode Channel Request Description : < Iu mode Channel Request Description IE > > }
+	 			{ 0 | 1 < RB Id : bit (5) > }
+				{ 0 | 1 < Timeslot Number : bit (3) > }
+		< padding bits > } };
+	
+	slave < Channel Quality Report struct > ::=
+		< C_VALUE : bit (6) >
+		< RXQUAL : bit (3) >
+		< SIGN_VAR : bit (6) >
+		{ 0 | 1 < I_LEVEL_TN0 : bit (4) > }
+		{ 0 | 1 < I_LEVEL_TN1 : bit (4) > }
+		{ 0 | 1 < I_LEVEL_TN2 : bit (4) > }
+		{ 0 | 1 < I_LEVEL_TN3 : bit (4) > }
+		{ 0 | 1 < I_LEVEL_TN4 : bit (4) > }
+		{ 0 | 1 < I_LEVEL_TN5 : bit (4) > }
+		{ 0 | 1 < I_LEVEL_TN6 : bit (4) > }
+		{ 0 | 1 < I_LEVEL_TN7 : bit (4) > } ;
+}
+
+#------------------------------------
+# TS 44.060, 11.2.7
+# Packet Downlink Assignment
+#------------------------------------
+csn.1 {
+	< Packet Downlink Assignment message content > ::=
+		{
+			< PAGE_MODE {octet enum {
+				b00 = "Normal Paging"
+				b01 = "Extended Paging"
+				b10 = "Paging Reorganization"
+				b11 = "Same as before"
+
+			}} : bit (2) >
+		{ 0 | 1 <PERSISTENCE_LEVEL : bit (4) > * 4 }
+		{	{ 0	< Global TFI : < Global TFI IE > >
+			| 10	< TLLI/ G-RNTI : bit (32) > }
+			{ 0		-- Message escape
+				{	< MAC_MODE {octet enum {
+				b00 = "Dynamic Allocation"
+				b01 = "Extended Dynamic Allocation"
+				b10 = "Reserved -- The value '10' was allocated in an earlier version of the protocol and shall not be used."
+				b11 = "Reserved -- The value '11' was allocated in an earlier version of the protocol and shall not be used."
+
+			}} : bit (2) >
+					< RLC_MODE {boolean enum {
+				b0 = "RLC acknowledged mode"
+				b1 = "RLC unacknowledged mode"
+
+			}} : bit (1) >
+					< CONTROL_ACK : bit (1) >
+					< TIMESLOT_ALLOCATION : bit (8) >
+					< Packet Timing Advance : < Packet Timing Advance IE > >
+					{ 0 | 1 < P0 : bit (4) >
+							0 		-- The value '1' was allocated in an earlier version of the protocol and shall not be used.
+							< PR_MODE : bit (1) > }
+					{	{ 0 | 1 < Frequency Parameters : < Frequency Parameters IE > > }
+						{ 0 | 1 < DOWNLINK_TFI_ASSIGNMENT : bit (5) > }
+						{ 0 | 1 < Power Control Parameters : < Power Control Parameters IE > > }
+						{ 0 | 1 < TBF Starting Time : < Starting Frame Number Description IE > > }
+						0			-- The value '1' was allocated in an earlier version of the protocol and shall not be used.
+						{ null | {0 bit** = <no string>} 		-- Receiver backward compatible with earlier version
+						| 1									-- Additional contents for Release 1999
+							{ 0 | 1 < EGPRS Window Size : < EGPRS Window Size IE >> 
+									< LINK_QUALITY_MEASUREMENT_MODE {octet enum {
+				b00 = "The MS shall not report either interference measurements (? values) or per slot BEP measurements."
+				b01 = "The MS shall report available interference measurements (? values) for timeslots 0 through 7. The ? value is defined in 3GPP TS 45.008. No per slot mean BEP measurements shall be reported."
+				b10 = "The MS shall report mean BEP on each allocated time slot. The MS shall report the mean BEP measurement corresponding to the modulation for which it has received a larger number of blocks since the previous report. The MS shall make BEP measurements only on Radio Blocks intended for it. No interference measurements (? values) shall be reported."
+				b11 = "The MS shall report mean BEP on each allocated time slot. The MS shall report the mean BEP measurement corresponding to the modulation for which it has received a larger number of blocks since the previous report. The MS shall make BEP measurements only on Radio Blocks intended for it. In addition to mean BEP, the MS shall report interference measurements (? values) for no more than four time slots. The MS shall first report available interference measurements for time slots 0, 1, 2, and 3; the MS shall next report available interference measurements for time slots 4, 5, 6, and 7; and the MS shall alternate between these two groups for subsequent reports. If any of the interference measurements are unavailable for reporting for reasons specified in 3GPP TS 45.008, the MS shall substitute least-recently-reported and available interference measurements for time slots not already included in the report."
+
+			}} : bit (2) >
+									{ 0 | 1 < BEP_PERIOD2 : bit(4) > }}
+							{ 0 | 1 <Packet Extended Timing Advance : bit (2)> }
+							{ 0 | 1 < COMPACT reduced MA : < COMPACT reduced MA IE >> }
+							{ null | {0 bit** = < no string >} 	-- Receiver backward compatible with earlier version
+							| 1						-- Additions for REL-5
+								{ 0 | 1 < RB Id : bit (5) > 
+									{ 0 | 1 < G-RNTI extension : bit (4) > } 
+									{ 0 | 1 < Uplink Control Timeslot : bit (3) > } 
+	{ 0 | 1 < HFN_LSB : bit (1) > } }
+				< padding bits > } } }//					-- truncation at end of message allowed, bits '0' assumed				
+				! < Non-distribution part error : bit (*) = < no string > > }
+				! < Message escape : 1 bit (*) = <no string> > }
+			! < Address information part error : bit (*) = < no string > > }
+		! < Distribution part error : bit (*) = < no string > >}
+	 <spare padding>;
+}
+
+#------------------------------------
+# TS 44.060, 11.2.10
+# Packet Paging Request
+#------------------------------------
+csn.1 {
+	< Packet Paging Request message content > ::=
+		< PAGE_MODE {octet enum {
+				b00 = "Normal Paging"
+				b01 = "Extended Paging"
+				b10 = "Paging Reorganization"
+				b11 = "Same as before"
+
+			}} : bit (2) >
+		{ 0 | 1 < PERSISTENCE_LEVEL : bit (4) >* 4}
+		{ 0 | 1 < NLN : bit (2) > }
+		{	{ 1 < Repeated Page info : < Repeated Page info struct > > } ** 0
+			{ null	| 0 {bit** = < no string >}			-- Receiver compatible with earlier release
+					| 1									-- REL-5 additions:
+						{ 1 < Repeated Iu Page info : < Repeated Iu Page info struct > > } ** 0
+			< padding bits > } }//		-- truncation at end of message allowed, bits '0' assumed
+		! < Distribution part error : bit (*) = < no string > > ;
+	
+	slave < Repeated Page info struct > ::=
+		{ 0										-- Page request for TBF establishment
+			{ 0	< PTMSI : bit (32) >
+			| 1	< Length of Mobile Identity contents : bit (4) >
+				< Mobile Identity : octet (val (Length of Mobile Identity contents)) > }
+		| 1											-- Page request for RR conn. establishment
+			{ 0	< TMSI : bit (32) >
+			| 1	< Length of Mobile Identity contents : bit (4) >
+				< Mobile Identity : octet (val (Length of Mobile Identity contents)) > }
+			< CHANNEL_NEEDED {octet enum {
+				b00 = "Any channel"
+				b01 = "SDCCH"
+				b10 = "TCH/F (Full rate)"
+				b11 = "TCH/H or TCH/F (Dual rate)"
+
+			}} : bit (2) >
+			{ 0 | 1 < eMLPP_PRIORITY : bit (3) > } }
+		! < Ignore : bit (*) = <no string> > ;
+	
+	slave < Repeated Iu Page info struct > ::= 
+		{
+			{ 0 < G-RNTI: bit(32) > 		-- used for a CN page to an MS in RRC connected mode, or a GERAN initiated page			
+				{ 0 | 1 < Page info struct : < Page info struct > > } 	-- only included for a CN page
+				| 1
+					{ 
+							00 	< TMSI : bit (32) >
+						| 01	< PTMSI : bit (32) >
+						| 11	{ 
+								< Length of Mobile Identity contents : bit (4) >
+								< Mobile Identity : octet (val (Length of Mobile Identity contents)) > 
+							}
+							< Page info struct : < Page info struct > > 
+				}
+				{ 0 | 1 < eMLPP_PRIORITY : bit (3) > } 
+		}
+	! < Ignore : bit (*) = <no string> > 
+		};
+	
+	< Page info struct > ::=
+		< PAGING CAUSE {octet enum {
+				b000 = "Terminating Conversational Call"
+				b001 = "Terminating Streaming Call"
+				b010 = "Terminating Interactive Call"
+				b011 = "Terminating Background Call"
+				b100 = "Terminating High Priority Signalling"
+				b101 = "Terminating Low Priority Signalling"
+				b110 = "Terminating – cause unknown"
+				b111 = "Reserved"
+
+			}} : bit (3) > 
+		< CN DOMAIN IDENTITY {octet enum {
+				b00 = "CS domain"
+				b01 = "PS domain"
+				b10 = "Either"
+				b11 = "Reserved"
+
+			}} : bit (2) >
+		{ 0 | 1 < Paging Record Type Identifier {octet enum {
+				b00 = "IMSI (GSM-MAP)"
+				b01 = "TMSI (GSM-MAP) / P-TMSI"
+				b10 = "IMSI (DS-41)"
+				b11 = "TMSI (DS-41)"
+
+			}} : bit (2) > };  -- This field Is only included if the MS is paged using a G-RNTI
+	
+}
+
+#------------------------------------
+# TS 44.060, 11.2.16
+# Packet Resource Request
+#------------------------------------
+csn.1 {
+	< Packet Resource Request message content > ::=
+		{ 0 | 1 < ACCESS_TYPE {octet enum {
+				b00 = "Two Phase Access Request"
+				b01 = "Page Response"
+				b10 = "Cell Update"
+				b11 = "Mobility Management procedure"
+
+			}} : bit (2) > }
+		{ 0 < Global TFI : < Global TFI IE > >
+		| 1 < TLLI / G-RNTI : < TLLI / G-RNTI IE > > }
+		{ 0 | 1 < MS Radio Access Capability 2 : < MS Radio Access Capability 2 IE > > }
+		< Channel Request Description : < Channel Request Description IE > >
+		{ 0 | 1 < CHANGE_MARK : bit (2) > }
+		< C_VALUE : bit (6) >
+		{ 0 | 1 < SIGN_VAR : bit (6) >}
+		{ 0 | 1 < I_LEVEL_TN0 : bit (4) > }
+		{ 0 | 1 < I_LEVEL_TN1 : bit (4) > }
+		{ 0 | 1 < I_LEVEL_TN2 : bit (4) > }
+		{ 0 | 1 < I_LEVEL_TN3 : bit (4) > }
+		{ 0 | 1 < I_LEVEL_TN4 : bit (4) > }
+		{ 0 | 1 < I_LEVEL_TN5 : bit (4) > }
+		{ 0 | 1 < I_LEVEL_TN6 : bit (4) > }
+		{ 0 | 1 < I_LEVEL_TN7 : bit (4) > }
+		{ null | {0 bit** = <no string>}					-- Receiver backward compatible with earlier version
+			| 1											-- Additional contents for Release 1999
+			{ 0 | 1 < EGPRS BEP Link Quality Measurements : 
+						< EGPRS BEP Link Quality Measurements IE >> }
+			{ 0 | 1 < EGPRS Timeslot Link Quality Measurements : 
+						< EGPRS Timeslot Link Quality Measurements IE >>}
+			{ 0 | 1 < PFI: bit(7) > }
+			< ADDITIONAL MS RAC INFORMATION AVAILABLE {boolean enum {
+				b0 = "indicates that the MS will not send more information about its radio access capabilities than included in this message"
+				b1 = "indicates that the MS will provide more information about its radio access capabilities by sending an ADDITIONAL MS RADIO ACCESS CAPABILITIES message, either in the next radio block allocated to the mobile station on the assigned PDCH, or upon a further request from the network if the mobile station was allocated only one radio block. This value shall not be used by MS operating in Iu mode."
+
+			}} : bit (1) >
+			< RETRANSMISSION OF PRR {boolean enum {
+				b0 = "indicates that this message is an initial Packet Resource Request"
+				b1 = "indicates that this message is a retransmitted Packet Resource Request: in this case the corresponding PRR message shall not be interpreted as a request for resource reassignment."
+
+			}} : bit (1) >
+			{ null | {0 bit** = < no string >}	-- Receiver backward compatible with earlier version
+				| 1						-- Additions for REL-5
+					{ 0 | 1 { 0 | 1 < G-RNTI extension : bit (4) > }
+							< Iu mode Channel Request Description : < Iu mode Channel Request Description IE > > } 
+							{ 0 | 1 < HFN_LSB : bit (1) > } } 
+		< padding bits > } ;
+	
+}
+
+#------------------------------------
+# TS 44.060, 11.2.26
+# Packet TBF Release
+#------------------------------------
+csn.1 {
+	< Packet TBF Release message content > ::=
+		< PAGE_MODE {octet enum {
+				b00 = "Normal Paging"
+				b01 = "Extended Paging"
+				b10 = "Paging Reorganization"
+				b11 = "Same as before"
+
+			}} : bit (2) >
+		{	0 < GLOBAL_TFI : Global TFI IE >
+			{	< UPLINK_RELEASE {boolean enum {
+				b0 = "TBF shall not be released"
+				b1 = "TBF shall be released"
+
+			}} : bit (1) >
+				< DOWNLINK_RELEASE : bit (1) >
+				< TBF_RELEASE_CAUSE {octet enum {
+				default = "Abnormal release"
+
+			}} : bit (4) = { 0000 | 0010 } >
+				< padding bits >
+				! < Non-distribution part error : bit (*) = < no string > > }
+			! < Address information part error : bit (*) = < no string > > }
+		! < Distribution part error : bit (*) = < no string > > ;
+}
+
+#------------------------------------
+# TS 44.060, 11.2.28
+# Packet Uplink Ack/Nack
+#------------------------------------
+csn.1 {
+	< Packet Uplink Ack/Nack message content > ::=
+		< PAGE MODE {octet enum {
+				b00 = "Normal Paging"
+				b01 = "Extended Paging"
+				b10 = "Paging Reorganization"
+				b11 = "Same as before"
+
+			}} : bit (2) >
+		{	00 < UPLINK_TFI : bit (5) >
+			{ 0		-- Message escape
+				{	< CHANNEL_CODING_COMMAND : bit (2) >
+					< Ack/Nack Description : < Ack/Nack Description IE > >
+					{ 0 | 1	< CONTENTION_RESOLUTION_TLLI : bit (32) > }
+					{ 0 | 1	< Packet Timing Advance : < Packet Timing Advance IE > > }
+					{ 0 | 1	< Power Control Parameters : < Power Control Parameters IE > > }
+					{ 0 | 1	< Extension Bits : Extension Bits IE > }				-- sub-clause 12.26
+					0			-- The value '1' was allocated in an earlier version of the protocol and shall not be used.
+					{ null	| {0 bit** = < no string >}	-- Receiver backward compatible with earlier version
+						| 1						-- Additions for R99
+							{ 0 | 1 <Packet Extended Timing Advance : bit (2) >}
+							< TBF_EST {boolean enum {
+				b0 = "the mobile station is not allowed to request the establishment of new TBF"
+				b1 = "the mobile station is allowed to request the establishment of new TBF"
+
+			}} : bit (1)>
+							{ null | {0 bit** = <no string>}	-- Receiver backward compatible with earlier version
+								| 1							-- Additions for REL-5
+									{ 0 | 1 < CONTENTION_RESOLUTION Identifier extension : bit (4) > }
+									{ 0 | 1 < RB Id : bit (5) > }
+						< padding bits > } }
+					! < Non-distribution part error : bit (*) = < no string > > }
+			| 1											-- Message escape bit used to define EGPRS message contents
+					{ 00 {	< EGPRS Channel Coding Command : < EGPRS Modulation and coding Scheme >>
+							< RESEGMENT : bit (1) >
+							<PRE_EMPTIVE_TRANSMISSION {boolean enum {
+				b0 = "The mobile station shall not use pre-emptive transmission."
+				b1 = "The mobile station shall use pre-emptive transmission."
+
+			}} : bit (1) >
+							< PRR RETRANSMISSION REQUEST {boolean enum {
+				b0 = "indicates that retransmission of a PACKET RESOURCE REQUEST message is not requested"
+				b1 = "indicates that retransmission of a PACKET RESOURCE REQUEST message is requested"
+
+			}} : bit (1) >
+							< ARAC RETRANSMISSION REQUEST {boolean enum {
+				b0 = "indicates that retransmission of an ADDITIONAL MS RADIO ACCESS CAPABILITIES message is not requested"
+				b1 = "indicates that retransmission of an ADDITIONAL MS RADIO ACCESS CAPABILITIES message is requested"
+
+			}} : bit (1) >
+							{ 0 | 1	< CONTENTION_RESOLUTION_TLLI : bit (32) > }
+							< TBF_EST {boolean enum {
+				b0 = "the mobile station is not allowed to request the establishment of new TBF"
+				b1 = "the mobile station is allowed to request the establishment of new TBF"
+
+			}} : bit (1)>
+						{ 0 | 1	< Packet Timing Advance : < Packet Timing Advance IE > > }
+						{ 0 | 1	<Packet Extended Timing Advance : bit (2) > }
+						{ 0 | 1	< Power Control Parameters : < Power Control Parameters IE > > }
+						{ 0 | 1	< Extension Bits : Extension Bits IE > }				-- sub-clause 12.26
+						{	< EGPRS Ack/Nack Description : < EGPRS Ack/Nack Description IE > >
+						0		-- The value '1' was allocated in an earlier version of the protocol and shall not be used.
+						} // 
+						{ null | {0 bit** = <no string>}			-- Receiver backward compatible with earlier version
+							| 1									-- Additions for REL-5
+								{ 0 | 1 < CONTENTION_RESOLUTION Identifier extension : bit (4) > } 
+								{ 0 | 1 < RB Id : bit (5) > }
+						< padding bits > }
+							! < Non-distribution part error : bit (*) = < no string > > }
+					! < Message escape : {01| 10 | 11} bit (*) = <no string> > } } 	-- Extended for future changes
+			! < Address information part error : bit (*) = < no string > > }
+		! < Distribution part error : bit (*) = < no string > > ;
+}
+
+#------------------------------------
+# TS 44.060, 11.2.31
+# Packet Timeslot Reconfigure
+#------------------------------------
+csn.1 {
+	< Packet Timeslot Reconfigure message content > ::=
+		< PAGE_MODE : bit (2) >
+		{	0 < GLOBAL_TFI : < Global TFI IE > >
+			{ 0		-- Message escape
+				{	< CHANNEL_CODING_COMMAND {octet enum {
+				b00 = "CS-1"
+				b01 = "CS-2"
+				b10 = "CS-3"
+				b11 = "CS-4"
+
+			}} : bit (2) >
+					< Global Packet Timing Advance : < Global Packet Timing Advance IE > >
+					< DOWNLINK_RLC_MODE {boolean enum {
+				b0 = "RLC acknowledged mode"
+				b1 = "RLC unacknowledged mode"
+
+			}} : bit (1) >
+					< CONTROL_ACK : bit (1) >
+					{ 0 | 1 < DOWNLINK_TFI_ASSIGNMENT : bit (5) > }
+					{ 0 | 1 < UPLINK_TFI_ASSIGNMENT : bit (5) > }
+					< DOWNLINK_TIMESLOT_ALLOCATION : bit (8) >
+					{ 0 | 1	< Frequency Parameters : < Frequency Parameters IE > > }
+					0				-- The value '1' was allocated in an earlier version of the protocol and shall not be used.
+					< Dynamic Allocation : < Dynamic Allocation struct > >
+					{ null | {0 bit** = < no string >}			-- Receiver backward compatible with earlier version
+						| 1						-- Additions for R99
+						{ 0 | 1 <Packet Extended Timing Advance : bit (2) > }
+						{ null | {0 bit** = < no string >}		-- Receiver backward compatible with earlier version
+							| 1						-- Additions for REL-5
+							{ 0 | 1 < RB Id of downlink TBF : bit (5) >
+									< RB Id of uplink TBF: bit (5) > } 
+							{ 0 | 1 < Uplink Control Timeslot : bit (3) > }
+						< padding bits > } }
+					! < Non-distribution part error : bit (*) = < no string > > }
+			| 1				-- Message escape bit used to define EGPRS message contents
+				{ 00 {	{ 0 | 1 < COMPACT reduced MA : < COMPACT reduced MA IE >> }
+						< EGPRS Channel Coding Command : < EGPRS Modulation and Coding IE >>
+						< RESEGMENT : bit (1) >
+						{ 0 | 1 < DOWNLINK EGPRS Window Size : < EGPRS Window Size IE > > }
+						{ 0 | 1 < UPLINK EGPRS Window Size : < EGPRS Window Size IE > > }
+						< LINK_QUALITY_MEASUREMENT_MODE : bit (2) >
+						< Global Packet Timing Advance : < Global Packet Timing Advance IE > >
+						{ 0 | 1 <Packet Extended Timing Advance : bit (2) > }
+						< DOWNLINK_RLC_MODE {boolean enum {
+				b0 = "RLC acknowledged mode"
+				b1 = "RLC unacknowledged mode"
+
+			}} : bit (1) >
+						< CONTROL_ACK : bit (1) >
+						{ 0 | 1 < DOWNLINK_TFI_ASSIGNMENT : bit (5) > }
+						{ 0 | 1 < UPLINK_TFI_ASSIGNMENT : bit (5) > }
+						< DOWNLINK_TIMESLOT_ALLOCATION : bit (8) >
+						{ 0 | 1	< Frequency Parameters : < Frequency Parameters IE > > }
+						0			-- The value '1' was allocated in an earlier version of the protocol and shall not be used.
+						< Dynamic Allocation : < Dynamic Allocation struct > >					
+						{ null | {0 bit** = < no string >}	-- Receiver backward compatible with earlier version
+							| 1						-- Additions for REL-5
+							{ 0 | 1 < RB Id of downlink TBF : bit (5) >
+									< RB Id of uplink TBF: bit (5) > }
+							{ 0 | 1 < Uplink Control Timeslot : bit (3) > }
+						< padding bits > }
+						! < Non-distribution part error : bit (*) = < no string > > }
+				! < Message escape : { 01| 10 | 11} bit (*) = <no string> > }} 	-- Extended for future changes
+			! < Address information part error : bit (*) = < no string > > }
+		! < Distribution part error : bit (*) = < no string > > ;
+}
+
+#------------------------------------
+# TS 44.060, 11.2.29
+# Packet Uplink Assignment
+#------------------------------------
+csn.1 {
+	< Packet Uplink Assignment message content > ::=
+		< PAGE_MODE {octet enum {
+				b00 = "Normal Paging"
+				b01 = "Extended Paging"
+				b10 = "Paging Reorganization"
+				b11 = "Same as before"
+
+			}} : bit (2) >
+		{ 0 | 1 <PERSISTENCE_LEVEL : bit (4) > * 4 }
+		{	{ 0	< Global TFI : < Global TFI IE > >
+			| 10	< TLLI / G-RNTI : bit (32) >
+			| 110	< TQI : bit (16) >
+			| 111	< Packet Request Reference : < Packet Request Reference IE > > }
+			{ 0		-- Message escape
+				{	< CHANNEL_CODING_COMMAND {octet enum {
+				b00 = "CS-1"
+				b01 = "CS-2"
+				b10 = "CS-3"
+				b11 = "CS-4"
+
+			}} : bit (2) >
+					< TLLI_BLOCK_CHANNEL_CODING {boolean enum {
+				b0 = "the mobile station shall use CS-1 in GPRS TBF mode and MCS-1 in EGPRS TBF mode."
+				b1 = "the mobile station shall use the value commanded in the CHANNEL_CODING_COMMAND or EGPRS_CHANNEL_CODING_COMMAND field."
+
+			}} : bit (1) >
+					< Packet Timing Advance : < Packet Timing Advance IE > >
+					{ 0 | 1	< Frequency Parameters : < Frequency Parameters IE > > }
+					{ 01	<Dynamic Allocation : < Dynamic Allocation struct > >
+					| 10	<Single Block Allocation : < Single Block Allocation struct > >
+					| 00	< extension >
+					| 11 }		-- The value '11' was allocated in an earlier version of the protocol and shall not be used.
+					{ null | {0 bit** = < no string >} -- Receiver backward compatible with earlier version
+						| 1						-- Additions for R99
+							{ 0 | 1 <Packet Extended Timing Advance : bit (2)> }
+							{ null | {0 bit** = <no string>}	-- Receiver backward compatible with earlier version
+								| 1							-- Additions for REL-5
+									{ 0 | 1 < G-RNTI extension : bit (4) > }
+									{ 0 | 1 < RB Id : bit (5) > }					< padding bits > } }
+					! < Non-distribution part error : bit (*) = < no string > > } 
+			| 1	-- Message escape bit used to define EGPRS message contents
+				{ 00 {	{ 0 | 1 <CONTENTION_RESOLUTION_TLLI : bit(32) > }
+					{ 0 | 1 < COMPACT reduced MA : < COMPACT reduced MA IE >> }
+					< EGPRS Channel Coding Command : < EGPRS Modulation and Coding IE >>
+						< RESEGMENT : bit (1) >
+						< EGPRS Window Size : < EGPRS Window Size IE > >
+						{ 0 | 1 < Access Technologies Request : Access Technologies Request struct >}
+						< ARAC RETRANSMISSION REQUEST {boolean enum {
+				b0 = "indicates that retransmission of an ADDITIONAL MS RADIO ACCESS CAPABILITIES message is not requested"
+				b1 = "indicates that retransmission of an ADDITIONAL MS RADIO ACCESS CAPABILITIES message is requested"
+
+			}} : bit (1) >
+						< TLLI_BLOCK_CHANNEL_CODING {boolean enum {
+				b0 = "the mobile station shall use CS-1 in GPRS TBF mode and MCS-1 in EGPRS TBF mode."
+				b1 = "the mobile station shall use the value commanded in the CHANNEL_CODING_COMMAND or EGPRS_CHANNEL_CODING_COMMAND field."
+
+			}} : bit (1) >
+							{ 0 | 1 < BEP_PERIOD2 : bit(4) > }
+					< Packet Timing Advance : < Packet Timing Advance IE > >
+							{ 0 | 1 <Packet Extended Timing Advance : bit (2)> }
+						{ 0 | 1	< Frequency Parameters : < Frequency Parameters IE > > }
+						{ 01	<Dynamic Allocation : < Dynamic Allocation struct > >
+						| 10	<Multi Block Allocation : < Multi Block Allocation struct > >
+						| 00	< extension >
+						| 11 }	-- The value '11' was allocated in an earlier version of the protocol and shall not be used.
+						{ null | {0 bit** = <no string>}	-- Receiver backward compatible with earlier version
+							| 1							-- Additions for REL-5
+								{ 0 | 1 < G-RNTI extension : bit (4) > }
+								{ 0 | 1 < RB Id : bit (5) > }
+						< padding bits > }
+						! < Non-distribution part error : bit (*) = < no string > > }
+					! < Message escape : { 01| 10 | 11 } bit (*) = <no string> > }} -- Extended for future changes
+			! < Address information part error : bit (*) = < no string > > } 
+		! < Distribution part error : bit (*) = < no string > > ;
+	
+	slave <extension> ::=	-- Future extension can be done by modifying this structure
+		null ;
+	
+	slave <Dynamic Allocation struct > ::= 
+		< EXTENDED_DYNAMIC_ALLOCATION {boolean enum {
+				b0 = "Dynamic Allocation"
+				b1 = "Extended Dynamic Allocation"
+
+			}} : bit (1) >
+		{ 0 | 1 < P0 : bit (4) > 
+				< PR_MODE {boolean enum {
+				b0 = "PR mode A: for one addressed MS"
+				b1 = "PR mode B: for all MS"
+
+			}} : bit (1) > }
+		< USF_GRANULARITY {boolean enum {
+				b0 = "the mobile station shall transmit one RLC/MAC block"
+				b1 = "the mobile station shall transmit four consecutive RLC/MAC blocks"
+
+			}} : bit (1) >
+		{ 0 | 1 < UPLINK_TFI_ASSIGNMENT : bit (5) > }
+		0 						-- The value '1' was allocated in an earlier version of the protocol and shall not be used.
+		{ 0 | 1 < TBF Starting Time : < Starting Frame Number Description IE > > }
+		{ 0						-- Timeslot Allocation
+			{ 0 | 1 < USF_TN0 : bit (3) > }
+			{ 0 | 1 < USF_TN1 : bit (3) > }
+			{ 0 | 1 < USF_TN2 : bit (3) > }
+			{ 0 | 1 < USF_TN3 : bit (3) > }
+			{ 0 | 1 < USF_TN4 : bit (3) > }
+			{ 0 | 1 < USF_TN5 : bit (3) > }
+			{ 0 | 1 < USF_TN6 : bit (3) > }
+			{ 0 | 1 < USF_TN7 : bit (3) > }
+		| 1						-- Timeslot Allocation with Power Control Parameters
+			< ALPHA : bit (4) >
+			{ 0 | 1	< USF_TN0 : bit (3) >
+					< GAMMA_TN0 : bit (5) > }
+			{ 0 | 1	< USF_TN1 : bit (3) >
+					< GAMMA_TN1 : bit (5) > }
+			{ 0 | 1	< USF_TN2 : bit (3) >
+					< GAMMA_TN2 : bit (5) > }
+			{ 0 | 1	< USF_TN3 : bit (3) >
+					< GAMMA_TN3 : bit (5) > }
+			{ 0 | 1	< USF_TN4 : bit (3) >
+					< GAMMA_TN4 : bit (5) > }
+			{ 0 | 1	< USF_TN5 : bit (3) >
+					< GAMMA_TN5 : bit (5) > }
+			{ 0 | 1	< USF_TN6 : bit (3) >
+					< GAMMA_TN6 : bit (5) > }
+			{ 0 | 1	< USF_TN7 : bit (3) >
+					< GAMMA_TN7 : bit (5) > } } ;
+	
+	slave <Single Block Allocation struct > ::=
+		< TIMESLOT_NUMBER : bit (3) > 
+		{ 0 | 1 < ALPHA : bit (4) >
+		< GAMMA_TN : bit (5) >}
+		{ 0 | 1 < P0 : bit (4) >
+				0				-- The value '1' was allocated in an earlier version of the protocol and shall not be used.
+				< PR_MODE {boolean enum {
+				b0 = "PR mode A: for one addressed MS"
+				b1 = "PR mode B: for all MS"
+
+			}} : bit (1) > }
+		< TBF Starting Time : < Starting Frame Number Description IE > > ;
+	
+	slave < Multi Block Allocation struct > ::=
+		< TIMESLOT_NUMBER : bit (3) >
+		{ 0 | 1 < ALPHA : bit (4) >
+		< GAMMA_TN : bit (5) >}
+		{ 0 | 1 < P0 : bit (4) >
+				0				-- The value '1' was allocated in an earlier version of the protocol and shall not be used.
+				< PR_MODE {boolean enum {
+				b0 = "PR mode A: for one addressed MS"
+				b1 = "PR mode B: for all MS"
+
+			}} : bit (1) > }
+		< TBF Starting Time : < Starting Frame Number Description IE > >
+		< NUMBER OF RADIO BLOCKS ALLOCATED {octet enum {
+				b00 = "1 radio block reserved for uplink transmission"
+				b01 = "2 radio blocks reserved for uplink transmission"
+				b10 = "reserved for future use"
+				b11 = "reserved for future use"
+
+			}}: bit (2)>;
+	
+	slave <Access Technologies Request struct> ::= -- recursive structure allows any combination of Access technologies
+		<Access Technology Type : bit (4)>
+		{ 0 | 1 <Access Technologies Request struct> };
+}
+
+#------------------------------------
+# TS 44.060, 12.3
+# Ack/Nack Description
+#------------------------------------
+csn.1 {
+	slave < Ack/Nack Description IE > ::=
+		< FINAL_ACK_INDICATION {boolean enum {
+				b0 = "retransmission are requested and the TBF is incomplete"
+				b1 = "no retransmissions are requested and this message indicates acknowledgement of all RLC data in the TBF"
+
+			}} : bit (1) >
+		< STARTING_SEQUENCE_NUMBER : bit (7) >
+		< RECEIVED_BLOCK_BITMAP : bit (64) > ;
+	
+}
+
+#------------------------------------
+# TS 44.060, 12.3.1
+# EGPRS Ack/Nack Description
+#------------------------------------
+csn.1 {
+	slave < EGPRS Ack/Nack Description IE > ::=
+		0	< EGPRS Ack/Nack Description struct >	-- This IE fills rest of message
+		| 1	
+			ENCODECO: %{
+				/* Save the position of the length. This allows us to write it back when encoding */
+				PUSH_TAG (1, CURPOS);
+			}%
+			< bit> *8	-- Length L
+			< EGPRS Ack/Nack Description struct >
+				ENCODE: %{
+					/* We save the effective length in the "Length L" field */
+					EDIntToBits (BUFFER, TAG(1), CURPOS-TAG(1)-8, 8);
+				}% 
+				DECODE: %{}%;
+
+	slave < EGPRS Ack/Nack Description struct > ::=
+		< FINAL_ACK_INDICATION {boolean enum {
+				b0 = "retransmissions are requested and the TBF is incomplete."
+				b1 = "no retransmissions are requested and this message indicates acknowledgement of all RLC data in the TBF."
+
+			}} : bit (1) >
+		< BEGINNING_OF_WINDOW {boolean enum {
+				b0 = "SSN not equal to (V(Q)+1) mod 2048."
+				b1 = "SSN = (V(Q) +1) mod 2048"
+
+			}} : bit (1) >
+		< END_OF_WINDOW {boolean enum {
+				b0 = "[V(R) – 1] modulo SNS is not included in the bitmap."
+				b1 = "[V(R) – 1] modulo SNS is included in the bitmap."
+
+			}} : bit (1) >
+		< STARTING_SEQUENCE_NUMBER : bit (11) >
+		{ 0 | 1	< COMPRESSED_BITMAP_LENGTH: bit (7) >
+			< COMPRESSED_BITMAP_STARTING_COLOR_CODE {boolean enum {
+				b0 = "First code word in CRBB represents run length of zeros."
+				b1 = "First code word in CRBB represents run length of ones."
+
+			}}: bit (1) >
+			< COMPRESSED_RECEIVED_BLOCK_BITMAP :  
+				bit (val(COMPRESSED_BITMAP_LENGTH)) > }
+		< UNCOMPRESSED_RECEIVED_BLOCK_BITMAP: bit** > ;
+
+}
+
+#------------------------------------
+# TS 44.060, 12.5.3
+# EGPRS BEP Link Quality Measurements IE
+#------------------------------------
+csn.1 {
+	slave <EGPRS BEP Link Quality Measurements IE> ::=
+		{ 0 | 1	< GMSK_MEAN_BEP : bit (5) >
+				< GMSK_CV_BEP : bit (3) >}
+		{ 0 | 1	< 8PSK_MEAN_BEP : bit (5) >
+				< 8PSK_CV_BEP : bit (3) > };
+}
+
+#------------------------------------
+# TS 44.060, 12.5.4
+# EGPRS Timeslot Link Quality Measurements IE
+#------------------------------------
+csn.1 {
+	slave <EGPRS Timeslot Link Quality Measurements IE> ::=
+	
+	{ 0 | 1< BEP_MEASUREMENTS : BEP Measurement Report Struct >}
+	{ 0 | 1 < INTERFERENCE_MEASUREMENTS : Interference Measurement Report Struct >};
+	
+	slave < BEP Measurement Report Struct > ::=
+		{ 0 | 1	{ 0 <GMSK_MEAN_BEP _TN0 : bit (4) >
+				| 1 < 8PSK_MEAN_BEP _TN0 : bit (4) >}}
+		{ 0 | 1	{ 0 <GMSK_MEAN_BEP _TN1 : bit (4) >
+				| 1 < 8PSK_MEAN_BEP _TN1 : bit (4) >}}
+		{ 0 | 1	{ 0 <GMSK_MEAN_BEP _TN2 : bit (4) >
+				| 1 < 8PSK_MEAN_BEP _TN2 : bit (4) >}}
+		{ 0 | 1	{ 0 <GMSK_MEAN_BEP _TN3 : bit (4) >
+				| 1 < 8PSK_MEAN_BEP _TN3 : bit (4) >}}
+		{ 0 | 1	{ 0 <GMSK_MEAN_BEP _TN4 : bit (4) >
+				| 1 < 8PSK_MEAN_BEP _TN4 : bit (4) >}}
+		{ 0 | 1	{ 0 <GMSK_MEAN_BEP _TN5 : bit (4) >
+				| 1 < 8PSK_MEAN_BEP _TN5 : bit (4) >}}
+		{ 0 | 1	{ 0 <GMSK_MEAN_BEP _TN6 : bit (4) >
+				| 1 < 8PSK_MEAN_BEP _TN6 : bit (4) >}}
+		{ 0 | 1	{ 0 <GMSK_MEAN_BEP _TN7 : bit (4) >
+				| 1 < 8PSK_MEAN_BEP _TN7 : bit (4) >} };
+	
+	slave < Interference Measurement Report Struct > ::=
+	{ 0 | 1 < I_LEVEL_TN0 : bit (4) > }
+	{ 0 | 1 < I_LEVEL_TN1 : bit (4) > }
+	{ 0 | 1 < I_LEVEL_TN2 : bit (4) > }
+	{ 0 | 1 < I_LEVEL_TN3 : bit (4) > }
+	{ 0 | 1 < I_LEVEL_TN4 : bit (4) > }
+	{ 0 | 1 < I_LEVEL_TN5 : bit (4) > }
+	{ 0 | 1 < I_LEVEL_TN6 : bit (4) > }
+	{ 0 | 1 < I_LEVEL_TN7 : bit (4) > };
+	
+}
+
+#------------------------------------
+# TS 44.060, 12.7
+# Channel Request Description
+#------------------------------------
+csn.1 {
+	slave < Channel Request Description IE > ::=
+		< PEAK_THROUGHPUT_CLASS : bit (4) >
+		< RADIO_PRIORITY : bit (2) >
+		< RLC_MODE {boolean enum {
+				b0 = "RLC acknowledged mode"
+				b1 = "RLC unacknowledged mode"
+
+			}} : bit (1) >
+		< LLC_ PDU_TYPE {boolean enum {
+				b0 = "LLC PDU is SACK or ACK"
+				b1 = "LLC PDU is not SACK or ACK"
+
+			}} : bit (1) >
+		< RLC_OCTET_COUNT : bit (16) > ;
+}
+
+#------------------------------------
+# TS 44.060, 12.7a
+# Iu mode Channel Request Description
+#------------------------------------
+csn.1 {
+	slave < Iu mode Channel Request Description IE > ::=
+		< RB Id : bit (5) >
+		< RADIO_PRIORITY : bit (2) >
+		{ 0 | 1 < RLC_BLOCK_COUNT : bit (8) > }
+		{ 0 | 1 < Iu mode Channel Request Description IE > } ;	-- IE to be repeated only when 
+																		-- in a Multiple TBF request message
+}
+
+#------------------------------------
+# TS 44.060, 12.8
+# Frequency Parameters
+#------------------------------------
+csn.1 {
+	slave < Frequency Parameters IE > ::=
+		< TSC : bit (3) >
+		{ 00 < ARFCN : bit (10) >
+		| 01 < Indirect encoding : < Indirect encoding struct > >
+		| 10 < Direct encoding 1 : < Direct encoding 1 struct > >
+		| 11 < Direct encoding 2 : < Direct encoding 2 struct > > } ;
+	
+	slave < Indirect encoding struct > ::=
+		< MAIO : bit (6) >
+		< MA_NUMBER : bit (4) >
+		{ 0 | 1	< CHANGE_MARK_1 : bit (2) >
+				{ 0 | 1 < CHANGE_MARK_2 : bit (2) > } } ;
+	
+	slave < Direct encoding 1 struct > ::=
+		< MAIO : bit (6) >
+		< GPRS Mobile Allocation : < GPRS Mobile Allocation IE > > ;
+	
+	slave < Direct encoding 2 struct > ::=
+		< MAIO : bit (6) >
+		< HSN : bit (6) >
+		< Length of MA Frequency List contents : bit (4) >
+		< MA Frequency List contents : octet (val(Length of MA Frequency List contents) + 3) > ;
+	
+}
+
+#------------------------------------
+# TS 44.060, 12.10
+# Global TFI
+#------------------------------------
+csn.1 {
+	slave < Global TFI IE > ::=
+		{ 0 < UPLINK_TFI : bit (5) >
+		| 1 < DOWNLINK_TFI : bit (5) > } ;
+	
+}
+
+#------------------------------------
+# TS 44.060, 12.10a
+# GPRS Mobile Allocation
+#------------------------------------
+csn.1 {
+	slave < GPRS Mobile Allocation IE > ::=
+		< HSN : bit (6) >
+		{ 0 | 1	< RFL number list : < RFL number list struct > > }
+		{ 0	< MA_LENGTH : bit (6) >
+			< MA_BITMAP : bit (val(MA_LENGTH) + 1) >
+		| 1	{ 0 | 1	< ARFCN index list : < ARFCN index list struct > > } } ;
+	slave < RFL number list struct > ::=
+		< RFL_NUMBER : bit (4) >
+		{ 0 | 1	< RFL number list struct > } ;
+	slave < ARFCN index list struct > ::=
+		< ARFCN_INDEX : bit (6) >
+		{ 0 | 1	< ARFCN index list struct > } ;
+}
+
+#------------------------------------
+# TS 04.60, 12.10d
+#------------------------------------
+csn.1 {
+	slave < EGPRS Window Size IE > ::= <EGPRS Window Size: bit (5)>;
+	
+	-- The definition of the entries below is missing from 44.060
+	-- It could be incorrect.
+	slave < EGPRS Modulation and coding Scheme > ::= <Scheme: bit (4)>;
+	slave < EGPRS Modulation and Coding IE > ::= <Scheme: bit (4)>;
+}
+
+#------------------------------------
+# TS 44.060, 12.11
+# Packet Request Reference
+#------------------------------------
+csn.1 {
+	slave < Packet Request Reference IE > ::=
+		< RANDOM_ACCESS_INFORMATION value : bit (11) >
+		< FRAME_NUMBER : bit (16) > ;
+	
+}
+
+#------------------------------------
+# TS 44.060, 12.12
+# Packet Timing Advance
+#------------------------------------
+csn.1 {
+	slave < Packet Timing Advance IE > ::=
+		{ 0 | 1	< TIMING_ADVANCE_VALUE : bit (6) > }
+		{ 0 | 1	< TIMING_ADVANCE_INDEX : bit (4) >
+				< TIMING_ADVANCE_TIMESLOT_NUMBER : bit (3) > } ;
+}
+
+#------------------------------------
+# TS 44.060, 12.12a
+# Global Packet Timing Advance
+#------------------------------------
+csn.1 {
+	slave < Global Packet Timing Advance IE > ::=
+				{ 0 | 1 < TIMING_ADVANCE_VALUE : bit (6) > }
+				{ 0 | 1 < UPLINK_TIMING_ADVANCE_INDEX : bit (4) >
+						< UPLINK_TIMING_ADVANCE_TIMESLOT_NUMBER : bit (3) > }
+				{ 0 | 1 < DOWNLINK_TIMING_ADVANCE_INDEX : bit (4) >
+						< DOWNLINK_TIMING_ADVANCE_TIMESLOT_NUMBER : bit (3) > };
+}
+
+#------------------------------------
+# TS 44.060, 12.13
+# Power Control Parameters
+#------------------------------------
+csn.1 {
+	slave < Power Control Parameters IE > ::=
+		< ALPHA : bit (4) >
+		{ 0 | 1 < GAMMA_TN0 : bit (5) > }
+		{ 0 | 1 < GAMMA_TN1 : bit (5) > }
+		{ 0 | 1 < GAMMA_TN2 : bit (5) > }
+		{ 0 | 1 < GAMMA_TN3 : bit (5) > }
+		{ 0 | 1 < GAMMA_TN4 : bit (5) > }
+		{ 0 | 1 < GAMMA_TN5 : bit (5) > }
+		{ 0 | 1 < GAMMA_TN6 : bit (5) > }
+		{ 0 | 1 < GAMMA_TN7 : bit (5) > } ;
+	
+}
+
+#------------------------------------
+# TS 44.060, 12.16a
+# GERAN Radio Network Temporary Identity (G-RNTI)
+#------------------------------------
+csn.1 {
+	slave < TLLI / G-RNTI IE > ::=
+		< S-RNTI : bit (20) >
+		< Serving BSC Identity : bit (12) > ;
+}
+
+#------------------------------------
+# TS 44.060, 12.21
+# Starting Frame Number Description
+#------------------------------------
+csn.1 {
+	slave < Starting Frame Number Description IE > ::=
+		{ 0 < Absolute Frame Number Encoding >
+		| 1 < Relative Frame Number Encoding > } ;
+}
+
+#------------------------------------
+# TS 04.60, 12.21.1
+#------------------------------------
+csn.1 {
+	slave < Absolute Frame Number Encoding > ::=
+		<T1: bit (5)>
+		<T3: bit (6)>
+		<T2: bit (5)> ;
+}
+
+#------------------------------------
+# TS 04.60, 12.21.2
+#------------------------------------
+csn.1 {
+	slave < Relative Frame Number Encoding > ::=
+		<k: bit (13)>;
+}
+
+#------------------------------------
+# TS 44.060, 12.26
+# Extension Bits IE
+#------------------------------------
+csn.1 {
+	slave < Extension Bits IE > ::=
+		< extension length : bit (6) >
+		< spare bit> * (val(extension length)+1) ;
+	
+}
+
+#------------------------------------
+# TS 44.060, 12.29
+# COMPACT reduced MA
+#------------------------------------
+csn.1 {
+	slave < COMPACT reduced MA IE > ::=
+		<Length of Reduced MA bitmap : bit (7) >
+		<Reduced MA bitmap : bit( val( Length of Reduced MA bitmap ) ) >
+		{ 0 | 1 <MAIO_2 : bit(6) >};
+}
+
+#------------------------------------
+# TS 44.060, 12.30
+#------------------------------------
+csn.1 {
+	slave < MS Radio Access Capability 2 IE > ::=
+		< MS RA capability : < MS RA capability value part struct > > ;
+
+	-- From 24.008
+	slave <MS RA capability value part struct >::= --recursive structure allows any number of Access technologies
+		< Access Technology Type: bit (4) >
+		< Access capabilities : <Access capabilities struct> >
+		{ 0 | 1 <MS RA capability value part struct> } ;
+
+	slave < Access capabilities struct > ::=
+		< Length : bit (7) > -- length in bits of Content and spare bits
+		ENCODE: %{PUSH_TAG (2, CURPOS);}%
+		DECODE: %{PUSH_TAG (1, (EDBitsToInt (BUFFER, CURPOS-7, 7)+CURPOS));}% 
+		<Access capabilities : <Content>>
+		<spare bits>*ENCODE_EXPR: %{0}% DECODE_EXPR: %{(TAG(1)>(int)CURPOS? TAG(1)-CURPOS:(CURPOS=TAG(1),0))}% -- expands to the indicated length
+		ENCODE: %{EDIntToBits (BUFFER, TAG(2)-7, CURPOS-TAG(2), 7);}% 
+		DECODE: %{}%;
+	  -- may be used for future enhancements
+
+	slave < Content > ::=
+		< RF Power Capability : bit (3) >
+		{ 0 | 1 <A5 bits : <A5 bits> > } -- zero means that the same values apply for parameters as in the immediately preceeding Access capabilities field within this IE
+		-- The presence of the A5 bits is mandatory in the 1st Access capabilities struct within this IE.
+		< ES IND : bit >
+		< PS : bit >
+		< VGCS : bit >
+		< VBS : bit >
+		{ 0 | 1 < Multislot capability : Multislot capability struct > } -- zero means that the same values for multislot parameters as given in an earlier Access capabilities field within this IE apply also here
+		-- Additions in release 99
+		{ 0 | 1 < m8PSK Power Capability : bit(2) >} -- ’1’ also means 8PSK modulation capability in uplink.
+		< COMPACT Interference Measurement Capability : bit >
+		< Revision Level Indicator : bit >
+		< UMTS FDD Radio Access Technology Capability : bit > -- 3G RAT
+		< UMTS 3.84 Mcps TDD Radio Access Technology Capability : bit > -- 3G RAT
+		< CDMA 2000 Radio Access Technology Capability : bit > -- 3G RAT
+		< UMTS 1.28 Mcps TDD Radio Access Technology Capability: bit > -- 3G RAT
+		< MS_EXT_UTBF : bit >;
+		-- error: struct too short, assume features do not exist
+		-- error: struct too long, ignore data and jump to next Access technology
+
+	slave < Multislot capability struct > ::=
+		{ 0 | 1 < HSCSD multislot class : bit (5) > }
+		{ 0 | 1 < GPRS multislot class : bit (5) > < GPRS Extended Dynamic Allocation Capability : bit > }
+		{ 0 | 1 < SMS_VALUE : bit (4) > < SM_VALUE : bit (4) > }
+			-- Additions in release 99
+		{ 0 | 1 < ECSD multislot class : bit (5) > }
+		{ 0 | 1 < EGPRS multislot class : bit (5) > < EGPRS Extended Dynamic Allocation Capability : bit > }
+		{0 | 1 < DTM GPRS Multi Slot Sub-Class: bit(2)>
+				<MAC Mode Support : bit>
+				{0 | 1 <DTM EGPRS Multi Slot Sub-Class : bit(2)> }
+		};
+			-- error: struct too short, assume features do not exist
+}	

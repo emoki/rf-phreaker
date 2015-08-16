@@ -1,0 +1,2134 @@
+/****************************************************************************
+	Dafocus 
+	
+	Implementation of 3GPP TS 24.008 V6.19.0 (2008-06)
+****************************************************************************/
+declare gsm-0407 incoming message set Layer3;
+
+/*-----------------------------------------------------------------------
+    MESSAGE: AUTHENTICATION RESPONSE
+    CHAPTER: TS 24.008, 9.2.3
+  DIRECTION: UPLINK
+-----------------------------------------------------------------------*/
+gsm-0407 AUTHENTICATION_RESPONSE_UP {
+  in message set Layer3;
+  ProtocolDiscriminator = 0101;
+  MessageType           = xx010100;
+
+     AuthRespParam                        M V   4       integer             ; # 10.5.3.2
+  21 AuthRespParamExt                     O TLV 3-14    binary              ; # 10.5.3.2.1
+};
+
+/*-----------------------------------------------------------------------
+    MESSAGE: CM SERVICE REQUEST
+    CHAPTER: TS 24.008, 9.2.9
+  DIRECTION: UPLINK
+-----------------------------------------------------------------------*/
+gsm-0407 CM_SERVICE_REQUEST_UP {
+  in message set Layer3;
+  ProtocolDiscriminator = 0101;
+  MessageType           = xx100100;
+
+     CmServType                           M V   1/2     integer             ; # 10.5.3.3
+     CiphKeySequenceNum                   M V   1/2     integer             ; # 10.5.1.2
+     MobileStationClassmark               M LV  4       MobileStationClassmark2; # 10.5.1.6
+     MobileId                             M LV  2-9     MobileId            ; # 10.5.1.4
+  8- Priority                             O TV  1       integer             ; # 10.5.1.11
+};
+
+/*-----------------------------------------------------------------------
+    MESSAGE: LOCATION UPDATING ACCEPT
+    CHAPTER: TS 24.008, 9.2.13
+  DIRECTION: DOWNLINK
+-----------------------------------------------------------------------*/
+gsm-0407 LOCATION_UPDATING_ACCEPT_DN {
+  in message set Layer3;
+  ProtocolDiscriminator = 0101;
+  MessageType           = xx000010;
+
+     LocationAreaId                       M V   5       LocationAreaId      ; # 10.5.1.3
+  17 MobileId                             O TLV 3-10    MobileId            ; # 10.5.1.4
+  A1 FollowOnProceed                      O T   1       FollowOnProceed     ; # 10.5.3.7
+  A2 CtsPermission                        O T   1       CtsPermission       ; # 10.5.3.10
+  4A EquivPlmns                           O TLV 5-17    PlmnList            ; # 10.5.1.13
+  34 EmergencyNumberList                  O TLV 5-50 force EmergencyNumberList ; # 10.5.3.13
+};
+
+/*-----------------------------------------------------------------------
+    MESSAGE: ALERTING
+    CHAPTER: TS 24.008, 9.3.1.1
+  DIRECTION: DOWNLINK
+-----------------------------------------------------------------------*/
+gsm-0407 ALERTING_DN {
+  in message set Layer3;
+  ProtocolDiscriminator = 0011;
+  MessageType           = xx000001;
+
+  HandleTransactionIdentifier;
+
+  1C Facility                             O TLV >=2     binary /* See 3GPP TS 24.080 */ ; # 10.5.4.15
+  1E ProgrInd                             O TLV 4       ProgrInd            ; # 10.5.4.21
+  7E UserUser                             O TLV 3-131   binary              ; # 10.5.4.25
+};
+
+
+/*-----------------------------------------------------------------------
+    MESSAGE: CALL PROCEEDING
+    CHAPTER: TS 24.008, 9.3.3
+  DIRECTION: DOWNLINK
+-----------------------------------------------------------------------*/
+gsm-0407 CALL_PROCEEDING_DN {
+  in message set Layer3;
+  ProtocolDiscriminator = 0011;
+  MessageType           = xx000010;
+
+  HandleTransactionIdentifier;
+
+  D- RepeatInd                            C TV  1       integer             ; # 10.5.4.22
+  04 BearerCpblty1                        O TLV 3-16    BearerCpblty        ; # 10.5.4.5
+  04 BearerCpblty2                        O TLV 3-16    BearerCpblty        ; # 10.5.4.5
+  1C Facility                             O TLV >=2     binary /* See 3GPP TS 24.080 */ ; # 10.5.4.15
+  1E ProgrInd                             O TLV 4       ProgrInd            ; # 10.5.4.21
+  8- PriorityGranted                      O TV  1       integer             ; # 10.5.1.11
+  2F NetwkCallControlCapabil              O TLV 3       NetwkCallControlCapabil; # 10.5.4.29
+};
+
+
+/*-----------------------------------------------------------------------
+    MESSAGE: CONNECT ACKNOWLEDGE
+    CHAPTER: TS 24.008, 9.3.6
+  DIRECTION: BOTH
+-----------------------------------------------------------------------*/
+gsm-0407 CONNECT_ACKNOWLEDGE {
+  in message set Layer3;
+  ProtocolDiscriminator = 0011;
+  MessageType           = xx001111;
+
+  HandleTransactionIdentifier;
+
+};
+
+/*-----------------------------------------------------------------------
+    MESSAGE: DISCONNECT
+    CHAPTER: TS 24.008, 9.3.7.1
+  DIRECTION: DOWNLINK
+-----------------------------------------------------------------------*/
+gsm-0407 DISCONNECT_DN {
+  in message set Layer3;
+  ProtocolDiscriminator = 0011;
+  MessageType           = xx100101;
+
+  HandleTransactionIdentifier;
+
+     Cause                                M LV  3-31    Cause               ; # 10.5.4.11
+  1C Facility                             O TLV >=2     binary /* See 3GPP TS 24.080 */ ; # 10.5.4.15
+  1E ProgrInd                             O TLV 4       ProgrInd            ; # 10.5.4.21
+  7E UserUser                             O TLV 3-131   binary              ; # 10.5.4.25
+  7B AllowedActionsCcbs                   O TLV 3       AllowedActionsCcbs  ; # 10.5.4.27
+};
+
+/*-----------------------------------------------------------------------
+    MESSAGE: SETUP
+    CHAPTER: TS 24.008, 9.3.23.1
+  DIRECTION: DOWNLINK
+-----------------------------------------------------------------------*/
+gsm-0407 SETUP_DN {
+  in message set Layer3;
+  ProtocolDiscriminator = 0011;
+  MessageType           = xx000101;
+
+  HandleTransactionIdentifier;
+
+  D- BcRepeatInd                          C TV  1       integer             ; # 10.5.4.22
+  04 BearerCpblty1                        O TLV 3-16    BearerCpblty        ; # 10.5.4.5
+  04 BearerCpblty2                        O TLV 3-16    BearerCpblty        ; # 10.5.4.5
+  1C Facility                             O TLV >=2     binary /* See 3GPP TS 24.080 */ ; # 10.5.4.15
+  1E ProgrInd                             O TLV 4       ProgrInd            ; # 10.5.4.21
+  34 Signal                               O TV  2       integer             ; # 10.5.4.23
+  5C CallingPartyBcdNum                   O TLV 3-14    CallingPartyBcdNum  ; # 10.5.4.9
+  5D CallingPartySubAddr                  O TLV 2-23    CallingPartySubaddr ; # 10.5.4.10
+  5E CalledPartyBcdNum                    O TLV 3-19    CalledPartyBcdNum   ; # 10.5.4.7
+  6D CalledPartySubAddr                   O TLV 2-23    CalledPartySubaddr  ; # 10.5.4.8
+  74 RedirPartyBcdNum                     O TLV 3-19    RedirPartyBcdNum    ; # 10.5.4.21b
+  75 RedirPartySubAddr                    O TLV 2-23    RedirPartySubaddr   ; # 10.5.4.21c
+  D- LlcRepeatInd                         O TV  1       integer             ; # 10.5.4.22
+  7C LowLayerCpbilityI                    O TLV 2-18    binary              ; # 10.5.4.18
+  7C LowLayerCpbilityIi                   C TLV 2-18    binary              ; # 10.5.4.18
+  D- HlcRepeatInd                         O TV  1       integer             ; # 10.5.4.22
+  7D HighLayerCpbilityI                   O TLV 2-5     HighLayerCpbility   ; # 10.5.4.16
+  7D HighLayerCpbilityIi                  C TLV 2-5     HighLayerCpbility   ; # 10.5.4.16
+  7E UserUser                             O TLV 3-35    binary              ; # 10.5.4.25
+  8- Priority                             O TV  1       integer             ; # 10.5.1.11
+  19 Alert                                O TLV 3       AlertingPattern     ; # 10.5.4.26
+  2F NetwkCallControlCapabil              O TLV 3       NetwkCallControlCapabil; # 10.5.4.29
+  3A CauseOfNoCli                         O TLV 3       integer             ; # 10.5.4.30
+  41 BackupBearerCapability               O TLV 3-15    BackupBearerCapability; # 10.5.4.4a
+};
+
+
+#------------------------------------
+# TS 24.008, 10.5.1.3
+#------------------------------------
+bit-field LocationAreaId {
+	size: 5 octets;
+	octet 1	bits 5-8: MCC2 integer;
+	octet 1	bits 1-4: MCC1 integer;
+	octet 2	bits 5-8: MNC3 integer;
+	octet 2	bits 1-4: MCC3 integer;
+	octet 3	bits 5-8: MNC2 integer;
+	octet 3	bits 1-4: MNC1 integer;
+	octet 5 bits 1-16: LAC integer;
+}
+
+#------------------------------------
+# TS 24.008, 10.5.1.4
+#------------------------------------
+dcl-type MobileId {
+	size 1 octet ... 9 octets;
+	type struct {
+		# If TMSI/P-TMSI it is coded using 4 digits of IdentityDigit
+		IdentityDigit: sequence [15] integer;
+		IdentityType:  integer enum {
+			b001 = "IMSI"
+			b010 = "IMEI"
+			b011 = "IMEISV"
+			b100 = "TMSI/P-TMSI"
+			b000 = "No Identity"
+		};
+	}
+
+  encode %{
+  	int i;
+		
+		if (Source->IdentityType == 4) {
+	  	/* Push digit 1 */
+ 			PUSH_INT (0xf4, 8);
+ 			
+ 			/* Push the values */
+ 			for (i=0; i<Source->IdentityDigit.items; i++) {
+ 				PUSH_INT (Source->IdentityDigit.data [i], 8);
+ 			}
+			return (Source->IdentityDigit.items + 1) << 3;
+		} else {
+			
+	  	/* Push digit 1 */
+	 		PUSH_INT (Source->IdentityDigit.items == 0? 15 : Source->IdentityDigit.data [0], 4);
+	
+	 		/* Push odd/even indicator */
+	  	PUSH_INT ((Source->IdentityDigit.items & 1) ? 1 : 0, 1);
+	
+	  	/* Push identity type */
+	  	PUSH_INT (Source->IdentityType, 3);
+			
+	  	/* Push remaining digits */
+	  	for (i=1; i<Source->IdentityDigit.items; i+=2) {
+	  		PUSH_INT (i+1 >= Source->IdentityDigit.items? 15 : Source->IdentityDigit.data [i+1], 4);
+	  		PUSH_INT (Source->IdentityDigit.data [i], 4);
+	  	}
+			return ((Source->IdentityDigit.items >> 1) << 3) + 8;
+	  }
+  }%
+
+  decode %{
+  	int i, odd;
+
+  	/* Shift digit 1 (we don't know yet whether it is valid or not) */
+  	i = SHIFT_INT (4);
+
+  	/* Shift odd indicator */
+  	odd = SHIFT_INT (1);
+
+		/* Now we know exactly how many items to expect */
+  	SETITEMS_c_MobileId_IdentityDigit (&Destin->IdentityDigit, (Length >> 2) - (odd ? 1 : 2));
+
+  	/* Now we know whether digit 1 is valid or not */
+  	if (Destin->IdentityDigit.items > 0) Destin->IdentityDigit.data [0] = i;
+
+		/* Extract identity type */
+		Destin->IdentityType = SHIFT_INT (3);
+	
+		/* If decoding a TMSI/P-TMSI, just get the following bytes */
+		if (Destin->IdentityType == 4) {
+			SETITEMS_c_MobileId_IdentityDigit (&(Destin->IdentityDigit), (Length>>3) - 1);
+			for (i=0; i < Destin->IdentityDigit.items; i++) {
+				Destin->IdentityDigit.data [i] = SHIFT_INT (8);
+			}
+		}
+		else {
+	  	/* Get the remaining digits */
+	  	for (i=1; i < Destin->IdentityDigit.items; i+=2) {
+	  		if (i+1 >= Destin->IdentityDigit.items) {
+	  			SHIFT_INT (4); /* Discard it! */
+	  		}
+	  		else {
+	  			Destin->IdentityDigit.data [i+1] = SHIFT_INT (4);
+	  		}
+	 			Destin->IdentityDigit.data [i] = SHIFT_INT (4);
+	  	}
+		}
+		return Length;
+  }%
+}
+
+#------------------------------------
+# TS 24.008, 10.5.1.6
+#------------------------------------
+bit-field MobileStationClassmark2 {
+	size: 3 octets;
+	octet 1 {
+		bit 8: spare1 void default = 0;
+		bits 6-7: RevisionLevel integer;
+		bit 5: EsInd boolean;
+		bit 4: A5_1 boolean;
+		bits 1-3: RFPowerCapability integer;
+	};
+	octet 2 {
+		bit 8: spare2 void default = 0;
+		bit 7: PSCapability boolean;
+		bits 5-6: SSScreenIndicator integer;
+		bit 4: SMCapability boolean;
+		bit 3: VBS boolean;
+		bit 2: VGCS boolean;
+		bit 1: FC boolean;
+	};
+	octet 3 {
+		bit 8: CM3 boolean;
+		bit 7: spare3 void default = 0;
+		bit 6: LCSVA_CAP boolean;
+		bit 5: UCS2 boolean;
+		bit 4: SoLSA boolean;
+		bit 3: CMSP boolean;
+		bit 2: A5_3 boolean;
+		bit 1: A5_2 boolean;
+	};
+}
+
+#------------------------------------
+# TS 24.008, 10.5.1.13
+#------------------------------------
+bit-field Plmn {
+	size: 3 octets;
+	octet 1	bits 5-8: MCC2 integer;
+	octet 1	bits 1-4: MCC1 integer;
+	octet 2	bits 5-8: MNC3 integer;
+	octet 2	bits 1-4: MCC3 integer;
+	octet 3	bits 5-8: MNC2 integer;
+	octet 3	bits 1-4: MNC1 integer;
+}
+
+sequence PlmnList [5] Plmn;
+
+#------------------------------------
+# TS 24.008, 10.5.3.13
+#------------------------------------
+dcl-type TBCDEmergencyNumber {
+	size 16 octets;
+	type struct {
+		ServiceCategory: ServCategory;
+		Numbers: sequence [32] octet;
+	};
+
+  encode %{
+		int i, Ret;
+
+		/* Skip the place where the length is saved */
+		CurrOfs += 8;
+
+  	/* Encode the ServiceCategory */
+  	Ret = ENCODE_c_ServCategory (Buffer, CurrOfs, &(Source->ServiceCategory));
+  	if (Ret < 0) return Ret;
+  	CurrOfs += Ret;
+
+  	/* Encode the numbers */
+		for (i=0; i < Source->Numbers.items; i+=2) {
+			if (i+1 >= Source->Numbers.items) PUSH_INT (15, 4);
+			else PUSH_INT (Source->Numbers.data [i+1], 4);
+			PUSH_INT (Source->Numbers.data [i], 4);
+		}
+
+		/* Encode back the length */
+		EDIntToBits (Buffer, BitOffset, (CurrOfs - BitOffset - 8) >> 3, 8);
+
+		return (CurrOfs - BitOffset);
+  }%
+
+  decode %{
+		int IELength, Ret;
+  	int nibbles;
+  	int i, odd;
+  	
+  	/* Read the IE Length */
+  	IELength = SHIFT_INT (8);
+  	
+  	/* Decode the ServiceCategory */
+  	Ret = DECODE_c_ServCategory (Buffer, CurrOfs, &(Destin->ServiceCategory), 8);
+  	if (Ret < 0) return Ret;
+  	CurrOfs += Ret;
+  	
+  	/* Convert IELength from octets to bits */
+  	IELength = (IELength - 1) * 8;
+  	
+  	/* Calculate the number of expected nibbles */
+  	nibbles = IELength >> 2;
+  	
+  	/* Find out too see whether items are odd or even */
+  	odd = (EDBitsToInt (Buffer, CURPOS+IELength-8, 4) == 15);
+  	
+  	SETITEMS_c_TBCDEmergencyNumber_Numbers (&(Destin->Numbers), (odd? nibbles-1 : nibbles));
+  	
+  	for (i=0; i<nibbles && i<32; i+=2) {
+  		if (!odd || i<nibbles-1) Destin->Numbers.data [i+1] = SHIFT_INT (4);
+  		else CurrOfs += 4;
+  		Destin->Numbers.data [i] = SHIFT_INT (4);
+  	}
+
+		return (CurrOfs - BitOffset);
+  }%
+}
+
+sequence EmergencyNumberList [6] TBCDEmergencyNumber;
+
+#------------------------------------
+# TS 24.008, 10.5.4.4a
+#------------------------------------
+0/1ext-field BackupBearerCapability {
+	size: 1 octets;
+  max size: 13 octets;
+	1ext octet 3 {
+		bits 6-7: RadioChannelRequirement integer;
+		bit 5: CodingStd boolean;
+		bit 4: TransferMode boolean;
+		bits 1-3: InformationTransferCapability integer;
+	};
+	1ext octet 4* {
+		bit 7: Compress boolean;
+		bits 5-6: Structure octet;
+		bit 4: DuplMode boolean;
+		bit 3: Configured boolean;
+		bit 2: NIRR boolean;
+		bit 1: Established boolean;
+	};
+	0/1ext octet 5* {
+		bits 6-7: AccessId void default=0;
+		bits 4-5: RateAdaption octet;
+		bits 1-3: SignallinAccessProtocol octet;
+	};
+	1ext octet 5a* {
+		bits 6-7: OtherITC octet;
+		bits 4-5: OtherRateAdaption octet;
+		bits 1-3: spare5a void default=0;
+	};
+	0/1ext octet 6* {
+		bits 6-7: Layer1id void default=1;
+		bits 2-5: UserInfoLayer1Protocol octet;
+		bit 1: Asynchronous boolean;
+	};
+	0/1ext octet 6a* {
+		bit 7: NumbStopBits boolean;
+		bit 6: Negotiations boolean;
+		bit 5: NumbDataBits boolean;
+		bit 1-4: UserRate octet;
+	};
+	0/1ext octet 6b* {
+		bits 6-7: IntermedRate octet;
+		bit 5: NIConTX boolean;
+		bit 4: NIConRX boolean;
+		bits 1-3: Parity octet;
+	};
+	0/1ext octet 6c* {
+		bits 6-7: ConnectionElement octet;
+		bits 1-5: ModemType octet;
+	};
+	0/1ext octet 6d* {
+		bits 6-7: OtherModemType octet;
+		bits 1-5: FixedNetworkUserRate octet;
+	};
+	0/1ext octet 6e* {
+		bits 4-7: AcceptableChannelCodings octet;
+		bits 1-3: MaxNumOfTrafficChannels octet;
+	};
+	0/1ext octet 6f* {
+		bits 5-7: UIMI octet;
+		bits 1-4: WantedAirInterfUserRate octet;
+	};
+	1ext octet 6g* {
+		bits 5-7: AcceptableChCodingsExt octet;
+		bits 3-4: AsymmetryInd octet;
+		bits 1-2: spare6g void default = 0;
+	};
+	1ext octet 7* {
+		bit 6-7: Layer2id void default = 2;
+		bit 1-5: USerInfoLayer2Protocol octet;
+	};
+}
+
+
+#------------------------------------
+# TS 24.008, 10.5.4.5
+#------------------------------------
+0/1ext-field BearerCpblty {
+	size: 1 octets;
+  max size: 14 octets;
+	0/1ext octet 3 {
+		bits 6-7: RadioChannelRequirement integer;
+		bit 5: CodingStd boolean;
+		bit 4: TransferMode boolean;
+		bits 1-3: InformationTransferCapability integer;
+	};
+	0/1ext octet 3a* {
+		bit 7: Coding1 boolean;
+		bit 5-6: spare3a void default=0;
+		bits 1-4: SpeechVersionIndicator1 integer;
+	};
+	0/1ext octet 3b* {
+		bit 7: Coding2 boolean;
+		bit 5-6: spare3b void default=0;
+		bits 1-4: SpeechVersionIndicator2 integer;
+	};
+	0/1ext octet 3c* {
+		bit 7: Coding3 boolean;
+		bit 5-6: spare3c void default=0;
+		bits 1-4: SpeechVersionIndicator3 integer;
+	};
+	1ext octet 3d* {
+		bit 7: Coding4 boolean;
+		bit 5-6: spare3d void default=0;
+		bits 1-4: SpeechVersionIndicator4 integer;
+	};
+	1ext octet 4* {
+		bit 7: Compress boolean;
+		bits 5-6: Structure integer;
+		bit 4: DuplMode boolean;
+		bit 3: Configuration boolean;
+		bit 2: NIRR boolean;
+		bit 1: Establishment boolean;
+	};
+	0/1ext octet 5* {
+		bits 6-7: AccessId integer;
+		bits 4-5: RateAdaption integer;
+		bits 1-3: SignallingAccessProtocol integer;
+	};
+	0/1ext octet 5a* {
+		bits 6-7: OtherITC integer;
+		bits 4-5: OtherRateAdaption integer;
+		bits 1-3: spare5a void default = 0;
+	};
+	1ext octet 5b* {
+		bit 7: HDR boolean;
+		bit 6: MultiFrame boolean;
+		bit 5: Mode boolean;
+		bit 4: LLI boolean;
+		bit 3: AssigNorE boolean;
+		bit 2: IbmNeg boolean;
+		bit 1: spare5b void default = 0;
+	};
+	0/1ext octet 6* {
+		bit 6-7: Layer1ID integer;
+		bit 2-5: UserInfoLayer1Protocol integer;
+		bit 1: ASync boolean;
+	};
+	0/1ext octet 6b* {
+		bit 6-7: IntermediateRate integer;
+		bit 5: NICOnTX boolean;
+		bit 4: NICOnRX boolean;
+		bit 1-3: Parity integer;
+	};
+	0/1ext octet 6c* {
+		bit 6-7: ConnectionElement integer;
+		bit 1-5: ModemType integer;
+	};
+	0/1ext octet 6d* {
+		bit 6-7: OtherModemType integer;
+		bit 1-5: FixedNetworkUserRate integer;
+	};
+	0/1ext octet 6e* {
+		bit 4-7: AcceptableChannelCodings integer;
+		bit 1-3: MaxNumberOfTrafficChannels integer;
+	};
+	0/1ext octet 6f* {
+		bit 5-7: UIMI integer;
+		bit 1-4: WantedAirInterfaceUserRate integer;
+	};
+	1ext octet 6g* {
+		bit 5-7: AcceptableChannelCodingExt integer;
+		bit 3-4: AsymmetryIndication integer;
+		bit 1-2: spare6g void default = 0;
+	};
+	1ext octet 7* {
+		bit 6-7: Layer2ID void default = 2;
+		bit 1-5: UserInfoLayer2Protocol integer;
+	};
+}
+
+#------------------------------------
+# TS 24.008, 10.5.4.7
+#------------------------------------
+0/1ext-field CalledPartyBcdNum {
+	size: 1 octets;
+  max size: 17 octets;
+  1ext octet 3 {
+  	bits 5-7: TypeOfNumber integer;
+  	bits 1-4: NumberingPlanIdent integer;
+  };
+  remainder: Number TBCDArray;
+}
+
+dcl-type TBCDArray {
+	size 16 octets;
+	type sequence [32] integer;
+
+  encode %{
+		int i;
+		for (i=0; i < Source->items; i+=2) {
+			if (i+1 >= Source->items) PUSH_INT (15, 4);
+			else PUSH_INT (Source->data [i+1], 4);
+			PUSH_INT (Source->data [i], 4);
+		}
+		return i<<2;
+  }%
+
+  decode %{
+  	int nibbles = Length >> 2;
+  	int i, odd;
+  	
+  	/* Find out too see whether items are odd or even */
+  	odd = (EDBitsToInt (Buffer, CURPOS+Length-8, 4) == 15);
+  	SETITEMS_c_TBCDArray (Destin, (odd? nibbles-1 : nibbles));
+  	
+  	for (i=0; i<nibbles; i+=2) {
+  		if (!odd || i<nibbles) Destin->data [i+1] = SHIFT_INT (4);
+  		Destin->data [i] = SHIFT_INT (4);
+  	}
+
+		return Length;
+  }%
+}
+
+#------------------------------------
+# TS 24.008, 10.5.4.8
+#------------------------------------
+bit-field CalledPartySubaddr {
+	size: 1 octet;
+  max size: 21 octets;
+  bit 8: ext void default = 1;
+  bit 5-7: TypeOfSubaddress integer;
+  bit 4: OddEvenIndicator boolean;
+  bits 1-3: spare void default = 0;
+  remainder: SubaddressInformation binary;
+}
+
+#------------------------------------
+# TS 24.008, 10.5.4.9
+#------------------------------------
+0/1ext-field CallingPartyBcdNum {
+	size: 1 octets;
+  max size: 12 octets;
+  0/1ext octet 3 {
+  	bits 5-7: TypeOfNumber integer;
+  	bits 1-4: NumberingPlanIdent integer;
+  };
+  1ext octet 3a* {
+  	bits 6-7: PresentationIndicator integer;
+	  bits 3-5: spare void default = 0;
+  	bits 1-2: ScreeningIndicator integer;
+  };
+  remainder: Number TBCDArray;
+}
+
+#------------------------------------
+# TS 24.008, 10.5.4.10
+#------------------------------------
+bit-field CallingPartySubaddr {
+	size: 1 octets;
+  max size: 21 octets;
+  bit 8: ext void default = 1;
+  bit 5-7: TypeOfSubaddress integer;
+  bit 4: OddEvenIndicator boolean;
+  bits 1-3: spare void default = 0;
+  remainder: SubaddressInformation binary;
+}
+
+#------------------------------------
+# TS 24.008, 10.5.4.11
+#------------------------------------
+0/1ext-field Cause {
+	size: 2 octets;
+  max size: 30 octets;
+  0/1ext octet 3 {
+  	bits 6-7: CodingStandard integer;
+  	bit 5: spare void default = 0;
+  	bits 1-4: Location integer;
+  };
+  1ext octet 3a* {
+  	bits 1-7: Recommendation integer;
+  };
+  1ext octet 4 {
+  	bits 1-7: CauseValue integer;
+  };
+  remainder: diagnostic binary;
+}
+
+#------------------------------------
+# TS 24.008, 10.5.4.16
+#------------------------------------
+0/1ext-field HighLayerCpbility {
+	size: 1 octets;
+  max size: 3 octets;
+	1ext octet 3* {
+		bits 6-7: CodingStandard integer;
+		bits 3-5: Interpretation integer;
+		bits 1-2: PresentationMethod integer;
+	};
+	0/1ext octet 4* {
+		bits 1-7: HighLayerCharacteristicsId integer;
+	};
+	1ext octet 4a*  {
+		bits 1-7: ExtHighLayerCharacteristicsId integer;
+	};
+}
+
+#------------------------------------
+# TS 24.008, 10.5.4.21
+#------------------------------------
+bit-field ProgrInd {
+	size: 2 octets;
+	octet 1 {
+		bit 8: ext1 void default = 1;
+		bits 6-7: CodingStandard integer;
+		bit 5: spare void default = 0;
+		bits 1-4: location integer;
+	};
+	octet 2 {
+		bit 8: ext2 void default = 1;
+		bit 1-7: ProgressDescription integer;
+	};
+}
+
+#------------------------------------
+# TS 24.008, 10.5.4.21a
+#------------------------------------
+bit-field RecallType {
+	size: 1 octets;
+	bits 4-8: spare void default = 0;
+	bits 1-3: RecallType integer;
+}
+
+#------------------------------------
+# TS 24.008, 10.5.4.21b
+#------------------------------------
+0/1ext-field RedirPartyBcdNum {
+	size: 1 octets;
+  max size: 17 octets;
+  0/1ext octet 3 {
+  	bits 5-7: TypeOfNumber integer;
+  	bits 1-4: NumberingPlanIdent integer;
+  };
+  1ext octet 3a* {
+  	bits 6-7: PresentationIndicator integer;
+	  bits 3-5: spare void default = 0;
+  	bits 1-2: ScreeningIndicator integer;
+  };
+  remainder: Number TBCDArray;
+}
+
+#------------------------------------
+# TS 24.008, 10.5.4.21c
+#------------------------------------
+bit-field RedirPartySubaddr {
+	size: 1 octet;
+  max size: 21 octets;
+  bit 8: ext void default = 1;
+  bit 5-7: TypeOfSubaddress integer;
+  bit 4: OddEvenIndicator boolean;
+  bits 1-3: spare void default = 0;
+  remainder: SubaddressInformation binary;
+}
+
+#------------------------------------
+# TS 24.008, 10.5.4.26
+#------------------------------------
+bit-field AlertingPattern {
+	size: 1 octets;
+	bits 5-8: spare void default = 0;
+	bits 1-4: AlertingPatternValue integer;
+}
+
+#------------------------------------
+# TS 24.008, 10.5.4.27
+#------------------------------------
+bit-field AllowedActionsCcbs {
+	size: 1 octets;
+	bit 8: CCBSAct boolean;
+	bit 1-7: spare void default = 0;
+}
+
+#------------------------------------
+# TS 24.008, 10.5.4.29
+#------------------------------------
+bit-field NetwkCallControlCapabil {
+	size: 1 octets;
+	bit 2-8: spare void default = 0;
+	bit 1: MCS boolean;
+}
+
+#------------------------------------
+# TS 24.008, 10.5.4.33
+#------------------------------------
+bit-field ServCategory {
+	size: 1 octets;
+	bits 6-8: spare void default = 0;
+	bits 5: MountainRescue boolean;
+	bits 4: MarineGuard boolean;
+	bits 3: FireBrigade boolean;
+	bits 2: Ambulance boolean;
+	bits 1: Police boolean;
+}
+
+
+/****************************************************************************
+  3GPP TS 44.018 - v8.2.0 (2008-03)
+
+  SUBSET
+****************************************************************************/
+declare gsm-0407-plen incoming message set RRSysInfo;
+
+
+#=================================================================
+# BASIC CSN.1 LIBRARY - Needed by most ETSI CSN.1 declarations
+#=================================================================
+csn.1 {
+  <bit> ::= 0|1;
+  <bit string> ::= 0|1;
+  <spare L> ::= L;
+  <spare bits> ::= L|H;
+  <spare bit> ::= <bit>;
+  <octet> ::= bit*(8);
+  <spare padding>::= L* ENCODE_EXPR: %{(8 - (CURPOS & 7)) & 7}% DECODE_INFINITE;
+}
+
+
+/*-----------------------------------------------------------------------
+    MESSAGE: SYSTEM INFORMATION TYPE 1
+    CHAPTER: TS 44.018 9.1.31
+  DIRECTION: DOWNLINK
+-----------------------------------------------------------------------*/
+gsm-0407-plen SYSTEM_INFORMATION_TYPE_1_UP {
+  in message set RRSysInfo;
+  ProtocolDiscriminator = 0110;
+  MessageType           = 00011001;
+  L2PseudoLength        = 21;
+
+     CellChannelDescription               M V   16      CellChannel         ; # 10.5.2.1b
+     RachControlParam                     M V   3       RACHCtrlParam       ; # 10.5.2.29
+     Si1RestOctets                        M V   1       force SI1RestOctets ; # 10.5.2.32
+};
+
+/*-----------------------------------------------------------------------
+    MESSAGE: SYSTEM INFORMATION TYPE 2
+    CHAPTER: TS 44.018 9.1.32
+  DIRECTION: DOWNLINK
+-----------------------------------------------------------------------*/
+gsm-0407-plen SYSTEM_INFORMATION_TYPE_2_UP {
+  in message set RRSysInfo;
+  ProtocolDiscriminator = 0110;
+  MessageType           = 00011010;
+  L2PseudoLength        = 22;
+
+     BcchFrequencyList                    M V   16      NeighbourCellDescription; # 10.5.2.22
+     NccPermitted                         M V   1       integer             ; # 10.5.2.27
+     RachControlParam                     M V   3       RACHCtrlParam       ; # 10.5.2.29
+};
+
+/*-----------------------------------------------------------------------
+    MESSAGE: SYSTEM INFORMATION TYPE 2BIS
+    CHAPTER: TS 44.018 9.1.33
+  DIRECTION: DOWNLINK
+-----------------------------------------------------------------------*/
+gsm-0407-plen SYSTEM_INFORMATION_TYPE_2BIS_UP {
+  in message set RRSysInfo;
+  ProtocolDiscriminator = 0110;
+  MessageType           = 00000010;
+  L2PseudoLength        = 21;
+
+     ExtendedBcchFrequencyList            M V   16      NeighbourCellDescription; # 10.5.2.22
+     RachControlParameters                M V   3       RACHCtrlParam       ; # 10.5.2.29
+     Si2bisRestOctets                     M V   1       force SI2bisRestOctets; # 10.5.2.33
+};
+
+/*-----------------------------------------------------------------------
+    MESSAGE: SYSTEM INFORMATION TYPE 2TER
+    CHAPTER: TS 44.018 9.1.34
+  DIRECTION: DOWNLINK
+-----------------------------------------------------------------------*/
+gsm-0407-plen SYSTEM_INFORMATION_TYPE_2TER_UP {
+  in message set RRSysInfo;
+  ProtocolDiscriminator = 0110;
+  MessageType           = 00000011;
+  L2PseudoLength        = 18;
+
+     ExtendedBcchFrequencyList            M V   16      NeighbourCellDescription2; # 10.5.2.22a
+     Si2terRestOctets                     M V   4       force SI2terRestOctets   ; # 10.5.2.33a
+};
+
+
+/*-----------------------------------------------------------------------
+    MESSAGE: SYSTEM INFORMATION TYPE 2QUATER
+    CHAPTER: TS 44.018 9.1.34a
+  DIRECTION: DOWNLINK
+-----------------------------------------------------------------------*/
+gsm-0407-plen SYSTEM_INFORMATION_TYPE_2QUATER_UP {
+  in message set RRSysInfo;
+  ProtocolDiscriminator = 0110;
+  MessageType           = 00000111;
+  L2PseudoLength        = 1;
+
+     Si2QuaterRestOctets                  M V   20      force SI2quaterRestOctets ; # 10.5.2.33b
+};
+
+/*-----------------------------------------------------------------------
+    MESSAGE: SYSTEM INFORMATION TYPE 3
+    CHAPTER: TS 44.018 9.1.35
+  DIRECTION: DOWNLINK
+-----------------------------------------------------------------------*/
+gsm-0407-plen SYSTEM_INFORMATION_TYPE_3_UP {
+  in message set RRSysInfo;
+  ProtocolDiscriminator = 0110;
+  MessageType           = 00011011;
+  L2PseudoLength        = 18;
+
+     CellId                               M V   2       integer             ; # 10.5.1.1
+     LocationAreaId                       M V   5       LocationAreaId      ; # 10.5.1.3
+     ControlChannelDescription            M V   3       CtrlChannelDesc     ; # 10.5.2.11
+     CellOpt                              M V   1       CellOptions         ; # 10.5.2.3
+     CellSelectionParameters              M V   2       CellSelParam        ; # 10.5.2.4
+     RachControlParameters                M V   3       RACHCtrlParam       ; # 10.5.2.29
+     Si3RestOctets                        M V   4       force SI3RestOctet  ; # 10.5.2.34
+};
+
+/*-----------------------------------------------------------------------
+    MESSAGE: SYSTEM INFORMATION TYPE 4
+    CHAPTER: TS 44.018 9.1.36
+  DIRECTION: DOWNLINK
+-----------------------------------------------------------------------*/
+gsm-0407-plen SYSTEM_INFORMATION_TYPE_4_UP {
+  in message set RRSysInfo;
+  ProtocolDiscriminator = 0110;
+  MessageType           = 00011100;
+
+     LocationAreaId                       M V   5       LocationAreaId      ; # 10.5.1.3
+     CellSelectionParameters              M V   2       CellSelParam        ; # 10.5.2.4
+     RachControlParameters                M V   3       RACHCtrlParam       ; # 10.5.2.29
+  64 CbchChannelDescription               O TV  4       TChDesc             ; # 10.5.2.5
+  72 CbchMobileAllocation                 C TLV 3-6     MobileAllocation    ; # 10.5.2.21
+  **EndOfL2Length**;
+     Si4RestOctets                        M V   0-10    force SI4_Rest_Octets  ; # 10.5.2.35
+};
+
+/*-----------------------------------------------------------------------
+    MESSAGE: SYSTEM INFORMATION TYPE 13
+    CHAPTER: TS 44.018 9.1.43a
+  DIRECTION: DOWNLINK
+-----------------------------------------------------------------------*/
+gsm-0407-plen SYSTEM_INFORMATION_TYPE_13_UP {
+  in message set RRSysInfo;
+  ProtocolDiscriminator = 0110;
+  MessageType           = 00000000;
+  L2PseudoLength        = 0;
+
+     Si13RestOctets                       M V   >=1      SI13RestOctets   ; # 10.5.2.37b
+};
+
+
+#------------------------------------
+# TS 44.018, 10.5.2.1b
+#
+# WARNING
+# The sizes given to the arrays are not the theorical maximum.
+# Change them to the right compromise of data size vs. elements required.
+#------------------------------------
+dcl-type CellChannel {
+  size 2 octets ... 130 octets;
+  type union {
+    BitMap0: sequence [124] boolean;
+    Range1024: struct {
+      W: sequence [64] integer;
+      F0: boolean;
+    }
+    Range512: struct {
+      W: sequence [64] integer;
+      OrigARFCN: integer;
+    }
+    Range256: struct {
+      W: sequence [64] integer;
+      OrigARFCN: integer;
+    }
+    Range128: struct {
+      W: sequence [64] integer;
+      OrigARFCN: integer;
+    }
+    Variable: struct {
+      RRFCN: sequence [111] boolean;
+      OrigARFCN: integer;
+    }
+  }
+
+  encode %{
+    int i, len;
+    switch (GETPRESENT_c_CellChannel (Source)) {
+      /*---------------------------------------------------------
+        DETECT BITMAP 0 FORMAT (signature 00XXX)
+      ---------------------------------------------------------*/
+      case U_c_CellChannel_BitMap0: {
+        PUSH_INT (0, 4); // Signature
+        for (i=0; i<VAR_c_CellChannel_BitMap0 (Source->u.BitMap0).items; i++) {
+          PUSH_INT ((VAR_c_CellChannel_BitMap0 (Source->u.BitMap0).data [i]? 1 : 0), 1);
+        }
+        break;
+      }
+      /*---------------------------------------------------------
+        DETECT BITMAP 1024 RANGE (signature 10000XX)
+      ---------------------------------------------------------*/
+      case U_c_CellChannel_Range1024: {
+        PUSH_INT (0x10, 5); // Signature
+
+        PUSH_INT ((VAR_c_CellChannel_Range1024 (Source->u.Range1024).F0? 1 : 0), 1);
+
+        for (i=0; i < VAR_c_CellChannel_Range1024 (Source->u.Range1024).W.items; i++) {
+          if (i==0) len = 10;
+          else if (i>=1 && i<=2) len = 9;
+          else if (i>=3 && i<=6) len = 8;
+          else if (i>=7 && i<=14) len = 7;
+          else if (i>=15 && i<=30) len = 6;
+          else if (i>=31 && i<=62) len = 5;
+          else if (i>=63 && i<=126) len = 4;
+          else len = 3;
+          PUSH_INT (VAR_c_CellChannel_Range1024 (Source->u.Range1024).W.data [i], len);
+        }
+        break;
+      }
+      /*---------------------------------------------------------
+        DETECT BITMAP 512 RANGE (signature 1000100)
+      ---------------------------------------------------------*/
+      case U_c_CellChannel_Range512: {
+        PUSH_INT (0x44, 7); // Signature
+
+        PUSH_INT (VAR_c_CellChannel_Range512 (Source->u.Range512).OrigARFCN, 10);
+
+        for (i=0; i < VAR_c_CellChannel_Range512 (Source->u.Range512).W.items; i++) {
+          if (i==0) len = 9;
+          else if (i>=1 && i<=2) len = 8;
+          else if (i>=3 && i<=6) len = 7;
+          else if (i>=7 && i<=14) len = 6;
+          else if (i>=15 && i<=30) len = 5;
+          else if (i>=31 && i<=62) len = 4;
+          else if (i>=63 && i<=126) len = 3;
+          else len = 2;
+          PUSH_INT (VAR_c_CellChannel_Range512 (Source->u.Range512).W.data [i], len);
+        }
+
+        break;
+      }
+      /*---------------------------------------------------------
+        DETECT BITMAP 256 RANGE (signature 1000101)
+      ---------------------------------------------------------*/
+      case U_c_CellChannel_Range256: {
+        PUSH_INT (0x45, 7); // Signature
+
+        PUSH_INT (VAR_c_CellChannel_Range256 (Source->u.Range256).OrigARFCN, 10);
+
+        for (i=0; i<VAR_c_CellChannel_Range256 (Source->u.Range256).W.items; i++) {
+          if (i==0) len = 8;
+          else if (i>=1 && i<=2) len = 7;
+          else if (i>=3 && i<=6) len = 6;
+          else if (i>=7 && i<=14) len = 5;
+          else if (i>=15 && i<=30) len = 4;
+          else if (i>=31 && i<=62) len = 3;
+          else if (i>=63 && i<=126) len = 2;
+          else len = 1;
+          PUSH_INT (VAR_c_CellChannel_Range256 (Source->u.Range256).W.data [i], len);
+        }
+
+        break;
+      }
+      /*---------------------------------------------------------
+        DETECT BITMAP 128 RANGE (signature 1000110)
+      ---------------------------------------------------------*/
+      case U_c_CellChannel_Range128: {
+        PUSH_INT (0x46, 7); // Signature
+
+        PUSH_INT (VAR_c_CellChannel_Range128 (Source->u.Range128).OrigARFCN, 10);
+
+        for (i=0; i<VAR_c_CellChannel_Range128 (Source->u.Range128).W.items; i++) {
+          if (i==0) len = 7;
+          else if (i>=1 && i<=2) len = 6;
+          else if (i>=3 && i<=6) len = 5;
+          else if (i>=7 && i<=14) len = 4;
+          else if (i>=15 && i<=30) len = 3;
+          else if (i>=31 && i<=62) len = 2;
+          else len = 1;
+
+          PUSH_INT (VAR_c_CellChannel_Range128 (Source->u.Range128).W.data [i], len);
+        }
+
+        break;
+      }
+      /*---------------------------------------------------------
+        DETECT BITMAP VARIABLE (signature 1000111)
+      ---------------------------------------------------------*/
+      case U_c_CellChannel_Variable: {
+        PUSH_INT (0x47, 7); // Signature
+
+        PUSH_INT (VAR_c_CellChannel_Variable (Source->u.Variable).OrigARFCN, 10);
+
+        for (i=0; i<VAR_c_CellChannel_Variable (Source->u.Variable).RRFCN.items; i++) {
+          PUSH_INT (VAR_c_CellChannel_Variable (Source->u.Variable).RRFCN.data [i], 1);
+        }
+
+        break;
+      }
+      /*---------------------------------------------------------
+        UNKNOWN CODING!
+      ---------------------------------------------------------*/
+      default: return ED_SYNTAX_ERROR;
+    }
+
+    // Pad with zeroes
+    len = (8 - (CURPOS & 7)) & 7;
+    if (len > 0) PUSH_INT (0, len);
+
+    return CURPOS-BitOffset;
+  }%
+
+  decode %{
+    int i, len;
+
+    /* Determine which type of encoding we have */
+    int Signature = EDBitsToInt (Buffer, CURPOS, 7);
+
+    /* Make sure spare bits are set to 0 */
+    Signature &= 0x47;
+
+    /*---------------------------------------------------------
+      DETECT BITMAP 0 FORMAT (signature 00XXX)
+    ---------------------------------------------------------*/
+    if ((Signature & 0x60) == 0x00) {
+      SETPRESENT_c_CellChannel_BitMap0 (Destin);
+      CURPOS += 4;
+      for (i=0; i<Length-4 && i < 124; i++) {
+        VAR_c_CellChannel_BitMap0 (Destin->u.BitMap0).data [i] = SHIFT_INT (1);
+      }
+      VAR_c_CellChannel_BitMap0 (Destin->u.BitMap0).items = i;
+    }
+    /*---------------------------------------------------------
+      DETECT BITMAP 1024 RANGE (signature 10000XX)
+    ---------------------------------------------------------*/
+    else if ((Signature & 0x64) == 0x40) {
+      SETPRESENT_c_CellChannel_Range1024 (Destin);
+      CURPOS += 5;
+      VAR_c_CellChannel_Range1024 (Destin->u.Range1024).F0 = SHIFT_INT (1);
+
+      for (i=0; i<64; i++) {
+        if (i==0) len = 10;
+        else if (i>=1 && i<=2) len = 9;
+        else if (i>=3 && i<=6) len = 8;
+        else if (i>=7 && i<=14) len = 7;
+        else if (i>=15 && i<=30) len = 6;
+        else if (i>=31 && i<=62) len = 5;
+        else if (i>=63 && i<=126) len = 4;
+        else len = 3;
+        if (CURPOS - BitOffset + len > Length) break;
+        VAR_c_CellChannel_Range1024 (Destin->u.Range1024).W.data [i] = SHIFT_INT (len);
+      }
+      VAR_c_CellChannel_Range1024 (Destin->u.Range1024).W.items = i;
+    }
+    /*---------------------------------------------------------
+      DETECT BITMAP 512 RANGE (signature 1000100)
+    ---------------------------------------------------------*/
+    else if ((Signature & 0x67) == 0x44) {
+      SETPRESENT_c_CellChannel_Range512 (Destin);
+      CURPOS += 7;
+      VAR_c_CellChannel_Range512 (Destin->u.Range512).OrigARFCN = SHIFT_INT (10);
+
+      for (i=0; i<64; i++) {
+        if (i==0) len = 9;
+        else if (i>=1 && i<=2) len = 8;
+        else if (i>=3 && i<=6) len = 7;
+        else if (i>=7 && i<=14) len = 6;
+        else if (i>=15 && i<=30) len = 5;
+        else if (i>=31 && i<=62) len = 4;
+        else if (i>=63 && i<=126) len = 3;
+        else len = 2;
+        if (CURPOS - BitOffset + len > Length) break;
+        VAR_c_CellChannel_Range512 (Destin->u.Range512).W.data [i] = SHIFT_INT (len);
+      }
+      VAR_c_CellChannel_Range512 (Destin->u.Range512).W.items = i;
+    }
+    /*---------------------------------------------------------
+      DETECT BITMAP 256 RANGE (signature 1000101)
+    ---------------------------------------------------------*/
+    else if ((Signature & 0x67) == 0x45) {
+      SETPRESENT_c_CellChannel_Range256 (Destin);
+      CURPOS += 7;
+      VAR_c_CellChannel_Range256 (Destin->u.Range256).OrigARFCN = SHIFT_INT (10);
+
+      for (i=0; i<64; i++) {
+        if (i==0) len = 8;
+        else if (i>=1 && i<=2) len = 7;
+        else if (i>=3 && i<=6) len = 6;
+        else if (i>=7 && i<=14) len = 5;
+        else if (i>=15 && i<=30) len = 4;
+        else if (i>=31 && i<=62) len = 3;
+        else if (i>=63 && i<=126) len = 2;
+        else len = 1;
+        if (CURPOS - BitOffset + len > Length) break;
+        VAR_c_CellChannel_Range256 (Destin->u.Range256).W.data [i] = SHIFT_INT (len);
+      }
+      VAR_c_CellChannel_Range256 (Destin->u.Range256).W.items = i;
+    }
+    /*---------------------------------------------------------
+      DETECT BITMAP 128 RANGE (signature 1000110)
+    ---------------------------------------------------------*/
+    else if ((Signature & 0x67) == 0x46) {
+      SETPRESENT_c_CellChannel_Range128 (Destin);
+      CURPOS += 7;
+
+      VAR_c_CellChannel_Range128 (Destin->u.Range128).OrigARFCN = SHIFT_INT (10);
+
+      for (i=0; i<64; i++) {
+        if (i==0) len = 7;
+        else if (i>=1 && i<=2) len = 6;
+        else if (i>=3 && i<=6) len = 5;
+        else if (i>=7 && i<=14) len = 4;
+        else if (i>=15 && i<=30) len = 3;
+        else if (i>=31 && i<=62) len = 2;
+        else len = 1;
+        if (CURPOS - BitOffset + len > Length) break;
+        VAR_c_CellChannel_Range128 (Destin->u.Range128).W.data [i] = SHIFT_INT (len);
+      }
+      VAR_c_CellChannel_Range128 (Destin->u.Range128).W.items = i;
+    }
+    /*---------------------------------------------------------
+      DETECT BITMAP VARIABLE (signature 1000111)
+    ---------------------------------------------------------*/
+    else if ((Signature & 0x67) == 0x47) {
+      SETPRESENT_c_CellChannel_Variable (Destin);
+      CURPOS += 7;
+
+      VAR_c_CellChannel_Variable (Destin->u.Variable).OrigARFCN = SHIFT_INT (10);
+      for (i=0; (CURPOS - BitOffset < Length) && i<111; i++) {
+        VAR_c_CellChannel_Variable (Destin->u.Variable).RRFCN.data [i] = SHIFT_INT (1);
+      }
+      VAR_c_CellChannel_Variable (Destin->u.Variable).RRFCN.items = i;
+    }
+    /*---------------------------------------------------------
+      UNKNOWN CODING!
+    ---------------------------------------------------------*/
+    else {
+      return ED_SYNTAX_ERROR;
+    }
+
+    return CURPOS - BitOffset + ((8 - (CURPOS & 7)) & 7);
+  }%
+}
+
+#------------------------------------
+# TS 44.018, 10.5.2.3
+#------------------------------------
+bit-field CellOptions {
+  size: 1 octet;
+  bit 8: DN_IND boolean enum {
+		b0 = "Dynamic ARFCN mapping is not used by the PLMN"
+		b1 = "Dynamic ARFCN mapping is used by the PLMN"
+  };
+  bit 7: PWRC boolean enum {
+		b0	= "PWRC is not set"
+		b1	= "PWRC is set"
+  };
+  bits 5-6: DTX integer enum {
+		b00	= "The MSs may use uplink discontinuous transmission"
+		b01	= "The MSs shall use uplink discontinuous transmission"
+		b10	= "The MS shall not use uplink discontinuous transmission"
+  };
+  bits 1-4: RadioLinkTimeout integer;
+}
+
+#------------------------------------
+# TS 44.018, 10.5.2.4
+#------------------------------------
+bit-field CellSelParam {
+  size: 2 octets;
+  bits 14-16: CellReseHyst integer enum {
+		b000 = "0 dB RXLEV hysteresis for LA re-selection"
+		b001 = "2 dB RXLEV hysteresis for LA re-selection"
+		b010 = "4 dB RXLEV hysteresis for LA re-selection"
+		b011 = "6 dB RXLEV hysteresis for LA re-selection"
+		b100 = "8 dB RXLEV hysteresis for LA re-selection"
+		b101 = "10 dB RXLEV hysteresis for LA re-selection"
+		b110 = "12 dB RXLEV hysteresis for LA re-selection"
+		b111 = "14 dB RXLEV hysteresis for LA re-selection"
+  };
+  bits 9-13: MsTxpwrMaxCch integer;
+  bit 8: ACS boolean;
+  bit 7: NECI boolean enum {
+		0	= "New establishment causes are not supported"
+		1 = "New establishment causes are supported"
+  };
+  bits 1-6: RxLevAccessMin integer;
+}
+
+#------------------------------------
+# TS 44.018, 10.5.2.5
+#------------------------------------
+dcl-type TChType {
+  size 5 bits;
+  type struct {
+    ChType: integer enum {
+      b00001 = "TCH/F + ACCHs"
+      b00010 = "TCH/H + ACCHs"
+      b00100 = "SDCCH/4 + SACCH/C4 or CBCH (SDCCH/4)"
+      b01000 = "SDCCH/8 + SACCH/C8 or CBCH (SDCCH/8)"
+    };
+    Subchannel: integer;
+  }
+
+  encode %{
+    int Value = 0;
+    switch (Source->ChType) {
+      case 1: Value = 1; break;
+      case 2: Value = 2 | (Source->Subchannel & 0x01); break;
+      case 4: Value = 4 | (Source->Subchannel & 0x03); break;
+      case 8: Value = 8 | (Source->Subchannel & 0x07); break;
+    }
+    PUSH_INT (Value, 5);
+    return 5;
+  }%
+
+  decode %{
+    int Value = SHIFT_INT (5);
+    if (Value == 1) {
+      Destin->Subchannel = 0;
+      Destin->ChType = 1;
+    }
+    else if ((Value & 0x08) == 0x08) {
+      Destin->Subchannel = Value & 0x07;
+      Destin->ChType = 8;
+    }
+    else if ((Value & 0x04) == 0x04) {
+      Destin->Subchannel = Value & 0x03;
+      Destin->ChType = 4;
+    }
+    else if ((Value & 0x02) == 0x02) {
+      Destin->Subchannel = Value & 0x01;
+      Destin->ChType = 2;
+    }
+    return 5;
+  }%
+}
+
+bit-field TChDesc {
+  size: 3 octets;
+  octet 1 bits 4-8: ChType TChType;
+  octet 1 bits 1-3: TN integer;
+  octet 2 bits 6-8: TSC integer;
+  octet 2 bit  5  : H boolean enum {
+		0	= "Single RF channel"
+		1	= "RF hopping channel"
+  };
+
+  octet 3 conditional %{DATA.H}% {
+    bits 7-12: MAIO integer;
+    bits 1-6: HSN integer;
+  };
+  octet 3 conditional %{!DATA.H}% {
+    bit 11-12: spare void default=0;
+    bits 1-10: ARFCN integer;
+  };
+}
+
+
+#------------------------------------
+# TS 44.018, 10.5.2.11
+#------------------------------------
+bit-field CtrlChannelDesc {
+  size: 3 octets;
+  octet 1 {
+    bit 8: MSCR boolean enum {
+			0	= "MSC is Release '98 or older"
+			1 = "MSC is Release '99 onwards"
+    };
+    bit 7: ATT boolean enum {
+			0 = "MSs in the cell are not allowed to apply IMSI attach and detach procedure"
+			1 = "MSs in the cell shall apply IMSI attach and detach procedure"
+    };
+    bits 4-6: BsAgBlksRes integer;
+    bits 1-3: CCCHConf integer enum {
+			b000 = "1 basic physical channel used for CCCH, not combined with SDCCHs"
+			b001 = "1 basic physical channel used for CCCH, combined with SDCCHs"
+			b010 = "2 basic physical channel used for CCCH, not combined with SDCCHs"
+			b100 = "3 basic physical channel used for CCCH, not combined with SDCCHs"
+			b110 = "4 basic physical channels used for CCCH, not combined with SDCCHs"
+    };
+  };
+  octet 2 {
+    bit  8:   spare1 void default=0;
+    bits 6-7: CBQ3 integer enum {
+			b00 = "Iu mode not supported"
+			b01 = "Iu mode capable MSs barred"
+			b10 = "Iu mode supported, cell not barred"
+			b11 = "Iu mode supported, cell not barred. The network shall not use this value"
+    };
+    bits 4-5: spare2 void default=0;
+    bits 1-3: BsPaMfrms integer enum {
+			b000 = "2 multiframes period for transmission of PAGING REQUEST messages to the same paging subgroup"
+			b001 = "3 multiframes period for transmission of PAGING REQUEST messages to the same paging subgroup"
+			b010 = "4 multiframes period for transmission of PAGING REQUEST messages to the same paging subgroup"
+    };
+  };
+  octet 3 {
+    bits 1-8: T3212TimeOutValue integer;
+  };
+}
+
+#------------------------------------
+# TS 44.018, 10.5.2.21
+#------------------------------------
+sequence MobileAllocation [64] boolean size 1 bit;
+
+
+#------------------------------------
+# TS 44.018, 10.5.2.22
+#------------------------------------
+dcl-type NeighbourCellDescription {
+  size 16 octets
+  type struct {
+    CellDescription: CellChannel;
+    ExtInd: boolean enum {
+			0 = "The information element carries the complete BA"
+			1 = "The information element carries only a part of the BA"
+    };
+    BAInd: boolean;
+  }
+
+  encode %{
+    int ret = ENCODE_c_CellChannel (Buffer, BitOffset, PTR_c_NeighbourCellDescription_CellDescription (THIS->CellDescription));
+    EDIntToBits (Buffer, BitOffset+2, (THIS->ExtInd? 1 : 0), 1);
+    EDIntToBits (Buffer, BitOffset+3, (THIS->BAInd? 1 : 0), 1);
+    return ret;
+  }%
+
+  decode %{
+    int ret = DECODE_c_CellChannel (Buffer, BitOffset, PTR_c_NeighbourCellDescription_CellDescription (THIS->CellDescription), Length);
+    THIS->ExtInd = (EDBitsToInt (Buffer, BitOffset+2, 1) ? ED_TRUE : ED_FALSE);
+    THIS->BAInd = (EDBitsToInt (Buffer, BitOffset+3, 1) ? ED_TRUE : ED_FALSE);
+    return ret;
+  }%
+}
+
+#------------------------------------
+# TS 44.018, 10.5.2.22a
+#------------------------------------
+dcl-type NeighbourCellDescription2 {
+  size 16 octets
+  type struct {
+    CellDescription: CellChannel;
+    MultibandReporting: octet enum {
+      b00 = "Report of the six strongest cells"
+      b01 = "Report of the strongest cell"
+      b10 = "Report of the two strongest cells"
+      b11 = "Report of the three strongest cells"
+    };
+    BAInd: boolean;
+  }
+
+  encode %{
+    int ret = ENCODE_c_CellChannel (Buffer, BitOffset, PTR_c_NeighbourCellDescription_CellDescription (THIS->CellDescription));
+    EDIntToBits (Buffer, BitOffset+1, THIS->MultibandReporting, 2);
+    EDIntToBits (Buffer, BitOffset+3, (THIS->BAInd? 1 : 0), 1);
+    return ret;
+  }%
+
+  decode %{
+    int ret = DECODE_c_CellChannel (Buffer, BitOffset, PTR_c_NeighbourCellDescription_CellDescription (THIS->CellDescription), Length);
+    THIS->MultibandReporting = EDBitsToInt (Buffer, BitOffset+1, 2);
+    THIS->BAInd = (EDBitsToInt (Buffer, BitOffset+3, 1) ? ED_TRUE : ED_FALSE);
+    return ret;
+  }%
+}
+
+#------------------------------------
+# TS 44.018, 10.5.2.29
+#------------------------------------
+bit-field RACHCtrlParam {
+  size: 3 octets;
+  octet 1 {
+    bits 7-8: MaxRetrans integer enum {
+			b00 = "Maximum 1 retransmission"
+			b01 = "Maximum 2 retransmissions"
+			b10 = "Maximum 4 retransmissions"
+			b11 = "Maximum 7 retransmissions"
+    };
+    bits 3-6: Tx integer enum {
+			b0000 = "3 slots used to spread transmission"
+			b0001 = "4 slots used to spread transmission"
+			b0010 = "5 slots used to spread transmission"
+			b0011 = "6 slots used to spread transmission"
+			b0100 = "7 slots used to spread transmission"
+			b0101 = "8 slots used to spread transmission"
+			b0110 = "9 slots used to spread transmission"
+			b0111 = "10 slots used to spread transmission"
+			b1000 = "11 slots used to spread transmission"
+			b1001 = "12 slots used to spread transmission"
+			b1010 = "14 slots used to spread transmission"
+			b1011 = "16 slots used to spread transmission"
+			b1100 = "20 slots used to spread transmission"
+			b1101 = "25 slots used to spread transmission"
+			b1110 = "32 slots used to spread transmission"
+			b1111 = "50 slots used to spread transmission"
+    };
+    bit 2: CellBarrAccess boolean enum {
+			0	= "The cell is not barred, see 3GPP TS 23.022"
+			1	= "The cell is barred, see 3GPP TS 23.022"
+    };
+    bit 1: RE boolean enum {
+			0	= "Call Reestablishment allowed in the cell"
+			1	= "Call Reestablishment not allowed in the cell"
+    };
+  };
+  octet 3 {
+    bit 16: AC_C15 boolean;
+    bit 15: AC_C14 boolean;
+    bit 14: AC_C13 boolean;
+    bit 13: AC_C12 boolean;
+    bit 12: AC_C11 boolean;
+    bit 11: EC_C10 boolean enum {
+			0	= "Emergency call allowed in the cell to all MSs"
+			1	= "Emergency call not allowed in the cell except for the MSs that belong to one of the classes between 11 to 15"
+    };
+    bit 10: AC_C09 boolean;
+    bit  9: AC_C08 boolean;
+    bit  8: AC_C07 boolean;
+    bit  7: AC_C06 boolean;
+    bit  6: AC_C05 boolean;
+    bit  5: AC_C04 boolean;
+    bit  4: AC_C03 boolean;
+    bit  3: AC_C02 boolean;
+    bit  2: AC_C01 boolean;
+    bit  1: AC_C00 boolean;
+  };
+}
+
+#------------------------------------
+# TS 44.018, 10.5.2.32
+#------------------------------------
+csn.1 {
+  <SI1RestOctets> ::=  {
+    L
+    |
+    H  <NCH Position : bit (5)> }
+    < Band indicator >
+    <spare padding>;
+
+  slave < Band indicator > ::= < BAND_INDICATOR : bit>;
+}
+
+#------------------------------------
+# TS 44.018, 10.5.2.33
+#------------------------------------
+csn.1 {
+  <SI2bisRestOctets> ::= <dummy{void}:null><spare padding>;
+}
+
+#NAME SI2terRestOctets
+#------------------------------------
+# TS 44.018, 10.5.2.33a
+#------------------------------------
+csn.1 {
+  <SI2terRestOctets> ::=
+    { L | H
+      < SI2ter_MP_CHANGE_MARK : bit(1) >
+      < SI2ter_3G_CHANGE_MARK : bit(1) >
+      < SI2ter_INDEX : bit(3) >
+      < SI2ter_COUNT : bit(3) >
+      { 0 | 1 < UTRAN FDD Description : < SI2 UTRAN FDD Description struct > > }
+      { 0 | 1 < UTRAN TDD Description : < SI2 UTRAN TDD Description struct > > }
+      { 0 | 1 < 3G MEASUREMENT Parameters Description: < SI2 3G MEASUREMENT Parameters Description struct > > }
+      { null  | L                         -- Receiver compatible with earlier release
+        | H                             -- Additions in release R5:
+        { 0 | 1 < 3G Additional Measurement Parameters Description : 
+            < SI2 3G Additional Measurement Parameters Description struct >> }
+      }
+    }
+  <spare padding> ;
+
+  slave < SI2 UTRAN FDD Description struct >::=               -- 21 bits are available if this structure is present on its own
+    01  < FDD-ARFCN : bit (14) >              -- requires 2+14=16 bits
+
+        -- The values '00', '10' and '11' were used in an earlier version
+
+        -- of the protocol and shall not be used.
+    { 0 | 1 < Bandwidth_FDD : bit (3) > } ;
+
+  slave < SI2 UTRAN TDD Description struct >::=               -- 21 bits are available if this structure is present on its own
+
+    01  < TDD-ARFCN : bit (14) >              -- requires 2+14=16 bits
+
+        -- The values '00', '10' and '11' were used in an earlier version
+
+        -- of the protocol and shall not be used.
+    { 0 | 1 < Bandwidth_TDD {octet enum {
+    		b000 = "3.84Mcps"
+				b001 = "1.28Mcps"
+				default = "Error"
+    	}
+    }: bit (3) > } ;
+
+  slave < SI2 3G MEASUREMENT Parameters Description struct >::=
+    < Qsearch_I : bit (4) >
+    { 0 | 1 < FDD_Qoffset : bit (4) >           -- FDD Parameters
+        < FDD_Qmin : bit (3) > }
+    { 0 | 1 < TDD_Qoffset : bit (4) > } ;           -- TDD Parameters
+
+  slave < SI2 3G Additional Measurement Parameters Description struct > ::= 
+    < FDD_Qmin_Offset : bit (3) >                   -- FDD Parameters
+    < FDD_RSCPmin : bit (4) > ;
+}
+
+#NAME SI2quaterRestOctets
+#NAME SI2quaterRestOctets
+#------------------------------------
+# TS 44.018, 10.5.2.33b
+#------------------------------------
+csn.1 {
+  < SI2quaterRestOctets > ::=
+
+    < BA_IND : bit (1) >
+    < p3G_BA_IND : bit (1) >
+    < MP_CHANGE_MARK : bit (1) >
+    < SI2quater_INDEX : bit (4) >
+    < SI2quater_COUNT : bit (4) >
+
+    { 0 | 1 < Measurement_Parameters Description : < Measurement Parameters Description struct >> }
+    { 0 | 1 < GPRS_Real Time Difference Description : < GPRS_Real Time Difference Description struct >> }
+    { 0 | 1 < GPRS_BSIC Description : GPRS_BSIC Description struct > }
+    { 0 | 1 < GPRS_REPORT PRIORITY Description : < GPRS_REPORT_PRIORITY Description struct >> }
+    { 0 | 1 < GPRS_MEASUREMENT_Parameters Description : < GPRS MEASUREMENT Parameters Description struct >> }
+    { 0 | 1 < NC Measurement Parameters : < NC Measurement Parameters struct >> }
+    { 0 | 1 < extension length : bit (8) >
+        { < spare bit>* (val(extension length)+1) &
+        { < SI2q Extension Information > } }
+    } -- used for future extensions of the 2G parameters
+
+    { 0 | 1 < p3G Neighbour Cell Description : < 3G Neighbour Cell Description struct >> }
+    { 0 | 1 < p3G Measurement Parameters Description : < SI2quater 3G Measurement Parameters Description struct >> }
+    { 0 | 1 < GPRS_3G_MEASUREMENT Parameters Description : < GPRS 3G MEASUREMENT Parameters Description struct >> }
+		{ 	null
+			| L 		-- Receiver compatible with earlier release
+			| H				-- Additions in Rel-5:
+				{ 0 | 1 < 3G Additional Measurement Parameters Description :
+						< 3G Additional Measurement Parameters Description struct > >
+			  }
+		 		{ 0 | 1 < 3G ADDITIONAL MEASUREMENT Parameters Description 2 :
+						< 3G ADDITIONAL MEASUREMENT Parameters Description 2 struct> >
+				}
+			  {
+			  	null
+			  	| L 		-- Receiver compatible with earlier release
+					| H 				-- Additions in Rel-6:
+						< 3G_CCN_ACTIVE {boolean enum {
+							0 = "CCN towards 3G cells is disabled in the cell"
+							1 = "CCN towards 3G cells is enabled in the cell"
+						}} : bit>
+						{
+							null
+							| L 		-- Receiver compatible with earlier release
+							| H 				-- Additions in Rel-7:
+								{ 0 | 1	< 700_REPORTING_OFFSET : bit (3) >
+										< 700_REPORTING_THRESHOLD : bit (3) > }
+								{ 0 | 1	< 810_REPORTING_OFFSET : bit (3) >
+										< 810_REPORTING_THRESHOLD : bit (3) > }
+						}
+			 }
+	 	}
+    < spare padding > ;
+
+  slave <MEASUREMENT PARAMETERS Description Struct > ::=
+    < REPORT_TYPE : bit >
+    < SERVING_BAND_REPORTING : bit (2) > ;
+
+  slave < SI2quater 3G MEASUREMENT PARAMETERS Description struct > ::=
+    < Qsearch_I : bit (4) >
+    < Qsearch_C_Initial : bit (1) >
+    { 0 | 1 < FDD_Qoffset : bit (4) >                 -- FDD information
+        < FDD_REP_QUANT : bit (1) >
+        < FDD_MULTIRAT_REPORTING : bit (2) >
+        < FDD_Qmin : bit (3) > }
+    { 0 | 1 < TDD_Qoffset : bit (4) >                 -- TDD information
+        < TDD_MULTIRAT_REPORTING : bit (2) > } ;
+
+  slave < GPRS Real Time Difference Description struct > ::=
+    { 0 | 1 { 0 | 1 < BA_Index_Start_RTD : bit (5) > }    --default value=0
+      < RTD : < RTD6 Struct >>
+      { 0 < RTD : < RTD6 Struct >> } **1 }         -- '0' : increment by 1 the index of the BA (list) frequency
+
+    { 0 | 1 { 0 | 1 < BA_Index_Start_RTD : bit (5) > }    --default value=0
+      < RTD : < RTD12 Struct >>
+      { 0 < RTD : < RTD12 Struct >> } **1 };         -- '0' : increment by 1 the index of the BA (list) frequency
+
+  slave < RTD6 Struct > ::=  { 0 < RTD : bit (6) > } ** 1;   -- Repeat until '1' ; '1' means last RTD for this frequency
+  slave < RTD12 Struct > ::= { 0 < RTD : bit (12) > } ** 1;    -- Repeat until '1' ; '1' means last RTD for this frequency
+
+  slave < GPRS BSIC Description struct > ::=
+    { 0 | 1 < BA_Index_Start_BSIC : bit (5) > }       -- default value=0
+    < BSIC : bit (6) >
+    < Number_Remaining_BSIC: bit (7) >
+    { < Frequency_Scrolling : bit >             -- 0 means same frequency
+      < BSIC : bit (6) > } * (val(Number_Remaining_BSIC)) ;
+
+  slave < GPRS REPORT PRIORITY Description struct > ::=
+    < Number_Cells : bit (7) >
+    < REP_PRIORITY {boolean enum {
+				0 = "Normal reporting priority"
+				1 = "High reporting priority"
+    	}}: bit > * (val(Number_Cells)) ;
+
+  slave < 3G Neighbour Cell Description struct > ::=
+    { 0 | 1 < Index_Start_3G : bit (7) > }
+    { 0 | 1 < Absolute_Index_Start_EMR : bit (7) > }
+    { 0 | 1 < UTRAN FDD Description : < UTRAN FDD Description struct >> }
+    { 0 | 1 < UTRAN TDD Description : < UTRAN TDD Description struct >> };
+
+  slave < REMOVED_3GCELL_Description struct > ::=
+    < N1 : bit (2) >
+    { < N2 : bit (5) >
+      { < REMOVED_3GCELL_INDEX : bit (7) >
+        < p3G_CELL_DIFF_LENGTH : bit (3) >
+        < p3GCELL_DIFF : bit (val(p3G_CELL_DIFF_LENGTH)) >
+      } * (1+val(N2))
+    } * (1+val(N1)) ;
+
+  slave < UTRAN FDD Description struct > ::=
+    { 0 | 1 < Bandwidth_FDD : bit (3) > }
+    { 1 < Repeated UTRAN FDD Neighbour Cells : < Repeated UTRAN FDD Neighbour Cells struct >> } ** 0 ;
+
+  slave < Repeated UTRAN FDD Neighbour Cells struct > ::=
+    0 < FDD-ARFCN : bit (14) >    -- The value '1' was used in an earlier
+                      -- version of the protocol and shall not be used.
+    < FDD_Indic0 : bit >
+    < NR_OF_FDD_CELLS : bit (5) > ENCODECO: %{PUSH_TAG(7, (EDBitsToInt(BUFFER, CURPOS-5, 5)));}%
+    < FDD_CELL_INFORMATION Field : bit* ENCODECO_EXPR: %{DECODE_FDD_CELL_INFORMATION_p (TAG(7))}% [122] > ; -- p(x) defined in table 11.2.9b.2.a/3GPP TS 44.060
+
+  slave < UTRAN TDD Description struct > ::=
+    { 0 | 1 < Bandwidth_TDD : bit (3) > }
+    { 1 < Repeated UTRAN TDD Neighbour Cells : < Repeated UTRAN TDD Neighbour Cells struct >> } ** 0 ;
+
+  slave < Repeated UTRAN TDD Neighbour Cells struct > ::=
+    { 0 < TDD-ARFCN : bit (14) > | 1 < TDD-ARFCN-INDEX : bit (3) > }
+                      -- The value '1' is not used anymore
+                      -- the protocol and shall not be used.
+    < TDD_Indic0 : bit >
+    < NR_OF_TDD_CELLS : bit (5) > ENCODECO: %{PUSH_TAG(6, (EDBitsToInt(BUFFER, CURPOS-5, 5)));}%
+    < TDD_CELL_INFORMATION Field : bit * ENCODECO_EXPR: %{DECODE_TDD_CELL_INFORMATION_q (TAG(6))}% [126]> ; -- q(x) defined in table 9.1.54.1/3GPP TS 44.060
+
+  slave < SI2q Extension Information > ::=
+    { 0 | 1 < CCN Support Description : < CCN Support Description struct >> }
+    <spare bit>** ;
+
+  slave < CCN Support Description struct > ::=
+    < Number_Cells : bit (7) >
+    < CCN_SUPPORTED{boolean enum {
+				0 = "CCN is enabled towards the corresponding cell"
+				1 = "CCN is disabled towards the corresponding cell"
+    	}} : bit> * (val(Number_Cells)) ;
+
+	slave < 3G Additional Measurement Parameters Description struct > ::=
+		< FDD_Qmin_Offset : bit (3) > 										-- FDD information
+		< FDD_RSCPmin : bit (4) > ;
+
+	slave < 3G Additional Measurement Parameters Description 2 struct > ::=
+ 		{ 0 | 1 < FDD_REPORTING_THRESHOLD_2 : bit (6) > } ;		-- FDD information
+
+
+	slave < GPRS MEASUREMENT PARAMETERS Description struct > ::=
+		< REPORT_TYPE : bit >
+		< REPORTING_RATE : bit >
+		< INVALID_BSIC_REPORTING : bit >
+		{ 0 | 1	< MULTIBAND_REPORTING : bit (2) > }
+		{ 0 | 1	< SERVING_BAND_REPORTING : bit (2) > }
+		< SCALE_ORD : bit(2) >
+
+		{ 0 | 1	< p900_REPORTING_OFFSET : bit (3) >
+				< p900_REPORTING_THRESHOLD : bit (3) > }
+
+		{ 0 | 1	< p1800_REPORTING_OFFSET : bit (3) >
+				< p1800_REPORTING_THRESHOLD : bit (3) > }
+
+		{ 0 | 1	< p400_REPORTING_OFFSET : bit (3) >
+				< p400_REPORTING_THRESHOLD : bit (3) > }
+
+		{ 0 | 1	< p1900_REPORTING_OFFSET : bit (3) >
+				< p1900_REPORTING_THRESHOLD : bit (3) > }
+
+		{ 0 | 1	< p850_REPORTING_OFFSET : bit (3) >
+				< p850_REPORTING_THRESHOLD : bit (3) > } ;
+
+
+	slave < GPRS 3G MEASUREMENT PARAMETERS Description struct > ::=
+		< Qsearch_P : bit (4) >
+		< p3G_SEARCH_PRIO : bit >
+		{ 0 | 1 < FDD_REP_QUANT : bit >
+					-- FDD Parameters
+				< FDD_MULTIRAT_REPORTING : bit (2) > }
+
+		{ 0 | 1	< FDD_REPORTING_OFFSET : bit (3) >
+				< FDD_REPORTING_THRESHOLD : bit (3) > }
+
+		{ 0 | 1	< TDD_MULTIRAT_REPORTING : bit (2) > }
+			-- TDD Parameters
+		{ 0 | 1	< TDD_REPORTING_OFFSET : bit (3) >
+				< TDD_REPORTING_THRESHOLD : bit (3) > } ;
+
+	slave < NC Measurement Parameters struct > ::=
+		< NETWORK_CONTROL_ORDER : bit (2) >
+		{ 0 | 1 < NC_NON_DRX_PERIOD : bit (3) >
+				< NC_REPORTING_PERIOD_I : bit (3) >
+				< NC_REPORTING_PERIOD_T : bit (3) > }
+		;
+}
+
+#NAME SI3RestOctet
+#------------------------------------
+# TS 44.018, 10.5.2.34
+#------------------------------------
+csn.1 {
+  <SI3RestOctet> ::=
+          <Optional selection parameters>
+          <Optional Power offset>
+          <System Information 2ter Indicator>
+          <Early Classmark Sending Control>
+          <Scheduling if and where>
+          { L | H   <SI13 GPRS Indicator> }
+          <3G Early Classmark Sending Restriction>
+          { L | H < SI2quater Indicator : < SI2quater Indicator struct > > }
+          {null | <Iu Indicator> }	-- Conditional
+          <spare padding> ;
+  slave <Optional Selection Parameters> ::=
+          L | H <Selection Parameters>;
+  slave <Selection Parameters> ::=
+          <CBQ: bit (1)>
+          <CELL_RESELECT_OFFSET: bit (6)>
+          <TEMPORARY_OFFSET: bit (3)>
+          <PENALTY_TIME: bit (5)>;
+  slave <Optional Power Offset> ::=
+          L | H <Power Offset {octet enum {
+						b00 = "0 dB power offset"
+						b01 = "2 dB power offset"
+						b10 = "4 dB power offset"
+						b11 = "6 dB power offset"
+          }}: bit (2)>;
+  slave <System Information 2ter Indicator> ::=
+          L | <System Information 2ter {void}: null> H;
+  slave <Early Classmark Sending Control> ::=
+          L | <Early Classmark Sending Control {void}: null> H;
+  slave <Scheduling if and where>::=
+          L | H <WHERE: bit (3)>;
+  slave <SI13 GPRS Indicator> ::=
+          < RA COLOUR : bit (3) >
+          < SI13 POSITION {boolean enum {
+						0 = "SYSTEM INFORMATION TYPE 13 message is sent on BCCH Norm"
+						1 = "SYSTEM INFORMATION TYPE 13 message is sent on BCCH Ext"
+          }}: bit >;
+  slave <3G Early Classmark Sending Restriction>::=
+          L | <3G Early Classmark Sending Restriction {void}: null> H;
+  slave < SI2quater Indicator struct > ::=
+           < SI2quater_POSITION {
+							boolean enum {
+								0 = "SYSTEM INFORMATION TYPE 2 quater message is sent on BCCH Norm"
+								1 = "SYSTEM INFORMATION TYPE 2 quater message is sent on BCCH Ext"
+							}
+           }: bit > ;
+  slave <Iu Indicator> ::= <SI13alt POSITION {boolean enum {
+			0 = "SYSTEM INFORMATION TYPE 13alt message is sent on BCCH Norm"
+			1 = "SYSTEM INFORMATION TYPE 13alt message is sent on BCCH Ext"
+  	}}: bit >;
+}
+
+#NAME SI4_Rest_Octets
+#------------------------------------
+# TS 44.018, 10.5.2.35
+#------------------------------------
+csn.1 {
+  <SI4 Rest Octets> ::=
+  {       
+    <SI4 Rest Octets_O>
+    {L <Break indicator> | H <SI4 Rest Octets_S>}
+    <spare padding>
+  } //;  -- truncation allowed, bits 'L' assumed
+  
+  slave <SI4 Rest Octets_O> ::=
+  {         <Optional selection parameters>
+          <Optional Power offset>
+          {L | H < GPRS Indicator >}
+  } // -- truncation allowed, bits 'L' assumed
+  ;
+  slave <SI4 Rest Octets_S> ::=
+          {L | H <LSA Parameters>}
+          {L | H <Cell Identity : bit(16)>}
+          {L | H <LSA ID information>} 
+					{L | H < CBQ3 : bit (2) >
+						{0 | 1 < SI13alt Position {boolean enum {
+			0 = "SYSTEM INFORMATION TYPE 13alt message is sent on BCCH Norm"
+			1 = "SYSTEM INFORMATION TYPE 13alt message is sent on BCCH Ext"
+  	}}: bit >}
+					};
+  
+  slave <Break Indicator> ::= L | <Break Indicator {void}: null> H ;
+  
+  <SI7 Rest Octets> ::= <SI4 Rest Octets_O><SI4 Rest Octets_S> |<SI4 Rest Octets_S> ;
+  
+  <SI8 Rest Octets> ::= <SI4 Rest Octets_O><SI4 Rest Octets_S> |<SI4 Rest Octets_S> ;
+  
+  slave <Optional Selection Parameters> ::=   L | H <Selection Parameters>  ;
+  
+  slave <Selection Parameters> ::=    <CBQ : bit (1)>
+                  <CELL_RESELECT_OFFSET : bit (6)>
+                      <TEMPORARY_OFFSET : bit (3)>
+                  < PENALTY_TIME : bit (5)> ;
+  
+  slave <Optional Power Offset> ::=   L | H <Power Offset {octet enum {
+						b00 = "0 dB power offset"
+						b01 = "2 dB power offset"
+						b10 = "4 dB power offset"
+						b11 = "6 dB power offset"
+          }}: bit(2)> ;
+  
+  slave <GPRS Indicator> ::=      < RA COLOUR : bit (3) >
+                        < SI13 POSITION {boolean enum {
+													0 = "SYSTEM INFORMATION TYPE 13 message is sent on BCCH Norm"
+													1 = "SYSTEM INFORMATION TYPE 13 message is sent on BCCH Ext"
+                        }}: bit > ;
+  
+  slave <LSA Parameters> ::=      <PRIO_THR : bit (3)>
+                    <LSA_OFFSET : bit (3)>
+                    {0 | 1 <MCC : bit (12)>
+                     <MNC : bit (12)>} ;
+  
+  slave <LSA ID information> ::=    <LSA identity>
+                      {0 | 1 <LSA ID information>} ;
+  
+  slave <LSA identity> ::=      {0 <LSA_ID : bit (24)>
+                     |1 <ShortLSA_ID : bit (10)>} ;
+}
+
+#------------------------------------
+# TS 44.018, 10.5.2.37b
+#------------------------------------
+csn.1 {
+  < SI13RestOctets > ::=
+    -- Save the position where the message begins: we'll need it
+    -- later to pad exactly to 20 octets
+    ENCODECO: %{PUSH_TAG (5, CURPOS);}%
+    {
+      L
+      |
+      H < BCCH_CHANGE_MARK : bit (3) >
+        < SI_CHANGE_FIELD {
+            octet enum {
+              0 = "Update of unspecified SI message or SI messages"
+              1 = "Update of SI1 message"
+              2 = "Update of SI2, SI2 bis or SI2 ter message or any instance of SI2quater messages"
+              3 = "Update of SI3, SI4, SI7 or SI8 message"
+              4 = "Update of SI9 message;"
+              5 = "Update of SI18 or SI20 message"
+              6 = "Update of SI19 message"
+              default = "update of unknown SI message type"
+            }
+          }: bit (4) >
+        {
+          0
+          |
+          1 < SI13_CHANGE_MARK : bit (2) >
+            < GPRS Mobile Allocation : GPRS Mobile Allocation IE >
+        }     -- Defined in 3GPP TS 04.60
+        {
+          0 -- PBCCH not present in cell :
+          <NoPBCCH:
+            < RAC : bit (8) >
+            < SPGC_CCCH_SUP {
+              boolean enum {
+                0 = "SPLIT_PG_CYCLE is not supported on CCCH in this cell"
+                1 = "SPLIT_PG_CYCLE is supported on CCCH in this cell"
+              }
+            }: bit >
+            < PRIORITY_ACCESS_THR {
+              octet enum {
+                b000 = "packet access is not allowed in the cell"
+                b001 = "spare, shall be interpreted as '000' (packet access not allowed)"
+                b010 = "spare, shall be interpreted as '000' (packet access not allowed)"
+                b011 = "packet access is allowed for priority level 1"
+                b100 = "packet access is allowed for priority level 1 to 2"
+                b101 = "packet access is allowed for priority level 1 to 3"
+                b110 = "packet access is allowed for priority level 1 to 4"
+                b111 = "spare, shall be interpreted as '110' (packet access allowed)"
+              }
+            }: bit (3) >
+            < NETWORK_CONTROL_ORDER {
+              octet enum {
+                b00 = "NC0: MS controlled cell re-selection, no measurement reporting"
+                b01 = "NC1: MS controlled cell re-selection, MS sends measurement reports"
+                b10 = "NC2: Network controlled cell re-selection, MS sends measurement reports"
+                b11 = "Reserved for future use, interpreted as NC0 by mobile station"
+              }
+            }: bit (2) >
+            < GPRS Cell Options : GPRS Cell Options IE >  -- Defined in 3GPP TS 04.60
+            < GPRS Power Control Parameters : GPRS Power Control Parameters struct >
+          >
+        | 1           -- PBCCH present in cell :
+          < PSI1_REPEAT_PERIOD : bit (4) >
+          < PBCCH Description : PBCCH Description struct >
+        }
+        {
+          null
+          |
+          L   -- Receiver compatible with ealier release
+          |
+          H   -- Additions in release 99 :
+            < SGSNR : bit >
+						{	null		
+							| L 		-- Receiver compatible with earlier release
+				 			| H 		-- Additions in release Rel-4:
+								< SI_STATUS_IND : bit > 
+								{	null 	
+									| L -- Receiver compatible with earlier release
+				 					| H -- Additions in release Rel-6:
+										{ 0	| 1	< LB_MS_TXPWR_MAX_CCH : bit (5) > }
+										< SI2n_SUPPORT : bit(2) > } 
+						}
+            
+        }
+    } { bit = L } * ENCODECO_EXPR: %{160 - (CURPOS - TAG(5))}%;
+
+  slave < PBCCH Description struct > ::=
+    < Pb : bit (4) >
+    < TSC : bit (3) >
+    < TN : bit (3) >
+    { 00 -- default to BCCH carrier
+    | 10  < ARFCN : bit (10) >
+    | 1  < MAIO : bit (6) > } ;
+}
+
+
+###################################
+# From 44.060, used here
+###################################
+
+
+#------------------------------------
+# TS 44.060, 12.9a
+#------------------------------------
+csn.1 {
+  slave < GPRS Power Control Parameters struct > ::=
+    < ALPHA : bit (4) >
+    < T_AVG_W : bit (5) >
+    < T_AVG_T : bit (5) >
+    < PC_MEAS_CHAN : bit >
+    < N_AVG_I : bit (4) > ;
+}
+
+
+#------------------------------------
+# TS 44.060, 12.10a
+#------------------------------------
+csn.1 {
+	slave < GPRS Mobile Allocation IE > ::=
+		< HSN : bit (6) >
+		{ 0 | 1 < RFL number list : < RFL number list struct > > }
+		{ 0
+			< MA_LENGTH : bit (6) >
+			< MA_BITMAP : bit (val(MA_LENGTH) + 1) >
+			|
+			1
+			{
+				0
+				<marker{void}: null> -- Added to avoid encoding ambiguity
+				|
+				1 < ARFCN index list : < ARFCN index list struct > >
+			}
+		};
+
+	slave < RFL number list struct > ::=
+		< RFL_NUMBER : bit (4) >
+		{ 0 | 1 < RFL number list struct > };
+
+	slave < ARFCN index list struct > ::=
+		< ARFCN_INDEX : bit (6) >
+		{ 0 | 1 < ARFCN index list struct > };
+}
+
+#------------------------------------
+# TS 44.060, 12.24
+#------------------------------------
+csn.1 {
+	slave < GPRS Cell Options IE > ::=
+		< NMO : bit (2) >
+		< T3168 : bit (3) >
+		< T3192 : bit (3) >
+		< DRX_TIMER_MAX : bit (3) >
+		< ACCESS_BURST_TYPE : bit >
+		< CONTROL_ACK_TYPE : bit >
+		< BS_CV_MAX : bit (4) >
+		{ 0
+			|
+			1 < PAN_DEC : bit (3) >
+			< PAN_INC : bit (3) >
+			< PAN_MAX : bit (3) >
+		}
+
+		-- Optional extension information:
+		{
+			0
+			|
+			1 <ext:
+				ENCODECO: %{
+					/* Save the position of the length. This allows us to
+						 write it back when encoding */
+					PUSH_TAG (1, CURPOS);
+				}%
+				<bit>*6 -- Extension Length: we removed the label because we manage it automatically
+					{
+						<Extension Information>
+					}
+					ENCODE: %{
+						/* We save the effective length in the "Extension Length" field */
+						EDIntToBits (BUFFER, TAG(1), CURPOS-TAG(1)-7, 6);
+					}%
+					DECODE: %{CURPOS = TAG (1)+EDBitsToInt (BUFFER, TAG(1), 6)+7;}%
+			>
+		} ;
+
+	slave < Extension Information> ::=
+		{ 	-- R99 extension:
+		{ 0 | 1 -- EGPRS supported by the cell if the choice bit is set to '1'
+			<EGPRS_PACKET_ CHANNEL_REQUEST : bit>
+			< BEP_PERIOD : bit (4) >
+		}
+		<PFC_FEATURE_MODE: bit>
+		<DTM_SUPPORT: bit>
+		<BSS_PAGING_COORDINATION: bit>
+		
+		{	-- REL 4 extension:
+				< CCN_ACTIVE : bit >
+				< NW_EXT_UTBF : bit > }
+			{	-- REL 6 extension:
+				< MULTIPLE_TBF_CAPABILITY : bit > 
+				< EXT_UTBF_NO_DATA : bit > 
+				< DTM_ENHANCEMENTS_CAPABILITY : bit >
+				{ 0			-- MBMS procedures not supported by the cell if the choice bit is set to '0'
+				| 1			-- MBMS procedures supported by the cell if the choice bit is set to '1'
+					< DEDICATED_MODE_MBMS_NOTIFICATION_SUPPORT: bit > 	
+					< MNCI_SUPPORT : bit > } }
+			{	-- Rel-7 extension:
+				< REDUCED_LATENCY_ACCESS : bit > }
+			< spare bit > ** } // ;			-- Extension information may be truncated between released versions of the protocol.
+											-- The receiver shall assume the value zero for any truncated bit.
+		
+}
