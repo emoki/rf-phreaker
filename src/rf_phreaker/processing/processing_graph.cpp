@@ -49,7 +49,7 @@ void processing_graph::start(scanner_controller_interface *sc, data_output_async
 			LOG(LINFO) << "gsm layer 3 general settings: " << config.gsm_layer_3_general_.band_power_threshold_ << ", " << config.gsm_layer_3_general_.side_power_threshold_ << ", "
 				<< config.gsm_layer_3_general_.perform_sync_correlations_ << ", " << config.gsm_layer_3_general_.sync_corr_confidence_threshold_ << ".";
 			LOG(LINFO) << "gsm layer 3 decode settings: " << config.gsm_layer_3_decode_.max_update_threshold_ << ", " << config.gsm_layer_3_decode_.minimum_collection_round_ << ", "
-				<< config.gsm_layer_3_decode_.decode_threshold_ << ", " << config.gsm_layer_3_decode_.decode_minimum_threshold_ << config.gsm_layer_3_decode_.minimum_decode_count_ << ", "
+				<< config.gsm_layer_3_decode_.decode_threshold_ << ", " << config.gsm_layer_3_decode_.decode_minimum_threshold_ << ", " << config.gsm_layer_3_decode_.minimum_decode_count_ << ", "
 				<< config.gsm_layer_3_decode_.should_prioritize_layer_3_ << ".";
 
 
@@ -63,7 +63,7 @@ void processing_graph::start(scanner_controller_interface *sc, data_output_async
 			LOG(LINFO) << "umts layer 3 general settings: " << config.umts_layer_3_general_.sensitivity_ << ", " << config.umts_layer_3_general_.full_scan_interval_ << ", "
 				<< config.umts_layer_3_general_.num_coherent_slots_ << ".";
 			LOG(LINFO) << "umts layer 3 decode settings: " << config.umts_layer_3_decode_.max_update_threshold_ << ", " << config.umts_layer_3_decode_.minimum_collection_round_ << ", "
-				<< config.umts_layer_3_decode_.decode_threshold_ << ", " << config.umts_layer_3_decode_.decode_minimum_threshold_ << config.umts_layer_3_decode_.minimum_decode_count_ << ", "
+				<< config.umts_layer_3_decode_.decode_threshold_ << ", " << config.umts_layer_3_decode_.decode_minimum_threshold_ << ", " << config.umts_layer_3_decode_.minimum_decode_count_ << ", "
 				<< config.umts_layer_3_decode_.should_prioritize_layer_3_ << ".";
 
 
@@ -75,7 +75,7 @@ void processing_graph::start(scanner_controller_interface *sc, data_output_async
 				<< config.lte_layer_3_collection_.collection_time_ << ".";
 			LOG(LINFO) << "lte layer 3 general settings: " << config.lte_layer_3_general_.sync_quality_confidence_threshold_ << ", " << config.lte_layer_3_general_.full_scan_interval_ << ".";
 			LOG(LINFO) << "lte layer 3 decode settings: " << config.lte_layer_3_decode_.max_update_threshold_ << ", " << config.lte_layer_3_decode_.minimum_collection_round_ << ", "
-				<< config.lte_layer_3_decode_.decode_threshold_ << ", " << config.lte_layer_3_decode_.decode_minimum_threshold_ << config.lte_layer_3_decode_.minimum_decode_count_ << ", "
+				<< config.lte_layer_3_decode_.decode_threshold_ << ", " << config.lte_layer_3_decode_.decode_minimum_threshold_ << ", " << config.lte_layer_3_decode_.minimum_decode_count_ << ", "
 				<< config.lte_layer_3_decode_.should_prioritize_layer_3_ << ".";
 
 			graph_ = (std::make_shared<tbb::flow::graph>());
