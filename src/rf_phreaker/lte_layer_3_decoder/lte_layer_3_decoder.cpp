@@ -22,14 +22,14 @@ lte_asn1_decoder::~lte_asn1_decoder()
 int lte_asn1_decoder::decode_bcch_bch_message(const uint8_t* bit_stream, uint32_t num_of_bytes, uint32_t unused_bits,  layer_3_information::lte_rrc_message_aggregate &message)
 {
 	int status = 0;
-	try
-	{
+	try {
 		message.clear();
 		bit_stream_container bits(bit_stream, num_of_bytes, unused_bits);
 
-		//std::ofstream debug("lte_bitstreams.txt", std::ios::app);
-		//if(debug)
-		//	debug << bits << "\n";
+		//if(debug) {
+		//static std::ofstream debug("lte_bitstreams.txt", std::ios::app);
+		//debug << bits << "\n";
+		//}
 
 		lte_bcch_bch_message_->populate_data(bits, message);
 	}
