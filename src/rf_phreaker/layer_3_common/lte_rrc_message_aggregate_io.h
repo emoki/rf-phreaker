@@ -44,7 +44,6 @@ inline std::ostream& operator<<(std::ostream &os, const neighbor_cell_cdma_2000 
 inline std::ostream& operator<<(std::ostream &os, const cell_reselection_parameters_cmda_2000 &t);
 inline std::ostream& operator<<(std::ostream &os, const lte_sib8_type &t);
 inline std::ostream& operator<<(std::ostream &os, const lte_rrc_message_aggregate &t);
-inline std::ostream& operator<<(std::ostream &os, const lte_rrc_message_aggregate &t);
 
 inline std::ostream& header(std::ostream &os, const lte_sib_base &t) {
 	os << "is_decoded";
