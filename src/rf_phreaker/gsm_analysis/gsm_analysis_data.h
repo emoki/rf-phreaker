@@ -59,6 +59,7 @@ enum GsmAnalysisMeasurementInfoMask
 	SyncBurstDecoded		= 0x1,
 	CGIDecoded				= 0x2,
 	BcchBurstDecoded		= 0x4,
+	ExtendedBcchBurstDecoded = 0x8,
 	Reserved_01				= 0x8000
 };
 typedef struct {
@@ -87,6 +88,7 @@ typedef struct {
 	int					LAC;
 	int					CellID;
 	GSM_BCCH_DATA_TYPE	BcchOctets;
+	GSM_BCCH_DATA_TYPE	ExtendedBcchOctets;
 	// Shows information related to the processing of the measurement:
 	// See the bit mask values defined in GsmAnalysisMeasurementInfoMask.
 	// If the associated bit is set, the stated condition is true.

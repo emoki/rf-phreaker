@@ -30,10 +30,71 @@ public:
 		, tdma_frame_number_(-1)
 		, sync_burst_decoded_(false)
 		, cgi_decoded_(false)
-		, bcch_burst_decoded_(false) {
+		, bcch_burst_decoded_(false) 
+		, extended_bcch_burst_decoded_(false) {
 		memset(bcch_octets_, 0, sizeof(bcch_octets_[0]) * bcch_octet_size_);
+		memset(extended_bcch_octets_, 0, sizeof(extended_bcch_octets_[0]) * bcch_octet_size_);
 	}
 
+	gsm_measurement(const gsm_measurement &meas) 
+		: channel_index_(meas.channel_index_)
+		, intermediate_frequency_(meas.intermediate_frequency_)
+		, center_frequency_(meas.center_frequency_)
+		, channel_power_(meas.channel_power_)
+		, fcch_freq_index_(meas.fcch_freq_index_)
+		, fcch_peak_freq_(meas.fcch_peak_freq_)
+		, fcch_peak_power_(meas.fcch_peak_power_)
+		, band_power_(meas.band_power_)
+		, side_power_(meas.side_power_)
+		, rms_corr_power_(meas.rms_corr_power_)
+		, norm_sync_corr_(meas.norm_sync_corr_)
+		, c_i_ratio_(meas.c_i_ratio_)
+		, sync_sample_num_(meas.sync_sample_num_)
+		, bsic_(meas.bsic_)
+		, tdma_frame_number_(meas.tdma_frame_number_)
+		, sync_burst_decoded_(meas.sync_burst_decoded_)
+		, cgi_decoded_(meas.cgi_decoded_)
+		, bcch_burst_decoded_(meas.bcch_burst_decoded_)
+		, extended_bcch_burst_decoded_(meas.extended_bcch_burst_decoded_)
+		, layer_3_(meas.layer_3_) {
+		memcpy(bcch_octets_, meas.bcch_octets_, sizeof(bcch_octets_[0]) * bcch_octet_size_);
+		memcpy(extended_bcch_octets_, meas.extended_bcch_octets_, sizeof(extended_bcch_octets_[0]) * bcch_octet_size_);	
+	}
+
+	gsm_measurement(gsm_measurement &&meas) {
+		swap(meas);
+	}
+
+	gsm_measurement& operator=(gsm_measurement meas) {
+		meas.swap(*this);
+		return *this;
+	}
+
+	void swap(gsm_measurement &meas) {
+		std::swap(channel_index_, meas.channel_index_);
+		std::swap(intermediate_frequency_, meas.intermediate_frequency_);
+		std::swap(center_frequency_, meas.center_frequency_);
+		std::swap(channel_power_, meas.channel_power_);
+		std::swap(fcch_freq_index_, meas.fcch_freq_index_);
+		std::swap(fcch_peak_freq_, meas.fcch_peak_freq_);
+		std::swap(fcch_peak_power_, meas.fcch_peak_power_);
+		std::swap(band_power_, meas.band_power_);
+		std::swap(side_power_, meas.side_power_);
+		std::swap(rms_corr_power_, meas.rms_corr_power_);
+		std::swap(norm_sync_corr_, meas.norm_sync_corr_);
+		std::swap(c_i_ratio_, meas.c_i_ratio_);
+		std::swap(sync_sample_num_, meas.sync_sample_num_);
+		std::swap(bsic_, meas.bsic_);
+		std::swap(tdma_frame_number_, meas.tdma_frame_number_);
+		std::swap(sync_burst_decoded_, meas.sync_burst_decoded_);
+		std::swap(cgi_decoded_, meas.cgi_decoded_);
+		std::swap(bcch_burst_decoded_, meas.bcch_burst_decoded_);
+		std::swap(bcch_octets_, meas.bcch_octets_);
+		std::swap(extended_bcch_burst_decoded_, meas.extended_bcch_burst_decoded_);
+		std::swap(extended_bcch_octets_, meas.extended_bcch_octets_);
+		layer_3_.swap(meas.layer_3_);
+	}
+	
 	static const int bcch_octet_size_ = 23;
 	int32_t channel_index_;
 	frequency_type intermediate_frequency_;
@@ -53,7 +114,9 @@ public:
 	bool sync_burst_decoded_;
 	bool cgi_decoded_;
 	bool bcch_burst_decoded_;
-	char bcch_octets_[bcch_octet_size_];
+	bool extended_bcch_burst_decoded_;
+	unsigned char bcch_octets_[bcch_octet_size_];
+	unsigned char extended_bcch_octets_[bcch_octet_size_];
 	layer_3_information::gsm_layer_3_message_aggregate layer_3_;
 };
 

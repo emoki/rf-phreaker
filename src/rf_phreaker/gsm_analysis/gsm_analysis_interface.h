@@ -46,7 +46,7 @@ public:
 		const Ipp32fc *pData, const int iDataLength,
 		gsm_analysis_output_list **head_row,
 		const float bandPowThresh, const float sidePowThresh,
-		const unsigned int IFFreqOffsetHz=0, const bool ProcessBCCH = false,
+		const unsigned int IFFreqOffsetHz=0,
 		const bool ProcessFreq[GSM_ANALYSIS_MAX_NUM_IF_FREQS]=NULL
 	);
 	gsm_analysis_output_list* GsmClearOutput( gsm_analysis_output_list *psuHead );
@@ -54,6 +54,14 @@ public:
 	double input_data_sampling_rate_hz() const { return input_data_sampling_rate_hz_; };
 	unsigned int upsample_factor() const { return upsample_factor_; };
 	unsigned int downsample_factor() const { return downsample_factor_; };
+
+	int DecodeBsic(
+		const Ipp32fc *pData, const int iDataLength,
+		rf_phreaker::gsm_measurement &meas);
+
+	int DecodeBcchBurst(
+		const Ipp32fc *pData, const int iDataLength,
+		rf_phreaker::gsm_measurement &meas);
 
 protected:
 	static const unsigned int data_bits_per_symbol_;

@@ -51,5 +51,5 @@ add_library (gsm_analysis SHARED ${gsm_analysis_SRCS})
 
 target_link_libraries (gsm_analysis common)
 target_link_libraries (gsm_analysis fir_filter)
-target_link_libraries (gsm_analysis layer_3_common)
+target_link_libraries (gsm_analysis gsm_layer_3_decoder)
 

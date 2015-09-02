@@ -302,7 +302,7 @@ ProcessBSIC_(false), ProcessCGI_(false)
 	{
 		BSIC_Decoder_ = new GsmBsicDecoder();
 	}
-	catch (int e)
+	catch (int)
 	{
 		ProcessBSIC_ = false;
 		delete BSIC_Decoder_;
@@ -316,7 +316,7 @@ ProcessBSIC_(false), ProcessCGI_(false)
 		{
 			CGI_Decoder_ = new GsmCgiDecoder(s->t);
 		}
-		catch (int e)
+		catch (int)
 		{
 			ProcessCGI_ = false;
 			delete CGI_Decoder_;
@@ -341,7 +341,7 @@ GsmSyncProcessor::~GsmSyncProcessor()
 int GsmSyncProcessor::sync_analysis(
 	const DATASTRUCT *data, unsigned int datasize,
 	float bandpow_threshold, float sidepow_threshold,
-	bool processBCCH, gsm_analysis_output_list *head
+	gsm_analysis_output_list *head
 )
 {
 	if ( !data || !datasize )
@@ -415,11 +415,6 @@ int GsmSyncProcessor::sync_analysis(
 
 	// BSIC and CGI information
 	const int BSIC_NumSamplesPad = (int)(s_.nspb*BSIC_BURST_NUM_BITS_PAD);
-	BSICChannelInfoType SyncInfo;
-	BSICDecoderMsgType BSIC_Error;
-	CGIChannelInfoType CGIInfo;
-	CGIDecoderMsgType CGI_Error;
-
 
 	fcch_to_sync_offset = (int)(GSM_BITS_PER_FRAME * s_.nspb);
 	datasize_ = s_.datasize;
@@ -577,57 +572,6 @@ int GsmSyncProcessor::sync_analysis(
 		current->data.MCC = 0;
 		current->data.LAC = 0;
 		current->data.CellID = 0;
-		if ( ProcessBSIC_ && (peak >= 0.70) ) {
-			if ( ((current->data.SyncSampleNum + s_.blocksize + BSIC_NumSamplesPad) < s_.datasize)
-				&& ((current->data.SyncSampleNum - BSIC_NumSamplesPad) > 0) )
-			{
-				// ensures all bits in the bit-field are 0 (for easier decoding)
-				*(unsigned int *)(&SyncInfo) = 0;
-				BSIC_Error = BSIC_Decoder_->DecodeBSIC(
-					&(s_.data[current->data.SyncSampleNum]),
-					current->data.IFFreq,
-					&SyncInfo, *sync_correlator_ );
-				if ( BSIC_Error == BSIC_NO_ERROR )
-				{
-					current->data.MeasurementInfo |= SyncBurstDecoded;
-					current->data.BSIC = (SyncInfo.NCC<<4)+SyncInfo.BCC;
-					current->data.TDMAFrameNumber = GetTDMAFrameNumber(SyncInfo);
-
-					// Attempt to decode BCCH bursts if either:
-					// ProcessBcch is selected or the Sync occurs in a CGI Frame.
-					// And of course we also must have a full and valid Bcch frame too.
-					if ( ProcessCGI_ && (processBCCH || IsCGIFrame(SyncInfo)) &&
-						ValidBcchData(SyncInfo,(unsigned int)current->data.SyncSampleNum) )
-					{
-						CGI_Error = CGI_Decoder_->DecodeCGI(
-							&(s_.data[current->data.SyncSampleNum]),
-							current->data.IFFreq,
-							current->data.BSIC,
-							&CGIInfo, current->data.BcchOctets);
-						if ( CGI_Error == CGI_NO_ERROR )
-						{
-							current->data.MeasurementInfo |= BcchBurstDecoded;
-							if (IsCGIFrame(SyncInfo) )
-							{
-								if ( (CGIInfo.MCC_100<10) && (CGIInfo.MCC_10<10) && (CGIInfo.MCC_1<10)
-									&& (CGIInfo.MNC_10<10) && (CGIInfo.MNC_1<10) )
-								{
-									current->data.MeasurementInfo |= CGIDecoded;
-									current->data.MNC = CGIInfo.MNC_100 * 100
-										+ CGIInfo.MNC_10 * 10
-										+ CGIInfo.MNC_1;
-									current->data.MCC = CGIInfo.MCC_100 * 100
-										+ CGIInfo.MCC_10 * 10
-										+ CGIInfo.MCC_1;
-									current->data.LAC = CGIInfo.LAC;
-									current->data.CellID = CGIInfo.CI;
-								}
-							}
-						}
-					}// end if ProcessCGI
-				}// end if BSIC_ERROR
-			}// end if BSIC location valid
-		}// end if ProcessBSIC
 
 		prev_row = current;
 		num++;
@@ -637,6 +581,81 @@ int GsmSyncProcessor::sync_analysis(
 	return 0;
 }
 
+int GsmSyncProcessor::bsic_analysis(const DATASTRUCT *data, unsigned int datasize, rf_phreaker::gsm_measurement &meas) {
+	const int BSIC_NumSamplesPad = (int)(s_.nspb*BSIC_BURST_NUM_BITS_PAD);
+	BSICChannelInfoType SyncInfo;
+	BSICDecoderMsgType BSIC_Error;
+	CGIChannelInfoType CGIInfo;
+	CGIDecoderMsgType CGI_Error;
+	if(((meas.sync_sample_num_ + s_.blocksize + BSIC_NumSamplesPad) < datasize)
+		&& ((meas.sync_sample_num_ - BSIC_NumSamplesPad) > 0)) {
+		// ensures all bits in the bit-field are 0 (for easier decoding)
+		*(unsigned int *)(&SyncInfo) = 0;
+		BSIC_Error = BSIC_Decoder_->DecodeBSIC(
+			&(data[meas.sync_sample_num_]),
+			meas.intermediate_frequency_,
+			&SyncInfo, *sync_correlator_);
+		if(BSIC_Error == BSIC_NO_ERROR) {
+			meas.sync_burst_decoded_ = true;
+			meas.bsic_ = (SyncInfo.NCC << 4) + SyncInfo.BCC;
+			meas.tdma_frame_number_ = GetTDMAFrameNumber(SyncInfo);
+		}
+	}
+
+	return 0;
+}
+
+int GsmSyncProcessor::bcch_burst_analysis(const DATASTRUCT *data, unsigned int datasize, rf_phreaker::gsm_measurement &meas) {
+	CGIChannelInfoType CGIInfo;
+	CGIDecoderMsgType CGI_Error;
+
+	if(meas.bsic_ == -1)
+		return 0;
+
+	auto str = std::to_string(meas.bsic_);
+	auto it = str.begin();
+	char tmp[2];
+	memset(tmp, 0, sizeof(char)*2);
+	char *endptr;
+	std::copy(it, it + (str.size() > 2 ? 2 : str.size()), tmp);
+	auto bsic = strtol(tmp, &endptr, 16);
+
+	const uint32_t sync_to_cgi_end_offset = (uint32_t)((GSM_SYNC_CGI_FRAMES_OFFSET * GSM_BITS_PER_FRAME) * NETSTART_SAMPLES_PER_GSM_BIT);
+
+	unsigned int rf_phreaker_bcch_end = meas.sync_sample_num_ + sync_to_cgi_end_offset
+		+ (unsigned int)(GSM_BURST_LEN_BITS * NETSTART_SAMPLES_PER_GSM_BIT);
+
+	if(meas.tdma_frame_number_ % 51 == 1 && rf_phreaker_bcch_end < datasize) {
+		CGI_Error = CGI_Decoder_->DecodeCGI(
+			&(data[meas.sync_sample_num_]),
+			meas.intermediate_frequency_,
+			bsic,
+			&CGIInfo, meas.bcch_octets_);
+		if(CGI_Error == CGI_NO_ERROR) {
+			meas.bcch_burst_decoded_ = true;
+
+			// Attempt to decode extended BCCH if the snapshot has room and TC = 5. 
+			// (It's possible that si4quater is broadcast on TC = 5, si7 is TC = 7, si8 is TC = 3;
+			const auto tc = (int)(meas.tdma_frame_number_ / 51) % 8;
+			if(tc == 5 || tc == 3 || tc == 7) {
+				unsigned int rf_phreaker_extended_bcch_end = (unsigned int)meas.sync_sample_num_ + 2 * sync_to_cgi_end_offset
+					+ (unsigned int)(GSM_BURST_LEN_BITS * NETSTART_SAMPLES_PER_GSM_BIT);
+
+				if(rf_phreaker_extended_bcch_end <= datasize) {
+					CGI_Error = CGI_Decoder_->DecodeCGI(
+						&data[meas.sync_sample_num_ + sync_to_cgi_end_offset],
+						meas.intermediate_frequency_,
+						bsic,
+						&CGIInfo, meas.extended_bcch_octets_);
+					if(CGI_Error == CGI_NO_ERROR) {
+						meas.extended_bcch_burst_decoded_ = true;
+					}
+				}
+			}
+		}
+	}
+	return 0;
+}
 
 bool GsmSyncProcessor::ValidBcchData(BSICChannelInfoType RFN, unsigned int sync_location)
 {

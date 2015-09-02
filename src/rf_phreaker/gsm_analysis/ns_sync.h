@@ -3,6 +3,7 @@
 #include "rf_phreaker/gsm_analysis/netstart.h"
 #include "rf_phreaker/gsm_analysis/ns_bsic.h"
 #include "rf_phreaker/gsm_analysis/ns_cgi.h"
+#include "rf_phreaker/gsm_analysis/gsm_measurement.h"
 
 #define SYNC_NO_ERROR			0
 #define SYNC_OUT_OF_MEMORY		1
@@ -41,8 +42,12 @@ public:
 	);
 	~GsmSyncProcessor();
 	int sync_analysis(const DATASTRUCT *data, unsigned int datasize,
-		float bandpow_threshold, float sidepow_threshold, bool processBCCH,
+		float bandpow_threshold, float sidepow_threshold,
 		gsm_analysis_output_list *head);
+
+	int bsic_analysis(const DATASTRUCT *data, unsigned int datasize, rf_phreaker::gsm_measurement &meas);
+	int bcch_burst_analysis(const DATASTRUCT *data, unsigned int datasize, rf_phreaker::gsm_measurement &meas);
+
 protected:
 	bool ValidBcchData(BSICChannelInfoType RFN, unsigned int sync_location);
 

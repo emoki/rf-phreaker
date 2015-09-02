@@ -4,6 +4,7 @@
 #include <fstream>
 #include <iostream>
 #include <iomanip>
+#include "rf_phreaker/gsm_analysis/gsm_measurement.h"
 #include "rf_phreaker/layer_3_common/gsm_layer_3_message_aggregate_io.h"
 #include "rf_phreaker/common/common_utility.h"
 
@@ -31,11 +32,11 @@ inline std::ostream& output_gsm_meas_debug_header(std::ostream &os) {
 		<< "cgi_decoded" << gsm_io_delimiter
 		<< "bcch_burst_decoded" << gsm_io_delimiter
 		<< "bcch_octets" << gsm_io_delimiter;
-	//layer_3_information::header(os, layer_3_information::gsm_rrc_message_aggregate());
+	layer_3_information::header(os, layer_3_information::gsm_layer_3_message_aggregate());
 	return os;
 }
 
-inline std::ostream& output_bcch_octets(std::ostream &os, const char *t) {
+inline std::ostream& output_bcch_octets(std::ostream &os, const unsigned char *t) {
 	os << "0x";
 	for(int i = 0; i < gsm_measurement::bcch_octet_size_; ++i)
 		os << hex_conversion::to_string<2>(t[i]);
@@ -63,7 +64,8 @@ inline std::ostream& operator<<(std::ostream &os, const gsm_measurement &t) {
 		<< t.cgi_decoded_ << gsm_io_delimiter
 		<< t.bcch_burst_decoded_ << gsm_io_delimiter
 		<< std::noboolalpha;
-		output_bcch_octets(os, t.bcch_octets_);
+	output_bcch_octets(os, t.bcch_octets_);
+	os << gsm_io_delimiter << t.layer_3_;
 	return os;
 }
 

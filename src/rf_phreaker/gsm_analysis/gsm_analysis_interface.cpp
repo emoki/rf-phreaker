@@ -14,7 +14,7 @@
 
 #include "rf_phreaker/gsm_analysis/gsm_analysis_interface.h"
 #include "rf_phreaker/gsm_analysis/gsm_sync_templates.h"
-
+#include "rf_phreaker/gsm_analysis/gsm_measurement.h"
 #include "rf_phreaker/gsm_analysis/netstart.h"
 #include <fstream>
 
@@ -100,8 +100,10 @@ downsample_factor_(downsample_factor)
 	// 60ms is equal to 13 bursts, which guarantees at least one full
 	// FCCH and SYNC burst inside the data vector.
 	// TODO : this should go in RF_PHREAKER_Defs.h
-	unsigned int MaxDataSize = (unsigned int)(13.0 * GSM_BITS_PER_FRAME * samples_per_GSM_Bit) + 1;
-	if ( max_num_data_samples > MaxDataSize )
+	//unsigned int MaxDataSize = (unsigned int)(13.0 * GSM_BITS_PER_FRAME * samples_per_GSM_Bit) + 1;
+	// TODO - testing to see if this helps us decode layer 3 faster...
+	unsigned int MaxDataSize = (unsigned int)(2 * 13.0 * GSM_BITS_PER_FRAME * samples_per_GSM_Bit) + 1;
+	if(max_num_data_samples > MaxDataSize)
 		m_suGSMStruct.datasize = MaxDataSize;
 	else m_suGSMStruct.datasize = max_num_data_samples;
 
@@ -155,7 +157,7 @@ int gsm_processor::GsmAnalysis(
 	const Ipp32fc *pData, const int iDataLength,
 	gsm_analysis_output_list **head_row,
 	const float bandPowThresh, const float sidePowThresh,
-	const unsigned int IFFreqOffsetHz, const bool ProcessBCCH,
+	const unsigned int IFFreqOffsetHz,
 	const bool ProcessFreq[GSM_ANALYSIS_MAX_NUM_IF_FREQS]
 )
 {
@@ -171,7 +173,7 @@ int gsm_processor::GsmAnalysis(
 	m_suGSMStruct.NumFreqs = ( IFFreqOffsetHz );
 	m_suGSMStruct.fcch_th2 = bandPowThresh;
 	m_suGSMStruct.fcch_th3 = sidePowThresh;
-	m_suGSMStruct.ProcessBCCH = ProcessBCCH;
+	m_suGSMStruct.ProcessBCCH = false;
 
 	iGSMError = gsm_analysis( &m_suGSMStruct );
 	*head_row = m_suGSMStruct.head_row;
@@ -189,8 +191,25 @@ int gsm_processor::GsmAnalysis(
 	return iGSMError;
 }
 
+int gsm_processor::DecodeBsic(
+	const Ipp32fc *pData, const int iDataLength,
+	rf_phreaker::gsm_measurement &meas) {
+	int iGSMError;
+	if(!m_bInitialized) return GSM_ANALYSIS_NOT_INITIALIZED;
+	iGSMError = m_suGSMStruct.sync_processor->bsic_analysis(pData, iDataLength, meas);
+	return iGSMError;
+}
 
-gsm_analysis_output_list* gsm_processor::GsmClearOutput( gsm_analysis_output_list *psuHead )
+int gsm_processor::DecodeBcchBurst(
+	const Ipp32fc *pData, const int iDataLength,
+	rf_phreaker::gsm_measurement &meas) {
+	int iGSMError;
+	if(!m_bInitialized) return GSM_ANALYSIS_NOT_INITIALIZED;
+	iGSMError = m_suGSMStruct.sync_processor->bcch_burst_analysis(pData, iDataLength, meas);
+	return iGSMError;
+}
+
+gsm_analysis_output_list* gsm_processor::GsmClearOutput(gsm_analysis_output_list *psuHead)
 {
 	if(m_bInitialized)
 		return del_rows(psuHead);

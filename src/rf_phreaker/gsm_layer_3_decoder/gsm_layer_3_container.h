@@ -3,7 +3,6 @@
 #include "rf_phreaker/gsm_layer_3_library/gsm_layer_3_common.h"
 #include "rf_phreaker/gsm_layer_3_library/nonstandard_message.h"
 #include "rf_phreaker/layer_3_common/gsm_layer_3_message_aggregate.h"
-#include "rf_phreaker/gsm_layer_3_decoder/populate_data_interface.h"
 #include <map>
 
 class gsm_layer_3_container

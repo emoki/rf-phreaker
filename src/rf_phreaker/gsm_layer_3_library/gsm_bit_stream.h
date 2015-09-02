@@ -2,7 +2,11 @@
 
 #include <stdint.h>
 #include <cmath>
+#include <iomanip>
 #include <boost/lexical_cast.hpp>
+
+class gsm_bit_stream;
+inline std::ostream& operator<<(std::ostream &os, const gsm_bit_stream &t);
 
 class gsm_bit_stream
 {
@@ -36,6 +40,8 @@ public:
 			throw std::runtime_error(std::string("Error decoding GSM bit stream.  ").append(boost::lexical_cast<std::string>(bits_left * -1)).append(" additional bit(s) are needed to continue current decode."));
 	}
 
+	const uint8_t *bit_stream() const { return bit_stream_; }
+
 protected:
 
 	const uint8_t *bit_stream_;
@@ -46,3 +52,13 @@ protected:
 
 	uint32_t bits_consumed_thus_far_;
 };
+
+
+inline std::ostream& operator<<(std::ostream &os, const gsm_bit_stream &t) {
+	os << t.num_bytes_in_bit_stream() << "\t" << t.num_bits_unused_in_bit_stream() << "\t";
+
+	for(uint32_t i = 0, end = t.num_bytes_in_bit_stream(); i < end; ++i)
+		os << std::hex << std::setw(2) << std::setfill('0') << (int)t.bit_stream()[i] << " ";
+
+	return os;
+}

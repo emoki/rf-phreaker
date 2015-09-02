@@ -43,9 +43,11 @@ namespace rf_phreaker {
 
 		~gsm_analysis();
 
-		int cell_search(const rf_phreaker::raw_signal &raw_signal, gsm_measurements &gsm_meas, bool do_octet_decoding = false);
+		int cell_search(const rf_phreaker::raw_signal &raw_signal, gsm_measurements &gsm_meas);
 
-		//int decode_layer_3(const rf_phreaker::raw_signal &raw_signal, gsm_measurements &gsm_meas);
+		int decode_bsic(const rf_phreaker::raw_signal &raw_signal, gsm_measurement &gsm_meas);
+
+		int decode_layer_3(const rf_phreaker::raw_signal &raw_signal, gsm_measurement &gsm_meas);
 
 	private:
 		gsm_analysis_impl *impl_;

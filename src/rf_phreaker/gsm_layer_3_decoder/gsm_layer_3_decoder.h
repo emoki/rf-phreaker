@@ -44,6 +44,6 @@ public:
 	void update_message_decode_list(layer_3_information::gsm_bcch_si_type message_t);
 
 private:
-	gsm_layer_3_container *gsm_layer_3_container_;
+	bool debug_;
 };
 

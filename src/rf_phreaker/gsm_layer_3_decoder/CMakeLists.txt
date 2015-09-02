@@ -11,21 +11,9 @@ set (gsm_layer_3_decoder_VERSION_TWEAK 0)
 
 # Set the source files.
 set (gsm_layer_3_decoder_SRCS 
-	gsm_layer_3_container.cpp
-	gsm_layer_3_container.h
 	gsm_layer_3_decoder.cpp
 	gsm_layer_3_decoder.h
-	populate_data_interface.h
-	si_2_container.cpp
-	si_2_container.h
-	si_2bis_container.cpp
-	si_2bis_container.h
-	si_2quarter_container.cpp
-	si_2quarter_container.h
-	si_2ter_container.cpp
-	si_2ter_container.h
-	si_3_container.cpp
-	si_3_container.h
+	gsm_layer_3_utility.h
 	${SRC_PLATFORM_SPECIFIC}/stdafx.cpp
 	${SRC_PLATFORM_SPECIFIC}/dllmain.cpp)
 

@@ -364,7 +364,7 @@ int gsm_analysis( GSMStruct *s ) {
 		//s->sync_s.data = data;
 		//s->sync_s.tb = s->tb;
 		s->sync_processor->sync_analysis( s->data, s->datalength,
-			s->fcch_th2, s->fcch_th3, s->ProcessBCCH, s->head_row );
+			s->fcch_th2, s->fcch_th3, s->head_row );
 	}
 
 	return(errFlag);

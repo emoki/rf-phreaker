@@ -57,10 +57,14 @@ TEST(GsmAnalysisTests, TestGeneral) {
 
 			gsm_measurements meas_group;
 
-			auto status = analysis.cell_search(signal, meas_group, true);
-
+			auto status = analysis.cell_search(signal, meas_group);
 			EXPECT_EQ(0, status);
-
+			for(auto &i : meas_group) {
+				status = analysis.decode_bsic(signal, i);
+				EXPECT_EQ(0, status);
+				status = analysis.decode_layer_3(signal, i);
+				EXPECT_EQ(0, status);
+			}
 			static std::ofstream output_file("gsm_measurements.txt");
 			static bool write_header = true;
 			if(write_header) {
