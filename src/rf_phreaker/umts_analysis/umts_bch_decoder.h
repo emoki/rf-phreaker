@@ -63,9 +63,14 @@ private:
 	std::vector<Ipp8u*>::iterator svit;
 	std::vector<Ipp32f*>::iterator ds01it, ds02it, ds11it, ds12it, accit;
 
+	int max_signal_length_;
+	int max_signal_length_buffer_; // length of buffer that holds signal plus extra samples needed for zero delay filter.
+	int max_resample_length_;
 	int signal_length_;
-	int signal_length_buffer_; // length of buffer that holds signal plus extra samples needed for zero delay filter.
+	int signal_length_buffer_;
 	int resample_length_;
+
+	int taps_length_;
 
 	void output_ascii_hex_string(const layer_3_information::umts_bcch_bch_message_aggregate& bchinfo);
 
