@@ -250,14 +250,24 @@ bool Api::event(QEvent *e) {
 		e->accept();
 		return true;
 	}
+	else if(e->type() == DeviceDisconnectedEvent::getType()) {
+		deviceDisconnected();
+		e->accept();
+		return true;
+	}
 
 	return QObject::event(e);
 }
 
 void Api::handle_message(rp_status status, const QString &s) {
-//	switch(rp_status) {
+	switch(status) {
+	case RP_STATUS_GENERIC_ERROR:
+		QCoreApplication::postEvent(Api::instance(), new DeviceDisconnectedEvent());
+	case RP_STATUS_OK:
+	default:
+		;// Do nothing.
 
-//	};
+	};
 	auto status_str = rp_status_message(status);
 	qDebug() << status_str + s;
 

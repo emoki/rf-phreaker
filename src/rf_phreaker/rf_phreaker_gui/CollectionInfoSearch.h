@@ -39,6 +39,8 @@ private:
 	void populateWithWcdma();
 	void populateWithLte();
 	void populateWithRaw();
+	void populateWithWcdmaFreqRange(const rf_phreaker::channel_freq &cf);
+	void populateWithLteFreqRange(const rf_phreaker::channel_freq &cf);
 
 	QList<QObject*> results_;
 	QString filter_;

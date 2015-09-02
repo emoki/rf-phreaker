@@ -89,6 +89,11 @@ public:
 	CollectionStoppedEvent() : QEvent(getType()) {}
 };
 
+class DeviceDisconnectedEvent : public QEvent, public TypeInterface<DeviceDisconnectedEvent> {
+public:
+	DeviceDisconnectedEvent() : QEvent(getType()) {}
+};
+
 
 
 class LogUpdateEvent : public QEvent, public TypeInterface<LogUpdateEvent> {

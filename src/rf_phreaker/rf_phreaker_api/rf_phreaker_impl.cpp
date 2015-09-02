@@ -8,6 +8,7 @@
 #include "rf_phreaker/processing/frequency_range_creation.h"
 #include "rf_phreaker/qt_specific/settings_io.h"
 #include "rf_phreaker/qt_specific/file_path_validation.h"
+#include "rf_phreaker/qt_specific/qt_utility.h"
 #include "tbb/task_scheduler_init.h"
 
 namespace rf_phreaker { namespace api {
@@ -52,6 +53,9 @@ rp_status rf_phreaker_impl::initialize(rp_callbacks *callbacks) {
 			logger_.reset(new logger("rf_phreaker_api", config_.output_directory_));
 		}
 		catch(...) {}
+
+		LOG(LINFO) << "Initializing rf phreaker api version " << build_version() << ".";
+
 		is_initialized_ = false;
 
 		if(logger_) {
@@ -64,8 +68,6 @@ rp_status rf_phreaker_impl::initialize(rp_callbacks *callbacks) {
 				logger_->handler_->worker->addSink(std::move(tmp), &log_handler::receive_log_message);
 			}
 		}
-
-		LOG(LINFO) << "Initializing rf phreaker api version " << build_version() << ".";
 
 		// Release all components before changing delegate.
 		if(processing_graph_) {
@@ -84,8 +86,14 @@ rp_status rf_phreaker_impl::initialize(rp_callbacks *callbacks) {
 			frequency_correction_graph_->cancel_and_wait();
 			frequency_correction_graph_.reset();
 		}
+		//if(data_output_)
+		//	data_output_->clear_queue();
 		data_output_.reset();
 		handler_.reset();
+		//if(scanners_.size()) {
+		//	for(auto &s : scanners_)
+		//		s->async_.clear_queue();
+		//}
 		scanners_.clear();
 
 		callbacks_ = callbacks;
@@ -99,6 +107,7 @@ rp_status rf_phreaker_impl::initialize(rp_callbacks *callbacks) {
 		gps_graph_.reset(new processing::gps_graph());
 		frequency_correction_graph_.reset(new processing::frequency_correction_graph());
 
+		data_output_->set_output_path(config_.output_directory_);
 		data_output_->set_file_output(config_.file_output_);
 		data_output_->set_standard_output(config_.standard_output_);
 		data_output_->set_signal_output(config_.signal_slots_);
@@ -124,7 +133,7 @@ rp_status rf_phreaker_impl::initialize(rp_callbacks *callbacks) {
 }
 
 void rf_phreaker_impl::read_settings() {
-	settings_io io("rf_phreaker_api", "cappeen");
+	settings_io io("rf_phreaker_api", qt_utility::app_name());
 
 	io.read(config_);
 }
@@ -154,8 +163,14 @@ rp_status rf_phreaker_impl::clean_up() {
 		gps_graph_.reset();
 		processing_graph_.reset();
 		frequency_correction_graph_.reset();
+		//if(data_output_)
+		//	data_output_->clear_queue();
 		data_output_.reset();
 		handler_.reset();
+		//if(scanners_.size()) {
+		//	for(auto &s : scanners_)
+		//		s->async_.clear_queue();
+		//}
 		scanners_.clear();
 		LOG(LINFO) << "Cleaned up successfully.";
 	}
@@ -303,7 +318,27 @@ rp_status rf_phreaker_impl::disconnect_device(rp_device *device) {
 		if(processing_graph_)
 			processing_graph_->cancel_and_wait();
 
+
+		// Write gps 1pps calibration to EEPROM if neccessary.
+		auto hw = device->async_.get_scanner().get()->get_hardware();
+		auto gps_1pps = device->async_.get_last_valid_gps_1pps_integration().get();
+		auto time_diff = gps_1pps.time_calculated() - hw.frequency_correction_calibration_date_;
+		LOG(LDEBUG) << "Frequency correction value last updated on " << boost::posix_time::to_simple_string(boost::posix_time::from_time_t(hw.frequency_correction_calibration_date_)) << ".";
+
+		if(gps_1pps.is_valid()) {
+			LOG(LDEBUG) << "GPS 1PPS calibration last occurred on " << boost::posix_time::to_simple_string(boost::posix_time::from_time_t(gps_1pps.time_calculated())) << ".";
+		}
+		else {
+			LOG(LDEBUG) << "GPS 1PPS calibration did not occur.";
+		}
+		if(gps_1pps.is_valid() && processing::g_scanner_error_tracker::instance().has_passed_settling_time() && time_diff > config_.eeprom_update_period_for_1pps_calibration_minutes_ * 60) {
+			LOG(LDEBUG) << "Storing latest GPS 1PPS calibration using " << gps_1pps.clock_ticks() << " clock ticks for an error of " << gps_1pps.error_in_hz() << " Hz.";
+			device->async_.calculate_vctcxo_trim_and_update_eeprom(gps_1pps.error_in_hz());
+		}
+
+
 		device->async_.close_scanner().get();
+		//device->async_.clear_queue();
 
 		// Remove this ptr and any scanner nulls that may be in there.
 		scanners_.erase(std::find_if(scanners_.begin(), scanners_.end(), [&](const std::shared_ptr<rp_device> &p) {
@@ -505,7 +540,7 @@ rp_status rf_phreaker_impl::add_sweep_operating_band(rp_device *device, rp_opera
 
 		// Check for calibration.
 		auto range = operating_bands_.get_band_freq_range(band);
-		if(rf_phreaker::is_within_freq_paths(hw.frequency_paths_, range.low_freq_hz_, range.high_freq_hz_))
+		if(!rf_phreaker::is_within_freq_paths(hw.frequency_paths_, range.low_freq_hz_, range.high_freq_hz_))
 			throw rf_phreaker_api_error("rp_operating_band is not within calibration limits.  Start freq: " +
 			std::to_string(range.low_freq_hz_ / 1e6) + ".  Stop freq: " + std::to_string(range.high_freq_hz_ / 1e6) + ".");
 
@@ -707,6 +742,18 @@ rp_status rf_phreaker_impl::stop_collection(rp_device *device) {
 
 		if(processing_graph_)
 			processing_graph_->cancel_and_wait();
+
+		//if(data_output_)
+		//	data_output_->clear_queue();
+
+		// Remove any frequencies that were added during sweeps.
+		for(auto &c : containers_) {
+			for(auto &i : c.collection_info_group_) {
+				if(i.can_remove_)
+					c.adjust(processing::remove_collection_info(i, c.get_technology()));
+			}
+		}
+
 	}
 	catch(const rf_phreaker_error &err) {
 		s = to_rp_status(err);
@@ -882,12 +929,17 @@ const char* rf_phreaker_impl::build_version() {
 
 void rf_phreaker_impl::message_handling(const std::string &str, int type, int code) {
 	if(callbacks_ && callbacks_->rp_message_update) {
-
+		callbacks_->rp_message_update(RP_STATUS_OK, str.c_str());
 	}
 }
 
 void rf_phreaker_impl::error_handling(const std::string &str, int type, int code) {
 	if(callbacks_ && callbacks_->rp_message_update) {
+		// Until we have a better handle on how specific errors should be handled.  We stop all communication to scanner.
+		if(scanners_.rbegin() != scanners_.rend()) {
+			rp_disconnect_device(scanners_.rbegin()->get());
+		}
+		callbacks_->rp_message_update(RP_STATUS_GENERIC_ERROR, str.c_str());	
 	}
 }
 

@@ -49,6 +49,8 @@ set (CMAKE_AUTOMOC ON)
 set (CMAKE_AUTORCC ON)
 set (CMAKE_AUTOUIC ON)
 
+set (AUTOGEN_TARGET_DEPENDS ${rf_phreaker_gui_SRCS})
+
 add_executable (rf_phreaker_gui  ${rf_phreaker_gui_SRCS} ${rf_phreaker_gui_QMLS} ${rf_phreaker_gui_QRCS})
 
 target_link_libraries (rf_phreaker_gui Qt5::Core)

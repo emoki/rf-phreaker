@@ -11,7 +11,7 @@ public:
 	ApiThreadWorker() : QObject(0), device_(0) {}
 
 	bool event(QEvent *e) {
-		if(e->type() == ListDevicesEvent::getType()){
+		if(e->type() == ListDevicesEvent::getType()) {
 			auto list = listDevices();
 			QCoreApplication::postEvent(Api::instance(), new AvailableDevicesEvent(list));
 			e->accept();
@@ -26,6 +26,8 @@ public:
 		}
 		else if(e->type() == DisconnectDeviceEvent::getType()) {
 			auto status = disconnectDevice();
+			// Regardless of status post a disconnected event.
+			QCoreApplication::postEvent(Api::instance(), new DeviceDisconnectedEvent());
 			Q_UNUSED(status);
 			e->accept();
 			return true;

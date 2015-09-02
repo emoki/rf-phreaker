@@ -7,20 +7,29 @@ Rectangle {
     implicitHeight: 100
     implicitWidth: 50
 
+    function setVisible(isVisible) {
+        console.debug("devicePage visibility = ", isVisible);
+        gpsLockStr.visible = isVisible;
+        gpsUtcStr.visible = isVisible;
+        trackingSatellitesStr.visible = isVisible;
+    }
+
     GridLayout {
         Layout.fillWidth: true
         anchors.fill: parent
         Layout.minimumWidth: 100
+        flow: GridLayout.LeftToRight
         columns: 2
+
         Label { text: "Status" }
-        Label { text: Api.statusStr; }
+        Label { id: statusStr; text: Api.statusStr; }
         Label { text: "Serial" }
-        Label { text: Api.connectedDevice.serial }
+        Label { id: serialStr; text: Api.connectedDevice.serial }
         Label { text: "GPS Lock" }
-        Label { text: Api.gps.gpsLock }
+        Label { id: gpsLockStr; text: Api.gps.gpsLock }
         Label { text: "Universal Time Coordinate" }
-        Label { text: Api.gps.utcDateTime}
+        Label { id: gpsUtcStr; text: Api.gps.utcDateTime}
         Label { text: "Tracking Satellites" }
-        Label { text: Api.gps.trackingSatellites }
+        Label { id: trackingSatellitesStr; text: Api.gps.trackingSatellites }
     }
 }

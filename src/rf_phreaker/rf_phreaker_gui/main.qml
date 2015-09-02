@@ -5,6 +5,7 @@ import QtQml.StateMachine 1.0 as DSM
 import RfPhreaker 1.0
 
 ApplicationWindow {
+    id: appWindow
     visible: true
     width: 1200
     height: 600
@@ -19,6 +20,7 @@ ApplicationWindow {
             onEntered: {
                 console.debug("Entered smDisconnected.");
                 Api.status = ApiTypes.DISCONNECTED;
+                devicePage.setVisible(false);
                 Api.listDevices();
             }
             DSM.SignalTransition {
@@ -56,6 +58,11 @@ ApplicationWindow {
                 Api.status = ApiTypes.CONNECTING;
                 Api.connectDevice();
             }
+            onExited: {
+                console.debug("Leaving smConnecting.");
+                devicePage.setVisible(true);
+            }
+
             DSM.SignalTransition {
                 id: smConnectingst1
                 targetState: smIdle
@@ -119,6 +126,7 @@ ApplicationWindow {
         }
     }
     SplitView {
+        id: splitView
         orientation: Qt.Vertical
         anchors.fill: parent
         GridLayout {

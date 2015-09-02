@@ -18,6 +18,7 @@ Item {
             Layout.fillWidth: true
             alternatingRowColors: true
             horizontalScrollBarPolicy: Qt.ScrollBarAlwaysOff
+            selectionMode: SelectionMode.ExtendedSelection
 
             TableViewColumn {
                 id: techBandColumn
@@ -37,6 +38,13 @@ Item {
                 title: "Channel Range"
                 role:  "channels"
                 width: (collectionList.viewport.width - techBandColumn.width) * 0.5
+            }
+
+            Keys.onDeletePressed: {
+                var selectedItems = [];
+                selection.forEach(function(rowIndex) { selectedItems.push(rowIndex); })
+                selectedItems.reverse();
+                selectedItems.forEach(function(item) { Api.collectionList.remove(item); })
             }
 
             model: Api.collectionList.list
