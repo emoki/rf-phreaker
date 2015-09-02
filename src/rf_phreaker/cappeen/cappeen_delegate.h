@@ -136,6 +136,12 @@ public:
 		if(t.empty()) return;
 
 		std::vector<beagle_api::gsm_sector_info> v(t.size());
+		std::vector<gsm_si_2_wrapper> si2; si2.reserve(t.size());
+		std::vector<gsm_si_2bis_wrapper> si2bis; si2bis.reserve(t.size());
+		std::vector<gsm_si_2ter_wrapper> si2ter; si2ter.reserve(t.size());
+		std::vector<gsm_si_2quater_wrapper> si2quater; si2quater.reserve(t.size());
+		std::vector<gsm_si_3_wrapper> si3; si3.reserve(t.size());
+		std::vector<gsm_si_4_wrapper> si4; si4.reserve(t.size());
 
 		int i = 0;
 		for(auto &gsm : t) {
@@ -147,7 +153,18 @@ public:
 			v[i].bsic_ = gsm.bsic_;
 			v[i].cell_sl_ = gsm.cell_signal_level_;
 			v[i].ctoi_ = gsm.ctoi_;
-
+			si2.push_back(gsm_si_2_wrapper(gsm.layer_3_.si_2_));
+			v[i].si_2_ = si2.back().s_;
+			si2bis.push_back(gsm_si_2bis_wrapper(gsm.layer_3_.si_2bis_));
+			v[i].si_2bis_ = si2bis.back().s_;
+			si2ter.push_back(gsm_si_2ter_wrapper(gsm.layer_3_.si_2ter_));
+			v[i].si_2ter_ = si2ter.back().s_;
+			si2quater.push_back(gsm_si_2quater_wrapper(gsm.layer_3_.si_2quater_));
+			v[i].si_2quater_ = si2quater.back().s_;
+			si3.push_back(gsm_si_3_wrapper(gsm.layer_3_.si_3_));
+			v[i].si_3_ = si3.back().s_;
+			si4.push_back(gsm_si_4_wrapper(gsm.layer_3_.si_4_));
+			v[i].si_4_ = si4.back().s_;
 			++i;
 		}
 

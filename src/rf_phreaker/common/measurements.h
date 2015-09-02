@@ -4,6 +4,7 @@
 #include <vector>
 #include "rf_phreaker/common/common_types.h"
 #include "rf_phreaker/common/license.h"
+#include "rf_phreaker/layer_3_common/gsm_layer_3_message_aggregate.h"
 #include "rf_phreaker/layer_3_common/umts_bcch_bch_message_aggregate.h"
 #include "rf_phreaker/layer_3_common/lte_rrc_message_aggregate.h"
 
@@ -52,6 +53,7 @@ namespace rf_phreaker {
 		int32_t tdma_frame_number_;
 		double cell_signal_level_;
 		double ctoi_;
+		layer_3_information::gsm_layer_3_message_aggregate layer_3_;
 	};
 
 	struct umts_data : public basic_data

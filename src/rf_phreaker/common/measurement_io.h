@@ -1,6 +1,7 @@
 #pragma once
 #include "rf_phreaker/common/measurements.h"
 #include "rf_phreaker/common/common_utility.h"
+#include "rf_phreaker/layer_3_common/gsm_layer_3_message_aggregate_io.h"
 #include "rf_phreaker/layer_3_common/lte_rrc_message_aggregate_io.h"
 #include "rf_phreaker/layer_3_common/umts_bcch_bch_message_aggregate_io.h"
 #include <fstream>
@@ -129,8 +130,8 @@ inline std::ostream& header(std::ostream &os, const gsm_data &t) {
 		<< "bsic" << delimiter
 		<< "cell_signal_level" << delimiter
 		<< "c/i" << delimiter
-		<< "tdma_frame_number";// << delimiter;
-	//layer_3_information::header(os, t.layer_3_);
+		<< "tdma_frame_number" << delimiter;
+	layer_3_information::header(os, t.layer_3_);
 	return os;
 }
 
@@ -141,8 +142,8 @@ inline std::ostream& operator<<(std::ostream &os, const gsm_data &t) {
 		<< t.bsic_ << delimiter
 		<< t.cell_signal_level_ << delimiter
 		<< t.ctoi_ << delimiter
-		<< t.tdma_frame_number_; // << delimiter
-		//<< t.layer_3_;
+		<< t.tdma_frame_number_ << delimiter
+		<< t.layer_3_;
 	return os;
 }
 

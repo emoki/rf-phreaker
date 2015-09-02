@@ -198,6 +198,115 @@ namespace beagle_api
 		channel_type *elements_;
 	};
 
+	typedef channel_group gsm_bcch_neighbors_group;
+	typedef channel_group gsm_utran_scrambling_code_group;
+	typedef channel_group gsm_pcid_group;
+
+	struct gsm_si_2 {
+		bool decoded_;
+		int32_t ba_ind_; 
+		int32_t ext_ind_;
+		gsm_bcch_neighbors_group bcch_neighbors_;
+	};
+
+	struct gsm_si_2bis {
+		bool decoded_;
+		int32_t ba_ind_;
+		int32_t ext_ind_;
+		gsm_bcch_neighbors_group bcch_neighbors_;
+		int32_t rest_octet_index_;
+		int32_t rest_octet_count_;
+	};
+
+	enum DUPLEX {
+		FDD,
+		TDD
+	};
+
+	enum UTRAN_BANDWIDTH {
+		UTRAN_3_84_MCPS, 
+		UTRAN_1_24_MCPS, 
+		UTRAN_2_MCPS,
+		UTRAN_3_MCPS,
+		UTRAN_4_MCPS,
+		UTRAN_5_MCPS,
+		UTRAN_6_MCPS,
+		UTRAN_7_MCPS,
+	};
+
+	struct gsm_utran_neighbor {
+		channel_type uarfcn_;
+		DUPLEX duplexing_;
+		UTRAN_BANDWIDTH bandwidth_;
+		gsm_utran_scrambling_code_group scrambling_codes_;
+	};
+	
+	struct gsm_utran_neighbor_group {
+		uint32_t num_elements_;
+		gsm_utran_neighbor *elements_;
+	};
+
+	struct gsm_si_2ter {
+		bool decoded_;
+		int32_t ba_ind_;
+		int32_t bcch_neighbor_multiband_reporting_;
+		gsm_bcch_neighbors_group bcch_neighbors_;
+		gsm_utran_neighbor_group utran_neighbors_;
+		int32_t rest_octet_index_;
+		int32_t rest_octet_count_;
+	};
+
+	struct gsm_pcid_groups {
+		uint32_t num_elements_;
+		gsm_pcid_group *elements_;
+	};
+
+	struct gsm_eutran_neighbor {
+		channel_type earfcn_;
+		int bandwidth_in_resource_blocks_;
+		gsm_pcid_group pcids_not_allowed_;
+		gsm_pcid_group pcids_allowed_;
+		gsm_pcid_groups pcids_same_tracking_area_;
+		gsm_pcid_groups pcids_different_tracking_area_;
+	};
+	
+	struct gsm_eutran_neighbor_group {
+		uint32_t num_elements_;
+		gsm_eutran_neighbor *elements_;
+	};
+	
+	struct gsm_si_2quater {
+		bool decoded_;
+		int32_t ba_ind_;
+		int32_t ba_ind_3g_;
+		gsm_utran_neighbor_group utran_neighbors_;
+		gsm_eutran_neighbor_group eutran_neighbors_;
+		int32_t rest_octet_index_;
+		int32_t rest_octet_count_;
+	};
+
+	struct gsm_si_3 {
+		bool decoded_;
+		plmn plmn_;
+		int32_t lac_;
+		int32_t cid_;
+		int32_t cell_reselect_hysteresis_db_;
+		int32_t cell_reselect_offset_;
+		bool is_2ter_present_;
+		bool is_2quater_present_;
+	};
+
+	struct gsm_si_4 {
+		bool decoded_;
+		plmn plmn_;
+		int32_t lac_;
+		int32_t cid_;
+		int32_t cell_reselect_hysteresis_db_;
+		int32_t cell_reselect_offset_;
+		bool is_cbch_present_;
+	};
+
+
 	/**
 	Encapsulates intra frequency neighbor list decoded from SIB 11/SIB 11bis.
 	*/
@@ -552,6 +661,13 @@ namespace beagle_api
 
 		/// Carrier to Interference ratio in dB.
 		double ctoi_;
+
+		gsm_si_2 si_2_;
+		gsm_si_2bis si_2bis_;
+		gsm_si_2ter si_2ter_;
+		gsm_si_2quater si_2quater_;
+		gsm_si_3 si_3_;
+		gsm_si_4 si_4_;
 	};
 
 	/**

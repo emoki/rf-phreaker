@@ -1,8 +1,9 @@
 #pragma once
 
-#include "rf_phreaker/layer_3_common/lte_rrc_message_aggregate.h"
-#include "rf_phreaker/cappeen/beagle_defines.h"
 #include <list>
+#include "rf_phreaker/layer_3_common/lte_rrc_message_aggregate.h"
+#include "rf_phreaker/layer_3_common/gsm_layer_3_message_aggregate.h"
+#include "rf_phreaker/cappeen/beagle_defines.h"
 
 namespace rf_phreaker { namespace cappeen_api {
 
@@ -315,7 +316,269 @@ public:
 	beagle_api::lte_sib_8 s_;
 	std::vector<beagle_api::lte_neighbor_inter_rat_cdma_2000> hrpd_;
 	std::vector<beagle_api::lte_neighbor_inter_rat_cdma_2000> xrtt_;
-	std::list <std::vector<beagle_api::channel_type>> channels_;
+	std::list<std::vector<beagle_api::channel_type>> channels_;
 };
+
+class gsm_si_2_wrapper {
+public:
+	gsm_si_2_wrapper() {}
+	gsm_si_2_wrapper(gsm_si_2_wrapper &&s)
+		: s_(std::move(s.s_))
+		, bcchs_(std::move(s.bcchs_)) {}
+	gsm_si_2_wrapper(const layer_3_information::gsm_si_2 &s) {
+		s_.decoded_ = s.is_decoded_;
+		s_.ba_ind_ = s.gsm_ba_ind_;
+		s_.ext_ind_ = s.bcch_neighbors_has_extension_;
+		for(const auto &i : s.bcch_neighbors_) {
+			bcchs_.push_back(i);
+		}
+		s_.bcch_neighbors_.num_elements_ = bcchs_.size();
+		s_.bcch_neighbors_.elements_ = bcchs_.size() ? &bcchs_[0] : 0;
+	}
+
+	beagle_api::gsm_si_2 s_;
+	std::vector<beagle_api::channel_type> bcchs_;
+};
+
+class gsm_si_2bis_wrapper {
+public:
+	gsm_si_2bis_wrapper() {}
+	gsm_si_2bis_wrapper(gsm_si_2bis_wrapper &&s)
+		: s_(std::move(s.s_)) 
+		, bcchs_(std::move(s.bcchs_)) {}
+	gsm_si_2bis_wrapper(const layer_3_information::gsm_si_2bis &s) {
+		s_.decoded_ = s.is_decoded_;
+		s_.ba_ind_ = s.gsm_ba_ind_;
+		s_.ext_ind_ = s.bcch_neighbors_has_extension_;
+		for(const auto &i : s.extended_bcch_neighbors_) {
+			bcchs_.push_back(i);
+		}
+		s_.bcch_neighbors_.num_elements_ = bcchs_.size();
+		s_.bcch_neighbors_.elements_ = bcchs_.size() ? &bcchs_[0] : 0;
+		s_.rest_octet_count_ = s.rest_octet_count_;
+		s_.rest_octet_index_ = s.rest_octet_index_;
+	}
+
+	beagle_api::gsm_si_2bis s_;
+	std::vector<beagle_api::channel_type> bcchs_;
+};
+
+class gsm_si_2ter_wrapper {
+public:
+	gsm_si_2ter_wrapper() {}
+	gsm_si_2ter_wrapper(gsm_si_2ter_wrapper &&s)
+		: s_(std::move(s.s_)) 
+		, bcchs_(std::move(s.bcchs_))
+		, scrambling_codes_(std::move(s.scrambling_codes_))
+		, utran_(std::move(s.utran_)) {}
+	gsm_si_2ter_wrapper(const layer_3_information::gsm_si_2ter &s) {
+		s_.decoded_ = s.is_decoded_;
+		s_.ba_ind_ = s.gsm_ba_ind_;
+		s_.bcch_neighbor_multiband_reporting_ = s.bcch_neighbors_multiband_reporting_;
+		for(const auto &i : s.extended_bcch_neighbors_) {
+			bcchs_.push_back(i);
+		}
+		s_.bcch_neighbors_.num_elements_ = bcchs_.size();
+		s_.bcch_neighbors_.elements_ = bcchs_.size() ? &bcchs_[0] : 0;
+		
+		for(const auto &i : s.utran_neighbors_) {
+			beagle_api::gsm_utran_neighbor u;
+			u.uarfcn_ = i.arfcn_;
+			u.duplexing_= (beagle_api::DUPLEX)i.duplexing_;
+			u.bandwidth_ = (beagle_api::UTRAN_BANDWIDTH)i.bandwidth_;
+
+			scrambling_codes_.push_back(std::vector<beagle_api::channel_type>());
+			auto &tmp = scrambling_codes_.back();
+			for(const auto &j : i.scrambling_codes_) {
+				tmp.push_back(j);
+			}
+			u.scrambling_codes_.num_elements_ = tmp.size();
+			u.scrambling_codes_.elements_ = tmp.size() ? &tmp[0] : 0;
+
+			utran_.push_back(u);
+		}
+		s_.utran_neighbors_.num_elements_ = utran_.size();
+		s_.utran_neighbors_.elements_ = utran_.size() ? &utran_[0] : 0;
+
+		s_.rest_octet_count_ = s.rest_octet_count_;
+		s_.rest_octet_index_ = s.rest_octet_index_;
+	}
+
+	beagle_api::gsm_si_2ter s_;
+	std::vector<beagle_api::channel_type> bcchs_;
+	std::list<std::vector<beagle_api::channel_type>> scrambling_codes_;
+	std::vector<beagle_api::gsm_utran_neighbor> utran_;
+};
+
+inline int convert(const layer_3_information::eutran_bandwidth_type b) {
+	using namespace layer_3_information;
+	switch(b) {
+	case num_resource_blocks_6: return 6;
+	case num_resource_blocks_15: return 15;
+	case num_resource_blocks_25: return 25;
+	case num_resource_blocks_50: return 50;
+	case num_resource_blocks_75: return 75;
+	case num_resource_blocks_100:
+	default:
+		return 100;
+	}
+}
+class gsm_si_2quater_wrapper {
+public:
+	gsm_si_2quater_wrapper() {}
+	gsm_si_2quater_wrapper(gsm_si_2quater_wrapper &&s)
+		: s_(std::move(s.s_))
+		, scrambling_codes_(std::move(s.scrambling_codes_))
+		, utran_(std::move(s.utran_))
+		, allowed_(std::move(s.allowed_))
+		, not_allowed_(std::move(s.not_allowed_))
+		, same_ta_(std::move(s.same_ta_))
+		, different_ta_(std::move(s.different_ta_)) 
+		, same_tas_(std::move(s.same_tas_))
+		, different_tas_(std::move(s.different_tas_))
+		, eutran_(std::move(s.eutran_))
+	{}
+	gsm_si_2quater_wrapper(const layer_3_information::gsm_si_2quater &s) {
+		s_.decoded_ = s.is_decoded_;
+		s_.ba_ind_ = s.gsm_ba_ind_;
+		s_.ba_ind_3g_ = s.p3g_ba_ind_;
+
+		for(const auto &i : s.utran_neighbors_) {
+			beagle_api::gsm_utran_neighbor u;
+			u.uarfcn_ = i.arfcn_;
+			u.duplexing_ = (beagle_api::DUPLEX)i.duplexing_;
+			u.bandwidth_ = (beagle_api::UTRAN_BANDWIDTH)i.bandwidth_;
+			scrambling_codes_.push_back(std::vector<beagle_api::channel_type>());
+			auto &tmp = scrambling_codes_.back();
+			for(const auto &j : i.scrambling_codes_) {
+				tmp.push_back(j);
+			}
+			u.scrambling_codes_.num_elements_ = tmp.size();
+			u.scrambling_codes_.elements_ = tmp.size() ? &tmp[0] : 0;
+
+			utran_.push_back(u);
+		}
+		s_.utran_neighbors_.num_elements_ = utran_.size();
+		s_.utran_neighbors_.elements_ = utran_.size() ? &utran_[0] : 0;
+
+		for(const auto &i : s.eutran_neighbors_) {
+			beagle_api::gsm_eutran_neighbor e;
+			e.earfcn_ = i.earfcn_;
+			e.bandwidth_in_resource_blocks_ = convert(i.bandwidth_);
+			
+			allowed_.push_back(std::vector<beagle_api::channel_type>());
+			auto &a = allowed_.back();
+			for(const auto &j : i.pcids_allowed_) {
+				a.push_back(j);
+			}
+			e.pcids_allowed_.num_elements_ = a.size();
+			e.pcids_allowed_.elements_ = a.size() ? &a[0] : 0;
+			
+			not_allowed_.push_back(std::vector<beagle_api::channel_type>());
+			auto &na = not_allowed_.back();
+			for(const auto &j : i.pcids_not_allowed_) {
+				na.push_back(j);
+			}
+			e.pcids_not_allowed_.num_elements_ = na.size();
+			e.pcids_not_allowed_.elements_ = na.size() ? &na[0] : 0;
+
+			{
+				same_tas_.push_back(std::vector<beagle_api::gsm_pcid_group>());
+				auto &ta_list = same_tas_.back();
+				for(const auto &j : i.pcids_same_tracking_area_) {
+					ta_list.push_back(beagle_api::gsm_pcid_group());
+					auto &pcid_group = ta_list.back();
+					same_ta_.push_back(std::vector<beagle_api::channel_type>());
+					auto &t = same_ta_.back();
+					for(const auto &k : j) {
+						t.push_back(k);
+					}
+					pcid_group.num_elements_ = t.size();
+					pcid_group.elements_ = t.size() ? &t[0] : 0;
+				}
+				e.pcids_same_tracking_area_.num_elements_ = ta_list.size();
+				e.pcids_same_tracking_area_.elements_ = ta_list.size() ? &ta_list[0] : 0;
+			}
+
+			{
+				different_tas_.push_back(std::vector<beagle_api::gsm_pcid_group>());
+				auto &ta_list = different_tas_.back();
+				for(const auto &j : i.pcids_different_tracking_area_) {
+					ta_list.push_back(beagle_api::gsm_pcid_group());
+					auto &pcid_group = ta_list.back();
+					different_ta_.push_back(std::vector<beagle_api::channel_type>());
+					auto &t = different_ta_.back();
+					for(const auto &k : j) {
+						t.push_back(k);
+					}
+					pcid_group.num_elements_ = t.size();
+					pcid_group.elements_ = t.size() ? &t[0] : 0;
+				}
+				e.pcids_different_tracking_area_.num_elements_ = ta_list.size();
+				e.pcids_different_tracking_area_.elements_ = ta_list.size() ? &ta_list[0] : 0;
+			}
+
+			eutran_.push_back(e);
+		}
+		s_.eutran_neighbors_.num_elements_ = eutran_.size();
+		s_.eutran_neighbors_.elements_ = eutran_.size() ? &eutran_[0] : 0;
+
+		s_.rest_octet_count_ = s.rest_octet_count_;
+		s_.rest_octet_index_ = s.rest_octet_index_;
+	}
+
+	beagle_api::gsm_si_2quater s_;
+	std::list<std::vector<beagle_api::channel_type>> scrambling_codes_;
+	std::vector<beagle_api::gsm_utran_neighbor> utran_;
+	std::list<std::vector<beagle_api::channel_type>> allowed_;
+	std::list<std::vector<beagle_api::channel_type>> not_allowed_;
+	std::list<std::vector<beagle_api::channel_type>> same_ta_;
+	std::list<std::vector<beagle_api::channel_type>> different_ta_;
+	std::list<std::vector<beagle_api::gsm_pcid_group>> same_tas_;
+	std::list<std::vector<beagle_api::gsm_pcid_group>> different_tas_;
+	std::vector<beagle_api::gsm_eutran_neighbor> eutran_;
+};
+
+class gsm_si_3_wrapper {
+public:
+	gsm_si_3_wrapper() {}
+	gsm_si_3_wrapper(gsm_si_3_wrapper &&s)
+		: s_(std::move(s.s_)) {}
+	gsm_si_3_wrapper(const layer_3_information::gsm_si_3 &s) {
+		s_.decoded_ = s.is_decoded_;
+		memcpy(s_.plmn_.mcc_, s.plmn_.mcc_.to_string(), s.plmn_.mcc_.num_characters());
+		s_.plmn_.mcc_[s.plmn_.mcc_.num_characters()] = 0;
+		memcpy(s_.plmn_.mnc_, s.plmn_.mnc_.to_string(), s.plmn_.mnc_.num_characters());
+		s_.plmn_.mnc_[s.plmn_.mnc_.num_characters()] = 0;
+		s_.lac_ = s.location_area_code_;
+		s_.cid_ = s.cell_id_;
+		s_.cell_reselect_hysteresis_db_ = s.cell_reselect_hysteresis_db_;
+		s_.cell_reselect_offset_ = s.selection_parameters_.cell_reselect_offset_;
+		s_.is_2ter_present_ = s.is_2ter_present_;
+		s_.is_2quater_present_ = s.is_2quater_present_;
+	}
+	beagle_api::gsm_si_3 s_;
+};
+
+class gsm_si_4_wrapper {
+public:
+	gsm_si_4_wrapper() {}
+	gsm_si_4_wrapper(gsm_si_4_wrapper &&s)
+		: s_(std::move(s.s_)) {}
+	gsm_si_4_wrapper(const layer_3_information::gsm_si_4 &s) {
+		s_.decoded_ = s.is_decoded_;
+		memcpy(s_.plmn_.mcc_, s.plmn_.mcc_.to_string(), s.plmn_.mcc_.num_characters());
+		s_.plmn_.mcc_[s.plmn_.mcc_.num_characters()] = 0;
+		memcpy(s_.plmn_.mnc_, s.plmn_.mnc_.to_string(), s.plmn_.mnc_.num_characters());
+		s_.plmn_.mnc_[s.plmn_.mnc_.num_characters()] = 0;
+		s_.lac_ = s.location_area_code_;
+		s_.cid_ = s.cell_id_;
+		s_.cell_reselect_hysteresis_db_ = s.cell_reselect_hysteresis_db_;
+		s_.cell_reselect_offset_ = s.selection_parameters_.cell_reselect_offset_;
+		s_.is_cbch_present_ = s.is_cbch_present_;
+	}
+	beagle_api::gsm_si_4 s_;
+};
+
 
 }}

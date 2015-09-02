@@ -102,7 +102,15 @@ public:
 		std::lock_guard<std::mutex> lock(std_mutex_);
 		for(int i = 0; i < num_records; ++i) {
 			std::cout << beagle_id << "\t" << info[i].collection_round_ << "\t" << info[i].carrier_freq_ << "\t" << info[i].rssi_ << "\t" << info[i].arfcn_ << "\t" << info[i].bsic_
-				<< "\t" << info[i].cell_sl_ << "\t" << info[i].ctoi_ << std::endl;
+				<< "\t" << info[i].cell_sl_ << "\t" << info[i].ctoi_ 
+				<< "\t" << info[i].si_2_.bcch_neighbors_.num_elements_
+				<< "\t" << info[i].si_2bis_.bcch_neighbors_.num_elements_
+				<< "\t" << info[i].si_2ter_.bcch_neighbors_.num_elements_
+				<< "\t" << info[i].si_2quater_.utran_neighbors_.num_elements_
+				<< "\t" << info[i].si_2quater_.eutran_neighbors_.num_elements_
+				<< "\t" << info[i].si_3_.plmn_.mcc_ << " " << info[i].si_3_.plmn_.mcc_
+				<< "\t" << info[i].si_4_.plmn_.mcc_ << " " << info[i].si_4_.plmn_.mcc_
+				<< std::endl;
 		}
 	}
 	virtual void __stdcall available_gsm_sweep_info(beagle_id_type beagle_id, const gsm_sweep_info *info, long num_records) {

@@ -351,3 +351,278 @@ TEST(RfPhreakerWrappers, Sib8) {
 		test.s_.parameters_hrpd_.elements_[0].physical_cell_ids_.elements_[0]);
 }
 
+TEST(RfPhreakerWrappers, GsmSib2) {
+	using namespace beagle_api;
+	using namespace layer_3_information;
+	using namespace rf_phreaker::cappeen_api;
+	layer_3_information::gsm_si_2 si;
+	int32_t tmp = 0;
+
+	si.is_decoded_ = rand() % 2 == 0;
+	si.bcch_neighbors_has_extension_ = rand() % 2 == 0;
+	si.gsm_ba_ind_ = tmp++;
+	for(int i = 0; i < 5; ++i)
+		si.bcch_neighbors_.push_back(tmp++);
+
+	tmp = 0;
+	gsm_si_2_wrapper w(si);
+	ASSERT_EQ(si.is_decoded_, w.s_.decoded_);
+	ASSERT_EQ(si.bcch_neighbors_has_extension_ == true ? 1 : 0, w.s_.ext_ind_);
+	ASSERT_EQ(tmp++, w.s_.ba_ind_);
+
+	ASSERT_EQ(si.bcch_neighbors_.size(), w.s_.bcch_neighbors_.num_elements_);
+	for(size_t i = 0; i < si.bcch_neighbors_.size(); ++i) {
+		ASSERT_EQ(tmp++, w.s_.bcch_neighbors_.elements_[i]);
+	}
+}
+
+TEST(RfPhreakerWrappers, GsmSib2bis) {
+	using namespace beagle_api;
+	using namespace layer_3_information;
+	using namespace rf_phreaker::cappeen_api;
+	layer_3_information::gsm_si_2bis si;
+	int32_t tmp = 0;
+
+	si.is_decoded_ = rand() % 2 == 0;
+	si.bcch_neighbors_has_extension_ = rand() % 2 == 0;
+	si.gsm_ba_ind_ = tmp++;
+	si.rest_octet_count_ = tmp++;
+	si.rest_octet_index_ = tmp++;
+	for(int i = 0; i < 5; ++i)
+		si.extended_bcch_neighbors_.push_back(tmp++);
+
+	tmp = 0;
+	gsm_si_2bis_wrapper w(si);
+	ASSERT_EQ(si.is_decoded_, w.s_.decoded_);
+	ASSERT_EQ(si.bcch_neighbors_has_extension_ == true ? 1 : 0, w.s_.ext_ind_);
+	ASSERT_EQ(tmp++, w.s_.ba_ind_);
+	ASSERT_EQ(tmp++, w.s_.rest_octet_count_);
+	ASSERT_EQ(tmp++, w.s_.rest_octet_index_);
+
+	ASSERT_EQ(si.extended_bcch_neighbors_.size(), w.s_.bcch_neighbors_.num_elements_);
+	for(size_t i = 0; i < si.extended_bcch_neighbors_.size(); ++i) {
+		ASSERT_EQ(tmp++, w.s_.bcch_neighbors_.elements_[i]);
+	}
+}
+
+TEST(RfPhreakerWrappers, GsmSib2ter) {
+	using namespace beagle_api;
+	using namespace layer_3_information;
+	using namespace rf_phreaker::cappeen_api;
+	layer_3_information::gsm_si_2ter si;
+	int32_t tmp = 0;
+
+	si.is_decoded_ = rand() % 2 == 0;
+	si.bcch_neighbors_multiband_reporting_ = tmp++;
+	si.gsm_ba_ind_ = tmp++;
+	si.rest_octet_count_ = tmp++;
+	si.rest_octet_index_ = tmp++;
+	for(int i = 0; i < 5; ++i)
+		si.extended_bcch_neighbors_.push_back(tmp++);
+
+	for(int i = 0; i < 5; ++i) {
+		layer_3_information::utran_neighbor u;
+		u.arfcn_ = tmp++;
+		u.duplexing_ = rand() % 2 == 0 ? fdd : tdd;
+		u.bandwidth_ = (utran_bandwidth_type)(rand() % 6);
+		for(int j = 0; j < 5; ++j)
+			u.scrambling_codes_.push_back(tmp++);
+		si.utran_neighbors_.push_back(u);
+	}
+
+	tmp = 0;
+	gsm_si_2ter_wrapper w(si);
+	ASSERT_EQ(si.is_decoded_, w.s_.decoded_);
+	ASSERT_EQ(tmp++, w.s_.bcch_neighbor_multiband_reporting_);
+	ASSERT_EQ(tmp++, w.s_.ba_ind_);
+	ASSERT_EQ(tmp++, w.s_.rest_octet_count_);
+	ASSERT_EQ(tmp++, w.s_.rest_octet_index_);
+
+	ASSERT_EQ(si.extended_bcch_neighbors_.size(), w.s_.bcch_neighbors_.num_elements_);
+	for(size_t i = 0; i < si.extended_bcch_neighbors_.size(); ++i) {
+		ASSERT_EQ(tmp++, w.s_.bcch_neighbors_.elements_[i]);
+	}
+
+	ASSERT_EQ(si.utran_neighbors_.size(), w.s_.utran_neighbors_.num_elements_);
+	for(size_t i = 0; i < si.utran_neighbors_.size(); ++i) {
+		auto &e = si.utran_neighbors_[i];
+		auto &t = w.s_.utran_neighbors_.elements_[i];
+		ASSERT_EQ(e.arfcn_, t.uarfcn_);
+		ASSERT_EQ((int)e.bandwidth_, (int)t.bandwidth_);
+		ASSERT_EQ((int)e.duplexing_, (int)t.duplexing_);
+		ASSERT_EQ(e.scrambling_codes_.size(), t.scrambling_codes_.num_elements_);
+		for(size_t j = 0; j < e.scrambling_codes_.size(); ++j) {
+			auto &ee = e.scrambling_codes_[j];
+			auto &tt = t.scrambling_codes_.elements_[j];
+			ASSERT_EQ(ee, tt);
+		}
+	}
+}
+
+TEST(RfPhreakerWrappers, GsmSib2quater) {
+	using namespace beagle_api;
+	using namespace layer_3_information;
+	using namespace rf_phreaker::cappeen_api;
+	layer_3_information::gsm_si_2quater si;
+	int32_t tmp = 0;
+
+	si.is_decoded_ = rand() % 2 == 0;
+	si.gsm_ba_ind_ = tmp++;
+	si.p3g_ba_ind_ = tmp++;
+	si.rest_octet_count_ = tmp++;
+	si.rest_octet_index_ = tmp++;
+
+	for(int i = 0; i < 5; ++i) {
+		layer_3_information::utran_neighbor u;
+		u.arfcn_ = tmp++;
+		u.duplexing_ = rand() % 2 == 0 ? fdd : tdd;
+		u.bandwidth_ = (utran_bandwidth_type)(rand() % 6);
+		for(int j = 0; j < 5; ++j)
+			u.scrambling_codes_.push_back(tmp++);
+		si.utran_neighbors_.push_back(u);
+	}
+
+	for(int i = 0; i < 5; ++i) {
+		layer_3_information::eutran_neighbor e;
+		e.earfcn_ = tmp++;
+		e.bandwidth_ = (eutran_bandwidth_type)(rand() % 6);
+		for(int j = 0; j < 5; ++j)
+			e.pcids_allowed_.push_back(tmp++);
+		for(int j = 0; j < 5; ++j)
+			e.pcids_not_allowed_.push_back(tmp++);
+		for(int j = 0; j < 5; ++j) {
+			std::vector<int32_t> pcids;
+			for(int k = 0; k < 5; ++k)
+				pcids.push_back(tmp++);
+			e.pcids_same_tracking_area_.push_back(pcids);
+		}
+		for(int j = 0; j < 5; ++j) {
+			std::vector<int32_t> pcids;
+			for(int k = 0; k < 5; ++k)
+				pcids.push_back(tmp++);
+			e.pcids_different_tracking_area_.push_back(pcids);
+		}
+		si.eutran_neighbors_.push_back(e);
+	}
+
+	tmp = 0;
+	gsm_si_2quater_wrapper w(si);
+	ASSERT_EQ(si.is_decoded_, w.s_.decoded_);
+	ASSERT_EQ(tmp++, w.s_.ba_ind_);
+	ASSERT_EQ(tmp++, w.s_.ba_ind_3g_);
+	ASSERT_EQ(tmp++, w.s_.rest_octet_count_);
+	ASSERT_EQ(tmp++, w.s_.rest_octet_index_);
+
+	ASSERT_EQ(si.utran_neighbors_.size(), w.s_.utran_neighbors_.num_elements_);
+	for(size_t i = 0; i < si.utran_neighbors_.size(); ++i) {
+		auto &e = si.utran_neighbors_[i];
+		auto &t = w.s_.utran_neighbors_.elements_[i];
+		ASSERT_EQ(e.arfcn_, t.uarfcn_);
+		ASSERT_EQ((int)e.bandwidth_, (int)t.bandwidth_);
+		ASSERT_EQ((int)e.duplexing_, (int)t.duplexing_);
+		ASSERT_EQ(e.scrambling_codes_.size(), t.scrambling_codes_.num_elements_);
+		for(size_t j = 0; j < e.scrambling_codes_.size(); ++j) {
+			auto &ee = e.scrambling_codes_[j];
+			auto &tt = t.scrambling_codes_.elements_[j];
+			ASSERT_EQ(ee, tt);
+		}
+	}
+
+	ASSERT_EQ(si.eutran_neighbors_.size(), w.s_.eutran_neighbors_.num_elements_);
+	for(size_t i = 0; i < si.eutran_neighbors_.size(); ++i) {
+		auto &e = si.eutran_neighbors_[i];
+		auto &t = w.s_.eutran_neighbors_.elements_[i];
+		ASSERT_EQ(e.earfcn_, t.earfcn_);
+		ASSERT_EQ(convert(e.bandwidth_), (int)t.bandwidth_in_resource_blocks_);
+
+		ASSERT_EQ(e.pcids_allowed_.size(), t.pcids_allowed_.num_elements_);
+		for(size_t j = 0; j < e.pcids_allowed_.size(); ++j) {
+			auto &ee = e.pcids_allowed_[j];
+			auto &tt = t.pcids_allowed_.elements_[j];
+			ASSERT_EQ(ee, tt);
+		}
+
+		ASSERT_EQ(e.pcids_not_allowed_.size(), t.pcids_not_allowed_.num_elements_);
+		for(size_t j = 0; j < e.pcids_not_allowed_.size(); ++j) {
+			auto &ee = e.pcids_not_allowed_[j];
+			auto &tt = t.pcids_not_allowed_.elements_[j];
+			ASSERT_EQ(ee, tt);
+		}
+
+		ASSERT_EQ(e.pcids_same_tracking_area_.size(), t.pcids_same_tracking_area_.num_elements_);
+		for(size_t j = 0; j < e.pcids_same_tracking_area_.size(); ++j) {
+			auto &ee = e.pcids_same_tracking_area_[j];
+			auto &tt = t.pcids_same_tracking_area_.elements_[j];
+			ASSERT_EQ(ee.size(), tt.num_elements_);
+			for(size_t k = 0; k < ee.size(); ++k)
+				ASSERT_EQ(ee[k], tt.elements_[k]);
+		}
+
+		ASSERT_EQ(e.pcids_different_tracking_area_.size(), t.pcids_different_tracking_area_.num_elements_);
+		for(size_t j = 0; j < e.pcids_different_tracking_area_.size(); ++j) {
+			auto &ee = e.pcids_different_tracking_area_[j];
+			auto &tt = t.pcids_different_tracking_area_.elements_[j];
+			ASSERT_EQ(ee.size(), tt.num_elements_);
+			for(size_t k = 0; k < ee.size(); ++k)
+				ASSERT_EQ(ee[k], tt.elements_[k]);
+		}
+	}
+}
+
+TEST(RfPhreakerWrappers, GsmSib3) {
+	using namespace beagle_api;
+	using namespace layer_3_information;
+	using namespace rf_phreaker::cappeen_api;
+	layer_3_information::gsm_si_3 si;
+	int32_t tmp = 0;
+
+	si.is_decoded_ = rand() % 2 == 0;
+	si.plmn_.mcc_ = tmp++;
+	si.plmn_.mnc_ = tmp++;
+	si.location_area_code_ = tmp++;
+	si.cell_id_ = tmp++;
+	si.selection_parameters_.cell_reselect_offset_ = tmp++;
+	si.cell_reselect_hysteresis_db_ = tmp++;
+	si.is_2ter_present_ = rand() % 2 == 0;
+	si.is_2quater_present_ = rand() % 2 == 0;
+
+	tmp = 0;
+	gsm_si_3_wrapper w(si);
+	ASSERT_EQ(si.is_decoded_, w.s_.decoded_);
+	ASSERT_STREQ(si.plmn_.mcc_.to_string(), w.s_.plmn_.mcc_);
+	ASSERT_STREQ(si.plmn_.mnc_.to_string(), w.s_.plmn_.mnc_);
+	ASSERT_EQ(si.location_area_code_, w.s_.lac_);
+	ASSERT_EQ(si.cell_id_, w.s_.cid_);
+	ASSERT_EQ(si.selection_parameters_.cell_reselect_offset_, w.s_.cell_reselect_offset_);
+	ASSERT_EQ(si.cell_reselect_hysteresis_db_, w.s_.cell_reselect_hysteresis_db_);
+	ASSERT_EQ(si.is_2ter_present_, w.s_.is_2ter_present_);
+	ASSERT_EQ(si.is_2quater_present_, w.s_.is_2quater_present_);
+}
+
+TEST(RfPhreakerWrappers, GsmSib4) {
+	using namespace beagle_api;
+	using namespace layer_3_information;
+	using namespace rf_phreaker::cappeen_api;
+	layer_3_information::gsm_si_4 si;
+	int32_t tmp = 0;
+
+	si.is_decoded_ = rand() % 2 == 0;
+	si.plmn_.mcc_ = tmp++;
+	si.plmn_.mnc_ = tmp++;
+	si.location_area_code_ = tmp++;
+	si.cell_id_ = tmp++;
+	si.selection_parameters_.cell_reselect_offset_ = tmp++;
+	si.cell_reselect_hysteresis_db_ = tmp++;
+	si.is_cbch_present_ = rand() % 2 == 0;
+
+	tmp = 0;
+	gsm_si_4_wrapper w(si);
+	ASSERT_EQ(si.is_decoded_, w.s_.decoded_);
+	ASSERT_STREQ(si.plmn_.mcc_.to_string(), w.s_.plmn_.mcc_);
+	ASSERT_STREQ(si.plmn_.mnc_.to_string(), w.s_.plmn_.mnc_);
+	ASSERT_EQ(si.location_area_code_, w.s_.lac_);
+	ASSERT_EQ(si.cell_id_, w.s_.cid_);
+	ASSERT_EQ(si.selection_parameters_.cell_reselect_offset_, w.s_.cell_reselect_offset_);
+	ASSERT_EQ(si.cell_reselect_hysteresis_db_, w.s_.cell_reselect_hysteresis_db_);
+	ASSERT_EQ(si.is_cbch_present_, w.s_.is_cbch_present_);
+}

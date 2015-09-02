@@ -147,11 +147,23 @@ void cappeen_impl::read_settings()
 	config_.lte_layer_3_general_.sync_quality_confidence_threshold_ = 10; // Set so that only measurements with decoded pbchs are outputted.
 	config_.lte_layer_3_general_.full_scan_interval_ = config_.lte_layer_3_decode_.max_update_threshold_;
 	config_.gsm_layer_3_decode_.should_prioritize_layer_3_ = true;
+	config_.gsm_layer_3_decode_.minimum_decode_count_ = config_.gsm_layer_3_decode_.minimum_collection_round_;
+	config_.gsm_layer_3_decode_.wanted_layer_3_.push_back(layer_3_information::gsm_bcch_si_type::SI_2);
+	config_.gsm_layer_3_decode_.wanted_layer_3_.push_back(layer_3_information::gsm_bcch_si_type::SI_2BIS);
+	config_.gsm_layer_3_decode_.wanted_layer_3_.push_back(layer_3_information::gsm_bcch_si_type::SI_2TER);
+	config_.gsm_layer_3_decode_.wanted_layer_3_.push_back(layer_3_information::gsm_bcch_si_type::SI_2QUATER);
+	config_.gsm_layer_3_decode_.wanted_layer_3_.push_back(layer_3_information::gsm_bcch_si_type::SI_3);
+	config_.gsm_layer_3_decode_.wanted_layer_3_.push_back(layer_3_information::gsm_bcch_si_type::SI_4);
+	//config_.gsm_layer_3_decode_.wanted_layer_3_.push_back(layer_3_information::gsm_bcch_si_type::SI_7);
+	//config_.gsm_layer_3_decode_.wanted_layer_3_.push_back(layer_3_information::gsm_bcch_si_type::SI_8);
+	//config_.gsm_layer_3_decode_.wanted_layer_3_.push_back(layer_3_information::gsm_bcch_si_type::SI_23);
 	config_.umts_layer_3_decode_.should_prioritize_layer_3_ = true;
+	config_.umts_layer_3_decode_.minimum_decode_count_ = config_.umts_layer_3_decode_.minimum_collection_round_;
 	config_.umts_layer_3_decode_.wanted_layer_3_.push_back(layer_3_information::umts_sib_type::SIB1);
 	config_.umts_layer_3_decode_.wanted_layer_3_.push_back(layer_3_information::umts_sib_type::SIB3_SIB4);
 	config_.umts_layer_3_decode_.wanted_layer_3_.push_back(layer_3_information::umts_sib_type::SIB11);
 	config_.lte_layer_3_decode_.should_prioritize_layer_3_ = true;
+	config_.lte_layer_3_decode_.minimum_decode_count_ = config_.lte_layer_3_decode_.minimum_collection_round_;
 	config_.lte_layer_3_decode_.wanted_layer_3_.push_back(layer_3_information::SIB_1);
 	config_.lte_layer_3_decode_.wanted_layer_3_.push_back(layer_3_information::SIB_3);
 	config_.lte_layer_3_decode_.wanted_layer_3_.push_back(layer_3_information::SIB_4);
@@ -756,5 +768,5 @@ long cappeen_impl::input_new_license(const char *serial, uint32_t serial_buf_siz
 
 const char* cappeen_impl::api_version() const
 {
-	return "1.1.1.0";
+	return "1.2.0.0";
 }
