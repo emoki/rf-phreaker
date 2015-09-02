@@ -57,7 +57,7 @@ public:
 					collection_bw = lte_layer_3_collection_info::bandwidth__;
 
 				auto packet = lte_layer_3_collection_info(meas.frequency(), collection_sampling_rate,
-					collection_bw, meas.get_operating_band());
+					collection_bw, meas.get_operating_band(), true);
 
 				std::get<0>(out).try_put(add_collection_info(packet, LTE_LAYER_3_DECODE));
 
@@ -142,7 +142,7 @@ public:
 		// Remove freq if indicated.
 		if(do_we_remove_collection_info(info)) {
 			std::get<0>(out).try_put(remove_collection_info(lte_layer_3_collection_info(meas.frequency(), meas.sampling_rate(),
-				meas.bandwidth(), meas.get_operating_band()), LTE_LAYER_3_DECODE));
+				meas.bandwidth(), meas.get_operating_band(), info.measurement_package_.can_remove_), LTE_LAYER_3_DECODE));
 		}
 		
 		std::vector<lte_data> lte_group;
@@ -179,7 +179,7 @@ public:
 							meas.bandwidth(), meas.get_operating_band()));
 
 						params.add_.push_back(lte_layer_3_collection_info(meas.frequency(), sampling_rate, determine_bandwidth_for_collection(decoded_bw),
-							meas.get_operating_band()));
+							meas.get_operating_band(), info.measurement_package_.can_remove_));
 
 						std::get<0>(out).try_put(params);
 					}

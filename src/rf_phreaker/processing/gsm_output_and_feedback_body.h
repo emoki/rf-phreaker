@@ -45,11 +45,11 @@ public:
 		for(auto &i : info.processed_data_) {
 			if(do_we_add_freq(i.center_frequency_)) {
 				// Add the freq to the layer_3_decoder making sure that we use a center freq that does not represent a true GSM channel.
-				auto freq = i.center_frequency_;
+				auto freq = calculate_closest_freq(i.center_frequency_, meas.get_operating_band());
 				if(freq % khz(200) == 0)
 					freq -= khz(100);
 				added_freqs_.insert(freq);
-				std::get<0>(out).try_put(add_collection_info(gsm_layer_3_collection_info(freq, meas.get_operating_band()), GSM_LAYER_3_DECODE));
+				std::get<0>(out).try_put(add_collection_info(gsm_layer_3_collection_info(freq, meas.get_operating_band(), true), GSM_LAYER_3_DECODE));
 			}
 		}
 		std::get<1>(out).try_put(tbb::flow::continue_msg());
@@ -70,6 +70,13 @@ private:
 		}
 		return add;
 	}
+	frequency_type calculate_closest_freq(frequency_type f, operating_band b) {
+		auto end_range = range_specifier_.get_band_freq_range(b);
+		auto new_freq = f + bandwidth_range_;
+		if(new_freq > end_range.high_freq_hz_)
+			new_freq = end_range.high_freq_hz_ - bandwidth_range_;
+		return new_freq;
+	}
 	
 	data_output_async *io_;
 
@@ -77,6 +84,7 @@ private:
 
 	std::set<frequency_type> added_freqs_;
 	static const bandwidth_type bandwidth_range_ = khz(1500);
+	operating_band_range_specifier range_specifier_;
 
 	boost::circular_buffer<frequency_type> freq_history_;
 	static const int freq_history_size_ = 60;
@@ -99,7 +107,7 @@ public:
 
 		// Add the freq to the layer_3_decoder.
 		if(info.remove_) {
-			std::get<0>(out).try_put(remove_collection_info(gsm_layer_3_collection_info(meas.frequency(), meas.get_operating_band()), GSM_LAYER_3_DECODE));
+			std::get<0>(out).try_put(remove_collection_info(gsm_layer_3_collection_info(meas.frequency(), meas.get_operating_band(), info.measurement_package_.can_remove_), GSM_LAYER_3_DECODE));
 		}
 
 		std::vector<gsm_data> gsm_group;

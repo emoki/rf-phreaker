@@ -19,7 +19,7 @@ public:
 	{
 		lte_config_.sampling_rate((int)s.sampling_rate_);
 		lte_config_.clock_rate((int)s.sampling_rate_);
-		lte_config_.max_signal_length(rf_phreaker::convert_to_samples(s.collection_time_, s.sampling_rate_));
+		lte_config_.max_signal_length(convert_to_samples_and_mod_1024(s.collection_time_, s.sampling_rate_));
 	}
 	lte_general_settings general_;
 	lte_config lte_config_;

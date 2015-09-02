@@ -21,8 +21,8 @@ enum test_layer_3_enum
 	NUM_LAYER_3
 };
 
-template<> template<> inline int rf_phreaker::processing::all_layer_3_decoded<test_layer_3_enum>::create_unique_identifier<>(const t_data &data) { return data.RsRecord.ID; }
-template<> template<> inline void rf_phreaker::processing::all_layer_3_decoded<test_layer_3_enum>::update(const t_data &data)
+template<> template<> inline int rf_phreaker::processing::all_layer_3_decoded<test_layer_3_enum, bool>::create_unique_identifier<>(const t_data &data) { return data.RsRecord.ID; }
+template<> template<> inline void rf_phreaker::processing::all_layer_3_decoded<test_layer_3_enum, bool>::update(const t_data &data)
 { ++num_updated_;  if(data.cid != 0xFFFFFFFF) all_layer_3_[TEST_SIB] = true; }
 
 TEST(Layer3Tracker, TestGeneral) {
@@ -39,7 +39,7 @@ TEST(Layer3Tracker, TestGeneral) {
 		int max_update = 150;
 		int min_collection_round = 10;
 		int min_decode_count_ = 5;
-		layer_3_tracker<test_layer_3_enum> tracker(max_update, min_collection_round, min_decode_count_, std::vector<test_layer_3_enum>{ TEST_SIB });
+		layer_3_tracker<test_layer_3_enum, bool> tracker(max_update, min_collection_round, min_decode_count_, std::vector<test_layer_3_enum>{ TEST_SIB });
 		
 		// No entries so everything is considered decoded.
         EXPECT_TRUE(tracker.is_all_decoded());
@@ -122,7 +122,7 @@ TEST(Layer3Tracker, TestDecodeCount) {
 	int max_update = 150;
 	int min_collection_round = 10;
 	int min_decode_count_ = 5;
-	layer_3_tracker<test_layer_3_enum> tracker(max_update, min_collection_round, min_decode_count_, std::vector<test_layer_3_enum>{ TEST_SIB });
+	layer_3_tracker<test_layer_3_enum, bool> tracker(max_update, min_collection_round, min_decode_count_, std::vector<test_layer_3_enum>{ TEST_SIB });
 
 	EXPECT_FALSE(tracker.has_freq_exceeded_max_no_decodes(f));
 
@@ -148,4 +148,24 @@ TEST(Layer3Tracker, TestDecodeCount) {
 		tracker.update_decodes(f, false);
 	}
 	EXPECT_TRUE(tracker.has_freq_exceeded_max_no_decodes(f));
+}
+
+TEST(Layer3Tracker, TestBitIndex) {
+	using namespace rf_phreaker;
+	using namespace rf_phreaker::processing;
+	bit_index bits;
+	EXPECT_FALSE(bits);
+	bits = true;
+	EXPECT_TRUE(bits);
+	bits = false;
+	bits.set_mask(6);
+	bits.add_bit(5);
+	EXPECT_FALSE(bits);
+	bits.add_bit(0);
+	bits.add_bit(1);
+	bits.add_bit(2);
+	EXPECT_FALSE(bits);
+	bits.add_bit(3);
+	bits.add_bit(4);
+	EXPECT_TRUE(bits);
 }

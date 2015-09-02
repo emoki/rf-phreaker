@@ -94,6 +94,14 @@ public:
 
 			clear_errors();
 		}
+		catch(const rf_phreaker_error &err) {
+			if(++error_count_ > 7) {
+				throw err;
+			}
+			else {
+				LOG(LERROR) << "Error during GPS communication. " << err.what() << ".  Retrying...";
+			}
+		}
 		catch(const std::exception &err) {
 			if(++error_count_ > 7) {
 				throw err;

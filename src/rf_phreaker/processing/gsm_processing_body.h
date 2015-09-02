@@ -18,7 +18,8 @@ class gsm_cell_search_settings
 public:
 	gsm_cell_search_settings(const collection_settings &s, const gsm_general_settings &g, const layer_3_settings &l)
 		: general_(g)
-		, gsm_config_(g.perform_sync_correlations_, (int)s.sampling_rate_, (int)s.sampling_rate_, rf_phreaker::convert_to_samples(s.collection_time_, s.sampling_rate_),
+		, gsm_config_(g.perform_sync_correlations_, (int)s.sampling_rate_, (int)s.sampling_rate_, 
+		rf_phreaker::convert_to_samples_and_mod_1024(s.collection_time_, s.sampling_rate_),
 			(int)g.side_power_threshold_, (int)g.band_power_threshold_, (int)s.bandwidth_) 
 		, layer_3_(l) {}
 
@@ -34,16 +35,22 @@ public:
 		: analysis_(config.gsm_config_, is_cancelled)
 		, tracker_(config.layer_3_.max_update_threshold_, config.layer_3_.minimum_collection_round_, config.layer_3_.minimum_decode_count_)
 		, config_(config) {
-		//if(config.layer_3_.wanted_layer_3_.empty()) {
-		//	LOG(LVERBOSE) << "Defaulting to decoding all GSM SIBs.";
-		//	std::vector<layer_3_information::gsm_sib_type> wanted;
-		//	wanted.push_back(layer_3_information::gsm_sib_type::SIB1);
-		//	wanted.push_back(layer_3_information::gsm_sib_type::SIB3_SIB4);
-		//	wanted.push_back(layer_3_information::gsm_sib_type::SIB11);
-		//	tracker_.set_wanted_layer_3(wanted);
-		//}
-		//else
-		//	tracker_.set_wanted_layer_3((std::vector<layer_3_information::gsm_sib_type>&)config.layer_3_.wanted_layer_3_);
+		if(config.layer_3_.wanted_layer_3_.empty()) {
+			LOG(LVERBOSE) << "Defaulting to decoding all GSM SIBs.";
+			std::vector<layer_3_information::gsm_bcch_si_type> wanted;
+			wanted.push_back(layer_3_information::gsm_bcch_si_type::SI_2);
+			wanted.push_back(layer_3_information::gsm_bcch_si_type::SI_2BIS);
+			wanted.push_back(layer_3_information::gsm_bcch_si_type::SI_2TER);
+			wanted.push_back(layer_3_information::gsm_bcch_si_type::SI_2QUATER);
+			wanted.push_back(layer_3_information::gsm_bcch_si_type::SI_3);
+			wanted.push_back(layer_3_information::gsm_bcch_si_type::SI_4);
+			//wanted.push_back(layer_3_information::gsm_bcch_si_type::SI_7);
+			//wanted.push_back(layer_3_information::gsm_bcch_si_type::SI_8);
+//			wanted.push_back(layer_3_information::gsm_bcch_si_type::SI_23);
+			tracker_.set_wanted_layer_3(wanted);
+		}
+		else
+			tracker_.set_wanted_layer_3((std::vector<layer_3_information::gsm_bcch_si_type>&)config.layer_3_.wanted_layer_3_);
 	}
 
 	gsm_processing_body(const gsm_processing_body &body)
@@ -59,9 +66,19 @@ public:
 		auto meas = *package.measurement_info_.get();
 		gsm_measurements gsm_group;
 
-		int status = analysis_.cell_search(meas, gsm_group, config_.general_.perform_sync_correlations_);
+		int status = analysis_.cell_search(meas, gsm_group);
 		if(status != 0)
-			throw gsm_analysis_error("Error processing gsm.");
+			throw gsm_analysis_error("Error performing gsm cell search.");
+
+		//if(config_.gsm_config_.preform_sync_correlations()) {
+		//	for(auto &i : gsm_group) {
+		//		if(i.norm_sync_corr_ > config_.general_.sync_corr_confidence_threshold_) {
+		//			status = analysis_.decode_bsic(meas, i);
+		//			if(status != 0)
+		//				throw gsm_analysis_error("Error decoding gsm bsic.");
+		//		}
+		//	}
+		//}
 
 		// Remove any measurements that are lower than are confidence threshold.  Note we should always keep measurements
 		// that have a BSIC decoded.
@@ -72,7 +89,14 @@ public:
 		LOG_IF(LCOLLECTION, (gsm_group.size() != 0)) << "GSM processing - Found " << gsm_group.size() << " GSM measurements using a center frequency of " 
 			<< meas.frequency() / 1e6 << "mhz and a bandwidth of " << meas.bandwidth() / 1e6 << "mhz";
 
-		freq_bin_calculator_.calculate_power_in_bins(meas.get_iq(), meas.sampling_rate(), gsm_channel_bandwidth_, 131072);
+		auto pow_2_length = 1 << 17;
+		for(int i = 0; i < 16; ++i) {
+			if(pow_2_length < meas.get_iq().length())
+				break;
+			pow_2_length = pow_2_length >> 1;
+		}
+		
+		freq_bin_calculator_.calculate_power_in_bins(meas.get_iq(), meas.sampling_rate(), gsm_channel_bandwidth_, pow_2_length);
 
 		auto center_freq = meas.frequency();
 		if(center_freq % khz(200) == 0)
@@ -93,35 +117,36 @@ public:
 			tracker_.clear();
 		}
 
-		auto freq = meas.frequency();
 		for(auto &data : info.processed_data_) {
-			//if(!tracker_.is_fully_decoded(freq, data) && (data.c_i_ratio_ > config_.layer_3_.decode_threshold_ || tracker_.in_history(freq, data))) {
-			//	int status = analysis_.decode_layer_3(meas, data);
-			//	if(status != 0)
-			//		throw gsm_analysis_error("Error decoding gsm layer 3.");
-			//	tracker_.update(freq, data);
-			//}
+			if(!tracker_.is_fully_decoded(data.center_frequency_, data) && (data.c_i_ratio_ > config_.layer_3_.decode_threshold_ || tracker_.in_history(data.center_frequency_, data))) {
+				if(data.bsic_ == -1) {
+					int status = analysis_.decode_bsic(meas, data);
+					if(status != 0)
+						throw gsm_analysis_error("Error decoding gsm bsic.");
+				}
+				int status = analysis_.decode_layer_3(meas, data);
+				if(status != 0)
+					throw gsm_analysis_error("Error decoding gsm layer 3.");
+				tracker_.update(data.center_frequency_, data);
+			}
 		}
 
-		//// If no measurements were greater than the decode_threshold and we are not tracking any cells on this freq, add the cell with the greatest ecio if
-		//// it meets the min decode threshold.
-		//helper_.update_tracker_if_necessary(tracker_, freq, info.processed_data_, config_.layer_3_.decode_minimum_threshold_);
-
+		// No minimum decode threshold because each base station is on a different freq.
+		auto freq = meas.frequency();
 		if(info.measurement_package_.can_remove_) {
+			tracker_.update_decodes(freq, !info.processed_data_.empty());
 			if(config_.layer_3_.should_prioritize_layer_3_) {
 				tracker_.update_freq(freq);
-				if((tracker_.has_freq_exceeded_max_updates(freq))) //|| tracker_.is_all_decoded_on_freq(freq)) && info.meas_->collection_round() > config_.layer_3_.minimum_collection_round_)
+				if(tracker_.has_freq_exceeded_max_updates(freq) /*|| (meas.collection_round() > config_.layer_3_.minimum_collection_round_ && tracker_.is_all_decoded())*/)
 					info.remove_ = true;
 			}
 			else {
-				tracker_.update_decodes(freq, !info.processed_data_.empty());
 				if(tracker_.has_freq_exceeded_max_no_decodes(freq)) {
 					info.remove_ = true;
 					tracker_.clear_decodes(freq);
 				}
 			}
 		}
-
 		return info;
 	}
 

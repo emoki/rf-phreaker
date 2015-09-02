@@ -92,18 +92,40 @@ public:
 
 	}
 
-	bool current_info(collection_info &p)
-	{
+	bool current_info(collection_info &p) {
 		if(finished_ || collection_info_group_.empty())
 			return false;
 		p = collection_info_group_[position_];
 		return true;
 	}
 
-	collection_info try_get_current_info()
-	{
+	collection_info try_get_current_info() {
 		collection_info info;
 		current_info(info);
+		return info;
+	}
+
+	bool current_info_determine_collection_round(collection_info &p) {
+		if(finished_ || collection_info_group_.empty()) {
+			position_ = 0;
+			include_first_position_ = true;
+			finished_ = true;
+			return false;
+		}
+		if(include_first_position_) {
+			include_first_position_ = false;
+			collection_round_ = 0;
+		}
+		else {
+			++collection_round_;
+		}
+		p = *collection_info_group_.begin();
+		return true;
+	}
+
+	collection_info try_get_current_info_determine_collection_round() {
+		collection_info info;
+		current_info_determine_collection_round(info);
 		return info;
 	}
 
@@ -129,8 +151,8 @@ public:
 			position_ = 0;
 			include_first_position_ = true;
 			finished_ = true;
-			}
-			else {
+		}
+		else {
 			if(include_first_position_)
 				include_first_position_ = false;
 			else

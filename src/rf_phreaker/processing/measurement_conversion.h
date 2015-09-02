@@ -67,6 +67,7 @@ inline void convert_to_gsm_data(gsm_data &data, const scanner::measurement_info 
 	data.ctoi_ = 10 * log10(gsm.c_i_ratio_);
 	data.operating_band_ = info.get_operating_band();
 	data.cell_signal_level_ = scanner::signal_level_calculator::calculate_sl(gsm.rms_corr_power_, info, gsm.center_frequency_);
+	data.layer_3_ = gsm.layer_3_;
 	static channel_conversion conversion;
 	data.arfcn_ = conversion.frequency_to_arfcn(gsm.center_frequency_, info.get_operating_band()).channel_;
 }

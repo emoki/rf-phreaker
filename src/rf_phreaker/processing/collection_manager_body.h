@@ -20,9 +20,9 @@ public:
 	collection_manager_body(tbb::flow::graph *graph, rf_phreaker::scanner::scanner_controller_interface *sc, const collection_info_containers &info, 
 		const output_settings &p_output, const settings &s_settings)
 		: scanner_io_(sc)
+		, scanner_interface_(sc)
 		, graph_(graph)
 		, containers_(info)
-		, is_simultaneous_collection_(false)
 		, do_multiple_scans_(true)
 		, packet_output_settings_(p_output)
 		, settings_(s_settings)
@@ -48,7 +48,14 @@ public:
 
 		for(auto &c : containers_) {
 			if(!c.is_finished()) {
-				auto ci = c.try_get_next_info();
+				//auto ci = c.try_get_next_info();
+				
+				collection_info ci;
+				if(c.get_technology() == GSM_LAYER_3_DECODE) 
+					c.current_info_determine_collection_round(ci);
+				else
+					ci = c.try_get_next_info();
+
 				if(c.is_finished()) {
 					//processing_.store(false);
 					//return;
@@ -57,7 +64,21 @@ public:
 				else {
 					scanning_finished_for_all_containers = false;
 
-					measurement_package package(std::make_shared<scanner::measurement_info>(scanner_io_(ci)), ci.can_remove_);
+					//measurement_package package(std::make_shared<scanner::measurement_info>(
+					//	scanner_interface_->get_rf_data(ci.freq_, ci.time_ns_, ci.bandwidth_, ci.sampling_rate_).get()), ci.can_remove_);
+
+					std::shared_ptr<scanner::measurement_info> meas_ptr;
+					if(c.get_technology() == GSM_LAYER_3_DECODE) {
+						//static std::ofstream f("debug_streaming.txt");
+						//static auto start_time = std::chrono::high_resolution_clock::now();
+						//f << std::chrono::duration_cast<std::chrono::milliseconds>(std::chrono::high_resolution_clock::now() - start_time).count() << std::endl;
+						meas_ptr = std::make_shared<scanner::measurement_info>(scanner_interface_->stream_rf_data(ci.freq_, ci.time_ns_, 35000000, ci.bandwidth_, ci.sampling_rate_).get());
+					}
+					else
+						meas_ptr = std::make_shared<scanner::measurement_info>(scanner_interface_->get_rf_data(ci.freq_, ci.time_ns_, ci.bandwidth_, ci.sampling_rate_).get());
+
+					measurement_package package(meas_ptr, ci.can_remove_);
+
 					auto &meas = package.measurement_info_;
 
 					// Make necessary changes to the packet.
@@ -95,7 +116,7 @@ public:
 						throw processing_error("Unknown specifier while trying to put meas in output port."); // Do nothing.
 					}
 				}
-				if(!is_simultaneous_collection_)
+				if(!settings_.simultaneous_collection_)
 					break;
 			}
 		}
@@ -137,12 +158,12 @@ protected:
 	virtual void finished_scanning() { throw processing_error("Finished scanning not supported."); }
 
 	scanner_io scanner_io_;
+	
+	rf_phreaker::scanner::scanner_controller_interface *scanner_interface_;
 
 	tbb::flow::graph *graph_;
 
 	collection_info_containers containers_;
-
-	bool is_simultaneous_collection_;
 
 	bool do_multiple_scans_;
 

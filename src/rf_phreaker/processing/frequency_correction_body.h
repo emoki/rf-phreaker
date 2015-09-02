@@ -19,7 +19,7 @@ public:
 		, io_(out)
 		, frequency_correction_settings_(freq_corr_settings)
 		, layer_3_settings_(layer_3_settings)
-		, umts_settings_((int)s.sampling_rate_, (int)s.sampling_rate_, rf_phreaker::convert_to_samples(s.collection_time_, s.sampling_rate_), freq_corr_settings.general_settings_.num_coherent_slots_)
+		, umts_settings_((int)s.sampling_rate_, (int)s.sampling_rate_, rf_phreaker::convert_to_samples_and_mod_1024(s.collection_time_, s.sampling_rate_), freq_corr_settings.general_settings_.num_coherent_slots_)
 		, analysis_(umts_settings_)
 		, calculator_((double)s.sampling_rate_)
 		, error_sum_(0)

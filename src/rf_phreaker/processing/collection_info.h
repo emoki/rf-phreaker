@@ -38,7 +38,7 @@ public:
 		, bandwidth_(bw)
 		, sampling_rate_(sampling_rate)
 		, operating_band_(band)
-	{}
+		, can_remove_(can_remove) {}
 
 	bool operator==(const collection_info &a)
 	{

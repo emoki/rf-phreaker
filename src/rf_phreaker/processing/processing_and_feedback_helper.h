@@ -2,6 +2,8 @@
 #include <tuple>
 #include <future>
 #include <vector>
+#include <set>
+#include <map>
 #include "rf_phreaker/scanner/measurement_info.h"
 #include "rf_phreaker/processing/layer_3_tracker.h"
 
@@ -48,8 +50,8 @@ public:
 		past_output_.push_back(std::move(t));
 	}
 
-	template<typename Layer_3, typename Data>
-	void update_tracker_if_necessary(layer_3_tracker<Layer_3> &tracker, frequency_type freq, std::vector<Data> &group, double threshold) const {
+	template<typename Layer_3, typename Type, typename Data>
+	void update_tracker_if_necessary(layer_3_tracker<Layer_3, Type> &tracker, frequency_type freq, std::vector<Data> &group, double threshold) const {
 		if(!tracker.is_freq_in_history(freq)) {
 			Data data;
 			for(auto &tmp : group) {
