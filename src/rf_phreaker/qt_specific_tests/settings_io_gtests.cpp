@@ -132,10 +132,14 @@ TEST(QtSpecific, TestSettingsIO)
 	EXPECT_EQ(settings_umts_general_num_coherent_slots_default, set.frequency_correction_settings_.general_settings_.num_coherent_slots_);
 
 	EXPECT_EQ(blade_log_level_default, set.blade_settings_.log_level_);
-	EXPECT_EQ(blade_rx_sync_num_buffers_default, set.blade_settings_.rx_sync_num_buffers_);
-	EXPECT_EQ(blade_rx_sync_buffer_size_default, set.blade_settings_.rx_sync_buffer_size_);
-	EXPECT_EQ(blade_rx_sync_num_transfers_default, set.blade_settings_.rx_sync_num_transfers_);
-	EXPECT_EQ(blade_rx_sync_timeout_default, set.blade_settings_.rx_sync_timeout_);
+	EXPECT_EQ(blade_rx_sync_num_buffers_default, set.blade_settings_.intermittent_streaming_rx_.rx_sync_num_buffers_);
+	EXPECT_EQ(blade_rx_sync_buffer_size_default, set.blade_settings_.intermittent_streaming_rx_.rx_sync_buffer_size_);
+	EXPECT_EQ(blade_rx_sync_num_transfers_default, set.blade_settings_.intermittent_streaming_rx_.rx_sync_num_transfers_);
+	EXPECT_EQ(blade_rx_sync_timeout_default, set.blade_settings_.intermittent_streaming_rx_.rx_sync_timeout_);
+	EXPECT_EQ(blade_rx_sync_num_buffers_default, set.blade_settings_.full_streaming_rx_.rx_sync_num_buffers_);
+	EXPECT_EQ(blade_rx_sync_buffer_size_default, set.blade_settings_.full_streaming_rx_.rx_sync_buffer_size_);
+	EXPECT_EQ(blade_rx_sync_num_transfers_default, set.blade_settings_.full_streaming_rx_.rx_sync_num_transfers_);
+	EXPECT_EQ(blade_rx_sync_timeout_default, set.blade_settings_.full_streaming_rx_.rx_sync_timeout_);
 
 	// Alter and store new settings. 
 	int tmp = 0;
@@ -240,10 +244,14 @@ TEST(QtSpecific, TestSettingsIO)
 	set.frequency_correction_settings_.general_settings_.num_coherent_slots_ = tmp++;
 	set.frequency_correction_settings_.general_settings_.sensitivity_ = tmp++;
 	set.blade_settings_.log_level_ = tmp++;
-	set.blade_settings_.rx_sync_buffer_size_ = tmp++;
-	set.blade_settings_.rx_sync_num_buffers_ = tmp++;
-	set.blade_settings_.rx_sync_num_transfers_ = tmp++;
-	set.blade_settings_.rx_sync_timeout_ = tmp++;
+	set.blade_settings_.intermittent_streaming_rx_.rx_sync_buffer_size_ = tmp++;
+	set.blade_settings_.intermittent_streaming_rx_.rx_sync_num_buffers_ = tmp++;
+	set.blade_settings_.intermittent_streaming_rx_.rx_sync_num_transfers_ = tmp++;
+	set.blade_settings_.intermittent_streaming_rx_.rx_sync_timeout_ = tmp++;
+	set.blade_settings_.full_streaming_rx_.rx_sync_buffer_size_ = tmp++;
+	set.blade_settings_.full_streaming_rx_.rx_sync_num_buffers_ = tmp++;
+	set.blade_settings_.full_streaming_rx_.rx_sync_num_transfers_ = tmp++;
+	set.blade_settings_.full_streaming_rx_.rx_sync_timeout_ = tmp++;
 	set_io.write(set);
 
 	settings set2;
@@ -376,10 +384,14 @@ TEST(QtSpecific, TestSettingsIO)
 	EXPECT_EQ(set.frequency_correction_settings_.general_settings_.sensitivity_, set2.frequency_correction_settings_.general_settings_.sensitivity_);
 
 	EXPECT_EQ(set.blade_settings_.log_level_, set2.blade_settings_.log_level_);
-	EXPECT_EQ(set.blade_settings_.rx_sync_buffer_size_, set2.blade_settings_.rx_sync_buffer_size_);
-	EXPECT_EQ(set.blade_settings_.rx_sync_num_buffers_, set2.blade_settings_.rx_sync_num_buffers_);
-	EXPECT_EQ(set.blade_settings_.rx_sync_num_transfers_, set2.blade_settings_.rx_sync_num_transfers_);
-	EXPECT_EQ(set.blade_settings_.rx_sync_timeout_, set2.blade_settings_.rx_sync_timeout_);
+	EXPECT_EQ(set.blade_settings_.intermittent_streaming_rx_.rx_sync_buffer_size_, set2.blade_settings_.intermittent_streaming_rx_.rx_sync_buffer_size_);
+	EXPECT_EQ(set.blade_settings_.intermittent_streaming_rx_.rx_sync_num_buffers_, set2.blade_settings_.intermittent_streaming_rx_.rx_sync_num_buffers_);
+	EXPECT_EQ(set.blade_settings_.intermittent_streaming_rx_.rx_sync_num_transfers_, set2.blade_settings_.intermittent_streaming_rx_.rx_sync_num_transfers_);
+	EXPECT_EQ(set.blade_settings_.intermittent_streaming_rx_.rx_sync_timeout_, set2.blade_settings_.intermittent_streaming_rx_.rx_sync_timeout_);
+	EXPECT_EQ(set.blade_settings_.full_streaming_rx_.rx_sync_buffer_size_, set2.blade_settings_.full_streaming_rx_.rx_sync_buffer_size_);
+	EXPECT_EQ(set.blade_settings_.full_streaming_rx_.rx_sync_num_buffers_, set2.blade_settings_.full_streaming_rx_.rx_sync_num_buffers_);
+	EXPECT_EQ(set.blade_settings_.full_streaming_rx_.rx_sync_num_transfers_, set2.blade_settings_.full_streaming_rx_.rx_sync_num_transfers_);
+	EXPECT_EQ(set.blade_settings_.full_streaming_rx_.rx_sync_timeout_, set2.blade_settings_.full_streaming_rx_.rx_sync_timeout_);
 
 	// Store default settings.
 	set_io.clear();

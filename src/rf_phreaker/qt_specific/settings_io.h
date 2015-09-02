@@ -26,7 +26,9 @@ static const std::string lte_layer_3_general_group_key = "lte_layer_3_general";
 static const std::string umts_sweep_general_group_key = "umts_sweep_general";
 static const std::string umts_layer_3_general_group_key = "umts_layer_3_general";
 static const std::string frequency_correction_group_key = "frequency_correction";
-static const std::string nuand_group_key = "nuand";
+static const std::string nr_general_group_key = "nr_general";
+static const std::string nr_full_streaming_group_key = "nr_full_streaming";
+static const std::string nr_intermittent_streaming_group_key = "nr_intermittent_streaming";
 static const std::string gsm_sweep_collection_group_key = "gsm_sweep_collection";
 static const std::string gsm_layer_3_collection_group_key = "gsm_layer_3_collection";
 static const std::string gsm_sweep_general_group_key = "gsm_sweep_general";
@@ -107,6 +109,8 @@ public:
 
 	void read(blade_settings &settings);
 
+	void read(blade_rx_settings &settings, const std::string &group_key);
+
 	void write(const settings &settings);
 
 	void write(const output_settings &settings, const std::string &group_key);
@@ -124,6 +128,8 @@ public:
 	void write(const frequency_correction_settings &settings, const std::string &group_key);
 
 	void write(const blade_settings &settings);
+
+	void write(const blade_rx_settings &settings, const std::string &group_key);
 
 	void clear();
 

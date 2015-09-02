@@ -110,19 +110,26 @@ public:
 };
 
 class scanner_settings {};
-class blade_settings : public scanner_settings {
+
+class blade_rx_settings {
 public:
-	blade_settings()
-		: log_level_(blade_log_level_default)
-		, rx_sync_num_buffers_(blade_rx_sync_num_buffers_default)
+	blade_rx_settings() 
+		: rx_sync_num_buffers_(blade_rx_sync_num_buffers_default)
 		, rx_sync_buffer_size_(blade_rx_sync_buffer_size_default)
 		, rx_sync_num_transfers_(blade_rx_sync_num_transfers_default)
 		, rx_sync_timeout_(blade_rx_sync_timeout_default) {}
-	int log_level_;
 	int rx_sync_num_buffers_;
 	int rx_sync_buffer_size_;
 	int rx_sync_num_transfers_;
 	int rx_sync_timeout_;
+};
+class blade_settings : public scanner_settings {
+public:
+	blade_settings()
+		: log_level_(blade_log_level_default) {}
+	int log_level_;
+	blade_rx_settings intermittent_streaming_rx_;
+	blade_rx_settings full_streaming_rx_;
 };
 
 class settings {

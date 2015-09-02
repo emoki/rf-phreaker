@@ -84,6 +84,12 @@ public:
 		});
 	}
 
+	virtual std::future<measurement_info> stream_rf_data(frequency_type freq, time_type time_ns, time_type time_ns_to_overlap, bandwidth_type bandwidth, frequency_type sampling_rate = 0) {
+		return controller_([=](blade_rf_controller &c) {
+			return c.stream_rf_data_use_auto_gain(freq, time_ns, time_ns_to_overlap, bandwidth, sampling_rate);
+		});
+	}
+
 	virtual std::future<void> write_license(const license &license) {
 		return controller_([=](blade_rf_controller &c) {
 			return c.write_license(license);

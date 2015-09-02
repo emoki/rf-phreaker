@@ -46,6 +46,9 @@ public:
 	virtual std::future<measurement_info> get_rf_data(frequency_type freq, time_type time_ns, bandwidth_type bandwidth, frequency_type sampling_rate = 0) = 0;
 
 	virtual std::future<measurement_info> get_rf_data(frequency_type freq, time_type time_ns, bandwidth_type bandwidth, gain_type &gain, frequency_type sampling_rate = 0) = 0;
+
+	virtual std::future<measurement_info> stream_rf_data(frequency_type frequency, time_type time_ns, time_type time_ns_to_overlap, bandwidth_type bandwidth, frequency_type sampling_rate = 0) = 0;
+
 };
 
 

@@ -143,8 +143,15 @@ void settings_io::read(frequency_correction_settings &settings, const std::strin
 }
 
 void settings_io::read(blade_settings &settings) {
-	qsettings_->beginGroup(nuand_group_key.c_str());
+	qsettings_->beginGroup(nr_general_group_key.c_str());
 	settings.log_level_ = qsettings_->value(blade_log_level_key.c_str(), blade_log_level_default).toInt();
+	qsettings_->endGroup();
+	read(settings.intermittent_streaming_rx_, nr_intermittent_streaming_group_key);
+	read(settings.full_streaming_rx_, nr_full_streaming_group_key);
+}
+
+void settings_io::read(blade_rx_settings &settings, const std::string &group_key) {
+	qsettings_->beginGroup(group_key.c_str());
 	settings.rx_sync_num_buffers_ = qsettings_->value(blade_rx_sync_num_buffers_key.c_str(), blade_rx_sync_num_buffers_default).toInt();
 	settings.rx_sync_buffer_size_ = qsettings_->value(blade_rx_sync_buffer_size_key.c_str(), blade_rx_sync_buffer_size_default).toInt();
 	settings.rx_sync_num_transfers_ = qsettings_->value(blade_rx_sync_num_transfers_key.c_str(), blade_rx_sync_num_transfers_default).toInt();
@@ -269,8 +276,15 @@ void settings_io::write(const frequency_correction_settings &settings, const std
 }
 
 void settings_io::write(const blade_settings &settings) {
-	qsettings_->beginGroup(nuand_group_key.c_str());
+	qsettings_->beginGroup(nr_general_group_key.c_str());
 	qsettings_->setValue(blade_log_level_key.c_str(), settings.log_level_);
+	qsettings_->endGroup();
+	write(settings.intermittent_streaming_rx_, nr_intermittent_streaming_group_key);
+	write(settings.full_streaming_rx_, nr_full_streaming_group_key);
+}
+
+void settings_io::write(const blade_rx_settings &settings, const std::string &group_key) {
+	qsettings_->beginGroup(group_key.c_str());
 	qsettings_->setValue(blade_rx_sync_num_buffers_key.c_str(), settings.rx_sync_num_buffers_);
 	qsettings_->setValue(blade_rx_sync_buffer_size_key.c_str(), settings.rx_sync_buffer_size_);
 	qsettings_->setValue(blade_rx_sync_num_transfers_key.c_str(), settings.rx_sync_num_transfers_);

@@ -29,10 +29,14 @@ TEST(BladeControllerTest, DISABLED_TestBladeControllerGeneral)
 
 			blade_settings blade_config;
 			blade_config.log_level_ = 0;
-			blade_config.rx_sync_buffer_size_ = 4*1024;
-			blade_config.rx_sync_num_buffers_ = 5;
-			blade_config.rx_sync_num_transfers_ = 4;
-			blade_config.rx_sync_timeout_ = 2000;
+			blade_config.intermittent_streaming_rx_.rx_sync_buffer_size_ = 4 * 1024;
+			blade_config.intermittent_streaming_rx_.rx_sync_num_buffers_ = 5;
+			blade_config.intermittent_streaming_rx_.rx_sync_num_transfers_ = 4;
+			blade_config.intermittent_streaming_rx_.rx_sync_timeout_ = 2000;
+			blade_config.full_streaming_rx_.rx_sync_buffer_size_ = 20 * 1024;
+			blade_config.full_streaming_rx_.rx_sync_num_buffers_ = 100;
+			blade_config.full_streaming_rx_.rx_sync_num_transfers_ = 4;
+			blade_config.full_streaming_rx_.rx_sync_timeout_ = 2000;
 			blade.do_initial_scanner_config(blade_config);
 
 			auto blade_info = blade.get_scanner_blade_rf();

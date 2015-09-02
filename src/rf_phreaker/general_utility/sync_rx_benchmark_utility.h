@@ -30,10 +30,10 @@ public:
 
 		rf_phreaker::blade_settings blade_config;
 		blade_config.log_level_ = 2;
-		blade_config.rx_sync_buffer_size_ = settings.start_buffer_size_;
-		blade_config.rx_sync_num_buffers_ = settings.start_num_buffer_;
-		blade_config.rx_sync_num_transfers_ = settings.start_num_transfer_;
-		blade_config.rx_sync_timeout_ = 5000;
+		blade_config.intermittent_streaming_rx_.rx_sync_buffer_size_ = settings.start_buffer_size_;
+		blade_config.intermittent_streaming_rx_.rx_sync_num_buffers_ = settings.start_num_buffer_;
+		blade_config.intermittent_streaming_rx_.rx_sync_num_transfers_ = settings.start_num_transfer_;
+		blade_config.intermittent_streaming_rx_.rx_sync_timeout_ = 5000;
 
 		blade_rf_controller scanner;
 		auto scanner_list = scanner.list_available_scanners();
@@ -69,14 +69,14 @@ public:
 	}
 
 	static void run_benchmark(benchmark_settings &s, rf_phreaker::scanner::blade_rf_controller &scanner, rf_phreaker::blade_settings &initial_config) {
-		auto current_config = initial_config;
-		for(int buffer_size = initial_config.rx_sync_buffer_size_; buffer_size <= s.max_buffer_size_; buffer_size += s.buffer_size_increment_) {
+		auto current_config = initial_config.intermittent_streaming_rx_;
+		for(int buffer_size = initial_config.intermittent_streaming_rx_.rx_sync_buffer_size_; buffer_size <= s.max_buffer_size_; buffer_size += s.buffer_size_increment_) {
 			current_config.rx_sync_buffer_size_ = buffer_size;
 
-			for(int num_buffers = initial_config.rx_sync_num_buffers_; num_buffers <= s.max_num_buffers_; num_buffers += s.num_buffer_increment_) {
+			for(int num_buffers = initial_config.intermittent_streaming_rx_.rx_sync_num_buffers_; num_buffers <= s.max_num_buffers_; num_buffers += s.num_buffer_increment_) {
 				current_config.rx_sync_num_buffers_ = num_buffers;
 
-				for(int num_xfers = initial_config.rx_sync_num_transfers_; num_xfers < current_config.rx_sync_num_buffers_; num_xfers += s.num_transfer_increment_) {
+				for(int num_xfers = initial_config.intermittent_streaming_rx_.rx_sync_num_transfers_; num_xfers < current_config.rx_sync_num_buffers_; num_xfers += s.num_transfer_increment_) {
 					if(num_xfers > s.max_num_transfers_)
 						break;
 					
@@ -88,7 +88,7 @@ public:
 		}
 	}
 
-	static void collect_packets(benchmark_settings &s, rf_phreaker::scanner::blade_rf_controller &scanner, rf_phreaker::blade_settings &config) {
+	static void collect_packets(benchmark_settings &s, rf_phreaker::scanner::blade_rf_controller &scanner, rf_phreaker::blade_rx_settings &config) {
 		using namespace rf_phreaker;
 		using namespace rf_phreaker::scanner;
 
@@ -165,7 +165,7 @@ public:
 		return drops;
 	}
 
-	static void output_benchmark(drop_info drops, rf_phreaker::frequency_type sampling_rate, benchmark_settings &s, rf_phreaker::blade_settings &config, 
+	static void output_benchmark(drop_info drops, rf_phreaker::frequency_type sampling_rate, benchmark_settings &s, rf_phreaker::blade_rx_settings &config, 
 			int64_t time_elapsed, int samples_collected, int samples_ignored) {
 		static bool output_header = true;
 		static std::ofstream f(s.filename_);

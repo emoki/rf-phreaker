@@ -1,5 +1,6 @@
 #pragma once
 
+#include "boost/circular_buffer.hpp"
 #include "rf_phreaker/scanner/scanner_controller_interface.h"
 #include "rf_phreaker/common/common_types.h"
 #include "rf_phreaker/common/concurrent.h"
@@ -73,12 +74,19 @@ public:
 
 	gps get_gps_data();
 
-	measurement_info get_rf_data_use_auto_gain(frequency_type freq, time_type time_ns, bandwidth_type bandwidth, frequency_type sampling_rate = 0);
+	measurement_info get_rf_data_use_auto_gain(frequency_type frequency, time_type time_ns, bandwidth_type bandwidth, frequency_type sampling_rate = 0);
 
 	measurement_info get_rf_data(frequency_type freq, time_type time_ns, bandwidth_type bandwidth, const gain_type &gain, frequency_type sampling_rate = 0,
 		uint32_t switch_setting = 0, uint32_t switch_mask = 0);
 
-	gain_type get_auto_gain(frequency_type freq, bandwidth_type bandwidth, time_type time_ns = 0, frequency_type sampling_rate = 0);
+	void configure_rf_parameters_use_auto_gain(frequency_type frequency, time_type time_ns, bandwidth_type bandwidth, frequency_type sampling_rate = 0);
+
+	void configure_rf_parameters(frequency_type frequency, time_type time_ns, bandwidth_type bandwidth, const gain_type &gain, frequency_type sampling_rate = 0,
+		uint32_t switch_setting = 0, uint32_t switch_mask = 0);
+
+	measurement_info stream_rf_data_use_auto_gain(frequency_type frequency, time_type time_ns, time_type time_ns_to_overlap, bandwidth_type bandwidth, frequency_type sampling_rate = 0);
+
+	gain_type get_auto_gain(frequency_type frequency, bandwidth_type bandwidth, time_type time_ns = 0, frequency_type sampling_rate = 0);
 
 	void initialize_eeprom();
 
@@ -112,7 +120,9 @@ public:
 
 	const ipp_16sc_aligned_buffer& get_internal_iq_buffer() { return aligned_buffer_; }
 
-	void set_blade_sync_rx_settings(const blade_settings &settings);
+	void set_blade_sync_rx_settings(const blade_rx_settings &settings);
+
+	void set_blade_sync_rx_stream_settings(const blade_rx_settings &settings);
 
 	void start_gps_1pps_integration(int seconds);
 
@@ -124,8 +134,14 @@ public:
 
 	void power_off_gps();
 
+	void enable_continuity_check();
+
+	void output_continuity_packet(int num_transfer_samples);
+
 private:
-	void enable_blade_rx();
+	void enable_blade_rx(const blade_rx_settings &settings);
+	void enable_full_streaming_rx();
+	void enable_intermittent_streaming_rx();
 
 	void disable_blade_rx();
 
@@ -136,6 +152,8 @@ private:
 	uint16_t calculate_vctcxo_trim_value(double error_in_hz);
 
 	void update_vctcxo_based_on_eeprom();
+
+	std::chrono::time_point<std::chrono::system_clock, std::chrono::system_clock::duration> get_collection_start_time();
 		
 	ipp_16sc_aligned_buffer aligned_buffer_;
 
@@ -153,11 +171,27 @@ private:
 
 	std::unique_ptr<gps_comm::gps_comm> gps_comm_;
 
-	blade_settings blade_settings_;
+	blade_rx_settings blade_settings_;
+
+	blade_rx_settings blade_settings_stream_;
 
 	gps_1pps_integration last_1pps_integration_;
 
 	gps_1pps_integration current_1pps_integration_;
+
+	ipp_32fc_array rf_stream_buffer_;
+	enum streaming_type {
+		NOT_STREAMING,
+		INTERMITTENT_STREAMING,
+		FULL_STREAMING
+	};
+	std::atomic<streaming_type> is_streaming_;
+	std::mutex meas_buffer_mutex_;
+	std::unique_ptr<std::thread> streaming_thread_;
+	boost::circular_buffer<measurement_info> meas_buffer_;
+
+	std::mutex rx_mutex_;
+
 };
 
 }}
