@@ -50,9 +50,8 @@ namespace rf_phreaker {
 //};
 
 
-inline int16_t sign_extend_12_bits(int16_t &var)
-{
-	if(var & 0x0800) 
+inline int16_t sign_extend_12_bits(int16_t &var) {
+	if(var & 0x0800)
 		var |= 0xF000;
 	else
 		var &= 0x0FFF;
@@ -70,18 +69,27 @@ inline void copy_serial(const std::string &serial, char *s, size_t size) {
 	memcpy(s, serial.c_str(), serial.size() > size ? size : serial.size());
 }
 
-inline int convert_to_samples(time_type time_ns, frequency_type actual_sampling_rate_used)
-{
+template<typename Type>
+typename Type add_mod(Type num, int mod) {
+	if(num % mod)
+		return num + (mod - (num % mod));
+	else
+		return num;
+}
+
+inline int convert_to_samples(time_type time_ns, frequency_type actual_sampling_rate_used) {
 	return static_cast<int>(time_ns / 1e9 * actual_sampling_rate_used);
 }
 
-inline time_type convert_to_time(int num_samples, frequency_type actual_sampling_rate_used)
-{
+inline int convert_to_samples_and_mod_1024(time_type time_ns, frequency_type actual_sampling_rate_used) {
+	return add_mod(static_cast<int>(time_ns / 1e9 * actual_sampling_rate_used), 0124);
+}
+
+inline time_type convert_to_time(int num_samples, frequency_type actual_sampling_rate_used) {
 	return static_cast<time_type>(((double)num_samples / actual_sampling_rate_used) * 1e9);
 }
 
-inline std::vector<std::string> tokenize(const std::string& input, const std::regex& pattern)
-{
+inline std::vector<std::string> tokenize(const std::string& input, const std::regex& pattern) {
 	if(input.empty())
 		return std::vector<std::string>();
 	// Passing -1 as the submatch index parameter performs splitting
@@ -90,8 +98,7 @@ inline std::vector<std::string> tokenize(const std::string& input, const std::re
 	return std::vector<std::string>(first, last);
 }
 
-inline std::string split_file_name(const std::string& str)
-{
+inline std::string split_file_name(const std::string& str) {
 	size_t found;
 	found = str.find_last_of("(/\\");
 	return str.substr(found + 1);
@@ -100,15 +107,6 @@ inline std::string split_file_name(const std::string& str)
 inline std::string& trim_whitespace(std::string &s) {
 	s.erase(std::remove_if(s.begin(), s.end(), [&](char ch) { return std::isspace<char>(ch, std::locale::classic()); }));
 	return s;
-}
-
-template<typename Type>
-typename Type add_mod(Type num, int mod)
-{
-	if(num % mod)
-		return num + (mod - (num % mod));
-	else
-		return num;
 }
 
 inline std::string timestamp_string() {
@@ -123,8 +121,8 @@ public:
 			timestamp_ = timestamp_string();
 		return timestamp_;
 	}
-	static void clear() { 
-		timestamp_.clear(); 
+	static void clear() {
+		timestamp_.clear();
 	}
 private:
 	static std::string timestamp_;
@@ -422,14 +420,13 @@ public:
 	//}
 
 	template<size_t Size>
-	static std::string to_string(int value)
-	{
+	static std::string to_string(int value) {
 		return std::move(str(boost::format("%x") % boost::io::group(std::setw(Size), std::setfill('0'), value)));
 	}
 };
 
 template<typename Map> typename Map::const_iterator
-greatest_less(Map const& m, typename Map::key_type const& k) {
+	greatest_less(Map const& m, typename Map::key_type const& k) {
 	typename Map::const_iterator it = m.lower_bound(k);
 	if(it != m.begin()) {
 		return --it;
@@ -438,7 +435,7 @@ greatest_less(Map const& m, typename Map::key_type const& k) {
 }
 
 template<typename Map> typename Map::iterator
-greatest_less(Map & m, typename Map::key_type const& k) {
+	greatest_less(Map & m, typename Map::key_type const& k) {
 	typename Map::iterator it = m.lower_bound(k);
 	if(it != m.begin()) {
 		return --it;
