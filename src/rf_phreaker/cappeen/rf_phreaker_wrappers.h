@@ -518,11 +518,22 @@ public:
 				e.pcids_different_tracking_area_.elements_ = ta_list.size() ? &ta_list[0] : 0;
 			}
 
+			e.priority_ = i.priority_;
+			e.threshold_high_ = i.threshold_high_;
+			e.threshold_low_ = i.threshold_low_;
+			e.qrxlevmin_ = i.qrxlevmin_;
+
 			eutran_.push_back(e);
 		}
 		s_.eutran_neighbors_.num_elements_ = eutran_.size();
 		s_.eutran_neighbors_.elements_ = eutran_.size() ? &eutran_[0] : 0;
 
+		for(auto &i : s.extended_eutran_neighbors_) {
+			extended_earfcns_.push_back(i);
+		}
+		s_.extended_earfcns_.num_elements_ = extended_earfcns_.size();
+		s_.extended_earfcns_.elements_ = extended_earfcns_.size() ? &extended_earfcns_[0] : 0;
+		
 		s_.rest_octet_count_ = s.rest_octet_count_;
 		s_.rest_octet_index_ = s.rest_octet_index_;
 	}
@@ -537,6 +548,7 @@ public:
 	std::list<std::vector<beagle_api::gsm_pcid_group>> same_tas_;
 	std::list<std::vector<beagle_api::gsm_pcid_group>> different_tas_;
 	std::vector<beagle_api::gsm_eutran_neighbor> eutran_;
+	std::vector<beagle_api::channel_type> extended_earfcns_;
 };
 
 class gsm_si_3_wrapper {

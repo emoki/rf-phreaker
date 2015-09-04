@@ -502,8 +502,17 @@ TEST(RfPhreakerWrappers, GsmSib2quater) {
 				pcids.push_back(tmp++);
 			e.pcids_different_tracking_area_.push_back(pcids);
 		}
+
+		e.priority_ = tmp++;
+		e.threshold_high_ = tmp++;
+		e.threshold_low_ = tmp++;
+		e.qrxlevmin_ = tmp++;
+
 		si.eutran_neighbors_.push_back(e);
 	}
+
+	for(int i = 0; i < 5; ++i)
+		si.extended_eutran_neighbors_.push_back(tmp++);
 
 	tmp = 0;
 	gsm_si_2quater_wrapper w(si);
@@ -566,7 +575,16 @@ TEST(RfPhreakerWrappers, GsmSib2quater) {
 			for(size_t k = 0; k < ee.size(); ++k)
 				ASSERT_EQ(ee[k], tt.elements_[k]);
 		}
+
+		ASSERT_EQ(e.priority_, t.priority_);
+		ASSERT_EQ(e.threshold_high_, t.threshold_high_);
+		ASSERT_EQ(e.threshold_low_, t.threshold_low_);
+		ASSERT_EQ(e.qrxlevmin_, t.qrxlevmin_);
 	}
+
+	ASSERT_EQ(si.extended_eutran_neighbors_.size(), w.s_.extended_earfcns_.num_elements_);
+	for(size_t i = 0; i < si.extended_eutran_neighbors_.size(); ++i)
+		ASSERT_EQ(si.extended_eutran_neighbors_[i], w.s_.extended_earfcns_.elements_[i]);
 }
 
 TEST(RfPhreakerWrappers, GsmSib3) {

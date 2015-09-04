@@ -201,6 +201,7 @@ namespace beagle_api
 	typedef channel_group gsm_bcch_neighbors_group;
 	typedef channel_group gsm_utran_scrambling_code_group;
 	typedef channel_group gsm_pcid_group;
+	typedef channel_group gsm_extended_earfcn_group;
 
 	struct gsm_si_2 {
 		bool decoded_;
@@ -263,7 +264,11 @@ namespace beagle_api
 
 	struct gsm_eutran_neighbor {
 		channel_type earfcn_;
-		int bandwidth_in_resource_blocks_;
+		int32_t bandwidth_in_resource_blocks_;
+		int32_t priority_;
+		int32_t threshold_high_;
+		int32_t threshold_low_; 
+		int32_t qrxlevmin_;
 		gsm_pcid_group pcids_not_allowed_;
 		gsm_pcid_group pcids_allowed_;
 		gsm_pcid_groups pcids_same_tracking_area_;
@@ -281,6 +286,7 @@ namespace beagle_api
 		int32_t ba_ind_3g_;
 		gsm_utran_neighbor_group utran_neighbors_;
 		gsm_eutran_neighbor_group eutran_neighbors_;
+		gsm_extended_earfcn_group extended_earfcns_;
 		int32_t rest_octet_index_;
 		int32_t rest_octet_count_;
 	};

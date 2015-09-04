@@ -166,8 +166,7 @@ inline std::ostream& header(std::ostream &os, const gsm_si_2quater &t) {
 		<< "si_2quater_utran_neighbor_cell_start_index" << main_delim
 		<< "si_2quater_utran_neighbor_cell_absolute_start_emr" << main_delim
 		<< "si_2quater_utran_neighbors [uarfcn : duplex : bandwidth : [scrambling_codes]]" << main_delim
-		//<< "si_2quater_eutran_neighbors [earfcn : bandwidth : priority : threshold_high : threshold_low : qrxlevmin]" << main_delim
-		<< "si_2quater_eutran_neighbors [earfcn : bandwidth [allowed_pcids] [not_allowed_pcids] [same_tracking_area groups][different_tracking_area_groups]]" << main_delim
+		<< "si_2quater_eutran_neighbors [earfcn : bandwidth : priority : threshold_high : threshold_low : qrxlevmin : [allowed_pcids] [not_allowed_pcids] [same_tracking_area groups][different_tracking_area_groups]]" << main_delim
 		<< "si_2quater_extended_eutran_nieghbors [earfcn]";
 	return os;
 }
@@ -213,8 +212,8 @@ inline std::ostream& operator<<(std::ostream &os, const gsm_si_2quater &t) {
 	os << main_delim;
 	os << begin_delim;
 	for(auto &i : t.eutran_neighbors_) {
-		os << i.earfcn_ << spacer2 << i.bandwidth_ << /*<< spacer2 << i.priority_ << spacer2
-			<< i.threshold_high_ << spacer2 << i.threshold_low_ << spacer2 << i.qrxlevmin_ <<*/ spacer;
+		os << i.earfcn_ << spacer2 << i.bandwidth_ << spacer2 << i.priority_ << spacer2
+			<< i.threshold_high_ << spacer2 << i.threshold_low_ << spacer2 << i.qrxlevmin_ << spacer;
 		os << begin_delim;
 		for(auto &j : i.pcids_allowed_)
 			os << j << spacer;

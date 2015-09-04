@@ -331,6 +331,10 @@ public:
 					n.bandwidth_ = determine_eutran_bandwidth(repeated->cell.data[i]->Measurement_Bandwidth);
 				else
 					n.bandwidth_ = num_resource_blocks_6;
+				n.qrxlevmin_ = repeated->E_UTRAN_QRXLEVMIN_Present ? repeated->E_UTRAN_QRXLEVMIN : -1;
+				n.priority_ = repeated->E_UTRAN_PRIORITY_Present ? repeated->E_UTRAN_PRIORITY : -1;
+				n.threshold_high_ = repeated->THRESH_E_UTRAN_high;
+				n.threshold_low_ = repeated->THRESH_E_UTRAN_low_Present ? repeated->THRESH_E_UTRAN_low : n.threshold_high_;
 				nieghbors.push_back(n);
 			}
 		}
