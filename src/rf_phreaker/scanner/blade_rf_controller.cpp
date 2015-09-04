@@ -304,8 +304,6 @@ void blade_rf_controller::do_initial_scanner_config(const scanner_settings &sett
 
 	update_vctcxo_based_on_eeprom();
 
-	//enable_blade_rx();
-
 	power_on_gps();
 }
 
@@ -405,8 +403,6 @@ void blade_rf_controller::write_vctcxo_trim(uint16_t trim)
 	check_blade_status(nr_write_flash(comm_blade_rf_->blade_rf(), image->data, page, count, __FILE__, __LINE__), __FILE__, __LINE__);
 
 	nr_free_image(image);
-
-	//enable_blade_rx();
 }
 
 void blade_rf_controller::update_frequency_correction_value_and_date_in_calibration(uint16_t value, time_t date)
