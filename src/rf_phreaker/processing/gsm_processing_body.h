@@ -137,7 +137,7 @@ public:
 			tracker_.update_decodes(freq, !info.processed_data_.empty());
 			if(config_.layer_3_.should_prioritize_layer_3_) {
 				tracker_.update_freq(freq);
-				if(tracker_.has_freq_exceeded_max_updates(freq) /*|| (meas.collection_round() > config_.layer_3_.minimum_collection_round_ && tracker_.is_all_decoded())*/)
+				if(tracker_.has_freq_exceeded_max_updates(freq) || (meas.collection_round() > config_.layer_3_.minimum_collection_round_ && tracker_.is_all_decoded()))
 					info.remove_ = true;
 			}
 			else {
