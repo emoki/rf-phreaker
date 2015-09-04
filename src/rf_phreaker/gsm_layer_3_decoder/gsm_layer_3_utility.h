@@ -290,7 +290,7 @@ public:
 				n.bandwidth_ = determine_utran_bandwidth(des.Bandwidth_TDD);
 			else
 				n.bandwidth_ = utran_default_mcps;
-			if(arfcns.data[i]->TDD_ARFCN_INDEX_Present)
+			if(arfcns.data[i]->TDD_ARFCN_Present)
 				n.arfcn_ = arfcns.data[i]->TDD_ARFCN;
 			else
 				n.arfcn_ = -1;
