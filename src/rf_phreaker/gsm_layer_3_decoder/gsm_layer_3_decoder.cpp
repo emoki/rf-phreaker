@@ -105,9 +105,9 @@ int32_t gsm_layer_3_decoder::decode_bcch_message(const uint8_t *bit_stream, uint
 			tmp.append(std::to_string((int)si3->LocationAreaId.MCC3).c_str());
 			message.si_3_.plmn_.mcc_ = tmp;
 			tmp.clear();
-			if(si3->LocationAreaId.MNC1 != 0xf) tmp.append(std::to_string((int)si3->LocationAreaId.MNC1).c_str());
+			tmp.append(std::to_string((int)si3->LocationAreaId.MNC1).c_str());
 			tmp.append(std::to_string((int)si3->LocationAreaId.MNC2).c_str());
-			tmp.append(std::to_string((int)si3->LocationAreaId.MNC3).c_str());
+			if(si3->LocationAreaId.MNC3 != 0xf) tmp.append(std::to_string((int)si3->LocationAreaId.MNC3).c_str());
 			message.si_3_.plmn_.mnc_ = tmp;
 			message.si_3_.location_area_code_ = si3->LocationAreaId.LAC;
 			message.si_3_.cell_id_ = si3->CellId;
@@ -140,9 +140,9 @@ int32_t gsm_layer_3_decoder::decode_bcch_message(const uint8_t *bit_stream, uint
 			tmp.append(std::to_string((int)si4->LocationAreaId.MCC3).c_str());
 			message.si_4_.plmn_.mcc_ = tmp;
 			tmp.clear();
-			if(si4->LocationAreaId.MNC1 != 0xf) tmp.append(std::to_string((int)si4->LocationAreaId.MNC1).c_str());
+			tmp.append(std::to_string((int)si4->LocationAreaId.MNC1).c_str());
 			tmp.append(std::to_string((int)si4->LocationAreaId.MNC2).c_str());
-			tmp.append(std::to_string((int)si4->LocationAreaId.MNC3).c_str());
+			if(si4->LocationAreaId.MNC3 != 0xf) tmp.append(std::to_string((int)si4->LocationAreaId.MNC3).c_str());
 			message.si_4_.plmn_.mnc_ = tmp;
 			message.si_4_.location_area_code_ = si4->LocationAreaId.LAC;
 
