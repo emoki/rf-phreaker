@@ -595,8 +595,8 @@ TEST(RfPhreakerWrappers, GsmSib3) {
 	int32_t tmp = 0;
 
 	si.is_decoded_ = rand() % 2 == 0;
-	si.plmn_.mcc_ = tmp++;
-	si.plmn_.mnc_ = tmp++;
+	si.plmn_.mcc_ = std::string("010");
+	si.plmn_.mnc_ = std::string("230");
 	si.location_area_code_ = tmp++;
 	si.cell_id_ = tmp++;
 	si.selection_parameters_.cell_reselect_offset_ = tmp++;
@@ -617,7 +617,7 @@ TEST(RfPhreakerWrappers, GsmSib3) {
 	ASSERT_EQ(si.is_2quater_present_, w.s_.is_2quater_present_);
 }
 
-TEST(RfPhreakerWrappers, GsmSib4) {
+TEST(RfPhreakerWrappers, GsmSib4TestBadMnc) {
 	using namespace beagle_api;
 	using namespace layer_3_information;
 	using namespace rf_phreaker::cappeen_api;
@@ -625,7 +625,7 @@ TEST(RfPhreakerWrappers, GsmSib4) {
 	int32_t tmp = 0;
 
 	si.is_decoded_ = rand() % 2 == 0;
-	si.plmn_.mcc_ = tmp++;
+	si.plmn_.mcc_ = std::string("0023");
 	si.plmn_.mnc_ = tmp++;
 	si.location_area_code_ = tmp++;
 	si.cell_id_ = tmp++;
@@ -636,7 +636,7 @@ TEST(RfPhreakerWrappers, GsmSib4) {
 	tmp = 0;
 	gsm_si_4_wrapper w(si);
 	ASSERT_EQ(si.is_decoded_, w.s_.decoded_);
-	ASSERT_STREQ(si.plmn_.mcc_.to_string(), w.s_.plmn_.mcc_);
+	ASSERT_STREQ("002", w.s_.plmn_.mcc_);
 	ASSERT_STREQ(si.plmn_.mnc_.to_string(), w.s_.plmn_.mnc_);
 	ASSERT_EQ(si.location_area_code_, w.s_.lac_);
 	ASSERT_EQ(si.cell_id_, w.s_.cid_);

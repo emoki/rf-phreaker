@@ -7,6 +7,12 @@
 
 namespace rf_phreaker { namespace cappeen_api {
 
+inline void copy_mcc_mnc(char m[4], const layer_3_information::uint16_string &str) {
+	memset(m, 0, 4);
+	auto size = str.num_characters() > 3 ? 3 : str.num_characters();
+	memcpy(m, str.to_string(), size);
+}
+
 class lte_sib1_wrapper
 {
 public:
@@ -24,10 +30,8 @@ public:
 
 		for(auto &i : s.multiple_plmn_) {
 			beagle_api::plmn p;
-			memcpy(p.mcc_, i.mcc_.to_string(), i.mcc_.num_characters());
-			p.mcc_[i.mcc_.num_characters()] = 0;
-			memcpy(p.mnc_, i.mnc_.to_string(), i.mnc_.num_characters());
-			p.mnc_[i.mnc_.num_characters()] = 0;
+			copy_mcc_mnc(p.mcc_, i.mcc_);
+			copy_mcc_mnc(p.mnc_, i.mnc_);
 			plmns_.push_back(p);
 		}
 		s_.plmns_.num_elements_ = plmns_.size();
@@ -558,10 +562,8 @@ public:
 		: s_(std::move(s.s_)) {}
 	gsm_si_3_wrapper(const layer_3_information::gsm_si_3 &s) {
 		s_.decoded_ = s.is_decoded_;
-		memcpy(s_.plmn_.mcc_, s.plmn_.mcc_.to_string(), s.plmn_.mcc_.num_characters());
-		s_.plmn_.mcc_[s.plmn_.mcc_.num_characters()] = 0;
-		memcpy(s_.plmn_.mnc_, s.plmn_.mnc_.to_string(), s.plmn_.mnc_.num_characters());
-		s_.plmn_.mnc_[s.plmn_.mnc_.num_characters()] = 0;
+		copy_mcc_mnc(s_.plmn_.mcc_, s.plmn_.mcc_);
+		copy_mcc_mnc(s_.plmn_.mnc_, s.plmn_.mnc_);
 		s_.lac_ = s.location_area_code_;
 		s_.cid_ = s.cell_id_;
 		s_.cell_reselect_hysteresis_db_ = s.cell_reselect_hysteresis_db_;
@@ -579,10 +581,8 @@ public:
 		: s_(std::move(s.s_)) {}
 	gsm_si_4_wrapper(const layer_3_information::gsm_si_4 &s) {
 		s_.decoded_ = s.is_decoded_;
-		memcpy(s_.plmn_.mcc_, s.plmn_.mcc_.to_string(), s.plmn_.mcc_.num_characters());
-		s_.plmn_.mcc_[s.plmn_.mcc_.num_characters()] = 0;
-		memcpy(s_.plmn_.mnc_, s.plmn_.mnc_.to_string(), s.plmn_.mnc_.num_characters());
-		s_.plmn_.mnc_[s.plmn_.mnc_.num_characters()] = 0;
+		copy_mcc_mnc(s_.plmn_.mcc_, s.plmn_.mcc_);
+		copy_mcc_mnc(s_.plmn_.mnc_, s.plmn_.mnc_);
 		s_.lac_ = s.location_area_code_;
 		s_.cid_ = s.cell_id_;
 		s_.cell_reselect_hysteresis_db_ = s.cell_reselect_hysteresis_db_;
