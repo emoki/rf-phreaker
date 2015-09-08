@@ -29,7 +29,7 @@ namespace beagle_api
 	*/
 	enum TECHNOLOGIES_AND_BANDS {
 		GSM_BAND_850, // [869 – 894 MHZ]
-		GSM_BAND_900, // [921 - 960 MHZ]
+		GSM_BAND_900, // [925 - 960 MHZ]
 		GSM_BAND_1800, // [1805 - 1880 MHZ]
 		GSM_BAND_1900, // [1930 - 1960 MHZ]
 		WCDMA_BAND_850, // operating band 5 [869 - 894 MHZ]

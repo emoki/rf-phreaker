@@ -18,7 +18,7 @@ static rf_phreaker::operating_band convert_band(beagle_api::TECHNOLOGIES_AND_BAN
 		b = rf_phreaker::GSM_850;
 		break;
 	case GSM_BAND_900:
-		b = rf_phreaker::GSM_R_900;
+		b = rf_phreaker::GSM_E_900;
 		break;
 	case GSM_BAND_1800:
 		b = rf_phreaker::GSM_DCS_1800;
