@@ -8,6 +8,7 @@ namespace layer_3_information {
 // placeholder
 enum gsm_bcch_si_type
 {
+	SI_1,
 	SI_2,
 	SI_2BIS,
 	SI_2TER,
@@ -34,6 +35,18 @@ struct gsm_si_base {
 	bool is_decoded_;
 };
 
+struct gsm_si_1 : public gsm_si_base {
+	virtual void clear() {
+		gsm_si_base::clear();
+		band_indicator_ = unknown_band_was_used;
+	}
+	void swap(gsm_si_1 &si) {
+		gsm_si_base::swap(si);
+		std::swap(band_indicator_, si.band_indicator_);
+	}
+	band_indicator band_indicator_;
+};
+
 struct gsm_si_2 : public gsm_si_base {
 	virtual void clear() {
 		gsm_si_base::clear();
@@ -42,6 +55,7 @@ struct gsm_si_2 : public gsm_si_base {
 		gsm_ba_ind_ = -1;
 	}
 	void swap(gsm_si_2 &si) {
+		gsm_si_base::swap(si);
 		std::swap(bcch_neighbors_, si.bcch_neighbors_);
 		std::swap(gsm_ba_ind_, si.gsm_ba_ind_);
 		std::swap(bcch_neighbors_has_extension_, si.bcch_neighbors_has_extension_);
@@ -368,6 +382,7 @@ public:
 	gsm_layer_3_message_aggregate();
 	
 	void clear() {
+		si_1_.clear();
 		si_2_.clear();
 		si_2bis_.clear();
 		si_2ter_.clear();
@@ -381,6 +396,7 @@ public:
 
 	void swap(gsm_layer_3_message_aggregate &a) {
 		bcch_bch_message_aggregate::swap(a);
+		si_1_.swap(a.si_1_);
 		si_2_.swap(a.si_2_);
 		si_2bis_.swap(a.si_2bis_);
 		si_2ter_.swap(a.si_2ter_);
@@ -392,6 +408,7 @@ public:
 		si_23_.swap(a.si_23_);
 	}
 
+	gsm_si_1 si_1_;
 	gsm_si_2 si_2_;
 	gsm_si_2bis si_2bis_;
 	gsm_si_2ter si_2ter_;

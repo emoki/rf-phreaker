@@ -38,6 +38,7 @@ public:
 		if(config.layer_3_.wanted_layer_3_.empty()) {
 			LOG(LVERBOSE) << "Defaulting to decoding all GSM SIBs.";
 			std::vector<layer_3_information::gsm_bcch_si_type> wanted;
+			wanted.push_back(layer_3_information::gsm_bcch_si_type::SI_1);
 			wanted.push_back(layer_3_information::gsm_bcch_si_type::SI_2);
 			wanted.push_back(layer_3_information::gsm_bcch_si_type::SI_2BIS);
 			wanted.push_back(layer_3_information::gsm_bcch_si_type::SI_2TER);

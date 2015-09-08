@@ -203,6 +203,11 @@ namespace beagle_api
 	typedef channel_group gsm_pcid_group;
 	typedef channel_group gsm_extended_earfcn_group;
 
+	struct gsm_si_1 {
+		bool decoded_;
+		BAND_INDICATOR band_indicator_;
+	};
+	
 	struct gsm_si_2 {
 		bool decoded_;
 		int32_t ba_ind_; 
@@ -668,6 +673,7 @@ namespace beagle_api
 		/// Carrier to Interference ratio in dB.
 		double ctoi_;
 
+		gsm_si_1 si_1_;
 		gsm_si_2 si_2_;
 		gsm_si_2bis si_2bis_;
 		gsm_si_2ter si_2ter_;

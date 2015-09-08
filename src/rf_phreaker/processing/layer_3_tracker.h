@@ -93,7 +93,14 @@ template<> template<> inline int all_layer_3_decoded<layer_3_information::lte_si
 
 template<> template<> inline void all_layer_3_decoded<layer_3_information::gsm_bcch_si_type, bit_index>::update(const gsm_measurement &data) {
 	++num_updated_;
-	auto it = all_layer_3_.find(layer_3_information::SI_2);
+	auto it = all_layer_3_.find(layer_3_information::SI_1);
+	if(it != all_layer_3_.end()) {
+		const auto &si = data.layer_3_.si_1_;
+		if(si.is_decoded()) {
+			it->second = true;
+		}
+	}
+	it = all_layer_3_.find(layer_3_information::SI_2);
 	if(it != all_layer_3_.end()) {
 		const auto &si = data.layer_3_.si_2_;
 		if(si.is_decoded()) {

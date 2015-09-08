@@ -9,6 +9,7 @@
 namespace layer_3_information {
 
 inline std::ostream& header(std::ostream &os, const gsm_si_base &t);
+inline std::ostream& header(std::ostream &os, const gsm_si_1 &t);
 inline std::ostream& header(std::ostream &os, const gsm_si_2 &t);
 inline std::ostream& header(std::ostream &os, const gsm_si_2bis &t);
 inline std::ostream& header(std::ostream &os, const gsm_si_2ter &t);
@@ -19,6 +20,7 @@ inline std::ostream& header(std::ostream &os, const gsm_si_7 &t);
 inline std::ostream& header(std::ostream &os, const gsm_si_8 &t);
 
 inline std::ostream& operator<<(std::ostream &os, const gsm_si_base &t);
+inline std::ostream& operator<<(std::ostream &os, const gsm_si_1 &t);
 inline std::ostream& operator<<(std::ostream &os, const gsm_si_2 &t);
 inline std::ostream& operator<<(std::ostream &os, const gsm_si_2bis &t);
 inline std::ostream& operator<<(std::ostream &os, const gsm_si_2ter &t);
@@ -38,12 +40,35 @@ inline std::ostream& operator<<(std::ostream &os, const gsm_si_base &t) {
 	return os;
 }
 
+inline std::ostream& output_empty_gsm_si_1(std::ostream &os) {
+	return os;
+}
+inline std::ostream& header(std::ostream &os, const gsm_si_1 &t) {
+	os << "si_1_band_indicator";
+	return os;
+}
+inline std::ostream& operator<<(std::ostream &os, const gsm_si_1 &t) {
+	switch(t.band_indicator_) {
+	case dcs_1800_was_used:
+		os << "dcs_1800_was_used";
+		break;
+	case pcs_1900_was_used:
+		os << "pcs_1900_was_used";
+		break;
+	case unknown_band_was_used:
+	default:
+		os << "unknown_band";
+	}
+	return os;
+}
+
+
 inline std::ostream& output_empty_gsm_si_2(std::ostream &os) {
 	for(int i = 0; i < 2; ++i) os << main_delim;
 	return os;
 }
 inline std::ostream& header(std::ostream &os, const gsm_si_2 &t) {
-	os 	<< "si_2_ba_ind" << main_delim
+	os	<< "si_2_ba_ind" << main_delim
 		<< "si_2_ext_ind" << main_delim
 		<< "si_2_bcch_neighbor_cells [bcch]";
 	return os;
@@ -52,7 +77,7 @@ inline std::ostream& operator<<(std::ostream &os, const gsm_si_2 &t) {
 	os << t.gsm_ba_ind_ << main_delim
 		<< t.bcch_neighbors_has_extension_ << main_delim;
 	os << begin_delim;
-	for(auto &i : t.bcch_neighbors_) 
+	for(auto &i : t.bcch_neighbors_)
 		os << i << spacer;
 	os << end_delim;
 	return os;
@@ -371,6 +396,7 @@ inline std::ostream& operator<<(std::ostream &os, const gsm_si_8 &t) {
 
 
 inline std::ostream& header(std::ostream &os, const gsm_layer_3_message_aggregate &t) {
+	header(os, t.si_1_) << main_delim;
 	header(os, t.si_2_) << main_delim;
 	header(os, t.si_2bis_) << main_delim;
 	header(os, t.si_2ter_) << main_delim;
@@ -383,6 +409,10 @@ inline std::ostream& header(std::ostream &os, const gsm_layer_3_message_aggregat
 }
 
 inline std::ostream& operator<<(std::ostream &os, const gsm_layer_3_message_aggregate &t) {
+	if(t.si_1_.is_decoded())
+		os << t.si_1_ << main_delim;
+	else
+		output_empty_gsm_si_1(os) << main_delim;
 	if(t.si_2_.is_decoded())
 		os << t.si_2_ << main_delim;
 	else

@@ -153,6 +153,9 @@ public:
 			v[i].bsic_ = gsm.bsic_;
 			v[i].cell_sl_ = gsm.cell_signal_level_;
 			v[i].ctoi_ = gsm.ctoi_;
+			v[i].si_1_.decoded_ = gsm.layer_3_.si_1_.is_decoded();
+			v[i].si_1_.band_indicator_ = gsm.layer_3_.si_1_.band_indicator_ == layer_3_information::pcs_1900_was_used 
+				? beagle_api::PCS_1900_WAS_USED : beagle_api::DCS_1800_WAS_USED;
 			si2.push_back(gsm_si_2_wrapper(gsm.layer_3_.si_2_));
 			v[i].si_2_ = si2.back().s_;
 			si2bis.push_back(gsm_si_2bis_wrapper(gsm.layer_3_.si_2bis_));

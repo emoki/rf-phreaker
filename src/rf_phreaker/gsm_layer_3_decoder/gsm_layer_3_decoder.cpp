@@ -33,6 +33,10 @@ int32_t gsm_layer_3_decoder::decode_bcch_message(const uint8_t *bit_stream, uint
 		INIT_TRRPLENDownlink_Data(&data);
 		SetDecode_RRPLENDownlink((char*)bits.bit_stream(), &data, bits.num_bits_in_bit_stream());
 		switch(data.Type) {
+		case ID_RRPLENDownlink_SYSTEM_INFORMATION_TYPE_1_DN: {
+			message.si_1_.is_decoded_ = true;
+			message.si_1_.band_indicator_ = data.Data.fld_c_SYSTEM_INFORMATION_TYPE_1_DN->Si1RestOctets.BAND_INDICATOR == 0 ? dcs_1800_was_used : pcs_1900_was_used;
+		} break;
 		case ID_RRPLENDownlink_SYSTEM_INFORMATION_TYPE_2_DN: {
 			message.si_2_.is_decoded_ = true;
 			auto cell_des = data.Data.fld_c_SYSTEM_INFORMATION_TYPE_2_DN->BcchFrequencyList;
