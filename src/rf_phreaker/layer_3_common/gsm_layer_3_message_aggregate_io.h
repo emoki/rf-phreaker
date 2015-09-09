@@ -299,7 +299,7 @@ inline std::ostream& operator<<(std::ostream &os, const gsm_si_3 &t) {
 		<< t.cell_id_ << main_delim
 		<< t.cell_reselect_hysteresis_db_ << main_delim
 		<< t.selection_parameters_.cbq_ << main_delim
-		<< t.selection_parameters_.cell_reselect_offset_ << main_delim
+		<< t.selection_parameters_.cell_reselect_offset_db_ << main_delim
 		<< t.selection_parameters_.temporary_offset_ << main_delim
 		<< t.selection_parameters_.penalty_time_ << main_delim
 		<< t.is_2ter_present_ << main_delim
@@ -334,7 +334,7 @@ inline std::ostream& operator<<(std::ostream &os, const gsm_si_4 &t) {
 		<< t.cell_id_ << main_delim
 		<< t.cell_reselect_hysteresis_db_ << main_delim
 		<< t.selection_parameters_.cbq_ << main_delim
-		<< t.selection_parameters_.cell_reselect_offset_ << main_delim
+		<< t.selection_parameters_.cell_reselect_offset_db_ << main_delim
 		<< t.selection_parameters_.temporary_offset_ << main_delim
 		<< t.selection_parameters_.penalty_time_ << main_delim
 		<< t.is_cbch_present_ << main_delim
@@ -362,7 +362,7 @@ inline std::ostream& operator<<(std::ostream &os, const gsm_si_7 &t) {
 		<< t.plmn_.mnc_ << main_delim
 		<< t.cell_id_ << main_delim
 		<< t.selection_parameters_.cbq_ << main_delim
-		<< t.selection_parameters_.cell_reselect_offset_ << main_delim
+		<< t.selection_parameters_.cell_reselect_offset_db_ << main_delim
 		<< t.selection_parameters_.temporary_offset_ << main_delim
 		<< t.selection_parameters_.penalty_time_;
 	return os;
@@ -388,7 +388,7 @@ inline std::ostream& operator<<(std::ostream &os, const gsm_si_8 &t) {
 		<< t.plmn_.mnc_ << main_delim
 		<< t.cell_id_ << main_delim
 		<< t.selection_parameters_.cbq_ << main_delim
-		<< t.selection_parameters_.cell_reselect_offset_ << main_delim
+		<< t.selection_parameters_.cell_reselect_offset_db_ << main_delim
 		<< t.selection_parameters_.temporary_offset_ << main_delim
 		<< t.selection_parameters_.penalty_time_;
 	return os;

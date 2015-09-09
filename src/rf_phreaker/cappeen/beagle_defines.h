@@ -302,7 +302,7 @@ namespace beagle_api
 		int32_t lac_;
 		int32_t cid_;
 		int32_t cell_reselect_hysteresis_db_;
-		int32_t cell_reselect_offset_;
+		int32_t cell_reselect_offset_db_;
 		bool is_2ter_present_;
 		bool is_2quater_present_;
 	};
@@ -313,7 +313,7 @@ namespace beagle_api
 		int32_t lac_;
 		int32_t cid_;
 		int32_t cell_reselect_hysteresis_db_;
-		int32_t cell_reselect_offset_;
+		int32_t cell_reselect_offset_db_;
 		bool is_cbch_present_;
 	};
 

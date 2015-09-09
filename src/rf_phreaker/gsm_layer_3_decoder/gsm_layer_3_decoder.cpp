@@ -121,7 +121,7 @@ int32_t gsm_layer_3_decoder::decode_bcch_message(const uint8_t *bit_stream, uint
 
 			auto octet = si3->Si3RestOctets;
 			if(octet.CELL_RESELECT_OFFSET_Present)
-				message.si_3_.selection_parameters_.cell_reselect_offset_ = octet.CELL_RESELECT_OFFSET;
+				message.si_3_.selection_parameters_.cell_reselect_offset_db_ = octet.CELL_RESELECT_OFFSET * 2;
 			if(octet.PENALTY_TIME_Present)
 				message.si_3_.selection_parameters_.penalty_time_ = octet.PENALTY_TIME;
 			if(octet.CBQ_Present)
@@ -156,7 +156,7 @@ int32_t gsm_layer_3_decoder::decode_bcch_message(const uint8_t *bit_stream, uint
 			
 			auto octet = si4->Si4RestOctets;
 			if(octet.CELL_RESELECT_OFFSET_Present)
-				message.si_4_.selection_parameters_.cell_reselect_offset_ = octet.CELL_RESELECT_OFFSET;
+				message.si_4_.selection_parameters_.cell_reselect_offset_db_ = octet.CELL_RESELECT_OFFSET * 2;
 			if(octet.PENALTY_TIME_Present)
 				message.si_4_.selection_parameters_.penalty_time_ = octet.PENALTY_TIME;
 			if(octet.CBQ_Present)
@@ -186,7 +186,7 @@ int32_t gsm_layer_3_decoder::decode_bcch_message(const uint8_t *bit_stream, uint
 			auto octet = data.Data.fld_c_SYSTEM_INFORMATION_TYPE_7_DN->Si7RestOctets;
 
 			if(octet.CELL_RESELECT_OFFSET_Present)
-				message.si_7_.selection_parameters_.cell_reselect_offset_ = octet.CELL_RESELECT_OFFSET;
+				message.si_7_.selection_parameters_.cell_reselect_offset_db_ = octet.CELL_RESELECT_OFFSET * 2;
 			if(octet.PENALTY_TIME_Present)
 				message.si_7_.selection_parameters_.penalty_time_ = octet.PENALTY_TIME;
 			if(octet.CBQ_Present)
@@ -209,7 +209,7 @@ int32_t gsm_layer_3_decoder::decode_bcch_message(const uint8_t *bit_stream, uint
 			auto octet = data.Data.fld_c_SYSTEM_INFORMATION_TYPE_8_DN->Si8RestOctets;
 
 			if(octet.CELL_RESELECT_OFFSET_Present)
-				message.si_8_.selection_parameters_.cell_reselect_offset_ = octet.CELL_RESELECT_OFFSET;
+				message.si_8_.selection_parameters_.cell_reselect_offset_db_ = octet.CELL_RESELECT_OFFSET * 2;
 			if(octet.PENALTY_TIME_Present)
 				message.si_8_.selection_parameters_.penalty_time_ = octet.PENALTY_TIME;
 			if(octet.CBQ_Present)

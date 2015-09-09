@@ -567,7 +567,7 @@ public:
 		s_.lac_ = s.location_area_code_;
 		s_.cid_ = s.cell_id_;
 		s_.cell_reselect_hysteresis_db_ = s.cell_reselect_hysteresis_db_;
-		s_.cell_reselect_offset_ = s.selection_parameters_.cell_reselect_offset_;
+		s_.cell_reselect_offset_db_ = s.selection_parameters_.cell_reselect_offset_db_;
 		s_.is_2ter_present_ = s.is_2ter_present_;
 		s_.is_2quater_present_ = s.is_2quater_present_;
 	}
@@ -586,7 +586,7 @@ public:
 		s_.lac_ = s.location_area_code_;
 		s_.cid_ = s.cell_id_;
 		s_.cell_reselect_hysteresis_db_ = s.cell_reselect_hysteresis_db_;
-		s_.cell_reselect_offset_ = s.selection_parameters_.cell_reselect_offset_;
+		s_.cell_reselect_offset_db_ = s.selection_parameters_.cell_reselect_offset_db_;
 		s_.is_cbch_present_ = s.is_cbch_present_;
 	}
 	beagle_api::gsm_si_4 s_;

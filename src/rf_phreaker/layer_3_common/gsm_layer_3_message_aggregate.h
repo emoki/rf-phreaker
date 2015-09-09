@@ -220,12 +220,12 @@ struct gsm_si_2n : public gsm_si_base {
 
 struct selection_parameters {
 	int32_t cbq_;
-	int32_t cell_reselect_offset_;
+	int32_t cell_reselect_offset_db_;
 	int32_t temporary_offset_;
 	int32_t penalty_time_;
 	void clear() {
 		cbq_ = INT_FAST32_MIN;
-		cell_reselect_offset_ = INT_FAST32_MIN;
+		cell_reselect_offset_db_ = INT_FAST32_MIN;
 		temporary_offset_ = INT_FAST32_MIN;
 		penalty_time_ = INT_FAST32_MIN;
 	}

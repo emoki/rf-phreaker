@@ -599,7 +599,7 @@ TEST(RfPhreakerWrappers, GsmSib3) {
 	si.plmn_.mnc_ = std::string("230");
 	si.location_area_code_ = tmp++;
 	si.cell_id_ = tmp++;
-	si.selection_parameters_.cell_reselect_offset_ = tmp++;
+	si.selection_parameters_.cell_reselect_offset_db_ = tmp++;
 	si.cell_reselect_hysteresis_db_ = tmp++;
 	si.is_2ter_present_ = rand() % 2 == 0;
 	si.is_2quater_present_ = rand() % 2 == 0;
@@ -611,7 +611,7 @@ TEST(RfPhreakerWrappers, GsmSib3) {
 	ASSERT_STREQ(si.plmn_.mnc_.to_string(), w.s_.plmn_.mnc_);
 	ASSERT_EQ(si.location_area_code_, w.s_.lac_);
 	ASSERT_EQ(si.cell_id_, w.s_.cid_);
-	ASSERT_EQ(si.selection_parameters_.cell_reselect_offset_, w.s_.cell_reselect_offset_);
+	ASSERT_EQ(si.selection_parameters_.cell_reselect_offset_db_, w.s_.cell_reselect_offset_db_);
 	ASSERT_EQ(si.cell_reselect_hysteresis_db_, w.s_.cell_reselect_hysteresis_db_);
 	ASSERT_EQ(si.is_2ter_present_, w.s_.is_2ter_present_);
 	ASSERT_EQ(si.is_2quater_present_, w.s_.is_2quater_present_);
@@ -629,7 +629,7 @@ TEST(RfPhreakerWrappers, GsmSib4TestBadMnc) {
 	si.plmn_.mnc_ = tmp++;
 	si.location_area_code_ = tmp++;
 	si.cell_id_ = tmp++;
-	si.selection_parameters_.cell_reselect_offset_ = tmp++;
+	si.selection_parameters_.cell_reselect_offset_db_ = tmp++;
 	si.cell_reselect_hysteresis_db_ = tmp++;
 	si.is_cbch_present_ = rand() % 2 == 0;
 
@@ -640,7 +640,7 @@ TEST(RfPhreakerWrappers, GsmSib4TestBadMnc) {
 	ASSERT_STREQ(si.plmn_.mnc_.to_string(), w.s_.plmn_.mnc_);
 	ASSERT_EQ(si.location_area_code_, w.s_.lac_);
 	ASSERT_EQ(si.cell_id_, w.s_.cid_);
-	ASSERT_EQ(si.selection_parameters_.cell_reselect_offset_, w.s_.cell_reselect_offset_);
+	ASSERT_EQ(si.selection_parameters_.cell_reselect_offset_db_, w.s_.cell_reselect_offset_db_);
 	ASSERT_EQ(si.cell_reselect_hysteresis_db_, w.s_.cell_reselect_hysteresis_db_);
 	ASSERT_EQ(si.is_cbch_present_, w.s_.is_cbch_present_);
 }
