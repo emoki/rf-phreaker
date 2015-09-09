@@ -34,10 +34,7 @@ blade_rf_controller::blade_rf_controller(blade_rf_controller &&c)
 
 blade_rf_controller::~blade_rf_controller()
 {
-	is_streaming_ = NOT_STREAMING;
-	if(streaming_thread_ && streaming_thread_->joinable()) {
-		streaming_thread_->join();
-	}
+	stop_streaming();
 	if(comm_blade_rf_.get()) {
 		nr_close(comm_blade_rf_->blade_rf(), __FILE__, __LINE__);
 	}
@@ -209,6 +206,7 @@ void blade_rf_controller::update_vctcxo_based_on_eeprom() {
 
 void blade_rf_controller::close_scanner()
 {
+	stop_streaming();
 	if(comm_blade_rf_.get()) {
 		nr_close(comm_blade_rf_->blade_rf());
 		comm_blade_rf_.reset();
@@ -831,6 +829,13 @@ measurement_info blade_rf_controller::stream_rf_data_use_auto_gain(frequency_typ
 		}
 	}
 	throw rf_phreaker_error("Error trying to stream data.");
+}
+
+void blade_rf_controller::stop_streaming() {
+	is_streaming_ = NOT_STREAMING;
+	if(streaming_thread_ && streaming_thread_->joinable()) {
+		streaming_thread_->join();
+	}
 }
 
 int blade_rf_controller::check_blade_status(int return_status, const std::string &file, int line)

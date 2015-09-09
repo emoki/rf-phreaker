@@ -86,6 +86,8 @@ public:
 
 	measurement_info stream_rf_data_use_auto_gain(frequency_type frequency, time_type time_ns, time_type time_ns_to_overlap, bandwidth_type bandwidth, frequency_type sampling_rate = 0);
 
+	void stop_streaming();
+
 	gain_type get_auto_gain(frequency_type frequency, bandwidth_type bandwidth, time_type time_ns = 0, frequency_type sampling_rate = 0);
 
 	void initialize_eeprom();
