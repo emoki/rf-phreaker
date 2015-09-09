@@ -108,8 +108,8 @@ public:
 				<< "\t" << info[i].si_2ter_.bcch_neighbors_.num_elements_
 				<< "\t" << info[i].si_2quater_.utran_neighbors_.num_elements_
 				<< "\t" << info[i].si_2quater_.eutran_neighbors_.num_elements_
-				<< "\t" << info[i].si_3_.plmn_.mcc_ << " " << info[i].si_3_.plmn_.mcc_
-				<< "\t" << info[i].si_4_.plmn_.mcc_ << " " << info[i].si_4_.plmn_.mcc_
+				<< "\t" << info[i].si_3_.plmn_.mcc_ << " " << info[i].si_3_.plmn_.mnc_
+				<< "\t" << info[i].si_4_.plmn_.mcc_ << " " << info[i].si_4_.plmn_.mnc_
 				<< std::endl;
 		}
 	}
