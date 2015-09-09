@@ -21,7 +21,7 @@ public:
 				if(adj_range.band_ == GSM_850) {
 					freq = mhz(894) - khz(1500);
 				}
-				else if(adj_range.band_ == GSM_R_900) {
+				else if(adj_range.band_ == GSM_E_900) {
 					freq = mhz(960) - khz(1500);
 				}
 				else if(adj_range.band_ == GSM_DCS_1800) {

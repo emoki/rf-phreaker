@@ -339,7 +339,7 @@ static beagle_api::TECHNOLOGIES_AND_BANDS convert_band_to_tech_band(rf_phreaker:
 	case rf_phreaker::GSM_850:
 		b = GSM_BAND_850;
 		break;
-	case rf_phreaker::GSM_R_900:
+	case rf_phreaker::GSM_E_900:
 		b = GSM_BAND_900;
 		break;
 	case rf_phreaker::GSM_DCS_1800:
