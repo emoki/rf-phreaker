@@ -18,9 +18,9 @@ static const std::string umts_layer_3_collection_group_key = "umts_layer_3_colle
 static const std::string lte_sweep_collection_group_key = "lte_sweep_collection";
 static const std::string lte_layer_3_collection_group_key = "lte_layer_3_collection";
 static const std::string sweep_collection_group_key = "sweep_collection";
-static const std::string gsm_decode_thresholds_group_key = "gsm_decode_thresholds";
-static const std::string umts_decode_thresholds_group_key = "umts_decode_thresholds";
-static const std::string lte_decode_thresholds_group_key = "lte_decode_thresholds";
+static const std::string gsm_decode_thresholds_group_key = "gsm_layer_3_general";
+static const std::string umts_decode_thresholds_group_key = "umts_layer_3_general";
+static const std::string lte_decode_thresholds_group_key = "lte_layer_3_general";
 static const std::string lte_sweep_general_group_key = "lte_sweep_general";
 static const std::string lte_layer_3_general_group_key = "lte_layer_3_general";
 static const std::string umts_sweep_general_group_key = "umts_sweep_general";
@@ -132,6 +132,13 @@ public:
 	void write(const blade_rx_settings &settings, const std::string &group_key);
 
 	void clear();
+
+	int convert_gsm_si(const std::string &s);
+	int convert_umts_sib(const std::string &s);
+	int convert_lte_sib(const std::string &s);
+	std::string convert_gsm_si(int s);
+	std::string convert_umts_sib(int s);
+	std::string convert_lte_sib(int s);
 
 private:
 	std::unique_ptr<QSettings> qsettings_;

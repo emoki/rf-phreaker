@@ -202,12 +202,31 @@ TEST(QtSpecific, TestSettingsIO)
 	set.sweep_collection_.sampling_rate_ = tmp++;
 	set.sweep_collection_.bandwidth_ = tmp++;
 	set.sweep_collection_.collection_time_ = tmp++;
+	set.gsm_layer_3_decode_.max_update_threshold_ = tmp++;
+	set.gsm_layer_3_decode_.minimum_collection_round_ = tmp++;
+	set.gsm_layer_3_decode_.decode_threshold_ = tmp++;
+	set.gsm_layer_3_decode_.decode_minimum_threshold_ = tmp++;
+	set.gsm_layer_3_decode_.minimum_decode_count_ = tmp++;
+	set.gsm_layer_3_decode_.should_prioritize_layer_3_ = false;
+	tmp = 0;
+	set.gsm_layer_3_decode_.wanted_layer_3_.push_back(tmp++);
+	set.gsm_layer_3_decode_.wanted_layer_3_.push_back(tmp++);
+	set.gsm_layer_3_decode_.wanted_layer_3_.push_back(tmp++);
+	set.gsm_layer_3_decode_.wanted_layer_3_.push_back(tmp++);
+	set.gsm_layer_3_decode_.wanted_layer_3_.push_back(tmp++);
+	set.gsm_layer_3_decode_.wanted_layer_3_.push_back(tmp++);
+	set.gsm_layer_3_decode_.wanted_layer_3_.push_back(tmp++);
+	set.gsm_layer_3_decode_.wanted_layer_3_.push_back(tmp++);
+	set.gsm_layer_3_decode_.wanted_layer_3_.push_back(tmp++);
+	set.gsm_layer_3_decode_.wanted_layer_3_.push_back(tmp++);
 	set.umts_layer_3_decode_.max_update_threshold_ = tmp++;
-	set.umts_layer_3_decode_.minimum_collection_round_= tmp++;
+	set.umts_layer_3_decode_.minimum_collection_round_ = tmp++;
 	set.umts_layer_3_decode_.decode_threshold_ = tmp++;
 	set.umts_layer_3_decode_.decode_minimum_threshold_ = tmp++;
 	set.umts_layer_3_decode_.minimum_decode_count_ = tmp++;
 	set.umts_layer_3_decode_.should_prioritize_layer_3_ = false;
+	tmp = 0;
+	set.umts_layer_3_decode_.wanted_layer_3_.push_back(tmp++);
 	set.umts_layer_3_decode_.wanted_layer_3_.push_back(tmp++);
 	set.umts_layer_3_decode_.wanted_layer_3_.push_back(tmp++);
 	set.umts_layer_3_decode_.wanted_layer_3_.push_back(tmp++);
@@ -217,6 +236,19 @@ TEST(QtSpecific, TestSettingsIO)
 	set.lte_layer_3_decode_.decode_minimum_threshold_ = tmp++;
 	set.lte_layer_3_decode_.minimum_decode_count_ = tmp++;
 	set.lte_layer_3_decode_.should_prioritize_layer_3_ = false;
+	tmp = 0;
+	set.lte_layer_3_decode_.wanted_layer_3_.push_back(tmp++);
+	set.lte_layer_3_decode_.wanted_layer_3_.push_back(tmp++);
+	set.lte_layer_3_decode_.wanted_layer_3_.push_back(tmp++);
+	set.lte_layer_3_decode_.wanted_layer_3_.push_back(tmp++);
+	set.lte_layer_3_decode_.wanted_layer_3_.push_back(tmp++);
+	set.lte_layer_3_decode_.wanted_layer_3_.push_back(tmp++);
+	set.lte_layer_3_decode_.wanted_layer_3_.push_back(tmp++);
+	set.lte_layer_3_decode_.wanted_layer_3_.push_back(tmp++);
+	set.lte_layer_3_decode_.wanted_layer_3_.push_back(tmp++);
+	set.lte_layer_3_decode_.wanted_layer_3_.push_back(tmp++);
+	set.lte_layer_3_decode_.wanted_layer_3_.push_back(tmp++);
+	set.lte_layer_3_decode_.wanted_layer_3_.push_back(tmp++);
 	set.lte_layer_3_decode_.wanted_layer_3_.push_back(tmp++);
 	set.lte_layer_3_decode_.wanted_layer_3_.push_back(tmp++);
 	set.lte_layer_3_decode_.wanted_layer_3_.push_back(tmp++);
@@ -327,6 +359,19 @@ TEST(QtSpecific, TestSettingsIO)
 	EXPECT_EQ(set.sweep_collection_.bandwidth_, set2.sweep_collection_.bandwidth_);
 	EXPECT_EQ(set.sweep_collection_.collection_time_, set2.sweep_collection_.collection_time_);
 
+	EXPECT_EQ(set.gsm_layer_3_decode_.max_update_threshold_, set2.gsm_layer_3_decode_.max_update_threshold_);
+	EXPECT_EQ(set.gsm_layer_3_decode_.minimum_collection_round_, set2.gsm_layer_3_decode_.minimum_collection_round_);
+	EXPECT_EQ(set.gsm_layer_3_decode_.decode_threshold_, set2.gsm_layer_3_decode_.decode_threshold_);
+	EXPECT_EQ(set.gsm_layer_3_decode_.decode_minimum_threshold_, set2.gsm_layer_3_decode_.decode_minimum_threshold_);
+	EXPECT_EQ(set.gsm_layer_3_decode_.minimum_decode_count_, set2.gsm_layer_3_decode_.minimum_decode_count_);
+	EXPECT_EQ(set.gsm_layer_3_decode_.should_prioritize_layer_3_, set2.gsm_layer_3_decode_.should_prioritize_layer_3_);
+	{
+		EXPECT_EQ(set.gsm_layer_3_decode_.wanted_layer_3_.size(), set2.gsm_layer_3_decode_.wanted_layer_3_.size());
+		auto j = set2.gsm_layer_3_decode_.wanted_layer_3_.begin();
+		for(auto i : set.gsm_layer_3_decode_.wanted_layer_3_)
+			EXPECT_EQ(i, *j++);
+	}
+
 	EXPECT_EQ(set.umts_layer_3_decode_.max_update_threshold_, set2.umts_layer_3_decode_.max_update_threshold_);
 	EXPECT_EQ(set.umts_layer_3_decode_.minimum_collection_round_, set2.umts_layer_3_decode_.minimum_collection_round_);
 	EXPECT_EQ(set.umts_layer_3_decode_.decode_threshold_, set2.umts_layer_3_decode_.decode_threshold_);
@@ -392,11 +437,6 @@ TEST(QtSpecific, TestSettingsIO)
 	EXPECT_EQ(set.blade_settings_.full_streaming_rx_.rx_sync_num_buffers_, set2.blade_settings_.full_streaming_rx_.rx_sync_num_buffers_);
 	EXPECT_EQ(set.blade_settings_.full_streaming_rx_.rx_sync_num_transfers_, set2.blade_settings_.full_streaming_rx_.rx_sync_num_transfers_);
 	EXPECT_EQ(set.blade_settings_.full_streaming_rx_.rx_sync_timeout_, set2.blade_settings_.full_streaming_rx_.rx_sync_timeout_);
-
-	// Store default settings.
-	set_io.clear();
-	set_io.read(set);
-	set_io.write(set);
 }
 
 TEST(QtSpecific, TestLocation) {
