@@ -40,9 +40,10 @@ public:
 	static void adjust_gsm_sweep_collection_info(const operating_band_range &range, collection_info_container &c) {
 		// Be sure to make sure the center freq is % khz(200) != 0
 		for(auto freq = range.low_freq_hz_, end_freq = range.high_freq_hz_; freq <= end_freq; freq += gsm_step_size_hz_) {
-			c.adjust(add_collection_info(gsm_sweep_collection_info(freq, range.band_, false)));
+		for(auto freq = range.low_freq_hz_ + gsm_low_step_size_hz_, end_freq = range.high_freq_hz_ + gsm_high_step_size_hz_; freq <= end_freq; freq += gsm_step_size_hz_) {
 			if(freq % khz(200) == 0)
 				freq -= khz(100);
+			c.adjust(add_collection_info(gsm_sweep_collection_info(freq, range.band_, false)));
 		}
 	}
 
