@@ -55,56 +55,71 @@ public:
 		uint16_t vctcxo;
 		blade.read_vctcxo_trim(vctcxo);
 
+		int errors = 0;
+
 		while(std::chrono::system_clock::now() - start_time < std::chrono::minutes(s.duration_mins_)) {
-			
-			for(auto &snapshot : s.snapshots_) {
-				for(auto freq = snapshot.start_freq_; freq <= snapshot.end_freq_; freq += snapshot.freq_increment_) {
-					auto tmp = blade.get_rf_data_use_auto_gain(freq, snapshot.time_, snapshot.bandwidth_, snapshot.sampling_rate_);
+			try {
+				for(auto &snapshot : s.snapshots_) {
+					for(auto freq = snapshot.start_freq_; freq <= snapshot.end_freq_; freq += snapshot.freq_increment_) {
+						auto tmp = blade.get_rf_data_use_auto_gain(freq, snapshot.time_, snapshot.bandwidth_, snapshot.sampling_rate_);
 
-					static auto update_vctcx_trim = std::chrono::system_clock::now();
-					if(std::chrono::system_clock::now() - update_vctcx_trim > std::chrono::seconds(s.update_vctcx_trim_duration_s_)) {
-						std::cout << "Updating vctcxo.\n";
-						blade.update_vctcxo_trim(vctcxo);
-						update_vctcx_trim = std::chrono::system_clock::now();
-					}
+						static auto update_vctcx_trim = std::chrono::system_clock::now();
+						if(std::chrono::system_clock::now() - update_vctcx_trim > std::chrono::seconds(s.update_vctcx_trim_duration_s_)) {
+							std::cout << "Updating vctcxo.\n";
+							blade.update_vctcxo_trim(vctcxo);
+							update_vctcx_trim = std::chrono::system_clock::now();
+						}
 
-					tmp = blade.get_rf_data_use_auto_gain(freq, snapshot.time_, snapshot.bandwidth_, snapshot.sampling_rate_);
+						tmp = blade.get_rf_data_use_auto_gain(freq, snapshot.time_, snapshot.bandwidth_, snapshot.sampling_rate_);
 
-					static auto write_vctcx_trim = std::chrono::system_clock::now();
-					if(std::chrono::system_clock::now() - write_vctcx_trim > std::chrono::seconds(s.write_vctcx_trim_duration_s_)) {
-						std::cout << "Writing vctcxo.\n";
-						blade.write_vctcxo_trim(vctcxo);
-						write_vctcx_trim = std::chrono::system_clock::now();
-					}
+						static auto write_vctcx_trim = std::chrono::system_clock::now();
+						if(std::chrono::system_clock::now() - write_vctcx_trim > std::chrono::seconds(s.write_vctcx_trim_duration_s_)) {
+							std::cout << "Writing vctcxo.\n";
+							blade.write_vctcxo_trim(vctcxo);
+							write_vctcx_trim = std::chrono::system_clock::now();
+						}
 
-					tmp = blade.get_rf_data_use_auto_gain(freq, snapshot.time_, snapshot.bandwidth_, snapshot.sampling_rate_);
+						tmp = blade.get_rf_data_use_auto_gain(freq, snapshot.time_, snapshot.bandwidth_, snapshot.sampling_rate_);
 
-					static auto get_gps_message = std::chrono::system_clock::now();
-					if(std::chrono::system_clock::now() - get_gps_message > std::chrono::seconds(s.get_gps_message_duration_s_)) {
-						auto gps = blade.get_gps_data();
-						std::cout << gps << std::endl;
-						get_gps_message = std::chrono::system_clock::now();
-					}
+						static auto get_gps_message = std::chrono::system_clock::now();
+						if(std::chrono::system_clock::now() - get_gps_message > std::chrono::seconds(s.get_gps_message_duration_s_)) {
+							auto gps = blade.get_gps_data();
+							std::cout << gps << std::endl;
+							get_gps_message = std::chrono::system_clock::now();
+						}
 
-					 tmp = blade.get_rf_data_use_auto_gain(freq, snapshot.time_, snapshot.bandwidth_, snapshot.sampling_rate_);
+						tmp = blade.get_rf_data_use_auto_gain(freq, snapshot.time_, snapshot.bandwidth_, snapshot.sampling_rate_);
 
-					static auto perform_1pps = std::chrono::system_clock::now();
-					if(std::chrono::system_clock::now() - perform_1pps > std::chrono::seconds(s.perform_1pps_calibration_s_)) {
-						std::cout << "Attempting 1pps.\n";
-						blade.attempt_gps_1pps_calibration();
-						blade.start_gps_1pps_integration(std::min(s.perform_1pps_calibration_s_ - 1, 54));			
-						perform_1pps = std::chrono::system_clock::now();
-					}
+						static auto perform_1pps = std::chrono::system_clock::now();
+						if(std::chrono::system_clock::now() - perform_1pps > std::chrono::seconds(s.perform_1pps_calibration_s_)) {
+							std::cout << "Attempting 1pps.\n";
+							blade.attempt_gps_1pps_calibration();
+							blade.start_gps_1pps_integration(std::min(s.perform_1pps_calibration_s_ - 1, 54));
+							perform_1pps = std::chrono::system_clock::now();
+						}
 
-					tmp = blade.get_rf_data_use_auto_gain(freq, snapshot.time_, snapshot.bandwidth_, snapshot.sampling_rate_);
+						tmp = blade.get_rf_data_use_auto_gain(freq, snapshot.time_, snapshot.bandwidth_, snapshot.sampling_rate_);
 
-					static auto read_eeprom = std::chrono::system_clock::now();
-					if(std::chrono::system_clock::now() - read_eeprom > std::chrono::seconds(s.read_eeprom_duration_s_)) {
-						std::cout << "Reading EEPROM.\n";
-						blade.read_eeprom();
-						read_eeprom = std::chrono::system_clock::now();
+						static auto read_eeprom = std::chrono::system_clock::now();
+						if(std::chrono::system_clock::now() - read_eeprom > std::chrono::seconds(s.read_eeprom_duration_s_)) {
+							std::cout << "Reading EEPROM.\n";
+							blade.read_eeprom();
+							read_eeprom = std::chrono::system_clock::now();
+						}
 					}
 				}
+			}
+			catch(const rf_phreaker_error &err) {
+				std::cout << "An rf_phreaker error occurred: " << err.what() << std::endl;
+				++errors;
+			}
+			catch(const std::exception &err) {
+				std::cout << "An generic error occurred: " << err.what() << std::endl;
+				++errors;
+			}
+			if(errors > 100) {
+				std::cout << "Stopping stress test.  Over 100 errors have occurred." << std::endl;
+				break;
 			}
 		}
 	}
