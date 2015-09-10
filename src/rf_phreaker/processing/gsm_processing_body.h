@@ -7,6 +7,7 @@
 #include "rf_phreaker/processing/processing_and_feedback_helper.h"
 #include "rf_phreaker/gsm_analysis/gsm_analysis.h"
 #include "rf_phreaker/gsm_analysis/gsm_config.h"
+#include "rf_phreaker/gsm_analysis/gsm_defs.h"
 #include "rf_phreaker/common/settings.h"
 #include "rf_phreaker/common/common_utility.h"
 #include "rf_phreaker/common/frequency_bin_calculator.h"
@@ -87,9 +88,6 @@ public:
 			return m.norm_sync_corr_ < config_.general_.sync_corr_confidence_threshold_ && m.bsic_ == -1;
 		}), gsm_group.end());
 
-		LOG_IF(LCOLLECTION, (gsm_group.size() != 0)) << "GSM processing - Found " << gsm_group.size() << " GSM measurements using a center frequency of " 
-			<< meas.frequency() / 1e6 << "mhz and a bandwidth of " << meas.bandwidth() / 1e6 << "mhz";
-
 		auto pow_2_length = 1 << 17;
 		for(int i = 0; i < 16; ++i) {
 			if(pow_2_length < meas.get_iq().length())
@@ -99,14 +97,17 @@ public:
 		
 		freq_bin_calculator_.calculate_power_in_bins(meas.get_iq(), meas.sampling_rate(), gsm_channel_bandwidth_, pow_2_length);
 
-		auto center_freq = meas.frequency();
-		if(center_freq % khz(200) == 0)
-			center_freq -= khz(100);
+		auto center_freq = meas.frequency() + GSM_PROCESSING_IF;
+		if(center_freq % khz(200) != 0)
+			throw processing_error("GSM center freq is incorrectly centered on a GSM channel.");
 
 		power_info_group p_info_group;
-		for(frequency_type freq = -khz(1500); freq <= khz(1500); freq += gsm_channel_bandwidth_) {
+		for(frequency_type freq = -GSM_LOW_BANDWIDTH_HZ; freq <= GSM_HIGH_BANDWIDTH_HZ; freq += gsm_channel_bandwidth_) {
 			p_info_group.push_back(power_info(center_freq + freq, gsm_channel_bandwidth_, freq_bin_calculator_.get_power_in_bin(freq)));
 		}
+
+		LOG_IF(LCOLLECTION, (gsm_group.size() != 0)) << "GSM processing - Found " << gsm_group.size() << " GSM measurements using a center frequency of "
+			<< meas.frequency() / 1e6 << "mhz and a bandwidth of " << meas.bandwidth() / 1e6 << "mhz";
 
 		return gsm_info(std::move(package), std::move(gsm_group), std::move(p_info_group));
 	}

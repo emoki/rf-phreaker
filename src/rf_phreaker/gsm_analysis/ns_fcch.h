@@ -1,10 +1,7 @@
 #if !defined _NS_FCCH_H
 #define _NS_FCCH_H
 
-
-// TODO: total num freqs is ... ?18-ish?
-#define NUMCARRIERFREQS 19
-
+#include "rf_phreaker/gsm_analysis/gsm_defs.h"
 
 typedef struct _SearchType {
    DATATYPE     peak;

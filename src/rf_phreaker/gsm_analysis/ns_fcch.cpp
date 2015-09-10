@@ -121,6 +121,12 @@ gsm_analysis_output_list* fcch( FCCHStruct *s ) {
 		}
 	}
 
+	// Set freqs we're not interested in processing to something less than RF_PHREAKER_LOWEST_IF.
+	// This corresponds to +-1.5mhz centered around IF = 100khz.
+	carrier_freqs[0] = RF_PHREAKER_LOWEST_IF - 100000000;
+	carrier_freqs[1] = RF_PHREAKER_LOWEST_IF - 100000000;
+	carrier_freqs[NumCarriers - 1] = RF_PHREAKER_LOWEST_IF - 100000000;
+
 	// find strongest fcch peak in power spectrum
 	ps_windows = s->ps_windows;
 	for( i = 0; i < s->num_windows; i++ ) {

@@ -7,6 +7,7 @@
 #include "rf_phreaker/processing/measurement_conversion.h"
 #include "rf_phreaker/processing/processing_and_feedback_helper.h"
 #include "rf_phreaker/common/common_utility.h"
+#include "rf_phreaker/gsm_analysis/gsm_defs.h"
 
 namespace rf_phreaker { namespace processing {
 
@@ -46,8 +47,6 @@ public:
 			if(do_we_add_freq(i.center_frequency_)) {
 				// Add the freq to the layer_3_decoder making sure that we use a center freq that does not represent a true GSM channel.
 				auto freq = calculate_closest_freq(i.center_frequency_, meas.get_operating_band());
-				if(freq % khz(200) == 0)
-					freq -= khz(100);
 				added_freqs_.insert(freq);
 				std::get<0>(out).try_put(add_collection_info(gsm_layer_3_collection_info(freq, meas.get_operating_band(), true), GSM_LAYER_3_DECODE));
 			}
@@ -63,18 +62,22 @@ private:
 		else {
 			auto lesser = greatest_less(added_freqs_, freq);
 			auto greater = added_freqs_.upper_bound(freq);
-			if(lesser != added_freqs_.end() && freq - *lesser <= bandwidth_range_)
+			if(lesser != added_freqs_.end() && freq - *lesser <= low_bandwidth_range_)
 				add = false;
-			else if(greater != added_freqs_.end() && *greater - freq <= bandwidth_range_)
+			else if(greater != added_freqs_.end() && *greater - freq <= high_bandwidth_range_)
 				add = false;
 		}
 		return add;
 	}
 	frequency_type calculate_closest_freq(frequency_type f, operating_band b) {
 		auto end_range = range_specifier_.get_band_freq_range(b);
-		auto new_freq = f + bandwidth_range_;
+		auto new_freq = f + low_bandwidth_range_;
 		if(new_freq > end_range.high_freq_hz_)
-			new_freq = end_range.high_freq_hz_ - bandwidth_range_;
+			new_freq = end_range.high_freq_hz_ - high_bandwidth_range_;
+
+		if(new_freq % khz(200) == 0)
+			new_freq -= khz(100);
+
 		return new_freq;
 	}
 	
@@ -83,7 +86,8 @@ private:
 	processing_and_feedback_helper helper_;
 
 	std::set<frequency_type> added_freqs_;
-	static const bandwidth_type bandwidth_range_ = khz(1500);
+	static const bandwidth_type low_bandwidth_range_ = GSM_LOW_BANDWIDTH_HZ;
+	static const bandwidth_type high_bandwidth_range_ = GSM_HIGH_BANDWIDTH_HZ;
 	operating_band_range_specifier range_specifier_;
 
 	boost::circular_buffer<frequency_type> freq_history_;

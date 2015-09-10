@@ -26,12 +26,11 @@ public:
 			meas_group.clear();
 			gsm_analysis_output_list *head = nullptr;
 
-			uint32_t freq_offset = 0;
-			if(raw_signal.frequency() % 200000 != 0)
-				freq_offset = 100000;
+			if(raw_signal.frequency() % 200000 == 0)
+				throw gsm_analysis_error("Center frequency cannot lie on the center of a GSM channel.");
 
 			auto samples_to_process = raw_signal.get_iq().length();
-			status = processor_.GsmAnalysis(raw_signal.get_iq().get(), samples_to_process, &head, (float)config_.band_pow(), (float)config_.side_pow(), freq_offset);
+			status = processor_.GsmAnalysis(raw_signal.get_iq().get(), samples_to_process, &head, (float)config_.band_pow(), (float)config_.side_pow(), GSM_PROCESSING_IF);
 			if(status != 0)
 				throw gsm_analysis_error(to_string(status));
 
