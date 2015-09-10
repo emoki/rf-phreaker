@@ -125,7 +125,7 @@ int32_t gsm_layer_3_decoder::decode_bcch_message(const uint8_t *bit_stream, uint
 			if(octet.PENALTY_TIME_Present)
 				message.si_3_.selection_parameters_.penalty_time_ = octet.PENALTY_TIME;
 			if(octet.CBQ_Present)
-				message.si_3_.selection_parameters_.cbq_ = octet.CBQ_Present;
+				message.si_3_.selection_parameters_.cbq_ = octet.CBQ;
 			if(octet.TEMPORARY_OFFSET_Present)
 				message.si_3_.selection_parameters_.temporary_offset_ = octet.TEMPORARY_OFFSET;
 
@@ -160,7 +160,7 @@ int32_t gsm_layer_3_decoder::decode_bcch_message(const uint8_t *bit_stream, uint
 			if(octet.PENALTY_TIME_Present)
 				message.si_4_.selection_parameters_.penalty_time_ = octet.PENALTY_TIME;
 			if(octet.CBQ_Present)
-				message.si_4_.selection_parameters_.cbq_ = octet.CBQ_Present;
+				message.si_4_.selection_parameters_.cbq_ = octet.CBQ;
 			if(octet.TEMPORARY_OFFSET_Present)
 				message.si_4_.selection_parameters_.temporary_offset_ = octet.TEMPORARY_OFFSET;
 			
@@ -190,7 +190,7 @@ int32_t gsm_layer_3_decoder::decode_bcch_message(const uint8_t *bit_stream, uint
 			if(octet.PENALTY_TIME_Present)
 				message.si_7_.selection_parameters_.penalty_time_ = octet.PENALTY_TIME;
 			if(octet.CBQ_Present)
-				message.si_7_.selection_parameters_.cbq_ = octet.CBQ_Present;
+				message.si_7_.selection_parameters_.cbq_ = octet.CBQ;
 			if(octet.TEMPORARY_OFFSET_Present)
 				message.si_7_.selection_parameters_.temporary_offset_ = octet.TEMPORARY_OFFSET;
 
@@ -213,7 +213,7 @@ int32_t gsm_layer_3_decoder::decode_bcch_message(const uint8_t *bit_stream, uint
 			if(octet.PENALTY_TIME_Present)
 				message.si_8_.selection_parameters_.penalty_time_ = octet.PENALTY_TIME;
 			if(octet.CBQ_Present)
-				message.si_8_.selection_parameters_.cbq_ = octet.CBQ_Present;
+				message.si_8_.selection_parameters_.cbq_ = octet.CBQ;
 			if(octet.TEMPORARY_OFFSET_Present)
 				message.si_8_.selection_parameters_.temporary_offset_ = octet.TEMPORARY_OFFSET;
 
