@@ -119,7 +119,7 @@ public:
 		}
 
 		for(auto &data : info.processed_data_) {
-			if(!tracker_.is_fully_decoded(data.center_frequency_, data) && (10 * log10(data.c_i_ratio_) > config_.layer_3_.decode_threshold_ || tracker_.in_history(data.center_frequency_, data))) {
+			if(!tracker_.is_fully_decoded(data.center_frequency_, data) && (data.c_i_ratio_ > config_.layer_3_.decode_threshold_ || tracker_.in_history(data.center_frequency_, data))) {
 				if(data.bsic_ == -1) {
 					int status = analysis_.decode_bsic(meas, data);
 					if(status != 0)

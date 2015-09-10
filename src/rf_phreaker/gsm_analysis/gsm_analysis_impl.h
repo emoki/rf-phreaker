@@ -49,7 +49,7 @@ public:
 				meas.side_power_ = row->data.SidePow;
 				meas.rms_corr_power_ = row->data.RMSCorrPower;
 				meas.norm_sync_corr_ = row->data.NormSyncCorr;
-				meas.c_i_ratio_ = row->data.C_I_Ratio;
+				meas.c_i_ratio_ = 10 * log10(row->data.C_I_Ratio);
 				meas.sync_sample_num_ = row->data.SyncSampleNum;
 				meas.bsic_ = -1; row->data.BSIC;// (row->data.BSIC == 0x99 || row->data.NormSyncCorr < .1) ? -1 : std::stoi(hex_conversion::to_string<2>(row->data.BSIC), 0, 10);
 				meas.tdma_frame_number_ = -1;
