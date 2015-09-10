@@ -585,15 +585,13 @@ int GsmSyncProcessor::bsic_analysis(const DATASTRUCT *data, unsigned int datasiz
 	const int BSIC_NumSamplesPad = (int)(s_.nspb*BSIC_BURST_NUM_BITS_PAD);
 	BSICChannelInfoType SyncInfo;
 	BSICDecoderMsgType BSIC_Error;
-	CGIChannelInfoType CGIInfo;
-	CGIDecoderMsgType CGI_Error;
 	if(((meas.sync_sample_num_ + s_.blocksize + BSIC_NumSamplesPad) < datasize)
 		&& ((meas.sync_sample_num_ - BSIC_NumSamplesPad) > 0)) {
 		// ensures all bits in the bit-field are 0 (for easier decoding)
 		*(unsigned int *)(&SyncInfo) = 0;
 		BSIC_Error = BSIC_Decoder_->DecodeBSIC(
 			&(data[meas.sync_sample_num_]),
-			meas.intermediate_frequency_,
+			(int)meas.intermediate_frequency_,
 			&SyncInfo, *sync_correlator_);
 		if(BSIC_Error == BSIC_NO_ERROR) {
 			meas.sync_burst_decoded_ = true;
@@ -628,7 +626,7 @@ int GsmSyncProcessor::bcch_burst_analysis(const DATASTRUCT *data, unsigned int d
 	if(meas.tdma_frame_number_ % 51 == 1 && rf_phreaker_bcch_end < datasize) {
 		CGI_Error = CGI_Decoder_->DecodeCGI(
 			&(data[meas.sync_sample_num_]),
-			meas.intermediate_frequency_,
+			(int)meas.intermediate_frequency_,
 			bsic,
 			&CGIInfo, meas.bcch_octets_);
 		if(CGI_Error == CGI_NO_ERROR) {
@@ -644,7 +642,7 @@ int GsmSyncProcessor::bcch_burst_analysis(const DATASTRUCT *data, unsigned int d
 				if(rf_phreaker_extended_bcch_end <= datasize) {
 					CGI_Error = CGI_Decoder_->DecodeCGI(
 						&data[meas.sync_sample_num_ + sync_to_cgi_end_offset],
-						meas.intermediate_frequency_,
+						(int)meas.intermediate_frequency_,
 						bsic,
 						&CGIInfo, meas.extended_bcch_octets_);
 					if(CGI_Error == CGI_NO_ERROR) {

@@ -305,7 +305,7 @@ gsm_analysis_output_list* fcch( FCCHStruct *s ) {
 				mytmp += s->avg_ps[(k+s->fft_size) % s->fft_size];
 			}
 			//mytmp /= (2 * AvgPow_bw + 1);
-			mytmp /= pow(s->fft_size, 2.0);
+			mytmp = (Ipp32f)(mytmp / pow(s->fft_size, 2.0));
 			current_row->data.ChannelPower = mytmp;
 
 			// store time block where found

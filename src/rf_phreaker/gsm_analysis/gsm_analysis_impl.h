@@ -51,7 +51,7 @@ public:
 				meas.norm_sync_corr_ = row->data.NormSyncCorr;
 				meas.c_i_ratio_ = 10 * log10(row->data.C_I_Ratio);
 				meas.sync_sample_num_ = row->data.SyncSampleNum;
-				meas.bsic_ = -1; row->data.BSIC;// (row->data.BSIC == 0x99 || row->data.NormSyncCorr < .1) ? -1 : std::stoi(hex_conversion::to_string<2>(row->data.BSIC), 0, 10);
+				meas.bsic_ = -1; 
 				meas.tdma_frame_number_ = -1;
 				meas.sync_burst_decoded_ = (row->data.MeasurementInfo & SyncBurstDecoded) == SyncBurstDecoded;
 				meas.cgi_decoded_ = (row->data.MeasurementInfo & CGIDecoded) == CGIDecoded;
