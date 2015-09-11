@@ -191,7 +191,7 @@ inline std::ostream& header(std::ostream &os, const gsm_si_2quater &t) {
 		<< "si_2quater_utran_neighbor_cell_start_index" << main_delim
 		<< "si_2quater_utran_neighbor_cell_absolute_start_emr" << main_delim
 		<< "si_2quater_utran_neighbors [uarfcn : duplex : bandwidth : [scrambling_codes]]" << main_delim
-		<< "si_2quater_eutran_neighbors [earfcn : bandwidth : priority : threshold_high : threshold_low : qrxlevmin : [allowed_pcids] [not_allowed_pcids] [same_tracking_area groups][different_tracking_area_groups]]" << main_delim
+		<< "si_2quater_eutran_neighbors [earfcn : bandwidth : priority : threshold_high_db : threshold_low_db : qrxlevmin_db : [allowed_pcids] [not_allowed_pcids] [same_tracking_area groups][different_tracking_area_groups]]" << main_delim
 		<< "si_2quater_extended_eutran_nieghbors [earfcn]";
 	return os;
 }
@@ -238,7 +238,7 @@ inline std::ostream& operator<<(std::ostream &os, const gsm_si_2quater &t) {
 	os << begin_delim;
 	for(auto &i : t.eutran_neighbors_) {
 		os << i.earfcn_ << spacer2 << i.bandwidth_ << spacer2 << i.priority_ << spacer2
-			<< i.threshold_high_ << spacer2 << i.threshold_low_ << spacer2 << i.qrxlevmin_ << spacer;
+			<< i.threshold_high_db_ << spacer2 << i.threshold_low_db_ << spacer2 << i.qrxlevmin_db_ << spacer;
 		os << begin_delim;
 		for(auto &j : i.pcids_allowed_)
 			os << j << spacer;
@@ -300,8 +300,8 @@ inline std::ostream& operator<<(std::ostream &os, const gsm_si_3 &t) {
 		<< t.cell_reselect_hysteresis_db_ << main_delim
 		<< t.selection_parameters_.cbq_ << main_delim
 		<< t.selection_parameters_.cell_reselect_offset_db_ << main_delim
-		<< t.selection_parameters_.temporary_offset_ << main_delim
-		<< t.selection_parameters_.penalty_time_ << main_delim
+		<< t.selection_parameters_.temporary_offset_db_ << main_delim
+		<< t.selection_parameters_.penalty_time_seconds_ << main_delim
 		<< t.is_2ter_present_ << main_delim
 		<< t.is_2quater_present_ << main_delim
 		<< t.bs_ag_blks_res_;
@@ -335,8 +335,8 @@ inline std::ostream& operator<<(std::ostream &os, const gsm_si_4 &t) {
 		<< t.cell_reselect_hysteresis_db_ << main_delim
 		<< t.selection_parameters_.cbq_ << main_delim
 		<< t.selection_parameters_.cell_reselect_offset_db_ << main_delim
-		<< t.selection_parameters_.temporary_offset_ << main_delim
-		<< t.selection_parameters_.penalty_time_ << main_delim
+		<< t.selection_parameters_.temporary_offset_db_ << main_delim
+		<< t.selection_parameters_.penalty_time_seconds_ << main_delim
 		<< t.is_cbch_present_ << main_delim
 		<< t.have_additional_param_in_si7_si8_;
 	return os;
@@ -363,8 +363,8 @@ inline std::ostream& operator<<(std::ostream &os, const gsm_si_7 &t) {
 		<< t.cell_id_ << main_delim
 		<< t.selection_parameters_.cbq_ << main_delim
 		<< t.selection_parameters_.cell_reselect_offset_db_ << main_delim
-		<< t.selection_parameters_.temporary_offset_ << main_delim
-		<< t.selection_parameters_.penalty_time_;
+		<< t.selection_parameters_.temporary_offset_db_ << main_delim
+		<< t.selection_parameters_.penalty_time_seconds_;
 	return os;
 }
 
@@ -389,8 +389,8 @@ inline std::ostream& operator<<(std::ostream &os, const gsm_si_8 &t) {
 		<< t.cell_id_ << main_delim
 		<< t.selection_parameters_.cbq_ << main_delim
 		<< t.selection_parameters_.cell_reselect_offset_db_ << main_delim
-		<< t.selection_parameters_.temporary_offset_ << main_delim
-		<< t.selection_parameters_.penalty_time_;
+		<< t.selection_parameters_.temporary_offset_db_ << main_delim
+		<< t.selection_parameters_.penalty_time_seconds_;
 	return os;
 }
 

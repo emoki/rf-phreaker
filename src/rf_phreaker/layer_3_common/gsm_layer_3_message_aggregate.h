@@ -158,9 +158,9 @@ struct eutran_neighbor {
 	int32_t earfcn_;
 	eutran_bandwidth_type bandwidth_;
 	int32_t priority_;
-	int32_t threshold_high_;
-	int32_t threshold_low_; // if not present, it takes the same value as high_;
-	int32_t qrxlevmin_;
+	int32_t threshold_high_db_; // actual range 0-31 (0, 2, 4, 6,...,62db)
+	int32_t threshold_low_db_; // if not present, it takes the same value as high_;
+	int32_t qrxlevmin_db_; // actual range = 0-31 (-140, -138,..., -78db)) 
 	std::vector<int32_t> pcids_allowed_;
 	std::vector<int32_t> pcids_not_allowed_;
 	std::vector<std::vector<int32_t>> pcids_same_tracking_area_;
@@ -220,14 +220,18 @@ struct gsm_si_2n : public gsm_si_base {
 
 struct selection_parameters {
 	int32_t cbq_;
-	int32_t cell_reselect_offset_db_;
-	int32_t temporary_offset_;
-	int32_t penalty_time_;
+	int32_t cell_reselect_offset_db_; // actual range = 0-63 (0, 2, 4,...,126db)
+	int32_t temporary_offset_db_; // actual range = 0-7 (0, 10, 20,...,60db, infinity)
+	int32_t penalty_time_seconds_; // actual range = 0-31 (20, 40, 60,...,620 seconds)
+	bool subtract_reselect_cell_offset_ignore_temp_offset_;
+	bool apply_infinity_offset_;
 	void clear() {
-		cbq_ = INT_FAST32_MIN;
-		cell_reselect_offset_db_ = INT_FAST32_MIN;
-		temporary_offset_ = INT_FAST32_MIN;
-		penalty_time_ = INT_FAST32_MIN;
+		cbq_ = -1;
+		cell_reselect_offset_db_ = -1;
+		temporary_offset_db_ = -1;
+		penalty_time_seconds_ = -1;
+		subtract_reselect_cell_offset_ignore_temp_offset_ = false;
+		apply_infinity_offset_ = false;
 	}
 };
 

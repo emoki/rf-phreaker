@@ -523,9 +523,9 @@ public:
 			}
 
 			e.priority_ = i.priority_;
-			e.threshold_high_ = i.threshold_high_;
-			e.threshold_low_ = i.threshold_low_;
-			e.qrxlevmin_ = i.qrxlevmin_;
+			e.threshold_high_db_ = i.threshold_high_db_;
+			e.threshold_low_db_ = i.threshold_low_db_;
+			e.qrxlevmin_db_ = i.qrxlevmin_db_;
 
 			eutran_.push_back(e);
 		}

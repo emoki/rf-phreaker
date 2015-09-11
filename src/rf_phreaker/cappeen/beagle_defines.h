@@ -271,9 +271,9 @@ namespace beagle_api
 		channel_type earfcn_;
 		int32_t bandwidth_in_resource_blocks_;
 		int32_t priority_;
-		int32_t threshold_high_;
-		int32_t threshold_low_; 
-		int32_t qrxlevmin_;
+		int32_t threshold_high_db_;
+		int32_t threshold_low_db_;
+		int32_t qrxlevmin_db_;
 		gsm_pcid_group pcids_not_allowed_;
 		gsm_pcid_group pcids_allowed_;
 		gsm_pcid_groups pcids_same_tracking_area_;

@@ -504,9 +504,9 @@ TEST(RfPhreakerWrappers, GsmSib2quater) {
 		}
 
 		e.priority_ = tmp++;
-		e.threshold_high_ = tmp++;
-		e.threshold_low_ = tmp++;
-		e.qrxlevmin_ = tmp++;
+		e.threshold_high_db_ = tmp++;
+		e.threshold_low_db_ = tmp++;
+		e.qrxlevmin_db_ = tmp++;
 
 		si.eutran_neighbors_.push_back(e);
 	}
@@ -577,9 +577,9 @@ TEST(RfPhreakerWrappers, GsmSib2quater) {
 		}
 
 		ASSERT_EQ(e.priority_, t.priority_);
-		ASSERT_EQ(e.threshold_high_, t.threshold_high_);
-		ASSERT_EQ(e.threshold_low_, t.threshold_low_);
-		ASSERT_EQ(e.qrxlevmin_, t.qrxlevmin_);
+		ASSERT_EQ(e.threshold_high_db_, t.threshold_high_db_);
+		ASSERT_EQ(e.threshold_low_db_, t.threshold_low_db_);
+		ASSERT_EQ(e.qrxlevmin_db_, t.qrxlevmin_db_);
 	}
 
 	ASSERT_EQ(si.extended_eutran_neighbors_.size(), w.s_.extended_earfcns_.num_elements_);

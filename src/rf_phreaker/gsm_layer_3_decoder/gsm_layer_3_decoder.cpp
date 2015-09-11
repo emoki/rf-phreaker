@@ -122,13 +122,28 @@ int32_t gsm_layer_3_decoder::decode_bcch_message(const uint8_t *bit_stream, uint
 			auto octet = si3->Si3RestOctets;
 			if(octet.CELL_RESELECT_OFFSET_Present)
 				message.si_3_.selection_parameters_.cell_reselect_offset_db_ = octet.CELL_RESELECT_OFFSET * 2;
-			if(octet.PENALTY_TIME_Present)
-				message.si_3_.selection_parameters_.penalty_time_ = octet.PENALTY_TIME;
+			if(octet.PENALTY_TIME_Present) {
+				if(octet.PENALTY_TIME != 31) {
+					message.si_3_.selection_parameters_.penalty_time_seconds_ = octet.PENALTY_TIME * 20 + 20;
+					message.si_3_.selection_parameters_.subtract_reselect_cell_offset_ignore_temp_offset_ = false;
+				}
+				else {
+					message.si_3_.selection_parameters_.penalty_time_seconds_ = -1;
+					message.si_3_.selection_parameters_.subtract_reselect_cell_offset_ignore_temp_offset_ = true;
+				}
+			}
 			if(octet.CBQ_Present)
 				message.si_3_.selection_parameters_.cbq_ = octet.CBQ;
-			if(octet.TEMPORARY_OFFSET_Present)
-				message.si_3_.selection_parameters_.temporary_offset_ = octet.TEMPORARY_OFFSET;
-
+			if(octet.TEMPORARY_OFFSET_Present) {
+				if(octet.TEMPORARY_OFFSET != 7) {
+					message.si_3_.selection_parameters_.temporary_offset_db_ = octet.TEMPORARY_OFFSET * 10;
+					message.si_3_.selection_parameters_.apply_infinity_offset_ = false;
+				}
+				else {
+						message.si_3_.selection_parameters_.temporary_offset_db_ = -1;
+						message.si_3_.selection_parameters_.apply_infinity_offset_ = true;
+				}
+			}
 			message.si_3_.is_2ter_present_ = octet.System_Information_2ter_Present == 1;
 			
 			message.si_3_.is_2quater_present_ = octet.SI2quater_Indicator_Present == 1;
@@ -157,13 +172,28 @@ int32_t gsm_layer_3_decoder::decode_bcch_message(const uint8_t *bit_stream, uint
 			auto octet = si4->Si4RestOctets;
 			if(octet.CELL_RESELECT_OFFSET_Present)
 				message.si_4_.selection_parameters_.cell_reselect_offset_db_ = octet.CELL_RESELECT_OFFSET * 2;
-			if(octet.PENALTY_TIME_Present)
-				message.si_4_.selection_parameters_.penalty_time_ = octet.PENALTY_TIME;
+			if(octet.PENALTY_TIME_Present) {
+				if(octet.PENALTY_TIME != 31) {
+					message.si_4_.selection_parameters_.penalty_time_seconds_ = octet.PENALTY_TIME * 20 + 20;
+					message.si_4_.selection_parameters_.subtract_reselect_cell_offset_ignore_temp_offset_ = false;
+				}
+				else {
+					message.si_4_.selection_parameters_.penalty_time_seconds_ = -1;
+					message.si_4_.selection_parameters_.subtract_reselect_cell_offset_ignore_temp_offset_ = true;
+				}
+			}
 			if(octet.CBQ_Present)
 				message.si_4_.selection_parameters_.cbq_ = octet.CBQ;
-			if(octet.TEMPORARY_OFFSET_Present)
-				message.si_4_.selection_parameters_.temporary_offset_ = octet.TEMPORARY_OFFSET;
-			
+			if(octet.TEMPORARY_OFFSET_Present) {
+				if(octet.TEMPORARY_OFFSET != 7) {
+					message.si_4_.selection_parameters_.temporary_offset_db_ = octet.TEMPORARY_OFFSET * 10;
+					message.si_4_.selection_parameters_.apply_infinity_offset_ = false;
+				}
+				else {
+					message.si_4_.selection_parameters_.temporary_offset_db_ = -1;
+					message.si_4_.selection_parameters_.apply_infinity_offset_ = true;
+				}
+			}
 			if(octet.Cell_Identity_Present)
 				message.si_4_.cell_id_ = octet.Cell_Identity;
 
@@ -187,13 +217,28 @@ int32_t gsm_layer_3_decoder::decode_bcch_message(const uint8_t *bit_stream, uint
 
 			if(octet.CELL_RESELECT_OFFSET_Present)
 				message.si_7_.selection_parameters_.cell_reselect_offset_db_ = octet.CELL_RESELECT_OFFSET * 2;
-			if(octet.PENALTY_TIME_Present)
-				message.si_7_.selection_parameters_.penalty_time_ = octet.PENALTY_TIME;
+			if(octet.PENALTY_TIME_Present) {
+				if(octet.PENALTY_TIME != 31) {
+					message.si_7_.selection_parameters_.penalty_time_seconds_ = octet.PENALTY_TIME * 20 + 20;
+					message.si_7_.selection_parameters_.subtract_reselect_cell_offset_ignore_temp_offset_ = false;
+				}
+				else {
+					message.si_7_.selection_parameters_.penalty_time_seconds_ = -1;
+					message.si_7_.selection_parameters_.subtract_reselect_cell_offset_ignore_temp_offset_ = true;
+				}
+			}
 			if(octet.CBQ_Present)
 				message.si_7_.selection_parameters_.cbq_ = octet.CBQ;
-			if(octet.TEMPORARY_OFFSET_Present)
-				message.si_7_.selection_parameters_.temporary_offset_ = octet.TEMPORARY_OFFSET;
-
+			if(octet.TEMPORARY_OFFSET_Present) {
+				if(octet.TEMPORARY_OFFSET != 7) {
+					message.si_7_.selection_parameters_.temporary_offset_db_ = octet.TEMPORARY_OFFSET * 10;
+					message.si_7_.selection_parameters_.apply_infinity_offset_ = false;
+				}
+				else {
+					message.si_7_.selection_parameters_.temporary_offset_db_ = -1;
+					message.si_7_.selection_parameters_.apply_infinity_offset_ = true;
+				}
+			}
 			if(octet.Cell_Identity_Present)
 				message.si_7_.cell_id_ = octet.Cell_Identity;
 
@@ -210,13 +255,28 @@ int32_t gsm_layer_3_decoder::decode_bcch_message(const uint8_t *bit_stream, uint
 
 			if(octet.CELL_RESELECT_OFFSET_Present)
 				message.si_8_.selection_parameters_.cell_reselect_offset_db_ = octet.CELL_RESELECT_OFFSET * 2;
-			if(octet.PENALTY_TIME_Present)
-				message.si_8_.selection_parameters_.penalty_time_ = octet.PENALTY_TIME;
+			if(octet.PENALTY_TIME_Present) {
+				if(octet.PENALTY_TIME != 31) {
+					message.si_8_.selection_parameters_.penalty_time_seconds_ = octet.PENALTY_TIME * 20 + 20;
+					message.si_8_.selection_parameters_.subtract_reselect_cell_offset_ignore_temp_offset_ = false;
+				}
+				else {
+					message.si_8_.selection_parameters_.penalty_time_seconds_ = -1;
+					message.si_8_.selection_parameters_.subtract_reselect_cell_offset_ignore_temp_offset_ = true;
+				}
+			}
 			if(octet.CBQ_Present)
 				message.si_8_.selection_parameters_.cbq_ = octet.CBQ;
-			if(octet.TEMPORARY_OFFSET_Present)
-				message.si_8_.selection_parameters_.temporary_offset_ = octet.TEMPORARY_OFFSET;
-
+			if(octet.TEMPORARY_OFFSET_Present) {
+				if(octet.TEMPORARY_OFFSET != 7) {
+					message.si_8_.selection_parameters_.temporary_offset_db_ = octet.TEMPORARY_OFFSET * 10;
+					message.si_8_.selection_parameters_.apply_infinity_offset_ = false;
+				}
+				else {
+					message.si_8_.selection_parameters_.temporary_offset_db_ = -1;
+					message.si_8_.selection_parameters_.apply_infinity_offset_ = true;
+				}
+			}
 			if(octet.Cell_Identity_Present)
 				message.si_8_.cell_id_ = octet.Cell_Identity;
 
