@@ -343,8 +343,7 @@ void blade_rf_controller::enable_intermittent_streaming_rx() {
 void blade_rf_controller::disable_blade_rx()
 {
 	std::lock_guard<std::mutex> lock(rx_mutex_);
-	is_streaming_ = NOT_STREAMING;
-
+	stop_streaming();
 	check_blade_comm();
 	check_blade_status(nr_enable_module(comm_blade_rf_->blade_rf(),
 		BLADERF_MODULE_RX,
