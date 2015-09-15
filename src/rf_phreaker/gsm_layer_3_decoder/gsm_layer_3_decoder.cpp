@@ -205,9 +205,6 @@ int32_t gsm_layer_3_decoder::decode_bcch_message(const uint8_t *bit_stream, uint
 			if(octet.MNC_Present)
 				message.si_4_.plmn_.mnc_ = octet.MNC;
 
-			if(octet.Cell_Identity_Present)
-				message.si_4_.cell_id_ = octet.Cell_Identity;
-
 			message.si_4_.have_additional_param_in_si7_si8_ = octet.Break_Indicator_Present != 0;
 		} break;
 
