@@ -74,7 +74,7 @@ public:
 
 		//if(config_.gsm_config_.preform_sync_correlations()) {
 		//	for(auto &i : gsm_group) {
-		//		if(i.norm_sync_corr_ > config_.general_.sync_corr_confidence_threshold_) {
+		//		if(i.c_i_ratio_ > config_.general_.c_i_ratio_confidence_threshold_) {
 		//			status = analysis_.decode_bsic(meas, i);
 		//			if(status != 0)
 		//				throw gsm_analysis_error("Error decoding gsm bsic.");
@@ -85,7 +85,7 @@ public:
 		// Remove any measurements that are lower than are confidence threshold.  Note we should always keep measurements
 		// that have a BSIC decoded.
 		gsm_group.erase(std::remove_if(gsm_group.begin(), gsm_group.end(), [&](const gsm_measurement& m) {
-			return m.norm_sync_corr_ < config_.general_.sync_corr_confidence_threshold_ && m.bsic_ == -1;
+			return m.c_i_ratio_ < config_.general_.c_i_ratio_confidence_threshold_ && m.bsic_ == -1;
 		}), gsm_group.end());
 
 		auto pow_2_length = 1 << 17;

@@ -104,12 +104,12 @@ TEST(QtSpecific, TestSettingsIO)
 	EXPECT_EQ(settings_gsm_general_side_power_threshold_default, set.gsm_sweep_general_.side_power_threshold_);
 	EXPECT_EQ(settings_gsm_general_band_power_threshold_default, set.gsm_sweep_general_.band_power_threshold_);
 	EXPECT_EQ(settings_gsm_general_perform_sync_correlations_default, set.gsm_sweep_general_.perform_sync_correlations_);
-	EXPECT_EQ(settings_gsm_general_sync_corr_confidence_threshold_default, set.gsm_sweep_general_.sync_corr_confidence_threshold_);
+	EXPECT_EQ(settings_gsm_general_c_i_ratio_confidence_threshold_default, set.gsm_sweep_general_.c_i_ratio_confidence_threshold_);
 
 	EXPECT_EQ(settings_gsm_general_side_power_threshold_default, set.gsm_layer_3_general_.side_power_threshold_);
 	EXPECT_EQ(settings_gsm_general_band_power_threshold_default, set.gsm_layer_3_general_.band_power_threshold_);
 	EXPECT_EQ(settings_gsm_general_perform_sync_correlations_default, set.gsm_layer_3_general_.perform_sync_correlations_);
-	EXPECT_EQ(settings_gsm_general_sync_corr_confidence_threshold_default, set.gsm_layer_3_general_.sync_corr_confidence_threshold_);
+	EXPECT_EQ(settings_gsm_general_c_i_ratio_confidence_threshold_default, set.gsm_layer_3_general_.c_i_ratio_confidence_threshold_);
 
 	EXPECT_EQ(settings_umts_general_sensitivity_default, set.umts_sweep_general_.sensitivity_);
 	EXPECT_EQ(settings_umts_general_full_scan_interval_default, set.umts_sweep_general_.full_scan_interval_);
@@ -256,11 +256,11 @@ TEST(QtSpecific, TestSettingsIO)
 	set.gsm_sweep_general_.side_power_threshold_ = tmp++;
 	set.gsm_sweep_general_.band_power_threshold_ = tmp++;
 	set.gsm_sweep_general_.perform_sync_correlations_ = false;
-	set.gsm_sweep_general_.sync_corr_confidence_threshold_ = tmp++;
+	set.gsm_sweep_general_.c_i_ratio_confidence_threshold_ = tmp++;
 	set.gsm_layer_3_general_.side_power_threshold_ = tmp++;
 	set.gsm_layer_3_general_.band_power_threshold_ = tmp++;
 	set.gsm_layer_3_general_.perform_sync_correlations_ = false;
-	set.gsm_layer_3_general_.sync_corr_confidence_threshold_ = tmp++;
+	set.gsm_layer_3_general_.c_i_ratio_confidence_threshold_ = tmp++;
 	set.umts_sweep_general_.sensitivity_ = tmp++;
 	set.umts_sweep_general_.full_scan_interval_ = tmp++;
 	set.umts_sweep_general_.num_coherent_slots_ = tmp++;
@@ -401,12 +401,12 @@ TEST(QtSpecific, TestSettingsIO)
 	EXPECT_EQ(set.gsm_sweep_general_.side_power_threshold_, set2.gsm_sweep_general_.side_power_threshold_);
 	EXPECT_EQ(set.gsm_sweep_general_.band_power_threshold_, set2.gsm_sweep_general_.band_power_threshold_);
 	EXPECT_EQ(set.gsm_sweep_general_.perform_sync_correlations_, set2.gsm_sweep_general_.perform_sync_correlations_);
-	EXPECT_EQ(set.gsm_sweep_general_.sync_corr_confidence_threshold_, set2.gsm_sweep_general_.sync_corr_confidence_threshold_);
+	EXPECT_EQ(set.gsm_sweep_general_.c_i_ratio_confidence_threshold_, set2.gsm_sweep_general_.c_i_ratio_confidence_threshold_);
 
 	EXPECT_EQ(set.gsm_layer_3_general_.side_power_threshold_, set2.gsm_layer_3_general_.side_power_threshold_);
 	EXPECT_EQ(set.gsm_layer_3_general_.band_power_threshold_, set2.gsm_layer_3_general_.band_power_threshold_);
 	EXPECT_EQ(set.gsm_layer_3_general_.perform_sync_correlations_, set2.gsm_layer_3_general_.perform_sync_correlations_);
-	EXPECT_EQ(set.gsm_layer_3_general_.sync_corr_confidence_threshold_, set2.gsm_layer_3_general_.sync_corr_confidence_threshold_);
+	EXPECT_EQ(set.gsm_layer_3_general_.c_i_ratio_confidence_threshold_, set2.gsm_layer_3_general_.c_i_ratio_confidence_threshold_);
 
 	EXPECT_EQ(set.umts_sweep_general_.sensitivity_, set2.umts_sweep_general_.sensitivity_);
 	EXPECT_EQ(set.umts_sweep_general_.full_scan_interval_, set2.umts_sweep_general_.full_scan_interval_);

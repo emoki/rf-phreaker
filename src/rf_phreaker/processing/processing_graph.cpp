@@ -42,12 +42,12 @@ void processing_graph::start(scanner_controller_interface *sc, data_output_async
 			LOG(LINFO) << "gsm sweep collection settings: " << config.gsm_sweep_collection_.sampling_rate_ << ", " << config.gsm_sweep_collection_.bandwidth_ << ", "
 				<< config.gsm_sweep_collection_.collection_time_ << ".";
 			LOG(LINFO) << "gsm sweep general settings: " << config.gsm_sweep_general_.band_power_threshold_ << ", " << config.gsm_sweep_general_.side_power_threshold_ << ", "
-				<< config.gsm_sweep_general_.perform_sync_correlations_ << ", " << config.gsm_sweep_general_.sync_corr_confidence_threshold_ << ".";
+				<< config.gsm_sweep_general_.perform_sync_correlations_ << ", " << config.gsm_sweep_general_.c_i_ratio_confidence_threshold_ << ".";
 
 			LOG(LINFO) << "gsm layer 3 collection settings: " << config.gsm_layer_3_collection_.sampling_rate_ << ", " << config.gsm_layer_3_collection_.bandwidth_ << ", "
 				<< config.gsm_layer_3_collection_.collection_time_ << ".";
 			LOG(LINFO) << "gsm layer 3 general settings: " << config.gsm_layer_3_general_.band_power_threshold_ << ", " << config.gsm_layer_3_general_.side_power_threshold_ << ", "
-				<< config.gsm_layer_3_general_.perform_sync_correlations_ << ", " << config.gsm_layer_3_general_.sync_corr_confidence_threshold_ << ".";
+				<< config.gsm_layer_3_general_.perform_sync_correlations_ << ", " << config.gsm_layer_3_general_.c_i_ratio_confidence_threshold_ << ".";
 			LOG(LINFO) << "gsm layer 3 decode settings: " << config.gsm_layer_3_decode_.max_update_threshold_ << ", " << config.gsm_layer_3_decode_.minimum_collection_round_ << ", "
 				<< config.gsm_layer_3_decode_.decode_threshold_ << ", " << config.gsm_layer_3_decode_.decode_minimum_threshold_ << ", " << config.gsm_layer_3_decode_.minimum_decode_count_ << ", "
 				<< config.gsm_layer_3_decode_.should_prioritize_layer_3_ << ".";

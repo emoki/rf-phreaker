@@ -45,7 +45,7 @@ static const bool log_collection_default = false;
 static const int settings_gsm_general_side_power_threshold_default = 5;
 static const int settings_gsm_general_band_power_threshold_default = 25;
 static const bool settings_gsm_general_perform_sync_correlations_default = true;
-static const double settings_gsm_general_sync_corr_confidence_threshold_default = .7;
+static const double settings_gsm_general_c_i_ratio_confidence_threshold_default = -5;
 
 class output_settings {
 public:
@@ -96,7 +96,7 @@ public:
 	double side_power_threshold_;
 	double band_power_threshold_;
 	bool perform_sync_correlations_;
-	double sync_corr_confidence_threshold_;
+	double c_i_ratio_confidence_threshold_;
 };
 
 class frequency_correction_settings {

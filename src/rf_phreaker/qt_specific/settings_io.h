@@ -81,7 +81,7 @@ static const std::string log_collection_key = "log_collection";
 static const std::string gsm_band_power_threshold_key = "band_power_threshold";
 static const std::string gsm_side_power_threshold_key = "side_power_threshold";
 static const std::string gsm_perform_sync_correlations_key = "perform_sync_correlations";
-static const std::string gsm_sync_corr_confidence_threshold_key = "sync_corr_confidence_threshold";
+static const std::string gsm_c_i_ratio_confidence_threshold_key = "c_i_ratio_confidence_threshold";
 
 class settings_io {
 public:

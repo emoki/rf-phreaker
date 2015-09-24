@@ -138,7 +138,7 @@ void settings_io::read(gsm_general_settings &settings, const std::string &group_
 	settings.side_power_threshold_ = qsettings_->value(gsm_side_power_threshold_key.c_str(), settings_gsm_general_side_power_threshold_default).toDouble();
 	settings.band_power_threshold_ = qsettings_->value(gsm_band_power_threshold_key.c_str(), settings_gsm_general_band_power_threshold_default).toDouble();
 	settings.perform_sync_correlations_ = qsettings_->value(gsm_perform_sync_correlations_key.c_str(), settings_gsm_general_perform_sync_correlations_default).toBool();
-	settings.sync_corr_confidence_threshold_ = qsettings_->value(gsm_sync_corr_confidence_threshold_key.c_str(), settings_gsm_general_sync_corr_confidence_threshold_default).toDouble();
+	settings.c_i_ratio_confidence_threshold_ = qsettings_->value(gsm_c_i_ratio_confidence_threshold_key.c_str(), settings_gsm_general_c_i_ratio_confidence_threshold_default).toDouble();
 	qsettings_->endGroup();
 }
 
@@ -285,7 +285,7 @@ void settings_io::write(const gsm_general_settings &settings, const std::string 
 	qsettings_->setValue(gsm_side_power_threshold_key.c_str(), settings.side_power_threshold_);
 	qsettings_->setValue(gsm_band_power_threshold_key.c_str(), settings.band_power_threshold_);
 	qsettings_->setValue(gsm_perform_sync_correlations_key.c_str(), settings.perform_sync_correlations_);
-	qsettings_->setValue(gsm_sync_corr_confidence_threshold_key.c_str(), settings.sync_corr_confidence_threshold_);
+	qsettings_->setValue(gsm_c_i_ratio_confidence_threshold_key.c_str(), settings.c_i_ratio_confidence_threshold_);
 	qsettings_->endGroup();
 }
 
