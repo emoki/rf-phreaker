@@ -224,7 +224,7 @@ public:
 			neighbors.push_back(orig);
 			for(int i = 0; i < cell_des.u.Variable->RRFCN.items; ++i) {
 				if(cell_des.u.Variable->RRFCN.data[i])
-					neighbors.push_back((cell_des.u.Variable->OrigARFCN + i % 1024));
+					neighbors.push_back((cell_des.u.Variable->OrigARFCN + i + 1) % 1024);
 			}
 		}
 									   break;
