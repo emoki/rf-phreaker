@@ -29,6 +29,8 @@ public:
 		case U_c_CellChannel_Range1024: {
 			auto w = cell_des.u.Range1024->W.data;
 			auto count = 0;
+			if(cell_des.u.Range1024->F0)
+				neighbors.push_back(0);
 			if(count++ < cell_des.u.Range1024->W.items && w[0])
 				neighbors.push_back(w[0]);
 			if(count++ < cell_des.u.Range1024->W.items && w[1])
