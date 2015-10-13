@@ -289,8 +289,9 @@ int32_t gsm_layer_3_decoder::decode_bcch_message(const uint8_t *bit_stream, uint
 		break;
 
 		default:
-		{ data.Type; };
-		}
+			{ data.Type; };
+		}	
+		FREE_TRRPLENDownlink_Data(&data);
 	}
 	catch(const std::exception &err)
 	{
