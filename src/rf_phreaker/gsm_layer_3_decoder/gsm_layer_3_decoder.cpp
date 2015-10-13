@@ -12,7 +12,7 @@
 using namespace layer_3_information;
 
 gsm_layer_3_decoder::gsm_layer_3_decoder()
-	: debug_(true) {}
+	: debug_(false) {}
 
 gsm_layer_3_decoder::~gsm_layer_3_decoder() {}
 
@@ -24,10 +24,10 @@ int32_t gsm_layer_3_decoder::decode_bcch_message(const uint8_t *bit_stream, uint
 	{
 		gsm_bit_stream bits(bit_stream, num_of_bytes, unused_bits);
 
-		//if(debug_) {
-		//	static std::ofstream debug("gsm_bitstreams.txt", std::ios::app);
-		//	debug << bits << std::endl;
-		//}
+		if(debug_) {
+			static std::ofstream debug("gsm_bit_streams.txt", std::ios::app);
+			debug << bits << std::endl;
+		}
 
 		TRRPLENDownlink_Data data;
 		INIT_TRRPLENDownlink_Data(&data);
