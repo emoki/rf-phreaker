@@ -23,7 +23,7 @@ public:
 		case U_c_CellChannel_BitMap0:
 			for(int i = 0; i < cell_des.u.BitMap0->items; ++i) {
 				if(cell_des.u.BitMap0->data[i])
-					neighbors.push_back(-(i - 124));
+					neighbors.push_back(i + 1);
 			}
 			break;
 		case U_c_CellChannel_Range1024: {
