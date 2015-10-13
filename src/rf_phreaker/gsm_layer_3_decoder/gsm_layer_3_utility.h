@@ -67,6 +67,7 @@ public:
 										break;
 		case U_c_CellChannel_Range512: {
 			auto orig = cell_des.u.Range512->OrigARFCN;
+			neighbors.push_back(orig);
 			auto w = cell_des.u.Range512->W.data;
 			auto count = 0;
 			if(count++ < cell_des.u.Range512->W.items && w[0])
@@ -108,6 +109,7 @@ public:
 									   break;
 		case U_c_CellChannel_Range256: {
 			auto orig = cell_des.u.Range256->OrigARFCN;
+			neighbors.push_back(orig);
 			auto w = cell_des.u.Range256->W.data;
 			auto count = 0;
 			if(count++ < cell_des.u.Range256->W.items && w[0])
@@ -156,6 +158,7 @@ public:
 									   break;
 		case U_c_CellChannel_Range128: {
 			auto orig = cell_des.u.Range128->OrigARFCN;
+			neighbors.push_back(orig);
 			auto w = cell_des.u.Range128->W.data;
 			auto count = 0;
 			if(count++ < cell_des.u.Range128->W.items && w[0])
@@ -217,6 +220,8 @@ public:
 		}
 									   break;
 		case U_c_CellChannel_Variable: {
+			auto orig = cell_des.u.Variable->OrigARFCN;
+			neighbors.push_back(orig);
 			for(int i = 0; i < cell_des.u.Variable->RRFCN.items; ++i) {
 				if(cell_des.u.Variable->RRFCN.data[i])
 					neighbors.push_back((cell_des.u.Variable->OrigARFCN + i % 1024));
