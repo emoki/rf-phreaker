@@ -50,8 +50,8 @@ class cappeen_delegate
 public:
 	cappeen_delegate(beagle_api::beagle_delegate *del)
 		: delegate_(del)
-		, gsm_layer_3_count_(1)
-		, gsm_layer_3_interval_(0) {
+		, collection_round_history_(-1)
+		, gsm_layer_3_interval_(1) {
 		if(del == nullptr)
 			throw rf_phreaker::cappeen_api_error("Beagle delegate is NULL.", beagle_api::BEAGLEUNABLETOINITIALIZE);
 
@@ -176,7 +176,7 @@ public:
 			}
 		}
 
-		if(should_output_gsm_layer_3())
+		if(should_output_gsm_layer_3(t.empty() ? -1 : t[0].collection_round_))
 			output_gsm_layer_3();
 	}
 
@@ -262,8 +262,11 @@ public:
 		delegate_->available_gsm_sector_info(beagle_info_.beagle_id_, &v, 1);
 	}
 
-	bool should_output_gsm_layer_3() {
-		return gsm_layer_3_count_++ % gsm_layer_3_interval_ == 0;
+	bool should_output_gsm_layer_3(int64_t cr = -1) {
+		bool output = (cr != -1 && cr < collection_round_history_) || cr % gsm_layer_3_interval_ == 0;
+		if(cr != -1)
+			collection_round_history_ = cr;
+		return output;
 	}
 
 	void output_umts_sweep(const basic_data &t, const std::vector<umts_data> &) {
@@ -584,7 +587,7 @@ public:
 
 	void clear_buffers_and_counts() {
 		gsm_layer_3_buffer_.clear();
-		gsm_layer_3_count_ = 1;
+		collection_round_history_ = -1;
 	}
 	int64_t gsm_layer_3_interval_;
 
@@ -604,7 +607,7 @@ private:
 	processing::frequency_correction_graph *frequency_correction_graph_;
 
 	std::map<int64_t, gsm_data> gsm_layer_3_buffer_;
-	int64_t gsm_layer_3_count_;
+	int64_t collection_round_history_;
 };
 
 }}
