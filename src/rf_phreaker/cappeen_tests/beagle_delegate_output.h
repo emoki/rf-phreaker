@@ -110,6 +110,37 @@ public:
 				<< "\t" << info[i].si_2quater_.eutran_neighbors_.num_elements_
 				<< "\t" << info[i].si_3_.plmn_.mcc_ << " " << info[i].si_3_.plmn_.mnc_
 				<< "\t" << info[i].si_4_.plmn_.mcc_ << " " << info[i].si_4_.plmn_.mnc_
+				<< "\t" << info[i].si_1_.decoded_
+				<< "\t" << info[i].si_2_.decoded_
+				<< "\t" << info[i].si_2bis_.decoded_
+				<< "\t" << info[i].si_2ter_.decoded_
+				<< "\t" << info[i].si_2quater_.decoded_
+				<< "\t" << info[i].si_3_.decoded_
+				<< "\t" << info[i].si_4_.decoded_
+				<< std::endl;
+
+			static std::ofstream f("gsm_layer_3.txt");
+			static auto oh = true;
+			if(oh) {
+				f << "id\tcr\tfreq\trssi\tarfcn\tbsic\tcell_sl\tc/i"
+					"\tsi1_decoded"
+					"\tsi2_decoded\tsi2bis_decoded\t2bis_idx\t2bis_count"
+					"\tsi2ter_decoded\t2ter_idx\t2ter_count"
+					"\tsi2quater_decoded\t2quater_idx\t2quater_count"
+					"\tsi3_decoded"
+					"\tsi4_decoded"
+					<< std::endl;
+				oh = false;
+			}
+			f << beagle_id << "\t" << info[i].collection_round_ << "\t" << info[i].carrier_freq_ << "\t" << info[i].rssi_ << "\t" << info[i].arfcn_ << "\t" << info[i].bsic_
+				<< "\t" << info[i].cell_sl_ << "\t" << info[i].ctoi_
+				<< "\t" << info[i].si_1_.decoded_
+				<< "\t" << info[i].si_2_.decoded_ 
+				<< "\t" << info[i].si_2bis_.decoded_ << "\t" << info[i].si_2bis_.rest_octet_index_ << "\t" << info[i].si_2bis_.rest_octet_count_
+				<< "\t" << info[i].si_2ter_.decoded_ << "\t" << info[i].si_2ter_.rest_octet_index_ << "\t" << info[i].si_2ter_.rest_octet_count_
+				<< "\t" << info[i].si_2quater_.decoded_ << "\t" << info[i].si_2quater_.rest_octet_index_ << "\t" << info[i].si_2quater_.rest_octet_count_
+				<< "\t" << info[i].si_3_.decoded_
+				<< "\t" << info[i].si_4_.decoded_
 				<< std::endl;
 		}
 	}
