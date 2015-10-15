@@ -154,7 +154,7 @@ public:
 					it->second.carrier_signal_level_ =  i.carrier_signal_level_;
 					it->second.time_ = i.time_;
 					it->second.status_flags_ = i.status_flags_;
-					if(i.bsic_ == -1)
+					if(i.bsic_ != -1)
 						it->second.bsic_ = i.bsic_;
 					if(i.layer_3_.si_1_.is_decoded())
 						it->second.layer_3_.si_1_ = i.layer_3_.si_1_;
