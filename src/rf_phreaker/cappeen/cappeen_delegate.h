@@ -18,8 +18,7 @@
 
 namespace rf_phreaker { namespace cappeen_api {
 
-inline int convert_message(int msg)
-{
+inline int convert_message(int msg) {
 	beagle_api::ERRORCODES code;
 	switch(msg) {
 	case (int)UNKNOWN_ERROR:
@@ -51,7 +50,8 @@ class cappeen_delegate
 public:
 	cappeen_delegate(beagle_api::beagle_delegate *del)
 		: delegate_(del)
-	{
+		, gsm_layer_3_count_(1)
+		, gsm_layer_3_interval_(0) {
 		if(del == nullptr)
 			throw rf_phreaker::cappeen_api_error("Beagle delegate is NULL.", beagle_api::BEAGLEUNABLETOINITIALIZE);
 
@@ -66,13 +66,11 @@ public:
 		beagle_info_.valid_licenses_.num_elements_ = 0;
 		beagle_info_.device_speed_ = beagle_api::UNKOWN_SPEED;
 	}
-	
-	~cappeen_delegate()
-	{}
+
+	~cappeen_delegate() {}
 
 	void initialize(processing::data_output_async *data_output, processing::processing_graph *pro, processing::gps_graph *gps,
-		processing::frequency_correction_graph *freq_correction)
-	{
+		processing::frequency_correction_graph *freq_correction) {
 		LOG(LVERBOSE) << "Creating connections...";
 		LOG(LVERBOSE) << "Connecting hardware.";
 		data_output->connect_hardware(boost::bind(&cappeen_delegate::output_hardware, this, _1)).get();
@@ -102,15 +100,13 @@ public:
 		frequency_correction_graph_ = freq_correction;
 	}
 
-	void output_hardware(const hardware &t)
-	{
+	void output_hardware(const hardware &t) {
 		initialize_beagle_info(t);
 		change_beagle_state(current_beagle_state());
 		//delegate_->available_beagle_info(beagle_id_, *beagle_info_);
 	}
-	
-	void output_gps(const gps &t)
-	{
+
+	void output_gps(const gps &t) {
 		beagle_api::gps_info g;
 		g.gps_locked_ = t.lock_;
 		g.hw_calibrated_ = false;
@@ -123,8 +119,10 @@ public:
 
 		delegate_->available_gps_info(beagle_info_.beagle_id_, g);
 	}
-	
+
 	void output_gsm_sweep(const basic_data &t, const std::vector<gsm_data> &) {
+		output_gsm_layer_3();
+
 		beagle_api::gsm_sweep_info a;
 		a.frequency_ = t.carrier_frequency_;
 		a.rssi_ = t.carrier_signal_level_;
@@ -133,18 +131,70 @@ public:
 	}
 
 	void output_gsm_layer_3(const std::vector<gsm_data> &t, const basic_data &) {
-		if(t.empty()) return;
+		if(!t.empty()) {
+			for(auto &i : t) {
+				auto key = i.arfcn_;
+				auto it = gsm_layer_3_buffer_.find(key);
 
-		std::vector<beagle_api::gsm_sector_info> v(t.size());
-		std::vector<gsm_si_2_wrapper> si2; si2.reserve(t.size());
-		std::vector<gsm_si_2bis_wrapper> si2bis; si2bis.reserve(t.size());
-		std::vector<gsm_si_2ter_wrapper> si2ter; si2ter.reserve(t.size());
-		std::vector<gsm_si_2quater_wrapper> si2quater; si2quater.reserve(t.size());
-		std::vector<gsm_si_3_wrapper> si3; si3.reserve(t.size());
-		std::vector<gsm_si_4_wrapper> si4; si4.reserve(t.size());
+				if(it != gsm_layer_3_buffer_.end()) {
+					// Because we do not store mulitple messages for the same SI, we output the previous message before overwriting.
+					if((i.layer_3_.si_2bis_.is_decoded() && (it->second.layer_3_.si_2bis_.is_decoded() && (i.layer_3_.si_2bis_.rest_octet_index_ != it->second.layer_3_.si_2bis_.rest_octet_index_))) ||
+						(i.layer_3_.si_2ter_.is_decoded() && (it->second.layer_3_.si_2ter_.is_decoded() && (i.layer_3_.si_2ter_.rest_octet_index_ != it->second.layer_3_.si_2ter_.rest_octet_index_))) ||
+						(i.layer_3_.si_2quater_.is_decoded() && (it->second.layer_3_.si_2quater_.is_decoded() && (i.layer_3_.si_2quater_.rest_octet_index_ != it->second.layer_3_.si_2quater_.rest_octet_index_))) ||
+						(i.bsic_ != -1 && it->second.bsic_ != -1 && i.bsic_ != it->second.bsic_)) {
+						output_gsm_layer_3(it->second);
+						it->second = i;
+						continue;
+					}
+
+					it->second.tdma_frame_number_ = i.tdma_frame_number_;
+					it->second.cell_signal_level_ = i.cell_signal_level_;
+					it->second.ctoi_ = i.ctoi_;
+					it->second.collection_round_ = i.collection_round_;
+					it->second.carrier_signal_level_ =  i.carrier_signal_level_;
+					it->second.time_ = i.time_;
+					it->second.status_flags_ = i.status_flags_;
+					if(i.bsic_ == -1)
+						it->second.bsic_ = i.bsic_;
+					if(i.layer_3_.si_1_.is_decoded())
+						it->second.layer_3_.si_1_ = i.layer_3_.si_1_;
+					if(i.layer_3_.si_2_.is_decoded())
+						it->second.layer_3_.si_2_ = i.layer_3_.si_2_;
+					if(i.layer_3_.si_2bis_.is_decoded())
+						it->second.layer_3_.si_2bis_ = i.layer_3_.si_2bis_;
+					if(i.layer_3_.si_2ter_.is_decoded())
+						it->second.layer_3_.si_2ter_ = i.layer_3_.si_2ter_;
+					if(i.layer_3_.si_2quater_.is_decoded())
+						it->second.layer_3_.si_2quater_ = i.layer_3_.si_2quater_;
+					if(i.layer_3_.si_3_.is_decoded())
+						it->second.layer_3_.si_3_ = i.layer_3_.si_3_;
+					if(i.layer_3_.si_4_.is_decoded())
+						it->second.layer_3_.si_4_ = i.layer_3_.si_4_;
+				}
+				else
+					gsm_layer_3_buffer_.insert(std::make_pair(key, i));
+			}
+		}
+
+		if(should_output_gsm_layer_3())
+			output_gsm_layer_3();
+	}
+
+	void output_gsm_layer_3() {
+		if(gsm_layer_3_buffer_.empty())
+			return;
+
+		std::vector<beagle_api::gsm_sector_info> v(gsm_layer_3_buffer_.size());
+		std::vector<gsm_si_2_wrapper> si2; si2.reserve(gsm_layer_3_buffer_.size());
+		std::vector<gsm_si_2bis_wrapper> si2bis; si2bis.reserve(gsm_layer_3_buffer_.size());
+		std::vector<gsm_si_2ter_wrapper> si2ter; si2ter.reserve(gsm_layer_3_buffer_.size());
+		std::vector<gsm_si_2quater_wrapper> si2quater; si2quater.reserve(gsm_layer_3_buffer_.size());
+		std::vector<gsm_si_3_wrapper> si3; si3.reserve(gsm_layer_3_buffer_.size());
+		std::vector<gsm_si_4_wrapper> si4; si4.reserve(gsm_layer_3_buffer_.size());
 
 		int i = 0;
-		for(auto &gsm : t) {
+		for(auto &j : gsm_layer_3_buffer_) {
+			auto &gsm = j.second;
 			v[i].operating_band_ = convert_band_to_tech_band(gsm.operating_band_);
 			v[i].carrier_freq_ = gsm.carrier_frequency_;
 			v[i].rssi_ = gsm.carrier_signal_level_;
@@ -154,7 +204,7 @@ public:
 			v[i].cell_sl_ = gsm.cell_signal_level_;
 			v[i].ctoi_ = gsm.ctoi_;
 			v[i].si_1_.decoded_ = gsm.layer_3_.si_1_.is_decoded();
-			v[i].si_1_.band_indicator_ = gsm.layer_3_.si_1_.band_indicator_ == layer_3_information::pcs_1900_was_used 
+			v[i].si_1_.band_indicator_ = gsm.layer_3_.si_1_.band_indicator_ == layer_3_information::pcs_1900_was_used
 				? beagle_api::PCS_1900_WAS_USED : beagle_api::DCS_1800_WAS_USED;
 			si2.push_back(gsm_si_2_wrapper(gsm.layer_3_.si_2_));
 			v[i].si_2_ = si2.back().s_;
@@ -172,9 +222,53 @@ public:
 		}
 
 		delegate_->available_gsm_sector_info(beagle_info_.beagle_id_, &v[0], v.size());
+
+		clear_buffers_and_counts();
+	}
+
+	void output_gsm_layer_3(const gsm_data &gsm) {
+		beagle_api::gsm_sector_info v;
+		std::vector<gsm_si_2_wrapper> si2; si2.reserve(1);
+		std::vector<gsm_si_2bis_wrapper> si2bis; si2bis.reserve(1);
+		std::vector<gsm_si_2ter_wrapper> si2ter; si2ter.reserve(1);
+		std::vector<gsm_si_2quater_wrapper> si2quater; si2quater.reserve(1);
+		std::vector<gsm_si_3_wrapper> si3; si3.reserve(1);
+		std::vector<gsm_si_4_wrapper> si4; si4.reserve(1);
+
+		v.operating_band_ = convert_band_to_tech_band(gsm.operating_band_);
+		v.carrier_freq_ = gsm.carrier_frequency_;
+		v.rssi_ = gsm.carrier_signal_level_;
+		v.collection_round_ = static_cast<uint32_t>(gsm.collection_round_);
+		v.arfcn_ = gsm.arfcn_;
+		v.bsic_ = gsm.bsic_;
+		v.cell_sl_ = gsm.cell_signal_level_;
+		v.ctoi_ = gsm.ctoi_;
+		v.si_1_.decoded_ = gsm.layer_3_.si_1_.is_decoded();
+		v.si_1_.band_indicator_ = gsm.layer_3_.si_1_.band_indicator_ == layer_3_information::pcs_1900_was_used
+			? beagle_api::PCS_1900_WAS_USED : beagle_api::DCS_1800_WAS_USED;
+		si2.push_back(gsm_si_2_wrapper(gsm.layer_3_.si_2_));
+		v.si_2_ = si2.back().s_;
+		si2bis.push_back(gsm_si_2bis_wrapper(gsm.layer_3_.si_2bis_));
+		v.si_2bis_ = si2bis.back().s_;
+		si2ter.push_back(gsm_si_2ter_wrapper(gsm.layer_3_.si_2ter_));
+		v.si_2ter_ = si2ter.back().s_;
+		si2quater.push_back(gsm_si_2quater_wrapper(gsm.layer_3_.si_2quater_));
+		v.si_2quater_ = si2quater.back().s_;
+		si3.push_back(gsm_si_3_wrapper(gsm.layer_3_.si_3_));
+		v.si_3_ = si3.back().s_;
+		si4.push_back(gsm_si_4_wrapper(gsm.layer_3_.si_4_));
+		v.si_4_ = si4.back().s_;
+
+		delegate_->available_gsm_sector_info(beagle_info_.beagle_id_, &v, 1);
+	}
+
+	bool should_output_gsm_layer_3() {
+		return gsm_layer_3_count_++ % gsm_layer_3_interval_ == 0;
 	}
 
 	void output_umts_sweep(const basic_data &t, const std::vector<umts_data> &) {
+		output_gsm_layer_3();
+
 		beagle_api::umts_sweep_info a;
 		a.frequency_ = t.carrier_frequency_;
 		a.rssi_ = t.carrier_signal_level_;
@@ -183,6 +277,8 @@ public:
 	}
 
 	void output_umts_layer_3(const std::vector<umts_data> &t, const basic_data &) {
+		output_gsm_layer_3();
+
 		if(t.empty()) return;
 
 		std::vector<beagle_api::umts_sector_info> v(t.size());
@@ -251,17 +347,19 @@ public:
 		delegate_->available_umts_sector_info(beagle_info_.beagle_id_, &v[0], v.size());
 	}
 
-	void output_lte_sweep(const basic_data &t, const std::vector<lte_data> &)
-	{
+	void output_lte_sweep(const basic_data &t, const std::vector<lte_data> &) {
+		output_gsm_layer_3();
+
 		beagle_api::lte_sweep_info a;
 		a.frequency_ = t.carrier_frequency_;
 		a.rssi_ = t.carrier_signal_level_;
 
 		delegate_->available_lte_sweep_info(beagle_info_.beagle_id_, &a, 1);
 	}
-	
-	void output_lte_layer_3(const std::vector<lte_data> &t, const basic_data &)
-	{
+
+	void output_lte_layer_3(const std::vector<lte_data> &t, const basic_data &) {
+		output_gsm_layer_3();
+
 		if(t.empty()) return;
 
 		std::vector<beagle_api::lte_sector_info> v(t.size());
@@ -320,36 +418,32 @@ public:
 		delegate_->available_lte_sector_info(beagle_info_.beagle_id_, &v[0], v.size());
 	}
 
-	void output_error_as_message(const std::exception &err)
-	{
+	void output_error_as_message(const std::exception &err) {
 		output_error_as_message(err.what(), beagle_api::STD_EXCEPTION_ERROR);
 	}
 
-	void output_error_as_message(const rf_phreaker::rf_phreaker_error &err)
-	{
+	void output_error_as_message(const rf_phreaker::rf_phreaker_error &err) {
 		output_error_as_message(err.what(), err.error_code_);
 	}
 
-	void output_error_as_message(const std::string &s, int code)
-	{
+	void output_error_as_message(const std::string &s, int code) {
 		LOG(LERROR) << s;
 		if(delegate_ != nullptr)
 			delegate_->available_message(beagle_info_.beagle_id_, code, s.c_str(), s.size() + 1);
 	}
 
-	void output_error(const std::string &s, int type, int code)
-	{
+	void output_error(const std::string &s, int type, int code) {
 		// Manually set the code to generic error for any code other than the ones below.
-		if(code != STD_EXCEPTION_ERROR || code != UNKNOWN_ERROR || code != FREQUENCY_CORRECTION_FAILED 
+		if(code != STD_EXCEPTION_ERROR || code != UNKNOWN_ERROR || code != FREQUENCY_CORRECTION_FAILED
 			|| code != beagle_api::WRONG_SPEED_DETECTED || code != CALIBRATION_ERROR || code != EEPROM_ERROR)
 			code = GENERAL_ERROR;
 		LOG(LERROR) << s;
 		if(delegate_ != nullptr) {
 			if(beagle_info_.state_ == beagle_api::BEAGLE_COLLECTING
-				   || beagle_info_.state_ == beagle_api::BEAGLE_USBOPENED
-				   || beagle_info_.state_ == beagle_api::BEAGLE_READY
-				   || beagle_info_.state_ == beagle_api::BEAGLE_WARMINGUP
-				   || beagle_info_.state_ == beagle_api::BEAGLE_CALCULATING_FREQUENCY_CORRECTION) {
+				|| beagle_info_.state_ == beagle_api::BEAGLE_USBOPENED
+				|| beagle_info_.state_ == beagle_api::BEAGLE_READY
+				|| beagle_info_.state_ == beagle_api::BEAGLE_WARMINGUP
+				|| beagle_info_.state_ == beagle_api::BEAGLE_CALCULATING_FREQUENCY_CORRECTION) {
 				switch(code) {
 				case GENERAL_ERROR:
 				case STD_EXCEPTION_ERROR:
@@ -373,8 +467,7 @@ public:
 		}
 	}
 
-	void output_message(const std::string &s, int type, int code)
-	{
+	void output_message(const std::string &s, int type, int code) {
 		LOG(LINFO) << s;
 		if(delegate_ != nullptr) {
 			delegate_->available_message(beagle_info_.beagle_id_, code, s.c_str(), s.size() + 1);
@@ -388,14 +481,12 @@ public:
 		}
 	}
 
-	void change_beagle_state(beagle_api::BEAGLESTATE state)
-	{
+	void change_beagle_state(beagle_api::BEAGLESTATE state) {
 		beagle_info_.state_ = state;
 		delegate_->available_beagle_info(beagle_info_.beagle_id_, beagle_info_);
 	}
 
-	void initialize_beagle_info(const hardware &t)
-	{
+	void initialize_beagle_info(const hardware &t) {
 		beagle_info_.beagle_id_ = t.hw_id_;
 		memset(beagle_info_.beagle_serial_, 0, sizeof(beagle_info_.beagle_serial_));
 		memcpy(beagle_info_.beagle_serial_, t.serial_.c_str(), t.serial_.size());
@@ -475,13 +566,11 @@ public:
 		}
 	}
 
-	bool is_within_freq_paths(frequency_type start, frequency_type stop)
-	{
+	bool is_within_freq_paths(frequency_type start, frequency_type stop) {
 		return rf_phreaker::is_within_freq_paths(frequency_paths_, start, stop);
 	}
 
-	bool is_within_freq_paths(frequency_type f) 
-	{
+	bool is_within_freq_paths(frequency_type f) {
 		return rf_phreaker::is_within_freq_paths(frequency_paths_, f);
 	}
 
@@ -492,6 +581,12 @@ public:
 	const std::vector<frequency_path>& frequency_paths() { return frequency_paths_; }
 
 	int32_t get_hw_id() const { return beagle_info_.beagle_id_; }
+
+	void clear_buffers_and_counts() {
+		gsm_layer_3_buffer_.clear();
+		gsm_layer_3_count_ = 1;
+	}
+	int64_t gsm_layer_3_interval_;
 
 private:
 	beagle_api::beagle_delegate *delegate_;
@@ -507,6 +602,9 @@ private:
 	processing::processing_graph *processing_graph_;
 	processing::gps_graph *gps_graph_;
 	processing::frequency_correction_graph *frequency_correction_graph_;
+
+	std::map<int64_t, gsm_data> gsm_layer_3_buffer_;
+	int64_t gsm_layer_3_count_;
 };
 
 }}

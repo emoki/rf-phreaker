@@ -46,6 +46,8 @@ void settings_io::read(settings &settings) {
 	read(settings.packet_output_, packet_output_group_key);
 	read(settings.file_output_, file_output_group_key);
 
+	read(settings.output_intervals_, output_interval_group_key);
+
 	read(settings.gsm_sweep_collection_, gsm_sweep_collection_group_key);
 	read(settings.gsm_layer_3_collection_, gsm_layer_3_collection_group_key);
 	read(settings.umts_sweep_collection_, umts_sweep_collection_group_key);
@@ -182,6 +184,21 @@ void settings_io::read(blade_rx_settings &settings, const std::string &group_key
 	qsettings_->endGroup();
 }
 
+void settings_io::read(output_interval_settings &settings, const std::string &group_key) {
+	qsettings_->beginGroup(group_key.c_str());
+	//settings.scanner_ = qsettings_->value(scanner_output_key.c_str(), settings_output_default).toBool();
+	//settings.gps_ = qsettings_->value(gps_output_key.c_str(), settings_output_default).toBool();
+	//settings.gsm_sweep_ = qsettings_->value(gsm_sweep_output_key.c_str(), settings_output_default).toBool();
+	settings.gsm_layer_3_ = qsettings_->value(gsm_layer_3_output_key.c_str(), settings_output_interval_default).toInt();
+	//settings.umts_sweep_ = qsettings_->value(umts_sweep_output_key.c_str(), settings_output_default).toBool();
+	//settings.umts_layer_3_ = qsettings_->value(umts_layer_3_output_key.c_str(), settings_output_default).toBool();
+	//settings.lte_sweep_ = qsettings_->value(lte_sweep_output_key.c_str(), settings_output_default).toBool();
+	//settings.lte_layer_3_ = qsettings_->value(lte_layer_3_output_key.c_str(), settings_output_default).toBool();
+	//settings.sweep_ = qsettings_->value(sweep_output_key.c_str(), settings_output_default).toBool();
+	qsettings_->endGroup();
+
+}
+
 
 
 void settings_io::write(const settings &settings) {
@@ -202,6 +219,8 @@ void settings_io::write(const settings &settings) {
 	write(settings.signal_slots_, signal_slot_output_group_key);
 	write(settings.packet_output_, packet_output_group_key);
 	write(settings.file_output_, file_output_group_key);
+
+	write(settings.output_intervals_, output_interval_group_key);
 
 	write(settings.gsm_sweep_collection_, gsm_sweep_collection_group_key);
 	write(settings.gsm_layer_3_collection_, gsm_layer_3_collection_group_key);
@@ -328,6 +347,20 @@ void settings_io::write(const blade_rx_settings &settings, const std::string &gr
 	qsettings_->setValue(blade_rx_sync_timeout_key.c_str(), settings.rx_sync_timeout_);
 	qsettings_->endGroup();
 
+}
+
+void settings_io::write(const output_interval_settings &settings, const std::string &group_key) {
+	qsettings_->beginGroup(group_key.c_str());
+	//qsettings_->setValue(scanner_output_key.c_str(), settings.scanner_);
+	//qsettings_->setValue(gps_output_key.c_str(), settings.gps_);
+	//qsettings_->setValue(gsm_sweep_output_key.c_str(), settings.gsm_sweep_);
+	qsettings_->setValue(gsm_layer_3_output_key.c_str(), settings.gsm_layer_3_);
+	//qsettings_->setValue(umts_sweep_output_key.c_str(), settings.umts_sweep_);
+	//qsettings_->setValue(umts_layer_3_output_key.c_str(), settings.umts_layer_3_);
+	//qsettings_->setValue(lte_sweep_output_key.c_str(), settings.lte_sweep_);
+	//qsettings_->setValue(lte_layer_3_output_key.c_str(), settings.lte_layer_3_);
+	//qsettings_->setValue(sweep_output_key.c_str(), settings.sweep_);
+	qsettings_->endGroup();
 }
 
 void settings_io::clear() {

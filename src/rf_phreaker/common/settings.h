@@ -46,6 +46,7 @@ static const int settings_gsm_general_side_power_threshold_default = 5;
 static const int settings_gsm_general_band_power_threshold_default = 25;
 static const bool settings_gsm_general_perform_sync_correlations_default = true;
 static const double settings_gsm_general_c_i_ratio_confidence_threshold_default = -5;
+static const int settings_output_interval_default = 1;
 
 class output_settings {
 public:
@@ -58,6 +59,11 @@ public:
 	bool lte_sweep_;
 	bool lte_layer_3_;
 	bool sweep_;
+};
+
+class output_interval_settings {
+public:
+	int32_t gsm_layer_3_;
 };
 
 class collection_settings {
@@ -153,6 +159,8 @@ public:
 	output_settings standard_output_;
 	output_settings file_output_;
 	output_settings signal_slots_;
+
+	output_interval_settings output_intervals_;
 
 	collection_settings gsm_sweep_collection_;
 	collection_settings gsm_layer_3_collection_;

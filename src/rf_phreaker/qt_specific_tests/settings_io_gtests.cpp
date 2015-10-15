@@ -57,6 +57,16 @@ TEST(QtSpecific, TestSettingsIO)
 	EXPECT_EQ(settings_output_default, set.packet_output_.lte_layer_3_);
 	EXPECT_EQ(settings_output_default, set.packet_output_.sweep_);
 
+	//EXPECT_EQ(settings_output_interval_default, set.output_intervals_.scanner_);
+	//EXPECT_EQ(settings_output_interval_default, set.output_intervals_.gps_);
+	//EXPECT_EQ(settings_output_interval_default, set.output_intervals_.gsm_sweep_);
+	EXPECT_EQ(settings_output_interval_default, set.output_intervals_.gsm_layer_3_);
+	//EXPECT_EQ(settings_output_interval_default, set.output_intervals_.umts_sweep_);
+	//EXPECT_EQ(settings_output_interval_default, set.output_intervals_.umts_layer_3_);
+	//EXPECT_EQ(settings_output_interval_default, set.output_intervals_.lte_sweep_);
+	//EXPECT_EQ(settings_output_interval_default, set.output_intervals_.lte_layer_3_);
+	//EXPECT_EQ(settings_output_interval_default, set.output_intervals_.sweep_);
+
 	EXPECT_EQ(settings_sampling_rate_default, set.gsm_sweep_collection_.sampling_rate_);
 	EXPECT_EQ(settings_bandwidth_default, set.gsm_sweep_collection_.bandwidth_);
 	EXPECT_EQ(settings_collection_time_default, set.gsm_sweep_collection_.collection_time_);
@@ -181,6 +191,7 @@ TEST(QtSpecific, TestSettingsIO)
 	set.packet_output_.lte_sweep_ = false;
 	set.packet_output_.lte_layer_3_ = true;
 	set.packet_output_.sweep_ = true;
+	set.output_intervals_.gsm_layer_3_ = tmp++;
 	set.gsm_sweep_collection_.sampling_rate_ = tmp++;
 	set.gsm_sweep_collection_.bandwidth_ = tmp++;
 	set.gsm_sweep_collection_.collection_time_ = tmp++;
@@ -330,6 +341,16 @@ TEST(QtSpecific, TestSettingsIO)
 	EXPECT_EQ(set.packet_output_.lte_sweep_, set2.packet_output_.lte_sweep_);
 	EXPECT_EQ(set.packet_output_.lte_layer_3_, set2.packet_output_.lte_layer_3_);
 	EXPECT_EQ(set.packet_output_.sweep_, set2.packet_output_.sweep_);
+
+	//EXPECT_EQ(set.output_intervals_.scanner_, set2.output_intervals_.scanner_);
+	//EXPECT_EQ(set.output_intervals_.gps_, set2.output_intervals_.gps_);
+	//EXPECT_EQ(set.output_intervals_.gsm_sweep_, set2.output_intervals_.gsm_sweep_);
+	EXPECT_EQ(set.output_intervals_.gsm_layer_3_, set2.output_intervals_.gsm_layer_3_);
+	//EXPECT_EQ(set.output_intervals_.umts_sweep_, set2.output_intervals_.umts_sweep_);
+	//EXPECT_EQ(set.output_intervals_.umts_layer_3_, set2.output_intervals_.umts_layer_3_);
+	//EXPECT_EQ(set.output_intervals_.lte_sweep_, set2.output_intervals_.lte_sweep_);
+	//EXPECT_EQ(set.output_intervals_.lte_layer_3_, set2.output_intervals_.lte_layer_3_);
+	//EXPECT_EQ(set.output_intervals_.sweep_, set2.output_intervals_.sweep_);
 
 	EXPECT_EQ(set.gsm_sweep_collection_.sampling_rate_, set2.gsm_sweep_collection_.sampling_rate_);
 	EXPECT_EQ(set.gsm_sweep_collection_.bandwidth_, set2.gsm_sweep_collection_.bandwidth_);

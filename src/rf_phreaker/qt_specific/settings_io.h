@@ -33,6 +33,7 @@ static const std::string gsm_sweep_collection_group_key = "gsm_sweep_collection"
 static const std::string gsm_layer_3_collection_group_key = "gsm_layer_3_collection";
 static const std::string gsm_sweep_general_group_key = "gsm_sweep_general";
 static const std::string gsm_layer_3_general_group_key = "gsm_layer_3_general";
+static const std::string output_interval_group_key = "output_interval";
 
 
 // Value keys
@@ -111,6 +112,8 @@ public:
 
 	void read(blade_rx_settings &settings, const std::string &group_key);
 
+	void read(output_interval_settings &settings, const std::string &group_key);
+
 	void write(const settings &settings);
 
 	void write(const output_settings &settings, const std::string &group_key);
@@ -130,6 +133,8 @@ public:
 	void write(const blade_settings &settings);
 
 	void write(const blade_rx_settings &settings, const std::string &group_key);
+
+	void write(const output_interval_settings &settings, const std::string &group_key);
 
 	void clear();
 

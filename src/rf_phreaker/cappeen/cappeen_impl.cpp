@@ -401,6 +401,8 @@ long cappeen_impl::stop_collection()
 		if(data_output_)
 			data_output_->clear_queue();
 
+		delegate_->clear_buffers_and_counts();
+
 		delegate_->change_beagle_state(BEAGLE_READY);
 		LOG(LINFO) << "Stopped collection successfully.";
 	}
@@ -438,6 +440,10 @@ long cappeen_impl::start_collection(const beagle_api::collection_info &collectio
 		// Initialize packet sizes.
 		read_settings();
 		processing::initialize_collection_info_defaults(config_);
+
+		delegate_->clear_buffers_and_counts();
+		delegate_->gsm_layer_3_interval_ = config_.output_intervals_.gsm_layer_3_;
+		LOG(LINFO) << "gsm layer 3 output interval: " << delegate_->gsm_layer_3_interval_;
 
 		auto collection_containers = create_collection_info_containers(collection);
 
