@@ -56,8 +56,10 @@ public:
 		for(auto path = t.frequency_paths_.begin(); path != t.frequency_paths_.end(); ++path) {
 			buf_.frequency_paths_[i].high_freq_ = path->high_freq_;
 			buf_.frequency_paths_[i].low_freq_ = path->low_freq_;
-			if(++i >= RP_FREQUENCY_PATH_SIZE)
+			if(++i >= RP_FREQUENCY_PATH_SIZE) {
+				buf_.num_frequency_paths_ = RP_FREQUENCY_PATH_SIZE;
 				break;
+			}
 		};
 		buf_.num_licenses_ = 0;
 	}
