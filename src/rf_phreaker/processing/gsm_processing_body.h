@@ -130,6 +130,14 @@ public:
 				if(status != 0)
 					throw gsm_analysis_error("Error decoding gsm layer 3.");
 				tracker_.update(data.center_frequency_, data);
+
+				//if(data.bcch_burst_decoded_) {
+				//	static std::ofstream layer_3("gsm_layer_3_bitstream_" + static_timestamp::to_string() + ".txt");
+				//	layer_3 << std::hex << data.bcch_octet_size_ << "\t0\t";
+				//	for(int i = 0; i < data.bcch_octet_size_; ++i)
+				//		layer_3 << std::setw(2) << std::setfill('0') << (int)data.bcch_octets_[i] << " ";
+				//	layer_3 << "\t" << std::dec << data.center_frequency_ << "\t" << data.bsic_ << std::endl;
+				//}
 			}
 		}
 
