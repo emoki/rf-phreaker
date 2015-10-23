@@ -14,7 +14,7 @@ enum error_type
 	scanner_init_error_type,
 	hardware_info_error_type,
 	misc_error_type,
-	io_error_type,
+	file_io_error_type,
 	blade_rf_error_type,
 	ipp_error_type,
 	filter_error_type,
@@ -42,8 +42,8 @@ inline const char* error_to_str(error_type err) {
 		return "hardware_info error";
 	case misc_error_type:
 		return "miscellaneous error";
-	case io_error_type:
-		return "io error";
+	case file_io_error_type:
+		return "file io error";
 	case blade_rf_error_type:
 		return "blade rf error";
 	case ipp_error_type:
@@ -96,7 +96,7 @@ typedef specific_error<comm_error_type> comm_error;
 typedef specific_error<scanner_init_error_type> scanner_init_error;
 typedef specific_error<hardware_info_error_type> hardware_info_error;
 typedef specific_error<misc_error_type> misc_error;
-typedef specific_error<io_error_type> io_error;
+typedef specific_error<file_io_error_type> file_io_error;
 typedef specific_error<blade_rf_error_type> blade_rf_error;
 typedef specific_error<ipp_error_type> ipp_error;
 typedef specific_error<filter_error_type> filter_error;

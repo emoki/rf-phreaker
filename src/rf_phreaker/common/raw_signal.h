@@ -141,7 +141,7 @@ inline std::istream& operator>>(std::istream &is, rf_phreaker::raw_signal &t) {
 		is >> t.get_iq();
 	}
 	else
-		throw io_error("Error reading raw_signal.");
+		throw file_io_error("Error reading raw_signal.");
 
 
 	return is;
