@@ -11,6 +11,27 @@ public:
 	ApiThreadWorker() : QObject(0), device_(0) {}
 
 	bool event(QEvent *e) {
+		if(e->type() == InitializeApiEvent::getType()) {
+			auto ev = static_cast<InitializeApiEvent*>(e);
+			auto status = InitializeApi(ev->callbacks_);
+			if(status == RP_STATUS_OK)
+				QCoreApplication::postEvent(Api::instance(), new ApiInitializedEvent());
+			else
+				QCoreApplication::postEvent(Api::instance(), new MessageUpdateEvent(status, QString("Unable to initialize API.  Error message \"") + rp_status_message(status) + "\"."));
+			e->accept();
+			return true;
+		}
+		if(e->type() == CleanUpApiEvent::getType()) {
+			auto status = CleanUpApi();
+			if(status == RP_STATUS_OK)
+				QCoreApplication::postEvent(Api::instance(), new ApiCleanedUpEvent());
+			else {
+				QCoreApplication::postEvent(Api::instance(), new ApiCleanedUpEvent());
+				QCoreApplication::postEvent(Api::instance(), new MessageUpdateEvent(status, QString("Unable to CleanUpAPI.  Error message \"") + rp_status_message(status) + "\"."));
+			}
+			e->accept();
+			return true;
+		}
 		if(e->type() == ListDevicesEvent::getType()) {
 			auto list = listDevices();
 			QCoreApplication::postEvent(Api::instance(), new AvailableDevicesEvent(list));
@@ -26,9 +47,9 @@ public:
 		}
 		else if(e->type() == DisconnectDeviceEvent::getType()) {
 			auto status = disconnectDevice();
-			// Regardless of status post a disconnected event.
-			QCoreApplication::postEvent(Api::instance(), new DeviceDisconnectedEvent());
-			Q_UNUSED(status);
+			if(ApiTypes::statusOk(status))
+				QCoreApplication::postEvent(Api::instance(), new DeviceDisconnectedEvent());
+			// Do not show error.
 			e->accept();
 			return true;
 		}
@@ -55,15 +76,34 @@ public:
 		return QObject::event(e);
 	}
 private:
+	rp_status InitializeApi(rp_callbacks *callbacks) {
+		qDebug() << "Initializing API.";
+		auto status = rp_initialize(callbacks);
+		if(!ApiTypes::statusOk(status)) {
+			qWarning() << "Failed to initialize API.  Error message \"" << rp_status_message(status) << "\".";
+		}
+		return status;
+	}
+
+	rp_status CleanUpApi() {
+		qDebug() << "Cleaning up API.";
+		auto status = rp_clean_up();
+		if(!ApiTypes::statusOk(status)) {
+			qWarning() << "Failed to clean up API.  Error message \"" << rp_status_message(status) << "\".";
+		}
+		return status;
+	}
+
 	QStringList listDevices() {
 		qDebug() << "Listing devices";
 		std::vector<rp_serial> serials{100};
 		int32_t size = serials.size();
 		auto status = rp_list_devices(&serials[0], &size);
 
-		if(!ApiTypes::statusOk(status))
+		if(!ApiTypes::statusOk(status)) {
 			qWarning() << "Failed to list devices.  Error:" << rp_status_message(status);
-
+			size = 0;
+		}
 		QStringList list;
 		for(int i = 0; i < size; ++i) {
 			list.push_back(serials[i].serial_);
@@ -104,7 +144,13 @@ private:
 
 	rp_status disconnectDevice() {
 		qDebug() << "Disconnecting device handle" << device_;
+
+		if(device_ == 0)
+			qDebug() << "Device handle zero, skipping rp_disconnect_device.";
+
 		auto status = rp_disconnect_device(device_);
+
+		device_ = 0;
 
 		if(!ApiTypes::statusOk(status))
 			qWarning() << "Error disconnecting device" << device_ << ". Error: " << rp_status_message(status);

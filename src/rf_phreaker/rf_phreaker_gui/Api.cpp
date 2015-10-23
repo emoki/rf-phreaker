@@ -61,8 +61,10 @@ Api* Api::instance() {
 
 Api::Api(QObject *parent)
 	: QObject(parent)
-	, status_(ApiTypes::DISCONNECTED)
-	, collectionList_(new CollectionInfoList(this))
+	, deviceStatus_(ApiTypes::OFF)
+	, connectionStatus_(ApiTypes::DISCONNECTED)
+	, scanList_(new CollectionInfoList(this))
+	, backgroundScanList_(new CollectionInfoList(this))
 	, thread_(new ApiThread)
 	, updateTimer_(new QTimer(this))
 	, canUpdateLog_(false)
@@ -82,19 +84,25 @@ Api::Api(QObject *parent)
 	callbacks_.rp_wcdma_update = rp_wcdma_update;
 	callbacks_.rp_lte_update = rp_lte_update;
 	callbacks_.rp_raw_data_update = /*rp_raw_data_update*/0;
-	rp_initialize(&callbacks_);
 
 	connect(updateTimer_, SIGNAL(timeout()), this, SLOT(emitSignals()));
 	updateTimer_->start(800);
 
 	thread_->start();
-
 }
 
 Api::~Api() {
 	thread_->quit();
 	thread_->wait();
 	rp_clean_up();
+}
+
+void Api::initializeApi() {
+	QCoreApplication::postEvent(thread_->worker(), new InitializeApiEvent(&callbacks_));
+}
+
+void Api::cleanUpApi() {
+	QCoreApplication::postEvent(thread_->worker(), new CleanUpApiEvent());
 }
 
 void Api::listDevices() {
@@ -122,7 +130,7 @@ void Api::startCollection() {
 	api_storage<rp_frequency_type, rp_frequency_group> raw_data;
 	QMap<ApiTypes::Tech, api_storage<rp_frequency_band, rp_frequency_band_group>> techs;
 
-	foreach(const auto &ci, collectionList_->qlist()) {
+	foreach(const auto &ci, scanList_->qlist()) {
 		auto cf = ci->channelFreqLow();
 		if(ci->isSweep()) {
 			sweep.push_back(cf->toRpBand());
@@ -140,6 +148,10 @@ void Api::startCollection() {
 
 void Api::stopCollection() {
 	QCoreApplication::postEvent(thread_->worker(), new StopCollectionEvent());
+}
+
+void Api::updateLicense() {
+
 }
 
 void Api::emitSignals() {
@@ -255,20 +267,26 @@ bool Api::event(QEvent *e) {
 		e->accept();
 		return true;
 	}
+	else if(e->type() == ApiInitializedEvent::getType()) {
+		apiInitialized();
+		e->accept();
+		return true;
+	}
 
 	return QObject::event(e);
 }
 
 void Api::handle_message(rp_status status, const QString &s) {
-	switch(status) {
-	case RP_STATUS_GENERIC_ERROR:
-		QCoreApplication::postEvent(Api::instance(), new DeviceDisconnectedEvent());
-	case RP_STATUS_OK:
-	default:
-		;// Do nothing.
-
-	};
 	auto status_str = rp_status_message(status);
+
+	switch(status) {
+	case RP_STATUS_OK:
+		break;
+	//case RP_OTHER_GOOD_THINGS:
+	// Handle other messages that may not be errors?
+	default:
+		errorMessage(status, s);
+	}
 	qDebug() << status_str + s;
 
 	messages_.prepend(status_str + s);

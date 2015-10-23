@@ -7,45 +7,42 @@
 namespace rf_phreaker { namespace api { 
 
 inline rp_status to_rp_status(const rf_phreaker_error &err) {
-	char *s = 0;
-
 	switch(err.error_type_) {
+	case no_error_type:
+		return RP_STATUS_OK;
+	case generic_error_type:
+		return RP_STATUS_GENERIC_ERROR;
 	case comm_error_type: 
-		break;
+		return RP_STATUS_COMMUNICATION_ERROR;
 	case scanner_init_error_type:
-		break;
+		return RP_STATUS_SCANNER_INIT_ERROR;
 	case hardware_info_error_type:
-		break;
+		return RP_STATUS_HARDWARE_INFO_ERROR;
 	case misc_error_type:
-		break;
-	case io_error_type:
-		break;
+		return RP_STATUS_MISC_ERROR;
+	case file_io_error_type:
+		return RP_STATUS_FILE_IO_ERROR;
 	case blade_rf_error_type:
-		break;
+		return RP_STATUS_BLADE_RF_ERROR;
 	case ipp_error_type:
-		break;
+		return RP_STATUS_IPP_ERROR;
 	case filter_error_type:
-		break;
+		return RP_STATUS_FILTER_ERROR;
 	case gsm_analysis_error_type:
-		break;
+		return RP_STATUS_GSM_ANALYSIS_ERROR;
 	case umts_analysis_error_type:
-		break;
+		return RP_STATUS_UMTS_ANALYSIS_ERROR;
 	case lte_analysis_error_type:
-		break;
+		return RP_STATUS_LTE_ANALYSIS_ERROR;
 	case processing_error_type:
-		break;
-	case matlab_interface_error_type:
-		break;
-	case cappeen_api_error_type:
-		break;
+		return RP_STATUS_PROCESSING_ERROR;
 	case gps_comm_error_type:
-		break;
+		return RP_STATUS_GPS_COMMUNICATION_ERROR;
 	case rf_phreaker_api_error_type:
-		break;
+		return RP_STATUS_RF_PHREAKER_API_ERROR;
 	default:
-		;
+		return RP_STATUS_UNKNOWN_ERROR;
 	}
-	return RP_STATUS_OK;
 }
 
 inline rf_phreaker::specifier to_sweep_specifier(rp_technology tech) {

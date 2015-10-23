@@ -27,6 +27,27 @@ public:
 	ExitEvent() : QEvent(getType()) {}
 };
 
+class InitializeApiEvent : public QEvent, public TypeInterface<InitializeApiEvent> {
+public:
+	InitializeApiEvent(rp_callbacks *rp_callbacks) : QEvent(getType()), callbacks_(rp_callbacks) {}
+	rp_callbacks *callbacks_;
+};
+
+class ApiInitializedEvent : public QEvent, public TypeInterface<ApiInitializedEvent> {
+public:
+	ApiInitializedEvent() : QEvent(getType()) {}
+};
+
+class CleanUpApiEvent : public QEvent, public TypeInterface<CleanUpApiEvent> {
+public:
+	CleanUpApiEvent() : QEvent(getType()) {}
+};
+
+class ApiCleanedUpEvent : public QEvent, public TypeInterface<ApiCleanedUpEvent> {
+public:
+	ApiCleanedUpEvent() : QEvent(getType()) {}
+};
+
 class ListDevicesEvent : public QEvent, public TypeInterface<ListDevicesEvent> {
 public:
 	ListDevicesEvent() : QEvent(getType()) {}

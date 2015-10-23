@@ -37,8 +37,14 @@ set (rf_phreaker_gui_SRCS
 
 set (rf_phreaker_gui_QMLS
 	ChannelList.qml
-	DevicePage.qml
+	Content.qml
+	ErrorWindow.qml
 	main.qml
+	MapPage.qml
+	ScannerPage.qml
+	SelectScannerWindow.qml
+	SideBarLabel.qml
+	StateMachine.qml
 	SuggestionTextField.qml
 	SuggestionView.qml)
 
@@ -56,5 +62,6 @@ add_executable (rf_phreaker_gui  ${rf_phreaker_gui_SRCS} ${rf_phreaker_gui_QMLS}
 target_link_libraries (rf_phreaker_gui Qt5::Core)
 target_link_libraries (rf_phreaker_gui Qt5::Widgets)
 target_link_libraries (rf_phreaker_gui Qt5::Quick)
+#target_link_libraries (rf_phreaker_gui Qt5::XmlListModel)
 target_link_libraries (rf_phreaker_gui rf_phreaker_api)
 

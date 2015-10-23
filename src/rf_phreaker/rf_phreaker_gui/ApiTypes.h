@@ -7,18 +7,33 @@
 
 class ApiTypes : public QObject {
 	Q_OBJECT
+	Q_ENUMS(ConnectionStatus)
 	Q_ENUMS(DeviceStatus)
 	Q_ENUMS(Tech)
 	Q_ENUMS(OperatingBand)
 
 public:
-	enum DeviceStatus {
+	enum ConnectionStatus {
 		DISCONNECTED,
 		CONNECTING,
+		CONNECTED
+	};
+
+	enum DeviceStatus {
+		OFF,
 		IDLE,
+		BACKGROUND_SCANNING,
 		SCANNING,
 		RECORDING,
+		UPDATING_LICENSE,
+		WORKBENCH,
 		ERROR
+	};
+
+	enum DeviceCommunication {
+		USB_HI_SPEED,
+		USB_SUPER_SPEED,
+		UNKNOWN_DEVICE_COMMUNICATION
 	};
 
 	enum Tech {
@@ -44,6 +59,7 @@ public:
 		GSM_P_900 = ::rp_operating_band::GSM_P_900, //	900	890.0�915.0	935.0�960.0	1�124
 		GSM_E_900 = ::rp_operating_band::GSM_E_900, //	900	880.0�915.0	925.0�960.0	975�1023, 0-124
 		GSM_R_900 = ::rp_operating_band::GSM_R_900, //	900	876.0�915.0	921.0�960.0	955�1023, 0-124
+		GSM_ER_900 = ::rp_operating_band::GSM_ER_900, //	900	873.0–915.0	918.0–960.0	945–1023, 0-124
 		GSM_T_900 = ::rp_operating_band::GSM_T_900, //	900	870.4�876.0	915.4�921.0	dynamic^
 		GSM_DCS_1800 = ::rp_operating_band::GSM_DCS_1800, //	1800	1,710.2�1,784.8	1,805.2�1,879.8	512�885
 		GSM_PCS_1900 = ::rp_operating_band::GSM_PCS_1900, //	1900	1,850.2�1,909.8	1,930.2�1,989.8	512�810
@@ -176,6 +192,8 @@ public:
 				return GSM_E_900; //	900	880.0�915.0	925.0�960.0	975�1023, 0-124
 		else if(t == "GSM R 900")
 				return GSM_R_900; //	900	876.0�915.0	921.0�960.0	955�1023, 0-124
+		else if(t == "GSM ER 900")
+				return GSM_ER_900; //	900	876.0ï¿½915.0	921.0ï¿½960.0	955ï¿½1023, 0-124
 		else if(t == "GSM T 900")
 				return GSM_T_900; //	900	870.4�876.0	915.4�921.0	dynamic^
 		else if(t == "GSM DCS 1800")
@@ -328,18 +346,33 @@ public:
 		}
 	}
 
-	Q_INVOKABLE static QString toQString(DeviceStatus s) {
+	Q_INVOKABLE static QString toQString(ConnectionStatus s) {
 		switch(s) {
 		case DISCONNECTED:
 			return "Disconnected";
 		case CONNECTING:
 			return "Connecting";
+		case CONNECTED:
+			return "Connected";
+		default:
+			return "Uknown";
+		}
+	}
+
+	Q_INVOKABLE static QString toQString(DeviceStatus s) {
+		switch(s) {
+		case OFF:
+			return "Off";
 		case IDLE:
 			return "Idle";
+		case BACKGROUND_SCANNING:
+			return "Background Scanning";
 		case SCANNING:
 			return "Scanning";
 		case RECORDING:
 			return "Recording";
+		case UPDATING_LICENSE:
+			return "Updating License";
 		case ERROR:
 			return "Error";
 		default:
@@ -371,6 +404,8 @@ public:
 			return "GSM E 900"; //	900	880.0�915.0	925.0�960.0	975�1023, 0-124
 		case GSM_R_900:
 			return "GSM R 900"; //	900	876.0�915.0	921.0�960.0	955�1023, 0-124
+		case GSM_ER_900:
+			return "GSM ER 900"; //	900	876.0ï¿½915.0	921.0ï¿½960.0	955ï¿½1023, 0-124
 		case GSM_T_900:
 			return "GSM T 900"; //	900	870.4�876.0	915.4�921.0	dynamic^
 		case GSM_DCS_1800:
@@ -514,9 +549,14 @@ public:
 		return toQString((OperatingBand)t);
 	}
 
-	Q_INVOKABLE static QString toQString(const rp_serial &serial) {
+	Q_INVOKABLE static QString toQStringShort(const rp_serial &serial) {
 		QString s(serial.serial_);
 		return s.left(serialLength);
+	}
+
+	Q_INVOKABLE static QString toQString(const rp_serial &serial) {
+		QString s(serial.serial_);
+		return s;
 	}
 
 	Q_INVOKABLE static bool statusOk(rp_status status) {
@@ -525,6 +565,18 @@ public:
 
 	Q_INVOKABLE static rp_operating_band toRpOperatingBand(rf_phreaker::operating_band t) {
 		return static_cast<rp_operating_band>(t);
+	}
+
+	Q_INVOKABLE static QString toQString(const rp_device_communication &comm) {
+		switch(comm) {
+		case USB_HI_SPEED:
+			return "Hi-Speed USB";
+		case USB_SUPER_SPEED:
+			return "Super-Speed USB";
+		case UNKNOWN_DEVICE_COMMUNICATION:
+		default:
+			return "Unknown Device Communication";
+		}
 	}
 };
 

@@ -8,13 +8,12 @@ TableView {
 
     property alias suggestionModel: s.model
     property var sTextField
-    property bool aboveSuggestionTextField: true
 
-    height: 100
+    height: 400
     width: sTextField.width
     visible: rowCount > 0
     headerVisible: false
-    alternatingRowColors: true
+    alternatingRowColors: false
     horizontalScrollBarPolicy: Qt.ScrollBarAlwaysOff
     selectionMode: SelectionMode.SingleSelection
 
@@ -29,12 +28,16 @@ TableView {
     Keys.onPressed: {
         if(event.key === Qt.Key_Up && currentRow === 0) {
             sTextField.focus = true;
+            event.accepted = true;
         }
         else if(event.key === Qt.Key_Down && currentRow === rowCount - 1) {
             sTextField.focus = true;
+            event.accepted = true;
         }
         else if(event.key === Qt.Key_Return) {
             sendCurrentSelection();
+            sTextField.focus = true;
+            event.accepted = true;
         }
     }
 

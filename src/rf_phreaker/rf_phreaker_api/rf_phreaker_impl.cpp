@@ -163,14 +163,14 @@ rp_status rf_phreaker_impl::clean_up() {
 		gps_graph_.reset();
 		processing_graph_.reset();
 		frequency_correction_graph_.reset();
-		//if(data_output_)
-		//	data_output_->clear_queue();
+		if(data_output_)
+			data_output_->clear_queue();
 		data_output_.reset();
 		handler_.reset();
-		//if(scanners_.size()) {
-		//	for(auto &s : scanners_)
-		//		s->async_.clear_queue();
-		//}
+		if(scanners_.size()) {
+			for(auto &s : scanners_)
+				s->async_.clear_queue();
+		}
 		scanners_.clear();
 		LOG(LINFO) << "Cleaned up successfully.";
 	}
@@ -913,10 +913,58 @@ const char* rf_phreaker_impl::status_message(rp_status status) {
 	switch(status) {
 	case RP_STATUS_OK:
 		s = "success";
+		break;
 	case RP_STATUS_NOT_INITIALIZED:
 		s = "rf_phreaker is not initialized";
+		break;
+	case RP_STATUS_GENERIC_ERROR:
+		s = "generic error";
+		break;
+	case RP_STATUS_COMMUNICATION_ERROR:
+		s = "communication error";
+		break;
+	case RP_STATUS_SCANNER_INIT_ERROR:
+		s = "scanner initialization error";
+		break;
+	case RP_STATUS_HARDWARE_INFO_ERROR:
+		s = "hardware info error";
+		break;
+	case RP_STATUS_MISC_ERROR:
+		s = "miscellaneous error";
+		break;
+	case RP_STATUS_FILE_IO_ERROR:
+		s = "file io error";
+		break;
+	case RP_STATUS_BLADE_RF_ERROR:
+		s = "rf_phreaker scanner error";
+		break;
+	case RP_STATUS_IPP_ERROR:
+		s = "ipp error";
+		break;
+	case RP_STATUS_FILTER_ERROR:
+		s = "filter error";
+		break;
+	case RP_STATUS_GSM_ANALYSIS_ERROR:
+		s = "gsm analysis error";
+		break;
+	case RP_STATUS_UMTS_ANALYSIS_ERROR:
+		s = "umts analysis error";
+		break;
+	case RP_STATUS_LTE_ANALYSIS_ERROR:
+		s = "lte analysis error";
+		break;
+	case RP_STATUS_PROCESSING_ERROR:
+		s = "processing error";
+		break;
+	case RP_STATUS_GPS_COMMUNICATION_ERROR:
+		s = "gps communication error";
+		break;
+	case RP_STATUS_RF_PHREAKER_API_ERROR:
+		s = "rf_phreaker api error";
+		break;
 	case RP_STATUS_UNKNOWN_ERROR:
 		s = "unknown error";
+		break;
 	default:
 		s = "unknown status";
 	}

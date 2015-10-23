@@ -108,8 +108,8 @@ public:
 	bool gpsLock() { return gps_.lock_; }
 	int visibleSatellites() { return gps_.visible_satellites_; }
 	int trackingSatellites() { return gps_.tracking_satellites_; }
-	int latitude() { return gps_.latitude_; }
-	int longitude() { return gps_.longitude_; }
+	double latitude() { return gps_.latitude_; }
+	double longitude() { return gps_.longitude_; }
 	int speed() { return gps_.speed_; }
 	QDate utcDate() { return dt_.fromTime_t(gps_.coordinated_universal_time_).date(); }
 	QString utcTime() {

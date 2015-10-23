@@ -18,19 +18,23 @@ class ApiThread;
 
 class Api : public QObject {
 	Q_OBJECT
-	Q_PROPERTY(ApiTypes::DeviceStatus status READ status WRITE setStatus NOTIFY statusChanged)
-	Q_PROPERTY(QString statusStr READ statusStr NOTIFY statusStrChanged)
-	Q_PROPERTY(CollectionInfoList* collectionList READ collectionList WRITE setCollectionList NOTIFY collectionListChanged)
+	Q_PROPERTY(ApiTypes::DeviceStatus deviceStatus READ deviceStatus WRITE setDeviceStatus NOTIFY deviceStatusChanged)
+	Q_PROPERTY(QString deviceStatusStr READ deviceStatusStr NOTIFY deviceStatusStrChanged)
+	Q_PROPERTY(ApiTypes::ConnectionStatus connectionStatus READ connectionStatus WRITE setConnectionStatus NOTIFY connectionStatusChanged)
+	Q_PROPERTY(QString connectionStatusStr READ connectionStatusStr NOTIFY connectionStatusStrChanged)
+	Q_PROPERTY(CollectionInfoList* scanList READ scanList WRITE setScanList NOTIFY scanListChanged)
+	Q_PROPERTY(CollectionInfoList* backgroundScanList READ backgroundScanList WRITE setBackgroundScanList NOTIFY backgroundScanListChanged)
 	Q_PROPERTY(QStringList log READ log NOTIFY logChanged)
 	Q_PROPERTY(QStringList messages READ messages NOTIFY messagesChanged)
 	Q_PROPERTY(Device* connectedDevice READ connectedDevice NOTIFY connectedDeviceChanged)
 	Q_PROPERTY(Gps* gps READ gps NOTIFY gpsChanged)
 	Q_PROPERTY(QList<QObject*> wcdmaList READ wcdmaList NOTIFY wcdmaListChanged)
 	Q_PROPERTY(QList<QObject*> lteList READ lteList NOTIFY lteListChanged)
+	//Q_PROPERTY(bool canRecordData READ canRecordData WRITE setCanRecordData NOTIFY canRecordDataChanged)
 	//	Q_PROPERTY( READ WRITE set NOTIFY Changed)
 
 	Q_PROPERTY(QStringList availableDevices READ availableDevices NOTIFY availableDevicesChanged)
-	//Q_PROPERTY(QString deviceSerial READ deviceSerial WRITE setDeviceSerial NOTIFY deviceSerialChanged)
+	Q_PROPERTY(QString deviceSerial READ deviceSerial WRITE setDeviceSerial NOTIFY deviceSerialChanged)
 	//Q_PROPERTY( READ NOTIFY Changed)
 	//	Q_PROPERTY( READ WRITE set NOTIFY Changed)
 
@@ -38,48 +42,87 @@ public:
 	~Api();
 	static Api* instance();
 
-	ApiTypes::DeviceStatus status() { return status_; }
-	QString statusStr() { return ApiTypes::toQString(status_); }
-	CollectionInfoList* collectionList() { return collectionList_; }
+	ApiTypes::DeviceStatus deviceStatus() { return deviceStatus_; }
+	QString deviceStatusStr() { return ApiTypes::toQString(deviceStatus_); }
+	ApiTypes::ConnectionStatus connectionStatus() { return connectionStatus_; }
+	QString connectionStatusStr() { return ApiTypes::toQString(connectionStatus_); }
+	CollectionInfoList* scanList() { return scanList_; }
+	CollectionInfoList* backgroundScanList() { return backgroundScanList_; }
 	QStringList log() { return log_; }
 	QStringList messages() { return messages_; }
-	//QString deviceSerial() const { return deviceSerial_; }
+	QString deviceSerial() const { return deviceSerial_; }
 	Device* connectedDevice() { return &connectedDevice_; }
 	Gps* gps() { return &gps_; }
 	QList<QObject*> wcdmaList() { return wcdmaList_; }
 	QList<QObject*> lteList() { return lteList_; }
 	QStringList availableDevices() { return availableDevices_; }
+	//bool canRecordData() { return canRecordData_; }
 
-
-	void setCollectionList(const CollectionInfoList *list) {
-		collectionList_->setList(list->qlist());
-		emit collectionListChanged();
+	void setScanList(const CollectionInfoList *list) {
+		scanList_->setList(list->qlist());
+		emit scanListChanged();
 	}
-	void setStatus(ApiTypes::DeviceStatus s) {
-		if(status_ != s) {
-			status_ = s;
-			emit statusChanged();
-			emit statusStrChanged();
+
+	void setBackgroundScanList(const CollectionInfoList *list) {
+		backgroundScanList_->setList(list->qlist());
+		emit backgroundScanListChanged();
+	}
+
+	void setDeviceStatus(ApiTypes::DeviceStatus s) {
+		if(deviceStatus_ != s) {
+			deviceStatus_ = s;
+			emit deviceStatusChanged();
+			emit deviceStatusStrChanged();
 		}
 	}
 
+	void setConnectionStatus(ApiTypes::ConnectionStatus s) {
+		if(connectionStatus_ != s) {
+			connectionStatus_ = s;
+			emit connectionStatusChanged();
+			emit connectionStatusStrChanged();
+		}
+	}
+
+//	void setCanRecordData(bool r) {
+//		if(canRecordData_ != r) {
+//			canRecordData_ = r;
+//			emit canRecordDataChanged();
+//		}
+//	}
+
+	void setDeviceSerial(QString s) {
+		if(deviceSerial_ != s) {
+			deviceSerial_ = s;
+			emit deviceSerialChanged();
+		}
+	}
+
+	Q_INVOKABLE void initializeApi();
 	Q_INVOKABLE void listDevices();
 	Q_INVOKABLE void connectDevice(QString qserial = "");
 	Q_INVOKABLE void disconnectDevice();
 	Q_INVOKABLE void startCollection();
 	Q_INVOKABLE void stopCollection();
+	Q_INVOKABLE void updateLicense();
+	Q_INVOKABLE void cleanUpApi();
 
 signals:
-	void collectionListChanged();
+	void scanListChanged();
+	void backgroundScanListChanged();
 	void logChanged();
 	void messagesChanged();
-	void statusChanged();
-	void statusStrChanged();
+	void deviceStatusChanged();
+	void deviceStatusStrChanged();
+	void connectionStatusChanged();
+	void connectionStatusStrChanged();
 	void availableDevicesChanged();
 	void connectedDeviceChanged();
 	void gpsChanged();
 	void wcdmaListChanged();
 	void lteListChanged();
+	//void canRecordDataChanged();
+	void deviceSerialChanged();
 
 	// Signals for state machine
 	void numDevicesConnected(int numDevices);
@@ -87,6 +130,11 @@ signals:
 	void deviceDisconnected();
 	void scanningStarted();
 	void scanningStopped();
+	void apiInitialized();
+	void licenseUpdateSucceeded();
+	void licenseUpdateFailed();
+	void errorMessage(int status, QString msg);
+	void message(int status, QString msg);
 
 protected:
 	bool event(QEvent *);
@@ -100,12 +148,15 @@ private:
 
 	static Api *instance_;
 	static QMutex instance_mutex_;
-	ApiTypes::DeviceStatus status_;
-	CollectionInfoList *collectionList_;
+	ApiTypes::DeviceStatus deviceStatus_;
+	ApiTypes::ConnectionStatus connectionStatus_;
+	CollectionInfoList *scanList_;
+	CollectionInfoList *backgroundScanList_;
 	QStringList availableDevices_;
 	QStringList log_;
 	QStringList messages_;
-	//QString deviceSerial_;
+	QStringList error_messages_;
+	QString deviceSerial_;
 	Device connectedDevice_;
 	Gps gps_;
 	QList<QObject*> wcdmaList_;
@@ -128,6 +179,8 @@ private:
 	bool canUpdateGsm_;
 	bool canUpdateWcdma_;
 	bool canUpdateLte_;
+
+	//bool canRecordData_;
 };
 
 //}}
