@@ -28,9 +28,18 @@ TEST(LteAnalysisTests, TestGeneral)
 		// ./cmake_build_directory			(cmake build directory)
 		// ./lte_phreaker					(git root directory)
 		// ./lte_phreaker/test_files		(directory containing test data)
-		std::string folder_path = "../../../../rf_phreaker/test_files/cobham3/";
+		std::string folder_path =
+			//"../../../../rf_phreaker/test_files/cobham3/"
+			//"../../../../rf_phreaker/test_files/cobham8/"
+			"../../../../rf_phreaker/test_files/cobham9/"
+			;
 
-		std::string prefix = "lte_layer_3_1413296677_";
+		std::string prefix = 
+			//"lte_layer_3_1413296677_"
+			//"lte_layer_3_1437488969_"
+			"lte_layer_3_1438857614_"
+			;
+		
 		std::string suffix = ".bin";
 		//std::string suffix = ".txt";
 
@@ -75,7 +84,7 @@ TEST(LteAnalysisTests, TestGeneral)
 
 				lte_measurements lte_meas;
 				
-				int status = analysis.cell_search(info, lte_meas, 10/*int(info.time_ns() / 1e6 / 5)*/);
+				int status = analysis.cell_search(info, lte_meas, int(info.time_ns() / 1e6 / 5));
 				EXPECT_EQ(0, status);
 
 				for(int j = 0; j < (int)lte_meas.size(); ++j) {
