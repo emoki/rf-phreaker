@@ -4,6 +4,7 @@
 #include "stdafx.h"
 #include "rf_phreaker/lte_layer_3_decoder/lte_layer_3_decoder.h"
 #include "rf_phreaker/lte_layer_3_decoder/lte_bcch_dl_sch_message.h"
+#include "rf_phreaker/common/common_utility.h"
 
 #include <fstream>
 
@@ -11,8 +12,8 @@ using namespace layer_3_information;
 
 lte_asn1_decoder::lte_asn1_decoder()
 : lte_bcch_bch_message_(new lte_bcch_dl_sch_message)
-{
-}
+, debug_(false) {}
+
 
 lte_asn1_decoder::~lte_asn1_decoder()
 {
@@ -26,10 +27,10 @@ int lte_asn1_decoder::decode_bcch_bch_message(const uint8_t* bit_stream, uint32_
 		message.clear();
 		bit_stream_container bits(bit_stream, num_of_bytes, unused_bits);
 
-		//if(debug) {
-		//static std::ofstream debug("lte_bitstreams.txt", std::ios::app);
-		//debug << bits << "\n";
-		//}
+		if(debug_) {
+			static std::ofstream f("lte_bitstreams_" + rf_phreaker::static_timestamp::to_string() + ".txt", std::ios::app);
+			f << bits << std::endl;
+		}
 
 		lte_bcch_bch_message_->populate_data(bits, message);
 	}

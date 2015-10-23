@@ -4,13 +4,13 @@
 #include "stdafx.h"
 #include "rf_phreaker/umts_layer_3_decoder/umts_layer_3_decoder.h"
 #include "rf_phreaker/umts_layer_3_decoder/umts_bcch_bch_message.h"
+#include "rf_phreaker/common/common_utility.h"
 
 using namespace layer_3_information;
 
 umts_asn1_decoder::umts_asn1_decoder()
 	: umts_bcch_bch_message_(new umts_bcch_bch_message)
-{
-}
+	, debug_(false) {}
 
 umts_asn1_decoder::~umts_asn1_decoder()
 {
@@ -48,6 +48,12 @@ int umts_asn1_decoder::decode_bcch_bch_message(const uint8_t* bit_stream, uint32
 	{
 		message.clear();
 		bit_stream_container bits(bit_stream, num_of_bytes, unused_bits);
+
+		if(debug_) {
+			static std::ofstream f("umts_bitstreams_" + rf_phreaker::static_timestamp::to_string() + ".txt", std::ios::app);
+			f << bits << std::endl;
+		}
+
 		umts_bcch_bch_message_->populate_data(bits, message);
 	}
 	catch(const std::exception &err)

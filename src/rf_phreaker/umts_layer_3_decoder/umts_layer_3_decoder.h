@@ -46,8 +46,11 @@ public:
 
 	int decode_bcch_bch_message(const uint8_t* bit_stream, uint32_t num_of_bytes, uint32_t unused_bits, layer_3_information::umts_bcch_bch_message_aggregate &message);
 
+	void output_debug_bit_stream(bool out) { debug_ = out; }
+
 private:
 	umts_bcch_bch_message *umts_bcch_bch_message_;
+	bool debug_;
 };
 
 

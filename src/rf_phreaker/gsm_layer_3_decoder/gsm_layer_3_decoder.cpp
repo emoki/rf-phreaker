@@ -8,6 +8,7 @@
 #include "rf_phreaker/gsm_layer_3_decoder/gsm_layer_3_decoder.h"
 #include "rf_phreaker/gsm_layer_3_library/gsm_bit_stream.h"
 #include "rf_phreaker/gsm_layer_3_decoder/gsm_layer_3_utility.h"
+#include "rf_phreaker/common/common_utility.h"
 
 using namespace layer_3_information;
 
@@ -25,7 +26,7 @@ int32_t gsm_layer_3_decoder::decode_bcch_message(const uint8_t *bit_stream, uint
 		gsm_bit_stream bits(bit_stream, num_of_bytes, unused_bits);
 
 		if(debug_) {
-			static std::ofstream debug("gsm_bit_streams.txt", std::ios::app);
+			static std::ofstream debug("gsm_bit_streams_" + rf_phreaker::static_timestamp::to_string() + ".txt", std::ios::app);
 			debug << bits << std::endl;
 		}
 

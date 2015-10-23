@@ -43,6 +43,8 @@ public:
 
 	void update_message_decode_list(layer_3_information::gsm_bcch_si_type message_t);
 
+	void output_debug_bit_stream(bool out) { debug_ = out; }
+
 private:
 	bool debug_;
 };
