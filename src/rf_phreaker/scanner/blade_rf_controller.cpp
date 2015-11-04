@@ -313,15 +313,9 @@ void blade_rf_controller::enable_blade_rx(const blade_rx_settings &settings)
 		tmp.rx_sync_buffer_size_ = add_mod(tmp.rx_sync_buffer_size_, 1024);
 		LOG(LWARNING) << "The nr rx sync buffer size is not a multiple of 1024.  Adjusting value to " << tmp.rx_sync_buffer_size_ << ".";
 	}
-#ifdef _DEBUG
-	check_blade_status(nr_sync_config(comm_blade_rf_->blade_rf(), BLADERF_MODULE_RX, BLADERF_FORMAT_SC16_Q11,
-		tmp.rx_sync_num_buffers_, tmp.rx_sync_buffer_size_, tmp.rx_sync_num_transfers_, 
-		tmp.rx_sync_timeout_, __FILE__, __LINE__), __FILE__, __LINE__);
-#else
 	check_blade_status(nr_sync_config(comm_blade_rf_->blade_rf(), BLADERF_MODULE_RX, BLADERF_FORMAT_SC16_Q11,
 		tmp.rx_sync_num_buffers_, tmp.rx_sync_buffer_size_, tmp.rx_sync_num_transfers_,
 		tmp.rx_sync_timeout_, __FILE__, __LINE__), __FILE__, __LINE__);
-#endif
 
 	check_blade_status(nr_enable_module(comm_blade_rf_->blade_rf(),
 		BLADERF_MODULE_RX,
