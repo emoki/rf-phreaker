@@ -784,15 +784,15 @@ measurement_info blade_rf_controller::stream_rf_data_use_auto_gain(frequency_typ
 
 					ipp_helper::subtract_dc(data.get_iq().get(), data.get_iq().length());
 
-					std::unique_lock<std::mutex> lock(meas_buffer_mutex_);
+					std::lock_guard<std::mutex> lock(meas_buffer_mutex_);
 					meas_buffer_.push_back(data);
 				}
-				std::unique_lock<std::mutex> lock(meas_buffer_mutex_);
-				meas_buffer_.clear();
 			}
 			catch(const std::exception &err) {
 				LOG(LERROR) << "Encountered error while attempting to stream. " << err.what();
 			}
+			std::lock_guard<std::mutex> lock(meas_buffer_mutex_);
+			meas_buffer_.clear();
 		}, time_ns, time_ns_to_overlap));
 
 		std::this_thread::sleep_for(std::chrono::nanoseconds(time_ns));
@@ -800,7 +800,7 @@ measurement_info blade_rf_controller::stream_rf_data_use_auto_gain(frequency_typ
 		auto start = std::chrono::high_resolution_clock::now();
 		while(streaming_thread_ && streaming_thread_->joinable()) {
 			if(!meas_buffer_.empty()) {
-				std::unique_lock<std::mutex> lock(meas_buffer_mutex_);
+				std::lock_guard<std::mutex> lock(meas_buffer_mutex_);
 				if(!meas_buffer_.empty()) {
 					auto meas = meas_buffer_.back();
 					meas_buffer_.pop_back();
@@ -821,7 +821,7 @@ measurement_info blade_rf_controller::stream_rf_data_use_auto_gain(frequency_typ
 		auto start = std::chrono::high_resolution_clock::now();
 		while(streaming_thread_ && streaming_thread_->joinable()) {
 			if(!meas_buffer_.empty()) {
-				std::unique_lock<std::mutex> lock(meas_buffer_mutex_);
+				std::lock_guard<std::mutex> lock(meas_buffer_mutex_);
 				if(!meas_buffer_.empty()) {
 					auto meas = meas_buffer_.back();
 					meas_buffer_.pop_back();
