@@ -313,6 +313,14 @@ void blade_rf_controller::enable_blade_rx(const blade_rx_settings &settings)
 		tmp.rx_sync_buffer_size_ = add_mod(tmp.rx_sync_buffer_size_, 1024);
 		LOG(LWARNING) << "The nr rx sync buffer size is not a multiple of 1024.  Adjusting value to " << tmp.rx_sync_buffer_size_ << ".";
 	}
+
+	std::unique_lock<std::recursive_timed_mutex> lock(rx_mutex_, std::defer_lock);
+	lock.try_lock_for(std::chrono::milliseconds(500));
+	if(!lock.owns_lock()) {
+		LOG(LERROR) << "Unable to acquire rx_mutex while enabling rx.";
+		throw rf_phreaker_error("Unable to acquire rx_mutex.");
+	}
+
 	check_blade_status(nr_sync_config(comm_blade_rf_->blade_rf(), BLADERF_MODULE_RX, BLADERF_FORMAT_SC16_Q11,
 		tmp.rx_sync_num_buffers_, tmp.rx_sync_buffer_size_, tmp.rx_sync_num_transfers_,
 		tmp.rx_sync_timeout_, __FILE__, __LINE__), __FILE__, __LINE__);
@@ -323,21 +331,36 @@ void blade_rf_controller::enable_blade_rx(const blade_rx_settings &settings)
 }
 
 void blade_rf_controller::enable_full_streaming_rx() {
-	std::lock_guard<std::mutex> lock(rx_mutex_);
+	std::unique_lock<std::recursive_timed_mutex> lock(rx_mutex_, std::defer_lock);
+	lock.try_lock_for(std::chrono::milliseconds(500));
+	if(!lock.owns_lock()) {
+		LOG(LERROR) << "Unable to acquire rx_mutex while enabling full rx streaming.";
+		throw rf_phreaker_error("Unable to acquire rx_mutex.");
+	}
 	enable_blade_rx(blade_settings_stream_);
 	is_streaming_ = FULL_STREAMING;
 }
 
 void blade_rf_controller::enable_intermittent_streaming_rx() {
-	std::lock_guard<std::mutex> lock(rx_mutex_);
+	std::unique_lock<std::recursive_timed_mutex> lock(rx_mutex_, std::defer_lock);
+	lock.try_lock_for(std::chrono::milliseconds(500));
+	if(!lock.owns_lock()) {
+		LOG(LERROR) << "Unable to acquire rx_mutex while enabling intermittent rx streaming.";
+		throw rf_phreaker_error("Unable to acquire rx_mutex.");
+	}
 	enable_blade_rx(blade_settings_);
 	is_streaming_ = INTERMITTENT_STREAMING;
 }
 
 void blade_rf_controller::disable_blade_rx()
 {
-	std::lock_guard<std::mutex> lock(rx_mutex_);
 	stop_streaming();
+	std::unique_lock<std::recursive_timed_mutex> lock(rx_mutex_, std::defer_lock);
+	lock.try_lock_for(std::chrono::milliseconds(500));
+	if(!lock.owns_lock()) {
+		LOG(LERROR) << "Unable to acquire rx_mutex while disabling rx streaming.";
+		throw rf_phreaker_error("Unable to acquire rx_mutex.");
+	}
 	check_blade_comm();
 	check_blade_status(nr_enable_module(comm_blade_rf_->blade_rf(),
 		BLADERF_MODULE_RX,
