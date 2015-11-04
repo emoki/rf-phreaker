@@ -534,10 +534,7 @@ measurement_info blade_rf_controller::get_rf_data(frequency_type frequency, time
 	auto aligned_buffer = aligned_buffer_.get_aligned_array();
 
 	if(is_streaming_ != INTERMITTENT_STREAMING) {
-		if(streaming_thread_ && streaming_thread_->joinable()) {
-			is_streaming_ = NOT_STREAMING;
-			streaming_thread_->join();
-		}
+		stop_streaming();
 		enable_intermittent_streaming_rx();
 	}
 
@@ -685,10 +682,7 @@ measurement_info blade_rf_controller::stream_rf_data_use_auto_gain(frequency_typ
 	if(!streaming_thread_ || !streaming_thread_->joinable() || frequency != parameter_cache_.frequency() || bandwidth != parameter_cache_.bandwidth() || sampling_rate != parameter_cache_.sampling_rate()) {
 		configure_rf_parameters_use_auto_gain(frequency, time_ns, bandwidth, sampling_rate);
 
-		if(streaming_thread_ && streaming_thread_->joinable()) {
-			is_streaming_ = NOT_STREAMING;
-			streaming_thread_->join();
-		}
+		stop_streaming();
 
 		if(time_ns_to_overlap > time_ns) {
 			throw misc_error("The total time for streaming must be larger than the overlap time.");
