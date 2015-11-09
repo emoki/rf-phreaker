@@ -10,8 +10,8 @@ class CollectionManagerTest : public ::testing::Test
 {
 protected:
 	CollectionManagerTest(int num = 1000)
-		: cp(0, 50, 10000000)
-		, cp_manager(rf_phreaker::UNKOWN_SPECIFIER, true)
+		: cp(0, 50, 10000000, 100000, rf_phreaker::specifier::LTE_LAYER_3_DECODE)
+		, cp_manager(rf_phreaker::specifier::LTE_LAYER_3_DECODE, true)
 		, max_num(num)
 	{
 

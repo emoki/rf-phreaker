@@ -10,7 +10,7 @@ void save(Archive & ar, const rf_phreaker::scanner::measurement_info &sig, const
 
 	int64_t collection_round = sig.collection_round();
 	rf_phreaker::scanner::gain_type gain = sig.gain();
-	rf_phreaker::operating_band operating_band = sig.get_operating_band();
+	rf_phreaker::operating_bands operating_bands = sig.get_operating_bands();
 	auto blade_adjustments = sig.blade_adjustments();
 	auto rf_board_adjustments =  sig.rf_board_adjustments();
 	std::string serial = sig.serial();
@@ -19,7 +19,7 @@ void save(Archive & ar, const rf_phreaker::scanner::measurement_info &sig, const
 	ar & gain.lna_gain_;
 	ar & gain.rxvga1_;
 	ar & gain.rxvga2_;
-	ar & operating_band;
+	ar & operating_bands;
 	ar & blade_adjustments;
 	ar & rf_board_adjustments;
 	ar & serial;
@@ -33,7 +33,7 @@ void load(Archive & ar, rf_phreaker::scanner::measurement_info &sig, const unsig
 
 	int64_t collection_round;
 	gain_type gain;
-	rf_phreaker::operating_band operating_band;
+	rf_phreaker::operating_bands operating_bands;
 	double tmp_blade_adjustment;
 	double tmp_rf_board_adjustment;
 	rf_adjustment blade_adjustment;
@@ -45,8 +45,17 @@ void load(Archive & ar, rf_phreaker::scanner::measurement_info &sig, const unsig
 	ar & gain.rxvga1_;
 	ar & gain.rxvga2_;
 	sig.gain(gain);
-	ar & operating_band;
-	sig.set_operating_band(operating_band);
+	if(version <= 1) {
+		rf_phreaker::operating_band b;
+		rf_phreaker::operating_bands bs;
+		ar & b;
+		operating_bands.add_band(b);
+	}
+	else {
+		ar & operating_bands;
+	}
+	sig.set_operating_bands(operating_bands);
+
 	if(version == 0) {
 		ar & tmp_blade_adjustment;
 		ar & tmp_rf_board_adjustment;
@@ -73,4 +82,4 @@ void serialize(Archive & ar, rf_phreaker::scanner::measurement_info &sig, const 
 }}
 
 
-BOOST_CLASS_VERSION(rf_phreaker::scanner::measurement_info, 1)
+BOOST_CLASS_VERSION(rf_phreaker::scanner::measurement_info, 2)

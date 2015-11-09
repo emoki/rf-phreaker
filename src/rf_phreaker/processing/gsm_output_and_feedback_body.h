@@ -46,9 +46,9 @@ public:
 		for(auto &i : info.processed_data_) {
 			if(do_we_add_freq(i.center_frequency_)) {
 				// Add the freq to the layer_3_decoder making sure that we use a center freq that does not represent a true GSM channel.
-				auto freq = calculate_closest_freq(i.center_frequency_, meas.get_operating_band());
+				auto freq = calculate_closest_freq(i.center_frequency_, meas.get_gsm_band());
 				added_freqs_.insert(freq);
-				std::get<0>(out).try_put(add_collection_info(gsm_layer_3_collection_info(freq, meas.get_operating_band(), true), GSM_LAYER_3_DECODE));
+				std::get<0>(out).try_put(add_collection_info(gsm_layer_3_collection_info(freq, meas.get_gsm_band(), true)));
 			}
 		}
 		std::get<1>(out).try_put(tbb::flow::continue_msg());
@@ -111,7 +111,7 @@ public:
 
 		// Add the freq to the layer_3_decoder.
 		if(info.remove_) {
-			std::get<0>(out).try_put(remove_collection_info(gsm_layer_3_collection_info(meas.frequency(), meas.get_operating_band(), info.measurement_package_.can_remove_), GSM_LAYER_3_DECODE));
+			std::get<0>(out).try_put(remove_collection_info(gsm_layer_3_collection_info(meas.frequency(), meas.get_gsm_band(), info.measurement_package_.can_remove_)));
 		}
 
 		std::vector<gsm_data> gsm_group;

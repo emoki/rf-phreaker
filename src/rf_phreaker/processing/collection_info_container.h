@@ -13,30 +13,27 @@ typedef std::vector<collection_info_container> collection_info_containers;
 class add_remove_collection_info
 {
 public:
-	add_remove_collection_info() : tech_(UNKOWN_SPECIFIER) {};
-	add_remove_collection_info(const add_remove_collection_info &info) : add_(info.add_), remove_(info.remove_), tech_(info.tech_) {};
+	add_remove_collection_info() {};
+	add_remove_collection_info(const add_remove_collection_info &info) : add_(info.add_), remove_(info.remove_) {};
 	collection_info_group_type add_;
 	collection_info_group_type remove_;
-	specifier tech_;
 };
 
 class add_collection_info : public add_remove_collection_info
 {
 public:
-	add_collection_info(collection_info info, specifier tech = UNKOWN_SPECIFIER)
+	add_collection_info(collection_info info)
 	{
 		add_.push_back(std::move(info));
-		tech_ = tech;
 	}
 };
 
 class remove_collection_info : public add_remove_collection_info
 {
 public:
-	remove_collection_info(collection_info info, specifier tech = UNKOWN_SPECIFIER)
+	remove_collection_info(collection_info info)
 	{
 		remove_.push_back(std::move(info));
-		tech_ = tech;
 	}
 };
 
@@ -44,18 +41,16 @@ public:
 class collection_info_container
 {
 public:
-	class collection_info_container(specifier tech = UNKOWN_SPECIFIER, bool finish_after_iteration = false)
+	class collection_info_container(specifiers specs = {}, bool finish_after_iteration = false)
 		: position_(0)
 		, include_first_position_(true)
 		, finished_(false)
 		, collection_round_(0)
-		, tech_(tech)
-		, finish_after_iteration_(finish_after_iteration) 
-	{}
+		, finish_after_iteration_(finish_after_iteration)
+		, specs_(specs) {}
 
-	void adjust(add_remove_collection_info param)
-	{
-		if(!collection_info_group_.empty() && param.remove_.size()) {
+	void adjust(add_remove_collection_info param) {
+		if(!collection_info_group_.empty() && param.remove_.size() && specs_.does_overlap(param.remove_[0].specs_)) {
 			// Remove entries from the beginning of the manager to our current position (current position is inclusive!) keeping track of removals.
 			uint32_t remove_count = 0;
 			collection_info_group_.erase(std::remove_if(std::begin(collection_info_group_), std::begin(collection_info_group_) + position_ + 1, [&](const collection_info &p) {
@@ -79,7 +74,7 @@ public:
 		}
 
 		// add new entries.
-		if(param.add_.size()) {
+		if(param.add_.size() && specs_.does_overlap(param.add_[0].specs_)) {
 			// If we add freqs then restart collection by saying we're not finished.
 			finished_ = false;
 
@@ -129,8 +124,7 @@ public:
 		return info;
 	}
 
-	bool get_next_info(collection_info &p)
-	{
+	bool get_next_info(collection_info &p) {
 		increment();
 		if(finished_)
 			return false;
@@ -138,15 +132,13 @@ public:
 		return true;
 	}
 
-	collection_info try_get_next_info()
-	{
+	collection_info try_get_next_info() {
 		collection_info info;
 		get_next_info(info);
 		return info;
 	}
 
-	void increment()
-	{
+	void increment() {
 		if(collection_info_group_.empty()) {
 			position_ = 0;
 			include_first_position_ = true;
@@ -172,18 +164,25 @@ public:
 
 	int64_t collection_round() { return collection_round_; }
 
-	specifier get_technology() { return tech_; }
-
-	void set_technology(specifier tech) { tech_ = tech; }
-
 	bool is_finished() { return finished_; }
 
-	void reset() 
-	{ 
+	void reset() {
 		collection_round_ = 0;
-		include_first_position_ = true; 
-		position_ = 0; 
-		finished_ = false; 
+		include_first_position_ = true;
+		position_ = 0;
+		finished_ = false;
+	}
+
+	bool has_specifier(specifier spec) const {
+		return specs_.has_spec(spec);
+	}
+
+	void add_specifier(specifier spec) {
+		specs_.add_spec(spec);
+	}
+
+	void remove_specifier(specifier spec) {
+		specs_.remove_spec(spec);
 	}
 
 	collection_info_group_type collection_info_group_;
@@ -196,9 +195,9 @@ public:
 
 	int64_t collection_round_;
 
-	specifier tech_;
-
 	bool finish_after_iteration_;
+
+	specifiers specs_;
 };
 
 

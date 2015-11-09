@@ -10,7 +10,7 @@ TEST(MeasurementInfo, TestMain)
 	gain_type g(lms::LNA_MAX, 30, 10);
 	rf_phreaker::frequency_type freq = 1001;
 	measurement_info test(signal_size, freq, 1002, 1003, g, std::chrono::milliseconds(1004), rf_adjustment{{freq, freq}, 1}, rf_adjustment{{freq, freq}, 2}, 1004, "1234567891234567891234");
-	test.set_operating_band(rf_phreaker::UMTS_OPERATING_BAND_1);
+	test.set_operating_bands(rf_phreaker::operating_bands({rf_phreaker::UMTS_OPERATING_BAND_1, rf_phreaker::LTE_OPERATING_BAND_10}));
 
 	for(int i = 0; i < signal_size; ++i) {
 		test.get_iq()[i].re = (float)i;

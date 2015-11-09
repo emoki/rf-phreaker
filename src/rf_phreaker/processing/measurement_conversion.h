@@ -65,11 +65,11 @@ inline void convert_to_gsm_data(gsm_data &data, const scanner::measurement_info 
 	data.bsic_ = gsm.bsic_;
 	data.tdma_frame_number_ = gsm.tdma_frame_number_;
 	data.ctoi_ = gsm.c_i_ratio_;
-	data.operating_band_ = info.get_operating_band();
+	data.operating_band_ = info.get_gsm_band();
 	data.cell_signal_level_ = scanner::signal_level_calculator::calculate_sl(gsm.rms_corr_power_, info, gsm.center_frequency_);
 	data.layer_3_ = gsm.layer_3_;
 	static channel_conversion conversion;
-	data.arfcn_ = conversion.frequency_to_arfcn(gsm.center_frequency_, info.get_operating_band()).channel_;
+	data.arfcn_ = conversion.frequency_to_arfcn(gsm.center_frequency_, info.get_gsm_band()).channel_;
 }
 
 inline gsm_data convert_to_gsm_data(const scanner::measurement_info &info, const gsm_measurement &gsm) {
@@ -82,11 +82,11 @@ inline void convert_to_umts_data(umts_data &data, const scanner::measurement_inf
 	convert_to_basic_data(data, info, umts.rms_signal_);
 	data.cpich_ = umts.cpich_;
 	data.ecio_ = umts.ecio_;
-	data.operating_band_ = info.get_operating_band();
+	data.operating_band_ = info.get_umts_band();
 	data.rscp_ = data.carrier_signal_level_ + data.ecio_;
 	data.layer_3_ = umts.layer_3_;
 	static channel_conversion conversion;
-	data.uarfcn_ = conversion.frequency_to_uarfcn(info.frequency(), info.get_operating_band()).channel_;
+	data.uarfcn_ = conversion.frequency_to_uarfcn(info.frequency(), info.get_umts_band()).channel_;
 }
 
 inline umts_data convert_to_umts_data(const scanner::measurement_info &info, const umts_measurement &umts) {
@@ -104,8 +104,8 @@ inline void convert_to_lte_data(lte_data &data, const scanner::measurement_info 
 	data.layer_3_ = lte.layer_3_;
 	data.num_antenna_ports_ = lte.NumAntennaPorts;
 	static channel_conversion conversion;
-	data.operating_band_ = info.get_operating_band();
-	data.earfcn_ = conversion.frequency_to_earfcn(info.frequency(), info.get_operating_band()).channel_;
+	data.operating_band_ = info.get_lte_band();
+	data.earfcn_ = conversion.frequency_to_earfcn(info.frequency(), info.get_lte_band()).channel_;
 	data.physical_cell_id_ = lte.RsRecord.ID;
 	data.psch_id_ = lte.PschRecord.ID;
 	data.psch_quality_ = lte.PschRecord.NormCorr;

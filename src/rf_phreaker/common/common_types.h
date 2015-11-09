@@ -2,6 +2,8 @@
 
 #include <stdint.h>
 #include <string>
+#include <set>
+#include <vector>
 
 namespace rf_phreaker {
 
@@ -27,6 +29,30 @@ enum specifier
 	LTE_LAYER_3_DECODE,
 	RAW_DATA,
 	UNKOWN_SPECIFIER
+};
+
+class specifiers {
+public:
+	specifiers() {}
+	specifiers(specifier spec) : specs_({spec}) {}
+	specifiers(std::vector<specifier> specs) {
+		for(auto &i : specs)
+			specs_.insert(i);
+	}
+	void add_spec(specifier spec) { specs_.insert(spec); }
+	void remove_spec(specifier spec) { specs_.erase(spec); }
+	bool has_spec(specifier spec) const { return specs_.find(spec) != specs_.end(); }
+	bool does_overlap(const specifiers &specs) {
+		for(const auto &i : specs.specs_) {
+			if(specs_.find(i) != specs_.end())
+				return true;
+		}
+		return false;
+	}
+	bool operator==(const specifiers& s) const { return specs_ == s.specs_; }
+	bool operator!=(const specifiers& s) const { return specs_ != s.specs_; }
+private:
+	std::set<specifier> specs_;
 };
 
 struct frequency_path
@@ -145,6 +171,33 @@ enum operating_band
 	LAST_UMTS_OPERATING_BAND = UMTS_OPERATING_BAND_26,
 	FIRST_LTE_OPERATING_BAND = LTE_OPERATING_BAND_1,
 	LAST_LTE_OPERATING_BAND = LTE_OPERATING_BAND_44,
+};
+
+class operating_bands {
+public:
+	operating_bands() {}
+	operating_bands(operating_band band) : bands_({band}) {}
+	operating_bands(std::vector<operating_band> bands) {
+		for(auto &i : bands)
+			bands_.insert(i);
+	}
+	void add_band(operating_band band) { bands_.insert(band); }
+	void remove_band(operating_band band) { bands_.erase(band); }
+	bool has_band(operating_band band) const { return bands_.find(band) != bands_.end(); }
+	bool operator==(const operating_bands& s) const { return bands_ == s.bands_; }
+	bool operator!=(const operating_bands& s) const { return bands_ != s.bands_; }
+	operating_band get_first_band() const { return bands_.size() ? *bands_.begin() : OPERATING_BAND_UNKNOWN; }
+	operating_band find_lte_band() const { return find_band(FIRST_LTE_OPERATING_BAND, LAST_LTE_OPERATING_BAND); }
+	operating_band find_gsm_band() const { return find_band(FIRST_GSM_OPERATING_BAND, LAST_GSM_OPERATING_BAND); }
+	operating_band find_umts_band() const { return find_band(FIRST_UMTS_OPERATING_BAND, LAST_UMTS_OPERATING_BAND); }
+	operating_band find_band(operating_band begin, operating_band end) const {
+		for(const auto& i : bands_) {
+			if(i >= begin && i <= end)
+				return i;
+		}
+		return OPERATING_BAND_UNKNOWN;
+	}
+	std::set<operating_band> bands_;
 };
 
 struct channel_freq

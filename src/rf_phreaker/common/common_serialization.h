@@ -4,7 +4,9 @@
 #include "boost/serialization/version.hpp"
 #include "boost/serialization/vector.hpp"
 #include "boost/serialization/map.hpp"
+#include "boost/serialization/set.hpp"
 #include "rf_phreaker/common/raw_signal.h"
+#include "rf_phreaker/common/common_types.h"
 
 BOOST_CLASS_VERSION(::rf_phreaker::raw_signal, 2)
 
@@ -92,5 +94,9 @@ void serialize(Archive & ar, rf_phreaker::raw_signal &sig, const unsigned int ve
 	boost::serialization::split_free(ar, sig, version);
 }
 
+template<class Archive>
+void serialize(Archive & ar, rf_phreaker::operating_bands &a, const unsigned int version) {
+	ar & a.bands_;
+}
 
 }}

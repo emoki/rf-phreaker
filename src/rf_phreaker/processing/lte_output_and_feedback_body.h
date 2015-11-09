@@ -57,9 +57,9 @@ public:
 					collection_bw = lte_layer_3_collection_info::bandwidth__;
 
 				auto packet = lte_layer_3_collection_info(meas.frequency(), collection_sampling_rate,
-					collection_bw, meas.get_operating_band(), true);
+					collection_bw, meas.get_lte_band(), true);
 
-				std::get<0>(out).try_put(add_collection_info(packet, LTE_LAYER_3_DECODE));
+				std::get<0>(out).try_put(add_collection_info(packet));
 
 				// Add packet info to our freqs_currently_added_.
 				freqs_currently_added_.push_back(packet);
@@ -89,7 +89,6 @@ private:
 	{
 		std::vector<lte_layer_3_collection_info> new_list;
 		add_remove_collection_info to_remove;
-		to_remove.tech_ = LTE_LAYER_3_DECODE;
 		for(auto info : freqs_currently_added_) {
 			if(tracker_.is_within_stronger_measurement_bandwidth(info.freq_)) {
 				to_remove.remove_.push_back(info);
@@ -142,7 +141,7 @@ public:
 		// Remove freq if indicated.
 		if(do_we_remove_collection_info(info)) {
 			std::get<0>(out).try_put(remove_collection_info(lte_layer_3_collection_info(meas.frequency(), meas.sampling_rate(),
-				meas.bandwidth(), meas.get_operating_band(), info.measurement_package_.can_remove_), LTE_LAYER_3_DECODE));
+				meas.bandwidth(), meas.get_lte_band(), info.measurement_package_.can_remove_)));
 		}
 		
 		std::vector<lte_data> lte_group;
@@ -173,13 +172,12 @@ public:
 
 					if(sampling_rate != 0 && sampling_rate != meas.sampling_rate()) {
 						add_remove_collection_info params;
-						params.tech_ = LTE_LAYER_3_DECODE;
 
 						params.remove_.push_back(lte_layer_3_collection_info(meas.frequency(), meas.sampling_rate(),
-							meas.bandwidth(), meas.get_operating_band()));
+							meas.bandwidth(), meas.get_lte_band()));
 
 						params.add_.push_back(lte_layer_3_collection_info(meas.frequency(), sampling_rate, determine_bandwidth_for_collection(decoded_bw),
-							meas.get_operating_band(), info.measurement_package_.can_remove_));
+							meas.get_lte_band(), info.measurement_package_.can_remove_));
 
 						std::get<0>(out).try_put(params);
 					}

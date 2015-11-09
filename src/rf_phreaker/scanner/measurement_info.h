@@ -21,7 +21,7 @@ public:
 		:raw_signal(0, -1, -1, -1, std::chrono::milliseconds(0))
 		, gain_(lms::LNA_UNKNOWN, -1, -1)
 		, collection_round_(-1)
-		, operating_band_(OPERATING_BAND_UNKNOWN)
+		, operating_bands_(OPERATING_BAND_UNKNOWN)
 		, serial_("00000000000000000000000000000000")
 	{}
 
@@ -31,7 +31,7 @@ public:
 		: raw_signal(num_samples, frequency, bandwidth, sampling_rate, orgin_time_pc)
 		, gain_(gain)
 		, collection_round_(cr)
-		, operating_band_(OPERATING_BAND_UNKNOWN)
+		, operating_bands_(OPERATING_BAND_UNKNOWN)
 		, blade_adjustments_(blade_adj)
 		, rf_board_adjustments_(band_adj)
 		, serial_(serial) {}
@@ -40,7 +40,7 @@ public:
 		: raw_signal(other)
 		, collection_round_(other.collection_round_)
 		, gain_(other.gain_)
-		, operating_band_(other.operating_band_)
+		, operating_bands_(other.operating_bands_)
 		, blade_adjustments_(other.blade_adjustments_)
 		, rf_board_adjustments_(other.rf_board_adjustments_)
 		, serial_(other.serial_)
@@ -50,7 +50,7 @@ public:
 		: raw_signal(std::move(other))
 		, gain_(std::move(other.gain_))
 		, collection_round_(std::move(other.collection_round_))
-		, operating_band_(std::move(other.operating_band_))
+		, operating_bands_(std::move(other.operating_bands_))
 		, blade_adjustments_(std::move(other.blade_adjustments_))
 		, rf_board_adjustments_(std::move(other.rf_board_adjustments_))
 		, serial_(std::move(other.serial_))
@@ -65,7 +65,7 @@ public:
 	bool operator ==(const measurement_info &a) const {
 		return gain_ == a.gain() &&
 			collection_round_ == a.collection_round() &&
-			operating_band_ == a.operating_band_ &&
+			operating_bands_ == a.operating_bands_ &&
 			blade_adjustments_ == a.blade_adjustments() &&
 			rf_board_adjustments_ == a.rf_board_adjustments() &&
 			serial_ == a.serial() &&
@@ -77,7 +77,7 @@ public:
 		raw_signal::swap(other);
 		std::swap(this->collection_round_, other.collection_round_);
 		std::swap(this->gain_, other.gain_);
-		std::swap(this->operating_band_, other.operating_band_);
+		std::swap(this->operating_bands_, other.operating_bands_);
 		std::swap(this->blade_adjustments_, other.blade_adjustments_);
 		std::swap(this->rf_board_adjustments_, other.rf_board_adjustments_);
 		std::swap(this->serial_, other.serial_);
@@ -85,7 +85,7 @@ public:
 
 	const gain_type& gain() const { return gain_; }
 	int64_t collection_round() const { return collection_round_; }
-	operating_band get_operating_band() const { return operating_band_; }
+	const operating_bands& get_operating_bands() const { return operating_bands_; }
 	const rf_adjustment& blade_adjustments() const { return blade_adjustments_; }
 	void gain(const gain_type &gain) { gain_ = gain; }
 	const rf_adjustment& rf_board_adjustments() const { return rf_board_adjustments_; }
@@ -94,10 +94,14 @@ public:
 	std::string serial() const { return serial_; }
 
 	void collection_round(int64_t cr) { collection_round_ = cr; }
-	void set_operating_band(operating_band band) { operating_band_ = band; }
+	void set_operating_bands(operating_bands bands) { operating_bands_ = bands; }
 	void blade_adjustments(rf_adjustment adj) { blade_adjustments_ = adj; }
 	void rf_board_adjustments(rf_adjustment adj) { rf_board_adjustments_ = adj; }
 	void serial(std::string serial) { serial_ = serial; }
+
+	operating_band get_gsm_band() const { return operating_bands_.find_gsm_band(); }
+	operating_band get_umts_band() const { return operating_bands_.find_umts_band(); }
+	operating_band get_lte_band() const { return operating_bands_.find_lte_band(); }
 
 	friend inline std::ostream& operator<<(std::ostream &os, const rf_phreaker::scanner::measurement_info &t);
 	friend inline std::istream& operator>>(std::istream &os, rf_phreaker::scanner::measurement_info &t);
@@ -105,7 +109,7 @@ public:
 private:
 	int64_t collection_round_;
 	gain_type gain_;
-	operating_band operating_band_;
+	operating_bands operating_bands_;
 	rf_adjustment blade_adjustments_;
 	rf_adjustment rf_board_adjustments_;
 	std::string serial_;
@@ -115,9 +119,11 @@ inline std::ostream& operator<<(std::ostream &os, const rf_phreaker::scanner::me
 {
 	const char* header = "measurement";
 	os << header << "\t";
-	os << 3 << "\t";
+	os << 4 << "\t";
 	os << t.collection_round_ << "\t";
-	os << t.operating_band_ << "\t";
+	os << t.operating_bands_.bands_.size() << "\t";
+	for(const auto i : t.operating_bands_.bands_)
+		os << i << "\t";
 	os << t.gain_.lna_gain_ << "\t";
 	os << t.gain_.rxvga1_ << "\t";
 	os << t.gain_.rxvga2_ << "\t";
@@ -156,8 +162,16 @@ inline std::istream& operator>>(std::istream &is, rf_phreaker::scanner::measurem
 		int version = stoi(parsed_data[pos++]);
 		if(version >= 1) {
 			t.collection_round_ = stoll(parsed_data[pos++]);
-			int i = stoi(parsed_data[pos++]); t.operating_band_ = static_cast<operating_band>(i);
-			i = stoi(parsed_data[pos++]);  t.gain_.lna_gain_ = lms::to_lna_gain(i);
+			if(version <= 3) {
+				int i = stoi(parsed_data[pos++]); 
+				t.operating_bands_.add_band(static_cast<operating_band>(i));
+			}
+			else {
+				int size = stoi(parsed_data[pos++]);
+				for(int i = 0; i < size; ++i)
+					t.operating_bands_.add_band(static_cast<operating_band>(stoi(parsed_data[pos++])));
+			}
+			int i = stoi(parsed_data[pos++]);  t.gain_.lna_gain_ = lms::to_lna_gain(i);
 			t.gain_.rxvga1_ = stoi(parsed_data[pos++]);
 			t.gain_.rxvga2_ = stoi(parsed_data[pos++]);
 		}
@@ -166,7 +180,7 @@ inline std::istream& operator>>(std::istream &is, rf_phreaker::scanner::measurem
 			t.rf_board_adjustments_ = rf_adjustment(frequency_path(), std::stod(parsed_data[pos++]));
 			t.serial_ = parsed_data[pos++];
 		}
-		else if(version == 3) {
+		else if(version >= 3) {
 			t.blade_adjustments_.path_.low_freq_ = std::stoll(parsed_data[pos++]);
 			t.blade_adjustments_.path_.high_freq_ = std::stoll(parsed_data[pos++]);
 			t.blade_adjustments_.spacing_ = std::stoll(parsed_data[pos++]);

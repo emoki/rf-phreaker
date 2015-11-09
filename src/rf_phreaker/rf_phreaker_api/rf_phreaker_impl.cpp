@@ -433,14 +433,14 @@ rp_status rf_phreaker_impl::add_collection_frequency(rp_device *device, rp_techn
 
 		auto specifier = to_layer_3_specifier(data);
 		auto it = std::find_if(containers_.begin(), containers_.end(), [&](const collection_info_container &c) {
-			return c.tech_ == specifier;
+			return c.has_specifier(specifier);
 		});
 
 		if(it == containers_.end()) {
 			// If simultaneous collection is enabled we do not want to stop collection after one iteration of freqs.
 			containers_.push_back(collection_info_container(specifier, !config_.simultaneous_collection_));
 			it = std::find_if(containers_.begin(), containers_.end(), [&](const collection_info_container &c) {
-				return c.tech_ == specifier;
+				return c.has_specifier(specifier);
 			});
 		}
 
@@ -478,7 +478,7 @@ rp_status rf_phreaker_impl::remove_collection_frequency(rp_device *device, rp_te
 
 		auto specifier = to_layer_3_specifier(data);
 		auto it = std::find_if(containers_.begin(), containers_.end(), [&](const collection_info_container &c) {
-			return c.tech_ == specifier;
+			return c.has_specifier(specifier);
 		});
 
 		if(it == containers_.end()) {
@@ -577,13 +577,13 @@ rp_status rf_phreaker_impl::add_sweep_operating_band(rp_device *device, rp_opera
 processing::collection_info_containers::iterator rf_phreaker_impl::add_sweep(specifier sweep, specifier decode) {
 	using namespace ::rf_phreaker::processing;
 	auto it = std::find_if(containers_.begin(), containers_.end(), [&](const collection_info_container &c) {
-		return c.tech_ == sweep;
+		return c.has_specifier(sweep);
 	});
 	if(it == containers_.end()) {
 		containers_.push_back(collection_info_container(sweep, !config_.simultaneous_collection_));
 		containers_.push_back(collection_info_container(decode, false));
 		it = std::find_if(containers_.begin(), containers_.end(), [&](const collection_info_container &c) {
-			return c.tech_ == sweep;
+			return c.has_specifier(sweep);
 		});
 	}
 	return it;
@@ -626,7 +626,7 @@ rp_status rf_phreaker_impl::remove_sweep_operating_band(rp_device *device, rp_op
 void rf_phreaker_impl::remove_sweep(operating_band band, specifier sweep) {
 	using namespace ::rf_phreaker::processing;
 	auto it = std::find_if(containers_.begin(), containers_.end(), [&](const collection_info_container &c) {
-		return c.tech_ == sweep;
+		return c.has_specifier(sweep);
 	});
 	if(it != containers_.end()) {
 		auto range = operating_bands_.get_band_freq_range(band);
@@ -750,7 +750,7 @@ rp_status rf_phreaker_impl::stop_collection(rp_device *device) {
 		for(auto &c : containers_) {
 			for(auto &i : c.collection_info_group_) {
 				if(i.can_remove_)
-					c.adjust(processing::remove_collection_info(i, c.get_technology()));
+					c.adjust(processing::remove_collection_info(i));
 			}
 		}
 

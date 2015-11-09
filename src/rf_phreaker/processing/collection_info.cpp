@@ -68,13 +68,13 @@ collection_info rf_phreaker::processing::create_tech_collection_info(rf_phreaker
 	switch(tech) {
 	case GSM_SWEEP: {
 		gsm_sweep_collection_info a(freq);
-		a.operating_band_ = band;
+		a.operating_bands_ = band;
 		a.can_remove_ = can_remove;
 		return a;
 	}
 	case GSM_LAYER_3_DECODE: {
 		gsm_layer_3_collection_info a(freq);
-		a.operating_band_ = band;
+		a.operating_bands_ = band;
 		a.can_remove_ = can_remove;
 		return a;
 	}
@@ -90,25 +90,25 @@ collection_info rf_phreaker::processing::create_tech_collection_info(rf_phreaker
 	//	return a;
 	case UMTS_SWEEP: {
 		umts_sweep_collection_info a(freq);
-		a.operating_band_ = band;
+		a.operating_bands_ = band;
 		a.can_remove_ = can_remove;
 		return a;
 	}
 	case UMTS_LAYER_3_DECODE: {
 		umts_layer_3_collection_info a(freq);
-		a.operating_band_ = band;
+		a.operating_bands_ = band;
 		a.can_remove_ = can_remove;
 		return a;
 	}
 	case LTE_SWEEP: {
 		lte_sweep_collection_info a(freq);
-		a.operating_band_ = band;
+		a.operating_bands_ = band;
 		a.can_remove_ = can_remove;
 		return a;
 	}
 	case LTE_LAYER_3_DECODE: {
 		lte_layer_3_collection_info a(freq);
-		a.operating_band_ = band;
+		a.operating_bands_ = band;
 		a.can_remove_ = can_remove;
 		return a;
 	}
@@ -119,4 +119,9 @@ collection_info rf_phreaker::processing::create_tech_collection_info(rf_phreaker
 	default:
 		throw misc_error("Unknown tech specifier.");
 	}
+}
+
+collection_info rf_phreaker::processing::create_sweep_collection_info(rf_phreaker::specifiers specs, rf_phreaker::frequency_type freq, operating_bands bands, bool can_remove) {
+	sweep_collection_info a(freq, specs, bands, can_remove);
+	return a;
 }

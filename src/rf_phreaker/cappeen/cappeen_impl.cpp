@@ -485,14 +485,14 @@ processing::collection_info_containers cappeen_impl::create_collection_info_cont
 
 		if(band >= FIRST_GSM_OPERATING_BAND && band <= LAST_GSM_OPERATING_BAND) {
 			auto it = std::find_if(containers.begin(), containers.end(), [&](const collection_info_container &c) {
-				return c.tech_ == GSM_SWEEP;
+				return c.has_specifier(GSM_SWEEP);
 			});
 
 			if(it == containers.end()) {
 				containers.push_back(collection_info_container(GSM_SWEEP, true));
 				containers.push_back(collection_info_container(GSM_LAYER_3_DECODE, false));
 				it = std::find_if(containers.begin(), containers.end(), [&](const collection_info_container &c) {
-					return c.tech_ == GSM_SWEEP;
+					return c.has_specifier(GSM_SWEEP);
 				});
 			}
 
@@ -501,14 +501,14 @@ processing::collection_info_containers cappeen_impl::create_collection_info_cont
 		}
 		else if(band >= FIRST_UMTS_OPERATING_BAND && band <= LAST_UMTS_OPERATING_BAND) {
 			auto it = std::find_if(containers.begin(), containers.end(), [&](const collection_info_container &c) {
-				return c.tech_ == UMTS_SWEEP;
+				return c.has_specifier(UMTS_SWEEP);
 			});
 
 			if(it == containers.end()) {
 				containers.push_back(collection_info_container(UMTS_SWEEP, true));
 				containers.push_back(collection_info_container(UMTS_LAYER_3_DECODE, false));
 				it = std::find_if(containers.begin(), containers.end(), [&](const collection_info_container &c) {
-					return c.tech_ == UMTS_SWEEP;
+					return c.has_specifier(UMTS_SWEEP);
 				});
 			}
 
@@ -520,14 +520,14 @@ processing::collection_info_containers cappeen_impl::create_collection_info_cont
 		}
 		else if(band >= FIRST_LTE_OPERATING_BAND && band <= LAST_LTE_OPERATING_BAND) {
 			auto it = std::find_if(containers.begin(), containers.end(), [&](const collection_info_container &c) {
-				return c.tech_ == LTE_SWEEP;
+				return c.has_specifier(LTE_SWEEP);
 			});
 
 			if(it == containers.end()) {
 				containers.push_back(collection_info_container(LTE_SWEEP, true));
 				containers.push_back(collection_info_container(LTE_LAYER_3_DECODE, false));
 				it = std::find_if(containers.begin(), containers.end(), [&](const collection_info_container &c) {
-					return c.tech_ == LTE_SWEEP;
+					return c.has_specifier(LTE_SWEEP);
 				});
 			}
 
@@ -537,12 +537,12 @@ processing::collection_info_containers cappeen_impl::create_collection_info_cont
 
 	// Comply with beagle_api behavior.  Go thru and change any xxxx.5 freqs that are in the operating band 1 to operating band 4.
 	auto it = std::find_if(containers.begin(), containers.end(), [&](const collection_info_container &c) {
-		return c.tech_ == UMTS_SWEEP;
+		return c.has_specifier(UMTS_SWEEP);
 	});
 	if(it != containers.end()) {
 		for(auto &ci : it->collection_info_group_) {
-			if(ci.operating_band_ == UMTS_OPERATING_BAND_1 && ci.freq_ % khz(200) != 0)
-				ci.operating_band_ = UMTS_OPERATING_BAND_4;
+			if(ci.operating_bands_.has_band(UMTS_OPERATING_BAND_1) && ci.freq_ % khz(200) != 0)
+				ci.operating_bands_ = UMTS_OPERATING_BAND_4;
 		}
 	}
 
@@ -556,7 +556,7 @@ void cappeen_impl::check_bands(const processing::collection_info_containers &con
 	for(auto &container : containers) {
 		for(auto &info : container.collection_info_group_) {
 			if(!delegate_->is_within_freq_paths(info.freq_)) {
-				bad_band.insert(convert_band_to_tech_band(info.operating_band_));
+				bad_band.insert(convert_band_to_tech_band(info.get_band()));
 				invalid_bands = true;
 				break;
 			}
@@ -611,7 +611,7 @@ long cappeen_impl::start_frequency_correction(const beagle_api::collection_info 
 		auto collection_containers = create_collection_info_containers(collection);
 
 		collection_containers.erase(std::remove_if(collection_containers.begin(), collection_containers.end(), [&](const processing::collection_info_container &c) {
-			return c.tech_ == LTE_LAYER_3_DECODE || c.tech_ == LTE_SWEEP;
+			return c.has_specifier(LTE_LAYER_3_DECODE) || c.has_specifier(LTE_SWEEP);
 		}), collection_containers.end());
 
 		if(collection_containers.empty())
