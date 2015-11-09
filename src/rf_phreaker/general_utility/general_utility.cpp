@@ -3,6 +3,7 @@
 #include "rf_phreaker/general_utility/calibration_utility.h"
 #include "rf_phreaker/general_utility/sync_rx_benchmark_utility.h"
 #include "rf_phreaker/general_utility/scanner_stress_test.h"
+#include "rf_phreaker/common/exception_types.h"
 
 int handle_calibration(int argc, char* argv[]) {
 	namespace po = boost::program_options;
@@ -213,11 +214,63 @@ int handle_scanner_stress_test(int argc, char* argv[]) {
 	return 0;
 }
 
+int dump_entire_eeprom(const std::string &str) {
+
+	using namespace rf_phreaker::scanner;
+
+	try {
+		std::cout << "\nAttemping to dump EEPROM...\n";
+
+		blade_rf_controller controller;
+
+		auto scanners = controller.list_available_scanners();
+
+		if(scanners.empty()) {
+			std::cout << "\nNo scanners detected.";
+			return 0;
+		}
+
+		std::cout << "\nOpening scanner " << scanners[0]->id().c_str() << ".\n";
+
+		controller.open_scanner(scanners[0]->id());
+
+		eeprom_addressing addy = eeprom::addressing();
+		std::cout << "\nReading EEPROM.\n";
+		auto data = controller.read_flash(addy);
+
+		auto out_filename = scanners[0]->id() + "_" + str;
+		std::cout << "\nWriting EEPROM to " << out_filename << ".\n";
+		auto file = std::ofstream(out_filename, std::ios::binary);
+		if(!file)
+			throw rf_phreaker::file_io_error("Unable to open file: " + out_filename + ".");
+		
+		for(const auto &i : data)
+			file << i;
+
+		std::cout << "\nEEPROM dumped successfully!\n";
+		return 0;
+	}
+	catch(rf_phreaker::rf_phreaker_error &err) {
+		std::cout << "\nError: " << err.what() << std::endl;
+	}
+	catch(std::exception &err) {
+		std::cout << "\nError: " << err.what() << std::endl;
+	}
+	catch(...) {
+		std::cout << "\nUnknown error has occurred." << std::endl;
+	}
+
+	std::cout << "\nDumping EEPROM failed!" << std::endl;
+
+	return 0;
+}
+
 int main(int argc, char* argv[]) {
 	//-c 77ecda454d25738ee419f6fd676170d5 13cadd7137a3ef4d18dcfcc179667998 47d54d57db30c9169c98c53e30c08d9a d01d12c0dc5c71c8a081e0c25f27b6fd d7db1c90fd06a5a6d950615ea7fa6164
 	//int status = handle_calibration(argc, argv);
 	//int status = handle_sync_rx_benchmark(argc, argv);
-	int status = handle_scanner_stress_test(argc, argv);
+	//int status = handle_scanner_stress_test(argc, argv);
+	int status = dump_entire_eeprom("eeprom_dump.bin");
 	system("pause");
 	return status;
 }
