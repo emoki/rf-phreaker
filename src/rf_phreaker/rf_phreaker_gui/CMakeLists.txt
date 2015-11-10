@@ -37,7 +37,6 @@ set (rf_phreaker_gui_SRCS
 
 set (rf_phreaker_gui_QMLS
 	ChannelList.qml
-	Content.qml
 	ErrorWindow.qml
 	main.qml
 	MapPage.qml
