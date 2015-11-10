@@ -420,6 +420,10 @@ TEST(Cappeen, DISABLED_LicenseCellAnalysisEverything) {
 
 		cappeen_license_version_3 v3(cell_analysis_license);
 		std::set<TECHNOLOGIES_AND_BANDS> band_licenses;
+		band_licenses.insert(GSM_BAND_850);
+		band_licenses.insert(GSM_BAND_900);
+		band_licenses.insert(GSM_BAND_1800);
+		band_licenses.insert(GSM_BAND_1900);
 		band_licenses.insert(WCDMA_BAND_850);
 		band_licenses.insert(WCDMA_BAND_900);
 		band_licenses.insert(WCDMA_BAND_1800);
