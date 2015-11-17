@@ -404,7 +404,7 @@ TEST(Cappeen, DISABLED_LicenseNetworkScanner) {
 	}
 }
 
-TEST(Cappeen, DISABLED_LicenseCellAnalysisEverything) {
+TEST(Cappeen, LicenseCellAnalysisEverything) {
 	using namespace rf_phreaker::cappeen_api;
 	output out;
 	EXPECT_EQ(0, cappeen_initialize(&out));
@@ -435,6 +435,7 @@ TEST(Cappeen, DISABLED_LicenseCellAnalysisEverything) {
 		band_licenses.insert(LTE_BAND_2);
 		band_licenses.insert(LTE_BAND_1);
 		band_licenses.insert(LTE_BAND_7);
+		band_licenses.insert(LTE_BAND_12);
 		std::set<software_license> soft_licenses;
 		soft_licenses.insert(network_coverage_license);
 		soft_licenses.insert(cell_analysis_license);
@@ -450,6 +451,10 @@ TEST(Cappeen, DISABLED_LicenseCellAnalysisEverything) {
 		collection_info info;
 		info.collection_filename_ = "test_file";
 		std::vector<TECHNOLOGIES_AND_BANDS> tech_bands;
+		tech_bands.push_back(GSM_BAND_850);
+		tech_bands.push_back(GSM_BAND_900);
+		tech_bands.push_back(GSM_BAND_1800);
+		tech_bands.push_back(GSM_BAND_1900);
 		tech_bands.push_back(WCDMA_BAND_850);
 		tech_bands.push_back(WCDMA_BAND_900);
 		tech_bands.push_back(WCDMA_BAND_1800);
