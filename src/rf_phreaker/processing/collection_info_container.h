@@ -22,6 +22,7 @@ public:
 class add_collection_info : public add_remove_collection_info
 {
 public:
+	add_collection_info() {}
 	add_collection_info(collection_info info)
 	{
 		add_.push_back(std::move(info));
@@ -31,6 +32,7 @@ public:
 class remove_collection_info : public add_remove_collection_info
 {
 public:
+	remove_collection_info() {}
 	remove_collection_info(collection_info info)
 	{
 		remove_.push_back(std::move(info));
@@ -49,7 +51,7 @@ public:
 		, finish_after_iteration_(finish_after_iteration)
 		, specs_(specs) {}
 
-	void adjust(add_remove_collection_info param) {
+	void adjust(const add_remove_collection_info &param) {
 		if(!collection_info_group_.empty() && param.remove_.size() && specs_.does_overlap(param.remove_[0].specs_)) {
 			// Remove entries from the beginning of the manager to our current position (current position is inclusive!) keeping track of removals.
 			uint32_t remove_count = 0;

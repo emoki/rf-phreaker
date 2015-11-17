@@ -35,7 +35,8 @@ class specifiers {
 public:
 	specifiers() {}
 	specifiers(specifier spec) : specs_({spec}) {}
-	specifiers(std::vector<specifier> specs) {
+	specifiers(specifiers &&specs) : specs_(std::move(specs.specs_)) {}
+	specifiers(const std::vector<specifier> &specs) {
 		for(auto &i : specs)
 			specs_.insert(i);
 	}
@@ -177,7 +178,8 @@ class operating_bands {
 public:
 	operating_bands() {}
 	operating_bands(operating_band band) : bands_({band}) {}
-	operating_bands(std::vector<operating_band> bands) {
+	operating_bands(operating_bands &&bands) : bands_(std::move(bands.bands_)) {}
+	operating_bands(const std::vector<operating_band> &bands) {
 		for(auto &i : bands)
 			bands_.insert(i);
 	}

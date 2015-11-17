@@ -23,6 +23,7 @@ public:
 		//if(adj_range.band_ == GSM_850 || adj_range.band_ == GSM_DCS_1800 || adj_range.band_ == GSM_PCS_1900) {
 			adj_range.low_freq_hz_ -= khz(200);
 		//}
+		add_collection_info info_to_add;
 		for(auto freq = adj_range.low_freq_hz_ + gsm_low_step_size_hz_, end_freq = adj_range.high_freq_hz_ + gsm_high_step_size_hz_; freq < end_freq; freq += gsm_step_size_hz_) {
 			if(freq >= adj_range.high_freq_hz_ - gsm_high_step_size_hz_) {
 				if(adj_range.band_ == GSM_850) {
@@ -40,41 +41,50 @@ public:
 			}
 			if(freq % khz(200) == 0)
 				freq -= khz(100);
-			c.adjust(add_collection_info(gsm_sweep_collection_info(freq, range.band_, false)));
+			info_to_add.add_.emplace_back(gsm_sweep_collection_info(freq, range.band_, false));
 		}
+		c.adjust(info_to_add);
 	}
 
 	static void adjust_gsm_sweep_collection_info(const operating_band_range &range, collection_info_container &c) {
 		// Be sure to make sure the center freq is % khz(200) != 0
+		add_collection_info info_to_add;
 		for(auto freq = range.low_freq_hz_ + gsm_low_step_size_hz_, end_freq = range.high_freq_hz_ + gsm_high_step_size_hz_; freq <= end_freq; freq += gsm_step_size_hz_) {
 			if(freq % khz(200) == 0)
 				freq -= khz(100);
-			c.adjust(add_collection_info(gsm_sweep_collection_info(freq, range.band_, false)));
+			info_to_add.add_.emplace_back(gsm_sweep_collection_info(freq, range.band_, false));
 		}
+		c.adjust(info_to_add);
 	}
 
 	static void adjust_umts_sweep_collection_info_with_adjustment(const operating_band_range &range, collection_info_container &c)
 	{
+		add_collection_info info_to_add;
 		for(auto freq = range.low_freq_hz_ - khz(2400), end_freq = range.high_freq_hz_ + khz(2400); freq <= end_freq; freq += khz(100)) {
 			if(freq % khz(200) != 0 && freq % khz(500) != 0)
 				continue;
-			c.adjust(add_collection_info(umts_sweep_collection_info(freq, range.band_, false)));
+			info_to_add.add_.emplace_back(umts_sweep_collection_info(freq, range.band_, false));
 		}
+		c.adjust(info_to_add);
 	}
 
 	static void adjust_umts_sweep_collection_info(const operating_band_range &range, collection_info_container &c) {
+		add_collection_info info_to_add;
 		for(auto freq = range.low_freq_hz_, end_freq = range.high_freq_hz_; freq <= end_freq; freq += khz(100)) {
 			if(freq % khz(200) != 0 && freq % khz(500) != 0)
 				continue;
-			c.adjust(add_collection_info(umts_sweep_collection_info(freq, range.band_, false)));
+			info_to_add.add_.emplace_back(umts_sweep_collection_info(freq, range.band_, false));
 		}
+		c.adjust(info_to_add);
 	}
 
 	static void adjust_lte_sweep_collection_info(const operating_band_range &range, collection_info_container &c)
 	{
+		add_collection_info info_to_add;
 		for(auto freq = range.low_freq_hz_, end_freq = range.high_freq_hz_; freq <= end_freq; freq += khz(100)) {
-			c.adjust(add_collection_info(lte_sweep_collection_info(freq, lte_sweep_collection_info::bandwidth__, range.band_, false)));
+			info_to_add.add_.emplace_back(lte_sweep_collection_info(freq, lte_sweep_collection_info::bandwidth__, range.band_, false));
 		}
+		c.adjust(info_to_add);
 	}
 };
 
