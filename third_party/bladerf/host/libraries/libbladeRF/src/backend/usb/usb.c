@@ -177,7 +177,9 @@ static int load_fpga_version(struct bladerf *dev)
                                    USB_DIR_DEVICE_TO_HOST, &cmd, 1);
 
         if (status != 0) {
-            memset(&dev->fpga_version, 0, sizeof(dev->fpga_version));
+			dev->fpga_version.major = 0;
+			dev->fpga_version.minor = 0;
+			dev->fpga_version.patch = 0;
             log_debug("Failed to read FPGA version[%d]: %s\n", i,
                         bladerf_strerror(status));
             return status;
