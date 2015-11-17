@@ -86,7 +86,7 @@ public:
 
 	measurement_info stream_rf_data_use_auto_gain(frequency_type frequency, time_type time_ns, time_type time_ns_to_overlap, bandwidth_type bandwidth, frequency_type sampling_rate = 0);
 
-	void stop_streaming();
+	void stop_streaming_and_disable_blade_rx();
 
 	gain_type get_auto_gain(frequency_type frequency, bandwidth_type bandwidth, time_type time_ns = 0, frequency_type sampling_rate = 0);
 
@@ -145,6 +145,7 @@ private:
 	void enable_full_streaming_rx();
 	void enable_intermittent_streaming_rx();
 
+	void stop_streaming();
 	void disable_blade_rx();
 
 	static int check_blade_status(int return_status, const std::string &file = "", int line = -1);

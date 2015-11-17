@@ -333,10 +333,15 @@ void blade_rf_controller::enable_intermittent_streaming_rx() {
 	is_streaming_ = INTERMITTENT_STREAMING;
 }
 
+void blade_rf_controller::stop_streaming_and_disable_blade_rx() {
+	stop_streaming();
+	if(comm_blade_rf_.get()) {
+		disable_blade_rx();
+	}
+}
+
 void blade_rf_controller::disable_blade_rx()
 {
-	stop_streaming();
-	}
 	check_blade_comm();
 	check_blade_status(nr_enable_module(comm_blade_rf_->blade_rf(),
 		BLADERF_MODULE_RX,
@@ -378,7 +383,7 @@ void blade_rf_controller::write_vctcxo_trim(uint16_t trim)
 {
 	check_blade_comm();
 
-	disable_blade_rx();
+	stop_streaming_and_disable_blade_rx();
 
 	auto image = nr_alloc_cal_image(BLADERF_FPGA_40KLE, trim, __FILE__, __LINE__);
 	if(image == nullptr)
@@ -822,6 +827,8 @@ void blade_rf_controller::stop_streaming() {
 	if(streaming_thread_ && streaming_thread_->joinable()) {
 		streaming_thread_->join();
 	}
+	if(streaming_thread_)
+		streaming_thread_.reset();
 }
 
 int blade_rf_controller::check_blade_status(int return_status, const std::string &file, int line)
@@ -840,7 +847,7 @@ void blade_rf_controller::check_blade_comm()
 
 void blade_rf_controller::write_flash(const std::vector<uint8_t> &bytes, const eeprom_addressing &addressing) {
 	check_blade_comm();
-	disable_blade_rx();
+	stop_streaming_and_disable_blade_rx();
 	
 	// Erase flash.
 	check_blade_status(nr_erase_flash(comm_blade_rf_->blade_rf(),
@@ -853,7 +860,7 @@ void blade_rf_controller::write_flash(const std::vector<uint8_t> &bytes, const e
 
 std::vector<uint8_t> blade_rf_controller::read_flash(const eeprom_addressing &addressing) {
 	check_blade_comm();
-	disable_blade_rx();
+	stop_streaming_and_disable_blade_rx();
 
 	std::vector<uint8_t> bytes(addressing.byte_length());
 

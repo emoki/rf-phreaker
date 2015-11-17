@@ -49,6 +49,8 @@ public:
 
 	virtual std::future<measurement_info> stream_rf_data(frequency_type frequency, time_type time_ns, time_type time_ns_to_overlap, bandwidth_type bandwidth, frequency_type sampling_rate = 0) = 0;
 
+	virtual std::future<void> stop_streaming() = 0;
+
 	virtual void clear_queue() = 0;
 
 	virtual void clear_and_wait(int loop, int ms_wait) = 0;

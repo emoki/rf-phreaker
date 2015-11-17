@@ -196,6 +196,7 @@ void processing_graph::start(scanner_controller_interface *sc, data_output_async
 		catch(...) {
 			delegate_sink::instance().log_error("An unknown error has occurred.", generic_error_type, UNKNOWN_ERROR);
 		}
+		sc->stop_streaming().get();
 	}, sc, out, collection_info, config));
 }
 

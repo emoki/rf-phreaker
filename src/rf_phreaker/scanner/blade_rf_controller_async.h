@@ -120,6 +120,12 @@ public:
 		});
 	}
 
+	virtual std::future<void> stop_streaming() {
+		return controller_([=](blade_rf_controller &c) {
+			return c.stop_streaming_and_disable_blade_rx();
+		});
+	}
+
 	void clear_queue() {
 		controller_.clear_queue();
 	}
