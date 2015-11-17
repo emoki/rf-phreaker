@@ -729,51 +729,54 @@ measurement_info blade_rf_controller::stream_rf_data_use_auto_gain(frequency_typ
 
 					int status = 0;
 					for(int i = 0; i < 2; ++i) {
+						if(is_streaming_ != FULL_STREAMING)
+							break;
+
 						status = nr_sync_rx(comm_blade_rf_->blade_rf(), aligned_buffer,
 							num_transfer_samples, &metadata, 2500);
+						
 /*						if((metadata.flags & BLADERF_META_STATUS_OVERRUN) == BLADERF_META_STATUS_OVERRUN) 
 							LOG(LINFO) << "Buffer overrun occurred while streaming.  Restarting stream...";
 						else */if(status == 0)
 							break;
-						else if(is_streaming_ != FULL_STREAMING) {
-							throw blade_rf_error("Intermittent streaming was cancelled.");
-						}
-						else {
+						else if(is_streaming_ == FULL_STREAMING) {
 							LOG(LDEBUG) << "Collecting " << num_transfer_samples << " samples failed. Status = " << status << ". Retrying...";
 							enable_full_streaming_rx();
 						}
 					}
-					if(status)
-						throw blade_rf_error(std::string("Error collecting data samples.  ") + nr_strerror(status));
+					if(status == 0) {
 
-					// For now we use the computer time.  In the future perhaps we can use timestamp coming from the hardware.
-					auto start_time = get_collection_start_time();
+						// For now we use the computer time.  In the future perhaps we can use timestamp coming from the hardware.
+						auto start_time = get_collection_start_time();
 
-					measurement_info data(meas_samples, frequency, bandwidth, sampling_rate, gain,
-						std::chrono::duration_cast<std::chrono::milliseconds>(std::chrono::high_resolution_clock::now() - start_time),
-						scanner_blade_rf_->eeprom_.cal_.get_nuand_adjustments(gain.lna_gain_, frequency, bandwidth),
-						scanner_blade_rf_->eeprom_.cal_.get_rf_board_adjustments(frequency, bandwidth, bandwidth),
-						collection_count_++, scanner_blade_rf_->eeprom_.cal_.nuand_serial_);
+						measurement_info data(meas_samples, frequency, bandwidth, sampling_rate, gain,
+							std::chrono::duration_cast<std::chrono::milliseconds>(std::chrono::high_resolution_clock::now() - start_time),
+							scanner_blade_rf_->eeprom_.cal_.get_nuand_adjustments(gain.lna_gain_, frequency, bandwidth),
+							scanner_blade_rf_->eeprom_.cal_.get_rf_board_adjustments(frequency, bandwidth, bandwidth),
+							collection_count_++, scanner_blade_rf_->eeprom_.cal_.nuand_serial_);
 
-					if(first_time) {
+						if(first_time) {
+							ipp_helper::check_status(ippsConvert_16s32f(((Ipp16s*)&(*aligned_buffer_.get_aligned_array())),
+								(Ipp32f*)rf_stream_buffer_.get(), rf_stream_buffer_.length() * 2));
+							first_time = false;
+							num_transfer_samples = meas_samples - num_overlap_samples;
+							continue;
+						}
+
+						data.get_iq().copy(rf_stream_buffer_.get(), num_overlap_samples);
+
 						ipp_helper::check_status(ippsConvert_16s32f(((Ipp16s*)&(*aligned_buffer_.get_aligned_array())),
-							(Ipp32f*)rf_stream_buffer_.get(), rf_stream_buffer_.length() * 2));
-						first_time = false;
-						num_transfer_samples = meas_samples - num_overlap_samples;
-						continue;
+							(Ipp32f*)data.get_iq().get(num_overlap_samples), num_transfer_samples * 2));
+
+						rf_stream_buffer_.copy(data.get_iq().get(copy_loc), num_overlap_samples);
+
+						ipp_helper::subtract_dc(data.get_iq().get(), data.get_iq().length());
+
+						std::lock_guard<std::mutex> lock(meas_buffer_mutex_);
+						meas_buffer_.push_back(data);
 					}
-
-					data.get_iq().copy(rf_stream_buffer_.get(), num_overlap_samples);
-
-					ipp_helper::check_status(ippsConvert_16s32f(((Ipp16s*)&(*aligned_buffer_.get_aligned_array())),
-						(Ipp32f*)data.get_iq().get(num_overlap_samples), num_transfer_samples * 2));
-
-					rf_stream_buffer_.copy(data.get_iq().get(copy_loc), num_overlap_samples);
-
-					ipp_helper::subtract_dc(data.get_iq().get(), data.get_iq().length());
-
-					std::lock_guard<std::mutex> lock(meas_buffer_mutex_);
-					meas_buffer_.push_back(data);
+					else if(is_streaming_ == FULL_STREAMING)
+						throw blade_rf_error(std::string("Error collecting data samples.  ") + nr_strerror(status));
 				}
 			}
 			catch(const std::exception &err) {
