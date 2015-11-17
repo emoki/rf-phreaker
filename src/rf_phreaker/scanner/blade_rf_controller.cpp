@@ -193,9 +193,8 @@ void blade_rf_controller::refresh_scanner_info()
 	LOG(LDEBUG) << "Scanner ID is " << scanner_blade_rf_->eeprom_.cal_.hw_id_ << ".";
 	LOG(LDEBUG) << "USB backend is " << usb_backend_to_string(scanner_blade_rf_->back_end()) << ".";
 	LOG(LDEBUG) << "Device speed is " << to_string(scanner_blade_rf_->usb_speed()) << ".";
-	LOG(LDEBUG) << "Blade library version is " << scanner_blade_rf_->blade_rf_version_description();
-	LOG(LDEBUG) << "Blade fpga version is " << scanner_blade_rf_->fpga_version_description();
-	LOG(LDEBUG) << "Blade firmware version is " << scanner_blade_rf_->firmware_version_description();
+	LOG(LDEBUG) << "Blade library version is " << scanner_blade_rf_->blade_rf_version_description() << ".";
+	LOG(LDEBUG) << "Blade firmware version is " << scanner_blade_rf_->firmware_version_description() << ".";
 	LOG(LDEBUG) << "RF calibration performed on " << boost::posix_time::to_simple_string(boost::posix_time::from_time_t(scanner_blade_rf_->get_rf_calibration_date())) << ".";
 	LOG(LDEBUG) << "VCTCXO trim value is " << scanner_blade_rf_->vctcxo_trim() << ".";
 	LOG(LDEBUG) << "Frequency correction performed on " << boost::posix_time::to_simple_string(boost::posix_time::from_time_t(scanner_blade_rf_->get_frequency_correction_date())) << ".";
@@ -298,7 +297,7 @@ void blade_rf_controller::do_initial_scanner_config(const scanner_settings &sett
 	// Update scanner fpga version because we loaded the FPGA.
 	if(scanner_blade_rf_) {
 		check_blade_status(nr_fpga_version(comm_blade_rf_->blade_rf(), &scanner_blade_rf_->fpga_version_, __FILE__, __LINE__), __FILE__, __LINE__);
-		LOG(LDEBUG) << "Blade fpga version is " << scanner_blade_rf_->fpga_version_description();
+		LOG(LDEBUG) << "Blade fpga version is " << scanner_blade_rf_->fpga_version_description() << ".";
 	}
 
 	check_blade_status(nr_enable_module(comm_blade_rf_->blade_rf(),
