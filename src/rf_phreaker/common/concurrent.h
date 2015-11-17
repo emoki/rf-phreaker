@@ -65,6 +65,16 @@ template <typename T> class concurrent {
 		queue_.clear();
 	}
 
+	void clear_and_wait(int loop, int ms_wait) {
+		queue_.clear();
+		for(int i = 0; i < loop; i++) {
+			if(queue_.size() > 0) {
+				std::this_thread::sleep_for(std::chrono::milliseconds(ms_wait));
+			}
+		}
+	}
+
+
 	int approximate_size() {
 		return queue_.size();
 	}

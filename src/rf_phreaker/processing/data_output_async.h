@@ -109,6 +109,10 @@ public:
 		out_.clear_queue();
 	}
 
+	void clear_and_wait(int loop, int ms_wait) {
+		out_.clear_and_wait(loop, ms_wait);
+	}
+
 private:
 	concurrent<data_output> out_;
 };

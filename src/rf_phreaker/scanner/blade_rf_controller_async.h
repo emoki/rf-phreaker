@@ -124,6 +124,10 @@ public:
 		controller_.clear_queue();
 	}
 
+	void clear_and_wait(int loop, int ms_wait) {
+		controller_.clear_and_wait(loop, ms_wait);
+	}
+
 private:
 	rf_phreaker::concurrent<blade_rf_controller> controller_;
 };

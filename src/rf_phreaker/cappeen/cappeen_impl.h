@@ -46,6 +46,8 @@ private:
 
 	void check_bands(const rf_phreaker::processing::collection_info_containers &containers);
 
+	void clear_queues();
+
 	bool is_initialized_;
 
 	rf_phreaker::settings config_;

@@ -25,16 +25,24 @@ cappeen_impl::~cappeen_impl()
 		gps_graph_.reset();
 		processing_graph_.reset();
 		frequency_correction_graph_.reset();
-		if(data_output_)
-			data_output_->clear_queue();
+		clear_queues();
 		data_output_.reset();
-		if(scanner_)
-			scanner_->clear_queue();
 		scanner_.reset();
 		delegate_.reset();
 		logger_.reset();
 	}
 	catch(...) {}
+}
+
+void cappeen_impl::clear_queues() {
+	if(data_output_)
+		data_output_->clear_queue();
+	if(scanner_)
+		scanner_->clear_queue();
+	if(data_output_)
+		data_output_->clear_and_wait(20, 200);
+	if(scanner_)
+		scanner_->clear_and_wait(20, 200);
 }
 
 long cappeen_impl::initialize(beagle_api::beagle_delegate *del)
@@ -79,12 +87,9 @@ long cappeen_impl::initialize(beagle_api::beagle_delegate *del)
 			frequency_correction_graph_->cancel_and_wait();
 			frequency_correction_graph_.reset();
 		}
-		if(data_output_)
-			data_output_->clear_queue();
+		clear_queues();
 		data_output_.reset();
 		delegate_.reset();
-		if(scanner_)
-			scanner_->clear_queue();
 		scanner_.reset();
 
 		LOG(LVERBOSE) << "Constructing cappeen_delegate.";
@@ -191,15 +196,12 @@ long cappeen_impl::clean_up()
 		LOG(LVERBOSE) << "Deleting frequency correction graph...";
 		frequency_correction_graph_.reset();
 		LOG(LVERBOSE) << "Deleting data output async...";
-		// We clear the data_output queue to reduce the time necessary for clean_up.  Users should be aware calling clean_up can remove valid data.
-		if(data_output_)
-			data_output_->clear_queue();
+		// We clear the data_output and scanner queues to reduce the time necessary for clean_up.  Users should be aware calling clean_up can remove valid data.
+		clear_queues();
 		data_output_.reset();
 		LOG(LVERBOSE) << "Deleting cappeen delegate...";
 		delegate_.reset();
 		LOG(LVERBOSE) << "Deleting bladerf controller async...";
-		if(scanner_)
-			scanner_->clear_queue();
 		scanner_.reset();
 		LOG(LINFO) << "Cleaned up successfully.";
 	}
@@ -286,6 +288,9 @@ long cappeen_impl::open_unit(const char *serial, unsigned int buf_size)
 			gps_graph_->cancel_and_wait();
 		if(processing_graph_)
 			processing_graph_->cancel_and_wait();
+
+		// Clear queue so that we start with a clean slate.  In case of recovering from an error we want to make sure nothing is queued up.
+		scanner_->clear_queue();
 
 		// Initialize a fake hw and initialize it.
 		hardware tmp_hw{serial, 0, device_communication::UNKNOWN_SPEED, 0, 0, {}, {true}};
