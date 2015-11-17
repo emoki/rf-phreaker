@@ -17,21 +17,27 @@ class serialization_helper
 public:
 	template<typename T>
 	static bool init(const std::vector<uint8_t> &bytes, T &t, bool use_sha256 = false) {
-		t.clear();
-		std::stringstream ss;
-		std::string str(bytes.begin(), bytes.end());
-		ss << str;
-		boost::archive::text_iarchive ia(ss);
-		ia & t;
-		if(use_sha256) {
-			size_t sha_start_position = str.rfind(sha_spacer);
-			std::string sha_str = str.substr(sha_start_position + strlen(sha_spacer), sha256_byte_size);
-			std::string original_str = str.substr(0, sha_start_position);
-			SHA256 sha;
-			if(sha_str != sha(original_str))
-				return false;
+		try {
+			t.clear();
+			std::stringstream ss;
+			std::string str(bytes.begin(), bytes.end());
+			ss << str;
+			boost::archive::text_iarchive ia(ss);
+			ia & t;
+			if(use_sha256) {
+				size_t sha_start_position = str.rfind(sha_spacer);
+				std::string sha_str = str.substr(sha_start_position + strlen(sha_spacer), sha256_byte_size);
+				std::string original_str = str.substr(0, sha_start_position);
+				SHA256 sha;
+				if(sha_str != sha(original_str))
+					return false;
+			}
+			return true;
 		}
-		return true;
+		catch(const std::exception &) {
+			//LOG(LERROR) << "Error while serializing object.";
+		}
+		return false;
 	}
 
 	template<typename T>
