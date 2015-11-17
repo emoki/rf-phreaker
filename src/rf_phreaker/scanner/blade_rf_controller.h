@@ -193,6 +193,7 @@ private:
 	std::unique_ptr<std::thread> streaming_thread_;
 	boost::circular_buffer<measurement_info> meas_buffer_;
 
+	std::recursive_mutex open_close_mutex_;
 };
 
 }}

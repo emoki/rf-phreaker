@@ -34,10 +34,7 @@ blade_rf_controller::blade_rf_controller(blade_rf_controller &&c)
 
 blade_rf_controller::~blade_rf_controller()
 {
-	stop_streaming();
-	if(comm_blade_rf_.get()) {
-		nr_close(comm_blade_rf_->blade_rf(), __FILE__, __LINE__);
-	}
+	close_scanner();
 }
 
 int blade_rf_controller::num_available_scanners()
@@ -108,6 +105,7 @@ void blade_rf_controller::open_scanner_and_refresh_scanner_info(const scanner_se
 
 void blade_rf_controller::open_scanner(const scanner_serial_type &id)
 {
+	std::lock_guard<std::recursive_mutex> lock(open_close_mutex_);
 	parameter_cache_ = measurement_info();
 
 	if(comm_blade_rf_.get()) {
@@ -206,9 +204,13 @@ void blade_rf_controller::update_vctcxo_based_on_eeprom() {
 
 void blade_rf_controller::close_scanner()
 {
+	// Only stop our streaming thread - disabling the RX stream will occur inside the bladeRF API close function.
 	stop_streaming();
 	if(comm_blade_rf_.get()) {
-		nr_close(comm_blade_rf_->blade_rf());
+		{
+			std::lock_guard<std::recursive_mutex> lock(open_close_mutex_);
+			nr_close(comm_blade_rf_->blade_rf());
+		}
 		comm_blade_rf_.reset();
 		scanner_blade_rf_.reset();
 		scanner_.reset();
