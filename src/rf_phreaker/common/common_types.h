@@ -17,6 +17,12 @@ typedef int32_t bandwidth_type;
 
 typedef int64_t time_type;
 
+enum scheduling_algorithm_type {
+	tech_based,
+	collection_round_based,
+	packet_based
+};
+
 enum specifier
 {
 	GSM_SWEEP,
