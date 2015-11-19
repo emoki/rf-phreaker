@@ -13,6 +13,8 @@ static const int settings_log_level_default = 3;
 static const frequency_type settings_sampling_rate_default = 4875000;
 static const frequency_type settings_bandwidth_default = 5000000;
 static const time_type settings_collection_time_default = (32000000);
+static const time_type settings_overlap_time_default = 10000000;
+static const bool settings_is_streaming_default = false;
 static const int settings_layer_3_max_update_threshold_default = 150;
 static const int settings_layer_3_min_collection_round_default = 5;
 static const int settings_layer_3_decode_threshold_default = -13;
@@ -71,6 +73,8 @@ public:
 	frequency_type sampling_rate_;
 	bandwidth_type bandwidth_;
 	time_type collection_time_;
+	bool is_streaming_;
+	time_type overlap_time_;
 };
 
 class layer_3_settings {

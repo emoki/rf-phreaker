@@ -24,7 +24,7 @@ public:
 			adj_range.low_freq_hz_ -= khz(200);
 		//}
 		add_collection_info info_to_add;
-		info_to_add.add_.reserve((adj_range.high_freq_hz_ - adj_range.low_freq_hz_) / gsm_step_size_hz_);
+		info_to_add.add_.reserve((unsigned int)((adj_range.high_freq_hz_ - adj_range.low_freq_hz_) / gsm_step_size_hz_));
 		for(auto freq = adj_range.low_freq_hz_ + gsm_low_step_size_hz_, end_freq = adj_range.high_freq_hz_ + gsm_high_step_size_hz_; freq < end_freq; freq += gsm_step_size_hz_) {
 			if(freq >= adj_range.high_freq_hz_ - gsm_high_step_size_hz_) {
 				if(adj_range.band_ == GSM_850) {
@@ -50,7 +50,7 @@ public:
 	static void adjust_gsm_sweep_collection_info(const operating_band_range &range, collection_info_container &c) {
 		// Be sure to make sure the center freq is % khz(200) != 0
 		add_collection_info info_to_add;
-		info_to_add.add_.reserve((range.high_freq_hz_ - range.low_freq_hz_) / gsm_step_size_hz_);
+		info_to_add.add_.reserve((unsigned int)((range.high_freq_hz_ - range.low_freq_hz_) / gsm_step_size_hz_));
 		for(auto freq = range.low_freq_hz_ + gsm_low_step_size_hz_, end_freq = range.high_freq_hz_ + gsm_high_step_size_hz_; freq <= end_freq; freq += gsm_step_size_hz_) {
 			if(freq % khz(200) == 0)
 				freq -= khz(100);
@@ -62,7 +62,7 @@ public:
 	static void adjust_umts_sweep_collection_info_with_adjustment(const operating_band_range &range, collection_info_container &c)
 	{
 		add_collection_info info_to_add;
-		info_to_add.add_.reserve((range.high_freq_hz_ - range.low_freq_hz_) / khz(100));
+		info_to_add.add_.reserve((unsigned int)((range.high_freq_hz_ - range.low_freq_hz_) / khz(100)));
 		for(auto freq = range.low_freq_hz_ - khz(2400), end_freq = range.high_freq_hz_ + khz(2400); freq <= end_freq; freq += khz(100)) {
 			if(freq % khz(200) != 0 && freq % khz(500) != 0)
 				continue;
@@ -73,7 +73,7 @@ public:
 
 	static void adjust_umts_sweep_collection_info(const operating_band_range &range, collection_info_container &c) {
 		add_collection_info info_to_add;
-		info_to_add.add_.reserve((range.high_freq_hz_ - range.low_freq_hz_) / khz(100));
+		info_to_add.add_.reserve((unsigned int)((range.high_freq_hz_ - range.low_freq_hz_) / khz(100)));
 		for(auto freq = range.low_freq_hz_, end_freq = range.high_freq_hz_; freq <= end_freq; freq += khz(100)) {
 			if(freq % khz(200) != 0 && freq % khz(500) != 0)
 				continue;
@@ -85,7 +85,7 @@ public:
 	static void adjust_lte_sweep_collection_info(const operating_band_range &range, collection_info_container &c)
 	{
 		add_collection_info info_to_add;
-		info_to_add.add_.reserve((range.high_freq_hz_ - range.low_freq_hz_) / khz(100));
+		info_to_add.add_.reserve((unsigned int)((range.high_freq_hz_ - range.low_freq_hz_) / khz(100)));
 		for(auto freq = range.low_freq_hz_, end_freq = range.high_freq_hz_; freq <= end_freq; freq += khz(100)) {
 			info_to_add.add_.emplace_back(lte_sweep_collection_info(freq, lte_sweep_collection_info::bandwidth__, range.band_, false));
 		}
