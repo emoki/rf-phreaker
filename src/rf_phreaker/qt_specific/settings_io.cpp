@@ -94,6 +94,8 @@ void settings_io::read(collection_settings &settings, const std::string &group_k
 	settings.sampling_rate_ = qsettings_->value(sampling_rate_key.c_str(), settings_sampling_rate_default).toLongLong();
 	settings.bandwidth_ = qsettings_->value(bandwidth_key.c_str(), settings_bandwidth_default).toLongLong();
 	settings.collection_time_ = qsettings_->value(collection_time_key.c_str(), settings_collection_time_default).toLongLong();
+	settings.is_streaming_ = qsettings_->value(is_streaming_key.c_str(), settings_is_streaming_default).toBool();
+	settings.overlap_time_ = qsettings_->value(overlap_time_key.c_str(), settings_overlap_time_default).toLongLong();
 	qsettings_->endGroup();
 }
 
@@ -267,6 +269,8 @@ void settings_io::write(const collection_settings &settings, const std::string &
 	qsettings_->setValue(sampling_rate_key.c_str(), settings.sampling_rate_);
 	qsettings_->setValue(bandwidth_key.c_str(), settings.bandwidth_);
 	qsettings_->setValue(collection_time_key.c_str(), settings.collection_time_);
+	qsettings_->setValue(is_streaming_key.c_str(), settings.is_streaming_);
+	qsettings_->setValue(overlap_time_key.c_str(), settings.overlap_time_);
 	qsettings_->endGroup();
 }
 
