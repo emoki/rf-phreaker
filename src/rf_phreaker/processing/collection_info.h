@@ -42,7 +42,16 @@ public:
 		, can_remove_(can_remove)
 		, specs_(spec) {}
 
-	bool operator==(const collection_info &a) {
+	collection_info(collection_info &&a)
+		: freq_(a.freq_)
+		, time_ns_(a.time_ns_)
+		, bandwidth_(a.bandwidth_)
+		, sampling_rate_(a.sampling_rate_)
+		, operating_bands_(std::move(a.operating_bands_))
+		, can_remove_(a.can_remove_)
+		, specs_(std::move(a.specs_)) {}
+
+	bool operator==(const collection_info &a) const {
 		return freq_ == a.freq_ && time_ns_ == a.time_ns_ && bandwidth_ == a.bandwidth_ && sampling_rate_ == a.sampling_rate_
 			&& operating_bands_ == a.operating_bands_ && can_remove_ == a.can_remove_ && specs_ == a.specs_;
 	}
