@@ -437,9 +437,17 @@ public:
 
 	void output_error(const std::string &s, int type, int code) {
 		// Manually set the code to generic error for any code other than the ones below.
-		if(code != STD_EXCEPTION_ERROR || code != UNKNOWN_ERROR || code != FREQUENCY_CORRECTION_FAILED
-			|| code != beagle_api::WRONG_SPEED_DETECTED || code != CALIBRATION_ERROR || code != EEPROM_ERROR)
-			code = GENERAL_ERROR;
+		switch(code) {
+		case rf_phreaker::STD_EXCEPTION_ERROR:
+		case rf_phreaker::UNKNOWN_ERROR:
+		case rf_phreaker::FREQUENCY_CORRECTION_FAILED:
+		case beagle_api::WRONG_SPEED_DETECTED:
+		case rf_phreaker::CALIBRATION_ERROR:
+		case rf_phreaker::EEPROM_ERROR:
+			break;
+		default:
+			code = rf_phreaker::GENERAL_ERROR;
+		}
 		LOG(LERROR) << s;
 		if(delegate_ != nullptr) {
 			if(beagle_info_.state_ == beagle_api::BEAGLE_COLLECTING
