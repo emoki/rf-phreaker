@@ -39,6 +39,9 @@ inline int convert_message(int msg) {
 	case (int)CALIBRATION_ERROR:
 		code = beagle_api::CALIBRATIONERROR;
 		break;
+	case (int)FREQUENCY_CORRECTION_VALUE_INVALID:
+		code = beagle_api::FREQUENCY_CORRECTION_VALUE_INVALID;
+		break;
 	default:
 		code = static_cast<beagle_api::ERRORCODES>(msg);
 	}
@@ -444,6 +447,7 @@ public:
 		case beagle_api::WRONG_SPEED_DETECTED:
 		case rf_phreaker::CALIBRATION_ERROR:
 		case rf_phreaker::EEPROM_ERROR:
+		case rf_phreaker::FREQUENCY_CORRECTION_VALUE_INVALID:
 			break;
 		default:
 			code = rf_phreaker::GENERAL_ERROR;
@@ -468,6 +472,7 @@ public:
 					if(gps_graph_) gps_graph_->enable_1pps_calibration();
 					change_beagle_state(beagle_api::BEAGLE_READY);
 				case beagle_api::WRONG_SPEED_DETECTED:
+				case rf_phreaker::FREQUENCY_CORRECTION_VALUE_INVALID:
 				case rf_phreaker::CALIBRATION_ERROR:
 				case rf_phreaker::EEPROM_ERROR:
 				default:;

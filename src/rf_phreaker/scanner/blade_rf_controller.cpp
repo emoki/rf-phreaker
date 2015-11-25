@@ -1043,7 +1043,14 @@ freq_correction_container blade_rf_controller::read_frequency_correction_contain
 	auto bytes = read_flash(meta_ee.freq_correction_addressing());
 
 	freq_correction_container con;
-	con.init(bytes);
+	if(!con.init(bytes)) {
+		delegate_sink::instance().log_error(std::string("Frequency correction data failed verification.  It appears corrupt."),
+			hardware_info_error_type, FREQUENCY_CORRECTION_VALUE_INVALID);
+	}
+	else if(con.nuand_freq_correction_value_ == 0) {
+		delegate_sink::instance().log_error(std::string("Frequency correction data is invalid."),
+			hardware_info_error_type, FREQUENCY_CORRECTION_VALUE_INVALID);
+	}
 	return con;
 }
 
