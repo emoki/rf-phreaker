@@ -53,7 +53,8 @@ public:
 			graph_->root_task()->cancel_group_execution();
 			if(num_shifts_ > 0) {
 				auto avg_error = error_sum_ / (double)num_shifts_;
-				update_frequency_correction(avg_error);
+				sc_->calculate_vctcxo_trim_and_update_eeprom(avg_error).get();
+				g_scanner_error_tracker::instance().new_freq_correction();
 
 				std::string message("Frequency correction successful.");
 
