@@ -147,6 +147,25 @@ void cappeen_impl::read_settings()
 
 	// Manually adjust parameters that are not in the cappeen_api.ini.
 	config_.simultaneous_collection_ = false;
+	config_.scheduling_algorithm_ = tech_based;
+	config_.gsm_sweep_collection_.is_streaming_ = false;
+	config_.gsm_sweep_collection_.priority_ = 1;
+	config_.gsm_sweep_collection_.overlap_time_ = 0;
+	config_.gsm_layer_3_collection_.is_streaming_ = true;
+	config_.gsm_layer_3_collection_.priority_ = 1;
+	config_.gsm_layer_3_collection_.overlap_time_ = 35;
+	config_.umts_sweep_collection_.is_streaming_ = false;
+	config_.umts_sweep_collection_.priority_ = 1;
+	config_.umts_sweep_collection_.overlap_time_ = 0;
+	config_.umts_layer_3_collection_.is_streaming_ = false;
+	config_.umts_layer_3_collection_.priority_ = 1;
+	config_.umts_layer_3_collection_.overlap_time_ = 0;
+	config_.lte_sweep_collection_.is_streaming_ = false;
+	config_.lte_sweep_collection_.priority_ = 1;
+	config_.lte_sweep_collection_.overlap_time_ = 0;
+	config_.lte_layer_3_collection_.is_streaming_ = false;
+	config_.lte_layer_3_collection_.priority_ = 1;
+	config_.lte_layer_3_collection_.overlap_time_ = 0;
 	config_.lte_sweep_general_.sync_quality_confidence_threshold_ = -11.5;
 	config_.lte_sweep_general_.full_scan_interval_ = config_.lte_layer_3_decode_.max_update_threshold_;
 	config_.lte_layer_3_general_.sync_quality_confidence_threshold_ = 10; // Set so that only measurements with decoded pbchs are outputted.
