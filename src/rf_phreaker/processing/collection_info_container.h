@@ -43,13 +43,14 @@ public:
 class collection_info_container
 {
 public:
-	class collection_info_container(specifiers specs = {}, bool finish_after_iteration = false)
+	collection_info_container(specifiers specs = {}, bool is_streaming = false, bool finish_after_iteration = false)
 		: position_(0)
 		, include_first_position_(true)
 		, finished_(false)
 		, collection_round_(0)
 		, finish_after_iteration_(finish_after_iteration)
-		, specs_(specs) {}
+		, specs_(specs)
+		, is_streaming_(is_streaming) {}
 
 	void adjust(const add_remove_collection_info &param) {
 		if(!collection_info_group_.empty() && param.remove_.size() && specs_.does_overlap(param.remove_[0].specs_)) {
@@ -87,6 +88,20 @@ public:
 			});
 		}
 
+	}
+
+	collection_info try_get_auto_info() {
+		if(is_streaming_)
+			return try_get_current_info_determine_collection_round();
+		else
+			return try_get_next_info();
+	}
+
+	bool get_auto_info(collection_info &p) {
+		if(is_streaming_)
+			return current_info_determine_collection_round(p);
+		else
+			return get_next_info(p);
 	}
 
 	bool current_info(collection_info &p) {
@@ -200,6 +215,8 @@ public:
 	bool finish_after_iteration_;
 
 	specifiers specs_;
+
+	bool is_streaming_;
 };
 
 

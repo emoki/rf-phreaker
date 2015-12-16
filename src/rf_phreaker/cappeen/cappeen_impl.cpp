@@ -513,8 +513,8 @@ processing::collection_info_containers cappeen_impl::create_collection_info_cont
 			});
 
 			if(it == containers.end()) {
-				containers.push_back(collection_info_container(GSM_SWEEP, true));
-				containers.push_back(collection_info_container(GSM_LAYER_3_DECODE, false));
+				containers.push_back(collection_info_container(GSM_SWEEP, config_.gsm_sweep_collection_.is_streaming_, true));
+				containers.push_back(collection_info_container(GSM_LAYER_3_DECODE, config_.gsm_layer_3_collection_.is_streaming_, false));
 				it = std::find_if(containers.begin(), containers.end(), [&](const collection_info_container &c) {
 					return c.has_specifier(GSM_SWEEP);
 				});
@@ -529,8 +529,8 @@ processing::collection_info_containers cappeen_impl::create_collection_info_cont
 			});
 
 			if(it == containers.end()) {
-				containers.push_back(collection_info_container(UMTS_SWEEP, true));
-				containers.push_back(collection_info_container(UMTS_LAYER_3_DECODE, false));
+				containers.push_back(collection_info_container(UMTS_SWEEP, config_.umts_sweep_collection_.is_streaming_, true));
+				containers.push_back(collection_info_container(UMTS_LAYER_3_DECODE, config_.umts_layer_3_collection_.is_streaming_, false));
 				it = std::find_if(containers.begin(), containers.end(), [&](const collection_info_container &c) {
 					return c.has_specifier(UMTS_SWEEP);
 				});
@@ -548,8 +548,8 @@ processing::collection_info_containers cappeen_impl::create_collection_info_cont
 			});
 
 			if(it == containers.end()) {
-				containers.push_back(collection_info_container(LTE_SWEEP, true));
-				containers.push_back(collection_info_container(LTE_LAYER_3_DECODE, false));
+				containers.push_back(collection_info_container(LTE_SWEEP, config_.lte_sweep_collection_.is_streaming_, true));
+				containers.push_back(collection_info_container(LTE_LAYER_3_DECODE, config_.lte_layer_3_collection_.is_streaming_, false));
 				it = std::find_if(containers.begin(), containers.end(), [&](const collection_info_container &c) {
 					return c.has_specifier(LTE_SWEEP);
 				});
