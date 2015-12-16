@@ -162,11 +162,11 @@ public:
 		}
 	}
 
-	bool is_empty() { return collection_info_group_.empty(); }
+	bool is_empty() const { return collection_info_group_.empty(); }
 
-	int64_t collection_round() { return collection_round_; }
+	int64_t collection_round() const { return collection_round_; }
 
-	bool is_finished() { return finished_; }
+	bool is_finished() const { return finished_; }
 
 	void reset() {
 		collection_round_ = 0;
