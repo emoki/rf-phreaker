@@ -49,7 +49,7 @@ public:
 	void add_spec(specifier spec) { specs_.insert(spec); }
 	void remove_spec(specifier spec) { specs_.erase(spec); }
 	bool has_spec(specifier spec) const { return specs_.find(spec) != specs_.end(); }
-	bool does_overlap(const specifiers &specs) {
+	bool does_overlap(const specifiers &specs) const {
 		for(const auto &i : specs.specs_) {
 			if(specs_.find(i) != specs_.end())
 				return true;
@@ -58,6 +58,8 @@ public:
 	}
 	bool operator==(const specifiers& s) const { return specs_ == s.specs_; }
 	bool operator!=(const specifiers& s) const { return specs_ != s.specs_; }
+	size_t size() const { return specs_.size(); }
+	specifier front() const { return *specs_.begin(); }
 private:
 	std::set<specifier> specs_;
 };
