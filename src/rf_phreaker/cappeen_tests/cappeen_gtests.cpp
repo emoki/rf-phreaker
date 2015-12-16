@@ -44,9 +44,9 @@ TEST(Cappeen, TestMain)
 		tech_bands.push_back(WCDMA_BAND_850);
 		tech_bands.push_back(WCDMA_BAND_1900);
 		tech_bands.push_back(WCDMA_BAND_2100);
-		//tech_bands.push_back(WCDMA_BAND_900);
-		//tech_bands.push_back(WCDMA_BAND_1800);
-		//tech_bands.push_back(LTE_BAND_12);
+		tech_bands.push_back(WCDMA_BAND_900);
+		tech_bands.push_back(WCDMA_BAND_1800);
+		tech_bands.push_back(LTE_BAND_12);
 		tech_bands.push_back(LTE_BAND_5);
 		tech_bands.push_back(LTE_BAND_2);
 		tech_bands.push_back(LTE_BAND_1);
@@ -54,29 +54,28 @@ TEST(Cappeen, TestMain)
 		info.tech_and_bands_to_sweep_.num_elements_ = tech_bands.size();
 
 		for(int i = 0; i < 5000000; ++i) {
-			EXPECT_EQ(0, cappeen_open_unit(&serial[0], serial.size()));
+			auto status = cappeen_open_unit(&serial[0], serial.size());
+			EXPECT_EQ(0, status);
+			if(status == 0) {
+				std::cout << "Starting collection.\n";
+				EXPECT_EQ(0, cappeen_start_collection(info));
 
-			std::cout << "Starting collection.\n";
-			EXPECT_EQ(0, cappeen_start_collection(info));
+				out.wait(30*60);
 
-			out.wait(5 * 60 * 60);
-
-			//bad_output bad_out;
-			//EXPECT_EQ(0, cappeen_initialize(&bad_out));
-
-			if(!out.error_occurred_) {
-				EXPECT_EQ(0, cappeen_stop_collection());
-				EXPECT_EQ(0, cappeen_close_unit(&serial[0], serial.size()));
-			}
-			else {
-				do {
-					cappeen_close_unit(&serial[0], serial.size());
-					EXPECT_EQ(0, cappeen_list_available_units(&serials[0], serials.size()));
-					serial = &serials[0];
-					serial = serial.substr(0, serial.find_first_of(';'));
-					std::this_thread::sleep_for(std::chrono::seconds(1));
+				if(!out.error_occurred_) {
+					EXPECT_EQ(0, cappeen_stop_collection());
+					EXPECT_EQ(0, cappeen_close_unit(&serial[0], serial.size()));
 				}
-				while(serial.empty());
+				else {
+					do {
+						cappeen_close_unit(&serial[0], serial.size());
+						EXPECT_EQ(0, cappeen_list_available_units(&serials[0], serials.size()));
+						serial = &serials[0];
+						serial = serial.substr(0, serial.find_first_of(';'));
+						std::this_thread::sleep_for(std::chrono::seconds(1));
+					}
+					while(serial.empty());
+				}
 			}
 		}
 	}
@@ -84,7 +83,7 @@ TEST(Cappeen, TestMain)
 	EXPECT_EQ(0, cappeen_clean_up());
 }
 
-TEST(Cappeen, FreqCorrection) {
+TEST(Cappeen, DISABLED_FreqCorrection) {
 	using namespace rf_phreaker::cappeen_api;
 	output out;
 	out.output_ = false;

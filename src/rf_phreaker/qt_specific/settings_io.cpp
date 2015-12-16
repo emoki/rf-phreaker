@@ -36,6 +36,7 @@ void settings_io::read(settings &settings) {
 	settings.simultaneous_collection_ = qsettings_->value(simultaneous_collection_key.c_str(), simultaneous_collection_default).toBool();
 	settings.eeprom_update_period_for_1pps_calibration_minutes_ = qsettings_->value(eeprom_update_period_for_1pps_calibration_minutes_key.c_str(),
 		eeprom_update_period_for_1pps_calibration_minutes_default).toInt();
+	settings.scheduling_algorithm_ = (scheduling_algorithm_type)qsettings_->value(scheduling_algorithm_key.c_str(), scheduling_algorithm_default).toInt();
 
 	settings.log_gps_general_ = qsettings_->value(log_gps_general_key.c_str(), log_gps_general_default).toBool();
 	settings.log_gps_parsing_ = qsettings_->value(log_gps_parsing_key.c_str(), log_gps_parsing_default).toBool();
@@ -96,6 +97,7 @@ void settings_io::read(collection_settings &settings, const std::string &group_k
 	settings.collection_time_ = qsettings_->value(collection_time_key.c_str(), settings_collection_time_default).toLongLong();
 	settings.is_streaming_ = qsettings_->value(is_streaming_key.c_str(), settings_is_streaming_default).toBool();
 	settings.overlap_time_ = qsettings_->value(overlap_time_key.c_str(), settings_overlap_time_default).toLongLong();
+	settings.priority_ = qsettings_->value(priority_key.c_str(), settings_priority_default).toInt();
 	qsettings_->endGroup();
 }
 
@@ -212,6 +214,7 @@ void settings_io::write(const settings &settings) {
 	qsettings_->setValue(output_in_binary_key.c_str(), settings.output_in_binary_);
 	qsettings_->setValue(simultaneous_collection_key.c_str(), settings.simultaneous_collection_);
 	qsettings_->setValue(eeprom_update_period_for_1pps_calibration_minutes_key.c_str(), settings.eeprom_update_period_for_1pps_calibration_minutes_);
+	qsettings_->setValue(scheduling_algorithm_key.c_str(), settings.scheduling_algorithm_);
 
 	qsettings_->setValue(log_gps_general_key.c_str(), settings.log_gps_general_);
 	qsettings_->setValue(log_gps_parsing_key.c_str(), settings.log_gps_parsing_);
@@ -271,6 +274,7 @@ void settings_io::write(const collection_settings &settings, const std::string &
 	qsettings_->setValue(collection_time_key.c_str(), settings.collection_time_);
 	qsettings_->setValue(is_streaming_key.c_str(), settings.is_streaming_);
 	qsettings_->setValue(overlap_time_key.c_str(), settings.overlap_time_);
+	qsettings_->setValue(priority_key.c_str(), settings.priority_);
 	qsettings_->endGroup();
 }
 

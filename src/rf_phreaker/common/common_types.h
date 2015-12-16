@@ -17,6 +17,12 @@ typedef int32_t bandwidth_type;
 
 typedef int64_t time_type;
 
+enum scheduling_algorithm_type {
+	tech_based,
+	collection_round_based,
+	packet_based
+};
+
 enum specifier
 {
 	GSM_SWEEP,
@@ -43,7 +49,7 @@ public:
 	void add_spec(specifier spec) { specs_.insert(spec); }
 	void remove_spec(specifier spec) { specs_.erase(spec); }
 	bool has_spec(specifier spec) const { return specs_.find(spec) != specs_.end(); }
-	bool does_overlap(const specifiers &specs) {
+	bool does_overlap(const specifiers &specs) const {
 		for(const auto &i : specs.specs_) {
 			if(specs_.find(i) != specs_.end())
 				return true;
@@ -52,6 +58,8 @@ public:
 	}
 	bool operator==(const specifiers& s) const { return specs_ == s.specs_; }
 	bool operator!=(const specifiers& s) const { return specs_ != s.specs_; }
+	size_t size() const { return specs_.size(); }
+	specifier front() const { return *specs_.begin(); }
 private:
 	std::set<specifier> specs_;
 };
@@ -78,6 +86,7 @@ enum message_codes
 	STD_EXCEPTION_ERROR,
 	UNKNOWN_ERROR,
 	FREQUENCY_CORRECTION_FAILED,
+	FREQUENCY_CORRECTION_VALUE_INVALID,
 	EEPROM_ERROR,
 	CALIBRATION_ERROR,
 	CONVERSION_ERROR

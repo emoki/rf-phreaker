@@ -15,6 +15,7 @@ set (processing_SRCS
 	collection_info.h
 	collection_info_container.h
 	collection_manager_body.h
+	collection_scheduler.h
 	data_output.h
 	data_output_async.h
 	gps_body.h

@@ -39,6 +39,9 @@ inline int convert_message(int msg) {
 	case (int)CALIBRATION_ERROR:
 		code = beagle_api::CALIBRATIONERROR;
 		break;
+	case (int)FREQUENCY_CORRECTION_VALUE_INVALID:
+		code = beagle_api::FREQUENCY_CORRECTION_VALUE_INVALID;
+		break;
 	default:
 		code = static_cast<beagle_api::ERRORCODES>(msg);
 	}
@@ -437,9 +440,18 @@ public:
 
 	void output_error(const std::string &s, int type, int code) {
 		// Manually set the code to generic error for any code other than the ones below.
-		if(code != STD_EXCEPTION_ERROR || code != UNKNOWN_ERROR || code != FREQUENCY_CORRECTION_FAILED
-			|| code != beagle_api::WRONG_SPEED_DETECTED || code != CALIBRATION_ERROR || code != EEPROM_ERROR)
-			code = GENERAL_ERROR;
+		switch(code) {
+		case rf_phreaker::STD_EXCEPTION_ERROR:
+		case rf_phreaker::UNKNOWN_ERROR:
+		case rf_phreaker::FREQUENCY_CORRECTION_FAILED:
+		case beagle_api::WRONG_SPEED_DETECTED:
+		case rf_phreaker::CALIBRATION_ERROR:
+		case rf_phreaker::EEPROM_ERROR:
+		case rf_phreaker::FREQUENCY_CORRECTION_VALUE_INVALID:
+			break;
+		default:
+			code = rf_phreaker::GENERAL_ERROR;
+		}
 		LOG(LERROR) << s;
 		if(delegate_ != nullptr) {
 			if(beagle_info_.state_ == beagle_api::BEAGLE_COLLECTING
@@ -448,20 +460,21 @@ public:
 				|| beagle_info_.state_ == beagle_api::BEAGLE_WARMINGUP
 				|| beagle_info_.state_ == beagle_api::BEAGLE_CALCULATING_FREQUENCY_CORRECTION) {
 				switch(code) {
-				case GENERAL_ERROR:
-				case STD_EXCEPTION_ERROR:
-				case UNKNOWN_ERROR:
+				case rf_phreaker::GENERAL_ERROR:
+				case rf_phreaker::STD_EXCEPTION_ERROR:
+				case rf_phreaker::UNKNOWN_ERROR:
 					if(processing_graph_) processing_graph_->cancel_and_wait();
 					if(gps_graph_) gps_graph_->cancel_and_wait();
 					if(frequency_correction_graph_) frequency_correction_graph_->cancel_and_wait();
 					change_beagle_state(beagle_api::BEAGLE_ERROR);
 					break;
-				case FREQUENCY_CORRECTION_FAILED:
+				case rf_phreaker::FREQUENCY_CORRECTION_FAILED:
 					if(gps_graph_) gps_graph_->enable_1pps_calibration();
 					change_beagle_state(beagle_api::BEAGLE_READY);
 				case beagle_api::WRONG_SPEED_DETECTED:
-				case CALIBRATION_ERROR:
-				case EEPROM_ERROR:
+				case rf_phreaker::FREQUENCY_CORRECTION_VALUE_INVALID:
+				case rf_phreaker::CALIBRATION_ERROR:
+				case rf_phreaker::EEPROM_ERROR:
 				default:;
 					// Do nothing.
 				}

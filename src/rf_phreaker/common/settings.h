@@ -10,11 +10,13 @@ namespace rf_phreaker
 // Default Values
 static const bool settings_output_raw_packets_default = false;
 static const int settings_log_level_default = 3;
+static const int scheduling_algorithm_default = (int)collection_round_based;
 static const frequency_type settings_sampling_rate_default = 4875000;
 static const frequency_type settings_bandwidth_default = 5000000;
 static const time_type settings_collection_time_default = (32000000);
 static const time_type settings_overlap_time_default = 10000000;
 static const bool settings_is_streaming_default = false;
+static const int settings_priority_default = 1;
 static const int settings_layer_3_max_update_threshold_default = 150;
 static const int settings_layer_3_min_collection_round_default = 5;
 static const int settings_layer_3_decode_threshold_default = -13;
@@ -75,6 +77,7 @@ public:
 	time_type collection_time_;
 	bool is_streaming_;
 	time_type overlap_time_;
+	int priority_;
 };
 
 class layer_3_settings {
@@ -156,6 +159,7 @@ public:
 	bool output_in_binary_;
 	bool simultaneous_collection_;
 	int eeprom_update_period_for_1pps_calibration_minutes_;
+	scheduling_algorithm_type scheduling_algorithm_;
 
 	blade_settings blade_settings_;
 
