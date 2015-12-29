@@ -211,11 +211,9 @@ void blade_rf_controller::close_scanner()
 {
 	// Only stop our streaming thread - disabling the RX stream will occur inside the bladeRF API close function.
 	stop_streaming();
+	std::lock_guard<std::recursive_mutex> lock(open_close_mutex_);
 	if(comm_blade_rf_.get()) {
-		{
-			std::lock_guard<std::recursive_mutex> lock(open_close_mutex_);
-			nr_close(comm_blade_rf_->blade_rf());
-		}
+		nr_close(comm_blade_rf_->blade_rf());
 		comm_blade_rf_.reset();
 		scanner_blade_rf_.reset();
 		scanner_.reset();
