@@ -22,6 +22,8 @@ cappeen_impl::~cappeen_impl()
 {
 	try {
 		// Order of components is important when destructing.
+		// VS 2013 bug can cause access violations when destructing at application's 
+		// exit due to synchronization issues like acquiring a mutex.  
 		gps_graph_.reset();
 		processing_graph_.reset();
 		frequency_correction_graph_.reset();
