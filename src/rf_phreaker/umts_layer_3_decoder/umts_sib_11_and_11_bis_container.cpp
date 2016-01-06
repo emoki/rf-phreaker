@@ -78,6 +78,8 @@ void umts_sib_11_and_11_bis_container::parse_data(umts_bcch_bch_message_aggregat
 void umts_sib_11_and_11_bis_container::parse_sib_11_bis()
 {
 	SysInfoType11bis_t *data = (SysInfoType11bis_t*)current_pdu_->decoded_structure();
+	
+	current_message_->sib11_bis_.is_decoded_ = true;
 
 	if(data->measurementControlSysInfo)
 	{
@@ -161,11 +163,17 @@ void umts_sib_11_and_11_bis_container::parse_sib_11_bis()
         default:;
         }
 	}
+
+	current_message_->sib11_bis_.neighbor_intra_group_ = current_message_->neighbor_intra_group_;
+	current_message_->sib11_bis_.neighbor_inter_group_ = current_message_->neighbor_inter_group_;
+	current_message_->sib11_bis_.neighbor_inter_rat_group_ = current_message_->neighbor_inter_rat_group_;
 }
 
 void umts_sib_11_and_11_bis_container::parse_sib_11()
 {
 	SysInfoType11_t *data = (SysInfoType11_t*)current_pdu_->decoded_structure();
+
+	current_message_->sib11_.is_decoded_ = true;
 
 	switch(data->measurementControlSysInfo.use_of_HCS.present)
 	{
@@ -260,6 +268,10 @@ void umts_sib_11_and_11_bis_container::parse_sib_11()
 		break;
 	default:;
 	}
+
+	current_message_->sib11_.neighbor_intra_group_ = current_message_->neighbor_intra_group_;
+	current_message_->sib11_.neighbor_inter_group_ = current_message_->neighbor_inter_group_;
+	current_message_->sib11_.neighbor_inter_rat_group_ = current_message_->neighbor_inter_rat_group_;
 }
 
 void umts_sib_11_and_11_bis_container::remove_decoded_pdu_element()

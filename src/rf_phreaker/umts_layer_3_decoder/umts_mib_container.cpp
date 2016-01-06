@@ -17,25 +17,42 @@ umts_mib_container::~umts_mib_container(void)
 {
 }
 
-void umts_mib_container::parse_data(umts_bcch_bch_message_aggregate &message)
-{
+void umts_mib_container::parse_data(umts_bcch_bch_message_aggregate &message) {
 	mib_data_ = (MasterInformationBlock_t*)decoded_structure();
+
+	message.mib_.is_decoded_ = true;
 
 	look_for_plmn(message);
 
 	look_for_sib_11(message);
 
 	look_for_sib_11_bis(message);
-}
 
+	// Decode multiple plmns
+	if(mib_data_->v690NonCriticalExtensions &&
+		mib_data_->v690NonCriticalExtensions->masterInformationBlock_v690ext.multiplePLMN_List) {
+		auto &list = mib_data_->v690NonCriticalExtensions->masterInformationBlock_v690ext.multiplePLMN_List->multiplePLMNs.list;
+		for(auto i = 0; i < list.count; ++i) {
+			plmn p;
+			auto &tmp_plmn = list.array[i];
+			if(tmp_plmn->mcc)
+				p.mcc_ = create_mcc_type(tmp_plmn->mcc->list.array, tmp_plmn->mcc->list.count);
+			p.mnc_ = create_mnc_type(tmp_plmn->mnc.list.array, tmp_plmn->mnc.list.count);
+			message.mib_.multiple_plmns_.push_back(p);
+		}
+	}
+}
+		
 void umts_mib_container::look_for_plmn(umts_bcch_bch_message_aggregate &message)
 {
 	// TODO - Where are multiple PLMNs?
 	switch(mib_data_->plmn_Type.present)
 	{
 	case PLMN_Type_PR_gsm_MAP:
-		message.mcc_ = create_mcc_type(mib_data_->plmn_Type.choice.gsm_MAP.plmn_Identity.mcc.list.array, mib_data_->plmn_Type.choice.gsm_MAP.plmn_Identity.mcc.list.count);
-		message.mnc_ = create_mnc_type(mib_data_->plmn_Type.choice.gsm_MAP.plmn_Identity.mnc.list.array, mib_data_->plmn_Type.choice.gsm_MAP.plmn_Identity.mnc.list.count);
+		message.mib_.plmn_.mcc_ = create_mcc_type(mib_data_->plmn_Type.choice.gsm_MAP.plmn_Identity.mcc.list.array, mib_data_->plmn_Type.choice.gsm_MAP.plmn_Identity.mcc.list.count);
+		message.mib_.plmn_.mnc_ = create_mnc_type(mib_data_->plmn_Type.choice.gsm_MAP.plmn_Identity.mnc.list.array, mib_data_->plmn_Type.choice.gsm_MAP.plmn_Identity.mnc.list.count);
+		message.mcc_ = message.mib_.plmn_.mcc_;
+		message.mnc_ = message.mib_.plmn_.mnc_;
 		break;
 
 	case PLMN_Type_PR_ansi_41:
@@ -44,9 +61,11 @@ void umts_mib_container::look_for_plmn(umts_bcch_bch_message_aggregate &message)
 		break;
 
 	case PLMN_Type_PR_gsm_MAP_and_ANSI_41:
-		message.mcc_ = create_mcc_type(mib_data_->plmn_Type.choice.gsm_MAP_and_ANSI_41.plmn_Identity.mcc.list.array, mib_data_->plmn_Type.choice.gsm_MAP_and_ANSI_41.plmn_Identity.mcc.list.count);
-		message.mnc_ = create_mnc_type(mib_data_->plmn_Type.choice.gsm_MAP_and_ANSI_41.plmn_Identity.mnc.list.array, mib_data_->plmn_Type.choice.gsm_MAP_and_ANSI_41.plmn_Identity.mnc.list.count);
-	break;
+		message.mib_.plmn_.mcc_ = create_mcc_type(mib_data_->plmn_Type.choice.gsm_MAP_and_ANSI_41.plmn_Identity.mcc.list.array, mib_data_->plmn_Type.choice.gsm_MAP_and_ANSI_41.plmn_Identity.mcc.list.count);
+		message.mib_.plmn_.mnc_ = create_mnc_type(mib_data_->plmn_Type.choice.gsm_MAP_and_ANSI_41.plmn_Identity.mnc.list.array, mib_data_->plmn_Type.choice.gsm_MAP_and_ANSI_41.plmn_Identity.mnc.list.count);
+		message.mcc_ = message.mib_.plmn_.mcc_;
+		message.mnc_ = message.mib_.plmn_.mnc_;
+		break;
 
 	case PLMN_Type_PR_spare:
 		break;

@@ -19,6 +19,8 @@ umts_sib_1_container::~umts_sib_1_container(void)
 void umts_sib_1_container::parse_data(umts_bcch_bch_message_aggregate &message)
 {
 	SysInfoType1_t *data = (SysInfoType1_t*)decoded_structure();
-	message.lac_ = create_lac(data->cn_CommonGSM_MAP_NAS_SysInfo);
+	message.sib1_.is_decoded_ = true;
+	message.sib1_.lac_ = create_lac(data->cn_CommonGSM_MAP_NAS_SysInfo);
+	message.lac_ = message.sib1_.lac_;
 }
 
