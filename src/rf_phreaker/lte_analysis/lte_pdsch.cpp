@@ -246,10 +246,14 @@ int lte_pdsch_decode(Ipp32fc* inSignal,
 
 		clock_t begin_asn = clock();
 
+		auto num_bit_stream_bytes = (transport_block_size + LTE_PDSCH_CRC_LEN) / 8;
+
 		lte_asn1_decoder decoder;
 
 		layer_3_information::lte_rrc_message_aggregate tmp;
 		decoder.decode_bcch_bch_message(lte_pdsch_byte_seq, 512, 0, tmp);
+
+		LteData[cell_no].layer_3_.raw_layer_3_.emplace_back(layer_3_information::bit_stream(lte_pdsch_byte_seq, num_bit_stream_bytes, 0));
 
 		// Only update sibs.
 		if(tmp.sib1_.is_decoded()) {

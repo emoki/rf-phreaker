@@ -15,7 +15,8 @@ inline std::ostream& header(std::ostream &os, const umts_bcch_bch_message_aggreg
 		<< "system_frame_number" << main_delim
 		<< "neighbor_intra" << main_delim
 		<< "neighbor_inter" << main_delim
-		<< "neighbor_inter_rat";
+		<< "neighbor_inter_rat" << main_delim
+		<< "raw_layer_3_streams";
 	return os;
 }
 
@@ -53,6 +54,8 @@ inline std::ostream& operator<<(std::ostream &os, const umts_bcch_bch_message_ag
 				<< spacer2 << rat.bsic_ << spacer2 << rat.qrx_lev_min_ << main_delim;
 		}
 	}
+
+	os << t.raw_layer_3_;
 
 	return os;
 }

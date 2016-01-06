@@ -41,13 +41,14 @@ int umts_asn1_decoder::specify_sibs_for_decoding(const pdu_element_type *element
 	return status;
 }
 
-int umts_asn1_decoder::decode_bcch_bch_message(const uint8_t* bit_stream, uint32_t num_of_bytes, uint32_t unused_bits, umts_bcch_bch_message_aggregate &message)
+int umts_asn1_decoder::decode_bcch_bch_message(const uint8_t* raw_bits, uint32_t num_of_bytes, uint32_t unused_bits, umts_bcch_bch_message_aggregate &message)
 {
 	int status = 0;
 	try
 	{
 		message.clear();
-		bit_stream_container bits(bit_stream, num_of_bytes, unused_bits);
+		message.raw_layer_3_.emplace_back(bit_stream(raw_bits, num_of_bytes, unused_bits));
+		bit_stream_container bits(raw_bits, num_of_bytes, unused_bits);
 
 		if(debug_) {
 			static std::ofstream f("umts_bitstreams_" + rf_phreaker::static_timestamp::to_string() + ".txt", std::ios::app);

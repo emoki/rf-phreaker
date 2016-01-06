@@ -17,13 +17,15 @@ gsm_layer_3_decoder::gsm_layer_3_decoder()
 
 gsm_layer_3_decoder::~gsm_layer_3_decoder() {}
 
-int32_t gsm_layer_3_decoder::decode_bcch_message(const uint8_t *bit_stream, uint32_t num_of_bytes, uint32_t unused_bits, layer_3_information::gsm_layer_3_message_aggregate &message)
+int32_t gsm_layer_3_decoder::decode_bcch_message(const uint8_t *raw_bits, uint32_t num_of_bytes, uint32_t unused_bits, layer_3_information::gsm_layer_3_message_aggregate &message)
 {
 	// See 3GPP spec 44.018 section 3.2.2 (Network side - System Information Broadcasting) to see when different sibs are scheduled.
 	int32_t status = 0;
 	try
 	{
-		gsm_bit_stream bits(bit_stream, num_of_bytes, unused_bits);
+		message.raw_layer_3_.emplace_back(bit_stream(raw_bits, num_of_bytes, unused_bits));
+
+		gsm_bit_stream bits(raw_bits, num_of_bytes, unused_bits);
 
 		if(debug_) {
 			static std::ofstream debug("gsm_bit_streams_" + rf_phreaker::static_timestamp::to_string() + ".txt", std::ios::app);
