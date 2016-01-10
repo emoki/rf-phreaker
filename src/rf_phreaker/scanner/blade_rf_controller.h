@@ -157,6 +157,8 @@ private:
 	void update_vctcxo_based_on_eeprom();
 
 	std::chrono::time_point<std::chrono::system_clock, std::chrono::system_clock::duration> get_collection_start_time();
+
+	measurement_info pop_measurement_buffer();
 		
 	ipp_16sc_aligned_buffer aligned_buffer_;
 
