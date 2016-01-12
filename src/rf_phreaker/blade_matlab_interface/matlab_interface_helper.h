@@ -12,7 +12,8 @@ enum matlab_interface_errors
 	matlab_interface_error_general = -1000,
 	matlab_interface_error_insufficient_buf_size,
 	matlab_interface_error_null_detected,
-	matlab_interface_error_invalid_parameter
+	matlab_interface_error_invalid_parameter,
+	matlab_interface_error_io_error
 };
 
 static rf_phreaker::scanner::blade_rf_controller controller;

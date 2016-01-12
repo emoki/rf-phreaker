@@ -8,6 +8,7 @@
 #include "rf_phreaker/common/delegate_sink.h"
 #include "rf_phreaker/scanner/signal_level_calculator.h"
 #include "rf_phreaker/scanner/eeprom.h"
+#include "rf_phreaker/cappeen/cappeen_license.h"
 
 using namespace rf_phreaker;
 using namespace rf_phreaker::scanner;
@@ -684,6 +685,90 @@ int power_off_gps() {
 	try {
 
 		controller.power_off_gps();
+
+		return matlab_interface_no_error;
+	}
+	catch(rf_phreaker::rf_phreaker_error &err) {
+		last_error_ = err.what();
+		return (int)err.error_code_;
+	}
+	catch(std::exception &err) {
+		last_error_ = err.what();
+	}
+	return matlab_interface_error_general;
+}
+
+int create_cappeen_license(int hw_id, const int8_t *license_filename) {
+	using namespace beagle_api;
+	using namespace rf_phreaker::cappeen_api;
+	try {
+		if(hw_id == 0) {
+			hw_id = controller.get_scanner()->get_hardware().hw_id_;
+		}
+
+		check_null(license_filename);
+		std::string filename((char*)license_filename);
+
+		std::set<TECHNOLOGIES_AND_BANDS> band_licenses;
+		band_licenses.insert(GSM_BAND_850);
+		band_licenses.insert(GSM_BAND_900);
+		band_licenses.insert(GSM_BAND_1900);
+		band_licenses.insert(GSM_BAND_1800);
+		band_licenses.insert(WCDMA_BAND_850);
+		band_licenses.insert(WCDMA_BAND_900);
+		band_licenses.insert(WCDMA_BAND_1800);
+		band_licenses.insert(WCDMA_BAND_1900);
+		band_licenses.insert(WCDMA_BAND_2100);
+		band_licenses.insert(LTE_BAND_5);
+		band_licenses.insert(LTE_BAND_7);
+		band_licenses.insert(LTE_BAND_8);
+		band_licenses.insert(LTE_BAND_3);
+		band_licenses.insert(LTE_BAND_2);
+		band_licenses.insert(LTE_BAND_1);
+		band_licenses.insert(LTE_BAND_12);
+		band_licenses.insert(LTE_BAND_20);
+
+		std::set<software_license> software_licenses;
+		software_licenses.insert(network_coverage_license);
+		software_licenses.insert(cell_analysis_license);
+
+		auto raw_license_v3 = cappeen_license_version_3::generate_license((uint32_t)hw_id, band_licenses, software_licenses);
+		{
+			std::ofstream f((char*)license_filename, std::ios::binary);
+			if(!f)
+				throw matlab_interface_error("Unable to write license file.  Cannot open file: " + filename + ".", matlab_interface_error_io_error);
+			f.write((char*)&raw_license_v3[0], raw_license_v3.size());
+		}
+
+		return matlab_interface_no_error;
+	}
+	catch(rf_phreaker::rf_phreaker_error &err) {
+		last_error_ = err.what();
+		return (int)err.error_code_;
+	}
+	catch(std::exception &err) {
+		last_error_ = err.what();
+	}
+	return matlab_interface_error_general;
+}
+
+int upload_cappeen_license(const int8_t *license_filename) {
+	using namespace beagle_api;
+	using namespace rf_phreaker::cappeen_api;
+	try {
+		check_null(license_filename);
+		std::string filename((char*)license_filename);
+
+		// Read license.
+		cappeen_license_version_3 license(cell_analysis_license);
+		auto raw_license = license.create_new_license_from_file(filename);
+
+		// Verify license is not corrupt.
+		license.initialize_license(raw_license, controller.get_scanner()->get_hardware().hw_id_);
+		if(license.corrupt_license())
+			throw matlab_interface_error("License read from file appears corrupt.");
+
+		controller.write_license(raw_license);
 
 		return matlab_interface_no_error;
 	}
