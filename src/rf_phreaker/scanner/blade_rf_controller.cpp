@@ -124,14 +124,14 @@ void blade_rf_controller::open_scanner(const scanner_serial_type &id)
 		try {
 			// If the FPGA is in a bad state we want to make sure we don't access it while opening even if
 			// the bladeRF says the FPGA is loaded.  Setting this environmental variable allows us to do that.
-			rf_phreaker::setenv("BLADERF_FORCE_NO_FPGA_PRESENT", "1", 1);
+			LOG_IF(LERROR, (rf_phreaker::setenv("BLADERF_FORCE_NO_FPGA_PRESENT", "1", 1) != 0)) << "Unable to set force_no_fpga_present variable.";
 
 			check_blade_status(nr_open(&blade_rf, open_str.c_str(), __FILE__, __LINE__), __FILE__, __LINE__);
 
 			check_blade_status(nr_get_devinfo(blade_rf, &dev_info, __FILE__, __LINE__), __FILE__, __LINE__);
 
 			// Remove this value so we can update the vctcxo trim value, which requires implicit use of the FPGA.
-			rf_phreaker::setenv("BLADERF_FORCE_NO_FPGA_PRESENT", "", 1);
+			LOG_IF(LERROR, (rf_phreaker::setenv("BLADERF_FORCE_NO_FPGA_PRESENT", "", 1) != 0)) << "Unable to remove force_no_fpga_present variable.";
 			break;
 		}
 		catch(rf_phreaker_error &err) {
