@@ -33,8 +33,10 @@ extern "C" {
 
 struct rp_device;
 
-const int RP_SERIAL_LENGTH = 33;
-const int RP_FREQUENCY_PATH_SIZE = 100;
+const int32_t RP_SERIAL_LENGTH = 33;
+const int32_t RP_FREQUENCY_PATH_SIZE = 100;
+const int32_t PLMN_STRING_SIZE = 4;
+const int32_t MAX_RAW_LAYER_3_BYTE_SIZE = 512;
 
 typedef int64_t rp_frequency_type;
 
@@ -211,9 +213,9 @@ typedef struct rp_device_info {
 	rp_device_communication device_communication_;
 	int64_t frequency_correction_calibration_date_;
 	int64_t rf_calibration_date_;
-	int num_frequency_paths_;
+	int32_t num_frequency_paths_;
 	rp_frequency_path frequency_paths_[RP_FREQUENCY_PATH_SIZE];
-	int num_licenses_;
+	int32_t num_licenses_;
 	// TODO - expose license.
 } rp_device_info;
 
@@ -239,12 +241,239 @@ typedef struct rp_base {
 	int32_t status_flags_;
 } rp_base;
 
+typedef struct rp_plmn {
+	uint8_t mcc_[PLMN_STRING_SIZE];
+	uint8_t mnc_[PLMN_STRING_SIZE];
+} rp_plmn;
+
+typedef struct rp_raw_layer_3 {
+	uint8_t bytes_[MAX_RAW_LAYER_3_BYTE_SIZE];
+	int32_t num_bytes_;
+	int32_t unused_bits_;
+} rp_raw_layer_3;
+
+typedef enum rp_band_indicator {
+	dcs_1800_was_used = 0,
+	pcs_1900_was_used = 1,
+	unknown_band_was_used = -1
+} rp_band_indicator;
+
+typedef enum rp_duplex_type {
+	fdd,
+	tdd
+} rp_duplex_type;
+
+typedef enum rp_utran_bandwidth_type {
+	utran_3_84_mcps,
+	utran_1_24_mcps,
+	utran_2_mcps,
+	utran_3_mcps,
+	utran_4_mcps,
+	utran_5_mcps,
+	utran_6_mcps,
+	utran_7_mcps,
+	utran_default_mcps = utran_3_84_mcps
+} rp_utran_bandwidth_type;
+
+typedef struct rp_gsm_utran_neighbor {
+	rp_duplex_type duplexing_;
+	int32_t arfcn_;
+	rp_utran_bandwidth_type bandwidth_;
+	int32_t num_scrambling_codes_;
+	int32_t *scrambling_codes_;
+} rp_gsm_utran_neighbor;
+
+
+typedef enum rp_eutran_bandwidth_type {
+	num_resource_blocks_6,
+	num_resource_blocks_15,
+	num_resource_blocks_25,
+	num_resource_blocks_50,
+	num_resource_blocks_75,
+	num_resource_blocks_100
+} rp_eutran_bandwidth_type;
+
+typedef struct rp_pcid_group {
+	int32_t num_pcids_;
+	int32_t *pcids_;
+} rp_pcid_group;
+
+typedef struct rp_gsm_eutran_neighbor {
+	int32_t earfcn_;
+	rp_eutran_bandwidth_type bandwidth_;
+	int32_t priority_;
+	int32_t threshold_high_db_;
+	int32_t threshold_low_db_;
+	int32_t qrxlevmin_db_;
+	rp_pcid_group pcids_allowed_;
+	rp_pcid_group pcids_not_allowed_;
+	int32_t num_pcids_same_tracking_area_;
+	rp_pcid_group *pcids_same_tracking_area_;
+	int32_t num_pcids_different_tracking_area_;
+	rp_pcid_group *pcids_different_tracking_area_;
+} rp_gsm_eutran_neighbor;
+
+typedef struct rp_gsm_si1 {
+	bool is_decoded_;
+	rp_band_indicator band_indicator_;
+} rp_gsm_si1;
+
+typedef struct rp_gsm_si2 {
+	bool is_decoded_;
+	int32_t num_bcch_neighbors_;
+	int32_t *bcch_neighbors_;
+	bool extension_indication_;
+	int32_t bcch_allocation_indication_;
+} rp_gsm_si2;
+
+typedef struct rp_gsm_si2_bis {
+	bool is_decoded_;
+	int32_t num_bcch_neighbors_;
+	int32_t *bcch_neighbors_;
+	bool extension_indication_;
+	int32_t bcch_allocation_indication_;
+	int32_t rest_octet_index_;
+	int32_t rest_octet_count_;
+} rp_gsm_si2_bis;
+
+typedef struct rp_gsm_si2_ter {
+	bool is_decoded_;
+	int32_t num_extended_bcch_neighbors_;
+	int32_t *extended_bcch_neighbors_;
+	int32_t gsm_bcch_allocation_indication_;
+	int32_t bcch_neighbors_multiband_reporting_;
+	int32_t num_utran_neighbors_;
+	rp_gsm_utran_neighbor *utran_neighbors_;
+	int32_t rest_octet_index_;
+	int32_t rest_octet_count_;
+} rp_gsm_si2_ter;
+
+typedef struct rp_gsm_si2_quater {
+	bool is_decoded_;
+	int32_t gsm_bcch_allocation_indication_;
+	int32_t p3g_bcch_allocation_indication_;
+	int32_t utran_neighbor_cell_index_start_3g_;
+	int32_t utran_neighbor_cell_absolute_index_start_emr_;
+	int32_t num_utran_neighbors_;
+	rp_gsm_utran_neighbor *utran_neighbors_;
+	int32_t num_eutran_neighbors_;
+	rp_gsm_eutran_neighbor *eutran_neighbors_;
+	int32_t rest_octet_index_;
+	int32_t rest_octet_count_;
+} rp_gsm_si2_quater;
+
+typedef struct rp_gsm_selection_parameters {
+	int32_t cbq_;
+	int32_t cell_reselect_offset_db_; // actual range = 0-63 (0, 2, 4,...,126db)
+	int32_t temporary_offset_db_; // actual range = 0-7 (0, 10, 20,...,60db, infinity)
+	int32_t penalty_time_seconds_; // actual range = 0-31 (20, 40, 60,...,620 seconds)
+	bool subtract_reselect_cell_offset_ignore_temp_offset_;
+	bool apply_infinity_offset_;
+} rp_gsm_selection_parameters;
+
+typedef struct rp_gsm_si3 {
+	bool is_decoded_;
+	rp_plmn plmn_;
+	int32_t location_area_code_;
+	int32_t cell_id_;
+	int32_t cell_reselect_hysteresis_db_;
+	rp_gsm_selection_parameters selection_parameters_;
+	int32_t bs_ag_blks_res_;
+	bool is_2ter_present_;
+	bool is_2quater_present_;
+} rp_gsm_si3;
+
+typedef struct rp_gsm_si4 {
+	bool is_decoded_;
+	rp_plmn plmn_;
+	int32_t location_area_code_;
+	int32_t cell_id_;
+	int32_t cell_reselect_hysteresis_db_;
+	rp_gsm_selection_parameters selection_parameters_;
+	bool is_cbch_present_;
+	bool have_additional_param_in_si7_si8_;
+} rp_gsm_si4;
+
+typedef struct rp_gsm_layer_3 {
+	int32_t num_raw_layer_3_;
+	rp_raw_layer_3 *raw_layer_3_;
+	rp_gsm_si1 si1_;
+	rp_gsm_si2 si2_;
+	rp_gsm_si2_bis si2_bis_;
+	rp_gsm_si2_ter si2_ter_;
+	rp_gsm_si2_quater si2_quater_;
+	rp_gsm_si3 si3_;
+	rp_gsm_si4 si4_;
+} rp_gsm_layer_3;
+
 typedef struct rp_gsm {
 	rp_base base_;
 	rp_channel_type arfcn_;
+	rp_operating_band operating_band_;
 	int32_t bsic_;
-	// TODO - expose layer 3
+	int32_t tdma_frame_number_;
+	double bcch_signal_level_;
+	double ctoi_;
+	rp_gsm_layer_3 layer_3_;
 } rp_gsm;
+
+
+typedef struct rp_wcdma_utran_neighbor {
+	int32_t uarfcn_;
+	int32_t cpich_;
+} rp_wcdma_neighbor_inter;
+
+typedef struct rp_wcdma_gsm_neighbor {
+	int32_t bsic_;
+	rp_band_indicator band_indicator_;
+	int32_t arfcn_;
+	int32_t qrx_lev_min_;
+} rp_wcdma_gsm_neighbor;
+
+typedef struct rp_wcdma_mib {
+	bool is_decoded_;
+	rp_plmn plmn_;
+	int32_t num_multiple_plmns_;
+	rp_plmn *multiple_plmns_;
+} rp_wcdma_mib;
+
+typedef struct rp_wcdma_sib1 {
+	bool is_decoded_;
+	int32_t lac_;
+} rp_wcdma_sib1;
+
+typedef struct rp_wcdma_sib3 {
+	bool is_decoded_;
+	int32_t cid_;
+} rp_wcdma_sib3;
+
+typedef struct rp_wcdma_sib4 {
+	bool is_decoded_;
+	int32_t cid_;
+} rp_wcdma_sib4;
+
+typedef struct rp_wcdma_sib11 {
+	bool is_decoded_;
+	int32_t num_utran_intra_neighbor_cpichs_;
+	int32_t *utran_intra_neighbor_cpichs_;
+	int32_t num_utran_inter_neighbors_;
+	rp_wcdma_utran_neighbor *utran_inter_neighbors_;
+	int32_t num_gsm_inter_neighbors_;
+	rp_wcdma_gsm_neighbor *gsm_inter_neighbors_;
+} rp_wcdma_sib11;
+
+typedef rp_wcdma_sib11 rp_wcdma_sib11_bis;
+
+typedef struct rp_wcdma_layer_3 {
+	int32_t num_raw_layer_3_;
+	rp_raw_layer_3 *raw_layer_3_;
+	rp_wcdma_mib mib_;
+	rp_wcdma_sib1 sib1_;
+	rp_wcdma_sib3 sib3_;
+	rp_wcdma_sib4 sib4_;
+	rp_wcdma_sib11 sib11_;
+	rp_wcdma_sib11_bis sib11_bis_;
+} rp_wcdma_layer_3;
 
 typedef struct rp_wcdma {
 	rp_base base_;
@@ -253,8 +482,220 @@ typedef struct rp_wcdma {
 	int32_t cpich_;
 	double ecio_;
 	double rscp_;
-	// TODO - expose layer 3
+	rp_wcdma_layer_3 layer_3_;
 } rp_wcdma;
+
+
+enum rp_lte_sib_type {
+	LTE_SIB1,
+	LTE_SIB2,
+	LTE_SIB3,
+	LTE_SIB4,
+	LTE_SIB5,
+	LTE_SIB6,
+	LTE_SIB7,
+	LTE_SIB8,
+	LTE_SIB9,
+	LTE_SIB10,
+	LTE_SIB11,
+	LTE_SIB12_V920,
+	LTE_SIB13_V920,
+	LTE_SIB14_V1130,
+	LTE_SIB15_V1130,
+	LTE_SIB16_V1130,
+	LTE_SPARE2,
+	LTE_SPARE1
+};
+typedef struct rp_lte_scheduling_info {
+	int32_t periodicity_in_frames_;
+	int32_t num_sibs_;
+	rp_lte_sib_type *sibs;
+} rp_lte_scheduling_info;
+
+typedef struct rp_lte_sib1 {
+	bool is_decoded_;
+	int32_t num_multiple_plmns_;
+	rp_plmn *multiple_plmns_;
+	int32_t tac_;
+	int32_t cid_;
+	int32_t num_scheduling_info_;
+	rp_lte_scheduling_info *scheduling_info_;
+	int32_t si_window_length_ms_;
+} rp_lte_sib1;
+
+typedef struct rp_lte_cell_reselection_serving_freq_info {
+	int32_t s_non_intra_search_; // reselection_threshold
+	int32_t threshold_serving_low_; // reselection_threshold
+	int32_t cell_reselection_priority_;
+} rp_lte_cell_reselection_serving_freq_info;
+
+typedef struct rp_lte_s_search_v920 {
+	int32_t p_; 
+	int32_t q_; 
+} rp_lte_s_search_v920;
+
+typedef struct rp_lte_sib3 {
+	bool is_decoded_;
+	rp_lte_cell_reselection_serving_freq_info cell_reselection_serving_freq_info_;
+	int32_t intra_freq_cell_reselection_info_s_intra_search_;
+	rp_lte_s_search_v920 s_intra_search_v920_;
+	rp_lte_s_search_v920 s_non_intra_search_v920_;
+	int32_t threshold_serving_low_q_;
+} rp_lte_sib3;
+
+typedef struct rp_lte_physical_cellid_range {
+	int32_t start_;
+	int32_t range_;
+} rp_lte_physical_cellid_range;
+
+typedef struct rp_lte_neighbor_cell {
+	int32_t physical_cell_id_;
+	int32_t q_offset_cell_;
+} rp_lte_neighbor_cell;
+
+typedef struct rp_lte_sib4 {
+	bool is_decoded_;
+	int32_t num_intra_freq_neighbor_cell_list_;
+	rp_lte_neighbor_cell *intra_freq_neighbor_cell_list_;
+	int32_t num_intra_freq_black_cell_list_;
+	rp_lte_physical_cellid_range *intra_freq_black_cell_list_;
+	rp_lte_physical_cellid_range csg_physical_cellid_range_;
+} rp_lte_sib4;
+
+typedef struct rp_lte_inter_freq_carrier_freq_info {
+	int32_t downlink_arfcn_value_eutra_;
+	int32_t q_rx_lev_min_;
+	int32_t q_offset_freq_;
+	int32_t allowed_measurement_bandwidth_;
+	bool presence_antenna_port_1_;
+	int32_t threshold_x_high_;
+	int32_t threshold_x_low_;
+	int32_t threshold_x_high_q_r9_;
+	int32_t threshold_x_low_q_r9_;
+	int32_t cell_reselection_priority_;
+	int32_t num_inter_freq_neighbor_cell_list_;
+	rp_lte_neighbor_cell *inter_freq_neighbor_cell_list_;
+	int32_t num_inter_freq_black_cell_list_;
+	rp_lte_physical_cellid_range *inter_freq_black_cell_list_;
+} rp_lte_inter_freq_carrier_freq_info;
+
+typedef struct rp_lte_sib5 {
+	bool is_decoded_;
+	int32_t num_inter_freq_carrier_info_list_;
+	rp_lte_inter_freq_carrier_freq_info *inter_freq_carrier_info_list_;
+} rp_lte_sib5;
+
+typedef struct rp_lte_carrier_freq_utra {
+	int32_t arfcn_value_utra_;
+	int32_t threshold_x_low_;
+	int32_t threshold_x_high_;
+	int32_t threshold_x_low_q_r9_;
+	int32_t threshold_x_high_q_r9_;
+	int32_t cell_reselection_priority_;
+} rp_lte_carrier_freq_utra;
+
+typedef struct rp_lte_sib6 {
+	bool is_decoded_;
+	int32_t num_carrier_freq_list_utra_fdd_;
+	rp_lte_carrier_freq_utra *carrier_freq_list_utra_fdd_;
+	int32_t num_carrier_freq_list_utra_tdd_;
+	rp_lte_carrier_freq_utra *carrier_freq_list_utra_tdd_;
+} rp_lte_sib6;
+
+typedef struct rp_lte_carrier_freqs_geran{
+	int32_t starting_arfcn_;
+	rp_band_indicator band_indicator_;
+	int32_t num_following_arfcns_;
+	int32_t *following_arfcns_;
+} rp_lte_carrier_freqs_geran;
+
+typedef struct rp_lte_geran_common_info {
+	int32_t cell_reselection_priority_;
+	int32_t threshold_x_high_;
+	int32_t threshold_x_low_;
+} rp_lte_geran_common_info;
+
+typedef struct rp_lte_carrier_freqs_info_geran {
+	rp_lte_carrier_freqs_geran carrier_freqs_;
+	rp_lte_geran_common_info common_info_;
+} rp_lte_carrier_freqs_info_geran;
+
+typedef struct rp_lte_sib7 {
+	bool is_decoded_;
+	int32_t num_carrier_freqs_info_list_geran_;
+	rp_lte_carrier_freqs_info_geran *carrier_freqs_info_list_geran_;
+} rp_lte_sib7;
+
+typedef struct rp_lte_neighbor_cells_per_band_class_cdma_2000 {
+	int32_t arfcn_value_cmda_2000_;
+	int32_t num_physical_cell_ids_;
+	int32_t *physical_cell_ids_;
+} rp_lte_neighbor_cells_per_band_class_cdma_2000;
+
+enum rp_lte_band_class_cmda_2000 {
+	bc0,
+	bc1,
+	bc2,
+	bc3,
+	bc4,
+	bc5,
+	bc6,
+	bc7,
+	bc8,
+	bc9,
+	bc10,
+	bc11,
+	bc12,
+	bc13,
+	bc14,
+	bc15,
+	bc16,
+	bc17,
+	bc18_v9a0,
+	bc19_v9a0,
+	bc20_v9a0,
+	bc21_v9a0,
+	spare10,
+	spare9,
+	spare8,
+	spare7,
+	spare6,
+	spare5,
+	spare4,
+	spare3,
+	spare2,
+	spare1
+};
+
+typedef struct rp_lte_neighbor_cell_cdma_2000{
+	rp_lte_band_class_cmda_2000 band_;
+	int32_t num_neighbor_cells_per_freq_list_;
+	rp_lte_neighbor_cells_per_band_class_cdma_2000 *neighbor_cells_per_freq_list_;
+} rp_lte_neighbor_cell_cdma_2000;
+
+typedef struct rp_lte_cell_reselection_parameters_cmda_2000 {
+	int32_t num_neighbor_cell_list_;
+	rp_lte_neighbor_cell_cdma_2000 *neighbor_cell_list_;
+} rp_lte_cell_reselection_parameters_cmda_2000;
+
+typedef struct rp_lte_sib8 {
+	bool is_decoded_;
+	rp_lte_cell_reselection_parameters_cmda_2000 parameters_hrpd_;
+	rp_lte_cell_reselection_parameters_cmda_2000 parameters_1xrtt_;
+} rp_lte_sib8;
+
+typedef struct rp_lte_layer_3 {
+	int32_t num_raw_layer_3_;
+	rp_raw_layer_3 *raw_layer_3_;
+	rp_lte_sib1 sib1_;
+	rp_lte_sib1 sib2_;
+	rp_lte_sib3 sib3_;
+	rp_lte_sib4 sib4_;
+	rp_lte_sib5 sib5_;
+	rp_lte_sib6 sib6_;
+	rp_lte_sib7 sib7_;
+	rp_lte_sib8 sib8_;
+} rp_lte_layer_3;
 
 typedef struct rp_lte {
 	rp_base base_;
@@ -273,7 +714,7 @@ typedef struct rp_lte {
 	int32_t num_antenna_ports_;
 	int32_t downlink_bandwidth_;
 	int32_t frame_number_;
-	// TODO - expose layer 3
+	rp_lte_layer_3 layer_3_;
 } rp_lte;
 
 typedef enum rp_sample_format {
@@ -297,22 +738,22 @@ typedef struct rp_callbacks {
 
 	void (RP_CALLCONV *rp_gps_update)(const rp_gps *gps);
 
-	void (RP_CALLCONV *rp_gsm_update)(const rp_base *base, const rp_gsm *gsm, int num_gsm);
+	void (RP_CALLCONV *rp_gsm_update)(const rp_base *base, const rp_gsm *gsm, int32_t num_gsm);
 
-	void (RP_CALLCONV *rp_wcdma_update)(const rp_base *base, const rp_wcdma *wcdma, int num_wcdma);
+	void (RP_CALLCONV *rp_wcdma_update)(const rp_base *base, const rp_wcdma *wcdma, int32_t num_wcdma);
 
-	void (RP_CALLCONV *rp_lte_update)(const rp_base *base, const rp_lte *lte, int num_lte);
+	void (RP_CALLCONV *rp_lte_update)(const rp_base *base, const rp_lte *lte, int32_t num_lte);
 
-	void (RP_CALLCONV *rp_sweep_update)(const rp_base *base, const rp_gsm *gsm, int num_gsm, const rp_wcdma *umts, int num_umts, const rp_lte *lte, int num_lte);
+	void (RP_CALLCONV *rp_sweep_update)(const rp_base *base, const rp_gsm *gsm, int32_t num_gsm, const rp_wcdma *umts, int32_t num_umts, const rp_lte *lte, int32_t num_lte);
 
-	void (RP_CALLCONV *rp_raw_data_update)(const rp_raw_data, int num_raw_data);
+	void (RP_CALLCONV *rp_raw_data_update)(const rp_raw_data, int32_t num_raw_data);
 } rp_callbacks;
 
 RP_LIBEXPORT(rp_status) rp_initialize(rp_callbacks *callbacks);
 
 RP_LIBEXPORT(rp_status) rp_clean_up();
 
-RP_LIBEXPORT(rp_status) rp_list_devices(rp_serial *serials, int *num_serials);
+RP_LIBEXPORT(rp_status) rp_list_devices(rp_serial *serials, int32_t *num_serials);
 
 RP_LIBEXPORT(rp_status) rp_connect_device(rp_serial serial, rp_device **device);
 

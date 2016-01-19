@@ -52,7 +52,11 @@ public:
 		callbacks_->rp_sweep_update(&base.buf_, 0, 0, wrap_u.get(), wrap_u.size(), wrap_l.get(), wrap_l.size());
 	}
 
-	void output_gsm(const std::vector<gsm_data> &t) {}
+	void output_gsm(const std::vector<gsm_data> &t, const basic_data &b) {
+		vector_wrap<gsm_wrap, gsm_data> wrap(t);
+		basic_wrap base(b);
+		callbacks_->rp_gsm_update(&base.buf_, wrap.get(), wrap.size());
+	}
 
 	void output_umts(const std::vector<umts_data> &t, const basic_data &b) {
 		vector_wrap<umts_wrap, umts_data> wrap(t);

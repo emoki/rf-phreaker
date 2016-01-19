@@ -408,6 +408,47 @@ inline rf_phreaker::operating_band to_operating_band(rp_operating_band t) {
 		return operating_band::OPERATING_BAND_UNKNOWN;
 	}
 }
+
+inline rp_band_indicator to_api_band_indicator(layer_3_information::band_indicator_type t) {
+	switch(t) {
+	case layer_3_information::dcs_1800_was_used:
+		return dcs_1800_was_used;
+	case layer_3_information::pcs_1900_was_used:
+		return pcs_1900_was_used;
+	case layer_3_information::unknown_band_was_used:
+	default:
+		return unknown_band_was_used;
+	}
+}
+
+inline void populate_plmn(rp_plmn &a, const layer_3_information::plmn &t) {
+	memset(a.mcc_, 0, PLMN_STRING_SIZE);
+	memcpy(a.mcc_, t.mcc_.to_string(), t.mcc_.num_characters());
+	memset(a.mnc_, 0, PLMN_STRING_SIZE);
+	memcpy(a.mnc_, t.mnc_.to_string(), t.mnc_.num_characters());
+}
+
+inline void populate_plmns(std::vector<rp_plmn> &a, const std::vector<layer_3_information::plmn> &t) {
+	a.reserve(t.size());
+	auto i = 0;
+	for(auto &j : t) {
+		populate_plmn(a[i], j);
+		++i;
+	}
+}
+
+inline void populate_raw_layer_3(std::vector<rp_raw_layer_3> &a, const std::vector<layer_3_information::bit_stream> &t) {
+	a.reserve(t.size());
+	auto i = 0;
+	for(auto &j : t) {
+		a[i].num_bytes_ = j.bytes_.size();
+		memset(a[i].bytes_, 0, MAX_RAW_LAYER_3_BYTE_SIZE);
+		memcpy(a[i].bytes_, j.bytes_.data(), std::min(MAX_RAW_LAYER_3_BYTE_SIZE, (int32_t)j.bytes_.size()));
+		a[i].unused_bits_ = j.unused_bits_;
+		++i;
+	}
+}
+
 class rf_phreaker_api_converter {
 	//rp_device_info* to_
 
