@@ -17,8 +17,8 @@ enum umts_sib_type
 };
 
 typedef uint16_t system_frame_number_type;
-typedef uint16_t cpich_type;
-typedef uint16_t channel_type;
+typedef int32_t cpich_type;
+typedef int32_t channel_type;
 typedef uint16_string bsic_type;
 typedef int16_t qrx_lev_min_type;
 
