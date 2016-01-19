@@ -21,7 +21,6 @@ typedef uint16_t cpich_type;
 typedef uint16_t channel_type;
 typedef uint16_string bsic_type;
 typedef int16_t qrx_lev_min_type;
-typedef int16_t band_indicator_type;
 
 struct neighbor_inter
 {
@@ -45,7 +44,7 @@ struct neighbor_inter_rat
 		, qrx_lev_min_(not_decoded_16) {}
 
 	bsic_type bsic_;
-	band_indicator band_indicator_;
+	band_indicator_type band_indicator_;
 	channel_type arfcn_;
 	qrx_lev_min_type qrx_lev_min_;
 };

@@ -366,7 +366,7 @@ void umts_sib_11_and_11_bis_container::parse_inter_rat_measurement_sys_info(cons
 			neighbor.bsic_ = std::string(boost::lexical_cast<std::string>(data.list.array[i]->technologySpecificInfo.choice.gsm.bsic.ncc)) +
 				(std::string(boost::lexical_cast<std::string>(data.list.array[i]->technologySpecificInfo.choice.gsm.bsic.bcc)));
 			
-			neighbor.band_indicator_ = (band_indicator)data.list.array[i]->technologySpecificInfo.choice.gsm.frequency_band;
+			neighbor.band_indicator_ = (band_indicator_type)data.list.array[i]->technologySpecificInfo.choice.gsm.frequency_band;
 
 			// 10.3.2.4 Cell selection and re-selection info for SIB11/12
 			// If the technology is not gsm skip this neighbor. 

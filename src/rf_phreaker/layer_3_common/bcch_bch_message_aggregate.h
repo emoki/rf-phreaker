@@ -18,7 +18,7 @@ typedef uint16_t lac_type;
 typedef uint32_t cid_type;
 typedef int64_t unique_sector_key_type;
 
-enum band_indicator
+enum band_indicator_type
 {
 	dcs_1800_was_used = 0,
 	pcs_1900_was_used = 1,
