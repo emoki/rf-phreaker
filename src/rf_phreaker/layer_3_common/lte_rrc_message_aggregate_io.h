@@ -501,7 +501,8 @@ inline std::ostream& header(std::ostream &os, const lte_rrc_message_aggregate &t
 	header(os, t.sib5_) << main_delim;
 	header(os, t.sib6_) << main_delim;
 	header(os, t.sib7_) << main_delim;
-	header(os, t.sib8_);
+	header(os, t.sib8_) << main_delim;
+	os << "raw_layer_3_streams";
 	return os;
 }
 
@@ -531,7 +532,10 @@ inline std::ostream& operator<<(std::ostream &os, const lte_rrc_message_aggregat
 	else
 		os << main_delim;
 	if(t.sib8_.is_decoded())
-		os << t.sib8_;
+		os << t.sib8_ << main_delim;
+	else
+		os << main_delim;
+	os << t.raw_layer_3_;
 	return os;
 }
 

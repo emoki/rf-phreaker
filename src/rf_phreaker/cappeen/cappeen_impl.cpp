@@ -22,6 +22,8 @@ cappeen_impl::~cappeen_impl()
 {
 	try {
 		// Order of components is important when destructing.
+		// VS 2013 bug can cause access violations when destructing at application's 
+		// exit due to synchronization issues like acquiring a mutex.  
 		gps_graph_.reset();
 		processing_graph_.reset();
 		frequency_correction_graph_.reset();
@@ -789,5 +791,5 @@ long cappeen_impl::input_new_license(const char *serial, uint32_t serial_buf_siz
 
 const char* cappeen_impl::api_version() const
 {
-	return "1.4.2.0";
+	return "2.0.0.0";
 }

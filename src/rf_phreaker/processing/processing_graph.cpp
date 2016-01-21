@@ -39,6 +39,14 @@ void processing_graph::start(scanner_controller_interface *sc, data_output_async
 			collection_manager_node_.reset();
 			nodes_.clear();
 
+			LOG(LINFO) << "intermittent streaming rx settings: " << config.blade_settings_.intermittent_streaming_rx_.rx_sync_buffer_size_ << ", "
+				<< config.blade_settings_.intermittent_streaming_rx_.rx_sync_num_buffers_ << ", " << config.blade_settings_.intermittent_streaming_rx_.rx_sync_num_transfers_
+				<< ", " << config.blade_settings_.intermittent_streaming_rx_.rx_sync_timeout_ << ".";
+
+			LOG(LINFO) << "full streaming rx streaming settings: " << config.blade_settings_.full_streaming_rx_.rx_sync_buffer_size_ << ", "
+				<< config.blade_settings_.full_streaming_rx_.rx_sync_num_buffers_ << ", " << config.blade_settings_.full_streaming_rx_.rx_sync_num_transfers_
+				<< ", " << config.blade_settings_.full_streaming_rx_.rx_sync_timeout_ << ".";
+
 			LOG(LINFO) << "gsm sweep collection settings: " << config.gsm_sweep_collection_.sampling_rate_ << ", " << config.gsm_sweep_collection_.bandwidth_ << ", "
 				<< config.gsm_sweep_collection_.collection_time_ << ".";
 			LOG(LINFO) << "gsm sweep general settings: " << config.gsm_sweep_general_.band_power_threshold_ << ", " << config.gsm_sweep_general_.side_power_threshold_ << ", "
@@ -196,7 +204,11 @@ void processing_graph::start(scanner_controller_interface *sc, data_output_async
 		catch(...) {
 			delegate_sink::instance().log_error("An unknown error has occurred.", generic_error_type, UNKNOWN_ERROR);
 		}
-		sc->stop_streaming().get();
+		// Stop streaming, ignoring any errors that may occur.  Any errors will show up elsewhere which is fine. 
+		try {
+			sc->stop_streaming().get();
+		}
+		catch(...) {}
 	}, sc, out, collection_info, config));
 }
 

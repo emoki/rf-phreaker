@@ -124,14 +124,14 @@ void blade_rf_controller::open_scanner(const scanner_serial_type &id)
 		try {
 			// If the FPGA is in a bad state we want to make sure we don't access it while opening even if
 			// the bladeRF says the FPGA is loaded.  Setting this environmental variable allows us to do that.
-			rf_phreaker::setenv("BLADERF_FORCE_NO_FPGA_PRESENT", "1", 1);
+			LOG_IF(LERROR, (rf_phreaker::setenv("BLADERF_FORCE_NO_FPGA_PRESENT", "1", 1) != 0)) << "Unable to set force_no_fpga_present variable.";
 
 			check_blade_status(nr_open(&blade_rf, open_str.c_str(), __FILE__, __LINE__), __FILE__, __LINE__);
 
 			check_blade_status(nr_get_devinfo(blade_rf, &dev_info, __FILE__, __LINE__), __FILE__, __LINE__);
 
 			// Remove this value so we can update the vctcxo trim value, which requires implicit use of the FPGA.
-			rf_phreaker::setenv("BLADERF_FORCE_NO_FPGA_PRESENT", "", 1);
+			LOG_IF(LERROR, (rf_phreaker::setenv("BLADERF_FORCE_NO_FPGA_PRESENT", "", 1) != 0)) << "Unable to remove force_no_fpga_present variable.";
 			break;
 		}
 		catch(rf_phreaker_error &err) {
@@ -211,11 +211,9 @@ void blade_rf_controller::close_scanner()
 {
 	// Only stop our streaming thread - disabling the RX stream will occur inside the bladeRF API close function.
 	stop_streaming();
+	std::lock_guard<std::recursive_mutex> lock(open_close_mutex_);
 	if(comm_blade_rf_.get()) {
-		{
-			std::lock_guard<std::recursive_mutex> lock(open_close_mutex_);
-			nr_close(comm_blade_rf_->blade_rf());
-		}
+		nr_close(comm_blade_rf_->blade_rf());
 		comm_blade_rf_.reset();
 		scanner_blade_rf_.reset();
 		scanner_.reset();
@@ -716,7 +714,7 @@ measurement_info blade_rf_controller::stream_rf_data_use_auto_gain(frequency_typ
 				bool first_time = true;
 
 				if(num_overlap_samples <= 0)
-					throw rf_phreaker_error("Theres needs to be at least sample of overlap when streaming.");
+					throw rf_phreaker_error("There needs to be at least sample of overlap when streaming.");
 
 				while(is_streaming_ == FULL_STREAMING) {
 					const auto return_bytes = (num_transfer_samples) * 2 * sizeof(int16_t);
@@ -727,25 +725,13 @@ measurement_info blade_rf_controller::stream_rf_data_use_auto_gain(frequency_typ
 					bladerf_metadata metadata;
 					metadata.flags = BLADERF_META_FLAG_RX_NOW;
 
-					int status = 0;
-					for(int i = 0; i < 2; ++i) {
-						if(is_streaming_ != FULL_STREAMING)
-							break;
+					int status = nr_sync_rx(comm_blade_rf_->blade_rf(), aligned_buffer,
+						num_transfer_samples, &metadata, 2500);
 
-						status = nr_sync_rx(comm_blade_rf_->blade_rf(), aligned_buffer,
-							num_transfer_samples, &metadata, 2500);
-						
-/*						if((metadata.flags & BLADERF_META_STATUS_OVERRUN) == BLADERF_META_STATUS_OVERRUN) 
-							LOG(LINFO) << "Buffer overrun occurred while streaming.  Restarting stream...";
-						else */if(status == 0)
-							break;
-						else if(is_streaming_ == FULL_STREAMING) {
-							LOG(LDEBUG) << "Collecting " << num_transfer_samples << " samples failed. Status = " << status << ". Retrying...";
-							enable_full_streaming_rx();
-						}
-					}
+					//if((metadata.flags & BLADERF_META_STATUS_OVERRUN) == BLADERF_META_STATUS_OVERRUN)
+					//	LOG(LINFO) << "Buffer overrun occurred while streaming.  Restarting stream...";
+					//else 
 					if(status == 0) {
-
 						// For now we use the computer time.  In the future perhaps we can use timestamp coming from the hardware.
 						auto start_time = get_collection_start_time();
 
@@ -775,8 +761,12 @@ measurement_info blade_rf_controller::stream_rf_data_use_auto_gain(frequency_typ
 						std::lock_guard<std::mutex> lock(meas_buffer_mutex_);
 						meas_buffer_.push_back(data);
 					}
-					else if(is_streaming_ == FULL_STREAMING)
-						throw blade_rf_error(std::string("Error collecting data samples.  ") + nr_strerror(status));
+					else {
+						LOG(LDEBUG) << "Collecting " << num_transfer_samples << " samples failed. Status = " << status << ".";
+						// If status does not equal zero and we're still supposed to be streaming, throw an exception.
+						if(is_streaming_ == FULL_STREAMING)
+							throw blade_rf_error(std::string("Error collecting data samples. ") + nr_strerror(status));
+					}
 				}
 			}
 			catch(const std::exception &err) {
@@ -785,51 +775,34 @@ measurement_info blade_rf_controller::stream_rf_data_use_auto_gain(frequency_typ
 			std::lock_guard<std::mutex> lock(meas_buffer_mutex_);
 			meas_buffer_.clear();
 		}, time_ns, time_ns_to_overlap));
+		std::this_thread::sleep_for(std::chrono::nanoseconds(2 * time_ns + time_ns_to_overlap));
+	}
+	return pop_measurement_buffer();
+}
 
-		std::this_thread::sleep_for(std::chrono::nanoseconds(time_ns));
-
-		auto start = std::chrono::high_resolution_clock::now();
-		while(streaming_thread_ && streaming_thread_->joinable()) {
+measurement_info blade_rf_controller::pop_measurement_buffer() {
+	auto start = std::chrono::high_resolution_clock::now();
+	while(streaming_thread_ && streaming_thread_->joinable()) {
+		if(!meas_buffer_.empty()) {
+			std::lock_guard<std::mutex> lock(meas_buffer_mutex_);
 			if(!meas_buffer_.empty()) {
-				std::lock_guard<std::mutex> lock(meas_buffer_mutex_);
-				if(!meas_buffer_.empty()) {
-					auto meas = meas_buffer_.back();
-					meas_buffer_.pop_back();
-					return meas;
-				}
+				auto meas = meas_buffer_.back();
+				meas_buffer_.pop_back();
+				return meas;
 			}
+		}
 #ifdef _DEBUG
-			if(0) {
+		if(0) {
 #else
-			if(std::chrono::high_resolution_clock::now() - start > std::chrono::seconds(2)) {
+		// Timeout should be longer than nuand usb timeout.
+		if(std::chrono::high_resolution_clock::now() - start > std::chrono::seconds(3)) {
 #endif			
-				is_streaming_ = NOT_STREAMING;
-				LOG(LERROR) << "Encountered error while attempting to stream.  The wait time was exceeded.";
-			}
+			is_streaming_ = NOT_STREAMING;
+			LOG(LERROR) << "A timeout occurred while waiting on blade_rf_controller streaming thread.";
+			break;
 		}
 	}
-	else {
-		auto start = std::chrono::high_resolution_clock::now();
-		while(streaming_thread_ && streaming_thread_->joinable()) {
-			if(!meas_buffer_.empty()) {
-				std::lock_guard<std::mutex> lock(meas_buffer_mutex_);
-				if(!meas_buffer_.empty()) {
-					auto meas = meas_buffer_.back();
-					meas_buffer_.pop_back();
-					return meas;
-				}
-			}
-#ifdef _DEBUG
-			if(0) {
-#else
-			if(std::chrono::high_resolution_clock::now() - start > std::chrono::seconds(2)) {
-#endif							
-				is_streaming_ = NOT_STREAMING;
-				throw rf_phreaker_error("Error trying to stream data.");
-			}
-		}
-	}
-	throw rf_phreaker_error("Error trying to stream data.");
+	throw rf_phreaker_error("Error streaming data.");
 }
 
 void blade_rf_controller::stop_streaming() {

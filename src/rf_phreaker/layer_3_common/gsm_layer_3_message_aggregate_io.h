@@ -404,7 +404,8 @@ inline std::ostream& header(std::ostream &os, const gsm_layer_3_message_aggregat
 	header(os, t.si_3_) << main_delim;
 	header(os, t.si_4_) << main_delim;
 	header(os, t.si_7_) << main_delim;
-	header(os, t.si_8_);
+	header(os, t.si_8_) << main_delim;
+	os << "raw_layer_3";
 	return os;
 }
 
@@ -445,6 +446,7 @@ inline std::ostream& operator<<(std::ostream &os, const gsm_layer_3_message_aggr
 		os << t.si_8_;
 	else
 		output_empty_gsm_si_8(os) << main_delim;
+	os << t.raw_layer_3_;
 	return os;
 }
 

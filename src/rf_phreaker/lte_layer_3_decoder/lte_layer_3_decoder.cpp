@@ -20,12 +20,13 @@ lte_asn1_decoder::~lte_asn1_decoder()
 	delete lte_bcch_bch_message_;
 }
 
-int lte_asn1_decoder::decode_bcch_bch_message(const uint8_t* bit_stream, uint32_t num_of_bytes, uint32_t unused_bits,  layer_3_information::lte_rrc_message_aggregate &message)
+int lte_asn1_decoder::decode_bcch_bch_message(const uint8_t* raw_bits, uint32_t num_of_bytes, uint32_t unused_bits, layer_3_information::lte_rrc_message_aggregate &message)
 {
 	int status = 0;
 	try {
 		message.clear();
-		bit_stream_container bits(bit_stream, num_of_bytes, unused_bits);
+		message.raw_layer_3_.emplace_back(bit_stream(raw_bits, num_of_bytes, unused_bits));
+		bit_stream_container bits(raw_bits, num_of_bytes, unused_bits);
 
 		if(debug_) {
 			static std::ofstream f("lte_bitstreams_" + rf_phreaker::static_timestamp::to_string() + ".txt", std::ios::app);

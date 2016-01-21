@@ -27,6 +27,7 @@ public:
 	int perform_1pps_calibration_s_;
 	int read_eeprom_duration_s_;
 	int log_level_;
+	int blade_log_level_;
 };
 
 class scanner_stress_test
@@ -37,12 +38,14 @@ public:
 
 		rf_phreaker::logger log("stress_test");
 		log.change_logging_level(s.log_level_);
-		log.enable_collection_log(true);
-		log.enable_gps_general_log(true);
-		log.enable_gps_parsing_log(false);
-
+		if(s.log_level_ == 0) {
+			log.enable_collection_log(true);
+			log.enable_gps_general_log(true);
+			log.enable_gps_parsing_log(true);
+		}
 
 		scanner::blade_rf_controller blade;
+		blade.set_log_level(s.blade_log_level_);
 		auto scanner_list = blade.list_available_scanners();
 		if(scanner_list.empty()) {
 			std::cout << "No scanners available." << std::endl;

@@ -17,6 +17,8 @@ umts_sib_3_container::~umts_sib_3_container(void)
 void umts_sib_3_container::parse_data(umts_bcch_bch_message_aggregate &message)
 {
 	SysInfoType3_t *data = (SysInfoType3_t*)decoded_structure();
-	message.cid_ = create_num_from_bit_stream(data->cellIdentity);
+	message.sib3_.is_decoded_ = true;
+	message.sib3_.cid_ = create_num_from_bit_stream(data->cellIdentity);
+	message.cid_ = message.sib3_.cid_;
 }
 

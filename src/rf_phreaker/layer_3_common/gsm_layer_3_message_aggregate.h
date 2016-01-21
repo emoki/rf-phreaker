@@ -44,7 +44,7 @@ struct gsm_si_1 : public gsm_si_base {
 		gsm_si_base::swap(si);
 		std::swap(band_indicator_, si.band_indicator_);
 	}
-	band_indicator band_indicator_;
+	band_indicator_type band_indicator_;
 };
 
 struct gsm_si_2 : public gsm_si_base {

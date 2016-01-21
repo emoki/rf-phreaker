@@ -174,7 +174,8 @@ int handle_scanner_stress_test(int argc, char* argv[]) {
 			("get_gps_message,g", po::value<int>(&settings.get_gps_message_duration_s_)->default_value(1), "Get GPS message interval (seconds)\n")
 			("1pps_cali,c", po::value<int>(&settings.perform_1pps_calibration_s_)->default_value(25), "Perform 1PPS calibration interval (seconds)\n")
 			("read_eeprom,r", po::value<int>(&settings.read_eeprom_duration_s_)->default_value(64), "Read EEPROM interval (seconds)\n")
-			("log_level,l", po::value<int>(&settings.log_level_)->default_value(0), "Log level.  0 - 5 with 0 being the most verbose\n");
+			("log_level,l", po::value<int>(&settings.log_level_)->default_value(0), "Log level.  0 - 5 with 0 being the most verbose\n")
+			("blade_log_level,b", po::value<int>(&settings.blade_log_level_)->default_value(2), "Blade log level.  0 - 5 with 0 being the most verbose\n");
 
 		// Read command line.
 		po::variables_map vm;

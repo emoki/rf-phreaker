@@ -197,7 +197,7 @@ struct lte_sib6_type : public lte_sib_base {
 
 struct carrier_freqs_geran {
 	int starting_arfcn_;
-	band_indicator band_indicator_;
+	band_indicator_type band_indicator_;
 	std::vector<int32_t> following_arfcns_;
 };
 struct geran_common_info {

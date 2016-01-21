@@ -147,6 +147,16 @@ extern "C" {
 
 	int DLL_PUBLIC power_off_gps();
 
+	/*
+		Creates a wide open cappeen license file.  If hw_id is set to zero then we try to acquire id from the connected scanner.
+		license_filename will written out to the working directory if no path is specified.
+	*/
+	int DLL_PUBLIC create_cappeen_license(int hw_id, const int8_t *license_filename);
+
+	/*
+		Uploads the specified license to the connected scanner.  Filename should include full path.
+	*/
+	int DLL_PUBLIC upload_cappeen_license(const int8_t *license_filename);
 #ifdef __cplusplus
 }
 #endif

@@ -200,37 +200,37 @@ template<typename DataType> inline void ipp_array<DataType>::allocate(int length
 template<> inline void ipp_array<Ipp16sc>::allocate_(int length) {
 	array_ = ippsMalloc_16sc(length);
 	if(array_ == 0)
-		throw std::runtime_error("Unable to construct Ipp16s ipp_array.\n");
+		throw rf_phreaker_error(std::string("Unable to construct Ipp16s ipp_array with length ") + std::to_string(length) + ".");
 }
 
 template<> inline void ipp_array<Ipp32u>::allocate_(int length) {
 	array_ = ippsMalloc_32u(length);
 	if(array_ == 0)
-		throw std::runtime_error("Unable to construct Ipp32u ipp_array.\n");
+		throw rf_phreaker_error(std::string("Unable to construct Ipp32u ipp_array with length ") + std::to_string(length) + ".");
 }
 
 template<> inline void ipp_array<Ipp32fc>::allocate_(int length) {
 	array_ = ippsMalloc_32fc(length);
 	if(array_ == 0)
-		throw std::runtime_error("Unable to construct Ipp32fc ipp_array.\n");
+		throw rf_phreaker_error(std::string("Unable to construct Ipp32fc ipp_array with length ") + std::to_string(length) + ".");
 }
 
 template<> inline void ipp_array<Ipp8u>::allocate_(int length) {
 	array_ = ippsMalloc_8u(length);
 	if(array_ == 0)
-		throw std::runtime_error("Unable to construct Ipp8u ipp_array.\n");
+		throw rf_phreaker_error(std::string("Unable to construct Ipp8u ipp_array with length ") + std::to_string(length) + ".");
 }
 
 template<> inline void ipp_array<Ipp32f>::allocate_(int length) {
 	array_ = ippsMalloc_32f(length);
 	if(array_ == 0)
-		throw std::runtime_error("Unable to construct Ipp32f ipp_array.\n");
+		throw rf_phreaker_error(std::string("Unable to construct Ipp32f ipp_array with length ") + std::to_string(length) + ".");
 }
 
 template<> inline void ipp_array<Ipp16s>::allocate_(int length) {
 	array_ = ippsMalloc_16s(length);
 	if(array_ == 0)
-		throw std::runtime_error("Unable to construct Ipp16s ipp_array.\n");
+		throw rf_phreaker_error(std::string("Unable to construct Ipp16s ipp_array with length ") + std::to_string(length) + ".");
 }
 
 template<> inline void ipp_array<Ipp16sc>::set_array_values(Ipp16sc value) {

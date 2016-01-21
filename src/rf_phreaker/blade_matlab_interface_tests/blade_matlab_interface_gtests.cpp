@@ -120,3 +120,21 @@ TEST(BladeMatlabInterface, TestMain)
 		EXPECT_EQ(0, stop_logging());
 	}
 }
+
+TEST(BladeMatlabInterface, TestLicense) {
+	int num_devices;
+
+	EXPECT_EQ(0, start_logging(0));
+
+	EXPECT_EQ(0, num_blade_devices_connected(&num_devices));
+
+	if(num_devices == 0) {
+		std::cout << "No devices connected!";
+		system("pause");
+	}
+
+	EXPECT_EQ(0, open_first_blade_device());
+	EXPECT_EQ(0, create_cappeen_license(0, (int8_t*)"wide_open_license.lic"));
+	EXPECT_EQ(0, upload_cappeen_license((int8_t*)"wide_open_license.lic"));
+	EXPECT_EQ(0, stop_logging());
+}

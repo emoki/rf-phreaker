@@ -57,6 +57,7 @@ int main(int argc, char* argv[])
 		static std::ofstream out("gsm_layer_3.txt");
 		static auto out_header = false;
 		if(!out_header) {
+			out << "index\t";
 			layer_3_information::header(out, message) << std::endl;
 			out_header = true;
 		}

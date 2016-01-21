@@ -14,6 +14,8 @@ set (blade_matlab_interface_SRCS
 	blade_matlab_interface.cpp
 	blade_matlab_interface.h
 	matlab_interface_helper.h
+	../cappeen/cappeen_license.cpp
+	../cappeen/cappeen_license.h
 	${SRC_PLATFORM_SPECIFIC}/stdafx.cpp)
 
 add_definitions (/DBUILDING_DLL)
