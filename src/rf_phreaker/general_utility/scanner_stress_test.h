@@ -115,16 +115,24 @@ public:
 			catch(const rf_phreaker_error &err) {
 				std::cout << "An rf_phreaker error occurred: " << err.what() << std::endl;
 				++errors;
+				recover(blade);
 			}
 			catch(const std::exception &err) {
 				std::cout << "An generic error occurred: " << err.what() << std::endl;
 				++errors;
+				recover(blade);
 			}
 			if(errors > 100) {
+				std::this_thread::sleep_for(std::chrono::milliseconds(500));
+
 				std::cout << "Stopping stress test.  Over 100 errors have occurred." << std::endl;
 				break;
 			}
 		}
+	}
+	static void recover(scanner::blade_rf_controller &blade) {
+		blade.open_scanner_and_refresh_scanner_info(blade.get_scanner_blade_rf()->scanner_id());
+		blade.do_initial_scanner_config();
 	}
 };
 
