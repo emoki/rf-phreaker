@@ -150,4 +150,4 @@ add_subdirectory (src/rf_phreaker/gps_comm)
 add_subdirectory (src/rf_phreaker/gps_comm_tests)
 add_subdirectory (src/rf_phreaker/gsm_analysis)
 add_subdirectory (src/rf_phreaker/gsm_analysis_tests)
-
+add_subdirectory (src/rf_phreaker/cappeen_console_app)

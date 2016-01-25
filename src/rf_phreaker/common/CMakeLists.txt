@@ -45,6 +45,7 @@ set (common_SRCS
 	serialization_helper.h
 	signal_slot.h
 	singleton.h
+	stats_tracker.h
 	${SRC_PLATFORM_SPECIFIC}/stdafx.cpp)
 
 add_library (common STATIC ${common_SRCS})
