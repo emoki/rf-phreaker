@@ -475,6 +475,7 @@ public:
 				case rf_phreaker::FREQUENCY_CORRECTION_FAILED:
 					if(gps_graph_) gps_graph_->enable_1pps_calibration();
 					change_beagle_state(beagle_api::BEAGLE_READY);
+					break;
 				case beagle_api::WRONG_SPEED_DETECTED:
 				case rf_phreaker::FREQUENCY_CORRECTION_VALUE_INVALID:
 				case rf_phreaker::CALIBRATION_ERROR:
