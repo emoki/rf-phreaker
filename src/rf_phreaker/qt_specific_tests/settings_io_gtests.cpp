@@ -533,6 +533,19 @@ TEST(QtSpecific, TestLocation) {
 	settings_io set_io("cappeen_api", "cappeen");
 
 	set_io.read(set);
+}
 
-	int i = 0;
+TEST(QtSpecific, TestExist) {
+	using namespace rf_phreaker;
+	{
+		// Qt creates ini file on destruction.
+		settings set;
+		settings_io set_io("test_exist", "cappeen");
+		set_io.write(set);
+	}
+	settings_io set_io("test_exist", "cappeen");
+	EXPECT_TRUE(set_io.does_exist());
+
+	settings_io t("alskdjfakljfa", "cappeen");
+	EXPECT_FALSE(t.does_exist());
 }

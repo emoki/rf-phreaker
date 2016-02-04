@@ -1,5 +1,6 @@
 #include "rf_phreaker/qt_specific/settings_io.h"
 #include "qtcore/qsettings.h"
+#include "qtcore/qfile.h"
 #include "rf_phreaker/common/common_utility.h"
 #include "rf_phreaker/qt_specific/file_path_validation.h"
 #include "rf_phreaker/common/log.h"
@@ -14,6 +15,15 @@ settings_io::settings_io(const std::string &filename)
 	: qsettings_(new QSettings(filename.c_str(), QSettings::IniFormat)) {}
 
 settings_io::~settings_io() {}
+
+bool settings_io::does_exist() const {
+	QFile file(qsettings_->fileName());
+	return file.exists();
+}
+
+std::string settings_io::filename() const {
+	return qsettings_->fileName().toStdString();
+}
 
 void settings_io::read(settings &settings) {
 	settings.log_level_ = qsettings_->value(log_level_key.c_str(), settings_log_level_default).toInt();

@@ -96,6 +96,10 @@ public:
 
 	~settings_io();
 
+	bool does_exist() const;
+
+	std::string filename() const;
+
 	void read(settings &settings);
 
 	void read(output_settings &settings, const std::string &group_key);
