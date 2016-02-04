@@ -42,6 +42,9 @@ inline int convert_message(int msg) {
 	case (int)FREQUENCY_CORRECTION_VALUE_INVALID:
 		code = beagle_api::FREQUENCY_CORRECTION_VALUE_INVALID;
 		break;
+	case (int)CONFIGURATION_FILE_NOT_FOUND:
+		code = beagle_api::CONFIGURATION_FILE_NOT_FOUND;
+		break;
 	default:
 		code = static_cast<beagle_api::ERRORCODES>(msg);
 	}
@@ -448,6 +451,7 @@ public:
 		case rf_phreaker::CALIBRATION_ERROR:
 		case rf_phreaker::EEPROM_ERROR:
 		case rf_phreaker::FREQUENCY_CORRECTION_VALUE_INVALID:
+		case rf_phreaker::CONFIGURATION_FILE_NOT_FOUND:
 			break;
 		default:
 			code = rf_phreaker::GENERAL_ERROR;
@@ -475,6 +479,7 @@ public:
 				case rf_phreaker::FREQUENCY_CORRECTION_VALUE_INVALID:
 				case rf_phreaker::CALIBRATION_ERROR:
 				case rf_phreaker::EEPROM_ERROR:
+				case rf_phreaker::CONFIGURATION_FILE_NOT_FOUND:
 				default:;
 					// Do nothing.
 				}

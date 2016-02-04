@@ -143,9 +143,18 @@ long cappeen_impl::initialize(beagle_api::beagle_delegate *del)
 
 void cappeen_impl::read_settings()
 {
-	settings_io io("cappeen_api", qt_utility::app_name());
+	std::unique_ptr<settings_io> io;
+	
+		io.reset(new settings_io("cappeen_api", qt_utility::app_name()));
 
-	io.read(config_);
+	if(!io->does_exist()) {
+		if(delegate_) 
+			delegate_->output_error("The INI file (\"" + io->filename() + 
+			"\") was not found.  This may adversely affect API functionality.", 
+			cappeen_api_error_type, CONFIGURATION_FILE_NOT_FOUND);
+	}
+
+	io->read(config_);
 
 	// Manually adjust parameters that are not in the cappeen_api.ini.
 	config_.simultaneous_collection_ = false;
