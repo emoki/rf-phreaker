@@ -107,7 +107,7 @@ Returns status in form of a long\n
 0 if operation completed successfully\n
 For further info please see ERRORCODES.
 */
-CAPPEEN_API long cappeen_start_collection(const beagle_api::collection_info &collection);
+CAPPEEN_API long cappeen_start_collection(const beagle_api::collection_info &collection, bool perform_quick_scan);
 
 /**
 Starts the frequency correction process.  

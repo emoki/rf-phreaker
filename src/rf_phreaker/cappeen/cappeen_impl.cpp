@@ -141,10 +141,13 @@ long cappeen_impl::initialize(beagle_api::beagle_delegate *del)
 	return status;
 }
 
-void cappeen_impl::read_settings()
+void cappeen_impl::read_settings(bool perform_quick_scan)
 {
 	std::unique_ptr<settings_io> io;
 	
+	if(perform_quick_scan)
+		io.reset(new settings_io("cappeen_api_quick_scan", qt_utility::app_name()));
+	else
 		io.reset(new settings_io("cappeen_api", qt_utility::app_name()));
 
 	if(!io->does_exist()) {
@@ -185,18 +188,8 @@ void cappeen_impl::read_settings()
 	config_.gsm_layer_3_decode_.minimum_decode_count_ = config_.gsm_layer_3_decode_.minimum_collection_round_;
 	config_.umts_layer_3_decode_.should_prioritize_layer_3_ = true;
 	config_.umts_layer_3_decode_.minimum_decode_count_ = config_.umts_layer_3_decode_.minimum_collection_round_;
-	config_.umts_layer_3_decode_.wanted_layer_3_.push_back(layer_3_information::umts_sib_type::SIB1);
-	config_.umts_layer_3_decode_.wanted_layer_3_.push_back(layer_3_information::umts_sib_type::SIB3_SIB4);
-	config_.umts_layer_3_decode_.wanted_layer_3_.push_back(layer_3_information::umts_sib_type::SIB11);
 	config_.lte_layer_3_decode_.should_prioritize_layer_3_ = true;
 	config_.lte_layer_3_decode_.minimum_decode_count_ = config_.lte_layer_3_decode_.minimum_collection_round_;
-	config_.lte_layer_3_decode_.wanted_layer_3_.push_back(layer_3_information::SIB_1);
-	config_.lte_layer_3_decode_.wanted_layer_3_.push_back(layer_3_information::SIB_3);
-	config_.lte_layer_3_decode_.wanted_layer_3_.push_back(layer_3_information::SIB_4);
-	config_.lte_layer_3_decode_.wanted_layer_3_.push_back(layer_3_information::SIB_5);
-	config_.lte_layer_3_decode_.wanted_layer_3_.push_back(layer_3_information::SIB_6);
-	config_.lte_layer_3_decode_.wanted_layer_3_.push_back(layer_3_information::SIB_7);
-	config_.lte_layer_3_decode_.wanted_layer_3_.push_back(layer_3_information::SIB_8);
 }
 
 long cappeen_impl::clean_up()
@@ -456,7 +449,7 @@ long cappeen_impl::stop_collection()
 	return status;
 }
 
-long cappeen_impl::start_collection(const beagle_api::collection_info &collection)
+long cappeen_impl::start_collection(const beagle_api::collection_info &collection, bool perform_quick_scan)
 {
 	long status = 0;
 	try {
@@ -473,7 +466,7 @@ long cappeen_impl::start_collection(const beagle_api::collection_info &collectio
 		check_licenses(collection);
 
 		// Initialize packet sizes.
-		read_settings();
+		read_settings(perform_quick_scan);
 		processing::initialize_collection_info_defaults(config_);
 
 		delegate_->clear_buffers_and_counts();

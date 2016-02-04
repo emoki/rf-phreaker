@@ -53,9 +53,9 @@ long cappeen_stop_collection()
 	return impl().stop_collection();
 }
 
-long cappeen_start_collection(const beagle_api::collection_info &collection)
+long cappeen_start_collection(const beagle_api::collection_info &collection, bool perform_quick_scan)
 {
-	return impl().start_collection(collection);
+	return impl().start_collection(collection, perform_quick_scan);
 }
 
 long cappeen_input_new_license(const char *serial, uint32_t serial_buf_size, const char *new_license_filename, uint32_t license_buf_size)

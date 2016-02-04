@@ -58,7 +58,7 @@ TEST(Cappeen, TestMain)
 			EXPECT_EQ(0, status);
 			if(status == 0) {
 				std::cout << "Starting collection.\n";
-				EXPECT_EQ(0, cappeen_start_collection(info));
+				EXPECT_EQ(0, cappeen_start_collection(info, false));
 
 				out.wait(30*60);
 
@@ -129,7 +129,7 @@ TEST(Cappeen, DISABLED_FreqCorrection) {
 			std::cout << "Finished freq correction.\n";
 
 			std::cout << "Starting collection.\n";
-			EXPECT_EQ(0, cappeen_start_collection(info));
+			EXPECT_EQ(0, cappeen_start_collection(info, false));
 
 			out.wait(5 * 60);
 			
@@ -150,7 +150,7 @@ TEST(Cappeen, DISABLED_FreqCorrection) {
 
 
 			std::cout << "Starting collection.\n";
-			EXPECT_EQ(0, cappeen_start_collection(info));
+			EXPECT_EQ(0, cappeen_start_collection(info, false));
 
 			out.wait(10 * 60);
 
@@ -162,7 +162,7 @@ TEST(Cappeen, DISABLED_FreqCorrection) {
 			std::this_thread::sleep_for(std::chrono::milliseconds(500));
 
 			std::cout << "Starting collection.\n";
-			EXPECT_EQ(0, cappeen_start_collection(info));
+			EXPECT_EQ(0, cappeen_start_collection(info, false));
 
 			out.wait(125 * 60);
 
@@ -226,7 +226,7 @@ TEST(Cappeen, DISABLED_FreqNotInCalibration) {
 		info.tech_and_bands_to_sweep_.num_elements_ = tech_bands.size();
 		std::cout << "Starting collection.\n";
 		
-		EXPECT_EQ(FREQNOTWITHINCALIBRATIONLIMITS, cappeen_start_collection(info));
+		EXPECT_EQ(FREQNOTWITHINCALIBRATIONLIMITS, cappeen_start_collection(info, false));
 		EXPECT_EQ(0, cappeen_close_unit(serial.c_str(), serial.size()));
 		EXPECT_EQ(0, cappeen_clean_up());
 	}
@@ -277,7 +277,7 @@ TEST(Cappeen, DISABLED_GeneralLicenseUpdate1) {
 		info.tech_and_bands_to_sweep_.elements_ = &tech_bands[0];
 		info.tech_and_bands_to_sweep_.num_elements_ = tech_bands.size();
 		std::cout << "Starting collection - FAILURE.\n";
-		EXPECT_EQ(FREQNOTLICENSED, cappeen_start_collection(info));
+		EXPECT_EQ(FREQNOTLICENSED, cappeen_start_collection(info, false));
 
 		tech_bands.clear();
 		tech_bands.push_back(WCDMA_BAND_850);
@@ -288,7 +288,7 @@ TEST(Cappeen, DISABLED_GeneralLicenseUpdate1) {
 		info.tech_and_bands_to_sweep_.elements_ = &tech_bands[0];
 		info.tech_and_bands_to_sweep_.num_elements_ = tech_bands.size();
 		std::cout << "Starting collection - FAILURE.\n";
-		EXPECT_EQ(FREQNOTLICENSED, cappeen_start_collection(info));
+		EXPECT_EQ(FREQNOTLICENSED, cappeen_start_collection(info, false));
 
 
 		tech_bands.clear();
@@ -298,7 +298,7 @@ TEST(Cappeen, DISABLED_GeneralLicenseUpdate1) {
 		info.tech_and_bands_to_sweep_.elements_ = &tech_bands[0];
 		info.tech_and_bands_to_sweep_.num_elements_ = tech_bands.size();
 		std::cout << "Starting collection.\n";
-		EXPECT_EQ(0, cappeen_start_collection(info));
+		EXPECT_EQ(0, cappeen_start_collection(info, false));
 		EXPECT_EQ(WRONGBEAGLESTATE, cappeen_input_new_license(serial.c_str(), serial.size(), license_filename.c_str(), license_filename.size()));
 		EXPECT_EQ(0, cappeen_stop_collection());
 		EXPECT_EQ(0, cappeen_close_unit(serial.c_str(), serial.size()));
@@ -347,7 +347,7 @@ TEST(Cappeen, DISABLED_GeneralLicenseUpdate2) {
 		info.tech_and_bands_to_sweep_.elements_ = &tech_bands[0];
 		info.tech_and_bands_to_sweep_.num_elements_ = tech_bands.size();
 		std::cout << "Starting collection.\n";
-		EXPECT_EQ(0, cappeen_start_collection(info));
+		EXPECT_EQ(0, cappeen_start_collection(info, false));
 		EXPECT_EQ(0, cappeen_stop_collection());
 		EXPECT_EQ(0, cappeen_close_unit(serial.c_str(), serial.size()));
 		EXPECT_EQ(0, cappeen_clean_up());
@@ -397,7 +397,7 @@ TEST(Cappeen, DISABLED_LicenseNetworkScanner) {
 		info.tech_and_bands_to_sweep_.elements_ = &tech_bands[0];
 		info.tech_and_bands_to_sweep_.num_elements_ = tech_bands.size();
 		std::cout << "Starting collection.\n";
-		EXPECT_EQ(FREQNOTLICENSED, cappeen_start_collection(info));
+		EXPECT_EQ(FREQNOTLICENSED, cappeen_start_collection(info, false));
 		EXPECT_EQ(0, cappeen_close_unit(serial.c_str(), serial.size()));
 		EXPECT_EQ(0, cappeen_clean_up());
 	}
@@ -478,7 +478,7 @@ TEST(Cappeen, LicenseCellAnalysisEverything) {
 		info.tech_and_bands_to_sweep_.elements_ = &tech_bands[0];
 		info.tech_and_bands_to_sweep_.num_elements_ = tech_bands.size();
 		std::cout << "Starting collection.\n";
-		EXPECT_EQ(0, cappeen_start_collection(info));
+		EXPECT_EQ(0, cappeen_start_collection(info, false));
 		EXPECT_EQ(0, cappeen_close_unit(serial.c_str(), serial.size()));
 		EXPECT_EQ(0, cappeen_clean_up());
 	}
@@ -516,7 +516,7 @@ TEST(Cappeen, NoClose)
 		info.tech_and_bands_to_sweep_.num_elements_ = tech_bands.size();
 
 		EXPECT_EQ(0, cappeen_open_unit(&serial[0], serial.size()));
-		EXPECT_EQ(0, cappeen_start_collection(info));
+		EXPECT_EQ(0, cappeen_start_collection(info, false));
 
 		std::this_thread::sleep_for(std::chrono::seconds(1));
 
@@ -548,7 +548,7 @@ TEST(Cappeen, NoCloseNoStop)
 		info.tech_and_bands_to_sweep_.num_elements_ = tech_bands.size();
 
 		EXPECT_EQ(0, cappeen_open_unit(&serial[0], serial.size()));
-		EXPECT_EQ(0, cappeen_start_collection(info));
+		EXPECT_EQ(0, cappeen_start_collection(info, false));
 
 		std::this_thread::sleep_for(std::chrono::seconds(20));
 	}

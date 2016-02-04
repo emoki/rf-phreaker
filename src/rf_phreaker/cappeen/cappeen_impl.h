@@ -29,7 +29,7 @@ public:
 	long open_unit(const char *serial, unsigned int buf_size);
 	long close_unit(const char *serial, unsigned int buf_size);
 	long stop_collection();
-	long start_collection(const beagle_api::collection_info &collection);
+	long start_collection(const beagle_api::collection_info &collection, bool perform_quick_scan);
 	long start_frequency_correction(const beagle_api::collection_info &collection);
 	long start_frequency_correction(uint32_t *wcdma_frequencies, int num_channels);
 	long input_new_license(const char *serial, uint32_t serial_buf_size, const char *new_license_filename, uint32_t license_buf_size);
@@ -38,7 +38,7 @@ public:
 private:
 	void verify_init();
 	
-	void read_settings();
+	void read_settings(bool perform_quick_scan = false);
 	
 	rf_phreaker::processing::collection_info_containers create_collection_info_containers(const beagle_api::collection_info &collection);
 

@@ -45,7 +45,7 @@ namespace cappeen_scanner
 
 		virtual long start_collection(const beagle_api::collection_info &collection)
 		{
-			return cappeen_start_collection(collection);
+			return cappeen_start_collection(collection, false);
 		}
 
 		virtual long input_new_license(const char *beagle_serial, uint32_t serial_buf_size, const char *new_license_filename, uint32_t license_buf_size)
