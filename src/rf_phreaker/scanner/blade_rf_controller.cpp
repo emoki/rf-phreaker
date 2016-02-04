@@ -524,7 +524,7 @@ gain_type blade_rf_controller::get_auto_gain(frequency_type freq, bandwidth_type
 
 measurement_info blade_rf_controller::get_rf_data(frequency_type frequency, time_type time_ns, bandwidth_type bandwidth, const gain_type &gain, frequency_type sampling_rate,
 	uint32_t switch_setting, uint32_t switch_mask) {
-	configure_rf_parameters(frequency, time_ns, bandwidth, gain, sampling_rate, switch_setting, switch_mask);
+	configure_rf_parameters(frequency, bandwidth, gain, sampling_rate, switch_setting, switch_mask);
 
 	auto blade_bandwidth = (uint32_t)parameter_cache_.bandwidth();
 	auto blade_sampling_rate = (uint32_t)parameter_cache_.sampling_rate();
@@ -598,16 +598,15 @@ std::chrono::time_point<std::chrono::system_clock, std::chrono::system_clock::du
 	return start_time;
 }
 
-void blade_rf_controller::configure_rf_parameters_use_auto_gain(frequency_type frequency, time_type time_ns, bandwidth_type bandwidth, frequency_type sampling_rate) {
+void blade_rf_controller::configure_rf_parameters_use_auto_gain(frequency_type frequency, bandwidth_type bandwidth, frequency_type sampling_rate) {
 	auto gain = get_auto_gain(frequency, bandwidth, 5000000, sampling_rate);
-	configure_rf_parameters(frequency, time_ns, bandwidth, gain, sampling_rate);
+	configure_rf_parameters(frequency, bandwidth, gain, sampling_rate);
 }
 
-void blade_rf_controller::configure_rf_parameters(frequency_type frequency, time_type time_ns, bandwidth_type bandwidth, const gain_type &gain, frequency_type sampling_rate,
+void blade_rf_controller::configure_rf_parameters(frequency_type frequency, bandwidth_type bandwidth, const gain_type &gain, frequency_type sampling_rate,
 	uint32_t switch_setting, uint32_t switch_mask) {
-	LOG(LCOLLECTION) << "Configuring scanner... " << "frequency: " << frequency / 1e6 << "mhz | time: "
-		<< time_ns / 1e6 << "ms | bandwidth: " << bandwidth / 1e6
-		<< "mhz | sampling_rate: " << sampling_rate / 1e6 << "mhz | gain: "
+	LOG(LCOLLECTION) << "Configuring scanner... " << "frequency: " << frequency / 1e6 << "mhz | bandwidth: " 
+		<< bandwidth / 1e6 << "mhz | sampling_rate: " << sampling_rate / 1e6 << "mhz | gain: "
 		<< gain.lna_gain_ << " " << gain.rxvga1_ << " " << gain.rxvga2_;
 
 	check_blade_comm();
@@ -689,7 +688,7 @@ void blade_rf_controller::configure_rf_parameters(frequency_type frequency, time
 
 measurement_info blade_rf_controller::stream_rf_data_use_auto_gain(frequency_type frequency, time_type time_ns, time_type time_ns_to_overlap, bandwidth_type bandwidth, frequency_type sampling_rate) {
 	if(!streaming_thread_ || !streaming_thread_->joinable() || frequency != parameter_cache_.frequency() || bandwidth != parameter_cache_.bandwidth() || sampling_rate != parameter_cache_.sampling_rate()) {
-		configure_rf_parameters_use_auto_gain(frequency, time_ns, bandwidth, sampling_rate);
+		configure_rf_parameters(frequency, bandwidth, gain, sampling_rate);
 
 		stop_streaming();
 

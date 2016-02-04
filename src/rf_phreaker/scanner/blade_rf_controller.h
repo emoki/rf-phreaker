@@ -79,9 +79,9 @@ public:
 	measurement_info get_rf_data(frequency_type freq, time_type time_ns, bandwidth_type bandwidth, const gain_type &gain, frequency_type sampling_rate = 0,
 		uint32_t switch_setting = 0, uint32_t switch_mask = 0);
 
-	void configure_rf_parameters_use_auto_gain(frequency_type frequency, time_type time_ns, bandwidth_type bandwidth, frequency_type sampling_rate = 0);
+	void configure_rf_parameters_use_auto_gain(frequency_type frequency, bandwidth_type bandwidth, frequency_type sampling_rate = 0);
 
-	void configure_rf_parameters(frequency_type frequency, time_type time_ns, bandwidth_type bandwidth, const gain_type &gain, frequency_type sampling_rate = 0,
+	void configure_rf_parameters(frequency_type frequency, bandwidth_type bandwidth, const gain_type &gain, frequency_type sampling_rate = 0,
 		uint32_t switch_setting = 0, uint32_t switch_mask = 0);
 
 	measurement_info stream_rf_data_use_auto_gain(frequency_type frequency, time_type time_ns, time_type time_ns_to_overlap, bandwidth_type bandwidth, frequency_type sampling_rate = 0);
