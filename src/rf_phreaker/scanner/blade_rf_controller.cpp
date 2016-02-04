@@ -16,7 +16,8 @@ namespace rf_phreaker { namespace scanner {
 
 blade_rf_controller::blade_rf_controller(comm_type)
 	: collection_count_(0)
-{
+	, streaming_time_ns_(-1)
+	, streaming_time_ns_to_overlap_(-1) {
 	is_streaming_ = NOT_STREAMING;
 	meas_buffer_.set_capacity(20);
 	nr_log_set_verbosity(BLADERF_LOG_LEVEL_INFO);
@@ -28,7 +29,9 @@ blade_rf_controller::blade_rf_controller(blade_rf_controller &&c)
 	, collection_count_(std::move(c.collection_count_))
 	, meas_buffer_(std::move(c.meas_buffer_))
 	, blade_settings_(std::move(blade_settings_))
-	, blade_settings_stream_(std::move(blade_settings_stream_)) {
+	, blade_settings_stream_(std::move(blade_settings_stream_)) 
+	, streaming_time_ns_(-1)
+	, streaming_time_ns_to_overlap_(-1) {
 	is_streaming_ = NOT_STREAMING;
 }
 
@@ -105,9 +108,9 @@ void blade_rf_controller::open_scanner_and_refresh_scanner_info(const scanner_se
 
 void blade_rf_controller::open_scanner(const scanner_serial_type &id)
 {
-	std::lock_guard<std::recursive_mutex> lock(open_close_mutex_);
-	parameter_cache_ = measurement_info();
+	set_parameter_cache(measurement_info());
 
+	std::lock_guard<std::recursive_mutex> lock(open_close_mutex_);
 	if(comm_blade_rf_.get()) {
 		close_scanner();
 		// If we close the scanner, we have to list devices.  It somehow release a mutex that
@@ -142,6 +145,16 @@ void blade_rf_controller::open_scanner(const scanner_serial_type &id)
 		}
 	}
 	comm_blade_rf_.reset(new comm_blade_rf(dev_info, blade_rf));
+}
+
+measurement_info blade_rf_controller::parameter_cache() {
+	std::lock_guard<std::mutex> lock(parameter_cache_mutex_);
+	return parameter_cache_;
+}
+
+void blade_rf_controller::set_parameter_cache(measurement_info &info) {
+	std::lock_guard<std::mutex> lock(parameter_cache_mutex_);
+	parameter_cache_ = info;
 }
 
 void blade_rf_controller::refresh_scanner_info()
@@ -526,8 +539,9 @@ measurement_info blade_rf_controller::get_rf_data(frequency_type frequency, time
 	uint32_t switch_setting, uint32_t switch_mask) {
 	configure_rf_parameters(frequency, bandwidth, gain, sampling_rate, switch_setting, switch_mask);
 
-	auto blade_bandwidth = (uint32_t)parameter_cache_.bandwidth();
-	auto blade_sampling_rate = (uint32_t)parameter_cache_.sampling_rate();
+	auto cache = parameter_cache();
+	auto blade_bandwidth = (uint32_t)cache.bandwidth();
+	auto blade_sampling_rate = (uint32_t)cache.sampling_rate();
 
 	// BladeRF only accepts data num_samples that are a multiple of 1024.
 	// Because the blade rx sync parameters are configurable we want to make sure we 
@@ -567,8 +581,6 @@ measurement_info blade_rf_controller::get_rf_data(frequency_type frequency, time
 	if(status)
 		throw blade_rf_error(std::string("Error collecting data samples.  ") + nr_strerror(status));
 
-	//parameter_cache_ = measurement_info(0, frequency, blade_bandwidth, blade_sampling_rate, gain);
-
 	// For now we use the computer time.  In the future perhaps we can use timestamp coming from the hardware.
 	auto start_time = get_collection_start_time();
 
@@ -583,14 +595,18 @@ measurement_info blade_rf_controller::get_rf_data(frequency_type frequency, time
 	ipp_helper::check_status(ippsConvert_16s32f(beginning_of_iq,
 		(Ipp32f*)data.get_iq().get(), data.get_iq().length() * 2));
 
-	auto lna_bypass = scanner_blade_rf_->eeprom_.cal_.get_nuand_adjustment(lms::LNA_BYPASS, frequency);
-	auto lna_mid = scanner_blade_rf_->eeprom_.cal_.get_nuand_adjustment(lms::LNA_MID, frequency);
-	auto lna_max = scanner_blade_rf_->eeprom_.cal_.get_nuand_adjustment(lms::LNA_MAX, frequency);
-	gain_manager_.update_gain(data, lna_bypass, lna_mid, lna_max);
+	update_gain(data);
 
 	ipp_helper::subtract_dc(data.get_iq().get(), data.get_iq().length());
 
 	return data;
+}
+
+void blade_rf_controller::update_gain(const measurement_info &info) {
+	auto lna_bypass = scanner_blade_rf_->eeprom_.cal_.get_nuand_adjustment(lms::LNA_BYPASS, info.frequency());
+	auto lna_mid = scanner_blade_rf_->eeprom_.cal_.get_nuand_adjustment(lms::LNA_MID, info.frequency());
+	auto lna_max = scanner_blade_rf_->eeprom_.cal_.get_nuand_adjustment(lms::LNA_MAX, info.frequency());
+	gain_manager_.update_gain(info, lna_bypass, lna_mid, lna_max);
 }
 
 std::chrono::time_point<std::chrono::system_clock, std::chrono::system_clock::duration> blade_rf_controller::get_collection_start_time() {
@@ -611,7 +627,9 @@ void blade_rf_controller::configure_rf_parameters(frequency_type frequency, band
 
 	check_blade_comm();
 
-	if(parameter_cache_.frequency() != frequency) {
+	auto cache = parameter_cache();
+
+	if(cache.frequency() != frequency) {
 		int status = 0;
 		for(int i = 0; i < 2; ++i) {
 			status = (nr_set_frequency(comm_blade_rf_->blade_rf(), BLADERF_MODULE_RX,
@@ -629,32 +647,24 @@ void blade_rf_controller::configure_rf_parameters(frequency_type frequency, band
 	if(sampling_rate == 0)
 		sampling_rate = static_cast<frequency_type>(bandwidth * 1.2);
 
-	if(parameter_cache_.gain().lna_gain_ != gain.lna_gain_) {
-		check_blade_status(nr_set_lna_gain(comm_blade_rf_->blade_rf(), convert(gain.lna_gain_), __FILE__, __LINE__), __FILE__, __LINE__);
-	}
-	if(parameter_cache_.gain().rxvga1_ != gain.rxvga1_) {
-		check_blade_status(nr_set_rxvga1(comm_blade_rf_->blade_rf(), gain.rxvga1_, __FILE__, __LINE__), __FILE__, __LINE__);
-	}
-	if(parameter_cache_.gain().rxvga2_ != gain.rxvga2_) {
-		check_blade_status(nr_set_rxvga2(comm_blade_rf_->blade_rf(), gain.rxvga2_, __FILE__, __LINE__), __FILE__, __LINE__);
-	}
+	set_gain(gain);
 
 	unsigned int blade_sampling_rate = 0;
 	unsigned int blade_bandwidth = 0;
 
-	if(parameter_cache_.sampling_rate() != sampling_rate) {
+	if(cache.sampling_rate() != sampling_rate) {
 		check_blade_status(nr_set_sample_rate(comm_blade_rf_->blade_rf(), BLADERF_MODULE_RX,
 			static_cast<uint32_t>(sampling_rate), &blade_sampling_rate, __FILE__, __LINE__), __FILE__, __LINE__);
 	}
 	else
-		blade_sampling_rate = static_cast<uint32_t>(parameter_cache_.sampling_rate());
+		blade_sampling_rate = static_cast<uint32_t>(cache.sampling_rate());
 
-	if(parameter_cache_.bandwidth() != bandwidth) {
+	if(cache.bandwidth() != bandwidth) {
 		check_blade_status(nr_set_bandwidth(comm_blade_rf_->blade_rf(), BLADERF_MODULE_RX,
 			bandwidth, &blade_bandwidth, __FILE__, __LINE__), __FILE__, __LINE__);
 	}
 	else
-		blade_bandwidth = parameter_cache_.bandwidth();
+		blade_bandwidth = cache.bandwidth();
 
 	uint32_t gpio_in_hw = 0;
 	check_blade_status(nr_expansion_gpio_read(comm_blade_rf_->blade_rf(),
@@ -683,98 +693,157 @@ void blade_rf_controller::configure_rf_parameters(frequency_type frequency, band
 			throw blade_rf_error("Unable to set xb gpio pins.");
 	}
 
-	parameter_cache_ = measurement_info(0, frequency, blade_bandwidth, blade_sampling_rate, gain);
+	set_parameter_cache(measurement_info(0, frequency, blade_bandwidth, blade_sampling_rate, gain));
+}
+
+void blade_rf_controller::set_gain(const gain_type &gain) {
+	auto cache = parameter_cache();
+	if(cache.gain().lna_gain_ != gain.lna_gain_) {
+		check_blade_status(nr_set_lna_gain(comm_blade_rf_->blade_rf(), convert(gain.lna_gain_), __FILE__, __LINE__), __FILE__, __LINE__);
+	}
+	if(cache.gain().rxvga1_ != gain.rxvga1_) {
+		check_blade_status(nr_set_rxvga1(comm_blade_rf_->blade_rf(), gain.rxvga1_, __FILE__, __LINE__), __FILE__, __LINE__);
+	}
+	if(cache.gain().rxvga2_ != gain.rxvga2_) {
+		check_blade_status(nr_set_rxvga2(comm_blade_rf_->blade_rf(), gain.rxvga2_, __FILE__, __LINE__), __FILE__, __LINE__);
+	}
+	set_parameter_cache_gain(gain);
+}
+
+void blade_rf_controller::set_parameter_cache_gain(const gain_type &gain) {
+	std::lock_guard<std::mutex> lock(parameter_cache_mutex_);
+	parameter_cache_.gain(gain);
 }
 
 measurement_info blade_rf_controller::stream_rf_data_use_auto_gain(frequency_type frequency, time_type time_ns, time_type time_ns_to_overlap, bandwidth_type bandwidth, frequency_type sampling_rate) {
 	if(!streaming_thread_ || !streaming_thread_->joinable() || frequency != parameter_cache_.frequency() || bandwidth != parameter_cache_.bandwidth() || sampling_rate != parameter_cache_.sampling_rate()) {
+		// Auto gain changes streaming to intermittent which causes us to stop full streaming, if already going.
+		// so we just pull the latest value and adjust within the streaming thread.  This is possible because
+		// the blade config functions use a mutex.
+		auto gain = gain_manager_.calculate_new_gain(frequency, bandwidth);
 		configure_rf_parameters(frequency, bandwidth, gain, sampling_rate);
+		should_update_streaming_parameters_ = true;
 
-		stop_streaming();
-
-		if(time_ns_to_overlap > time_ns) {
-			throw misc_error("The total time for streaming must be larger than the overlap time.");
-		}
-		
-		enable_full_streaming_rx();
-
-		streaming_thread_.reset(new std::thread([this](time_type time_ns, time_type time_ns_to_overlap) {
-			try {
-				auto sampling_rate = parameter_cache_.sampling_rate();
-				auto bandwidth = parameter_cache_.bandwidth();
-				auto frequency = parameter_cache_.frequency();
-				auto gain = parameter_cache_.gain();
-
-				auto meas_samples = convert_to_samples_and_mod_1024(time_ns, sampling_rate);
-				auto num_overlap_samples = rf_phreaker::convert_to_samples(time_ns_to_overlap, parameter_cache_.sampling_rate());
-				auto num_transfer_samples = num_overlap_samples;
-				auto copy_loc = meas_samples - num_overlap_samples;
-				rf_stream_buffer_.reset(num_overlap_samples);		
-				bool first_time = true;
-
-				if(num_overlap_samples <= 0)
-					throw rf_phreaker_error("There needs to be at least sample of overlap when streaming.");
-
-				while(is_streaming_ == FULL_STREAMING) {
-					const auto return_bytes = (num_transfer_samples) * 2 * sizeof(int16_t);
-
-					aligned_buffer_.align_array(return_bytes);
-					auto aligned_buffer = aligned_buffer_.get_aligned_array();
-
-					bladerf_metadata metadata;
-					metadata.flags = BLADERF_META_FLAG_RX_NOW;
-
-					int status = nr_sync_rx(comm_blade_rf_->blade_rf(), aligned_buffer,
-						num_transfer_samples, &metadata, 2500);
-
-					//if((metadata.flags & BLADERF_META_STATUS_OVERRUN) == BLADERF_META_STATUS_OVERRUN)
-					//	LOG(LINFO) << "Buffer overrun occurred while streaming.  Restarting stream...";
-					//else 
-					if(status == 0) {
-						// For now we use the computer time.  In the future perhaps we can use timestamp coming from the hardware.
-						auto start_time = get_collection_start_time();
-
-						measurement_info data(meas_samples, frequency, bandwidth, sampling_rate, gain,
-							std::chrono::duration_cast<std::chrono::milliseconds>(std::chrono::high_resolution_clock::now() - start_time),
-							scanner_blade_rf_->eeprom_.cal_.get_nuand_adjustments(gain.lna_gain_, frequency, bandwidth),
-							scanner_blade_rf_->eeprom_.cal_.get_rf_board_adjustments(frequency, bandwidth, bandwidth),
-							collection_count_++, scanner_blade_rf_->eeprom_.cal_.nuand_serial_);
-
-						if(first_time) {
-							ipp_helper::check_status(ippsConvert_16s32f(((Ipp16s*)&(*aligned_buffer_.get_aligned_array())),
-								(Ipp32f*)rf_stream_buffer_.get(), rf_stream_buffer_.length() * 2));
-							first_time = false;
-							num_transfer_samples = meas_samples - num_overlap_samples;
-							continue;
-						}
-
-						data.get_iq().copy(rf_stream_buffer_.get(), num_overlap_samples);
-
-						ipp_helper::check_status(ippsConvert_16s32f(((Ipp16s*)&(*aligned_buffer_.get_aligned_array())),
-							(Ipp32f*)data.get_iq().get(num_overlap_samples), num_transfer_samples * 2));
-
-						rf_stream_buffer_.copy(data.get_iq().get(copy_loc), num_overlap_samples);
-
-						ipp_helper::subtract_dc(data.get_iq().get(), data.get_iq().length());
-
-						std::lock_guard<std::mutex> lock(meas_buffer_mutex_);
-						meas_buffer_.push_back(data);
-					}
-					else {
-						LOG(LDEBUG) << "Collecting " << num_transfer_samples << " samples failed. Status = " << status << ".";
-						// If status does not equal zero and we're still supposed to be streaming, throw an exception.
-						if(is_streaming_ == FULL_STREAMING)
-							throw blade_rf_error(std::string("Error collecting data samples. ") + nr_strerror(status));
-					}
-				}
-			}
-			catch(const std::exception &err) {
-				LOG(LERROR) << "Encountered error while attempting to stream. " << err.what();
-			}
+		{
+			// Wait for nuand buffers to fill with new data.  Clear old data from measurement buffer.
+			std::this_thread::sleep_for(std::chrono::nanoseconds(2 * time_ns + time_ns_to_overlap));
 			std::lock_guard<std::mutex> lock(meas_buffer_mutex_);
 			meas_buffer_.clear();
-		}, time_ns, time_ns_to_overlap));
-		std::this_thread::sleep_for(std::chrono::nanoseconds(2 * time_ns + time_ns_to_overlap));
+		}
+
+		if(is_streaming_ != FULL_STREAMING || time_ns != streaming_time_ns_ || time_ns_to_overlap != streaming_time_ns_to_overlap_) {
+			if(time_ns_to_overlap > time_ns) {
+				throw misc_error("The total time for streaming must be larger than the overlap time.");
+			}
+
+			stop_streaming();
+
+			streaming_time_ns_ = time_ns;
+			streaming_time_ns_to_overlap_ = time_ns_to_overlap;
+
+			enable_full_streaming_rx();
+
+			streaming_thread_.reset(new std::thread([this](time_type time_ns, time_type time_ns_to_overlap) {
+				try {
+					auto cache = parameter_cache();
+					auto sampling_rate = cache.sampling_rate();
+					auto bandwidth = cache.bandwidth();
+					auto frequency = cache.frequency();
+					auto gain = cache.gain();
+
+					auto meas_samples = convert_to_samples_and_mod_1024(time_ns, sampling_rate);
+					auto num_overlap_samples = rf_phreaker::convert_to_samples(time_ns_to_overlap, cache.sampling_rate());
+					auto num_transfer_samples = num_overlap_samples;
+					auto copy_loc = meas_samples - num_overlap_samples;
+					rf_stream_buffer_.reset(num_overlap_samples);
+					bool first_time = true;
+					int gain_count = 0;
+
+					if(num_overlap_samples <= 0)
+						throw rf_phreaker_error("There needs to be at least sample of overlap when streaming.");
+
+					while(is_streaming_ == FULL_STREAMING) {
+						if(should_update_streaming_parameters_) {
+							should_update_streaming_parameters_ = false;
+							num_overlap_samples = rf_phreaker::convert_to_samples(time_ns_to_overlap, cache.sampling_rate());
+							first_time = true;
+							gain_count = 0;
+							cache = parameter_cache();
+							sampling_rate = cache.sampling_rate();
+							bandwidth = cache.bandwidth();
+							frequency = cache.frequency();
+							gain = cache.gain();
+						}
+						const auto return_bytes = (num_transfer_samples)* 2 * sizeof(int16_t);
+
+						aligned_buffer_.align_array(return_bytes);
+						auto aligned_buffer = aligned_buffer_.get_aligned_array();
+
+						bladerf_metadata metadata;
+						metadata.flags = BLADERF_META_FLAG_RX_NOW;
+
+						int status = nr_sync_rx(comm_blade_rf_->blade_rf(), aligned_buffer,
+							num_transfer_samples, &metadata, 2500);
+
+						//if((metadata.flags & BLADERF_META_STATUS_OVERRUN) == BLADERF_META_STATUS_OVERRUN)
+						//	LOG(LINFO) << "Buffer overrun occurred while streaming.  Restarting stream...";
+						//else 
+						if(status == 0) {
+							// For now we use the computer time.  In the future perhaps we can use timestamp coming from the hardware.
+							auto start_time = get_collection_start_time();
+
+							measurement_info data(meas_samples, frequency, bandwidth, sampling_rate, gain,
+								std::chrono::duration_cast<std::chrono::milliseconds>(std::chrono::high_resolution_clock::now() - start_time),
+								scanner_blade_rf_->eeprom_.cal_.get_nuand_adjustments(gain.lna_gain_, frequency, bandwidth),
+								scanner_blade_rf_->eeprom_.cal_.get_rf_board_adjustments(frequency, bandwidth, bandwidth),
+								collection_count_++, scanner_blade_rf_->eeprom_.cal_.nuand_serial_);
+							
+							data.get_iq().zero_out();
+
+							if(first_time) {
+								ipp_helper::check_status(ippsConvert_16s32f(((Ipp16s*)&(*aligned_buffer_.get_aligned_array())),
+									(Ipp32f*)rf_stream_buffer_.get(), rf_stream_buffer_.length() * 2));
+								first_time = false;
+								num_transfer_samples = meas_samples - num_overlap_samples;
+								continue;
+							}
+
+							ipp_helper::check_status(ippsConvert_16s32f(((Ipp16s*)&(*aligned_buffer_.get_aligned_array())),
+								(Ipp32f*)data.get_iq().get(num_overlap_samples), num_transfer_samples * 2));
+
+							// Zero in on gain. Do this only on the new samples and only in the beginning of streaming. 
+							// It's possible this may occur while blade_rf_controller is adjusting 
+							// the gain, however this should be ok given that the blade function uses a mutex.
+							if(gain_count++ < 3) {
+								update_gain(data);
+								gain = gain_manager_.calculate_new_gain(frequency, bandwidth);
+								set_gain(gain);
+							}
+							data.get_iq().copy(rf_stream_buffer_.get(), num_overlap_samples);
+
+							rf_stream_buffer_.copy(data.get_iq().get(copy_loc), num_overlap_samples);
+
+							ipp_helper::subtract_dc(data.get_iq().get(), data.get_iq().length());
+
+							std::lock_guard<std::mutex> lock(meas_buffer_mutex_);
+							meas_buffer_.push_back(data);
+						}
+						else {
+							LOG(LDEBUG) << "Collecting " << num_transfer_samples << " samples failed. Status = " << status << ".";
+							// If status does not equal zero and we're still supposed to be streaming, throw an exception.
+							if(is_streaming_ == FULL_STREAMING)
+								throw blade_rf_error(std::string("Error collecting data samples. ") + nr_strerror(status));
+						}
+					}
+				}
+				catch(const std::exception &err) {
+					LOG(LERROR) << "Encountered error while attempting to stream. " << err.what();
+				}
+				std::lock_guard<std::mutex> lock(meas_buffer_mutex_);
+				meas_buffer_.clear();
+			}, time_ns, time_ns_to_overlap));
+			std::this_thread::sleep_for(std::chrono::nanoseconds(2 * time_ns + time_ns_to_overlap));
+		}
 	}
 	return pop_measurement_buffer();
 }
@@ -811,6 +880,8 @@ void blade_rf_controller::stop_streaming() {
 	}
 	if(streaming_thread_)
 		streaming_thread_.reset();
+	streaming_time_ns_ = -1;
+	streaming_time_ns_to_overlap_ = -1;
 }
 
 int blade_rf_controller::check_blade_status(int return_status, const std::string &file, int line)

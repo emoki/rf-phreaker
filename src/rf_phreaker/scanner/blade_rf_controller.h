@@ -159,7 +159,17 @@ private:
 	std::chrono::time_point<std::chrono::system_clock, std::chrono::system_clock::duration> get_collection_start_time();
 
 	measurement_info pop_measurement_buffer();
-		
+
+	void set_gain(const gain_type &gain);
+
+	void update_gain(const measurement_info &info);
+
+	measurement_info parameter_cache();
+
+	void set_parameter_cache(measurement_info &info);
+
+	void set_parameter_cache_gain(const gain_type &gain);
+
 	ipp_16sc_aligned_buffer aligned_buffer_;
 
 	gain_manager gain_manager_;
@@ -170,6 +180,7 @@ private:
 
 	std::shared_ptr<scanner_blade_rf> scanner_;
 
+	std::mutex parameter_cache_mutex_;
 	measurement_info parameter_cache_;
 
 	int64_t collection_count_;
@@ -191,6 +202,9 @@ private:
 		FULL_STREAMING
 	};
 	std::atomic<streaming_type> is_streaming_;
+	std::atomic_bool should_update_streaming_parameters_;
+	time_type streaming_time_ns_;
+	time_type streaming_time_ns_to_overlap_;
 	std::mutex meas_buffer_mutex_;
 	std::unique_ptr<std::thread> streaming_thread_;
 	boost::circular_buffer<measurement_info> meas_buffer_;
