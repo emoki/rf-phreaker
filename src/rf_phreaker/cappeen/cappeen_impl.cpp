@@ -75,17 +75,17 @@ long cappeen_impl::initialize(beagle_api::beagle_delegate *del)
 		}
 		// Release all components before changing delegate.
 		if(processing_graph_) {
-			LOG(LDEBUG) << "Found processing graph on heap.  Sending cancel request and releasing it.";
+			LOG(LDEBUG) << "Found processing graph on heap.  Sending cancel request and resetting.";
 			processing_graph_->cancel_and_wait();
 			processing_graph_.reset();
 		}
 		if(gps_graph_) {
-			LOG(LDEBUG) << "Found gps graph on heap.  Sending cancel request and releasing it.";
+			LOG(LDEBUG) << "Found gps graph on heap.  Sending cancel request and resetting.";
 			gps_graph_->cancel_and_wait();
 			gps_graph_.reset();
 		}
 		if(frequency_correction_graph_) {
-			LOG(LDEBUG) << "Found frequency correction graph on heap.  Sending cancel request and releasing it.";
+			LOG(LDEBUG) << "Found frequency correction graph on heap.  Sending cancel request and resetting.";
 			frequency_correction_graph_->cancel_and_wait();
 			frequency_correction_graph_.reset();
 		}
