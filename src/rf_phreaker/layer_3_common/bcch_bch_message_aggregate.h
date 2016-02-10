@@ -22,7 +22,7 @@ enum band_indicator_type
 {
 	dcs_1800_was_used = 0,
 	pcs_1900_was_used = 1,
-	unknown_band_was_used = -1
+	unknown_band_was_used = 2
 };
 
 struct plmn
@@ -34,6 +34,7 @@ struct plmn
 typedef std::vector<plmn> multiple_plmn_type;
 
 struct bit_stream {
+	bit_stream() : unused_bits_(0) {}
 	bit_stream(const uint8_t *stream, uint32_t num_bytes, uint32_t unused_bits = 0)
 	: bytes_(num_bytes)
 	, unused_bits_(unused_bits) {

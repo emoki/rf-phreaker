@@ -24,19 +24,24 @@ void (RP_CALLCONV rp_gps_update)(const rp_gps *gps) {
 	QCoreApplication::postEvent(Api::instance(), new GpsUpdateEvent(*gps));
 }
 
-void (RP_CALLCONV rp_gsm_update)(const rp_base *base, const rp_gsm *gsm, int num_gsm) {
-}
+void (RP_CALLCONV rp_gsm_full_scan_update)(const rp_base *base, const rp_gsm *gsm, int num_gsm) {}
 
-void (RP_CALLCONV rp_wcdma_update)(const rp_base *base, const rp_wcdma *wcdma, int num_umts) {
+void (RP_CALLCONV rp_wcdma_full_scan_update)(const rp_base *base, const rp_wcdma *wcdma, int num_umts) {
 	QCoreApplication::postEvent(Api::instance(), new WcdmaUpdateEvent(base, wcdma, num_umts));
 }
 
-void (RP_CALLCONV rp_lte_update)(const rp_base *base, const rp_lte *lte, int num_lte) {
+void (RP_CALLCONV rp_lte_full_scan_update)(const rp_base *base, const rp_lte *lte, int num_lte) {
 	QCoreApplication::postEvent(Api::instance(), new LteUpdateEvent(base, lte, num_lte));
 }
 
-void (RP_CALLCONV rp_sweep_update)(const rp_base *base, const rp_gsm *gsm, int num_gsm, const rp_wcdma *wcdma, int num_wcdma, const rp_lte *lte, int num_lte) {
+void (RP_CALLCONV rp_gsm_sweep_update)(const rp_base *base, const rp_gsm *gsm, int num_gsm) {}
 
+void (RP_CALLCONV rp_wcdma_sweep_update)(const rp_base *base, const rp_wcdma *wcdma, int num_umts) {
+	//QCoreApplication::postEvent(Api::instance(), new WcdmaUpdateEvent(base, wcdma, num_umts));
+}
+
+void (RP_CALLCONV rp_lte_sweep_update)(const rp_base *base, const rp_lte *lte, int num_lte) {
+	//QCoreApplication::postEvent(Api::instance(), new LteUpdateEvent(base, lte, num_lte));
 }
 
 void (RP_CALLCONV rp_raw_data_update)(const rp_raw_data *raw, int num_raw_data) {
@@ -76,14 +81,18 @@ Api::Api(QObject *parent)
 	, canUpdateLte_(false)
 
 {
+	callbacks_.rp_update = 0;
 	callbacks_.rp_log_update = rp_log_update;
 	callbacks_.rp_message_update = rp_message_update;
 	callbacks_.rp_device_info_update = rp_device_info_update;
 	callbacks_.rp_gps_update = rp_gps_update;
-	callbacks_.rp_gsm_update = rp_gsm_update;
-	callbacks_.rp_wcdma_update = rp_wcdma_update;
-	callbacks_.rp_lte_update = rp_lte_update;
+	callbacks_.rp_gsm_full_scan_update = rp_gsm_full_scan_update;
+	callbacks_.rp_wcdma_full_scan_update = rp_wcdma_full_scan_update;
+	callbacks_.rp_lte_full_scan_update = rp_lte_full_scan_update;
 	callbacks_.rp_raw_data_update = /*rp_raw_data_update*/0;
+	callbacks_.rp_gsm_sweep_update = rp_gsm_sweep_update;
+	callbacks_.rp_wcdma_sweep_update = rp_wcdma_sweep_update;
+	callbacks_.rp_lte_sweep_update = rp_lte_sweep_update;
 
 	connect(updateTimer_, SIGNAL(timeout()), this, SLOT(emitSignals()));
 	updateTimer_->start(800);

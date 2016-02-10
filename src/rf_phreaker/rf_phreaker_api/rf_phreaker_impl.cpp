@@ -32,6 +32,7 @@ rf_phreaker_impl::~rf_phreaker_impl() {
 		frequency_correction_graph_.reset();
 		data_output_.reset();
 		handler_.reset();
+		handler_pb_.reset();
 		scanners_.clear();
 		logger_.reset();
 	}
@@ -90,6 +91,7 @@ rp_status rf_phreaker_impl::initialize(rp_callbacks *callbacks) {
 		//	data_output_->clear_queue();
 		data_output_.reset();
 		handler_.reset();
+		handler_pb_.reset();
 		//if(scanners_.size()) {
 		//	for(auto &s : scanners_)
 		//		s->async_.clear_queue();
@@ -102,7 +104,12 @@ rp_status rf_phreaker_impl::initialize(rp_callbacks *callbacks) {
 
 
 		data_output_.reset(new processing::data_output_async());
-		handler_.reset(new rf_phreaker_handler(data_output_.get(), callbacks));
+		if(callbacks_->rp_device_info_update || callbacks_->rp_gps_update || callbacks_->rp_gsm_sweep_update || callbacks_->rp_gsm_full_scan_update
+			|| callbacks_->rp_log_update || callbacks_->rp_lte_sweep_update || callbacks_->rp_lte_full_scan_update || callbacks_->rp_message_update
+			|| callbacks_->rp_raw_data_update || callbacks_->rp_wcdma_sweep_update || callbacks_->rp_wcdma_full_scan_update)
+			handler_.reset(new rf_phreaker_handler(data_output_.get(), callbacks));
+		if(callbacks_->rp_update)
+			handler_pb_.reset(new rf_phreaker_handler_protobuf(data_output_.get(), callbacks));
 		processing_graph_.reset(new processing::processing_graph());
 		gps_graph_.reset(new processing::gps_graph());
 		frequency_correction_graph_.reset(new processing::frequency_correction_graph());
@@ -167,6 +174,7 @@ rp_status rf_phreaker_impl::clean_up() {
 			data_output_->clear_queue();
 		data_output_.reset();
 		handler_.reset();
+		handler_pb_.reset();
 		if(scanners_.size()) {
 			for(auto &s : scanners_)
 				s->async_.clear_queue();
@@ -280,7 +288,10 @@ rp_status rf_phreaker_impl::connect_device(rp_serial serial, rp_device **device_
 
 		auto hw = device->async_.get_scanner().get()->get_hardware();
 
-		handler_->output_device_info(hw);
+		if(handler_)
+			handler_->output_device_info(hw);
+		if(handler_pb_)
+			handler_pb_->output_device_info(hw);
 
 		gps_graph_->start(&device->async_, data_output_.get(), config_);
 
@@ -979,16 +990,47 @@ void rf_phreaker_impl::message_handling(const std::string &str, int type, int co
 	if(callbacks_ && callbacks_->rp_message_update) {
 		callbacks_->rp_message_update(RP_STATUS_OK, str.c_str());
 	}
+	if(callbacks_ && callbacks_->rp_update) {
+		std::lock_guard<std::mutex> lock(update_mutex_);
+		update_.populate_message(RP_STATUS_OK, str.c_str());
+		update_.serialize();
+		callbacks_->rp_update(update_.to_bytes(), update_.size());
+	}
 }
 
 void rf_phreaker_impl::error_handling(const std::string &str, int type, int code) {
+	// Until we have a better handle on how specific errors should be handled.  We stop all communication to scanner.
+	bool disconnect = false;
+	switch((message_codes)code) {
+			break;
+		case GENERAL_ERROR:
+		case STD_EXCEPTION_ERROR:
+		case UNKNOWN_ERROR:
+		case CONVERSION_ERROR:
+			disconnect = true;
+			break;
+		case CALIBRATION_ERROR:
+		case EEPROM_ERROR:
+		case FREQUENCY_CORRECTION_FAILED:
+		case FREQUENCY_CORRECTION_VALUE_INVALID:
+		case FREQUENCY_CORRECTION_SUCCESSFUL:
+		default:
+			;
+	}
+	if(disconnect && scanners_.rbegin() != scanners_.rend()) {
+		rp_disconnect_device(scanners_.rbegin()->get());
+	}
+
 	if(callbacks_ && callbacks_->rp_message_update) {
-		// Until we have a better handle on how specific errors should be handled.  We stop all communication to scanner.
-		if(scanners_.rbegin() != scanners_.rend()) {
-			rp_disconnect_device(scanners_.rbegin()->get());
-		}
 		callbacks_->rp_message_update(RP_STATUS_GENERIC_ERROR, str.c_str());	
 	}
+	if(callbacks_ && callbacks_->rp_update) {
+		std::lock_guard<std::mutex> lock(update_mutex_);
+		update_.populate_message(RP_STATUS_OK, str.c_str());
+		update_.serialize();
+		callbacks_->rp_update(update_.to_bytes(), update_.size());
+	}
+
 }
 
 

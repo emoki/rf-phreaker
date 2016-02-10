@@ -6,6 +6,7 @@
 #include "tbb/task_scheduler_init.h"
 #include "rf_phreaker/rf_phreaker_api/rf_phreaker_api.h"
 #include "rf_phreaker/rf_phreaker_api/rf_phreaker_handler.h"
+#include "rf_phreaker/rf_phreaker_api/rf_phreaker_handler_protobuf.h"
 #include "rf_phreaker/scanner/blade_rf_controller_async.h"
 #include "rf_phreaker/processing/processing_graph.h"
 #include "rf_phreaker/processing/frequency_correction_graph.h"
@@ -20,7 +21,6 @@ typedef struct rp_device
 		: async_(comm) {}
 	rf_phreaker::scanner::blade_rf_controller_async async_;
 } rp_device;
-
 
 namespace rf_phreaker { namespace api {
 
@@ -108,6 +108,7 @@ private:
 
 	// Order of components is important when destructing.
 	std::unique_ptr<rf_phreaker_handler> handler_;
+	std::unique_ptr<rf_phreaker_handler_protobuf> handler_pb_;
 
 	std::unique_ptr<processing::processing_graph> processing_graph_;
 
@@ -131,6 +132,10 @@ private:
 	tbb::task_scheduler_init tbb_task_scheduler_;
 
 	rp_callbacks *callbacks_;
+
+	protobuf::update_pb update_;
+	
+	std::mutex update_mutex_;
 };
 
 }}

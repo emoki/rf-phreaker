@@ -345,7 +345,7 @@ public:
 		auto i = 0;
 		for(auto &j : t) {
 			a[i].arfcn_ = j.arfcn_;
-			a[i].band_indicator_ = (rp_band_indicator)j.band_indicator_;
+			a[i].band_indicator_ = (rp_band_indicator_type)j.band_indicator_;
 			a[i].bsic_ = j.bsic_.to_uint16();
 			a[i].qrx_lev_min_ = j.qrx_lev_min_ == layer_3_information::not_decoded_16 ? -1 : j.qrx_lev_min_;
 			++i;
@@ -525,11 +525,10 @@ public:
 			a[i].common_info_.cell_reselection_priority_ = j.common_info_.cell_reselection_priority_;
 			a[i].common_info_.threshold_x_high_ = j.common_info_.threshold_x_high_.reselection_threshold();
 			a[i].common_info_.threshold_x_low_ = j.common_info_.threshold_x_low_.reselection_threshold();
-			a[i].carrier_freqs_.band_indicator_ = (rp_band_indicator)j.carrier_freqs_.band_indicator_;
-			a[i].carrier_freqs_.starting_arfcn_ = j.carrier_freqs_.starting_arfcn_;
+			a[i].carrier_freqs_.band_indicator_ = (rp_band_indicator_type)j.carrier_freqs_.band_indicator_;
 			sib7_arfcns_[i] = j.carrier_freqs_.following_arfcns_;
-			a[i].carrier_freqs_.following_arfcns_ = sib7_arfcns_[i].data();
-			a[i].carrier_freqs_.num_following_arfcns_ = sib7_arfcns_[i].size();
+			a[i].carrier_freqs_.arfcns_ = sib7_arfcns_[i].data();
+			a[i].carrier_freqs_.num_arfcns_ = sib7_arfcns_[i].size();
 			++i;
 		}
 		*d = a.data();
@@ -546,7 +545,7 @@ public:
 		auto &i = a.back();
 		for(auto &j : t) {
 			rp_lte_neighbor_cell_cdma_2000 q;
-			q.band_ = (rp_lte_band_class_cmda_2000)j.band_;
+			q.band_ = (rp_lte_band_class_cmda_2000_type)j.band_;
 			populate(&q.neighbor_cells_per_freq_list_, q.num_neighbor_cells_per_freq_list_, c, j.neighbor_cells_per_freq_list_);
 			i.push_back(q);
 		}

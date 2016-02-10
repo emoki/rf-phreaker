@@ -1,0 +1,646 @@
+syntax = "proto3";
+
+package rf_phreaker.protobuf;
+
+// Main message
+message rp_update {
+	oneof update {
+		rp_log log = 1;
+		rp_message msg = 2;
+		rp_device_info device = 3;
+		rp_gps gps = 4;
+		rp_gsm_update gsm_full_scan = 5;
+		rp_gsm_update gsm_sweep = 6;
+		rp_wcdma_update wcdma_full_scan = 7;
+		rp_wcdma_update wcdma_sweep = 8;
+		rp_lte_update lte_full_scan = 9;
+		rp_lte_update lte_sweep = 10;
+	}
+}
+
+enum rp_status {
+	RP_STATUS_OK = 0;
+	RP_STATUS_NOT_INITIALIZED = 1;
+	RP_STATUS_INVALID_PARAMETER = 2;
+	RP_STATUS_COMMUNICATION_ERROR = 3;
+	RP_STATUS_SCANNER_INIT_ERROR = 4;
+	RP_STATUS_HARDWARE_INFO_ERROR = 5;
+	RP_STATUS_MISC_ERROR = 6;
+	RP_STATUS_FILE_IO_ERROR = 7;
+	RP_STATUS_BLADE_RF_ERROR = 8;
+	RP_STATUS_IPP_ERROR = 9;
+	RP_STATUS_FILTER_ERROR = 10;
+	RP_STATUS_GSM_ANALYSIS_ERROR = 11;
+	RP_STATUS_UMTS_ANALYSIS_ERROR = 12;
+	RP_STATUS_LTE_ANALYSIS_ERROR = 13;
+	RP_STATUS_PROCESSING_ERROR = 14;
+	RP_STATUS_GPS_COMMUNICATION_ERROR = 15;
+	RP_STATUS_RF_PHREAKER_API_ERROR = 16;
+	RP_STATUS_GENERIC_ERROR = 17;
+	RP_STATUS_UNKNOWN_ERROR = 18;
+}
+
+message rp_log {
+	string msg = 1;
+}
+
+message rp_message {
+	rp_status status = 1;
+	string msg = 2;
+}
+
+enum rp_technology {
+	GSM = 0;
+	CDMA = 1;
+	WCDMA = 2;
+	LTE = 3;
+	RAW_DATA = 4;
+}
+
+enum rp_operating_band {
+	option allow_alias = true;
+
+	OPERATING_BAND_UNKNOWN = 0;
+
+	GSM_T_380 = 0; //	380	380.2–389.8	390.2–399.8	dynamic
+	GSM_T_410 = 1; //	410	410.2–419.8	420.2–429.8	dynamic
+	GSM_450 = 2; //	450	450.6–457.6	460.6–467.6	259–293
+	GSM_480 = 3; //	480	479.0–486.0	489.0–496.0	306–340
+	GSM_710 = 4; //	710	698.2–716.2	728.2–746.2	dynamic
+	GSM_750 = 5; //	750	747.2–762.2	777.2–792.2	438–511
+	GSM_T_810 = 6; //	810	806.2–821.2	851.2–866.2	dynamic
+	GSM_850 = 7; //	850	824.2–849.2	869.2–894.2	128–251
+	GSM_P_900 = 8; //	900	890.0–915.0	935.0–960.0	1–124
+	GSM_E_900 = 9; //	900	880.0–915.0	925.0–960.0	975–1023 = ; 0-124
+	GSM_R_900 = 10; //	900	876.0–915.0	921.0–960.0	955–1023 = ; 0-124
+	GSM_ER_900 = 11; //	900	873.0–915.0	918.0–960.0	945–1023 = ; 0-124
+	GSM_T_900 = 12; //	900	870.4–876.0	915.4–921.0	dynamic^
+	GSM_DCS_1800 = 13; //	1800	1 = ;710.2–1 = ;784.8	1 = ;805.2–1 = ;879.8	512–885
+	GSM_PCS_1900 = 14; //	1900	1 = ;850.2–1 = ;909.8	1 = ;930.2–1 = ;989.8	512–810
+
+	UMTS_OPERATING_BAND_1 = 15;	//  2100	IMT	1920 - 1980	2110 – 2170
+	UMTS_OPERATING_BAND_2 = 16;	//  1900	PCS A-F	1850 – 1910	1930 – 1990
+	UMTS_OPERATING_BAND_3 = 17;	//	1800	DCS	1710 – 1785	1805 – 1880
+	UMTS_OPERATING_BAND_4 = 18;	//	1700	AWS A-F	1710 – 1755	2110 – 2155
+	UMTS_OPERATING_BAND_5 = 19;	//	850	CLR	824 – 849	869 – 894
+	UMTS_OPERATING_BAND_6 = 20;	//	800		830 – 840	875 – 885
+	UMTS_OPERATING_BAND_7 = 21;	//	2600	IMT-E	2500 – 2570	2620 – 2690
+	UMTS_OPERATING_BAND_8 = 22;	//	900	E-GSM	880 – 915	925 – 960
+	UMTS_OPERATING_BAND_9 = 23;	//	1700		1749.9 – 1784.9	1844.9 – 1879.9
+	UMTS_OPERATING_BAND_10 = 24;	//	1700	EAWS A-G	1710 – 1770	2110 – 2170
+	UMTS_OPERATING_BAND_11 = 25;	//	1500	LPDC	1427.9 – 1447.9	1475.9 – 1495.9
+	UMTS_OPERATING_BAND_12 = 26;	//	700	LSMH A/B/C	699 – 716	729 – 746
+	UMTS_OPERATING_BAND_13 = 27;	//	700	USMH C	777 – 787	746 – 756
+	UMTS_OPERATING_BAND_14 = 28;	//	700	USMH D	788 – 798	758 – 768
+	UMTS_OPERATING_BAND_19 = 29;	//	800		832.4 – 842.6	877.4 – 887.6
+	UMTS_OPERATING_BAND_20 = 30;	//	800	EUDD	832 – 862	791 – 821
+	UMTS_OPERATING_BAND_21 = 31;	//	1500	UPDC	1447.9 – 1462.9	1495.9 – 1510.9
+	UMTS_OPERATING_BAND_22 = 32;	//	3500		3410 – 3490	3510 – 3590
+	UMTS_OPERATING_BAND_25 = 33;	//	1900	EPCS A-G	1850 – 1915	1930 – 1995
+	UMTS_OPERATING_BAND_26 = 34;	//	850	ECLR	814 – 849	859 – 894
+
+	LTE_OPERATING_BAND_1 = 35;	//	1920 - 1980	2110 - 2170	FDD
+	LTE_OPERATING_BAND_2 = 36;	//	1850 - 1910	1930 - 1990	FDD
+	LTE_OPERATING_BAND_3 = 37;	//	1710 - 1785	1805 - 1880	FDD
+	LTE_OPERATING_BAND_4 = 38;	//	1710 - 1755	2110 - 2155	FDD
+	LTE_OPERATING_BAND_5 = 39;	//	824 - 849	869 - 894	FDD
+	LTE_OPERATING_BAND_6 = 40;	//	830 - 840	875 - 885	FDD
+	LTE_OPERATING_BAND_7 = 41;	//	2500 - 2570	2620 - 2690	FDD
+	LTE_OPERATING_BAND_8 = 42;	//	880 - 915	925 - 960	FDD
+	LTE_OPERATING_BAND_9 = 43;	//	1749.9 - 1784.9	1844.9 - 1879.9	FDD
+	LTE_OPERATING_BAND_10 = 44;	//	1710 - 1770	2110 - 2170	FDD
+	LTE_OPERATING_BAND_11 = 45;	//	1427.9 - 1447.9	1475.9 - 1495.9	FDD
+	LTE_OPERATING_BAND_12 = 46;	//	699 - 716	729 - 746	FDD
+	LTE_OPERATING_BAND_13 = 47;	//	777 - 787	746 - 756	FDD
+	LTE_OPERATING_BAND_14 = 48;	//	788 - 798	758 - 768	FDD
+	LTE_OPERATING_BAND_17 = 49;	//	704 - 716	734 - 746	FDD
+	LTE_OPERATING_BAND_18 = 50;	//	815 - 830	860 - 875	FDD
+	LTE_OPERATING_BAND_19 = 51;	//	830 - 845	875 - 890	FDD
+	LTE_OPERATING_BAND_20 = 52;	//	832 - 862	791 - 821	FDD
+	LTE_OPERATING_BAND_21 = 53;	//	1447.9 - 1462.9	1495.9 - 1510.9	FDD
+	LTE_OPERATING_BAND_22 = 54;	//	3410 - 3490	3510 - 3590	FDD
+	LTE_OPERATING_BAND_23 = 55;	//	2000 - 2020	2180 - 2200	FDD
+	LTE_OPERATING_BAND_24 = 56;	//	1626.5 - 1660.5	1525 - 1559	FDD
+	LTE_OPERATING_BAND_25 = 57;	//	1850 - 1915	1930 - 1995	FDD
+	LTE_OPERATING_BAND_26 = 58;	//	814 - 849	859 - 894	FDD
+	LTE_OPERATING_BAND_27 = 59;	//	807 - 824	852 - 869	FDD
+	LTE_OPERATING_BAND_28 = 60;	//	703 - 748	758 - 803	FDD
+	LTE_OPERATING_BAND_29 = 61;	//	N/A	716 - 728	FDD
+	LTE_OPERATING_BAND_30 = 62;	//	2305 - 2315	 2350 - 2360 FDD
+	LTE_OPERATING_BAND_33 = 63;	//	1900 - 1920		TDD
+	LTE_OPERATING_BAND_34 = 64;	//	2010 - 2025		TDD
+	LTE_OPERATING_BAND_35 = 65;	//	1850 - 1910		TDD
+	LTE_OPERATING_BAND_36 = 66;	//	1930 - 1990		TDD
+	LTE_OPERATING_BAND_37 = 67;	//	1910 - 1930		TDD
+	LTE_OPERATING_BAND_38 = 68;	//	2570 - 2620		TDD
+	LTE_OPERATING_BAND_39 = 69;	//	1880 - 1920		TDD
+	LTE_OPERATING_BAND_40 = 70;	//	2300 - 2400		TDD
+	LTE_OPERATING_BAND_41 = 71;	//	2496 - 2690		TDD
+	LTE_OPERATING_BAND_42 = 72;	//	3400 - 3600		TDD
+	LTE_OPERATING_BAND_43 = 73;	//	3600 - 3800		TDD
+	LTE_OPERATING_BAND_44 = 74;	//	703 - 803		TDD
+
+	FIRST_GSM_OPERATING_BAND = 0;
+	LAST_GSM_OPERATING_BAND = 14;
+	FIRST_UMTS_OPERATING_BAND = 15;
+	LAST_UMTS_OPERATING_BAND = 34;
+	FIRST_LTE_OPERATING_BAND = 35;
+	LAST_LTE_OPERATING_BAND = 74;
+}
+
+enum rp_device_communication {
+	USB_HI_SPEED = 0;
+	USB_SUPER_SPEED = 1;
+	UNKNOWN_DEVICE_COMMUNICATION = 2;
+}
+
+message rp_frequency_path {
+	int64 low_freq = 1;
+	int64 high_freq = 2;
+}
+
+message rp_device_info {
+	string serial = 1;
+	rp_device_communication device_communication = 2;
+	int64 frequency_correction_calibration_date = 3;
+	int64 rf_calibration_date = 4;
+	repeated rp_frequency_path frequency_paths = 5;
+	// TODO - expose license.
+}
+
+message rp_gps {
+	string serial = 1;
+	bool lock = 2;
+	int64 coordinated_universal_time = 3;
+	int32 visible_satellites = 4;
+	int32 tracking_satellites = 5;
+	double latitude = 6;
+	double longitude = 7;
+	int32 speed = 8;
+	int64 raw_status = 9;
+}
+
+message rp_base {
+	string serial = 1;
+	int64 collection_round = 2;
+	int64 carrier_frequency = 3;
+	int32 carrier_bandwidth = 4;
+	double carrier_signal_level = 5;
+	int64 time = 6;
+	int32 status_flags = 7;
+}
+
+message rp_plmn {
+	string mcc = 1;
+	string mnc = 2;
+}
+
+message rp_raw_layer_3 {
+	bytes bytes = 1;
+	int32 unused_bits = 2;
+}
+
+enum rp_band_indicator_type {
+	dcs_1800_was_used = 0;
+	pcs_1900_was_used = 1;
+	unknown_band_was_used = 2;
+}
+
+enum rp_duplex_type {
+	fdd = 0;
+	tdd = 1;
+}
+
+enum rp_utran_bandwidth_type {
+	option allow_alias = true;
+	utran_3_84_mcps = 0;
+	utran_1_24_mcps = 1;
+	utran_2_mcps = 2;
+	utran_3_mcps = 3;
+	utran_4_mcps = 4;
+	utran_5_mcps = 5;
+	utran_6_mcps = 6;
+	utran_7_mcps = 7;
+	utran_default_mcps = 0;
+}
+
+message rp_gsm_utran_neighbor {
+	rp_duplex_type duplexing = 1;
+	int32 arfcn = 2;
+	rp_utran_bandwidth_type bandwidth = 3;
+	repeated int32 scrambling_codes = 4 [packed=true] ;
+}
+
+
+enum rp_eutran_bandwidth_type {
+	num_resource_blocks_6 = 0;
+	num_resource_blocks_15 = 1;
+	num_resource_blocks_25 = 2;
+	num_resource_blocks_50 = 3;
+	num_resource_blocks_75 = 4;
+	num_resource_blocks_100 = 5;
+}
+
+message rp_pcid_group {
+	repeated int32 pcids = 1 [packed=true];
+}
+
+message rp_gsm_eutran_neighbor {
+	int32 earfcn = 1;
+	rp_eutran_bandwidth_type bandwidth = 2;
+	int32 priority = 3;
+	int32 threshold_high_db = 4;
+	int32 threshold_low_db = 5;
+	int32 qrxlevmin_db = 6;
+	rp_pcid_group pcids_allowed = 7;
+	rp_pcid_group pcids_not_allowed = 8;
+	repeated rp_pcid_group pcids_same_tracking_area = 9;
+	repeated rp_pcid_group pcids_different_tracking_area = 10;
+}
+
+message rp_gsm_si1 {
+	rp_band_indicator_type band_indicator = 2;
+}
+
+message rp_gsm_si2 {
+	repeated int32 bcch_neighbors = 2 [packed=true];
+	bool extension_indication = 3;
+	int32 bcch_allocation_indication = 4;
+}
+
+message rp_gsm_si2_bis {
+	repeated int32 extended_bcch_neighbors = 2 [packed=true];
+	bool extension_indication = 3;
+	int32 bcch_allocation_indication = 4;
+	int32 rest_octet_index = 5;
+	int32 rest_octet_count = 6;
+}
+
+message rp_gsm_si2_ter {
+	repeated int32 extended_bcch_neighbors = 2 [packed=true];
+	int32 gsm_bcch_allocation_indication = 3;
+	int32 bcch_neighbors_multiband_reporting = 4;
+	repeated rp_gsm_utran_neighbor utran_neighbors = 5;
+	int32 rest_octet_index = 6;
+	int32 rest_octet_count = 7;
+}
+
+message rp_gsm_si2_quater {
+	int32 gsm_bcch_allocation_indication = 2;
+	int32 p3g_bcch_allocation_indication = 3;
+	int32 utran_neighbor_cell_index_start_3g = 4;
+	int32 utran_neighbor_cell_absolute_index_start_emr = 5;
+	repeated rp_gsm_utran_neighbor utran_neighbors = 6;
+	repeated rp_gsm_eutran_neighbor eutran_neighbors = 7;
+	int32 rest_octet_index = 8;
+	int32 rest_octet_count = 9;
+}
+
+message rp_gsm_selection_parameters {
+	int32 cbq = 1;
+	int32 cell_reselect_offset_db = 2; // actual range = 0-63 (0 = ; 2 = ; 4 = ;... = ;126db)
+	int32 temporary_offset_db = 3; // actual range = 0-7 (0 = ; 10 = ; 20 = ;... = ;60db = ; infinity)
+	int32 penalty_time_seconds = 4; // actual range = 0-31 (20 = ; 40 = ; 60 = ;... = ;620 seconds)
+	bool subtract_reselect_cell_offset_ignore_temp_offset = 5;
+	bool apply_infinity_offset = 6;
+}
+
+message rp_gsm_si3 {
+	rp_plmn plmn = 2;
+	int32 location_area_code = 3;
+	int32 cell_id = 4;
+	int32 cell_reselect_hysteresis_db = 5;
+	rp_gsm_selection_parameters selection_parameters = 6;
+	int32 bs_ag_blks_res = 7;
+	bool is_2ter_present = 8;
+	bool is_2quater_present = 9;
+}
+
+message rp_gsm_si4 {
+	rp_plmn plmn = 2;
+	int32 location_area_code = 3;
+	int32 cell_id = 4;
+	int32 cell_reselect_hysteresis_db = 5;
+	rp_gsm_selection_parameters selection_parameters = 6;
+	bool is_cbch_present = 7;
+	bool have_additional_param_in_si7_si8 = 8;
+}
+
+message rp_gsm_layer_3 {
+	repeated rp_raw_layer_3 raw_layer_3 = 1;
+	rp_gsm_si1 si1 = 2;
+	rp_gsm_si2 si2 = 3;
+	rp_gsm_si2_bis si2_bis = 4;
+	rp_gsm_si2_ter si2_ter = 5;
+	rp_gsm_si2_quater si2_quater = 6;
+	rp_gsm_si3 si3 = 7;
+	rp_gsm_si4 si4 = 8;
+}
+
+message rp_gsm {
+	rp_base base = 1;
+	int32 arfcn = 2;
+	rp_operating_band operating_band = 3;
+	int32 bsic = 4;
+	int32 tdma_frame_number = 5;
+	double bcch_signal_level = 6;
+	double ctoi = 7;
+	rp_gsm_layer_3 layer_3 = 8;
+}
+
+message rp_gsm_update {
+	rp_base base = 1;
+	repeated rp_gsm gsm = 2;
+}
+
+
+message rp_wcdma_utran_neighbor {
+	int32 uarfcn = 1;
+	int32 cpich = 2;
+}
+
+message rp_wcdma_gsm_neighbor {
+	int32 bsic = 1;
+	rp_band_indicator_type band_indicator = 2;
+	int32 arfcn = 3;
+	int32 qrx_lev_min = 4;
+}
+
+message rp_wcdma_mib {
+	rp_plmn plmn = 2;
+	repeated rp_plmn multiple_plmns = 3;
+}
+
+message rp_wcdma_sib1 {
+	int32 lac = 2;
+}
+
+message rp_wcdma_sib3 {
+	int32 cid = 2;
+}
+
+message rp_wcdma_sib4 {
+	int32 cid = 2;
+}
+
+message rp_wcdma_sib11 {
+	repeated int32 utran_intra_neighbor_cpichs = 2 [packed=true];
+	repeated rp_wcdma_utran_neighbor utran_inter_neighbors = 3;
+	repeated rp_wcdma_gsm_neighbor gsm_inter_neighbors = 4;
+}
+
+message rp_wcdma_sib11_bis {
+	repeated int32 utran_intra_neighbor_cpichs = 2 [packed=true];
+	repeated rp_wcdma_utran_neighbor utran_inter_neighbors = 3;
+	repeated rp_wcdma_gsm_neighbor gsm_inter_neighbors = 4;
+}
+
+message rp_wcdma_layer_3 {
+	repeated rp_raw_layer_3 raw_layer_3 = 1;
+	rp_wcdma_mib mib = 2;
+	rp_wcdma_sib1 sib1 = 3;
+	rp_wcdma_sib3 sib3 = 4;
+	rp_wcdma_sib4 sib4 = 5;
+	rp_wcdma_sib11 sib11 = 6;
+	rp_wcdma_sib11_bis sib11_bis = 7;
+}
+
+message rp_wcdma {
+	rp_base base = 1;
+	int32 uarfcn = 2;
+	rp_operating_band operating_band = 3;
+	int32 cpich = 4;
+	double ecio = 5;
+	double rscp = 6;
+	rp_wcdma_layer_3 layer_3 = 7;
+}
+
+message rp_wcdma_update {
+	rp_base base = 1;
+	repeated rp_wcdma wcdma  = 2;
+}
+
+
+enum rp_lte_sib_type {
+	LTE_SIB1 = 0;
+	LTE_SIB2 = 1;
+	LTE_SIB3 = 2;
+	LTE_SIB4 = 3;
+	LTE_SIB5 = 4;
+	LTE_SIB6 = 5;
+	LTE_SIB7 = 6;
+	LTE_SIB8 = 7;
+	LTE_SIB9 = 8;
+	LTE_SIB10 = 9;
+	LTE_SIB11 = 10;
+	LTE_SIB12_V920 = 11;
+	LTE_SIB13_V920 = 12;
+	LTE_SIB14_V1130 = 13;
+	LTE_SIB15_V1130 = 14;
+	LTE_SIB16_V1130 = 15;
+	LTE_SPARE2 = 16;
+	LTE_SPARE1 = 17;
+} 
+
+message rp_lte_scheduling_info {
+	int32 periodicity_in_frames = 1;
+	repeated rp_lte_sib_type sibs = 3;
+}
+
+message rp_lte_sib1 {
+	repeated rp_plmn multiple_plmns = 2;
+	int32 tac = 3;
+	int32 cid = 4;
+	repeated rp_lte_scheduling_info scheduling_info = 5;
+	int32 si_window_length_ms = 6;
+}
+
+message rp_lte_cell_reselection_serving_freq_info {
+	int32 s_non_intra_search = 1;
+	int32 threshold_serving_low = 2;
+	int32 cell_reselection_priority = 3;
+}
+
+message rp_lte_s_search_v920 {
+	int32 p = 1; 
+	int32 q = 2; 
+}
+
+message rp_lte_sib3 {
+	rp_lte_cell_reselection_serving_freq_info cell_reselection_serving_freq_info = 2;
+	int32 intra_freq_cell_reselection_info_s_intra_search = 3;
+	rp_lte_s_search_v920 s_intra_search_v920 = 4;
+	rp_lte_s_search_v920 s_non_intra_search_v920 = 5;
+	int32 threshold_serving_low_q = 6;
+}
+
+message rp_lte_physical_cellid_range {
+	int32 start = 1;
+	int32 range = 2;
+}
+
+message rp_lte_neighbor_cell {
+	int32 physical_cell_id = 1;
+	int32 q_offset_cell = 2;
+}
+
+message rp_lte_sib4 {
+	repeated rp_lte_neighbor_cell intra_freq_neighbor_cell_list = 2;
+	repeated rp_lte_physical_cellid_range intra_freq_black_cell_list = 3;
+	rp_lte_physical_cellid_range csg_physical_cellid_range = 4;
+}
+
+message rp_lte_inter_freq_carrier_freq_info {
+	int32 downlink_arfcn_value_eutra = 1;
+	int32 q_rx_lev_min = 2;
+	int32 q_offset_freq = 3;
+	int32 allowed_measurement_bandwidth = 4;
+	bool presence_antenna_port_1 = 5;
+	int32 threshold_x_high = 6;
+	int32 threshold_x_low = 7;
+	int32 threshold_x_high_q_r9 = 8;
+	int32 threshold_x_low_q_r9 = 9;
+	int32 cell_reselection_priority = 10;
+	repeated rp_lte_neighbor_cell inter_freq_neighbor_cell_list = 11;
+	repeated rp_lte_physical_cellid_range inter_freq_black_cell_list = 12;
+}
+
+message rp_lte_sib5 {
+	repeated rp_lte_inter_freq_carrier_freq_info inter_freq_carrier_info_list = 2;
+}
+
+message rp_lte_carrier_freq_utra {
+	int32 arfcn_value_utra = 1;
+	int32 threshold_x_low = 2;
+	int32 threshold_x_high = 3;
+	int32 threshold_x_low_q_r9 = 4;
+	int32 threshold_x_high_q_r9 = 5;
+	int32 cell_reselection_priority = 6;
+}
+
+message rp_lte_sib6 {
+	repeated rp_lte_carrier_freq_utra carrier_freq_list_utra_fdd = 2;
+	repeated rp_lte_carrier_freq_utra carrier_freq_list_utra_tdd = 3;
+}
+
+message rp_lte_carrier_freqs_geran{
+	rp_band_indicator_type band_indicator = 1;
+	repeated int32 arfcns = 2 [packed=true];
+}
+
+message rp_lte_geran_common_info {
+	int32 cell_reselection_priority = 1;
+	int32 threshold_x_high = 2;
+	int32 threshold_x_low = 3;
+}
+
+message rp_lte_carrier_freqs_info_geran {
+	rp_lte_carrier_freqs_geran carrier_freqs = 1;
+	rp_lte_geran_common_info common_info = 2;
+}
+
+message rp_lte_sib7 {
+	repeated rp_lte_carrier_freqs_info_geran carrier_freqs_info_list_geran = 2;
+}
+
+message rp_lte_neighbor_cells_per_band_class_cdma_2000 {
+	int32 arfcn_value_cdma_2000 = 1;
+	repeated int32 physical_cell_ids = 2 [packed=true];
+}
+
+enum rp_lte_band_class_cdma_2000_type {
+	bc0 = 0;
+	bc1 = 1;
+	bc2 = 2;
+	bc3 = 3;
+	bc4 = 4;
+	bc5 = 5;
+	bc6 = 6;
+	bc7 = 7;
+	bc8 = 8;
+	bc9 = 9;
+	bc10 = 10;
+	bc11 = 11;
+	bc12 = 12;
+	bc13 = 13;
+	bc14 = 14;
+	bc15 = 15;
+	bc16 = 16;
+	bc17 = 17;
+	bc18_v9a0 = 18;
+	bc19_v9a0 = 19;
+	bc20_v9a0 = 20;
+	bc21_v9a0 = 21;
+	spare10 = 22;
+	spare9 = 23;
+	spare8 = 24;
+	spare7 = 25;
+	spare6 = 26;
+	spare5 = 27;
+	spare4 = 28;
+	spare3 = 29;
+	spare2 = 30;
+	spare1 = 31;
+}
+
+message rp_lte_neighbor_cell_cdma_2000{
+	rp_lte_band_class_cdma_2000_type band = 1;
+	repeated rp_lte_neighbor_cells_per_band_class_cdma_2000 neighbor_cells_per_freq_list = 2;
+}
+
+message rp_lte_cell_reselection_parameters_cmda_2000 {
+	repeated rp_lte_neighbor_cell_cdma_2000 neighbor_cell_list = 1;
+}
+
+message rp_lte_sib8 {
+	rp_lte_cell_reselection_parameters_cmda_2000 parameters_hrpd = 2;
+	rp_lte_cell_reselection_parameters_cmda_2000 parameters_1xrtt = 3;
+}
+
+message rp_lte_layer_3 {
+	repeated rp_raw_layer_3 raw_layer_3 = 1;
+	rp_lte_sib1 sib1 = 2;
+	rp_lte_sib3 sib3 = 4;
+	rp_lte_sib4 sib4 = 5;
+	rp_lte_sib5 sib5 = 6;
+	rp_lte_sib6 sib6 = 7;
+	rp_lte_sib7 sib7 = 8;
+	rp_lte_sib8 sib8 = 9;
+}
+
+message rp_lte {
+	rp_base base = 1;
+	int32 earfcn = 2;
+	rp_operating_band operating_band = 3;
+	int32 physical_cell_id = 4;
+	double rsrp = 5;
+	double rsrq = 6;
+	double rssi = 7;
+	int32 psch_id = 8;
+	double psch_quality = 9;
+	int32 ssch_id = 10;
+	double ssch_quality = 11;
+	double sync_quality = 12;
+	int32 cyclic_prefix = 13;
+	int32 num_antenna_ports = 14;
+	int32 downlink_bandwidth = 15;
+	int32 frame_number = 16;
+	rp_lte_layer_3 layer_3 = 17;
+}
+
+message rp_lte_update {
+	rp_base base = 1;
+	repeated rp_lte lte = 2;
+}
+
+enum rp_sample_format_type {
+	LITTLE_ENDIAN_FLOAT_REAL_IMAGINARY = 0;
+}
+
+message rp_raw_data {
+	rp_base base = 1;
+	double power_adjustment = 2;
+	rp_sample_format_type sample_format = 3;
+	int64 num_samples = 4;
+	repeated float samples = 5 [packed=true];
+}

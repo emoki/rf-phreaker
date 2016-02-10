@@ -409,7 +409,7 @@ inline rf_phreaker::operating_band to_operating_band(rp_operating_band t) {
 	}
 }
 
-inline rp_band_indicator to_api_band_indicator(layer_3_information::band_indicator_type t) {
+inline rp_band_indicator_type to_api_band_indicator(layer_3_information::band_indicator_type t) {
 	switch(t) {
 	case layer_3_information::dcs_1800_was_used:
 		return dcs_1800_was_used;

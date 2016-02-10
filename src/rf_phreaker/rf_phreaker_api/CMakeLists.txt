@@ -16,6 +16,7 @@ set (rf_phreaker_api_SRCS
 	rf_phreaker_utility.h
 	rf_phreaker_conversion.h
 	rf_phreaker_handler.h
+	rf_phreaker_handler_protobuf.h
 	rf_phreaker_impl.cpp
 	rf_phreaker_impl.h
 	measurement_io.h
@@ -29,3 +30,4 @@ add_library (rf_phreaker_api SHARED ${rf_phreaker_api_SRCS})
 
 target_link_libraries (rf_phreaker_api processing)
 target_link_libraries (rf_phreaker_api qt_specific)
+target_link_libraries (rf_phreaker_api protobuf_specific)

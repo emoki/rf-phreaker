@@ -6,17 +6,17 @@ option(protobuf_ABSOLUTE_TEST_PLUGIN_PATH
   "Using absolute test_plugin path in tests" ON)
 
 include_directories(
-  ${protobuf_source_dir}/gmock
-  ${protobuf_source_dir}/gmock/gtest
-  ${protobuf_source_dir}/gmock/gtest/include
-  ${protobuf_source_dir}/gmock/include
+  "${PROJECT_SOURCE_DIR}/third_party/gmock
+  "${PROJECT_SOURCE_DIR}/third_party/gmock/gtest
+  "${PROJECT_SOURCE_DIR}/third_party/gmock/gtest/include
+  "${PROJECT_SOURCE_DIR}/third_party/gmock/include
 )
 
 add_library(gmock STATIC
-  ${protobuf_source_dir}/gmock/src/gmock-all.cc
-  ${protobuf_source_dir}/gmock/gtest/src/gtest-all.cc
+  "${PROJECT_SOURCE_DIR}/third_party/gmock/src/gmock-all.cc
+  "${PROJECT_SOURCE_DIR}/third_party/gmock/gtest/src/gtest-all.cc
 )
-add_library(gmock_main STATIC ${protobuf_source_dir}/gmock/src/gmock_main.cc)
+add_library(gmock_main STATIC "${PROJECT_SOURCE_DIR}/third_party/gmock/src/gmock_main.cc)
 target_link_libraries(gmock_main gmock)
 
 set(lite_test_protos
