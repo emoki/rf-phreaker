@@ -67,11 +67,18 @@ ENDIF()
    #MESSAGE("  g3logger files: [${SRC_FILES}]")
    add_library(g3logger ${SRC_FILES})
    set_target_properties(g3logger PROPERTIES LINKER_LANGUAGE CXX)
-   add_library(g3logger_shared SHARED ${SRC_FILES})
-   set_target_properties(g3logger_shared PROPERTIES LINKER_LANGUAGE CXX)
-  
-   SET(G3LOG_SHARED_LIBRARY g3logger_shared)
    SET(G3LOG_LIBRARY g3logger)
 
+   IF(NOT(CMAKE_VERSION LESS 3.4) AND MSVC)
+	  MESSAGE("exporting all symbols!")
+      set(CMAKE_WINDOWS_EXPORT_ALL_SYMBOLS ON)
+   ENDIF()
+   add_library(g3logger_shared SHARED ${SRC_FILES})
+   set_target_properties(g3logger_shared PROPERTIES LINKER_LANGUAGE CXX)
+   IF(APPLE)
+      set_target_properties(g3logger_shared PROPERTIES MACOSX_RPATH TRUE)
+   ENDIF(APPLE)
+   target_link_libraries(g3logger_shared ${PLATFORM_LINK_LIBRIES})   
 
+   SET(G3LOG_SHARED_LIBRARY g3logger_shared)
 

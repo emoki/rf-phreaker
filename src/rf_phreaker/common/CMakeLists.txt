@@ -51,7 +51,7 @@ set (common_SRCS
 add_library (common STATIC ${common_SRCS})
 target_link_libraries (common ${TBB_LIBRARY})
 target_link_libraries (common ipp_custom)
-target_link_libraries (common g3logger)
+target_link_libraries (common g3logger_shared)
 target_link_libraries (common hash_utility)
 
 # For some reason, cmake wasn't adding boost libraries to this project
