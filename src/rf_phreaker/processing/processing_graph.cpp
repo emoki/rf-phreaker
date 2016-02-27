@@ -16,8 +16,10 @@
 using namespace rf_phreaker::scanner;
 using namespace rf_phreaker::processing;
 
-processing_graph::processing_graph(void)
-{}
+processing_graph::processing_graph(void) {
+	is_cancelled_ = false;
+	is_initialized_ = false;
+}
 
 processing_graph::~processing_graph(void) {}
 
@@ -25,13 +27,13 @@ void processing_graph::start(scanner_controller_interface *sc, data_output_async
 {
 	std::lock_guard<std::recursive_mutex> lock(mutex_);
 
-	is_initialized_ = false;
-	is_cancelled_ = false;
-
 	if(thread_ && thread_->joinable()) {
 		cancel();
 		wait();
 	}
+
+	is_cancelled_ = false;
+	is_initialized_ = false;
 
 	thread_.reset(new std::thread([this](scanner_controller_interface *sc, data_output_async *out, const collection_info_containers &collection_info, const rf_phreaker::settings &config) {
 		try {

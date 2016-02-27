@@ -12,19 +12,21 @@
 using namespace rf_phreaker::scanner;
 using namespace rf_phreaker::processing;
 
-frequency_correction_graph::frequency_correction_graph(void) {}
+frequency_correction_graph::frequency_correction_graph(void) {
+	is_initialized_ = false;
+}
 
 frequency_correction_graph::~frequency_correction_graph(void) {}
 
 void frequency_correction_graph::start(scanner_controller_interface *sc, data_output_async *out, const collection_info_containers &collection_info, const rf_phreaker::settings &config) {
 	std::lock_guard<std::recursive_mutex> lock(mutex_);
 
-	is_initialized_ = false;
-
 	if(thread_ && thread_->joinable()) {
 		cancel();
 		wait();
 	}
+
+	is_initialized_ = false;
 
 	thread_.reset(new std::thread([this](scanner_controller_interface *sc, data_output_async *out, const collection_info_containers &collection_info, const rf_phreaker::settings &config) {
 		try {

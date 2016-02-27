@@ -15,19 +15,21 @@ namespace rf_phreaker { namespace processing {
 class gps_graph
 {
 public:
-	gps_graph() {}
+	gps_graph() {
+		is_initialized_ = false;
+	}
 
 	~gps_graph() {}
 
 	void start(rf_phreaker::scanner::scanner_controller_interface *sc, data_output_async *out, const settings &config) {
 		std::lock_guard<std::recursive_mutex> lock(mutex_);
 
-		is_initialized_ = false;
-
 		if(thread_ && thread_->joinable()) {
 			cancel();
 			wait();
 		}
+
+		is_initialized_ = false;
 
 		thread_.reset(new std::thread([this](rf_phreaker::scanner::scanner_controller_interface *sc, data_output_async *out, const settings &config) {
 			try {
