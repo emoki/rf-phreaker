@@ -695,7 +695,7 @@ long cappeen_impl::start_frequency_correction(uint32_t *wcdma_frequencies, int n
 		containers.push_back(collection_info_container(UMTS_LAYER_3_DECODE, false));
 
 		for(int i = 0; i < num_channels; ++i)
-			containers[0].adjust(add_collection_info(umts_layer_3_collection_info(wcdma_frequencies[i])));
+			containers[0].adjust(add_collection_info(umts_layer_3_collection_info(wcdma_frequencies[i], rf_phreaker::OPERATING_BAND_UNKNOWN, true)));
 
 		if(num_channels <= 0)
 			throw cappeen_api_error("Please input at least one WCDMA frequency to start frequency correction.", GENERAL_ERROR);
