@@ -27,7 +27,7 @@ public:
 	void operator()(gsm_info info, gsm_output_and_feedback_node::output_ports_type &out) {
 		auto meas = *info.measurement_package_.measurement_info_.get();
 		if(helper_.has_sweep_restarted(meas)) {
-			added_freqs_.clear();
+			freq_tracker_.clear();
 			freq_history_.clear();
 		}
 
@@ -44,52 +44,20 @@ public:
 		}
 
 		for(auto &i : info.processed_data_) {
-			if(do_we_add_freq(i.center_frequency_)) {
+			if(freq_tracker_.do_we_add_freq(i.center_frequency_)) {
 				// Add the freq to the layer_3_decoder making sure that we use a center freq that does not represent a true GSM channel.
-				auto freq = calculate_closest_freq(i.center_frequency_, meas.get_gsm_band());
-				added_freqs_.insert(freq);
+				auto freq = freq_tracker_.calculate_closest_freq(i.center_frequency_, meas.get_gsm_band());
+				freq_tracker_.insert(freq);
 				std::get<0>(out).try_put(add_collection_info(gsm_layer_3_collection_info(freq, meas.get_gsm_band(), true)));
 			}
 		}
 		std::get<1>(out).try_put(tbb::flow::continue_msg());
 	}
 
-private:
-	bool do_we_add_freq(frequency_type freq) {
-		bool add = true;
-		if(added_freqs_.find(freq) != added_freqs_.end())
-			add = false;
-		else {
-			auto lesser = greatest_less(added_freqs_, freq);
-			auto greater = added_freqs_.upper_bound(freq);
-			if(lesser != added_freqs_.end() && freq - *lesser <= low_bandwidth_range_)
-				add = false;
-			else if(greater != added_freqs_.end() && *greater - freq <= high_bandwidth_range_)
-				add = false;
-		}
-		return add;
-	}
-	frequency_type calculate_closest_freq(frequency_type f, operating_band b) {
-		auto end_range = range_specifier_.get_band_freq_range(b);
-		auto new_freq = f + low_bandwidth_range_;
-		if(new_freq > end_range.high_freq_hz_)
-			new_freq = end_range.high_freq_hz_ - high_bandwidth_range_;
-
-		if(new_freq % khz(200) == 0)
-			new_freq -= khz(100);
-
-		return new_freq;
-	}
-	
+private:	
 	data_output_async *io_;
-
 	processing_and_feedback_helper helper_;
-
-	std::set<frequency_type> added_freqs_;
-	static const bandwidth_type low_bandwidth_range_ = GSM_LOW_BANDWIDTH_HZ;
-	static const bandwidth_type high_bandwidth_range_ = GSM_HIGH_BANDWIDTH_HZ;
-	operating_band_range_specifier range_specifier_;
-
+	gsm_frequency_tracker freq_tracker_;
 	boost::circular_buffer<frequency_type> freq_history_;
 	static const int freq_history_size_ = 60;
 };

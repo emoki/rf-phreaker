@@ -5,7 +5,8 @@
 #include "rf_phreaker/common/common_utility.h"
 #include "rf_phreaker/lte_analysis/lte_types.h"
 #include "rf_phreaker/lte_analysis/lte_measurement.h"
-
+#include "rf_phreaker/gsm_analysis/gsm_defs.h"
+#include "rf_phreaker/common/operating_band_range_specifier.h"
 
 namespace rf_phreaker { namespace processing {
 
@@ -186,6 +187,49 @@ private:
 	};
 
 	std::map<frequency_type, lte_watch> strongest_measurements_;
+};
+
+class gsm_frequency_tracker {
+public:
+	void clear() {
+		added_freqs_.clear();
+	}
+
+	void insert(frequency_type freq) {
+		added_freqs_.insert(freq);
+	}
+
+	bool do_we_add_freq(frequency_type freq) {
+		bool add = true;
+		if(added_freqs_.find(freq) != added_freqs_.end())
+			add = false;
+		else {
+			auto lesser = greatest_less(added_freqs_, freq);
+			auto greater = added_freqs_.upper_bound(freq);
+			if(lesser != added_freqs_.end() && freq - *lesser <= low_bandwidth_range_)
+				add = false;
+			else if(greater != added_freqs_.end() && *greater - freq <= high_bandwidth_range_)
+				add = false;
+		}
+		return add;
+	}
+	frequency_type calculate_closest_freq(frequency_type f, operating_band b) {
+		auto end_range = range_specifier_.get_band_freq_range(b);
+		auto new_freq = f + low_bandwidth_range_;
+		if(new_freq > end_range.high_freq_hz_)
+			new_freq = end_range.high_freq_hz_ - high_bandwidth_range_;
+
+		if(new_freq % khz(200) == 0)
+			new_freq -= khz(100);
+
+		return new_freq;
+	}
+
+private:
+	std::set<frequency_type> added_freqs_;
+	static const bandwidth_type low_bandwidth_range_ = GSM_LOW_BANDWIDTH_HZ;
+	static const bandwidth_type high_bandwidth_range_ = GSM_HIGH_BANDWIDTH_HZ;
+	operating_band_range_specifier range_specifier_;
 };
 
 }}
