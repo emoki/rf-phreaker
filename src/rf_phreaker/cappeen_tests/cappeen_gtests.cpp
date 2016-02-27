@@ -37,22 +37,29 @@ TEST(Cappeen, TestMain)
 	
 		tech_bands.push_back(GSM_BAND_850);
 		tech_bands.push_back(GSM_BAND_1900);
-		tech_bands.push_back(GSM_BAND_900);
-		tech_bands.push_back(GSM_BAND_1800);
+		//tech_bands.push_back(GSM_BAND_900);
+		//tech_bands.push_back(GSM_BAND_1800);
 
-		tech_bands.push_back(WCDMA_BAND_850);
-		tech_bands.push_back(WCDMA_BAND_1900);
+		//tech_bands.push_back(WCDMA_BAND_850);
+		//tech_bands.push_back(WCDMA_BAND_1900);
 		tech_bands.push_back(WCDMA_BAND_2100);
 		tech_bands.push_back(WCDMA_BAND_900);
 		tech_bands.push_back(WCDMA_BAND_1800);
 		tech_bands.push_back(LTE_BAND_12);
-		tech_bands.push_back(LTE_BAND_5);
-		tech_bands.push_back(LTE_BAND_2);
+		//tech_bands.push_back(LTE_BAND_5);
+		//tech_bands.push_back(LTE_BAND_2);
 		tech_bands.push_back(LTE_BAND_1);
 		info.tech_and_bands_to_sweep_.elements_ = &tech_bands[0];
 		info.tech_and_bands_to_sweep_.num_elements_ = tech_bands.size();
 
-		for(int i = 0; i < 5000000; ++i) {
+		std::vector<band_freq> freq_bands;
+		//freq_bands.push_back({GSM_BAND_1900, khz(1947800)});
+		//freq_bands.push_back({WCDMA_BAND_2100, khz(2152500)});
+		//freq_bands.push_back({LTE_BAND_1, khz(2120000)});
+		info.frequencies_to_scan_.elements_ = freq_bands.data();
+		info.frequencies_to_scan_.num_elements_ = freq_bands.size();
+
+		for(int i = 0; i < 1000; ++i) {
 			auto status = cappeen_open_unit(&serial[0], serial.size());
 			EXPECT_EQ(0, status);
 			if(status == 0) {
@@ -61,9 +68,10 @@ TEST(Cappeen, TestMain)
 
 				out.wait(30*60);
 
-				if(!out.error_occurred_) {
+				if(!out.error_occurred_ && out.hw().state_ == BEAGLE_COLLECTING) {
 					EXPECT_EQ(0, cappeen_stop_collection());
 					EXPECT_EQ(0, cappeen_close_unit(&serial[0], serial.size()));
+
 				}
 				else {
 					do {
@@ -104,7 +112,8 @@ TEST(Cappeen, DISABLED_FreqCorrection) {
 		tech_bands.push_back(WCDMA_BAND_2100);
 		info.tech_and_bands_to_sweep_.elements_ = &tech_bands[0];
 		info.tech_and_bands_to_sweep_.num_elements_ = tech_bands.size();
-	
+		info.frequencies_to_scan_.num_elements_ = 0;
+
 		std::vector<uint32_t> freqs;
 		freqs.push_back(871800000);
 		freqs.push_back(876800000);
@@ -113,7 +122,7 @@ TEST(Cappeen, DISABLED_FreqCorrection) {
 		freqs.push_back(2147500000);
 		freqs.push_back(2152500000);
 
-		for(int i = 0; i < 5000000; ++i) {
+		for(int i = 0; i < 1; ++i) {
 			EXPECT_EQ(0, cappeen_open_unit(&serial[0], serial.size()));
 			
 			//std::cout << "Collect GPS.\n";
@@ -131,7 +140,8 @@ TEST(Cappeen, DISABLED_FreqCorrection) {
 
 			out.wait(5 * 60);
 			
-			EXPECT_EQ(0, cappeen_stop_collection());
+			if(out.hw().state_ == BEAGLE_COLLECTING)
+				EXPECT_EQ(0, cappeen_stop_collection());
 			EXPECT_EQ(0, cappeen_close_unit(&serial[0], serial.size()));
 			EXPECT_EQ(0, cappeen_open_unit(&serial[0], serial.size()));
 			std::this_thread::sleep_for(std::chrono::milliseconds(500));
@@ -152,8 +162,10 @@ TEST(Cappeen, DISABLED_FreqCorrection) {
 
 			out.wait(10 * 60);
 
-			std::cout << "Stopping collection.\n";
-			EXPECT_EQ(0, cappeen_stop_collection());
+			if(out.hw().state_ == BEAGLE_COLLECTING) {
+				std::cout << "Stopping collection.\n";
+				EXPECT_EQ(0, cappeen_stop_collection());
+			}
 
 			EXPECT_EQ(0, cappeen_close_unit(&serial[0], serial.size()));
 			EXPECT_EQ(0, cappeen_open_unit(&serial[0], serial.size()));
@@ -164,7 +176,7 @@ TEST(Cappeen, DISABLED_FreqCorrection) {
 
 			out.wait(125 * 60);
 
-			if(!out.error_occurred_) {
+			if(!out.error_occurred_ && out.hw().state_ == BEAGLE_COLLECTING) {
 				std::cout << "Stopping collection.";
 				EXPECT_EQ(0, cappeen_stop_collection());
 				EXPECT_EQ(0, cappeen_close_unit(&serial[0], serial.size()));
@@ -221,6 +233,7 @@ TEST(Cappeen, DISABLED_FreqNotInCalibration) {
 		tech_bands.push_back(LTE_BAND_12); // operating band[1475.9 - 1495.9 MHZ]
 		info.tech_and_bands_to_sweep_.elements_ = &tech_bands[0];
 		info.tech_and_bands_to_sweep_.num_elements_ = tech_bands.size();
+		info.frequencies_to_scan_.num_elements_ = 0;
 		std::cout << "Starting collection.\n";
 		
 		EXPECT_EQ(FREQNOTWITHINCALIBRATIONLIMITS, cappeen_start_collection(info, false));
@@ -272,6 +285,7 @@ TEST(Cappeen, DISABLED_GeneralLicenseUpdate1) {
 		tech_bands.push_back(WCDMA_BAND_1900);
 		info.tech_and_bands_to_sweep_.elements_ = &tech_bands[0];
 		info.tech_and_bands_to_sweep_.num_elements_ = tech_bands.size();
+		info.frequencies_to_scan_.num_elements_ = 0;
 		std::cout << "Starting collection - FAILURE.\n";
 		EXPECT_EQ(FREQNOTLICENSED, cappeen_start_collection(info, false));
 
@@ -296,7 +310,8 @@ TEST(Cappeen, DISABLED_GeneralLicenseUpdate1) {
 		std::cout << "Starting collection.\n";
 		EXPECT_EQ(0, cappeen_start_collection(info, false));
 		EXPECT_EQ(WRONGBEAGLESTATE, cappeen_input_new_license(serial.c_str(), serial.size(), license_filename.c_str(), license_filename.size()));
-		EXPECT_EQ(0, cappeen_stop_collection());
+		if(out.hw().state_ == BEAGLE_COLLECTING)
+			EXPECT_EQ(0, cappeen_stop_collection());
 		EXPECT_EQ(0, cappeen_close_unit(serial.c_str(), serial.size()));
 		EXPECT_EQ(0, cappeen_clean_up());
 	}
@@ -341,9 +356,11 @@ TEST(Cappeen, DISABLED_GeneralLicenseUpdate2) {
 		tech_bands.push_back(LTE_BAND_8);
 		info.tech_and_bands_to_sweep_.elements_ = &tech_bands[0];
 		info.tech_and_bands_to_sweep_.num_elements_ = tech_bands.size();
+		info.frequencies_to_scan_.num_elements_ = 0;
 		std::cout << "Starting collection.\n";
 		EXPECT_EQ(0, cappeen_start_collection(info, false));
-		EXPECT_EQ(0, cappeen_stop_collection());
+		if(out.hw().state_ == BEAGLE_COLLECTING)
+			EXPECT_EQ(0, cappeen_stop_collection());
 		EXPECT_EQ(0, cappeen_close_unit(serial.c_str(), serial.size()));
 		EXPECT_EQ(0, cappeen_clean_up());
 	}
@@ -390,6 +407,7 @@ TEST(Cappeen, DISABLED_LicenseNetworkScanner) {
 		tech_bands.push_back(LTE_BAND_12);
 		info.tech_and_bands_to_sweep_.elements_ = &tech_bands[0];
 		info.tech_and_bands_to_sweep_.num_elements_ = tech_bands.size();
+		info.frequencies_to_scan_.num_elements_ = 0;
 		std::cout << "Starting collection.\n";
 		EXPECT_EQ(FREQNOTLICENSED, cappeen_start_collection(info, false));
 		EXPECT_EQ(0, cappeen_close_unit(serial.c_str(), serial.size()));
@@ -470,6 +488,7 @@ TEST(Cappeen, LicenseCellAnalysisEverything) {
 		tech_bands.push_back(LTE_BAND_7); // operating band 7 [2620 - 2690 MHZ]
 		info.tech_and_bands_to_sweep_.elements_ = &tech_bands[0];
 		info.tech_and_bands_to_sweep_.num_elements_ = tech_bands.size();
+		info.frequencies_to_scan_.num_elements_ = 0;
 		std::cout << "Starting collection.\n";
 		EXPECT_EQ(0, cappeen_start_collection(info, false));
 		EXPECT_EQ(0, cappeen_close_unit(serial.c_str(), serial.size()));
@@ -506,13 +525,15 @@ TEST(Cappeen, NoClose)
 		tech_bands.push_back(LTE_BAND_1);
 		info.tech_and_bands_to_sweep_.elements_ = &tech_bands[0];
 		info.tech_and_bands_to_sweep_.num_elements_ = tech_bands.size();
+		info.frequencies_to_scan_.num_elements_ = 0;
 
 		EXPECT_EQ(0, cappeen_open_unit(&serial[0], serial.size()));
 		EXPECT_EQ(0, cappeen_start_collection(info, false));
 
 		std::this_thread::sleep_for(std::chrono::seconds(1));
 
-		EXPECT_EQ(0, cappeen_stop_collection());
+		if(out.hw().state_ == BEAGLE_COLLECTING)
+			EXPECT_EQ(0, cappeen_stop_collection());
 	}
 	EXPECT_EQ(0, cappeen_clean_up());
 }
@@ -537,6 +558,7 @@ TEST(Cappeen, NoCloseNoStop)
 		tech_bands.push_back(LTE_BAND_1);
 		info.tech_and_bands_to_sweep_.elements_ = &tech_bands[0];
 		info.tech_and_bands_to_sweep_.num_elements_ = tech_bands.size();
+		info.frequencies_to_scan_.num_elements_ = 0;
 
 		EXPECT_EQ(0, cappeen_open_unit(&serial[0], serial.size()));
 		EXPECT_EQ(0, cappeen_start_collection(info, false));

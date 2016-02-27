@@ -40,7 +40,9 @@ private:
 	
 	void read_settings(bool perform_quick_scan = false);
 	
-	rf_phreaker::processing::collection_info_containers create_collection_info_containers(const beagle_api::collection_info &collection);
+	rf_phreaker::processing::collection_info_containers create_collection_info_containers_for_sweep(const beagle_api::collection_info &collection);
+
+	void create_collection_info_containers_for_scan(const beagle_api::collection_info &collection, rf_phreaker::processing::collection_info_containers &containers);
 
 	void check_licenses(const beagle_api::collection_info &collection);
 

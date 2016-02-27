@@ -158,7 +158,11 @@ protected:
 		}
 	}
 
-	virtual void finished_scanning() { throw processing_error("Finished scanning not supported."); }
+	virtual void finished_scanning() { 
+		graph_->root_task()->cancel_group_execution();
+		delegate_sink::instance().log_message("Collection finished.", processing_error_type, COLLECTION_FINISHED);
+		LOG(LVERBOSE) << "Collection finished.  Stopping root task.";
+	}
 
 	rf_phreaker::scanner::scanner_controller_interface *scanner_interface_;
 
@@ -197,5 +201,6 @@ protected:
 		graph_->root_task()->cancel_group_execution();
 	}
 };
+
 
 }}

@@ -8,6 +8,7 @@
 #include "rf_phreaker/qt_specific/qt_utility.h"
 #include "boost/date_time/posix_time/posix_time.hpp"
 #include "rf_phreaker/processing/scanner_error_tracker.h"
+#include "rf_phreaker/processing/processing_utility.h"
 
 using namespace rf_phreaker;
 using namespace rf_phreaker::cappeen_api;
@@ -473,7 +474,9 @@ long cappeen_impl::start_collection(const beagle_api::collection_info &collectio
 		delegate_->gsm_layer_3_interval_ = config_.output_intervals_.gsm_layer_3_;
 		LOG(LINFO) << "gsm layer 3 output interval: " << delegate_->gsm_layer_3_interval_;
 
-		auto collection_containers = create_collection_info_containers(collection);
+		auto collection_containers = create_collection_info_containers_for_sweep(collection);
+
+		create_collection_info_containers_for_scan(collection, collection_containers);
 
 		if(collection_containers.empty())
 			throw cappeen_api_error("beagle_api::collection_info is empty.", GENERAL_ERROR);
@@ -500,7 +503,7 @@ long cappeen_impl::start_collection(const beagle_api::collection_info &collectio
 	return status;
 }
 
-processing::collection_info_containers cappeen_impl::create_collection_info_containers(const beagle_api::collection_info &collection)
+processing::collection_info_containers cappeen_impl::create_collection_info_containers_for_sweep(const beagle_api::collection_info &collection)
 {
 	using namespace processing;
 
@@ -577,6 +580,82 @@ processing::collection_info_containers cappeen_impl::create_collection_info_cont
 	return containers;
 }
 
+void cappeen_impl::create_collection_info_containers_for_scan(const beagle_api::collection_info &collection, 
+	rf_phreaker::processing::collection_info_containers &containers) {
+	using namespace processing;
+
+	std::vector<std::pair<operating_band, frequency_type>> gsm_freqs;
+	for(uint32_t i = 0, end = collection.frequencies_to_scan_.num_elements_; i < end; ++i) {
+		auto band = convert_band(collection.frequencies_to_scan_.elements_[i].band_);
+		auto freq = collection.frequencies_to_scan_.elements_[i].frequency_;
+
+		LOG(LVERBOSE) << "Adding frequency: " << freq / 1e6 << " mhz" << ", operating band: " << to_string(band) << ".";
+
+		if(band >= FIRST_GSM_OPERATING_BAND && band <= LAST_GSM_OPERATING_BAND) {
+			auto it = std::find_if(containers.begin(), containers.end(), [&](const collection_info_container &c) {
+				return c.has_specifier(GSM_LAYER_3_DECODE);
+			});
+
+			if(it == containers.end()) {
+				containers.push_back(collection_info_container(GSM_LAYER_3_DECODE, false));
+				it = containers.end() - 1;
+			}
+			if(freq % khz(200) == 0)
+				freq += khz(100);
+			gsm_freqs.push_back(std::make_pair(band, freq));
+		}
+		else if(band >= FIRST_UMTS_OPERATING_BAND && band <= LAST_UMTS_OPERATING_BAND) {
+			auto it = std::find_if(containers.begin(), containers.end(), [&](const collection_info_container &c) {
+				return c.has_specifier(UMTS_LAYER_3_DECODE);
+			});
+
+			if(it == containers.end()) {
+				containers.push_back(collection_info_container(UMTS_LAYER_3_DECODE, false));
+				it = containers.end() - 1;
+			}
+			it->adjust(add_collection_info(umts_layer_3_collection_info(freq, band, true)));
+		}
+		else if(band >= FIRST_LTE_OPERATING_BAND && band <= LAST_LTE_OPERATING_BAND) {
+			auto it = std::find_if(containers.begin(), containers.end(), [&](const collection_info_container &c) {
+				return c.has_specifier(LTE_LAYER_3_DECODE);
+			});
+
+			if(it == containers.end()) {
+				containers.push_back(collection_info_container(LTE_LAYER_3_DECODE, false));
+				it = containers.end() - 1;
+			}
+			it->adjust(add_collection_info(lte_layer_3_collection_info(freq, lte_layer_3_collection_info::sampling_rate__, 
+				lte_layer_3_collection_info::bandwidth__, band, true)));
+		}
+	}
+
+	// If gsm freqs were added add those that cover the most
+	if(gsm_freqs.size()) {
+		std::sort(std::begin(gsm_freqs), std::end(gsm_freqs), [&](const std::pair<operating_band, frequency_type> &a, const std::pair<operating_band, frequency_type> &b) {
+			if(a.first == b.first) return a.second < b.second;
+			else return a.first < b.first;
+		});
+
+		gsm_frequency_tracker tracker;
+		std::vector<std::pair<operating_band, frequency_type>> new_gsm;
+		auto i = gsm_freqs.begin();
+		while(i != gsm_freqs.end()) {
+			if(tracker.do_we_add_freq(i->second)) {
+				auto freq = tracker.calculate_closest_freq(i->second, i->first);
+				new_gsm.push_back(std::make_pair(i->first, freq));
+				tracker.insert(freq);
+			}
+			++i;
+		}
+
+		auto it = std::find_if(containers.begin(), containers.end(), [&](const collection_info_container &c) {
+			return c.has_specifier(GSM_LAYER_3_DECODE);
+		});
+		for(auto &j : new_gsm)
+			it->adjust(add_collection_info(gsm_layer_3_collection_info(j.second, j.first, true)));
+	}
+}
+
 void cappeen_impl::check_bands(const processing::collection_info_containers &containers) {
 	bool invalid_bands = false;
 	std::set<TECHNOLOGIES_AND_BANDS> bad_band;
@@ -636,7 +715,7 @@ long cappeen_impl::start_frequency_correction(const beagle_api::collection_info 
 		config_.umts_layer_3_collection_.collection_time_ = milli_to_nano(60);
 		processing::initialize_collection_info_defaults(config_);
 
-		auto collection_containers = create_collection_info_containers(collection);
+		auto collection_containers = create_collection_info_containers_for_sweep(collection);
 
 		collection_containers.erase(std::remove_if(collection_containers.begin(), collection_containers.end(), [&](const processing::collection_info_container &c) {
 			return c.has_specifier(LTE_LAYER_3_DECODE) || c.has_specifier(LTE_SWEEP);

@@ -189,6 +189,19 @@ namespace beagle_api
 		uint32_t num_elements_;
 		TECHNOLOGIES_AND_BANDS *elements_;
 	};
+	
+	struct band_freq {
+		TECHNOLOGIES_AND_BANDS band_;
+		frequency_type frequency_;
+	};
+
+	/**
+		Contains multiple band/freqs.
+	*/
+	struct technology_band_freq_group {
+		uint32_t num_elements_;
+		band_freq *elements_;
+	};
 
 	/**
 	Can represent GSM/UMTS/LTE channels.
@@ -548,6 +561,9 @@ namespace beagle_api
 	struct collection_info {
 		/// Specifies the technologies and bands to sweep during collection.
 		technologies_and_band_group tech_and_bands_to_sweep_;
+
+		/// Specifies the technologies and freqs to scan during collection.
+		technology_band_freq_group frequencies_to_scan_;
 	};
 
 	/**

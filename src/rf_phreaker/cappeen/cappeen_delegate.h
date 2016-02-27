@@ -498,6 +498,9 @@ public:
 				change_beagle_state(beagle_api::BEAGLE_READY);
 				if(gps_graph_) gps_graph_->enable_1pps_calibration();
 				break;
+			case COLLECTION_FINISHED:
+				change_beagle_state(beagle_api::BEAGLE_READY);
+				break;
 			default:;
 			}
 		}
