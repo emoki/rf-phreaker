@@ -90,6 +90,54 @@ TEST(Cappeen, TestMain)
 	EXPECT_EQ(0, cappeen_clean_up());
 }
 
+TEST(Cappeen, FreqCorrectionTwice) {
+	using namespace rf_phreaker::cappeen_api;
+	output out;
+	out.output_ = false;
+	EXPECT_EQ(0, cappeen_initialize(&out));
+
+	std::array<char, 1024 * 10> serials;
+	EXPECT_EQ(0, cappeen_list_available_units(&serials[0], serials.size()));
+
+	std::string serial(&serials[0]);
+	serial = serial.substr(0, serial.find_first_of(';'));
+
+	if(!serial.empty()) {
+		collection_info info;
+		std::vector<TECHNOLOGIES_AND_BANDS> tech_bands;
+		info.tech_and_bands_to_sweep_.elements_ = 0;
+		info.tech_and_bands_to_sweep_.num_elements_ = 0;;
+		tech_bands.push_back(WCDMA_BAND_2100);
+		info.tech_and_bands_to_sweep_.elements_ = &tech_bands[0];
+		info.tech_and_bands_to_sweep_.num_elements_ = tech_bands.size();
+		info.frequencies_to_scan_.num_elements_ = 0;
+
+		EXPECT_EQ(0, cappeen_open_unit(&serial[0], serial.size()));
+	
+		for(int i = 0; i < 3; ++i) {
+			std::cout << "Starting frequency correction using sweep.\n";
+			EXPECT_EQ(0, cappeen_start_frequency_correction_using_sweep(info));
+			out.wait(10 * 60);
+			if(!out.error_occurred_) {
+				std::cout << "Finished freq correction." << std::endl;
+			}
+			else {
+				do {
+					std::cout << "Error occurred." << std::endl;
+					cappeen_close_unit(&serial[0], serial.size());
+					EXPECT_EQ(0, cappeen_list_available_units(&serials[0], serials.size()));
+					serial = &serials[0];
+					serial = serial.substr(0, serial.find_first_of(';'));
+					std::this_thread::sleep_for(std::chrono::seconds(1));
+				}
+				while(serial.empty());
+				out.reinit();
+			}
+		}
+	}
+	EXPECT_EQ(0, cappeen_clean_up());
+}
+
 TEST(Cappeen, DISABLED_FreqCorrection) {
 	using namespace rf_phreaker::cappeen_api;
 	output out;
