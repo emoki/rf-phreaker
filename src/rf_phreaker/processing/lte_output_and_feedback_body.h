@@ -206,6 +206,9 @@ private:
 
 	bool do_we_remove_collection_info(lte_info info)
 	{
+		if(!info.measurement_package_.can_remove_)
+			return false;
+
 		const auto freq = info.measurement_package_.measurement_info_->frequency();
 		const auto cr = info.measurement_package_.measurement_info_->collection_round();
 		return info.remove_ ||
