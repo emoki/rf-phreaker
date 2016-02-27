@@ -31,7 +31,6 @@ TEST(Cappeen, TestMain)
 	if(!serial.empty()) {
 
 		collection_info info;
-		info.collection_filename_ = "test_file";
 		std::vector<TECHNOLOGIES_AND_BANDS> tech_bands;
 		info.tech_and_bands_to_sweep_.elements_ = 0;
 		info.tech_and_bands_to_sweep_.num_elements_ = 0;;
@@ -97,7 +96,6 @@ TEST(Cappeen, DISABLED_FreqCorrection) {
 
 	if(!serial.empty()) {
 		collection_info info;
-		info.collection_filename_ = "test_file";
 		std::vector<TECHNOLOGIES_AND_BANDS> tech_bands;
 		info.tech_and_bands_to_sweep_.elements_ = 0;
 		info.tech_and_bands_to_sweep_.num_elements_ = 0;;
@@ -219,7 +217,6 @@ TEST(Cappeen, DISABLED_FreqNotInCalibration) {
 		EXPECT_EQ(0, cappeen_input_new_license(serial.c_str(), serial.size(), license_filename.c_str(), license_filename.size()));
 
 		collection_info info;
-		info.collection_filename_ = "test_file";
 		std::vector<TECHNOLOGIES_AND_BANDS> tech_bands;		
 		tech_bands.push_back(LTE_BAND_12); // operating band[1475.9 - 1495.9 MHZ]
 		info.tech_and_bands_to_sweep_.elements_ = &tech_bands[0];
@@ -269,7 +266,6 @@ TEST(Cappeen, DISABLED_GeneralLicenseUpdate1) {
 		EXPECT_EQ(0, cappeen_input_new_license(serial.c_str(), serial.size(), license_filename.c_str(), license_filename.size()));
 
 		collection_info info;
-		info.collection_filename_ = "test_file";
 		std::vector<TECHNOLOGIES_AND_BANDS> tech_bands;
 		info.tech_and_bands_to_sweep_.elements_ = 0;
 		info.tech_and_bands_to_sweep_.num_elements_ = 0;;
@@ -338,7 +334,6 @@ TEST(Cappeen, DISABLED_GeneralLicenseUpdate2) {
 		EXPECT_EQ(0, cappeen_input_new_license(serial.c_str(), serial.size(), license_filename.c_str(), license_filename.size()));
 
 		collection_info info;
-		info.collection_filename_ = "test_file";
 		std::vector<TECHNOLOGIES_AND_BANDS> tech_bands;
 		tech_bands.push_back(WCDMA_BAND_1800);
 		tech_bands.push_back(WCDMA_BAND_1900);
@@ -387,7 +382,6 @@ TEST(Cappeen, DISABLED_LicenseNetworkScanner) {
 		EXPECT_EQ(0, cappeen_input_new_license(serial.c_str(), serial.size(), license_filename.c_str(), license_filename.size()));
 
 		collection_info info;
-		info.collection_filename_ = "test_file";
 		std::vector<TECHNOLOGIES_AND_BANDS> tech_bands;
 		tech_bands.push_back(WCDMA_BAND_1800);
 		tech_bands.push_back(WCDMA_BAND_1900);
@@ -448,7 +442,6 @@ TEST(Cappeen, LicenseCellAnalysisEverything) {
 		EXPECT_EQ(0, cappeen_input_new_license(serial.c_str(), serial.size(), license_filename.c_str(), license_filename.size()));
 
 		collection_info info;
-		info.collection_filename_ = "test_file";
 		std::vector<TECHNOLOGIES_AND_BANDS> tech_bands;
 		tech_bands.push_back(GSM_BAND_850);
 		tech_bands.push_back(GSM_BAND_900);
@@ -509,7 +502,6 @@ TEST(Cappeen, NoClose)
 	if(!serial.empty()) {
 
 		collection_info info;
-		info.collection_filename_ = "test_file";
 		std::vector<TECHNOLOGIES_AND_BANDS> tech_bands;
 		tech_bands.push_back(LTE_BAND_1);
 		info.tech_and_bands_to_sweep_.elements_ = &tech_bands[0];
@@ -541,7 +533,6 @@ TEST(Cappeen, NoCloseNoStop)
 	if(!serial.empty()) {
 
 		collection_info info;
-		info.collection_filename_ = "test_file";
 		std::vector<TECHNOLOGIES_AND_BANDS> tech_bands;
 		tech_bands.push_back(LTE_BAND_1);
 		info.tech_and_bands_to_sweep_.elements_ = &tech_bands[0];

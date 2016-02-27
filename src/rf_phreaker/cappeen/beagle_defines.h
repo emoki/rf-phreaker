@@ -546,9 +546,6 @@ namespace beagle_api
 	Encapsulates parameters used during collection.
 	*/
 	struct collection_info {
-		/// Used for debugging purposes.
-		char *collection_filename_;
-
 		/// Specifies the technologies and bands to sweep during collection.
 		technologies_and_band_group tech_and_bands_to_sweep_;
 	};

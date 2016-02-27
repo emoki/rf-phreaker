@@ -23,9 +23,6 @@ void cappeen_command_handler::start_collection(std::vector<beagle_api::TECHNOLOG
 
 	beagle_api::collection_info info;
 
-	// Filename is only used during beagle api debug.
-	info.collection_filename_ = "debug_beagle_api_collection";
-
 	if(bands.empty())
 		throw std::runtime_error("No technologies_and_bands to sweep.");
 
