@@ -63,14 +63,6 @@ bool cappeen_dispatcher::is_shutting_down() {
 	return shutting_down_;
 }
 
-bool cappeen_dispatcher::has_fatal_error_occurred() const {
-	return fatal_error_has_occurred_;
-}
-
-bool cappeen_dispatcher::is_calibrated() const {
-	return is_calibrated_;
-}
-
 void cappeen_dispatcher::dispatch_data() {
 	auto beagle_info_list = cappeen_delegate_->retrieve_beagle_list();
 	auto gps_info_list = cappeen_delegate_->retrieve_gps_list();
@@ -120,7 +112,8 @@ void cappeen_dispatcher::dispatch_data() {
 	// Look at the most recent beagle info to see if the unit is ready for collection.
 	if(beagle_info_list.size()) {
 		beagle_info_ = *beagle_info_list.rbegin();
-		is_calibrated_ = beagle_info_.state_ == beagle_api::BEAGLE_READY ? true : false;
+		is_calibrated_ = beagle_info_.state_ == beagle_api::BEAGLE_READY;
+		is_collecting_ = beagle_info_.state_ == beagle_api::BEAGLE_COLLECTING;
 	}
 }
 

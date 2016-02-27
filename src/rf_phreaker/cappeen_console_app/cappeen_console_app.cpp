@@ -113,10 +113,10 @@ int _tmain(int argc, _TCHAR* argv[])
 		boost::shared_ptr<cappeen_interface> api_interface(new cappeen_wrapper(c_delegate.get()));
 
 		// The cappeen_dispatcher runs a boost thread which monitors output from the cappeen_delegate.
-		cappeen_dispatcher c_dispatcher(c_delegate, base_filename, vm.count("log") != 0.);
+		cappeen_dispatcher c_dispatcher(c_delegate, base_filename, vm.count("log") != 0);
 
 		// Output beagle_api_version.  This function can be used without initializing the API.
-		simple_logger::instance().log(std::string("Running beagle api version: ") + api_interface->api_version());
+		simple_logger::instance().log(std::string("Running cappeen api version: ") + api_interface->api_version());
 
 		// The cappeen_command_handler mainly handles the additional logic that comes with opening/closing a beagle unit, 
 		// starting/stopping collection and the additional beagle functions.
@@ -142,12 +142,12 @@ int _tmain(int argc, _TCHAR* argv[])
 
 					
 					for(int i = 0; i < iterations; ++i) {
-						// Start collection.  
-						c_command_handler.start_collection(tech_bands);
-
 						// Wait for time_ms then stop collection and exit.
 						auto start = std::chrono::high_resolution_clock::now();
 						while(std::chrono::high_resolution_clock::now() - start < std::chrono::minutes(time_min)) {
+							if(!c_dispatcher.is_collecting()) {
+								c_command_handler.start_collection(tech_bands);
+							}
 							std::this_thread::sleep_for(std::chrono::milliseconds(500));
 							if(c_dispatcher.has_fatal_error_occurred()) {
 								c_dispatcher.reset_error();
@@ -158,7 +158,7 @@ int _tmain(int argc, _TCHAR* argv[])
 							}
 						}
 
-						if(c_command_handler.is_scanner_collecting())
+						if(c_dispatcher.is_collecting())
 							c_command_handler.stop_collection();
 					}
 				}

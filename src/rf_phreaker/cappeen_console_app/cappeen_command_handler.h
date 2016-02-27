@@ -31,10 +31,7 @@ public:
 
 	bool is_scanner_open() { return scanner_connection_open_; }
 
-	bool is_scanner_collecting() { return scanner_collecting_; }
-
 private:
-
 	std::string parse_first_serial(std::string serials);
 
 	bool list_scanners();
@@ -45,8 +42,6 @@ private:
 
 	bool scanner_connection_open_;
 
-	bool scanner_collecting_;
-
 	static const std::size_t string_buf_size_ = 1024;
 
 	char scanner_buf_[string_buf_size_];
@@ -54,7 +49,6 @@ private:
 	std::string scanner_id_;
 
 	std::vector<char> base_filename_;
-
 };
 
 }

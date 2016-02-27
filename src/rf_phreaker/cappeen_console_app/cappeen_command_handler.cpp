@@ -10,7 +10,6 @@ namespace cappeen_scanner {
 cappeen_command_handler::cappeen_command_handler(boost::shared_ptr<cappeen_interface> beagle)
 	: beagle_(beagle)
 	, scanner_connection_open_(false)
-	, scanner_collecting_(false)
 {}
 
 cappeen_command_handler::~cappeen_command_handler(void)
@@ -28,6 +27,7 @@ void cappeen_command_handler::start_collection(std::vector<beagle_api::TECHNOLOG
 
 	info.tech_and_bands_to_sweep_.elements_ = &bands[0];
 	info.tech_and_bands_to_sweep_.num_elements_ = bands.size();
+	info.frequencies_to_scan_.num_elements_ = 0;
 
 	long error = beagle_->start_collection(info);
 
@@ -35,8 +35,6 @@ void cappeen_command_handler::start_collection(std::vector<beagle_api::TECHNOLOG
 		throw std::runtime_error("Error starting collection.  Error code: " + boost::lexical_cast<std::string>(error));
 	else
 		simple_logger::instance().log("Collection started successfully.");
-
-	scanner_collecting_ = true;
 }
 
 void cappeen_command_handler::stop_collection()
@@ -48,10 +46,7 @@ void cappeen_command_handler::stop_collection()
 	if(error)
 		throw std::runtime_error("Unable to stop collection.  Error code: " + boost::lexical_cast<std::string>(error));
 	else
-	{
 		simple_logger::instance().log("Collection stopped successfully.");
-		scanner_collecting_ = false;
-	}
 }
 
 void cappeen_command_handler::upload_license(const std::string &license_filename, const std::string hw_serial)
@@ -87,7 +82,6 @@ bool cappeen_command_handler::connect_to_scanner()
 	{
 		simple_logger::instance().log("Connection to beagle unit " + scanner_id_  + " established.");	
 		scanner_connection_open_  = true;
-		scanner_collecting_ = false;
 	}
 
 	return scanner_connection_open_;
@@ -155,7 +149,6 @@ void cappeen_command_handler::close_scanner()
 	{
 		simple_logger::instance().log("Closed beagle unit successfully.");
 		scanner_connection_open_ = false;
-		scanner_collecting_ = false;
 	}
 }
 

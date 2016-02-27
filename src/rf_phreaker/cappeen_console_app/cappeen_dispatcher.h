@@ -77,9 +77,11 @@ public:
 
 	void shut_down();
 
-	bool has_fatal_error_occurred() const;
+	bool has_fatal_error_occurred() const { return fatal_error_has_occurred_; }
 
-	bool is_calibrated() const;
+	bool is_calibrated() const { return is_calibrated_; }
+
+	bool is_collecting() const { return is_collecting_; }
 
 	void reset_error() { fatal_error_has_occurred_ = false; }
 
@@ -112,6 +114,8 @@ private:
 	std::atomic_bool fatal_error_has_occurred_;
 
 	std::atomic_bool is_calibrated_;
+	
+	std::atomic_bool is_collecting_;
 
 	std::atomic_int32_t error_count_;
 
