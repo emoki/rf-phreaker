@@ -78,7 +78,7 @@ public:
 		helper_.remove_futures();
 
 		// Add the freq to the layer_3_decoder.
-		if(info.remove_) {
+		if(info.remove_ && info.measurement_package_.can_remove_) {
 			std::get<0>(out).try_put(remove_collection_info(gsm_layer_3_collection_info(meas.frequency(), meas.get_gsm_band(), info.measurement_package_.can_remove_)));
 		}
 

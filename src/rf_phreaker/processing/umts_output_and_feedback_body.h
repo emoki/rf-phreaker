@@ -56,7 +56,7 @@ public:
 		auto meas = *info.measurement_package_.measurement_info_.get();
 		helper_.remove_futures();
 
-		if(info.remove_) {
+		if(info.remove_ && info.measurement_package_.can_remove_) {
 			std::get<0>(out).try_put(remove_collection_info(umts_layer_3_collection_info(meas.frequency(), meas.get_umts_band(), info.measurement_package_.can_remove_)));
 		}
 
