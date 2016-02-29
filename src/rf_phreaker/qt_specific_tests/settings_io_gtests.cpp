@@ -122,6 +122,7 @@ TEST(QtSpecific, TestSettingsIO)
 	EXPECT_EQ(settings_layer_3_decode_threshold_default, set.umts_layer_3_decode_.decode_threshold_);
 	EXPECT_EQ(settings_layer_3_min_decode_threshold_default, set.umts_layer_3_decode_.decode_minimum_threshold_);
 	EXPECT_EQ(settings_layer_3_minimum_decode_count_default, set.umts_layer_3_decode_.minimum_decode_count_);
+	EXPECT_EQ(settings_layer_3_complete_decode_interval_default, set.umts_layer_3_decode_.complete_decode_interval_);
 	EXPECT_EQ(settings_layer_3_should_prioritize_layer_3_default, set.umts_layer_3_decode_.should_prioritize_layer_3_);
 	EXPECT_EQ(0, set.umts_layer_3_decode_.wanted_layer_3_.size());
 
@@ -130,6 +131,7 @@ TEST(QtSpecific, TestSettingsIO)
 	EXPECT_EQ(settings_layer_3_decode_threshold_default, set.lte_layer_3_decode_.decode_threshold_);
 	EXPECT_EQ(settings_layer_3_min_decode_threshold_default, set.lte_layer_3_decode_.decode_minimum_threshold_);
 	EXPECT_EQ(settings_layer_3_minimum_decode_count_default, set.lte_layer_3_decode_.minimum_decode_count_);
+	EXPECT_EQ(settings_layer_3_complete_decode_interval_default, set.lte_layer_3_decode_.complete_decode_interval_);
 	EXPECT_EQ(settings_layer_3_should_prioritize_layer_3_default, set.lte_layer_3_decode_.should_prioritize_layer_3_);
 	EXPECT_EQ(0, set.lte_layer_3_decode_.wanted_layer_3_.size());
 
@@ -262,6 +264,7 @@ TEST(QtSpecific, TestSettingsIO)
 	set.gsm_layer_3_decode_.decode_threshold_ = tmp++;
 	set.gsm_layer_3_decode_.decode_minimum_threshold_ = tmp++;
 	set.gsm_layer_3_decode_.minimum_decode_count_ = tmp++;
+	set.gsm_layer_3_decode_.complete_decode_interval_ = tmp++;
 	set.gsm_layer_3_decode_.should_prioritize_layer_3_ = false;
 	tmp = 0;
 	set.gsm_layer_3_decode_.wanted_layer_3_.push_back(tmp++);
@@ -279,6 +282,7 @@ TEST(QtSpecific, TestSettingsIO)
 	set.umts_layer_3_decode_.decode_threshold_ = tmp++;
 	set.umts_layer_3_decode_.decode_minimum_threshold_ = tmp++;
 	set.umts_layer_3_decode_.minimum_decode_count_ = tmp++;
+	set.umts_layer_3_decode_.complete_decode_interval_ = tmp++;
 	set.umts_layer_3_decode_.should_prioritize_layer_3_ = false;
 	tmp = 0;
 	set.umts_layer_3_decode_.wanted_layer_3_.push_back(tmp++);
@@ -290,6 +294,7 @@ TEST(QtSpecific, TestSettingsIO)
 	set.lte_layer_3_decode_.decode_threshold_ = tmp++;
 	set.lte_layer_3_decode_.decode_minimum_threshold_ = tmp++;
 	set.lte_layer_3_decode_.minimum_decode_count_ = tmp++;
+	set.lte_layer_3_decode_.complete_decode_interval_ = tmp++;
 	set.lte_layer_3_decode_.should_prioritize_layer_3_ = false;
 	tmp = 0;
 	set.lte_layer_3_decode_.wanted_layer_3_.push_back(tmp++);
@@ -451,6 +456,7 @@ TEST(QtSpecific, TestSettingsIO)
 	EXPECT_EQ(set.gsm_layer_3_decode_.decode_threshold_, set2.gsm_layer_3_decode_.decode_threshold_);
 	EXPECT_EQ(set.gsm_layer_3_decode_.decode_minimum_threshold_, set2.gsm_layer_3_decode_.decode_minimum_threshold_);
 	EXPECT_EQ(set.gsm_layer_3_decode_.minimum_decode_count_, set2.gsm_layer_3_decode_.minimum_decode_count_);
+	EXPECT_EQ(set.gsm_layer_3_decode_.complete_decode_interval_, set2.gsm_layer_3_decode_.complete_decode_interval_);
 	EXPECT_EQ(set.gsm_layer_3_decode_.should_prioritize_layer_3_, set2.gsm_layer_3_decode_.should_prioritize_layer_3_);
 	{
 		EXPECT_EQ(set.gsm_layer_3_decode_.wanted_layer_3_.size(), set2.gsm_layer_3_decode_.wanted_layer_3_.size());
@@ -464,6 +470,7 @@ TEST(QtSpecific, TestSettingsIO)
 	EXPECT_EQ(set.umts_layer_3_decode_.decode_threshold_, set2.umts_layer_3_decode_.decode_threshold_);
 	EXPECT_EQ(set.umts_layer_3_decode_.decode_minimum_threshold_, set2.umts_layer_3_decode_.decode_minimum_threshold_);
 	EXPECT_EQ(set.umts_layer_3_decode_.minimum_decode_count_, set2.umts_layer_3_decode_.minimum_decode_count_);
+	EXPECT_EQ(set.umts_layer_3_decode_.complete_decode_interval_, set2.umts_layer_3_decode_.complete_decode_interval_);
 	EXPECT_EQ(set.umts_layer_3_decode_.should_prioritize_layer_3_, set2.umts_layer_3_decode_.should_prioritize_layer_3_);
 	{
 		EXPECT_EQ(set.umts_layer_3_decode_.wanted_layer_3_.size(), set2.umts_layer_3_decode_.wanted_layer_3_.size());
@@ -477,6 +484,7 @@ TEST(QtSpecific, TestSettingsIO)
 	EXPECT_EQ(set.lte_layer_3_decode_.decode_threshold_, set2.lte_layer_3_decode_.decode_threshold_);
 	EXPECT_EQ(set.lte_layer_3_decode_.decode_minimum_threshold_, set2.lte_layer_3_decode_.decode_minimum_threshold_);
 	EXPECT_EQ(set.lte_layer_3_decode_.minimum_decode_count_, set2.lte_layer_3_decode_.minimum_decode_count_);
+	EXPECT_EQ(set.lte_layer_3_decode_.complete_decode_interval_, set2.lte_layer_3_decode_.complete_decode_interval_);
 	EXPECT_EQ(set.lte_layer_3_decode_.should_prioritize_layer_3_, set2.lte_layer_3_decode_.should_prioritize_layer_3_);
 	{
 		EXPECT_EQ(set.lte_layer_3_decode_.wanted_layer_3_.size(), set2.lte_layer_3_decode_.wanted_layer_3_.size());

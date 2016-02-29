@@ -121,6 +121,11 @@ public:
 		}
 
 		auto freq = meas.frequency();
+
+		if(!config_.layer_3_.should_prioritize_layer_3_ && meas.collection_round() % config_.layer_3_.complete_decode_interval_ == 0) {
+			tracker_.clear_history(freq);
+		}
+
 		for(auto &data : info.processed_data_) {
 			if(!tracker_.is_fully_decoded(freq, data) && (data.ecio_ > config_.layer_3_.decode_threshold_ || tracker_.in_history(freq, data))) {
 				int status = analysis_.decode_layer_3(meas, data);

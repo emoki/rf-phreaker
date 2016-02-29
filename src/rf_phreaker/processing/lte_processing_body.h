@@ -89,6 +89,10 @@ public:
 		if(meas.collection_round() % config_.general_.full_scan_interval_ == 0) {
 			analysis_.clear_tracking_si(freq);
 		}
+		if(!config_.layer_3_.should_prioritize_layer_3_ && meas.collection_round() % config_.layer_3_.complete_decode_interval_ == 0) {
+			analysis_.clear_tracking_si(freq);
+			tracker_.clear_history(freq);
+		}
 
 		if(info.processed_data_.size()) {
 			if(0)

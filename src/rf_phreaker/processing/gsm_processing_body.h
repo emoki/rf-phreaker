@@ -119,6 +119,11 @@ public:
 			tracker_.clear();
 		}
 
+		// For GSM the history freq actually corresponds to multiple bcchs.
+		if(!config_.layer_3_.should_prioritize_layer_3_ && meas.collection_round() % config_.layer_3_.complete_decode_interval_ == 0) {
+			tracker_.clear_history(meas.frequency());
+		}
+
 		for(auto &data : info.processed_data_) {
 			if(!tracker_.is_fully_decoded(data.center_frequency_, data) && (data.c_i_ratio_ > config_.layer_3_.decode_threshold_ || tracker_.in_history(data.center_frequency_, data))) {
 				if(data.bsic_ == -1) {
