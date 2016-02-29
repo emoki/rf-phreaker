@@ -346,6 +346,28 @@ void Api::handle_message(rp_status status, const QString &s) {
 	switch(status) {
 	case RP_STATUS_OK:
 		break;
+    case RP_STATUS_FREQUENCY_CORRECTION_SUCCESSFUL:
+        message(status, s);
+        break;
+    case RP_STATUS_FREQUENCY_CORRECTION_FAILED:
+        message(status, s);
+        break;
+    case RP_STATUS_FREQUENCY_CORRECTION_VALUE_INVALID:
+        message(status, s);
+        break;
+    case RP_STATUS_NOT_INITIALIZED:
+        message(status, s);
+        break;
+    case RP_STATUS_INVALID_PARAMETER:
+        message(status, s);
+        break;
+    case RP_STATUS_CALIBRATION_ERROR:
+        message(status, s);
+        break;
+    case RP_STATUS_EEPROM_ERROR:
+        message(status, s);
+        break;
+
 	//case RP_OTHER_GOOD_THINGS:
 	// Handle other messages that may not be errors?
 	default:
