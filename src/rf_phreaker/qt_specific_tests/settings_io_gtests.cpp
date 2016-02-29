@@ -117,6 +117,15 @@ TEST(QtSpecific, TestSettingsIO)
 	EXPECT_EQ(settings_overlap_time_default, set.sweep_collection_.overlap_time_);
 	EXPECT_EQ(settings_priority_default, set.sweep_collection_.priority_);
 
+	EXPECT_EQ(settings_layer_3_max_update_threshold_default, set.gsm_layer_3_decode_.max_update_threshold_);
+	EXPECT_EQ(settings_layer_3_min_collection_round_default, set.gsm_layer_3_decode_.minimum_collection_round_);
+	EXPECT_EQ(settings_layer_3_decode_threshold_default, set.gsm_layer_3_decode_.decode_threshold_);
+	EXPECT_EQ(settings_layer_3_min_decode_threshold_default, set.gsm_layer_3_decode_.decode_minimum_threshold_);
+	EXPECT_EQ(settings_layer_3_minimum_decode_count_default, set.gsm_layer_3_decode_.minimum_decode_count_);
+	EXPECT_EQ(settings_layer_3_complete_decode_interval_default, set.gsm_layer_3_decode_.complete_decode_interval_);
+	EXPECT_EQ(settings_layer_3_should_prioritize_layer_3_default, set.gsm_layer_3_decode_.should_prioritize_layer_3_);
+	EXPECT_EQ(0, set.gsm_layer_3_decode_.wanted_layer_3_.size());
+
 	EXPECT_EQ(settings_layer_3_max_update_threshold_default, set.umts_layer_3_decode_.max_update_threshold_);
 	EXPECT_EQ(settings_layer_3_min_collection_round_default, set.umts_layer_3_decode_.minimum_collection_round_);
 	EXPECT_EQ(settings_layer_3_decode_threshold_default, set.umts_layer_3_decode_.decode_threshold_);
