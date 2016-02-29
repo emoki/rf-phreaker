@@ -429,7 +429,7 @@ inline void populate_plmn(rp_plmn &a, const layer_3_information::plmn &t) {
 }
 
 inline void populate_plmns(std::vector<rp_plmn> &a, const std::vector<layer_3_information::plmn> &t) {
-	a.reserve(t.size());
+	a.resize(t.size());
 	auto i = 0;
 	for(auto &j : t) {
 		populate_plmn(a[i], j);
@@ -438,7 +438,7 @@ inline void populate_plmns(std::vector<rp_plmn> &a, const std::vector<layer_3_in
 }
 
 inline void populate_raw_layer_3(std::vector<rp_raw_layer_3> &a, const std::vector<layer_3_information::bit_stream> &t) {
-	a.reserve(t.size());
+	a.resize(t.size());
 	auto i = 0;
 	for(auto &j : t) {
 		a[i].num_bytes_ = j.bytes_.size();
