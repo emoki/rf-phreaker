@@ -61,7 +61,7 @@ public:
 
 		// The flow graph controls processing by alloting x number of tokens to the system.  If the system is 
 		// alloted 8 tokens then 8 tasks can be occurring simultaneously.  For this to work correctly a token 
-		// cannot mutliple, meaning 1 token does not become 3 tokens.  This is what happens if we're using 
+		// cannot mutliply, meaning 1 token does not become 3 tokens.  This is what happens if we're using 
 		// the generic sweep.  One token comes in and it's possible to send three out (gsm, umts, lte).  Therefore 
 		// we keep a count of how many tokens we sent out and wait until we have received that number of tokens 
 		// before collecting another packet.  Because this is the first node in the system we should be able to stay
@@ -90,36 +90,38 @@ public:
 			if(!settings_.use_rf_board_adjustment_)
 				meas->rf_board_adjustments(scanner::rf_adjustment{});
 
+			std::string log("Sending to following processors: ");
 			if(ci.specs_.has_spec(GSM_SWEEP)) {
-				//if(std::get<GSM_SWEEP_PORT>(out).try_put(package)) ++token_count_;
+				log += "gsm_sweep ";
 				send_msg<GSM_SWEEP_PORT>(out, package);
 				if(packet_output_settings_.gsm_sweep_) { output(meas.get(), "gsm_sweep_", gsm_sweep_++); }
 			}
 			if(ci.specs_.has_spec(GSM_LAYER_3_DECODE)) {
-				//if(std::get<GSM_LAYER3_PORT>(out).try_put(package)) ++token_count_;
+				log += "gsm_layer_3 ";
 				send_msg<GSM_LAYER3_PORT>(out, package);
 				if(packet_output_settings_.gsm_layer_3_) { output(meas.get(), "gsm_layer_3_", gsm_layer_3_++); }
 			}
 			if(ci.specs_.has_spec(UMTS_SWEEP)) {
-				//if(std::get<UMTS_SWEEP_PORT>(out).try_put(package)) ++token_count_;
+				log += "umts_sweep ";
 				send_msg<UMTS_SWEEP_PORT>(out, package);
 				if(packet_output_settings_.umts_sweep_) { output(meas.get(), "umts_sweep_", umts_sweep_++); }
 			}
 			if(ci.specs_.has_spec(UMTS_LAYER_3_DECODE)) {
-				//if(std::get<UMTS_LAYER3_PORT>(out).try_put(package)) ++token_count_;
+				log += "umts_layer_3" ;
 				send_msg<UMTS_LAYER3_PORT>(out, package);
 				if(packet_output_settings_.umts_layer_3_) { output(meas.get(), "umts_layer_3_", umts_layer_3_++); }
 			}
 			if(ci.specs_.has_spec(LTE_SWEEP)) {
-				//if(std::get<LTE_SWEEP_PORT>(out).try_put(package)) ++token_count_;
+				log += "lte_sweep ";
 				send_msg<LTE_SWEEP_PORT>(out, package);
 				if(packet_output_settings_.lte_sweep_) { output(meas.get(), "lte_sweep_", lte_sweep_++); }
 			}
 			if(ci.specs_.has_spec(LTE_LAYER_3_DECODE)) {
-				//if(std::get<LTE_LAYER3_PORT>(out).try_put(package)) ++token_count_;
+				log += "lte_layer_3 ";
 				send_msg<LTE_LAYER3_PORT>(out, package);
 				if(packet_output_settings_.lte_layer_3_) { output(meas.get(), "lte_layer_3_", lte_layer_3_++); }
 			}
+			LOG(LCOLLECTION) << log;
 		}
 		else {
 			// If scanning has finished for all containers then we will not process any packets this time thru which 
