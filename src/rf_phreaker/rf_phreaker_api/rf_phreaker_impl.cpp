@@ -591,8 +591,22 @@ processing::collection_info_containers::iterator rf_phreaker_impl::add_sweep(spe
 		return c.has_specifier(sweep);
 	});
 	if(it == containers_.end()) {
-		containers_.push_back(collection_info_container(sweep, !config_.simultaneous_collection_));
-		containers_.push_back(collection_info_container(decode, false));
+		it = std::find_if(containers_.begin(), containers_.end(), [&](const collection_info_container &c) {
+			return c.has_specifier(GSM_SWEEP) || c.has_specifier(UMTS_SWEEP) || c.has_specifier(LTE_SWEEP) || c.has_specifier(CDMA_SWEEP);
+		});
+
+		if(it != containers_.end()) 
+			it->add_specifier(sweep);
+		else 
+			containers_.push_back(collection_info_container(sweep, find_collection_settings(sweep, config_).is_streaming_));
+
+		auto tmp = std::find_if(containers_.begin(), containers_.end(), [&](const collection_info_container &c) {
+			return c.has_specifier(decode);
+		});
+		if(tmp == containers_.end())
+			containers_.push_back(collection_info_container(decode, find_collection_settings(decode, config_).is_streaming_));
+
+		// We make sure the iterator to the sweep container is valid by getting it after all the insertions have occurred.
 		it = std::find_if(containers_.begin(), containers_.end(), [&](const collection_info_container &c) {
 			return c.has_specifier(sweep);
 		});
@@ -650,7 +664,7 @@ void rf_phreaker_impl::remove_sweep(operating_band band, specifier sweep) {
 			frequency_range_creation::adjust_lte_sweep_collection_info(range, tmp);
 			break;
 		case GSM_SWEEP:
-//			frequency_range_creation::adjust_gsm_sweep_collection_info(range, tmp);
+			frequency_range_creation::adjust_gsm_sweep_collection_info(range, tmp);
 			break;
 		default:
 			;

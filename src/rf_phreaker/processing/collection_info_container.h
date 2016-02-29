@@ -52,14 +52,26 @@ public:
 		, specs_(specs)
 		, is_streaming_(is_streaming) {}
 
+	// Does not support adding/removing parameters that have multiple specs.
 	void adjust(const add_remove_collection_info &param) {
 		if(!collection_info_group_.empty() && param.remove_.size() && specs_.does_overlap(param.remove_[0].specs_)) {
 			// Remove entries from the beginning of the manager to our current position (current position is inclusive!) keeping track of removals.
 			uint32_t remove_count = 0;
-			collection_info_group_.erase(std::remove_if(std::begin(collection_info_group_), std::begin(collection_info_group_) + position_ + 1, [&](const collection_info &p) {
-				bool ret = (std::find(std::begin(param.remove_), std::end(param.remove_), p) != param.remove_.end());
-				if(ret) ++remove_count;
-				return ret;
+			collection_info_group_.erase(std::remove_if(std::begin(collection_info_group_), std::begin(collection_info_group_) + position_ + 1, [&](collection_info &p) {
+				auto i = std::find_if(std::begin(param.remove_), std::end(param.remove_), [&](const collection_info &a) {
+					return p.partial_equal_specs_overlap(a);
+				});
+				if(i != param.remove_.end()) {
+					// If this is the last spec we have to remove the item.  Otherwise only remove that spec.
+					if(p.specs_.size() == 1) {
+						++remove_count;
+						return true;
+					}
+					else {
+						p.specs_.remove_spec(i->specs_.front());
+					}
+				}
+				return false;
 			}), std::begin(collection_info_group_) + position_ + 1);
 
 			// find new current_parameters.
@@ -71,8 +83,16 @@ public:
 				position_ -= remove_count;
 
 			// remove entries from position_ to end.
-			collection_info_group_.erase(std::remove_if(std::begin(collection_info_group_) + position_, std::end(collection_info_group_), [&](const collection_info &p) {
-				return std::find(std::begin(param.remove_), std::end(param.remove_), p) != param.remove_.end();
+			collection_info_group_.erase(std::remove_if(std::begin(collection_info_group_) + position_, std::end(collection_info_group_), [&](collection_info &p) {
+				auto i = std::find_if(std::begin(param.remove_), std::end(param.remove_), [&](const collection_info &a) {
+					return p.partial_equal_specs_overlap(a);
+				});
+				if(i != param.remove_.end())
+					if(p.specs_.size() == 1)
+						return true;
+					else 
+						p.specs_.remove_spec(i->specs_.front());
+				return false;
 			}), std::end(collection_info_group_));
 		}
 
@@ -81,13 +101,17 @@ public:
 			// If we add freqs then restart collection by saying we're not finished.
 			finished_ = false;
 
-			collection_info_group_.reserve(collection_info_group_.size() + param.add_.size());
+			//collection_info_group_.reserve(collection_info_group_.size() + param.add_.size());
 			std::for_each(std::begin(param.add_), std::end(param.add_), [&](const collection_info &p) {
-				if(std::find(std::begin(collection_info_group_), std::end(collection_info_group_), p) == collection_info_group_.end())
+				auto i = std::find_if(std::begin(collection_info_group_), std::end(collection_info_group_), [&](const collection_info &a) {
+					return p.partial_equal(a);
+				});
+				if(i == collection_info_group_.end())
 					collection_info_group_.push_back(p);
+				else
+					i->specs_.add_spec(p.specs_.front());
 			});
 		}
-
 	}
 
 	collection_info try_get_auto_info() {

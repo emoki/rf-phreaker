@@ -19,19 +19,19 @@ protected:
 		, c3(rf_phreaker::GSM_LAYER_3_DECODE, false, false)
 		, c3_empty(rf_phreaker::GSM_LAYER_3_DECODE, false, false)
 		, c4(rf_phreaker::GSM_SWEEP, false, false) {
-		info_c1a = collection_info(mhz(11), 10000, mhz(5), 0, UMTS_LAYER_3_DECODE, OPERATING_BAND_UNKNOWN, true);
-		info_c2a = collection_info(mhz(21), 10000, mhz(5), 0, LTE_LAYER_3_DECODE, OPERATING_BAND_UNKNOWN, true);
-		info_c2b = collection_info(mhz(22), 10000, mhz(5), 0, LTE_LAYER_3_DECODE, OPERATING_BAND_UNKNOWN, true);
-		info_c2c = collection_info(mhz(23), 10000, mhz(5), 0, LTE_LAYER_3_DECODE, OPERATING_BAND_UNKNOWN, true);
-		info_c2d = collection_info(mhz(24), 10000, mhz(5), 0, LTE_LAYER_3_DECODE, OPERATING_BAND_UNKNOWN, true);
-		info_c2e = collection_info(mhz(25), 10000, mhz(5), 0, LTE_LAYER_3_DECODE, OPERATING_BAND_UNKNOWN, true);
-		info_c2f = collection_info(mhz(26), 10000, mhz(5), 0, LTE_LAYER_3_DECODE, OPERATING_BAND_UNKNOWN, true);
-		info_c3a = collection_info(mhz(31), 10000, mhz(5), 0, GSM_LAYER_3_DECODE, OPERATING_BAND_UNKNOWN, true);
-		info_c4a = collection_info(mhz(41), 10000, mhz(5), 0, GSM_SWEEP, OPERATING_BAND_UNKNOWN, true);
-		info_c4b = collection_info(mhz(42), 10000, mhz(5), 0, GSM_SWEEP, OPERATING_BAND_UNKNOWN, true);
-		info_c4c = collection_info(mhz(43), 10000, mhz(5), 0, GSM_SWEEP, OPERATING_BAND_UNKNOWN, true);
-		info_c4d = collection_info(mhz(44), 10000, mhz(5), 0, GSM_SWEEP, OPERATING_BAND_UNKNOWN, true);
-		info_c4e = collection_info(mhz(45), 10000, mhz(5), 0, GSM_SWEEP, OPERATING_BAND_UNKNOWN, true);
+		info_c1a = collection_info(mhz(11), 10000, 0, mhz(5), 0, UMTS_LAYER_3_DECODE, OPERATING_BAND_UNKNOWN, true);
+		info_c2a = collection_info(mhz(21), 10000, 0, mhz(5), 0, LTE_LAYER_3_DECODE, OPERATING_BAND_UNKNOWN, true);
+		info_c2b = collection_info(mhz(22), 10000, 0, mhz(5), 0, LTE_LAYER_3_DECODE, OPERATING_BAND_UNKNOWN, true);
+		info_c2c = collection_info(mhz(23), 10000, 0, mhz(5), 0, LTE_LAYER_3_DECODE, OPERATING_BAND_UNKNOWN, true);
+		info_c2d = collection_info(mhz(24), 10000, 0, mhz(5), 0, LTE_LAYER_3_DECODE, OPERATING_BAND_UNKNOWN, true);
+		info_c2e = collection_info(mhz(25), 10000, 0, mhz(5), 0, LTE_LAYER_3_DECODE, OPERATING_BAND_UNKNOWN, true);
+		info_c2f = collection_info(mhz(26), 10000, 0, mhz(5), 0, LTE_LAYER_3_DECODE, OPERATING_BAND_UNKNOWN, true);
+		info_c3a = collection_info(mhz(31), 10000, 0, mhz(5), 0, GSM_LAYER_3_DECODE, OPERATING_BAND_UNKNOWN, true);
+		info_c4a = collection_info(mhz(41), 10000, 0, mhz(5), 0, GSM_SWEEP, OPERATING_BAND_UNKNOWN, true);
+		info_c4b = collection_info(mhz(42), 10000, 0, mhz(5), 0, GSM_SWEEP, OPERATING_BAND_UNKNOWN, true);
+		info_c4c = collection_info(mhz(43), 10000, 0, mhz(5), 0, GSM_SWEEP, OPERATING_BAND_UNKNOWN, true);
+		info_c4d = collection_info(mhz(44), 10000, 0, mhz(5), 0, GSM_SWEEP, OPERATING_BAND_UNKNOWN, true);
+		info_c4e = collection_info(mhz(45), 10000, 0, mhz(5), 0, GSM_SWEEP, OPERATING_BAND_UNKNOWN, true);
 
 		c1.adjust(add_collection_info(info_c1a));
 		c2.adjust(add_collection_info(info_c2a));

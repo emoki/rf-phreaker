@@ -232,8 +232,7 @@ TEST_F(CollectionManagerTest, RemoveBeginOfRangeTest)
 	EXPECT_EQ(end_remove, cp_manager.try_get_next_info().freq_);
 }
 
-TEST_F(CollectionManagerTest, ShouldNotRemoveUsingDifferentParametersTest)
-{
+TEST_F(CollectionManagerTest, ShouldNotRemoveUsingDifferentParametersTest) {
 	const int start_remove = 190;
 	const int end_remove = max_num;
 	const int current_pos = 100;
@@ -250,6 +249,36 @@ TEST_F(CollectionManagerTest, ShouldNotRemoveUsingDifferentParametersTest)
 
 	for(int i = 0; i < max_num; ++i)
 		EXPECT_EQ(i, cp_manager.try_get_next_info().freq_);
+}
+
+TEST_F(CollectionManagerTest, TestAdditionalSpecs) {
+	const int start_remove = 190;
+	const int end_remove = max_num;
+	const int current_pos = 100;
+
+	add_remove_collection_info params = create_add_params(0, max_num);
+	for(auto &i : params.add_) {
+		i.specs_.add_spec(rf_phreaker::UMTS_LAYER_3_DECODE);
+	}
+
+	cp_manager.adjust(params);
+
+	auto remove_params = create_remove_params(start_remove, end_remove);
+
+	cp_manager.adjust(remove_params);
+
+	for(int i = 0; i < start_remove; ++i) {
+		auto k = cp_manager.try_get_next_info();
+		EXPECT_EQ(i, k.freq_);
+		EXPECT_TRUE(k.specs_.has_spec(rf_phreaker::LTE_LAYER_3_DECODE));
+		EXPECT_TRUE(k.specs_.has_spec(rf_phreaker::UMTS_LAYER_3_DECODE));
+	}
+	for(int i = start_remove; i < max_num; ++i) {
+		auto k = cp_manager.try_get_next_info();
+		EXPECT_EQ(i, k.freq_);
+		EXPECT_FALSE(k.specs_.has_spec(rf_phreaker::LTE_LAYER_3_DECODE));
+		EXPECT_TRUE(k.specs_.has_spec(rf_phreaker::UMTS_LAYER_3_DECODE));
+	}
 }
 
 

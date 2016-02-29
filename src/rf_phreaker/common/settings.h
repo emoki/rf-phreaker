@@ -3,6 +3,7 @@
 #include <stdint.h>
 #include <vector>
 #include "rf_phreaker/common/common_types.h"
+#include "rf_phreaker/common/exception_types.h"
 
 namespace rf_phreaker
 {
@@ -52,6 +53,10 @@ static const int settings_gsm_general_band_power_threshold_default = 25;
 static const bool settings_gsm_general_perform_sync_correlations_default = true;
 static const double settings_gsm_general_c_i_ratio_confidence_threshold_default = -5;
 static const int settings_output_interval_default = 1;
+
+class collection_settings;
+class settings;
+collection_settings& find_collection_settings(rf_phreaker::specifier tech, settings &s);
 
 class output_settings {
 public:
@@ -194,8 +199,31 @@ public:
 	lte_general_settings lte_layer_3_general_;
 	
 	frequency_correction_settings frequency_correction_settings_;
-
-
 };
+
+inline collection_settings& find_collection_settings(rf_phreaker::specifier tech, settings &s) {
+	switch(tech) {
+	case GSM_SWEEP:
+		return s.gsm_sweep_collection_;
+	case GSM_LAYER_3_DECODE:
+		return s.gsm_layer_3_collection_;
+		//case CDMA_SWEEP:
+		//	return s.gsm_sweep_collection_;
+		//case CDMA_LAYER_3_DECODE:
+		//	return s.gsm_sweep_collection_;
+	case UMTS_SWEEP:
+		return s.umts_sweep_collection_;
+	case UMTS_LAYER_3_DECODE:
+		return s.umts_layer_3_collection_;
+	case LTE_SWEEP:
+		return s.lte_sweep_collection_;
+	case LTE_LAYER_3_DECODE:
+		return s.lte_layer_3_collection_;
+		//case RAW_DATA:
+		//	return s.gsm_sweep_collection_;
+	default:
+		throw rf_phreaker_error("Unable to find collection_settings.  Specifier unknown!");
+	}
+}
 
 }
