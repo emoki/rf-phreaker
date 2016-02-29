@@ -37,5 +37,7 @@ void registerQmlTypes()
 	qmlRegisterType<Lte>(uri.latin1(), 1, 0, "Lte");
 	qmlRegisterType<Sweep>(uri.latin1(), 1, 0, "Sweep");
 	qmlRegisterType<Sweep>(uri.latin1(), 1, 0, "Base");
+	qRegisterMetaTypeStreamOperators<rf_phreaker::channel_freq>("channel_freq");
+	qRegisterMetaTypeStreamOperators<::rp_technology>("rp_technology");
 }
 

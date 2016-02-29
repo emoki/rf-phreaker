@@ -29,6 +29,8 @@ set (rf_phreaker_gui_SRCS
 	Gps.h
 	Gsm.h
 	Lte.h
+	Serialization.h
+	Settings.h
 	Sweep.h
 	Utility.h
 	Wcdma.h
