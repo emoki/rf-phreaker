@@ -17,6 +17,7 @@ void CollectionInfoList::remove(int index) {
 	if(index < list_.count()) {
 		list_.removeAt(index);
 		emit listChanged();
+        emit sizeChanged();
 	}
 }
 
@@ -25,7 +26,8 @@ void CollectionInfoList::append(CollectionInfo *item) {
 		item->setParent(this);
 		list_.append(item);
 		emit listChanged();
-	}
+        emit sizeChanged();
+    }
 }
 
 CollectionInfo* CollectionInfoList::at(int index){
@@ -35,6 +37,7 @@ CollectionInfo* CollectionInfoList::at(int index){
 void CollectionInfoList::clear() {
 	list_.clear();
 	emit listChanged();
+    emit sizeChanged();
 }
 
 int CollectionInfoList::count() {
@@ -74,6 +77,8 @@ int CollectionInfoList::count(QQmlListProperty<CollectionInfo> *list) {
 
 void CollectionInfoList::setList(const QList<CollectionInfo*> &list) {
 	list_ = list;
+	emit listChanged();
+    emit sizeChanged();
 }
 
 const QList<CollectionInfo*>& CollectionInfoList::qlist() const {

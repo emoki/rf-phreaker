@@ -43,7 +43,6 @@ ApplicationWindow {
         property alias y: mainWindow.y
         property alias width: mainWindow.width
         property alias height: mainWindow.height
-        //property var scanList
     }
 
     StateMachine {
@@ -203,7 +202,7 @@ ApplicationWindow {
                     id: recordButton
                     text: "Record"
                     Layout.fillWidth: true
-                    enabled: Api.deviceStatus === ApiTypes.IDLE /*&& Api.scanList.length > 0*/
+                    enabled: Api.deviceStatus === ApiTypes.IDLE && Api.scanList.size > 0
                     onClicked: {
                         dsmOperation.startRecording();
                     }

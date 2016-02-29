@@ -11,6 +11,7 @@
 #include "rf_phreaker/rf_phreaker_gui/Wcdma.h"
 #include "rf_phreaker/rf_phreaker_gui/Lte.h"
 #include "rf_phreaker/rf_phreaker_gui/Sweep.h"
+#include "rf_phreaker/rf_phreaker_gui/Settings.h"
 
 //namespace rf_phreaker { namespace gui {
 
@@ -179,6 +180,9 @@ private:
 	bool canUpdateGsm_;
 	bool canUpdateWcdma_;
 	bool canUpdateLte_;
+
+	Settings settings_;
+	SettingsIO settingsIO_;
 
 	//bool canRecordData_;
 };

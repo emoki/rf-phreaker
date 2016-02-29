@@ -7,14 +7,17 @@
 class CollectionInfoList : public QObject {
 	Q_OBJECT
 	Q_PROPERTY(QQmlListProperty<CollectionInfo> list READ list NOTIFY listChanged)
+    Q_PROPERTY(int size READ size NOTIFY sizeChanged)
 
 signals:
 	void listChanged();
+    void sizeChanged();
 
 public:
 	CollectionInfoList(QObject *parent = 0);
 
 	QQmlListProperty<CollectionInfo> list();
+    int size() { return list_.size(); }
 
 	Q_INVOKABLE void remove(int index);
 	Q_INVOKABLE void append(CollectionInfo *item);
@@ -24,6 +27,7 @@ public:
 
 	void setList(const QList<CollectionInfo*> &list);
 	const QList<CollectionInfo *> &qlist() const;
+
 private:
 	static void append(QQmlListProperty<CollectionInfo> *list, CollectionInfo *item);
 	static CollectionInfo* at(QQmlListProperty<CollectionInfo> *list, int index);

@@ -102,12 +102,16 @@ Api::Api(QObject *parent)
 
 Api::~Api() {
 	thread_->quit();
+	settingsIO_.writeSettings(settings_);
+	settingsIO_.writeScanList(scanList_->qlist());
 	thread_->wait();
 	rp_clean_up();
 }
 
 void Api::initializeApi() {
 	QCoreApplication::postEvent(thread_->worker(), new InitializeApiEvent(&callbacks_));
+	settingsIO_.readSettings(settings_);
+	scanList_->setList(settingsIO_.readScanList());
 }
 
 void Api::cleanUpApi() {
