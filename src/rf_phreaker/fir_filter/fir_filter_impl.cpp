@@ -56,9 +56,16 @@ fir_filter_impl::~fir_filter_impl()
 
 void fir_filter_impl::set_up_down_factor_based_on_sampling_rates(frequency_type original_sampling_rate, frequency_type new_sampling_rate)
 {
-	auto lcm = boost::math::lcm(original_sampling_rate, new_sampling_rate);
-
-	set_up_down_factor(static_cast<int>(lcm / original_sampling_rate), static_cast<int>(lcm / new_sampling_rate));
+	if(original_sampling_rate % new_sampling_rate == 0) {
+		set_up_down_factor(1, original_sampling_rate / new_sampling_rate);
+	}
+	else if(new_sampling_rate % original_sampling_rate == 0) {
+		set_up_down_factor(new_sampling_rate / original_sampling_rate, 1);
+	}
+	else {
+		auto lcm = boost::math::lcm(original_sampling_rate, new_sampling_rate);
+		set_up_down_factor(static_cast<int>(lcm / original_sampling_rate), static_cast<int>(lcm / new_sampling_rate));
+	}
 }
 
 void fir_filter_impl::set_up_down_factor(int up_factor, int down_factor)
