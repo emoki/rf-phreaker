@@ -1153,12 +1153,12 @@ public:
 	}
 	std::vector<lte_data> get_lte_sweep() {
 		std::vector<lte_data> t;
-		lte_update_pb::populate(pb_->lte_full_scan(), t);
+		lte_update_pb::populate(pb_->lte_sweep(), t);
 		return t;
 	}
 	basic_data get_lte_sweep_basic() {
 		basic_data t;
-		base_pb::populate(pb_->lte_full_scan().base(), t);
+		base_pb::populate(pb_->lte_sweep().base(), t);
 		return t;
 	}
 	static void populate_message(const ::rp_status s, const std::string &str, rp_update *pb) {
