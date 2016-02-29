@@ -715,6 +715,11 @@ rp_status rf_phreaker_impl::start_collection(rp_device *device, const rp_collect
 
 		remove_collection_frequencies_and_bands(device);
 
+		// Initialize packet sizes.
+		read_settings();
+		processing::initialize_collection_info_defaults(config_);
+
+
 		for(int i = 0; i < info->gsm_.size_; ++i) {
 			rp_status status = add_collection_frequency(device, rp_technology::GSM, info->gsm_.e_[i].freq_, info->gsm_.e_[i].band_);
 			if(status != RP_STATUS_OK)
