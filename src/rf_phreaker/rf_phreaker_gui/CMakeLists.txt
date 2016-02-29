@@ -26,11 +26,15 @@ set (rf_phreaker_gui_SRCS
 	CollectionInfoSearch.h
 	Device.h
 	Events.h
+	FileSaveDialog.cpp
+	FileSaveDialog.h
 	Gps.h
 	Gsm.h
+	IO.h
 	Lte.h
 	Serialization.h
 	Settings.h
+	Stats.h
 	Sweep.h
 	Utility.h
 	Wcdma.h
@@ -49,6 +53,16 @@ set (rf_phreaker_gui_QMLS
 	SuggestionTextField.qml
 	SuggestionView.qml)
 
+set (qt_PRIVATE_GUI "C:/bin/qt/5.5/msvc2013/include/QtGui/5.5.1" CACHE STRING "Path to private QT GUI.")
+set (qt_PRIVATE_CORE "C:/bin/qt/5.5/msvc2013/include/QtCore/5.5.1" CACHE STRING "Path to private QT Core.")
+set (qt_PRIVATE_GUIP "C:/bin/qt/5.5/msvc2013/include/QtGui/5.5.1/QtGui" CACHE STRING "Path to private QT GUI.")
+set (qt_PRIVATE_COREP "C:/bin/qt/5.5/msvc2013/include/QtCore/5.5.1/QtCore" CACHE STRING "Path to private QT Core.")
+
+include_directories (${qt_PRIVATE_GUI})	
+include_directories (${qt_PRIVATE_CORE})	
+include_directories (${qt_PRIVATE_GUIP})	
+include_directories (${qt_PRIVATE_COREP})	
+	
 set (rf_phreaker_gui_QRCS
 	qml.qrc)
 

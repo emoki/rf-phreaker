@@ -1,11 +1,13 @@
 import QtQuick 2.5
 import QtQuick.Layouts 1.1
+import QtQuick.Dialogs 1.2
 import QtQuick.Controls 1.4
 import QtQuick.Controls.Styles.Flat 1.0 as Flat
 import QtQuick.Extras 1.4
 import QtQuick.Extras.Private 1.0
 import QtQml.Models 2.2
 import QtQml.StateMachine 1.0 as DSM
+import QtQml 2.2
 import Qt.labs.settings 1.0
 import RfPhreaker 1.0
 
@@ -196,7 +198,10 @@ ApplicationWindow {
                     Layout.fillWidth: true
                     style: CustomFlatButtonStyle { textPixelSize: 25}
                     enabled: Api.deviceStatus === ApiTypes.SCANNING || Api.deviceStatus === ApiTypes.RECORDING
-                    onClicked: Api.stopCollection();
+                    onClicked: {
+						Api.stopCollection();
+						Api.closeCollectionFile();
+					}
                 }
                 Button {
                     id: recordButton
@@ -204,7 +209,9 @@ ApplicationWindow {
                     Layout.fillWidth: true
                     enabled: Api.deviceStatus === ApiTypes.IDLE && Api.scanList.size > 0
                     onClicked: {
-                        dsmOperation.startRecording();
+                        startCollectionDialog.filename = "collection_data_" +
+                                Qt.formatDateTime(new Date(), "yyyy-MMM-dd_hh-mm-ss");
+                        startCollectionDialog.open();
                     }
                     style: CustomFlatButtonStyle { textPixelSize: 25}
 
@@ -328,6 +335,22 @@ ApplicationWindow {
                 sourceComponent: scannerPage
             }
         }
+    }
+    FileSaveDialog{
+        id: startCollectionDialog
+        visible: false
+        title: "Please choose the collection filename"
+        nameFilters: [ "rf phreaker files (*.rfp)", "All files (*)" ]
+//        modality: Qt.WindowModal
+//        folder: shortcuts.documents
+//        selectedNameFilter: "rf phreaker files (*.rfp)"
+//        sidebarVisible: true
+        onAccepted: {
+            Api.collectionFilename = fileUrl;
+            console.log("collection filename is" + fileUrl);
+            dsmOperation.startRecording();
+        }
+        onRejected: { console.log("Cancelled save collection filename.") }
     }
 }
 

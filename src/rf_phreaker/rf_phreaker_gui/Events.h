@@ -117,6 +117,15 @@ public:
 
 
 
+class ProtobufUpdateEvent : public QEvent, public TypeInterface<ProtobufUpdateEvent> {
+public:
+	ProtobufUpdateEvent(const int8_t *google_protocol_buffer_stream, int32_t size) : QEvent(getType()), 
+		data_((const char*)google_protocol_buffer_stream, size) {}
+	QByteArray& data() { return data_; }
+private:
+	QByteArray data_;
+};
+
 class LogUpdateEvent : public QEvent, public TypeInterface<LogUpdateEvent> {
 public:
 	LogUpdateEvent(const QString &msg) : QEvent(getType()), msg_(msg) {}
@@ -180,5 +189,11 @@ private:
 	rp_base base_;
 	QList<rp_lte> list_;
 };
+
+class CloseCollectionFileEvent : public QEvent, public TypeInterface<CloseCollectionFileEvent> {
+public:
+    CloseCollectionFileEvent() : QEvent(getType()) {}
+};
+
 
 //}}

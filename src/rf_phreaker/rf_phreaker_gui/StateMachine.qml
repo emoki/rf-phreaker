@@ -192,6 +192,7 @@ DSM.StateMachine {
                 DSM.SignalTransition {
                     targetState: smRecording
                     signal: dsmOperation.startRecording
+                    guard: Api.collectionFilename !== ""
                 }
             }
             DSM.State {
@@ -245,7 +246,7 @@ DSM.StateMachine {
                 onEntered: {
                     console.debug("Entered smRecording.");
                     Api.deviceStatus = ApiTypes.RECORDING;
-                    Api.canRecordData = true;
+                    Api.openCollectionFile();
                     Api.startCollection();
                 }
                 onExited: {

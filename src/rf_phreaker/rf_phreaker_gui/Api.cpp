@@ -4,9 +4,14 @@
 #include "rf_phreaker/rf_phreaker_gui/Utility.h"
 #include "rf_phreaker/rf_phreaker_gui/Events.h"
 #include "rf_phreaker/rf_phreaker_gui/ApiThreadWorker.h"
+#include "rf_phreaker/protobuf_specific/io.h"
 
 //namespace rf_phreaker { namespace gui {
 
+void (RP_CALLCONV rp_update)(const int8_t *google_protocol_buffer_stream, int32_t size) {
+	QCoreApplication::postEvent(Api::instance(), 
+		new ProtobufUpdateEvent(google_protocol_buffer_stream, size));
+}
 
 void (RP_CALLCONV rp_log_update)(const char *message) {
 	QCoreApplication::postEvent(Api::instance(), new LogUpdateEvent(message));
@@ -78,10 +83,9 @@ Api::Api(QObject *parent)
 	, canUpdateGps_(false)
 	, canUpdateGsm_(false)
 	, canUpdateWcdma_(false)
-	, canUpdateLte_(false)
-
-{
-	callbacks_.rp_update = 0;
+    , canUpdateLte_(false) {
+    canRecordData_ = false;
+	callbacks_.rp_update = rp_update;
 	callbacks_.rp_log_update = rp_log_update;
 	callbacks_.rp_message_update = rp_message_update;
 	callbacks_.rp_device_info_update = rp_device_info_update;
@@ -106,6 +110,7 @@ Api::~Api() {
 	settingsIO_.writeScanList(scanList_->qlist());
 	thread_->wait();
 	rp_clean_up();
+	closeCollectionFile();
 }
 
 void Api::initializeApi() {
@@ -161,6 +166,7 @@ void Api::startCollection() {
 
 void Api::stopCollection() {
 	QCoreApplication::postEvent(thread_->worker(), new StopCollectionEvent());
+	stats_.stop_benchmark();
 }
 
 void Api::updateLicense() {
@@ -201,6 +207,46 @@ void Api::emitSignals() {
 }
 
 bool Api::event(QEvent *e) {
+	if(e->type() == ProtobufUpdateEvent::getType()) {
+		auto ev = static_cast<ProtobufUpdateEvent*>(e);
+		auto &proto = update_pb_.protobuf();
+		proto.ParseFromArray(ev->data().data(), ev->data().size());
+		stats_.update_benchmark(proto.update_case());
+
+		if(canRecordData_) {
+			if(proto.update_case() != rf_phreaker::protobuf::rp_update::UpdateCase::kLog)
+				rf_phreaker::protobuf::write_delimited_to(proto, output_file_.get());
+			if(settings_.api_output_) {
+				api_debug_output_.output_api_data(update_pb_, collectionFilename_, current_gps_);
+			}
+		}
+
+		switch(proto.update_case()) {
+		case rf_phreaker::protobuf::rp_update::UpdateCase::kLog:
+			break;
+		case rf_phreaker::protobuf::rp_update::UpdateCase::kMsg:
+			break;
+		case rf_phreaker::protobuf::rp_update::UpdateCase::kDevice:
+			break;
+		case rf_phreaker::protobuf::rp_update::UpdateCase::kGps:
+			current_gps_ = update_pb_.get_gps();
+			break;
+		case rf_phreaker::protobuf::rp_update::UpdateCase::kGsmFullScan:
+			break;
+		case rf_phreaker::protobuf::rp_update::UpdateCase::kWcdmaFullScan:
+			break;
+		case rf_phreaker::protobuf::rp_update::UpdateCase::kLteFullScan:
+			break;
+		case rf_phreaker::protobuf::rp_update::UpdateCase::kGsmSweep:
+			break;
+		case rf_phreaker::protobuf::rp_update::UpdateCase::kWcdmaSweep:
+			break;
+		case rf_phreaker::protobuf::rp_update::UpdateCase::kLteSweep:
+			break;
+		default:
+			qDebug() << "Unknown protobuf message.";
+		}
+	}
 	if(e->type() == WcdmaUpdateEvent::getType()) {
 		auto ev = static_cast<WcdmaUpdateEvent*>(e);
 		for(auto i = ev->wcdmaList().begin(); i != ev->wcdmaList().end(); ++i) {
@@ -285,6 +331,11 @@ bool Api::event(QEvent *e) {
 		e->accept();
 		return true;
 	}
+	else if(e->type() == CloseCollectionFileEvent::getType()) {
+		close_collection_file();
+		e->accept();
+		return true;
+	}
 
 	return QObject::event(e);
 }
@@ -305,3 +356,35 @@ void Api::handle_message(rp_status status, const QString &s) {
 	messages_.prepend(status_str + s);
 	emit messagesChanged();
 }
+
+bool Api::openCollectionFile(){
+	qDebug() << "Opening collection file. " << collectionFilename_ << ".";
+	collectionFilename_.remove("file:///");
+	output_qfile_.setFileName(collectionFilename_);
+	if(!output_qfile_.open(QIODevice::WriteOnly | QIODevice::Unbuffered)) {
+		qDebug() << "Failed to open collection file. " << output_qfile_.errorString();
+		canRecordData_ = false;
+	}
+	else {
+		output_file_ = std::make_unique<google::protobuf::io::FileOutputStream>(output_qfile_.handle());
+		canRecordData_ = true;
+		stats_.start_benchmark(collectionFilename_.toStdString());
+	}
+
+	return canRecordData_;
+}
+
+void Api::closeCollectionFile() {
+	QCoreApplication::postEvent(Api::instance(), new CloseCollectionFileEvent());
+}
+
+void Api::close_collection_file() {
+	canRecordData_ = false;
+	if(output_file_) {
+		output_file_->Flush();
+		output_file_.reset();
+		output_qfile_.close();
+	}
+	api_debug_output_.close();
+}
+

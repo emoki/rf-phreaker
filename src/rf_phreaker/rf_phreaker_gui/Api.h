@@ -1,9 +1,11 @@
 #pragma once
+#include <atomic>
 #include <QObject>
 #include <QQmlEngine>
 #include <QJSEngine>
 #include <QMutex>
 #include <QTimer>
+#include <QFile>
 #include "rf_phreaker/rf_phreaker_gui/CollectionInfoList.h"
 #include "rf_phreaker/rf_phreaker_gui/Device.h"
 #include "rf_phreaker/rf_phreaker_gui/Gps.h"
@@ -12,6 +14,10 @@
 #include "rf_phreaker/rf_phreaker_gui/Lte.h"
 #include "rf_phreaker/rf_phreaker_gui/Sweep.h"
 #include "rf_phreaker/rf_phreaker_gui/Settings.h"
+#include "rf_phreaker/rf_phreaker_gui/IO.h"
+#include "rf_phreaker/rf_phreaker_gui/Stats.h"
+#include "rf_phreaker/protobuf_specific/rf_phreaker_serialization.h"
+#include <google/protobuf/io/zero_copy_stream_impl.h>
 
 //namespace rf_phreaker { namespace gui {
 
@@ -31,12 +37,11 @@ class Api : public QObject {
 	Q_PROPERTY(Gps* gps READ gps NOTIFY gpsChanged)
 	Q_PROPERTY(QList<QObject*> wcdmaList READ wcdmaList NOTIFY wcdmaListChanged)
 	Q_PROPERTY(QList<QObject*> lteList READ lteList NOTIFY lteListChanged)
-	//Q_PROPERTY(bool canRecordData READ canRecordData WRITE setCanRecordData NOTIFY canRecordDataChanged)
 	//	Q_PROPERTY( READ WRITE set NOTIFY Changed)
 
 	Q_PROPERTY(QStringList availableDevices READ availableDevices NOTIFY availableDevicesChanged)
 	Q_PROPERTY(QString deviceSerial READ deviceSerial WRITE setDeviceSerial NOTIFY deviceSerialChanged)
-	//Q_PROPERTY( READ NOTIFY Changed)
+	Q_PROPERTY(QString collectionFilename READ collectionFilename WRITE setCollectionFilename NOTIFY collectionFilenameChanged)
 	//	Q_PROPERTY( READ WRITE set NOTIFY Changed)
 
 public:
@@ -52,6 +57,7 @@ public:
 	QStringList log() { return log_; }
 	QStringList messages() { return messages_; }
 	QString deviceSerial() const { return deviceSerial_; }
+	QString collectionFilename() const { return collectionFilename_; }
 	Device* connectedDevice() { return &connectedDevice_; }
 	Gps* gps() { return &gps_; }
 	QList<QObject*> wcdmaList() { return wcdmaList_; }
@@ -85,19 +91,19 @@ public:
 		}
 	}
 
-//	void setCanRecordData(bool r) {
-//		if(canRecordData_ != r) {
-//			canRecordData_ = r;
-//			emit canRecordDataChanged();
-//		}
-//	}
-
 	void setDeviceSerial(QString s) {
 		if(deviceSerial_ != s) {
 			deviceSerial_ = s;
 			emit deviceSerialChanged();
 		}
-	}
+    }
+
+    void setCollectionFilename(QString s) {
+        if(collectionFilename_ != s) {
+            collectionFilename_ = s;
+            emit collectionFilenameChanged();
+        }
+    }
 
 	Q_INVOKABLE void initializeApi();
 	Q_INVOKABLE void listDevices();
@@ -107,6 +113,8 @@ public:
 	Q_INVOKABLE void stopCollection();
 	Q_INVOKABLE void updateLicense();
 	Q_INVOKABLE void cleanUpApi();
+	Q_INVOKABLE bool openCollectionFile();
+	Q_INVOKABLE void closeCollectionFile();
 
 signals:
 	void scanListChanged();
@@ -122,8 +130,8 @@ signals:
 	void gpsChanged();
 	void wcdmaListChanged();
 	void lteListChanged();
-	//void canRecordDataChanged();
 	void deviceSerialChanged();
+	void collectionFilenameChanged();
 
 	// Signals for state machine
 	void numDevicesConnected(int numDevices);
@@ -146,6 +154,7 @@ private slots:
 private:
 	explicit Api(QObject *parent = 0);
 	void handle_message(rp_status status, const QString &s);
+	void close_collection_file(); // Handled internally using the event loop so we don't have to worry about threading issues.
 
 	static Api *instance_;
 	static QMutex instance_mutex_;
@@ -158,6 +167,7 @@ private:
 	QStringList messages_;
 	QStringList error_messages_;
 	QString deviceSerial_;
+	QString collectionFilename_;
 	Device connectedDevice_;
 	Gps gps_;
 	QList<QObject*> wcdmaList_;
@@ -180,11 +190,20 @@ private:
 	bool canUpdateGsm_;
 	bool canUpdateWcdma_;
 	bool canUpdateLte_;
+	std::atomic_bool canRecordData_;
+
+	rf_phreaker::protobuf::update_pb update_pb_;
+	rf_phreaker::gps current_gps_;
+
+	QFile output_qfile_;
+	std::unique_ptr<google::protobuf::io::FileOutputStream> output_file_;
 
 	Settings settings_;
 	SettingsIO settingsIO_;
 
-	//bool canRecordData_;
+	IO api_debug_output_;
+
+	Stats stats_;
 };
 
 //}}

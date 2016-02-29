@@ -1,10 +1,10 @@
 #pragma once
 #include <QtQml/qqml.h>
+#include "rf_phreaker/rf_phreaker_gui/Api.h"
 #include "rf_phreaker/rf_phreaker_gui/ApiTypes.h"
 #include "rf_phreaker/rf_phreaker_gui/ChannelFreq.h"
 #include "rf_phreaker/rf_phreaker_gui/CollectionInfoList.h"
 #include "rf_phreaker/rf_phreaker_gui/CollectionInfoSearch.h"
-#include "rf_phreaker/rf_phreaker_gui/Api.h"
 #include "rf_phreaker/rf_phreaker_gui/Device.h"
 #include "rf_phreaker/rf_phreaker_gui/Gps.h"
 #include "rf_phreaker/rf_phreaker_gui/Gsm.h"
@@ -12,6 +12,8 @@
 #include "rf_phreaker/rf_phreaker_gui/Lte.h"
 #include "rf_phreaker/rf_phreaker_gui/Sweep.h"
 #include "rf_phreaker/rf_phreaker_gui/Base.h"
+#include "rf_phreaker/rf_phreaker_gui/Serialization.h"
+#include "rf_phreaker/rf_phreaker_gui/FileSaveDialog.h"
 
 //namespace rf_phreaker { namespace gui {
 
@@ -27,6 +29,7 @@ void registerQmlTypes()
 
 	qmlRegisterSingletonType<Api>(uri.latin1(), 1, 0, "Api", ApiInterfaceSingletonTypeProvider);
 	qmlRegisterType<ApiTypes>(uri.latin1(), 1, 0, "ApiTypes");
+	qmlRegisterType<ChannelFreq>(uri.latin1(), 1, 0, "ChannelFreq");
 	qmlRegisterType<CollectionInfo>(uri.latin1(), 1, 0, "CollectionInfo");
 	qmlRegisterType<CollectionInfoList>(uri.latin1(), 1, 0, "CollectionInfoList");
 	qmlRegisterType<CollectionInfoSearch>(uri.latin1(), 1, 0, "CollectionInfoSearch");
@@ -36,8 +39,11 @@ void registerQmlTypes()
 	qmlRegisterType<Wcdma>(uri.latin1(), 1, 0, "Wcdma");
 	qmlRegisterType<Lte>(uri.latin1(), 1, 0, "Lte");
 	qmlRegisterType<Sweep>(uri.latin1(), 1, 0, "Sweep");
-	qmlRegisterType<Sweep>(uri.latin1(), 1, 0, "Base");
+    qmlRegisterType<Sweep>(uri.latin1(), 1, 0, "Base");
+    qmlRegisterType<FileSaveDialog>(uri.latin1(), 1, 0, "FileSaveDialog");
+
 	qRegisterMetaTypeStreamOperators<rf_phreaker::channel_freq>("channel_freq");
 	qRegisterMetaTypeStreamOperators<::rp_technology>("rp_technology");
 }
 
+//}}
