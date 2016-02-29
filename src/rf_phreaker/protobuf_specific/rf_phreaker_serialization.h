@@ -22,6 +22,7 @@ public:
 		return buf_.size();
 	}
 	typename Pb&  protobuf() { return *pb_.get(); }
+	const typename Pb&  protobuf_const() const { return *pb_.get(); }
 protected:
 	std::unique_ptr<Pb> pb_;
 	std::string buf_;
