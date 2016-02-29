@@ -116,14 +116,8 @@ inline std::string timestamp_string() {
 class static_timestamp
 {
 public:
-	static std::string to_string() {
-		if(timestamp_.empty())
-			timestamp_ = timestamp_string();
-		return timestamp_;
-	}
-	static void clear() {
-		timestamp_.clear();
-	}
+	static std::string to_string();
+	static void clear();
 private:
 	static std::string timestamp_;
 };

@@ -48,7 +48,8 @@ set (common_SRCS
 	stats_tracker.h
 	${SRC_PLATFORM_SPECIFIC}/stdafx.cpp)
 
-add_library (common STATIC ${common_SRCS})
+set(CMAKE_WINDOWS_EXPORT_ALL_SYMBOLS ON)
+add_library (common SHARED ${common_SRCS}) 
 target_link_libraries (common ${TBB_LIBRARY})
 target_link_libraries (common ipp_custom)
 target_link_libraries (common g3logger_shared)
