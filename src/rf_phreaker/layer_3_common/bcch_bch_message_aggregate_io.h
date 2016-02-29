@@ -30,21 +30,13 @@ inline std::ostream& operator << (std::ostream &os, const std::vector<bit_stream
 }
 
 inline std::ostream& header(std::ostream &os, const bcch_bch_message_aggregate &t) {
-	os << "mcc" << main_delim
-		<< "mnc" << main_delim
-		<< "lac" << main_delim
-		<< "cid" << main_delim
-		<< "raw_layer_3";
+	os << "raw_layer_3";
 	return os;
 }
 
 inline std::ostream& operator << (std::ostream &os, const bcch_bch_message_aggregate &t)
 {
-	os << t.mcc_ << main_delim
-		<< t.mnc_ << main_delim
-		<< t.lac_ << main_delim
-		<< t.cid_ << main_delim
-		<< t.raw_layer_3_;
+	os << t.raw_layer_3_;
 	return os;
 }
 
