@@ -357,6 +357,12 @@ public:
 		freq_decode_count_.clear();
 	}
 
+	void clear_history(rf_phreaker::frequency_type f) {
+		auto freq_history = all_layer_3_history_.find(f);
+		if(freq_history != all_layer_3_history_.end())
+			freq_history->second.clear();
+	}
+
 	void clear_freq(rf_phreaker::frequency_type f) {
 		auto it = freq_max_updates_.find(f);
 		if(it != freq_max_updates_.end())
