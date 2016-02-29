@@ -54,8 +54,7 @@ void cpich_table_container::generate_resampled_cpich_table(rf_phreaker::frequenc
 
 	configure(filter.up_factor(), filter.down_factor(), num_chips);
 
-	// Use a longer length for the taps because we're only doing this once.
-	filter.set_taps(6501);
+	filter.set_taps();
 
 	generate_resampled_cpich_table(&filter);
 }
