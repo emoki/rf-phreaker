@@ -215,6 +215,10 @@ collection_info_container* get_next_container() {
 	return *ordered_containers_it_;
 }
 
+collection_info_container* get_current_container() {
+	return *ordered_containers_it_;
+}
+
 bool is_done() const { return is_done_; }
 
 int64_t current_container_collection_round() const { return (*ordered_containers_it_)->collection_round(); }

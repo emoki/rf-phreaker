@@ -449,7 +449,7 @@ rp_status rf_phreaker_impl::add_collection_frequency(rp_device *device, rp_techn
 
 		if(it == containers_.end()) {
 			// If simultaneous collection is enabled we do not want to stop collection after one iteration of freqs.
-			containers_.push_back(collection_info_container(specifier, !config_.simultaneous_collection_));
+			containers_.push_back(collection_info_container(specifier, find_collection_settings(specifier, config_).is_streaming_));
 			it = std::find_if(containers_.begin(), containers_.end(), [&](const collection_info_container &c) {
 				return c.has_specifier(specifier);
 			});

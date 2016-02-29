@@ -75,8 +75,8 @@ public:
 		collection_info ci;
 		if(scheduler_.get_next_collection_info(ci)) {
 			std::shared_ptr<scanner::measurement_info> meas_ptr;
-			if(ci.specs_.has_spec(GSM_LAYER_3_DECODE))
-				meas_ptr = std::make_shared<scanner::measurement_info>(scanner_interface_->stream_rf_data(ci.freq_, ci.time_ns_, 35000000, ci.bandwidth_, ci.sampling_rate_).get());
+			if(scheduler_.get_current_container()->is_streaming_)
+				meas_ptr = std::make_shared<scanner::measurement_info>(scanner_interface_->stream_rf_data(ci.freq_, ci.time_ns_, ci.overlap_time_ns_, ci.bandwidth_, ci.sampling_rate_).get());
 			else
 				meas_ptr = std::make_shared<scanner::measurement_info>(scanner_interface_->get_rf_data(ci.freq_, ci.time_ns_, ci.bandwidth_, ci.sampling_rate_).get());
 
