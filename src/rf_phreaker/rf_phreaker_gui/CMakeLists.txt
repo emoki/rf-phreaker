@@ -43,9 +43,13 @@ set (rf_phreaker_gui_SRCS
 
 set (rf_phreaker_gui_QMLS
 	ChannelList.qml
+	CustomFlatButtonStyle.qml
+	DataAnalysisLabel.qml
+	DataAnalysisPage.qml
 	ErrorWindow.qml
 	main.qml
 	MapPage.qml
+	ScanConfigurationPage.qml
 	ScannerPage.qml
 	SelectScannerWindow.qml
 	SideBarLabel.qml
