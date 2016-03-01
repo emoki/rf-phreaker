@@ -32,6 +32,7 @@ ApplicationWindow {
     property MapPage mapPage: Component { MapPage {} }
     property ScanConfigurationPage scanConfigurationPage: Component { ScanConfigurationPage {} }
     property DataAnalysisPage dataAnalysisPage: Component { DataAnalysisPage {} }
+    property WorkbenchPage workbenchPage: Component { WorkbenchPage {} }
 
     onClosing: {
         console.debug("Closing main app!");
@@ -307,7 +308,7 @@ ApplicationWindow {
                 text: "WorkBench"
                 MouseArea {
                     anchors.fill: parent
-                    onClicked: contentLoader.sourceComponent = testBenchPage;
+                    onClicked: contentLoader.sourceComponent = workbenchPage;
                 }
             }
         }

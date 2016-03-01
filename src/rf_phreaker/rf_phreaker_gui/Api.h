@@ -115,6 +115,8 @@ public:
 	Q_INVOKABLE void cleanUpApi();
 	Q_INVOKABLE bool openCollectionFile();
 	Q_INVOKABLE void closeCollectionFile();
+	Q_INVOKABLE void convertRfp(QString filename);
+
 
 signals:
 	void scanListChanged();

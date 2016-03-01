@@ -410,3 +410,8 @@ void Api::close_collection_file() {
 	api_debug_output_.close();
 }
 
+void Api::convertRfp(QString filename) {
+	filename.remove("file:///");
+	IO::convert_rpf(filename);
+}
+

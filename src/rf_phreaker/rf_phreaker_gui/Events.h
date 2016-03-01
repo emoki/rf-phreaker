@@ -195,5 +195,10 @@ public:
     CloseCollectionFileEvent() : QEvent(getType()) {}
 };
 
+class ConvertRpfEvent : public QEvent, public TypeInterface<ConvertRpfEvent> {
+public:
+    ConvertRpfEvent() : QEvent(getType()) {}
+};
+
 
 //}}

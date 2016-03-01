@@ -51,7 +51,8 @@ set (rf_phreaker_gui_QMLS
 	SideBarLabel.qml
 	StateMachine.qml
 	SuggestionTextField.qml
-	SuggestionView.qml)
+	SuggestionView.qml
+	WorkbenchPage.qml)
 
 set (qt_PRIVATE_GUI "C:/bin/qt/5.5/msvc2013/include/QtGui/5.5.1" CACHE STRING "Path to private QT GUI.")
 set (qt_PRIVATE_CORE "C:/bin/qt/5.5/msvc2013/include/QtCore/5.5.1" CACHE STRING "Path to private QT Core.")
