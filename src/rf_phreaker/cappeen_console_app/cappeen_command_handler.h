@@ -21,7 +21,7 @@ public:
 
 	std::string get_serial_id();
 
-	void start_collection(std::vector<beagle_api::TECHNOLOGIES_AND_BANDS> &bands);
+	void start_collection(std::vector<beagle_api::TECHNOLOGIES_AND_BANDS> &bands, bool perform_quick_scan);
 
 	void stop_collection();
 

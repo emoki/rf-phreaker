@@ -33,6 +33,7 @@ int _tmain(int argc, _TCHAR* argv[])
 	int time_min;
 	int iterations;
 	bool should_report;
+	bool perform_quick_scan;
 
 	try {
 		po::options_description desc("Allowed options");
@@ -80,6 +81,7 @@ int _tmain(int argc, _TCHAR* argv[])
 			("upload_license,u", po::value<std::string>(), "Upload new license to scanner.  Include full path and filename.")
 			("upload_license_hardware_id,s", po::value<std::string>(), "Hardware ID used when uploading a license.  Only necessary when overwriting a corrupt license.")
 			("iterations,i", po::value<int>(&iterations)->default_value(1))
+			("perform_quick_scan,q", po::value<bool>(&perform_quick_scan)->default_value(false), "Perfrom quick scan.")
 			;
 
 		// Read command line.
@@ -146,7 +148,7 @@ int _tmain(int argc, _TCHAR* argv[])
 						auto start = std::chrono::high_resolution_clock::now();
 						while(std::chrono::high_resolution_clock::now() - start < std::chrono::minutes(time_min)) {
 							if(!c_dispatcher.is_collecting()) {
-								c_command_handler.start_collection(tech_bands);
+								c_command_handler.start_collection(tech_bands, perform_quick_scan);
 							}
 							std::this_thread::sleep_for(std::chrono::milliseconds(500));
 							if(c_dispatcher.has_fatal_error_occurred()) {

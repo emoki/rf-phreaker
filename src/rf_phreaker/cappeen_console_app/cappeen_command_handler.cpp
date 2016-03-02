@@ -16,7 +16,7 @@ cappeen_command_handler::~cappeen_command_handler(void)
 {
 }
 
-void cappeen_command_handler::start_collection(std::vector<beagle_api::TECHNOLOGIES_AND_BANDS> &bands)
+void cappeen_command_handler::start_collection(std::vector<beagle_api::TECHNOLOGIES_AND_BANDS> &bands, bool perform_quick_scan)
 {
 	simple_logger::instance().log("Starting collection.");
 
@@ -29,7 +29,10 @@ void cappeen_command_handler::start_collection(std::vector<beagle_api::TECHNOLOG
 	info.tech_and_bands_to_sweep_.num_elements_ = bands.size();
 	info.frequencies_to_scan_.num_elements_ = 0;
 
-	long error = beagle_->start_collection(info);
+	if(perform_quick_scan)
+		std::cout << "Performing quick scan.";
+
+	long error = beagle_->start_collection(info, perform_quick_scan);
 
 	if(error)
 		throw std::runtime_error("Error starting collection.  Error code: " + boost::lexical_cast<std::string>(error));
