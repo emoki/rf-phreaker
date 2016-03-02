@@ -45,7 +45,7 @@ void CollectionInfoSearch::populateWithWcdma() {
 	// Try to treat query as channel.  If successful add it to list.
 	auto cf = finder_.uarfcn_to_frequency(tmp_channel_);
 	if(cf.is_valid()) {
-		results_.append(new CollectionInfo(cf, ApiTypes::WCDMA));
+		results_.append(new CollectionInfo(cf, ApiTypes::WCDMA_FULL_SCAN));
 		populateWithWcdmaFreqRange(cf);
 	}
 	// Find all possible options if it was a frequency.
@@ -53,7 +53,7 @@ void CollectionInfoSearch::populateWithWcdma() {
 	for(auto r : ranges) {
 		auto cf = finder_.frequency_to_uarfcn(tmp_freq_, r.band_);
 		if(cf.is_valid()) {
-			results_.append(new CollectionInfo(cf, ApiTypes::WCDMA));
+			results_.append(new CollectionInfo(cf, ApiTypes::WCDMA_FULL_SCAN));
 			populateWithWcdmaFreqRange(cf);
 		}
 	}
@@ -63,14 +63,14 @@ void CollectionInfoSearch::populateWithWcdmaFreqRange(const rf_phreaker::channel
 	auto r = finder_.ranges_.get_band_freq_range(cf.band_);
 	auto cf_low = finder_.frequency_to_uarfcn(r.low_freq_hz_, r.band_);
 	auto cf_high = finder_.frequency_to_uarfcn(r.high_freq_hz_, r.band_);
-	results_.append(new CollectionInfo(cf_low, cf_high, ApiTypes::WCDMA));
+	results_.append(new CollectionInfo(cf_low, cf_high, ApiTypes::WCDMA_SWEEP));
 }
 
 void CollectionInfoSearch::populateWithLte() {
 	// Try to treat query as channel.  If successful add it to list.
 	auto cf = finder_.earfcn_to_frequency(tmp_channel_);
 	if(cf.is_valid()) {
-		results_.append(new CollectionInfo(cf, ApiTypes::LTE));
+		results_.append(new CollectionInfo(cf, ApiTypes::LTE_FULL_SCAN));
 		populateWithLteFreqRange(cf);
 	}
 	// Find all possible options if it was a frequency.
@@ -78,7 +78,7 @@ void CollectionInfoSearch::populateWithLte() {
 	for(auto r : ranges) {
 		auto cf = finder_.frequency_to_earfcn(tmp_freq_, r.band_);
 		if(cf.is_valid()) {
-			results_.append(new CollectionInfo(cf, ApiTypes::LTE));
+			results_.append(new CollectionInfo(cf, ApiTypes::LTE_FULL_SCAN));
 			populateWithLteFreqRange(cf);
 		}
 	}
@@ -88,7 +88,7 @@ void CollectionInfoSearch::populateWithLteFreqRange(const rf_phreaker::channel_f
 	auto r = finder_.ranges_.get_band_freq_range(cf.band_);
 	auto cf_low = finder_.frequency_to_earfcn(r.low_freq_hz_, r.band_);
 	auto cf_high = finder_.frequency_to_earfcn(r.high_freq_hz_, r.band_);
-	results_.append(new CollectionInfo(cf_low, cf_high, ApiTypes::LTE));
+	results_.append(new CollectionInfo(cf_low, cf_high, ApiTypes::LTE_SWEEP));
 }
 
 void CollectionInfoSearch::populateWithRaw() {

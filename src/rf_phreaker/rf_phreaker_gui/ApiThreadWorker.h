@@ -164,9 +164,9 @@ private:
 		qDebug() << "Starting collection.";
 
 		rp_collection_info info;
-		info.gsm_ = techs[ApiTypes::GSM].get_group();
-		info.wcdma_ = techs[ApiTypes::WCDMA].get_group();
-		info.lte_ = techs[ApiTypes::LTE].get_group();
+		info.gsm_ = techs[ApiTypes::GSM_FULL_SCAN].get_group();
+		info.wcdma_ = techs[ApiTypes::WCDMA_FULL_SCAN].get_group();
+		info.lte_ = techs[ApiTypes::LTE_FULL_SCAN].get_group();
 		info.raw_data_ = raw.get_group();
 		info.sweep_ = sweep.get_group();
 

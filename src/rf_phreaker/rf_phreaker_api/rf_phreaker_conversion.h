@@ -45,38 +45,26 @@ inline rp_status to_rp_status(const rf_phreaker_error &err) {
 	}
 }
 
-inline rf_phreaker::specifier to_sweep_specifier(rp_technology tech) {
-	switch(tech) {
-	case GSM:
-		return GSM_SWEEP;
-    case WCDMA:
-		return UMTS_SWEEP;
-	case LTE:
-		return LTE_SWEEP;
-	case CDMA:
-		return CDMA_SWEEP;
-	case RAW_DATA:
-        return RAW_DATA;
-	default:
-		throw rf_phreaker_api_error("sweep specifier not supported.");
-	}
+inline rf_phreaker::specifier to_sweep_specifier(rf_phreaker::operating_band b) {
+	if(b >= FIRST_GSM_OPERATING_BAND && b <= LAST_GSM_OPERATING_BAND)
+		return GSM_LAYER_3_DECODE;
+	else if(b >= FIRST_UMTS_OPERATING_BAND && b <= LAST_UMTS_OPERATING_BAND)
+		return UMTS_LAYER_3_DECODE;
+	else if(b >= FIRST_LTE_OPERATING_BAND && b <= LAST_LTE_OPERATING_BAND)
+		return LTE_LAYER_3_DECODE;
+	else
+		throw rf_phreaker_api_error("Unable to convert operating band to layer 3 specifier.");
 }
 
-inline rf_phreaker::specifier to_layer_3_specifier(rp_technology tech) {
-	switch(tech) {
-	case GSM:
-		return GSM_LAYER_3_DECODE;
-    case WCDMA:
-		return UMTS_LAYER_3_DECODE;
-	case LTE:
-		return LTE_LAYER_3_DECODE;
-	case CDMA:
-		return CDMA_LAYER_3_DECODE;
-	case RAW_DATA:
-        return RAW_DATA;
-	default:
-		throw rf_phreaker_api_error("sweep specifier not supported.");
-	}
+inline rf_phreaker::specifier to_layer_3_specifier(rf_phreaker::operating_band b) {
+	if(b >= FIRST_GSM_OPERATING_BAND && b <= LAST_GSM_OPERATING_BAND)
+		return GSM_SWEEP;
+	else if(b >= FIRST_UMTS_OPERATING_BAND && b <= LAST_UMTS_OPERATING_BAND)
+		return UMTS_SWEEP;
+	else if(b >= FIRST_LTE_OPERATING_BAND && b <= LAST_LTE_OPERATING_BAND)
+		return LTE_SWEEP;
+	else
+		throw rf_phreaker_api_error("Unable to convert operating band to sweep specifier.");
 }
 
 inline rp_device_communication to_api_device_communication(device_communication t) {

@@ -135,30 +135,6 @@ inline bool rp_status_Parse(
   return ::google::protobuf::internal::ParseNamedEnum<rp_status>(
     rp_status_descriptor(), name, value);
 }
-enum rp_technology {
-  GSM = 0,
-  CDMA = 1,
-  WCDMA = 2,
-  LTE = 3,
-  RAW_DATA = 4,
-  rp_technology_INT_MIN_SENTINEL_DO_NOT_USE_ = ::google::protobuf::kint32min,
-  rp_technology_INT_MAX_SENTINEL_DO_NOT_USE_ = ::google::protobuf::kint32max
-};
-bool rp_technology_IsValid(int value);
-const rp_technology rp_technology_MIN = GSM;
-const rp_technology rp_technology_MAX = RAW_DATA;
-const int rp_technology_ARRAYSIZE = rp_technology_MAX + 1;
-
-const ::google::protobuf::EnumDescriptor* rp_technology_descriptor();
-inline const ::std::string& rp_technology_Name(rp_technology value) {
-  return ::google::protobuf::internal::NameOfEnum(
-    rp_technology_descriptor(), value);
-}
-inline bool rp_technology_Parse(
-    const ::std::string& name, rp_technology* value) {
-  return ::google::protobuf::internal::ParseNamedEnum<rp_technology>(
-    rp_technology_descriptor(), name, value);
-}
 enum rp_operating_band {
   OPERATING_BAND_UNKNOWN = 0,
   GSM_T_380 = 0,
@@ -12785,11 +12761,6 @@ template <> struct is_proto_enum< ::rf_phreaker::protobuf::rp_status> : ::google
 template <>
 inline const EnumDescriptor* GetEnumDescriptor< ::rf_phreaker::protobuf::rp_status>() {
   return ::rf_phreaker::protobuf::rp_status_descriptor();
-}
-template <> struct is_proto_enum< ::rf_phreaker::protobuf::rp_technology> : ::google::protobuf::internal::true_type {};
-template <>
-inline const EnumDescriptor* GetEnumDescriptor< ::rf_phreaker::protobuf::rp_technology>() {
-  return ::rf_phreaker::protobuf::rp_technology_descriptor();
 }
 template <> struct is_proto_enum< ::rf_phreaker::protobuf::rp_operating_band> : ::google::protobuf::internal::true_type {};
 template <>

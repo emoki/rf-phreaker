@@ -51,11 +51,11 @@ public:
 
 	rp_status get_device_info(rp_device *device, rp_device_info *device_info);
 
-	rp_status add_collection_frequency(rp_device *device, rp_technology data, rp_frequency_type freq, rp_operating_band band);
+	rp_status add_collection_frequency(rp_device *device, rp_frequency_type freq, rp_operating_band band);
 
 	//rp_status add_collection_channel(rp_device *device, rp_technology data, rp_channel_type channel);
 
-	rp_status remove_collection_frequency(rp_device *device, rp_technology data, rp_frequency_type freq, rp_operating_band band);
+	rp_status remove_collection_frequency(rp_device *device, rp_frequency_type freq, rp_operating_band band);
 
 	rp_status add_sweep_operating_band(rp_device *device, rp_operating_band band);
 

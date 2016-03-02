@@ -73,14 +73,6 @@ typedef enum rp_status {
 	RP_STATUS_UNKNOWN_ERROR
 } rp_status;
 
-typedef enum rp_technology {
-	GSM,
-	CDMA,
-	WCDMA,
-	LTE,
-	RAW_DATA
-} rp_technology;
-
 typedef enum rp_operating_band {
 	OPERATING_BAND_UNKNOWN,
 

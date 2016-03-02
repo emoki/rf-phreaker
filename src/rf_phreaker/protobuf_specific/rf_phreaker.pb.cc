@@ -209,7 +209,6 @@ const ::google::protobuf::Descriptor* rp_raw_data_descriptor_ = NULL;
 const ::google::protobuf::internal::GeneratedMessageReflection*
   rp_raw_data_reflection_ = NULL;
 const ::google::protobuf::EnumDescriptor* rp_status_descriptor_ = NULL;
-const ::google::protobuf::EnumDescriptor* rp_technology_descriptor_ = NULL;
 const ::google::protobuf::EnumDescriptor* rp_operating_band_descriptor_ = NULL;
 const ::google::protobuf::EnumDescriptor* rp_device_communication_descriptor_ = NULL;
 const ::google::protobuf::EnumDescriptor* rp_band_indicator_type_descriptor_ = NULL;
@@ -1287,16 +1286,15 @@ void protobuf_AssignDesc_rf_5fphreaker_2eproto() {
       GOOGLE_PROTOBUF_GENERATED_MESSAGE_FIELD_OFFSET(rp_raw_data, _internal_metadata_),
       GOOGLE_PROTOBUF_GENERATED_MESSAGE_FIELD_OFFSET(rp_raw_data, _is_default_instance_));
   rp_status_descriptor_ = file->enum_type(0);
-  rp_technology_descriptor_ = file->enum_type(1);
-  rp_operating_band_descriptor_ = file->enum_type(2);
-  rp_device_communication_descriptor_ = file->enum_type(3);
-  rp_band_indicator_type_descriptor_ = file->enum_type(4);
-  rp_duplex_type_descriptor_ = file->enum_type(5);
-  rp_utran_bandwidth_type_descriptor_ = file->enum_type(6);
-  rp_eutran_bandwidth_type_descriptor_ = file->enum_type(7);
-  rp_lte_sib_type_descriptor_ = file->enum_type(8);
-  rp_lte_band_class_cdma_2000_type_descriptor_ = file->enum_type(9);
-  rp_sample_format_type_descriptor_ = file->enum_type(10);
+  rp_operating_band_descriptor_ = file->enum_type(1);
+  rp_device_communication_descriptor_ = file->enum_type(2);
+  rp_band_indicator_type_descriptor_ = file->enum_type(3);
+  rp_duplex_type_descriptor_ = file->enum_type(4);
+  rp_utran_bandwidth_type_descriptor_ = file->enum_type(5);
+  rp_eutran_bandwidth_type_descriptor_ = file->enum_type(6);
+  rp_lte_sib_type_descriptor_ = file->enum_type(7);
+  rp_lte_band_class_cdma_2000_type_descriptor_ = file->enum_type(8);
+  rp_sample_format_type_descriptor_ = file->enum_type(9);
 }
 
 namespace {
@@ -1848,96 +1846,94 @@ void protobuf_AddDesc_rf_5fphreaker_2eproto() {
     "R\020\016\022%\n!RP_STATUS_GPS_COMMUNICATION_ERROR"
     "\020\017\022#\n\037RP_STATUS_RF_PHREAKER_API_ERROR\020\020\022"
     "\033\n\027RP_STATUS_GENERIC_ERROR\020\021\022\033\n\027RP_STATU"
-    "S_UNKNOWN_ERROR\020\022*D\n\rrp_technology\022\007\n\003GS"
-    "M\020\000\022\010\n\004CDMA\020\001\022\t\n\005WCDMA\020\002\022\007\n\003LTE\020\003\022\014\n\010RAW"
-    "_DATA\020\004*\232\020\n\021rp_operating_band\022\032\n\026OPERATI"
-    "NG_BAND_UNKNOWN\020\000\022\r\n\tGSM_T_380\020\000\022\r\n\tGSM_"
-    "T_410\020\001\022\013\n\007GSM_450\020\002\022\013\n\007GSM_480\020\003\022\013\n\007GSM"
-    "_710\020\004\022\013\n\007GSM_750\020\005\022\r\n\tGSM_T_810\020\006\022\013\n\007GS"
-    "M_850\020\007\022\r\n\tGSM_P_900\020\010\022\r\n\tGSM_E_900\020\t\022\r\n"
-    "\tGSM_R_900\020\n\022\016\n\nGSM_ER_900\020\013\022\r\n\tGSM_T_90"
-    "0\020\014\022\020\n\014GSM_DCS_1800\020\r\022\020\n\014GSM_PCS_1900\020\016\022"
-    "\031\n\025UMTS_OPERATING_BAND_1\020\017\022\031\n\025UMTS_OPERA"
-    "TING_BAND_2\020\020\022\031\n\025UMTS_OPERATING_BAND_3\020\021"
-    "\022\031\n\025UMTS_OPERATING_BAND_4\020\022\022\031\n\025UMTS_OPER"
-    "ATING_BAND_5\020\023\022\031\n\025UMTS_OPERATING_BAND_6\020"
-    "\024\022\031\n\025UMTS_OPERATING_BAND_7\020\025\022\031\n\025UMTS_OPE"
-    "RATING_BAND_8\020\026\022\031\n\025UMTS_OPERATING_BAND_9"
-    "\020\027\022\032\n\026UMTS_OPERATING_BAND_10\020\030\022\032\n\026UMTS_O"
-    "PERATING_BAND_11\020\031\022\032\n\026UMTS_OPERATING_BAN"
-    "D_12\020\032\022\032\n\026UMTS_OPERATING_BAND_13\020\033\022\032\n\026UM"
-    "TS_OPERATING_BAND_14\020\034\022\032\n\026UMTS_OPERATING"
-    "_BAND_19\020\035\022\032\n\026UMTS_OPERATING_BAND_20\020\036\022\032"
-    "\n\026UMTS_OPERATING_BAND_21\020\037\022\032\n\026UMTS_OPERA"
-    "TING_BAND_22\020 \022\032\n\026UMTS_OPERATING_BAND_25"
-    "\020!\022\032\n\026UMTS_OPERATING_BAND_26\020\"\022\030\n\024LTE_OP"
-    "ERATING_BAND_1\020#\022\030\n\024LTE_OPERATING_BAND_2"
-    "\020$\022\030\n\024LTE_OPERATING_BAND_3\020%\022\030\n\024LTE_OPER"
-    "ATING_BAND_4\020&\022\030\n\024LTE_OPERATING_BAND_5\020\'"
-    "\022\030\n\024LTE_OPERATING_BAND_6\020(\022\030\n\024LTE_OPERAT"
-    "ING_BAND_7\020)\022\030\n\024LTE_OPERATING_BAND_8\020*\022\030"
-    "\n\024LTE_OPERATING_BAND_9\020+\022\031\n\025LTE_OPERATIN"
-    "G_BAND_10\020,\022\031\n\025LTE_OPERATING_BAND_11\020-\022\031"
-    "\n\025LTE_OPERATING_BAND_12\020.\022\031\n\025LTE_OPERATI"
-    "NG_BAND_13\020/\022\031\n\025LTE_OPERATING_BAND_14\0200\022"
-    "\031\n\025LTE_OPERATING_BAND_17\0201\022\031\n\025LTE_OPERAT"
-    "ING_BAND_18\0202\022\031\n\025LTE_OPERATING_BAND_19\0203"
-    "\022\031\n\025LTE_OPERATING_BAND_20\0204\022\031\n\025LTE_OPERA"
-    "TING_BAND_21\0205\022\031\n\025LTE_OPERATING_BAND_22\020"
-    "6\022\031\n\025LTE_OPERATING_BAND_23\0207\022\031\n\025LTE_OPER"
-    "ATING_BAND_24\0208\022\031\n\025LTE_OPERATING_BAND_25"
-    "\0209\022\031\n\025LTE_OPERATING_BAND_26\020:\022\031\n\025LTE_OPE"
-    "RATING_BAND_27\020;\022\031\n\025LTE_OPERATING_BAND_2"
-    "8\020<\022\031\n\025LTE_OPERATING_BAND_29\020=\022\031\n\025LTE_OP"
-    "ERATING_BAND_30\020>\022\031\n\025LTE_OPERATING_BAND_"
-    "33\020\?\022\031\n\025LTE_OPERATING_BAND_34\020@\022\031\n\025LTE_O"
-    "PERATING_BAND_35\020A\022\031\n\025LTE_OPERATING_BAND"
-    "_36\020B\022\031\n\025LTE_OPERATING_BAND_37\020C\022\031\n\025LTE_"
-    "OPERATING_BAND_38\020D\022\031\n\025LTE_OPERATING_BAN"
-    "D_39\020E\022\031\n\025LTE_OPERATING_BAND_40\020F\022\031\n\025LTE"
-    "_OPERATING_BAND_41\020G\022\031\n\025LTE_OPERATING_BA"
-    "ND_42\020H\022\031\n\025LTE_OPERATING_BAND_43\020I\022\031\n\025LT"
-    "E_OPERATING_BAND_44\020J\022\034\n\030FIRST_GSM_OPERA"
-    "TING_BAND\020\000\022\033\n\027LAST_GSM_OPERATING_BAND\020\016"
-    "\022\035\n\031FIRST_UMTS_OPERATING_BAND\020\017\022\034\n\030LAST_"
-    "UMTS_OPERATING_BAND\020\"\022\034\n\030FIRST_LTE_OPERA"
-    "TING_BAND\020#\022\033\n\027LAST_LTE_OPERATING_BAND\020J"
-    "\032\002\020\001*b\n\027rp_device_communication\022\020\n\014USB_H"
-    "I_SPEED\020\000\022\023\n\017USB_SUPER_SPEED\020\001\022 \n\034UNKNOW"
-    "N_DEVICE_COMMUNICATION\020\002*a\n\026rp_band_indi"
-    "cator_type\022\025\n\021dcs_1800_was_used\020\000\022\025\n\021pcs"
-    "_1900_was_used\020\001\022\031\n\025unknown_band_was_use"
-    "d\020\002*\"\n\016rp_duplex_type\022\007\n\003fdd\020\000\022\007\n\003tdd\020\001*"
-    "\313\001\n\027rp_utran_bandwidth_type\022\023\n\017utran_3_8"
-    "4_mcps\020\000\022\023\n\017utran_1_24_mcps\020\001\022\020\n\014utran_2"
-    "_mcps\020\002\022\020\n\014utran_3_mcps\020\003\022\020\n\014utran_4_mcp"
-    "s\020\004\022\020\n\014utran_5_mcps\020\005\022\020\n\014utran_6_mcps\020\006\022"
-    "\020\n\014utran_7_mcps\020\007\022\026\n\022utran_default_mcps\020"
-    "\000\032\002\020\001*\302\001\n\030rp_eutran_bandwidth_type\022\031\n\025nu"
-    "m_resource_blocks_6\020\000\022\032\n\026num_resource_bl"
-    "ocks_15\020\001\022\032\n\026num_resource_blocks_25\020\002\022\032\n"
-    "\026num_resource_blocks_50\020\003\022\032\n\026num_resourc"
-    "e_blocks_75\020\004\022\033\n\027num_resource_blocks_100"
-    "\020\005*\264\002\n\017rp_lte_sib_type\022\014\n\010LTE_SIB1\020\000\022\014\n\010"
-    "LTE_SIB2\020\001\022\014\n\010LTE_SIB3\020\002\022\014\n\010LTE_SIB4\020\003\022\014"
-    "\n\010LTE_SIB5\020\004\022\014\n\010LTE_SIB6\020\005\022\014\n\010LTE_SIB7\020\006"
-    "\022\014\n\010LTE_SIB8\020\007\022\014\n\010LTE_SIB9\020\010\022\r\n\tLTE_SIB1"
-    "0\020\t\022\r\n\tLTE_SIB11\020\n\022\022\n\016LTE_SIB12_V920\020\013\022\022"
-    "\n\016LTE_SIB13_V920\020\014\022\023\n\017LTE_SIB14_V1130\020\r\022"
-    "\023\n\017LTE_SIB15_V1130\020\016\022\023\n\017LTE_SIB16_V1130\020"
-    "\017\022\016\n\nLTE_SPARE2\020\020\022\016\n\nLTE_SPARE1\020\021*\201\003\n rp"
-    "_lte_band_class_cdma_2000_type\022\007\n\003bc0\020\000\022"
-    "\007\n\003bc1\020\001\022\007\n\003bc2\020\002\022\007\n\003bc3\020\003\022\007\n\003bc4\020\004\022\007\n\003b"
-    "c5\020\005\022\007\n\003bc6\020\006\022\007\n\003bc7\020\007\022\007\n\003bc8\020\010\022\007\n\003bc9\020\t"
-    "\022\010\n\004bc10\020\n\022\010\n\004bc11\020\013\022\010\n\004bc12\020\014\022\010\n\004bc13\020\r"
-    "\022\010\n\004bc14\020\016\022\010\n\004bc15\020\017\022\010\n\004bc16\020\020\022\010\n\004bc17\020\021"
-    "\022\r\n\tbc18_v9a0\020\022\022\r\n\tbc19_v9a0\020\023\022\r\n\tbc20_v"
-    "9a0\020\024\022\r\n\tbc21_v9a0\020\025\022\013\n\007spare10\020\026\022\n\n\006spa"
-    "re9\020\027\022\n\n\006spare8\020\030\022\n\n\006spare7\020\031\022\n\n\006spare6\020"
-    "\032\022\n\n\006spare5\020\033\022\n\n\006spare4\020\034\022\n\n\006spare3\020\035\022\n\n"
-    "\006spare2\020\036\022\n\n\006spare1\020\037*\?\n\025rp_sample_forma"
-    "t_type\022&\n\"LITTLE_ENDIAN_FLOAT_REAL_IMAGI"
-    "NARY\020\000b\006proto3", 15254);
+    "S_UNKNOWN_ERROR\020\022*\232\020\n\021rp_operating_band\022"
+    "\032\n\026OPERATING_BAND_UNKNOWN\020\000\022\r\n\tGSM_T_380"
+    "\020\000\022\r\n\tGSM_T_410\020\001\022\013\n\007GSM_450\020\002\022\013\n\007GSM_48"
+    "0\020\003\022\013\n\007GSM_710\020\004\022\013\n\007GSM_750\020\005\022\r\n\tGSM_T_8"
+    "10\020\006\022\013\n\007GSM_850\020\007\022\r\n\tGSM_P_900\020\010\022\r\n\tGSM_"
+    "E_900\020\t\022\r\n\tGSM_R_900\020\n\022\016\n\nGSM_ER_900\020\013\022\r"
+    "\n\tGSM_T_900\020\014\022\020\n\014GSM_DCS_1800\020\r\022\020\n\014GSM_P"
+    "CS_1900\020\016\022\031\n\025UMTS_OPERATING_BAND_1\020\017\022\031\n\025"
+    "UMTS_OPERATING_BAND_2\020\020\022\031\n\025UMTS_OPERATIN"
+    "G_BAND_3\020\021\022\031\n\025UMTS_OPERATING_BAND_4\020\022\022\031\n"
+    "\025UMTS_OPERATING_BAND_5\020\023\022\031\n\025UMTS_OPERATI"
+    "NG_BAND_6\020\024\022\031\n\025UMTS_OPERATING_BAND_7\020\025\022\031"
+    "\n\025UMTS_OPERATING_BAND_8\020\026\022\031\n\025UMTS_OPERAT"
+    "ING_BAND_9\020\027\022\032\n\026UMTS_OPERATING_BAND_10\020\030"
+    "\022\032\n\026UMTS_OPERATING_BAND_11\020\031\022\032\n\026UMTS_OPE"
+    "RATING_BAND_12\020\032\022\032\n\026UMTS_OPERATING_BAND_"
+    "13\020\033\022\032\n\026UMTS_OPERATING_BAND_14\020\034\022\032\n\026UMTS"
+    "_OPERATING_BAND_19\020\035\022\032\n\026UMTS_OPERATING_B"
+    "AND_20\020\036\022\032\n\026UMTS_OPERATING_BAND_21\020\037\022\032\n\026"
+    "UMTS_OPERATING_BAND_22\020 \022\032\n\026UMTS_OPERATI"
+    "NG_BAND_25\020!\022\032\n\026UMTS_OPERATING_BAND_26\020\""
+    "\022\030\n\024LTE_OPERATING_BAND_1\020#\022\030\n\024LTE_OPERAT"
+    "ING_BAND_2\020$\022\030\n\024LTE_OPERATING_BAND_3\020%\022\030"
+    "\n\024LTE_OPERATING_BAND_4\020&\022\030\n\024LTE_OPERATIN"
+    "G_BAND_5\020\'\022\030\n\024LTE_OPERATING_BAND_6\020(\022\030\n\024"
+    "LTE_OPERATING_BAND_7\020)\022\030\n\024LTE_OPERATING_"
+    "BAND_8\020*\022\030\n\024LTE_OPERATING_BAND_9\020+\022\031\n\025LT"
+    "E_OPERATING_BAND_10\020,\022\031\n\025LTE_OPERATING_B"
+    "AND_11\020-\022\031\n\025LTE_OPERATING_BAND_12\020.\022\031\n\025L"
+    "TE_OPERATING_BAND_13\020/\022\031\n\025LTE_OPERATING_"
+    "BAND_14\0200\022\031\n\025LTE_OPERATING_BAND_17\0201\022\031\n\025"
+    "LTE_OPERATING_BAND_18\0202\022\031\n\025LTE_OPERATING"
+    "_BAND_19\0203\022\031\n\025LTE_OPERATING_BAND_20\0204\022\031\n"
+    "\025LTE_OPERATING_BAND_21\0205\022\031\n\025LTE_OPERATIN"
+    "G_BAND_22\0206\022\031\n\025LTE_OPERATING_BAND_23\0207\022\031"
+    "\n\025LTE_OPERATING_BAND_24\0208\022\031\n\025LTE_OPERATI"
+    "NG_BAND_25\0209\022\031\n\025LTE_OPERATING_BAND_26\020:\022"
+    "\031\n\025LTE_OPERATING_BAND_27\020;\022\031\n\025LTE_OPERAT"
+    "ING_BAND_28\020<\022\031\n\025LTE_OPERATING_BAND_29\020="
+    "\022\031\n\025LTE_OPERATING_BAND_30\020>\022\031\n\025LTE_OPERA"
+    "TING_BAND_33\020\?\022\031\n\025LTE_OPERATING_BAND_34\020"
+    "@\022\031\n\025LTE_OPERATING_BAND_35\020A\022\031\n\025LTE_OPER"
+    "ATING_BAND_36\020B\022\031\n\025LTE_OPERATING_BAND_37"
+    "\020C\022\031\n\025LTE_OPERATING_BAND_38\020D\022\031\n\025LTE_OPE"
+    "RATING_BAND_39\020E\022\031\n\025LTE_OPERATING_BAND_4"
+    "0\020F\022\031\n\025LTE_OPERATING_BAND_41\020G\022\031\n\025LTE_OP"
+    "ERATING_BAND_42\020H\022\031\n\025LTE_OPERATING_BAND_"
+    "43\020I\022\031\n\025LTE_OPERATING_BAND_44\020J\022\034\n\030FIRST"
+    "_GSM_OPERATING_BAND\020\000\022\033\n\027LAST_GSM_OPERAT"
+    "ING_BAND\020\016\022\035\n\031FIRST_UMTS_OPERATING_BAND\020"
+    "\017\022\034\n\030LAST_UMTS_OPERATING_BAND\020\"\022\034\n\030FIRST"
+    "_LTE_OPERATING_BAND\020#\022\033\n\027LAST_LTE_OPERAT"
+    "ING_BAND\020J\032\002\020\001*b\n\027rp_device_communicatio"
+    "n\022\020\n\014USB_HI_SPEED\020\000\022\023\n\017USB_SUPER_SPEED\020\001"
+    "\022 \n\034UNKNOWN_DEVICE_COMMUNICATION\020\002*a\n\026rp"
+    "_band_indicator_type\022\025\n\021dcs_1800_was_use"
+    "d\020\000\022\025\n\021pcs_1900_was_used\020\001\022\031\n\025unknown_ba"
+    "nd_was_used\020\002*\"\n\016rp_duplex_type\022\007\n\003fdd\020\000"
+    "\022\007\n\003tdd\020\001*\313\001\n\027rp_utran_bandwidth_type\022\023\n"
+    "\017utran_3_84_mcps\020\000\022\023\n\017utran_1_24_mcps\020\001\022"
+    "\020\n\014utran_2_mcps\020\002\022\020\n\014utran_3_mcps\020\003\022\020\n\014u"
+    "tran_4_mcps\020\004\022\020\n\014utran_5_mcps\020\005\022\020\n\014utran"
+    "_6_mcps\020\006\022\020\n\014utran_7_mcps\020\007\022\026\n\022utran_def"
+    "ault_mcps\020\000\032\002\020\001*\302\001\n\030rp_eutran_bandwidth_"
+    "type\022\031\n\025num_resource_blocks_6\020\000\022\032\n\026num_r"
+    "esource_blocks_15\020\001\022\032\n\026num_resource_bloc"
+    "ks_25\020\002\022\032\n\026num_resource_blocks_50\020\003\022\032\n\026n"
+    "um_resource_blocks_75\020\004\022\033\n\027num_resource_"
+    "blocks_100\020\005*\264\002\n\017rp_lte_sib_type\022\014\n\010LTE_"
+    "SIB1\020\000\022\014\n\010LTE_SIB2\020\001\022\014\n\010LTE_SIB3\020\002\022\014\n\010LT"
+    "E_SIB4\020\003\022\014\n\010LTE_SIB5\020\004\022\014\n\010LTE_SIB6\020\005\022\014\n\010"
+    "LTE_SIB7\020\006\022\014\n\010LTE_SIB8\020\007\022\014\n\010LTE_SIB9\020\010\022\r"
+    "\n\tLTE_SIB10\020\t\022\r\n\tLTE_SIB11\020\n\022\022\n\016LTE_SIB1"
+    "2_V920\020\013\022\022\n\016LTE_SIB13_V920\020\014\022\023\n\017LTE_SIB1"
+    "4_V1130\020\r\022\023\n\017LTE_SIB15_V1130\020\016\022\023\n\017LTE_SI"
+    "B16_V1130\020\017\022\016\n\nLTE_SPARE2\020\020\022\016\n\nLTE_SPARE"
+    "1\020\021*\201\003\n rp_lte_band_class_cdma_2000_type"
+    "\022\007\n\003bc0\020\000\022\007\n\003bc1\020\001\022\007\n\003bc2\020\002\022\007\n\003bc3\020\003\022\007\n\003"
+    "bc4\020\004\022\007\n\003bc5\020\005\022\007\n\003bc6\020\006\022\007\n\003bc7\020\007\022\007\n\003bc8\020"
+    "\010\022\007\n\003bc9\020\t\022\010\n\004bc10\020\n\022\010\n\004bc11\020\013\022\010\n\004bc12\020\014"
+    "\022\010\n\004bc13\020\r\022\010\n\004bc14\020\016\022\010\n\004bc15\020\017\022\010\n\004bc16\020\020"
+    "\022\010\n\004bc17\020\021\022\r\n\tbc18_v9a0\020\022\022\r\n\tbc19_v9a0\020\023"
+    "\022\r\n\tbc20_v9a0\020\024\022\r\n\tbc21_v9a0\020\025\022\013\n\007spare1"
+    "0\020\026\022\n\n\006spare9\020\027\022\n\n\006spare8\020\030\022\n\n\006spare7\020\031\022"
+    "\n\n\006spare6\020\032\022\n\n\006spare5\020\033\022\n\n\006spare4\020\034\022\n\n\006s"
+    "pare3\020\035\022\n\n\006spare2\020\036\022\n\n\006spare1\020\037*\?\n\025rp_sa"
+    "mple_format_type\022&\n\"LITTLE_ENDIAN_FLOAT_"
+    "REAL_IMAGINARY\020\000b\006proto3", 15184);
   ::google::protobuf::MessageFactory::InternalRegisterGeneratedFile(
     "rf_phreaker.proto", &protobuf_RegisterTypes);
   rp_update::default_instance_ = new rp_update();
@@ -2091,23 +2087,6 @@ bool rp_status_IsValid(int value) {
     case 16:
     case 17:
     case 18:
-      return true;
-    default:
-      return false;
-  }
-}
-
-const ::google::protobuf::EnumDescriptor* rp_technology_descriptor() {
-  protobuf_AssignDescriptorsOnce();
-  return rp_technology_descriptor_;
-}
-bool rp_technology_IsValid(int value) {
-  switch(value) {
-    case 0:
-    case 1:
-    case 2:
-    case 3:
-    case 4:
       return true;
     default:
       return false;

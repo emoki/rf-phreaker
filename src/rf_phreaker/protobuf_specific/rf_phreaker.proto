@@ -49,14 +49,6 @@ message rp_message {
 	string msg = 2;
 }
 
-enum rp_technology {
-	GSM = 0;
-	CDMA = 1;
-	WCDMA = 2;
-	LTE = 3;
-	RAW_DATA = 4;
-}
-
 enum rp_operating_band {
 	option allow_alias = true;
 

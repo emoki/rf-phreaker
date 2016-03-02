@@ -43,7 +43,7 @@ void registerQmlTypes()
     qmlRegisterType<FileSaveDialog>(uri.latin1(), 1, 0, "FileSaveDialog");
 
 	qRegisterMetaTypeStreamOperators<rf_phreaker::channel_freq>("channel_freq");
-	qRegisterMetaTypeStreamOperators<::rp_technology>("rp_technology");
+	qRegisterMetaTypeStreamOperators<ApiTypes::Tech>("ApiTech");
 }
 
 //}}

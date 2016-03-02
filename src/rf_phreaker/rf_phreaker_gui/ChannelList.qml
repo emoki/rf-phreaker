@@ -29,23 +29,30 @@ Item {
 
 
             TableViewColumn {
-                id: techBandColumn
+                id: techColumn
                 horizontalAlignment: Text.AlignHCenter
-                title: "Tech/Band"
-                role: "techBand"
-                width: bandColumnWidth
+                title: "Tech"
+                role: "tech"
+                width: (scanListView.width / 3) / 2
+            }
+            TableViewColumn {
+                id: bandColumn
+                horizontalAlignment: Text.AlignHCenter
+                title: "Band"
+                role: "band"
+                width: (scanListView.width / 3) / 2
             }
             TableViewColumn {
                 horizontalAlignment: Text.AlignHCenter
                 title: "Frequency Range"
                 role: "freqs"
-                width: (scanListView.viewport.width - techBandColumn.width)  * 0.5
+                width: (scanListView.width / 3)
             }
             TableViewColumn {
                 horizontalAlignment: Text.AlignHCenter
                 title: "Channel Range"
                 role:  "channels"
-                width: (scanListView.viewport.width - techBandColumn.width) * 0.5
+                width: (scanListView.width / 3)
             }
 
             Keys.onDeletePressed: {
@@ -105,9 +112,13 @@ Item {
 
         TableViewColumn {
             horizontalAlignment: Text.AlignHCenter
-            title: "Tech/Band"
-            role: "techBand"
-            width: bandColumnWidth
+            title: "Tech"
+            role: "tech"
+        }
+        TableViewColumn {
+            horizontalAlignment: Text.AlignHCenter
+            title: "Band"
+            role: "band"
         }
         TableViewColumn {
             horizontalAlignment: Text.AlignHCenter

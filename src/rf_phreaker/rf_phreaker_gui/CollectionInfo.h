@@ -14,7 +14,8 @@ class CollectionInfo : public QObject
 
 	Q_PROPERTY(QString channels READ toChannelsStr NOTIFY infoChanged)
 	Q_PROPERTY(QString freqs READ toFreqsStr NOTIFY infoChanged)
-	Q_PROPERTY(QString techBand READ toTechBandStr NOTIFY infoChanged)
+	Q_PROPERTY(QString band READ toBandStr NOTIFY infoChanged)
+	Q_PROPERTY(QString tech READ toTechStr NOTIFY infoChanged)
 
 public:
 	explicit CollectionInfo(QObject *parent = 0) : QObject(parent) {}
@@ -62,11 +63,15 @@ public:
 		else
 			return cfLow_.toFreqStr() + " MHz";
 	}
-	QString toTechBandStr() const {
+	QString toBandStr() const {
 		if(cfLow_.tech() == ApiTypes::RAW_DATA)
-			return cfLow_.toTechStr();
+			return "";
 		else
 			return cfLow_.toBandStr();
+	}
+
+	QString toTechStr() const {
+		return cfLow_.toTechStr();
 	}
 
 signals:

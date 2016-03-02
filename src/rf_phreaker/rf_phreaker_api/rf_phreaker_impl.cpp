@@ -426,7 +426,7 @@ rp_status rf_phreaker_impl::get_device_info(rp_device *device, rp_device_info *d
 	return s;
 }
 
-rp_status rf_phreaker_impl::add_collection_frequency(rp_device *device, rp_technology data, rp_frequency_type freq, rp_operating_band band) {
+rp_status rf_phreaker_impl::add_collection_frequency(rp_device *device, rp_frequency_type freq, rp_operating_band rp_band) {
 	using namespace ::rf_phreaker::processing;
 	rp_status s = RP_STATUS_OK;
 	try {
@@ -442,7 +442,8 @@ rp_status rf_phreaker_impl::add_collection_frequency(rp_device *device, rp_techn
 
 		// Check for license.
 
-		auto specifier = to_layer_3_specifier(data);
+		auto band = to_operating_band(rp_band);
+		auto specifier = to_layer_3_specifier(band);
 		auto it = std::find_if(containers_.begin(), containers_.end(), [&](const collection_info_container &c) {
 			return c.has_specifier(specifier);
 		});
@@ -455,7 +456,7 @@ rp_status rf_phreaker_impl::add_collection_frequency(rp_device *device, rp_techn
 			});
 		}
 
-		it->adjust(add_collection_info(create_tech_collection_info(specifier, (frequency_type)freq, to_operating_band(band))));
+		it->adjust(add_collection_info(create_tech_collection_info(specifier, (frequency_type)freq, band)));
 
 		// Add to processing graph?
 	}
@@ -477,7 +478,7 @@ void rf_phreaker_impl::check_calibration(hardware hw, frequency_type freq) {
 		throw rf_phreaker_api_error("Frequency (" + std::to_string(freq / 1e6) + " mhz) is not within calibration limits.");
 }
 
-rp_status rf_phreaker_impl::remove_collection_frequency(rp_device *device, rp_technology data, rp_frequency_type freq, rp_operating_band band) {
+rp_status rf_phreaker_impl::remove_collection_frequency(rp_device *device, rp_frequency_type freq, rp_operating_band rp_band) {
 	using namespace ::rf_phreaker::processing;
 	rp_status s = RP_STATUS_OK;
 	try {
@@ -487,13 +488,14 @@ rp_status rf_phreaker_impl::remove_collection_frequency(rp_device *device, rp_te
 
 		general_checks(device);
 
-		auto specifier = to_layer_3_specifier(data);
+		auto band = to_operating_band(rp_band);
+		auto specifier = to_layer_3_specifier(band);
 		auto it = std::find_if(containers_.begin(), containers_.end(), [&](const collection_info_container &c) {
 			return c.has_specifier(specifier);
 		});
 
 		if(it == containers_.end()) {
-			it->adjust(remove_collection_info(create_tech_collection_info(specifier, (frequency_type)freq, to_operating_band(band))));
+			it->adjust(remove_collection_info(create_tech_collection_info(specifier, (frequency_type)freq, band)));
 		}
 	}
 	catch(const rf_phreaker_error &err) {
@@ -721,23 +723,23 @@ rp_status rf_phreaker_impl::start_collection(rp_device *device, const rp_collect
 
 
 		for(int i = 0; i < info->gsm_.size_; ++i) {
-			rp_status status = add_collection_frequency(device, rp_technology::GSM, info->gsm_.e_[i].freq_, info->gsm_.e_[i].band_);
+			rp_status status = add_collection_frequency(device, info->gsm_.e_[i].freq_, info->gsm_.e_[i].band_);
 			if(status != RP_STATUS_OK)
 				return status;
 		}
 		for(int i = 0; i < info->wcdma_.size_; ++i) {
-			rp_status status = add_collection_frequency(device, rp_technology::WCDMA, info->wcdma_.e_[i].freq_, info->wcdma_.e_[i].band_);
+			rp_status status = add_collection_frequency(device, info->wcdma_.e_[i].freq_, info->wcdma_.e_[i].band_);
 			if(status != RP_STATUS_OK)
 				return status;
 		}
 		for(int i = 0; i < info->lte_.size_; ++i) {
-			rp_status status = add_collection_frequency(device, rp_technology::LTE, info->lte_.e_[i].freq_, info->lte_.e_[i].band_);
+			rp_status status = add_collection_frequency(device, info->lte_.e_[i].freq_, info->lte_.e_[i].band_);
 			if(status != RP_STATUS_OK)
 				return status;
 		}
 		for(int i = 0; i < info->raw_data_.size_; ++i) {
 			throw rf_phreaker_api_error("RAW_DATA not yet supported.");
-			rp_status status = add_collection_frequency(device, rp_technology::RAW_DATA, info->raw_data_.e_[i], rp_operating_band::OPERATING_BAND_UNKNOWN);
+			rp_status status = add_collection_frequency(device, info->raw_data_.e_[i], rp_operating_band::OPERATING_BAND_UNKNOWN);
 			if(status != RP_STATUS_OK)
 				return status;
 		}

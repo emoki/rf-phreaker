@@ -38,11 +38,15 @@ public:
 
 	enum Tech {
 		UNKNOWN_TECH,
-		GSM = ::rp_technology::GSM,
-		CDMA = ::rp_technology::CDMA,
-		WCDMA = ::rp_technology::WCDMA,
-		LTE = ::rp_technology::LTE,
-		RAW_DATA = ::rp_technology::RAW_DATA
+		GSM_FULL_SCAN = ::rf_phreaker::GSM_LAYER_3_DECODE,
+		CDMA_FULL_SCAN = ::rf_phreaker::CDMA_LAYER_3_DECODE,
+		WCDMA_FULL_SCAN = ::rf_phreaker::UMTS_LAYER_3_DECODE,
+		LTE_FULL_SCAN = ::rf_phreaker::LTE_LAYER_3_DECODE,
+		GSM_SWEEP = ::rf_phreaker::GSM_SWEEP,
+		CDMA_SWEEP = ::rf_phreaker::CDMA_SWEEP,
+		WCDMA_SWEEP = ::rf_phreaker::UMTS_SWEEP,
+		LTE_SWEEP = ::rf_phreaker::LTE_SWEEP,
+		RAW_DATA = ::rf_phreaker::RAW_DATA
 	};
 
 	enum OperatingBand {
@@ -138,14 +142,22 @@ public:
 
 	Q_INVOKABLE static rf_phreaker::specifier toSpecifier(Tech s) {
 		switch(s) {
-		case GSM:
+		case GSM_FULL_SCAN:
 			return rf_phreaker::GSM_LAYER_3_DECODE;
-		case CDMA:
+		case CDMA_FULL_SCAN:
 			return rf_phreaker::CDMA_LAYER_3_DECODE;
-		case WCDMA:
+		case WCDMA_FULL_SCAN:
 			return rf_phreaker::UMTS_LAYER_3_DECODE;
-		case LTE:
+		case LTE_FULL_SCAN:
 			return rf_phreaker::LTE_LAYER_3_DECODE;
+		case GSM_SWEEP:
+			return rf_phreaker::GSM_SWEEP;
+		case CDMA_SWEEP:
+			return rf_phreaker::CDMA_SWEEP;
+		case WCDMA_SWEEP:
+			return rf_phreaker::UMTS_SWEEP;
+		case LTE_SWEEP:
+			return rf_phreaker::LTE_SWEEP;
 		case RAW_DATA:
 			return rf_phreaker::RAW_DATA;
 		default:
@@ -155,18 +167,51 @@ public:
 	}
 
 	Q_INVOKABLE static Tech toTech(QString s) {
-		if(s == "GSM")
-			return GSM;
-		if(s == "CDMA")
-			return CDMA;
-		if(s == "WCDMA")
-			return WCDMA;
-		if(s == "LTE")
-			return LTE;
-		if(s == "RAW DATA")
+		if(s == "GSM FULL SCAN")
+			return GSM_FULL_SCAN;
+		else if(s == "CDMA FULL SCAN")
+			return CDMA_FULL_SCAN;
+		else if(s == "WCDMA FULL SCAN")
+			return WCDMA_FULL_SCAN;
+		else if(s == "LTE FULL SCAN")
+			return LTE_FULL_SCAN;
+		else if(s == "GSM SWEEP")
+			return GSM_SWEEP;
+		else if(s == "CDMA SWEEP")
+			return CDMA_SWEEP;
+		else if(s == "WCDMA SWEEP")
+			return WCDMA_SWEEP;
+		else if(s == "LTE SWEEP")
+			return LTE_SWEEP;
+		else if(s == "RAW DATA")
 			return RAW_DATA;
 		else
 			return UNKNOWN_TECH;
+	}
+
+	Q_INVOKABLE static QString toQString(Tech s) {
+		switch(s) {
+		case GSM_FULL_SCAN:
+			return "GSM FULL SCAN";
+		case CDMA_FULL_SCAN:
+			return "CDMA FULL SCAN";
+		case WCDMA_FULL_SCAN:
+			return "WCDMA FULL SCAN";
+		case LTE_FULL_SCAN:
+			return "LTE FULL SCAN";
+		case GSM_SWEEP:
+			return "GSM SWEEP";
+		case CDMA_SWEEP:
+			return "CDMA SWEEP";
+		case WCDMA_SWEEP:
+			return "WCDMA SWEEP";
+		case LTE_SWEEP:
+			return "LTE SWEEP";
+		case RAW_DATA:
+			return "RAW DATA";
+		default:
+			return "UNKNOWN";
+		}
 	}
 
 	Q_INVOKABLE static OperatingBand toOperatingBand(QString t) {
@@ -326,24 +371,6 @@ public:
 		else
 			return OPERATING_BAND_UNKNOWN;
 
-	}
-
-	Q_INVOKABLE static QString toQString(Tech s) {
-		switch(s) {
-		case GSM:
-			return "GSM";
-		case CDMA:
-			return "CDMA";
-		case WCDMA:
-			return "WCDMA";
-		case LTE:
-			return "LTE";
-		case RAW_DATA:
-			return "RAW DATA";
-		default:
-			return "UNKNOWN";
-
-		}
 	}
 
 	Q_INVOKABLE static QString toQString(ConnectionStatus s) {
