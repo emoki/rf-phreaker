@@ -1,5 +1,6 @@
 #pragma once
 
+#include <memory>
 #include <boost/thread.hpp>
 
 namespace cappeen_scanner {
@@ -31,7 +32,7 @@ private:
 
 	boost::mutex m2_;
 
-	static boost::scoped_ptr<simple_logger> logger_;
+	static std::unique_ptr<simple_logger> logger_;
 	static boost::mutex m1_;
 };
 
