@@ -45,7 +45,7 @@ inline rp_status to_rp_status(const rf_phreaker_error &err) {
 	}
 }
 
-inline rf_phreaker::specifier to_sweep_specifier(rf_phreaker::operating_band b) {
+inline rf_phreaker::specifier to_layer_3_specifier(rf_phreaker::operating_band b) {
 	if(b >= FIRST_GSM_OPERATING_BAND && b <= LAST_GSM_OPERATING_BAND)
 		return GSM_LAYER_3_DECODE;
 	else if(b >= FIRST_UMTS_OPERATING_BAND && b <= LAST_UMTS_OPERATING_BAND)
@@ -56,7 +56,7 @@ inline rf_phreaker::specifier to_sweep_specifier(rf_phreaker::operating_band b) 
 		throw rf_phreaker_api_error("Unable to convert operating band to layer 3 specifier.");
 }
 
-inline rf_phreaker::specifier to_layer_3_specifier(rf_phreaker::operating_band b) {
+inline rf_phreaker::specifier to_sweep_specifier(rf_phreaker::operating_band b) {
 	if(b >= FIRST_GSM_OPERATING_BAND && b <= LAST_GSM_OPERATING_BAND)
 		return GSM_SWEEP;
 	else if(b >= FIRST_UMTS_OPERATING_BAND && b <= LAST_UMTS_OPERATING_BAND)
