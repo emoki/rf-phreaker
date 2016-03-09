@@ -41,7 +41,7 @@ void processing_graph::start(scanner_controller_interface *sc, data_output_async
 			start_node_.reset();
 			collection_manager_node_.reset();
 			nodes_.clear();
-
+			LOG(LINFO) << "current debug timestamp: " << static_timestamp().to_string();
 			LOG(LINFO) << "intermittent streaming rx settings: " << config.blade_settings_.intermittent_streaming_rx_.rx_sync_buffer_size_ << ", "
 				<< config.blade_settings_.intermittent_streaming_rx_.rx_sync_num_buffers_ << ", " << config.blade_settings_.intermittent_streaming_rx_.rx_sync_num_transfers_
 				<< ", " << config.blade_settings_.intermittent_streaming_rx_.rx_sync_timeout_ << ".";
