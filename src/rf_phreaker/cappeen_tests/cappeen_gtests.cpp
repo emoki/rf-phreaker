@@ -49,7 +49,7 @@ TEST(Cappeen, TestMain)
 		//tech_bands.push_back(LTE_BAND_5);
 		//tech_bands.push_back(LTE_BAND_2);
 		tech_bands.push_back(LTE_BAND_1);
-		info.tech_and_bands_to_sweep_.elements_ = &tech_bands[0];
+		info.tech_and_bands_to_sweep_.elements_ = tech_bands.data();
 		info.tech_and_bands_to_sweep_.num_elements_ = tech_bands.size();
 
 		std::vector<band_freq> freq_bands;
@@ -108,7 +108,7 @@ TEST(Cappeen, FreqCorrectionTwice) {
 		info.tech_and_bands_to_sweep_.elements_ = 0;
 		info.tech_and_bands_to_sweep_.num_elements_ = 0;;
 		tech_bands.push_back(WCDMA_BAND_2100);
-		info.tech_and_bands_to_sweep_.elements_ = &tech_bands[0];
+		info.tech_and_bands_to_sweep_.elements_ = tech_bands.data();
 		info.tech_and_bands_to_sweep_.num_elements_ = tech_bands.size();
 		info.frequencies_to_scan_.num_elements_ = 0;
 
@@ -158,7 +158,7 @@ TEST(Cappeen, DISABLED_FreqCorrection) {
 		tech_bands.push_back(WCDMA_BAND_850);
 		tech_bands.push_back(WCDMA_BAND_1900);
 		tech_bands.push_back(WCDMA_BAND_2100);
-		info.tech_and_bands_to_sweep_.elements_ = &tech_bands[0];
+		info.tech_and_bands_to_sweep_.elements_ = tech_bands.data();
 		info.tech_and_bands_to_sweep_.num_elements_ = tech_bands.size();
 		info.frequencies_to_scan_.num_elements_ = 0;
 
@@ -279,7 +279,7 @@ TEST(Cappeen, DISABLED_FreqNotInCalibration) {
 		collection_info info;
 		std::vector<TECHNOLOGIES_AND_BANDS> tech_bands;		
 		tech_bands.push_back(LTE_BAND_12); // operating band[1475.9 - 1495.9 MHZ]
-		info.tech_and_bands_to_sweep_.elements_ = &tech_bands[0];
+		info.tech_and_bands_to_sweep_.elements_ = tech_bands.data();
 		info.tech_and_bands_to_sweep_.num_elements_ = tech_bands.size();
 		info.frequencies_to_scan_.num_elements_ = 0;
 		std::cout << "Starting collection.\n";
@@ -331,7 +331,7 @@ TEST(Cappeen, DISABLED_GeneralLicenseUpdate1) {
 		info.tech_and_bands_to_sweep_.elements_ = 0;
 		info.tech_and_bands_to_sweep_.num_elements_ = 0;;
 		tech_bands.push_back(WCDMA_BAND_1900);
-		info.tech_and_bands_to_sweep_.elements_ = &tech_bands[0];
+		info.tech_and_bands_to_sweep_.elements_ = tech_bands.data();
 		info.tech_and_bands_to_sweep_.num_elements_ = tech_bands.size();
 		info.frequencies_to_scan_.num_elements_ = 0;
 		std::cout << "Starting collection - FAILURE.\n";
@@ -343,7 +343,7 @@ TEST(Cappeen, DISABLED_GeneralLicenseUpdate1) {
 		tech_bands.push_back(WCDMA_BAND_1900);
 		tech_bands.push_back(LTE_BAND_27);
 		tech_bands.push_back(LTE_BAND_26);
-		info.tech_and_bands_to_sweep_.elements_ = &tech_bands[0];
+		info.tech_and_bands_to_sweep_.elements_ = tech_bands.data();
 		info.tech_and_bands_to_sweep_.num_elements_ = tech_bands.size();
 		std::cout << "Starting collection - FAILURE.\n";
 		EXPECT_EQ(FREQNOTLICENSED, cappeen_start_collection(info, false));
@@ -353,7 +353,7 @@ TEST(Cappeen, DISABLED_GeneralLicenseUpdate1) {
 		tech_bands.push_back(WCDMA_BAND_2100);
 		tech_bands.push_back(LTE_BAND_27);
 		tech_bands.push_back(LTE_BAND_26);
-		info.tech_and_bands_to_sweep_.elements_ = &tech_bands[0];
+		info.tech_and_bands_to_sweep_.elements_ = tech_bands.data();
 		info.tech_and_bands_to_sweep_.num_elements_ = tech_bands.size();
 		std::cout << "Starting collection.\n";
 		EXPECT_EQ(0, cappeen_start_collection(info, false));
@@ -402,7 +402,7 @@ TEST(Cappeen, DISABLED_GeneralLicenseUpdate2) {
 		tech_bands.push_back(WCDMA_BAND_1900);
 		tech_bands.push_back(LTE_BAND_3);
 		tech_bands.push_back(LTE_BAND_8);
-		info.tech_and_bands_to_sweep_.elements_ = &tech_bands[0];
+		info.tech_and_bands_to_sweep_.elements_ = tech_bands.data();
 		info.tech_and_bands_to_sweep_.num_elements_ = tech_bands.size();
 		info.frequencies_to_scan_.num_elements_ = 0;
 		std::cout << "Starting collection.\n";
@@ -453,7 +453,7 @@ TEST(Cappeen, DISABLED_LicenseNetworkScanner) {
 		tech_bands.push_back(LTE_BAND_3);
 		tech_bands.push_back(LTE_BAND_8);
 		tech_bands.push_back(LTE_BAND_12);
-		info.tech_and_bands_to_sweep_.elements_ = &tech_bands[0];
+		info.tech_and_bands_to_sweep_.elements_ = tech_bands.data();
 		info.tech_and_bands_to_sweep_.num_elements_ = tech_bands.size();
 		info.frequencies_to_scan_.num_elements_ = 0;
 		std::cout << "Starting collection.\n";
@@ -534,7 +534,7 @@ TEST(Cappeen, LicenseCellAnalysisEverything) {
 		tech_bands.push_back(LTE_BAND_4);// operating band 4 [2110 - 2155 MHZ]
 		tech_bands.push_back(LTE_BAND_10);// operating band  [2110 - 2170 MHZ]
 		tech_bands.push_back(LTE_BAND_7); // operating band 7 [2620 - 2690 MHZ]
-		info.tech_and_bands_to_sweep_.elements_ = &tech_bands[0];
+		info.tech_and_bands_to_sweep_.elements_ = tech_bands.data();
 		info.tech_and_bands_to_sweep_.num_elements_ = tech_bands.size();
 		info.frequencies_to_scan_.num_elements_ = 0;
 		std::cout << "Starting collection.\n";
@@ -571,7 +571,7 @@ TEST(Cappeen, NoClose)
 		collection_info info;
 		std::vector<TECHNOLOGIES_AND_BANDS> tech_bands;
 		tech_bands.push_back(LTE_BAND_1);
-		info.tech_and_bands_to_sweep_.elements_ = &tech_bands[0];
+		info.tech_and_bands_to_sweep_.elements_ = tech_bands.data();
 		info.tech_and_bands_to_sweep_.num_elements_ = tech_bands.size();
 		info.frequencies_to_scan_.num_elements_ = 0;
 
@@ -604,7 +604,7 @@ TEST(Cappeen, NoCloseNoStop)
 		collection_info info;
 		std::vector<TECHNOLOGIES_AND_BANDS> tech_bands;
 		tech_bands.push_back(LTE_BAND_1);
-		info.tech_and_bands_to_sweep_.elements_ = &tech_bands[0];
+		info.tech_and_bands_to_sweep_.elements_ = tech_bands.data();
 		info.tech_and_bands_to_sweep_.num_elements_ = tech_bands.size();
 		info.frequencies_to_scan_.num_elements_ = 0;
 
