@@ -168,7 +168,7 @@ void cappeen_impl::read_settings(bool perform_quick_scan)
 	config_.gsm_sweep_collection_.overlap_time_ = 0;
 	config_.gsm_layer_3_collection_.is_streaming_ = true;
 	config_.gsm_layer_3_collection_.priority_ = 1;
-	config_.gsm_layer_3_collection_.overlap_time_ = 35;
+	config_.gsm_layer_3_collection_.overlap_time_ = 35000000;
 	config_.umts_sweep_collection_.is_streaming_ = false;
 	config_.umts_sweep_collection_.priority_ = 1;
 	config_.umts_sweep_collection_.overlap_time_ = 0;
