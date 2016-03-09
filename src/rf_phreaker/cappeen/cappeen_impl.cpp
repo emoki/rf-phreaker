@@ -600,8 +600,6 @@ void cappeen_impl::create_collection_info_containers_for_scan(const beagle_api::
 				containers.push_back(collection_info_container(GSM_LAYER_3_DECODE, false));
 				it = containers.end() - 1;
 			}
-			if(freq % khz(200) == 0)
-				freq += khz(100);
 			gsm_freqs.push_back(std::make_pair(band, freq));
 		}
 		else if(band >= FIRST_UMTS_OPERATING_BAND && band <= LAST_UMTS_OPERATING_BAND) {
