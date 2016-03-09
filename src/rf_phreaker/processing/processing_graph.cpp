@@ -11,6 +11,7 @@
 #include "rf_phreaker/processing/lte_output_and_feedback_body.h"
 #include "rf_phreaker/common/delegate_sink.h"
 #include "rf_phreaker/common/log.h"
+#include "rf_phreaker/layer_3_common/layer_3_utility.h"
 #include "tbb/task_scheduler_init.h"
 
 using namespace rf_phreaker::scanner;
@@ -61,7 +62,10 @@ void processing_graph::start(scanner_controller_interface *sc, data_output_async
 			LOG(LINFO) << "gsm layer 3 decode settings: " << config.gsm_layer_3_decode_.max_update_threshold_ << ", " << config.gsm_layer_3_decode_.minimum_collection_round_ << ", "
 				<< config.gsm_layer_3_decode_.decode_threshold_ << ", " << config.gsm_layer_3_decode_.decode_minimum_threshold_ << ", " << config.gsm_layer_3_decode_.minimum_decode_count_ << ", "
 				<< config.gsm_layer_3_decode_.should_prioritize_layer_3_ << ".";
-
+			std::string gsm_layer_3("gsm layer 3 si tracking: ");
+			for(auto i : config.gsm_layer_3_decode_.wanted_layer_3_)
+				gsm_layer_3 += convert_gsm_si(i) + " ";
+			LOG(LINFO) << gsm_layer_3;
 
 			LOG(LINFO) << "umts sweep collection settings: " << config.umts_sweep_collection_.sampling_rate_ << ", " << config.umts_sweep_collection_.bandwidth_ << ", "
 				<< config.umts_sweep_collection_.collection_time_ << ", " << config.umts_sweep_collection_.overlap_time_ << ".";
@@ -75,6 +79,11 @@ void processing_graph::start(scanner_controller_interface *sc, data_output_async
 			LOG(LINFO) << "umts layer 3 decode settings: " << config.umts_layer_3_decode_.max_update_threshold_ << ", " << config.umts_layer_3_decode_.minimum_collection_round_ << ", "
 				<< config.umts_layer_3_decode_.decode_threshold_ << ", " << config.umts_layer_3_decode_.decode_minimum_threshold_ << ", " << config.umts_layer_3_decode_.minimum_decode_count_ << ", "
 				<< config.umts_layer_3_decode_.should_prioritize_layer_3_ << ".";
+			std::string umts_layer_3("umts layer 3 sib tracking: ");
+			for(auto i : config.umts_layer_3_decode_.wanted_layer_3_)
+				umts_layer_3 += convert_umts_sib(i) + " ";
+			LOG(LINFO) << umts_layer_3;
+
 
 
 			LOG(LINFO) << "lte sweep collection settings: " << config.lte_sweep_collection_.sampling_rate_ << ", " << config.lte_sweep_collection_.bandwidth_ << ", "
@@ -87,6 +96,10 @@ void processing_graph::start(scanner_controller_interface *sc, data_output_async
 			LOG(LINFO) << "lte layer 3 decode settings: " << config.lte_layer_3_decode_.max_update_threshold_ << ", " << config.lte_layer_3_decode_.minimum_collection_round_ << ", "
 				<< config.lte_layer_3_decode_.decode_threshold_ << ", " << config.lte_layer_3_decode_.decode_minimum_threshold_ << ", " << config.lte_layer_3_decode_.minimum_decode_count_ << ", "
 				<< config.lte_layer_3_decode_.should_prioritize_layer_3_ << ".";
+			std::string lte_layer_3("lte layer 3 sib tracking: ");
+			for(auto i : config.lte_layer_3_decode_.wanted_layer_3_)
+				lte_layer_3 += convert_lte_sib(i) + " ";
+			LOG(LINFO) << lte_layer_3;
 
 			graph_ = (std::make_shared<tbb::flow::graph>());
 

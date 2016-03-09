@@ -147,13 +147,6 @@ public:
 
 	void clear();
 
-	int convert_gsm_si(const std::string &s);
-	int convert_umts_sib(const std::string &s);
-	int convert_lte_sib(const std::string &s);
-	std::string convert_gsm_si(int s);
-	std::string convert_umts_sib(int s);
-	std::string convert_lte_sib(int s);
-
 private:
 	std::unique_ptr<QSettings> qsettings_;
 };

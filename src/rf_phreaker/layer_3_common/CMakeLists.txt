@@ -17,6 +17,7 @@ set (layer_3_common_SRCS
 	gsm_layer_3_message_aggregate.cpp
 	gsm_layer_3_message_aggregate.h
 	gsm_layer_3_message_aggregate_io.h
+	layer_3_utility.h
 	lte_rrc_message_aggregate.cpp
 	lte_rrc_message_aggregate.h
 	lte_rrc_message_aggregate_io.h
