@@ -199,36 +199,77 @@ public:
 		added_freqs_.insert(freq);
 	}
 
-	bool do_we_add_freq(frequency_type freq) {
-		bool add = true;
+	bool do_we_add_freq(frequency_type freq) const {
 		if(added_freqs_.find(freq) != added_freqs_.end())
-			add = false;
-		else {
-			auto lesser = greatest_less(added_freqs_, freq);
-			auto greater = added_freqs_.upper_bound(freq);
-			if(lesser != added_freqs_.end() && freq - *lesser <= low_bandwidth_range_)
-				add = false;
-			else if(greater != added_freqs_.end() && *greater - freq <= high_bandwidth_range_)
-				add = false;
-		}
-		return add;
+			return false;
+		bool within_lower_freq = distance_to_lesser(freq) != -1 
+			&& distance_to_lesser(freq) <= high_bandwidth_range_ + gsm_processing_if_;
+		bool within_higher_freq = distance_to_higher(freq) != -1 
+			&& distance_to_higher(freq) <= low_bandwidth_range_;
+		return !within_lower_freq && !within_higher_freq;
 	}
-	frequency_type calculate_closest_freq(frequency_type f, operating_band b) {
-		auto end_range = range_specifier_.get_band_freq_range(b);
-		auto new_freq = f + low_bandwidth_range_;
-		if(new_freq > end_range.high_freq_hz_)
-			new_freq = end_range.high_freq_hz_ - high_bandwidth_range_;
+	frequency_type distance_to_lesser(frequency_type freq) const {
+		auto lesser = greatest_less(added_freqs_, freq);
+		if(lesser != added_freqs_.end()) 
+			return freq - *lesser;
+		else
+			return -1;
+	}
 
-		if(new_freq % khz(200) == 0)
-			new_freq -= khz(100);
+	frequency_type distance_to_higher(frequency_type freq) const {
+		auto greater = added_freqs_.upper_bound(freq);
+		if(greater != added_freqs_.end())
+			return *greater - freq;
+		else
+			return -1;
+	}
+	
+	frequency_type calculate_closest_freq(frequency_type freq, operating_band b) const {
+		auto range = range_specifier_.get_band_freq_range(b);
+		auto lower_distance = distance_to_lesser(freq);
+		auto higher_distance = distance_to_higher(freq);
+		frequency_type new_freq;
+		if(lower_distance != -1 && higher_distance != -1) {
+			if(higher_distance > total_processing_bandwidth_)
+				new_freq = freq + low_bandwidth_range_;
+			else if(lower_distance > total_processing_bandwidth_)
+				new_freq = freq - high_bandwidth_range_;
+			else {
+				new_freq = rf_phreaker::round_to_nearest<khz(100)>((freq + higher_distance + freq - lower_distance) / 2);
+			}
 
-		return new_freq;
+		}
+		else if(higher_distance == -1) {
+			new_freq = freq + low_bandwidth_range_;
+		}
+		else if(lower_distance == -1) {
+			new_freq = freq - high_bandwidth_range_;
+		}
+		else { // no other freqs
+			new_freq = freq + low_bandwidth_range_;
+		}
+
+		if(new_freq < range.low_freq_hz_)
+			new_freq = range.low_freq_hz_;
+		else if(new_freq > range.high_freq_hz_)
+			new_freq = range.high_freq_hz_;
+
+		return ensure_proper_processing_if(new_freq);
+	}
+
+	frequency_type ensure_proper_processing_if(frequency_type freq) const {
+		if(freq % khz(200) == 0)
+			return freq - gsm_processing_if_;
+		else
+			return freq;
 	}
 
 private:
 	std::set<frequency_type> added_freqs_;
+	static const bandwidth_type total_processing_bandwidth_ = GSM_PROCESSING_BANDWIDTH;
 	static const bandwidth_type low_bandwidth_range_ = GSM_LOW_BANDWIDTH_HZ;
 	static const bandwidth_type high_bandwidth_range_ = GSM_HIGH_BANDWIDTH_HZ;
+	static const bandwidth_type gsm_processing_if_ = GSM_PROCESSING_IF;
 	operating_band_range_specifier range_specifier_;
 };
 

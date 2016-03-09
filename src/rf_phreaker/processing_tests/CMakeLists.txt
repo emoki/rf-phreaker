@@ -18,6 +18,7 @@ set (processing_tests_SRCS
 	lte_output_and_feedback_body_gtests.cpp
 	processing_tests.cpp
 	processing_graph_gtests.cpp
+	processing_utility_gtests.cpp
 	${SRC_PLATFORM_SPECIFIC}/stdafx.cpp)
 
 add_executable (processing_tests ${processing_tests_SRCS})
