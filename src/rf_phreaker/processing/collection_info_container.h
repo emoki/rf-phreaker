@@ -90,8 +90,10 @@ public:
 				if(i != param.remove_.end())
 					if(p.specs_.size() == 1)
 						return true;
-					else 
+					else {
+						p.operating_bands_.remove_band(i->operating_bands_.get_first_band());
 						p.specs_.remove_spec(i->specs_.front());
+					}
 				return false;
 			}), std::end(collection_info_group_));
 		}
@@ -108,8 +110,10 @@ public:
 				});
 				if(i == collection_info_group_.end())
 					collection_info_group_.push_back(p);
-				else
+				else {
+					i->operating_bands_.add_band(p.operating_bands_.get_first_band());
 					i->specs_.add_spec(p.specs_.front());
+				}
 			});
 		}
 	}
