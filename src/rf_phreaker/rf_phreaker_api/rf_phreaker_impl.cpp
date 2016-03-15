@@ -586,6 +586,11 @@ rp_status rf_phreaker_impl::add_sweep_operating_band(rp_device *device, rp_opera
 			it = add_sweep(GSM_SWEEP, GSM_LAYER_3_DECODE);
 			//frequency_range_creation::adjust_gsm_sweep_collection_info(range, *it);
 		}
+
+		// We sort the sweep items to make sure they are in ascending order.  This makes the graphs look pretty in the output.
+		std::sort(it->collection_info_group_.begin(), it->collection_info_group_.end(), [&](const collection_info &a, const collection_info &b) {
+			return a.freq_ < b.freq_;
+		});
 	}
 	catch(const rf_phreaker_error &err) {
 		s = to_rp_status(err);
