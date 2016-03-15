@@ -32,6 +32,9 @@ set (rf_phreaker_gui_SRCS
 	Gsm.h
 	IO.h
 	Lte.h
+	MeasurementIndex.h
+	MeasurementModel.h
+	ProxyMeasurementModel.h
 	Serialization.h
 	Settings.h
 	Stats.h

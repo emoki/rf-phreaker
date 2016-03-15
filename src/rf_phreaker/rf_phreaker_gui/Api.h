@@ -16,9 +16,10 @@
 #include "rf_phreaker/rf_phreaker_gui/Settings.h"
 #include "rf_phreaker/rf_phreaker_gui/IO.h"
 #include "rf_phreaker/rf_phreaker_gui/Stats.h"
+#include "rf_phreaker/rf_phreaker_gui/MeasurementModel.h"
+#include "rf_phreaker/rf_phreaker_gui/ProxyMeasurementModel.h"
 #include "rf_phreaker/protobuf_specific/rf_phreaker_serialization.h"
 #include <google/protobuf/io/zero_copy_stream_impl.h>
-
 //namespace rf_phreaker { namespace gui {
 
 class ApiThread;
@@ -35,20 +36,65 @@ class Api : public QObject {
 	Q_PROPERTY(QStringList messages READ messages NOTIFY messagesChanged)
 	Q_PROPERTY(Device* connectedDevice READ connectedDevice NOTIFY connectedDeviceChanged)
 	Q_PROPERTY(Gps* gps READ gps NOTIFY gpsChanged)
-	Q_PROPERTY(QList<QObject*> wcdmaList READ wcdmaList NOTIFY wcdmaListChanged)
-	Q_PROPERTY(QList<QObject*> lteList READ lteList NOTIFY lteListChanged)
-	//	Q_PROPERTY( READ WRITE set NOTIFY Changed)
-
+	Q_PROPERTY(MeasurementModel* highestCellPerChannelModel READ highestCellPerChannelModel NOTIFY highestCellPerChannelModelChanged)
+	Q_PROPERTY(MeasurementModel* gsmFullScanModel READ gsmFullScanModel NOTIFY gsmFullScanModelChanged)
+	Q_PROPERTY(MeasurementModel* wcdmaFullScanModel READ wcdmaFullScanModel NOTIFY wcdmaFullScanModelChanged)
+	Q_PROPERTY(MeasurementModel* lteFullScanModel READ lteFullScanModel NOTIFY lteFullScanModelChanged)
 	Q_PROPERTY(QStringList availableDevices READ availableDevices NOTIFY availableDevicesChanged)
 	Q_PROPERTY(QString deviceSerial READ deviceSerial WRITE setDeviceSerial NOTIFY deviceSerialChanged)
 	Q_PROPERTY(QString collectionFilename READ collectionFilename WRITE setCollectionFilename NOTIFY collectionFilenameChanged)
-	//	Q_PROPERTY( READ WRITE set NOTIFY Changed)
+	Q_PROPERTY(QList<QObject*> sweepModelList READ sweepModelList NOTIFY sweepModelListChanged)
 	Q_PROPERTY(int lowestFreq READ lowestFreq NOTIFY lowestFreqChanged)
 	Q_PROPERTY(int highestFreq READ highestFreq NOTIFY highestFreqChanged)
 
+public:
+	Q_INVOKABLE void initializeApi();
+	Q_INVOKABLE void listDevices();
+	Q_INVOKABLE void connectDevice(QString qserial = "");
+	Q_INVOKABLE void disconnectDevice();
+	Q_INVOKABLE void startCollection();
+	Q_INVOKABLE void stopCollection();
+	Q_INVOKABLE void updateLicense();
+	Q_INVOKABLE void cleanUpApi();
+	Q_INVOKABLE bool openCollectionFile();
+	Q_INVOKABLE void closeCollectionFile();
+	Q_INVOKABLE void convertRfp(QString filename);
+	Q_INVOKABLE QString getColorTheme(Base *b);
+	Q_INVOKABLE MeasurementModel* getSweepModel(Base *b);
+
 signals:
+	void scanListChanged();
+	void backgroundScanListChanged();
+	void logChanged();
+	void messagesChanged();
+	void deviceStatusChanged();
+	void deviceStatusStrChanged();
+	void connectionStatusChanged();
+	void connectionStatusStrChanged();
+	void availableDevicesChanged();
+	void connectedDeviceChanged();
+	void gpsChanged();
+	void highestCellPerChannelModelChanged();
+	void gsmFullScanModelChanged();
+	void wcdmaFullScanModelChanged();
+	void lteFullScanModelChanged();
+	void sweepModelListChanged();
+	void deviceSerialChanged();
+	void collectionFilenameChanged();
 	void lowestFreqChanged();
 	void highestFreqChanged();
+
+	// Signals for state machine
+	void numDevicesConnected(int numDevices);
+	void deviceConnected();
+	void deviceDisconnected();
+	void scanningStarted();
+	void scanningStopped();
+	void apiInitialized();
+	void licenseUpdateSucceeded();
+	void licenseUpdateFailed();
+	void errorMessage(int status, QString msg);
+	void message(int status, QString msg);
 
 public slots:
 	void findFreqMinMax();
@@ -69,10 +115,12 @@ public:
 	QString collectionFilename() const { return collectionFilename_; }
 	Device* connectedDevice() { return &connectedDevice_; }
 	Gps* gps() { return &gps_; }
-	QList<QObject*> wcdmaList() { return wcdmaList_; }
-	QList<QObject*> lteList() { return lteList_; }
 	QStringList availableDevices() { return availableDevices_; }
-	//bool canRecordData() { return canRecordData_; }
+	MeasurementModel* highestCellPerChannelModel() { return &highestCellPerChannelModel_; }
+	MeasurementModel* gsmFullScanModel() { return &gsmFullScanModel_; }
+	MeasurementModel* wcdmaFullScanModel() { return &wcdmaFullScanModel_; }
+	MeasurementModel* lteFullScanModel() { return &lteFullScanModel_; }
+	QList<QObject*> sweepModelList() { return sweepModelList_; }
 	int lowestFreq() { return lowestFreq_; }
 	int highestFreq() { return highestFreq_; }
 
@@ -107,56 +155,14 @@ public:
 			deviceSerial_ = s;
 			emit deviceSerialChanged();
 		}
-    }
+	}
 
-    void setCollectionFilename(QString s) {
-        if(collectionFilename_ != s) {
-            collectionFilename_ = s;
-            emit collectionFilenameChanged();
-        }
-    }
-
-	Q_INVOKABLE void initializeApi();
-	Q_INVOKABLE void listDevices();
-	Q_INVOKABLE void connectDevice(QString qserial = "");
-	Q_INVOKABLE void disconnectDevice();
-	Q_INVOKABLE void startCollection();
-	Q_INVOKABLE void stopCollection();
-	Q_INVOKABLE void updateLicense();
-	Q_INVOKABLE void cleanUpApi();
-	Q_INVOKABLE bool openCollectionFile();
-	Q_INVOKABLE void closeCollectionFile();
-	Q_INVOKABLE void convertRfp(QString filename);
-
-
-signals:
-	void scanListChanged();
-	void backgroundScanListChanged();
-	void logChanged();
-	void messagesChanged();
-	void deviceStatusChanged();
-	void deviceStatusStrChanged();
-	void connectionStatusChanged();
-	void connectionStatusStrChanged();
-	void availableDevicesChanged();
-	void connectedDeviceChanged();
-	void gpsChanged();
-	void wcdmaListChanged();
-	void lteListChanged();
-	void deviceSerialChanged();
-	void collectionFilenameChanged();
-
-	// Signals for state machine
-	void numDevicesConnected(int numDevices);
-	void deviceConnected();
-	void deviceDisconnected();
-	void scanningStarted();
-	void scanningStopped();
-	void apiInitialized();
-	void licenseUpdateSucceeded();
-	void licenseUpdateFailed();
-	void errorMessage(int status, QString msg);
-	void message(int status, QString msg);
+	void setCollectionFilename(QString s) {
+		if(collectionFilename_ != s) {
+			collectionFilename_ = s;
+			emit collectionFilenameChanged();
+		}
+	}
 
 protected:
 	bool event(QEvent *);
@@ -183,11 +189,6 @@ private:
 	QString collectionFilename_;
 	Device connectedDevice_;
 	Gps gps_;
-	QList<QObject*> wcdmaList_;
-	QList<QObject*> lteList_;
-
-	QMap<int64_t, QObject*> wcdmaMap_;
-	QMap<int64_t, QObject*> lteMap_;
 
 	// Perhaps in the future we allow for multiple devices.
 	// This for the most part should be opaque to the user.
@@ -200,9 +201,6 @@ private:
 	bool canUpdateMessages_;
 	bool canUpdateDevice_;
 	bool canUpdateGps_;
-	bool canUpdateGsm_;
-	bool canUpdateWcdma_;
-	bool canUpdateLte_;
 	std::atomic_bool canRecordData_;
 
 	rf_phreaker::protobuf::update_pb update_pb_;
@@ -217,6 +215,14 @@ private:
 	IO api_debug_output_;
 
 	Stats stats_;
+
+	MeasurementModel highestCellPerChannelModel_;
+	MeasurementModel gsmFullScanModel_;
+	MeasurementModel wcdmaFullScanModel_;
+	MeasurementModel lteFullScanModel_;
+	QMap<ApiTypes::OperatingBand, std::shared_ptr<MeasurementModel>> sweepModels_;
+	QList<QObject*> sweepModelList_;
+	rf_phreaker::operating_band_range_specifier band_specifier_;
 
 	static const int lowestFreqDefault_ = 700;
 	static const int highestFreqDefault_ = 2600;

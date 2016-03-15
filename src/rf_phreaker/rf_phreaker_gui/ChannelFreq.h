@@ -84,6 +84,12 @@ public:
 	QString toBandStr() const { return ApiTypes::toQString(cf_.band_); }
 	QString toTechStr() const { return ApiTypes::toQString(tech_); }
 
+	double freqMhz() const { return cf_.freq_ / 1e6; }
+
+	ApiTypes::OperatingBand band() {
+		return ApiTypes::toOperatingBand(cf_.band_);
+	}
+
 	const rf_phreaker::channel_freq& channelFreq() const { return cf_; }
 
 	rp_frequency_band toRpFrequencyBand() const {

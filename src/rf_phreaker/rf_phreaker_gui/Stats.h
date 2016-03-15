@@ -1,5 +1,6 @@
 #include <QMap>
 #include <stdint.h>
+#include "boost/chrono.hpp"
 #include "rf_phreaker/common/common_types.h"
 #include "rf_phreaker/common/benchmark.h"
 #include "rf_phreaker/protobuf_specific/rf_phreaker.pb.h"

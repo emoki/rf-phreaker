@@ -3,6 +3,7 @@
 #include <QDateTime>
 #include "rf_phreaker/rf_phreaker_api/rf_phreaker_api.h"
 #include "rf_phreaker/rf_phreaker_gui/ApiTypes.h"
+#include "rf_phreaker/common/measurements.h"
 
 //namespace rf_phreaker { namespace gui {
 
@@ -24,9 +25,8 @@ public:
 	explicit Gps(QObject *parent = 0)
 		: QObject(parent) {
 		dt_.setTimeSpec(Qt::UTC);
-		memset(&gps_, 0, sizeof(gps_));
 	}
-	explicit Gps(const rp_gps& gps, QObject *parent = 0)
+	explicit Gps(const rf_phreaker::gps& gps, QObject *parent = 0)
 		: QObject(parent)
 		, gps_(gps) {
 		dt_.setTimeSpec(Qt::UTC);
@@ -35,8 +35,8 @@ public:
 	~Gps() {}
 
 	void copy(const Gps &a) {
-		if(memcmp(gps_.serial_.serial_, a.gps_.serial_.serial_, RP_SERIAL_LENGTH)) {
-			memcpy(gps_.serial_.serial_, a.gps_.serial_.serial_, RP_SERIAL_LENGTH);
+		if(gps_.serial_ != a.gps_.serial_) {
+			gps_.serial_ = a.gps_.serial_;
 			emit serialChanged();
 		}
 		if(gps_.lock_ != a.gps_.lock_) {
@@ -69,9 +69,9 @@ public:
 		}
 	}
 
-	void copy(const rp_gps &a) {
-		if(memcmp(gps_.serial_.serial_, a.serial_.serial_, RP_SERIAL_LENGTH)) {
-			memcpy(gps_.serial_.serial_, a.serial_.serial_, RP_SERIAL_LENGTH);
+	void copy(const rf_phreaker::gps &a) {
+		if(gps_.serial_ != a.serial_) {
+			gps_.serial_ = a.serial_;
 			emit serialChanged();
 		}
 		if(gps_.lock_ != a.lock_) {
@@ -104,7 +104,7 @@ public:
 		}
 	}
 
-	QString serial() { return ApiTypes::toQString(gps_.serial_); }
+	QString serial() { return gps_.serial_.c_str(); }
 	bool gpsLock() { return gps_.lock_; }
 	int visibleSatellites() { return gps_.visible_satellites_; }
 	int trackingSatellites() { return gps_.tracking_satellites_; }
@@ -138,7 +138,7 @@ signals:
 public slots:
 
 private:
-	rp_gps gps_;
+	rf_phreaker::gps gps_;
 	QDateTime dt_;
 };
 

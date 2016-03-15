@@ -25,7 +25,8 @@ enum error_type
 	matlab_interface_error_type,
 	cappeen_api_error_type,
 	gps_comm_error_type,
-	rf_phreaker_api_error_type
+	rf_phreaker_api_error_type,
+	rf_phreaker_gui_error_type
 };
 
 inline const char* error_to_str(error_type err) {
@@ -66,6 +67,8 @@ inline const char* error_to_str(error_type err) {
 		return "gps communciation error";
 	case rf_phreaker_api_error_type:
 		return "rf phreaker api error";
+	case rf_phreaker_gui_error_type:
+		return "rf phreaker gui error";
 	default:
 		return "unknown error type";
 	}
@@ -108,5 +111,6 @@ typedef specific_error<matlab_interface_error_type> matlab_interface_error;
 typedef specific_error<cappeen_api_error_type> cappeen_api_error;
 typedef specific_error<gps_comm_error_type> gps_comm_error;
 typedef specific_error<rf_phreaker_api_error_type> rf_phreaker_api_error;
+typedef specific_error<rf_phreaker_gui_error_type> rf_phreaker_gui_error;
 
 }

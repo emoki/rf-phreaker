@@ -72,6 +72,7 @@ struct frequency_path
 	frequency_path(frequency_type start, frequency_type end) : low_freq_(start), high_freq_(end) {}
 	frequency_type low_freq_;
 	frequency_type high_freq_;
+	bool operator==(const frequency_path &a) const { return low_freq_ == a.low_freq_ && high_freq_ == a.high_freq_; }
 };
 
 enum device_communication

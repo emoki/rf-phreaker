@@ -9,7 +9,7 @@
 //namespace rf_phreaker { namespace gui {
 
 void (RP_CALLCONV rp_update)(const int8_t *google_protocol_buffer_stream, int32_t size) {
-	QCoreApplication::postEvent(Api::instance(), 
+	QCoreApplication::postEvent(Api::instance(),
 		new ProtobufUpdateEvent(google_protocol_buffer_stream, size));
 }
 
@@ -29,7 +29,9 @@ void (RP_CALLCONV rp_gps_update)(const rp_gps *gps) {
 	QCoreApplication::postEvent(Api::instance(), new GpsUpdateEvent(*gps));
 }
 
-void (RP_CALLCONV rp_gsm_full_scan_update)(const rp_base *base, const rp_gsm *gsm, int num_gsm) {}
+void (RP_CALLCONV rp_gsm_full_scan_update)(const rp_base *base, const rp_gsm *gsm, int num_gsm) {
+	//QCoreApplication::postEvent(Api::instance(), new GsmUpdateEvent(base, gsm, num_gsm));
+}
 
 void (RP_CALLCONV rp_wcdma_full_scan_update)(const rp_base *base, const rp_wcdma *wcdma, int num_umts) {
 	QCoreApplication::postEvent(Api::instance(), new WcdmaUpdateEvent(base, wcdma, num_umts));
@@ -39,7 +41,9 @@ void (RP_CALLCONV rp_lte_full_scan_update)(const rp_base *base, const rp_lte *lt
 	QCoreApplication::postEvent(Api::instance(), new LteUpdateEvent(base, lte, num_lte));
 }
 
-void (RP_CALLCONV rp_gsm_sweep_update)(const rp_base *base, const rp_gsm *gsm, int num_gsm) {}
+void (RP_CALLCONV rp_gsm_sweep_update)(const rp_base *base, const rp_gsm *gsm, int num_gsm) {
+	//QCoreApplication::postEvent(Api::instance(), new GsmUpdateEvent(base, gsm, num_gsm));
+}
 
 void (RP_CALLCONV rp_wcdma_sweep_update)(const rp_base *base, const rp_wcdma *wcdma, int num_umts) {
 	//QCoreApplication::postEvent(Api::instance(), new WcdmaUpdateEvent(base, wcdma, num_umts));
@@ -82,23 +86,20 @@ Api::Api(QObject *parent)
 	, canUpdateLog_(false)
 	, canUpdateMessages_(false)
 	, canUpdateDevice_(false)
-	, canUpdateGps_(false)
-	, canUpdateGsm_(false)
-	, canUpdateWcdma_(false)
-    , canUpdateLte_(false) {
-    canRecordData_ = false;
+	, canUpdateGps_(false) {
+	canRecordData_ = false;
 	callbacks_.rp_update = rp_update;
-	callbacks_.rp_log_update = rp_log_update;
-	callbacks_.rp_message_update = rp_message_update;
-	callbacks_.rp_device_info_update = rp_device_info_update;
-	callbacks_.rp_gps_update = rp_gps_update;
-	callbacks_.rp_gsm_full_scan_update = rp_gsm_full_scan_update;
-	callbacks_.rp_wcdma_full_scan_update = rp_wcdma_full_scan_update;
-	callbacks_.rp_lte_full_scan_update = rp_lte_full_scan_update;
-	callbacks_.rp_raw_data_update = /*rp_raw_data_update*/0;
-	callbacks_.rp_gsm_sweep_update = rp_gsm_sweep_update;
-	callbacks_.rp_wcdma_sweep_update = rp_wcdma_sweep_update;
-	callbacks_.rp_lte_sweep_update = rp_lte_sweep_update;
+	callbacks_.rp_log_update = nullptr;
+	callbacks_.rp_message_update = nullptr;
+	callbacks_.rp_device_info_update = nullptr;
+	callbacks_.rp_gps_update = nullptr;
+	callbacks_.rp_gsm_full_scan_update = nullptr;
+	callbacks_.rp_wcdma_full_scan_update = nullptr;
+	callbacks_.rp_lte_full_scan_update = nullptr;
+	callbacks_.rp_raw_data_update = nullptr;
+	callbacks_.rp_gsm_sweep_update = nullptr;
+	callbacks_.rp_wcdma_sweep_update = nullptr;
+	callbacks_.rp_lte_sweep_update = nullptr;
 
 	connect(updateTimer_, SIGNAL(timeout()), this, SLOT(emitSignals()));
 	updateTimer_->start(800);
@@ -109,9 +110,9 @@ Api::Api(QObject *parent)
 }
 
 Api::~Api() {
-	thread_->quit();
 	settingsIO_.writeSettings(settings_);
 	settingsIO_.writeScanList(scanList_->qlist());
+	thread_->quit();
 	thread_->wait();
 	rp_clean_up();
 	closeCollectionFile();
@@ -246,20 +247,6 @@ void Api::emitSignals() {
 		emit gpsChanged();
 		canUpdateGps_ = false;
 	}
-//	if(canUpdateGsm_) {
-//		emit gsmListChanged();
-//	    canUpdateGsm_ = false;
-//	}
-	if(canUpdateWcdma_) {
-		emit wcdmaListChanged();
-		wcdmaList_ = wcdmaMap_.values();
-		canUpdateWcdma_ = false;
-	}
-	if(canUpdateLte_) {
-		emit lteListChanged();
-		lteList_ = lteMap_.values();
-		canUpdateLte_ = false;
-	}
 }
 
 bool Api::event(QEvent *e) {
@@ -278,86 +265,98 @@ bool Api::event(QEvent *e) {
 		}
 
 		switch(proto.update_case()) {
-		case rf_phreaker::protobuf::rp_update::UpdateCase::kLog:
+		case rf_phreaker::protobuf::rp_update::UpdateCase::kLog: {
+			QString msg(update_pb_.protobuf().log().msg().c_str());
+			qDebug() << msg;
+			log_.prepend(msg);
+			canUpdateLog_ = true;
 			break;
-		case rf_phreaker::protobuf::rp_update::UpdateCase::kMsg:
+		}
+		case rf_phreaker::protobuf::rp_update::UpdateCase::kMsg: {
+			auto &msg = update_pb_.protobuf().msg();
+			handle_message((rp_status)msg.status(), msg.msg().c_str());
+			canUpdateMessages_ = true;
 			break;
-		case rf_phreaker::protobuf::rp_update::UpdateCase::kDevice:
+		}
+		case rf_phreaker::protobuf::rp_update::UpdateCase::kDevice: {
+			auto &device = update_pb_.get_hardware();
+			connectedDevice_.copy(device);
+			canUpdateDevice_ = true;
+			deviceConnected();
 			break;
-		case rf_phreaker::protobuf::rp_update::UpdateCase::kGps:
+		}
+		case rf_phreaker::protobuf::rp_update::UpdateCase::kGps: {
 			current_gps_ = update_pb_.get_gps();
+			gps_.copy(current_gps_);
+			canUpdateGps_ = true;
 			break;
-		case rf_phreaker::protobuf::rp_update::UpdateCase::kGsmFullScan:
+		}
+		case rf_phreaker::protobuf::rp_update::UpdateCase::kGsmFullScan: {
+			auto &t = update_pb_.get_gsm_full_scan();
+			if(t.empty()) {
+				auto &k = update_pb_.get_gsm_full_scan_basic();
+				gsmFullScanModel_.update_with_basic_data(k, ApiTypes::GSM_FULL_SCAN);
+			}
+			else {
+				gsmFullScanModel_.update(t);
+				highestCellPerChannelModel_.update_freq_using_highest<less_than_cell_sl>(t);
+			}
 			break;
-		case rf_phreaker::protobuf::rp_update::UpdateCase::kWcdmaFullScan:
+		}
+		case rf_phreaker::protobuf::rp_update::UpdateCase::kWcdmaFullScan: {
+			auto &t = update_pb_.get_wcdma_full_scan();
+			if(t.empty()) {
+				auto &k = update_pb_.get_wcdma_full_scan_basic();
+				wcdmaFullScanModel_.update_with_basic_data(k, ApiTypes::WCDMA_FULL_SCAN);
+			}
+			else {
+				wcdmaFullScanModel_.update(t);
+				highestCellPerChannelModel_.update_freq_using_highest<less_than_cell_sl>(t);
+			}
 			break;
-		case rf_phreaker::protobuf::rp_update::UpdateCase::kLteFullScan:
+		}
+		case rf_phreaker::protobuf::rp_update::UpdateCase::kLteFullScan: {
+			auto &t = update_pb_.get_lte_full_scan();
+			if(t.empty()) {
+				auto &k = update_pb_.get_lte_full_scan_basic();
+				lteFullScanModel_.update_with_basic_data(k, ApiTypes::LTE_FULL_SCAN);
+			}
+			else {
+				lteFullScanModel_.update(t);
+				highestCellPerChannelModel_.update_freq_using_highest<less_than_cell_sl>(t);
+			}
 			break;
-		case rf_phreaker::protobuf::rp_update::UpdateCase::kGsmSweep:
+		}
+		case rf_phreaker::protobuf::rp_update::UpdateCase::kGsmSweep: {
+			auto &t = update_pb_.get_gsm_sweep_basic();
+			auto bands = band_specifier_.find_avaliable_gsm_operating_bands(t.carrier_frequency_);
+			for(auto i : bands) {
+				if(sweepModels_.contains(ApiTypes::toOperatingBand(i.band_)))
+					sweepModels_[ApiTypes::toOperatingBand(i.band_)]->update_with_basic_data(t, ApiTypes::GSM_SWEEP);
+			}
 			break;
-		case rf_phreaker::protobuf::rp_update::UpdateCase::kWcdmaSweep:
+		}
+		case rf_phreaker::protobuf::rp_update::UpdateCase::kWcdmaSweep: {
+			auto &t = update_pb_.get_wcdma_sweep_basic();
+			auto bands = band_specifier_.find_avaliable_umts_operating_bands(t.carrier_frequency_);
+			for(auto i : bands) {
+				if(sweepModels_.contains(ApiTypes::toOperatingBand(i.band_)))
+					sweepModels_[ApiTypes::toOperatingBand(i.band_)]->update_with_basic_data(t, ApiTypes::WCDMA_SWEEP);
+			}
 			break;
-		case rf_phreaker::protobuf::rp_update::UpdateCase::kLteSweep:
+		}
+		case rf_phreaker::protobuf::rp_update::UpdateCase::kLteSweep: {
+			auto &t = update_pb_.get_lte_sweep_basic();
+			auto bands = band_specifier_.find_avaliable_lte_operating_bands(t.carrier_frequency_);
+			for(auto i : bands) {
+				if(sweepModels_.contains(ApiTypes::toOperatingBand(i.band_)))
+					sweepModels_[ApiTypes::toOperatingBand(i.band_)]->update_with_basic_data(t, ApiTypes::LTE_SWEEP);
+			}
 			break;
+		}
 		default:
 			qDebug() << "Unknown protobuf message.";
 		}
-	}
-	if(e->type() == WcdmaUpdateEvent::getType()) {
-		auto ev = static_cast<WcdmaUpdateEvent*>(e);
-		for(auto i = ev->wcdmaList().begin(); i != ev->wcdmaList().end(); ++i) {
-			auto it = wcdmaMap_.find(to_hash(*i));
-			if(it == wcdmaMap_.end())
-				wcdmaMap_.insert(to_hash(*i), new Wcdma(*i, this));
-			else
-				static_cast<Wcdma*>(it.value())->copy(*i);
-		}
-		canUpdateWcdma_ = true;
-		e->accept();
-		return true;
-	}
-	else if(e->type() == LteUpdateEvent::getType()) {
-		auto ev = static_cast<LteUpdateEvent*>(e);
-		for(auto i = ev->lteList().begin(); i != ev->lteList().end(); ++i) {
-			auto it = lteMap_.find(to_hash(*i));
-			if(it == lteMap_.end())
-				lteMap_.insert(to_hash(*i), new Lte(*i, this));
-			else
-				static_cast<Lte*>(it.value())->copy(*i);
-		}
-		canUpdateLte_ = true;
-		e->accept();
-		return true;
-	}
-	else if(e->type() == GpsUpdateEvent::getType()) {
-		auto ev = static_cast<GpsUpdateEvent*>(e);
-		gps_.copy(ev->gps());
-		canUpdateGps_ = true;
-		e->accept();
-		return true;
-	}
-	else if(e->type() == LogUpdateEvent::getType()) {
-		auto ev = static_cast<LogUpdateEvent*>(e);
-		qDebug() << ev->msg();
-		log_.prepend(ev->msg());
-		canUpdateLog_ = true;
-		e->accept();
-		return true;
-	}
-	else if(e->type() == MessageUpdateEvent::getType()) {
-		auto ev = static_cast<MessageUpdateEvent*>(e);
-		handle_message(ev->status(), ev->msg());
-		canUpdateMessages_ = true;
-		e->accept();
-		return true;
-	}
-	else if(e->type() == DeviceUpdateEvent::getType()) {
-		auto ev = static_cast<DeviceUpdateEvent*>(e);
-		connectedDevice_.copy(ev->device());
-		canUpdateDevice_ = true;
-		deviceConnected();
-		e->accept();
-		return true;
 	}
 	else if(e->type() == AvailableDevicesEvent::getType()) {
 		auto ev = static_cast<AvailableDevicesEvent*>(e);
@@ -402,27 +401,27 @@ void Api::handle_message(rp_status status, const QString &s) {
 	switch(status) {
 	case RP_STATUS_OK:
 		break;
-    case RP_STATUS_FREQUENCY_CORRECTION_SUCCESSFUL:
-        message(status, s);
-        break;
-    case RP_STATUS_FREQUENCY_CORRECTION_FAILED:
-        message(status, s);
-        break;
-    case RP_STATUS_FREQUENCY_CORRECTION_VALUE_INVALID:
-        message(status, s);
-        break;
-    case RP_STATUS_NOT_INITIALIZED:
-        message(status, s);
-        break;
-    case RP_STATUS_INVALID_PARAMETER:
-        message(status, s);
-        break;
-    case RP_STATUS_CALIBRATION_ERROR:
-        message(status, s);
-        break;
-    case RP_STATUS_EEPROM_ERROR:
-        message(status, s);
-        break;
+	case RP_STATUS_FREQUENCY_CORRECTION_SUCCESSFUL:
+		message(status, s);
+		break;
+	case RP_STATUS_FREQUENCY_CORRECTION_FAILED:
+		message(status, s);
+		break;
+	case RP_STATUS_FREQUENCY_CORRECTION_VALUE_INVALID:
+		message(status, s);
+		break;
+	case RP_STATUS_NOT_INITIALIZED:
+		message(status, s);
+		break;
+	case RP_STATUS_INVALID_PARAMETER:
+		message(status, s);
+		break;
+	case RP_STATUS_CALIBRATION_ERROR:
+		message(status, s);
+		break;
+	case RP_STATUS_EEPROM_ERROR:
+		message(status, s);
+		break;
 
 	//case RP_OTHER_GOOD_THINGS:
 	// Handle other messages that may not be errors?
@@ -471,3 +470,28 @@ void Api::convertRfp(QString filename) {
 	IO::convert_rpf(filename);
 }
 
+QString Api::getColorTheme(Base *b) {
+	if(b == nullptr)
+		return "dimgrey";
+	switch(b->cellTech()) {
+	case ApiTypes::GSM_SWEEP:
+	case ApiTypes::WCDMA_SWEEP:
+	case ApiTypes::LTE_SWEEP:
+		return "seagreen";
+	case ApiTypes::GSM_FULL_SCAN:
+		return "paleturquoise";
+	case ApiTypes::WCDMA_FULL_SCAN:
+		return "firebrick";
+	case ApiTypes::LTE_FULL_SCAN:
+		return "mediumslateblue";
+	default:
+		return "dimgrey";
+	}
+}
+
+MeasurementModel* Api::getSweepModel(Base *b) {
+	if(sweepModels_.contains(b->cellBand()))
+		return sweepModels_[b->cellBand()].get();
+	else
+		return nullptr;
+}

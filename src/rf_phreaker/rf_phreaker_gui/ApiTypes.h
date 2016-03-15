@@ -46,7 +46,7 @@ public:
 		CDMA_SWEEP = ::rf_phreaker::CDMA_SWEEP,
 		WCDMA_SWEEP = ::rf_phreaker::UMTS_SWEEP,
 		LTE_SWEEP = ::rf_phreaker::LTE_SWEEP,
-		RAW_DATA = ::rf_phreaker::RAW_DATA
+		RAW_DATA = ::rf_phreaker::RAW_DATA,
 	};
 
 	enum OperatingBand {
@@ -581,6 +581,11 @@ public:
 		return s.left(serialLength);
 	}
 
+	Q_INVOKABLE static QString toQStringShort(const rf_phreaker::scanner_serial_type &serial) {
+		QString s(serial.c_str());
+		return s.left(serialLength);
+	}
+
 	Q_INVOKABLE static QString toQString(const rp_serial &serial) {
 		QString s(serial.serial_);
 		return s;
@@ -594,7 +599,27 @@ public:
 		return static_cast<rp_operating_band>(t);
 	}
 
+	Q_INVOKABLE static OperatingBand toOperatingBand(rf_phreaker::operating_band t) {
+		return static_cast<OperatingBand>(t);
+	}
+
+	Q_INVOKABLE static rf_phreaker::operating_band toOperatingBand(OperatingBand t) {
+		return static_cast<rf_phreaker::operating_band>(t);
+	}
+
 	Q_INVOKABLE static QString toQString(const rp_device_communication &comm) {
+		switch(comm) {
+		case USB_HI_SPEED:
+			return "Hi-Speed USB";
+		case USB_SUPER_SPEED:
+			return "Super-Speed USB";
+		case UNKNOWN_DEVICE_COMMUNICATION:
+		default:
+			return "Unknown Device Communication";
+		}
+	}
+
+	Q_INVOKABLE static QString toQString(const rf_phreaker::device_communication &comm) {
 		switch(comm) {
 		case USB_HI_SPEED:
 			return "Hi-Speed USB";

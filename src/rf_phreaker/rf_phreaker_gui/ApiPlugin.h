@@ -14,8 +14,17 @@
 #include "rf_phreaker/rf_phreaker_gui/Base.h"
 #include "rf_phreaker/rf_phreaker_gui/Serialization.h"
 #include "rf_phreaker/rf_phreaker_gui/FileSaveDialog.h"
+#include "rf_phreaker/rf_phreaker_gui/MeasurementModel.h"
+#include "rf_phreaker/rf_phreaker_gui/ProxyMeasurementModel.h"
 
 //namespace rf_phreaker { namespace gui {
+
+Q_DECLARE_METATYPE(Base*)
+Q_DECLARE_METATYPE(GenericMeasurement*)
+Q_DECLARE_METATYPE(Gsm*)
+Q_DECLARE_METATYPE(Wcdma*)
+Q_DECLARE_METATYPE(Lte*)
+Q_DECLARE_METATYPE(Sweep*)
 
 QObject* ApiInterfaceSingletonTypeProvider(QQmlEngine *engine, QJSEngine *scriptEngine) {
 	Q_UNUSED(engine);
@@ -39,8 +48,12 @@ void registerQmlTypes()
 	qmlRegisterType<Wcdma>(uri.latin1(), 1, 0, "Wcdma");
 	qmlRegisterType<Lte>(uri.latin1(), 1, 0, "Lte");
 	qmlRegisterType<Sweep>(uri.latin1(), 1, 0, "Sweep");
-    qmlRegisterType<Sweep>(uri.latin1(), 1, 0, "Base");
-    qmlRegisterType<FileSaveDialog>(uri.latin1(), 1, 0, "FileSaveDialog");
+	qmlRegisterType<GenericMeasurement>(uri.latin1(), 1, 0, "GenericMeasurement");
+	qmlRegisterType<Sweep>(uri.latin1(), 1, 0, "Base");
+	qmlRegisterType<FileSaveDialog>(uri.latin1(), 1, 0, "FileSaveDialog");
+	qmlRegisterType<MeasurementModel>(uri.latin1(), 1, 0, "MeasurementModel");
+	qmlRegisterType<FilterProxyMeasurementModel>(uri.latin1(), 1, 0, "FilterProxyMeasurementModel");
+	qmlRegisterType<BarGraphProxyMeasurementModel>(uri.latin1(), 1, 0, "BarGraphProxyMeasurementModel");
 
 	qRegisterMetaTypeStreamOperators<rf_phreaker::channel_freq>("channel_freq");
 	qRegisterMetaTypeStreamOperators<ApiTypes::Tech>("ApiTech");

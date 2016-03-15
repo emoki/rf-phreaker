@@ -32,7 +32,7 @@ public:
 			qs_.setArrayIndex(i);
 			auto low = qs_.value("channel_freq_low").value<rf_phreaker::channel_freq>();
 			auto high = qs_.value("channel_freq_high").value<rf_phreaker::channel_freq>();
-			auto tech = (ApiTypes::Tech)qs_.value("tech").value<::rp_technology>();
+			auto tech = (ApiTypes::Tech)qs_.value("tech").value<ApiTypes::Tech>();
 			list.append(new CollectionInfo(low, high, tech));
 		}
 		qs_.endArray();
@@ -51,7 +51,7 @@ public:
 			qs_.setArrayIndex(i++);
 			qs_.setValue("channel_freq_low", QVariant::fromValue(j->channelFreqLow()->channelFreq()));
 			qs_.setValue("channel_freq_high", QVariant::fromValue(j->channelFreqHigh()->channelFreq()));
-			qs_.setValue("tech", QVariant::fromValue((::rp_technology)j->channelFreqLow()->tech()));
+			qs_.setValue("tech", QVariant::fromValue(j->channelFreqLow()->tech()));
 		}
 		qs_.endArray();
 

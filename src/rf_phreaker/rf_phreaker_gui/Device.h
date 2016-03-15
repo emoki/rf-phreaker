@@ -3,6 +3,7 @@
 #include <QDateTime>
 #include "rf_phreaker/rf_phreaker_api/rf_phreaker_api.h"
 #include "rf_phreaker/rf_phreaker_gui/ApiTypes.h"
+#include "rf_phreaker/common/measurements.h"
 
 //namespace rf_phreaker { namespace gui {
 
@@ -26,23 +27,20 @@ public:
 	explicit Device(QObject *parent = 0)
 		:QObject(parent)
 	{
-		memset(device_.serial_.serial_, 0, RP_SERIAL_LENGTH);
-		device_.device_communication_ = UNKNOWN_DEVICE_COMMUNICATION;
+		device_.device_communication_ = rf_phreaker::UNKNOWN_SPEED;
 		device_.frequency_correction_calibration_date_  = 0;
 		device_.rf_calibration_date_ = 0;
-		device_.num_frequency_paths_ = 0;
-		device_.num_licenses_ = 0;
 	}
-	explicit Device(const rp_device_info &rp_device, QObject *parent = 0)
+	explicit Device(const rf_phreaker::hardware &device, QObject *parent = 0)
 		: QObject(parent)
-		, device_(rp_device)
+		, device_(device)
 	{}
 
 	~Device() {}
 
 	void copy(const Device &a) {
-		if(memcmp(device_.serial_.serial_, a.device_.serial_.serial_, RP_SERIAL_LENGTH)) {
-			memcpy(device_.serial_.serial_, a.device_.serial_.serial_, RP_SERIAL_LENGTH);
+		if(device_.serial_ != a.device_.serial_) {
+			device_.serial_ = a.device_.serial_;
 			emit serialChanged();
 		}
 		if(device_.device_communication_ != a.device_.device_communication_) {
@@ -57,24 +55,10 @@ public:
 			device_.rf_calibration_date_ = a.device_.rf_calibration_date_;
 			emit rfCalibrationDateChanged();
 		}
-		if(device_.num_frequency_paths_ != a.device_.num_frequency_paths_) {
-			device_.num_frequency_paths_ = a.device_.num_frequency_paths_;
+		if(device_.frequency_paths_ != a.device_.frequency_paths_) {
+			device_.frequency_paths_ = a.device_.frequency_paths_;
+			format_frequency_paths();
 			emit calibratedFreqListChanged();
-		}
-		if(memcmp(device_.frequency_paths_, a.device_.frequency_paths_, RP_FREQUENCY_PATH_SIZE)) {
-			memcpy(device_.frequency_paths_, a.device_.frequency_paths_, RP_FREQUENCY_PATH_SIZE);
-			calibratedFreqList_.clear();
-			for(auto i = 0; i < device_.num_frequency_paths_; ++i) {
-				calibratedFreqList_.push_back(QString(QString::number(device_.frequency_paths_[i].low_freq_)
-													  + " - " +
-													  QString::number(device_.frequency_paths_[i].high_freq_)
-													  + " mhz"));
-			}
-			emit calibratedFreqListChanged();
-		}
-		if(device_.num_licenses_ != a.device_.num_licenses_) {
-			device_.num_licenses_ = a.device_.num_licenses_;
-			emit licenseListChanged();
 		}
 //		if(memcmp(device_.licenses_, a.device_.licenses_, RP_FREQUENCY_PATH_SIZE)) {
 //			memcpy(device_.licenses_, a.device_.licenses_, RP_FREQUENCY_PATH_SIZE);
@@ -82,9 +66,9 @@ public:
 //		}
 	}
 
-	void copy(const rp_device_info &a) {
-		if(memcmp(device_.serial_.serial_, a.serial_.serial_, RP_SERIAL_LENGTH)) {
-			memcpy(device_.serial_.serial_, a.serial_.serial_, RP_SERIAL_LENGTH);
+	void copy(const rf_phreaker::hardware &a) {
+		if(device_.serial_ != a.serial_) {
+			device_.serial_ = a.serial_;
 			emit serialChanged();
 		}
 		if(device_.device_communication_ != a.device_communication_) {
@@ -99,17 +83,10 @@ public:
 			device_.rf_calibration_date_ = a.rf_calibration_date_;
 			emit rfCalibrationDateChanged();
 		}
-		if(device_.num_frequency_paths_ != a.num_frequency_paths_) {
-			device_.num_frequency_paths_ = a.num_frequency_paths_;
+		if(device_.frequency_paths_ != a.frequency_paths_) {
+			device_.frequency_paths_ = a.frequency_paths_;
+			format_frequency_paths();
 			emit calibratedFreqListChanged();
-		}
-		if(memcmp(device_.frequency_paths_, a.frequency_paths_, RP_FREQUENCY_PATH_SIZE)) {
-			memcpy(device_.frequency_paths_, a.frequency_paths_, RP_FREQUENCY_PATH_SIZE);
-			emit calibratedFreqListChanged();
-		}
-		if(device_.num_licenses_ != a.num_licenses_) {
-			device_.num_licenses_ = a.num_licenses_;
-			emit licenseListChanged();
 		}
 //		if(memcmp(device_.licenses_, a.device_.licenses_, RP_FREQUENCY_PATH_SIZE)) {
 //			memcpy(device_.licenses_, a.device_.licenses_, RP_FREQUENCY_PATH_SIZE);
@@ -117,7 +94,7 @@ public:
 //		}
 	}
 
-	QString serial() { return ApiTypes::toQString(device_.serial_); }
+	QString serial() { return QString(device_.serial_.c_str()); }
 	QString serialShort() { return ApiTypes::toQStringShort(device_.serial_); }
 	ApiTypes::DeviceCommunication deviceCommunication() { return (ApiTypes::DeviceCommunication)device_.device_communication_; }
 	QString deviceCommunicationStr() { return ApiTypes::toQString(device_.device_communication_); }
@@ -138,6 +115,15 @@ public:
 	QStringList calibratedFreqList() { return calibratedFreqList_; }
 	QList<QObject*> licenseList() { return licenseList_; }
 
+	void format_frequency_paths() {
+		calibratedFreqList_.clear();
+		for(auto &i : device_.frequency_paths_) {
+			calibratedFreqList_.push_back(QString(QString::number(i.low_freq_)
+				+ " - " +
+				QString::number(i.high_freq_)
+				+ " mhz"));
+		}
+	}
 signals:
 	void serialChanged();
 	void deviceCommunicationChanged();
@@ -149,7 +135,7 @@ signals:
 public slots:
 
 private:
-	rp_device_info device_;
+	rf_phreaker::hardware device_;
 	QDateTime dt_;
 	QStringList calibratedFreqList_;
 	QList<QObject*> licenseList_;
