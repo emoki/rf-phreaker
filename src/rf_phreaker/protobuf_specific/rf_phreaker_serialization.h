@@ -53,7 +53,7 @@ public:
 		populate(str, pb_.get());
 	}
 	static void populate(const std::string& str, rp_log *pb) {
-			pb->set_msg(str.c_str());
+		pb->set_msg(str.c_str());
 	}
 };
 
@@ -85,6 +85,7 @@ public:
 		}
 	}
 	static void populate(const hardware &t, rp_device_info *pb) {
+		pb->Clear();
 		pb->set_serial(t.serial_);
 		pb->set_device_communication((rp_device_communication)t.device_communication_);
 		pb->set_frequency_correction_calibration_date(t.frequency_correction_calibration_date_);
@@ -180,6 +181,7 @@ public:
 		t.status_flags_ = pb.status_flags();
 	}
 	static void populate(const basic_data &t, rp_base *pb) {
+		pb->Clear();
 		pb->set_serial(t.serial_);
 		pb->set_collection_round(t.collection_round_);
 		pb->set_carrier_frequency(t.carrier_frequency_);
@@ -993,6 +995,7 @@ public:
 		populate(t, b, pb_.get());
 	}
 	static void populate(const rp_gsm_update &pb, std::vector<gsm_data> &t) {
+		t.clear();
 		auto j = 0;
 		for(auto i = 0; i < pb.gsm_size(); ++i) {
 			gsm_data g;
@@ -1001,6 +1004,7 @@ public:
 		}
 	}
 	static void populate(const std::vector<gsm_data> &t, const basic_data &b, rp_gsm_update *pb) {
+		pb->Clear();
 		for(auto &i : t) {
 			gsm_pb::populate(i, pb->add_gsm());
 		}
@@ -1018,6 +1022,7 @@ public:
 		populate(t, b, pb_.get());
 	}
 	static void populate(const rp_wcdma_update &pb, std::vector<umts_data> &t) {
+		t.clear();
 		auto j = 0;
 		for(auto i = 0; i < pb.wcdma_size(); ++i) {
 			umts_data g;
@@ -1026,6 +1031,7 @@ public:
 		}
 	}
 	static void populate(const std::vector<umts_data> &t, const basic_data &b, rp_wcdma_update *pb) {
+		pb->Clear();
 		for(auto &i : t) {
 			wcdma_pb::populate(i, pb->add_wcdma());
 		}
@@ -1043,6 +1049,7 @@ public:
 		populate(t, b, pb_.get());
 	}
 	static void populate(const rp_lte_update &pb, std::vector<lte_data> &t) {
+		t.clear();
 		auto j = 0;
 		for(auto i = 0; i < pb.lte_size(); ++i) {
 			lte_data g;
@@ -1051,6 +1058,7 @@ public:
 		}
 	}
 	static void populate(const std::vector<lte_data> &t, const basic_data &b, rp_lte_update *pb) {
+		pb->Clear();
 		for(auto &i : t) {
 			lte_pb::populate(i, pb->add_lte());
 		}
