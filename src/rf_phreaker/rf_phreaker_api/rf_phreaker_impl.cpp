@@ -574,16 +574,16 @@ rp_status rf_phreaker_impl::add_sweep_operating_band(rp_device *device, rp_opera
 		collection_info_containers::iterator it;
 
 		if(band >= FIRST_UMTS_OPERATING_BAND && band <= LAST_UMTS_OPERATING_BAND) {
-			auto it = add_sweep(UMTS_SWEEP, UMTS_LAYER_3_DECODE);
+			it = add_sweep(UMTS_SWEEP, UMTS_LAYER_3_DECODE);
 			frequency_range_creation::adjust_umts_sweep_collection_info(range, *it);
 		}
 		else if(band >= FIRST_LTE_OPERATING_BAND && band <= LAST_LTE_OPERATING_BAND) {
-			auto it = add_sweep(LTE_SWEEP, LTE_LAYER_3_DECODE);
+			it = add_sweep(LTE_SWEEP, LTE_LAYER_3_DECODE);
 			frequency_range_creation::adjust_lte_sweep_collection_info(range, *it);
 		}
 		else if(band >= FIRST_GSM_OPERATING_BAND && band <= LAST_GSM_OPERATING_BAND) {
 			throw rf_phreaker_api_error("GSM not supported.");
-			auto it = add_sweep(GSM_SWEEP, GSM_LAYER_3_DECODE);
+			it = add_sweep(GSM_SWEEP, GSM_LAYER_3_DECODE);
 			//frequency_range_creation::adjust_gsm_sweep_collection_info(range, *it);
 		}
 	}
