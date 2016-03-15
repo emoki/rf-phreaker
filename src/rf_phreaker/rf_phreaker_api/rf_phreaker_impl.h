@@ -102,6 +102,8 @@ private:
 
 	void error_handling(const std::string &str, int type, int code);
 
+	void clear_queues();
+
 	bool is_initialized_;
 
 	rf_phreaker::settings config_;

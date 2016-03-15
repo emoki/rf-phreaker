@@ -41,6 +41,21 @@ rf_phreaker_impl::~rf_phreaker_impl() {
 	catch(...) {}
 }
 
+void rf_phreaker_impl::clear_queues() {
+	if(data_output_)
+		data_output_->clear_queue();
+	if(scanners_.size()) {
+		for(auto &s : scanners_)
+			s->async_.clear_queue();
+	}
+	if(data_output_)
+		data_output_->clear_and_wait(20, 200);
+	if(scanners_.size()) {
+		for(auto &s : scanners_)
+			s->async_.clear_and_wait(20, 200);
+	}
+}
+
 rp_status rf_phreaker_impl::initialize(rp_callbacks *callbacks) {
 	rp_status s = RP_STATUS_OK;
 	callbacks_ = nullptr;
@@ -172,15 +187,10 @@ rp_status rf_phreaker_impl::clean_up() {
 		gps_graph_.reset();
 		processing_graph_.reset();
 		frequency_correction_graph_.reset();
-		if(data_output_)
-			data_output_->clear_queue();
-		data_output_.reset();
 		handler_.reset();
 		handler_pb_.reset();
-		if(scanners_.size()) {
-			for(auto &s : scanners_)
-				s->async_.clear_queue();
-		}
+		clear_queues();
+		data_output_.reset();
 		scanners_.clear();
 		LOG(LINFO) << "Cleaned up successfully.";
 	}
