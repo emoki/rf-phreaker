@@ -43,6 +43,15 @@ class Api : public QObject {
 	Q_PROPERTY(QString deviceSerial READ deviceSerial WRITE setDeviceSerial NOTIFY deviceSerialChanged)
 	Q_PROPERTY(QString collectionFilename READ collectionFilename WRITE setCollectionFilename NOTIFY collectionFilenameChanged)
 	//	Q_PROPERTY( READ WRITE set NOTIFY Changed)
+	Q_PROPERTY(int lowestFreq READ lowestFreq NOTIFY lowestFreqChanged)
+	Q_PROPERTY(int highestFreq READ highestFreq NOTIFY highestFreqChanged)
+
+signals:
+	void lowestFreqChanged();
+	void highestFreqChanged();
+
+public slots:
+	void findFreqMinMax();
 
 public:
 	~Api();
@@ -64,6 +73,8 @@ public:
 	QList<QObject*> lteList() { return lteList_; }
 	QStringList availableDevices() { return availableDevices_; }
 	//bool canRecordData() { return canRecordData_; }
+	int lowestFreq() { return lowestFreq_; }
+	int highestFreq() { return highestFreq_; }
 
 	void setScanList(const CollectionInfoList *list) {
 		scanList_->setList(list->qlist());
@@ -206,6 +217,11 @@ private:
 	IO api_debug_output_;
 
 	Stats stats_;
+
+	static const int lowestFreqDefault_ = 700;
+	static const int highestFreqDefault_ = 2600;
+	int highestFreq_;
+	int lowestFreq_;
 };
 
 //}}

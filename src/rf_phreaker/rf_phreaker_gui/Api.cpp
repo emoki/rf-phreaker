@@ -77,6 +77,8 @@ Api::Api(QObject *parent)
 	, backgroundScanList_(new CollectionInfoList(this))
 	, thread_(new ApiThread)
 	, updateTimer_(new QTimer(this))
+	, lowestFreq_(lowestFreqDefault_)
+	, highestFreq_(highestFreqDefault_)
 	, canUpdateLog_(false)
 	, canUpdateMessages_(false)
 	, canUpdateDevice_(false)
@@ -100,6 +102,8 @@ Api::Api(QObject *parent)
 
 	connect(updateTimer_, SIGNAL(timeout()), this, SLOT(emitSignals()));
 	updateTimer_->start(800);
+
+	connect(scanList_, SIGNAL(listChanged()), this, SLOT(findFreqMinMax()));
 
 	thread_->start();
 }
@@ -143,6 +147,13 @@ void Api::disconnectDevice() {
 void Api::startCollection() {
 	qDebug() << "Starting collection.";
 
+	gsmFullScanModel_.clear();
+	wcdmaFullScanModel_.clear();
+	lteFullScanModel_.clear();
+	highestCellPerChannelModel_.clear();
+	sweepModelList_.clear();
+	sweepModels_.clear();
+
 	// Create storage for all possible techs.  Note, QMap automatically inserts a default item if it is empty.
 	api_storage<rp_operating_band, rp_operating_band_group> sweep;
 	api_storage<rp_frequency_type, rp_frequency_group> raw_data;
@@ -152,6 +163,11 @@ void Api::startCollection() {
 		auto cf = ci->channelFreqLow();
 		if(ci->isSweep()) {
 			sweep.push_back(cf->toRpBand());
+
+			// Add operating band to sweep models
+			auto sweepModel = sweepModels_.insert(cf->band(), std::make_shared<MeasurementModel>());
+			QQmlEngine::setObjectOwnership(sweepModel->get(), QQmlEngine::CppOwnership);
+			sweepModelList_.push_back(sweepModel->get());
 		}
 		else if(cf->tech() == ApiTypes::RAW_DATA) {
 			raw_data.push_back(cf->toRpFreq());
@@ -161,8 +177,48 @@ void Api::startCollection() {
 		}
 	}
 
+	// Alert the GUI that the sweep models have changed.
+	emit sweepModelListChanged();
+
 	QCoreApplication::postEvent(thread_->worker(), new StartCollectionEvent(sweep, raw_data, techs));
 }
+
+void Api::findFreqMinMax() {
+	int low;
+	int high;
+	auto list = scanList_->qlist();
+	if(list.empty()) {
+		low = lowestFreqDefault_;
+		high = highestFreqDefault_;
+	}
+	else {
+		low = list[0]->channelFreqLow()->freqMhz();
+		high = list[0]->isSweep() ? list[0]->channelFreqHigh()->freqMhz() : list[0]->channelFreqLow()->freqMhz();
+		foreach(const auto &ci, list) {
+			if(ci->channelFreqLow()->freqMhz() < low)
+				low = ci->channelFreqLow()->freqMhz();
+			if(ci->isSweep() && ci->channelFreqHigh()->freqMhz() > high)
+				high = ci->channelFreqHigh()->freqMhz();
+			else if(ci->channelFreqLow()->freqMhz() > high)
+				high = ci->channelFreqLow()->freqMhz();
+		}
+		// Add some additional clearance due to bandwidth of LTE channels.
+		low -= 15;
+		high += 15;
+		// Make it look more consistent.
+		low = low - (low % 20);
+		high = high + (20 - high % 20);
+	}
+	if(low != lowestFreq_) {
+		lowestFreq_ = low;
+		emit lowestFreqChanged();
+	}
+	if(high != highestFreq_) {
+		highestFreq_ = high;
+		emit highestFreqChanged();
+	}
+
+	}
 
 void Api::stopCollection() {
 	QCoreApplication::postEvent(thread_->worker(), new StopCollectionEvent());
