@@ -27,14 +27,16 @@ rf_phreaker_impl::rf_phreaker_impl()
 rf_phreaker_impl::~rf_phreaker_impl() {
 	try {
 		// Order of components is important when destructing.
-		gps_graph_.reset();
-		processing_graph_.reset();
-		frequency_correction_graph_.reset();
-		data_output_.reset();
-		handler_.reset();
-		handler_pb_.reset();
-		scanners_.clear();
-		logger_.reset();
+		// VS 2013 bug can cause access violations when destructing at application's 
+		// exit due to synchronization issues like acquiring a mutex.  
+		//gps_graph_.reset();
+		//processing_graph_.reset();
+		//frequency_correction_graph_.reset();
+		//data_output_.reset();
+		//handler_.reset();
+		//handler_pb_.reset();
+		//scanners_.clear();
+		//logger_.reset();
 	}
 	catch(...) {}
 }
