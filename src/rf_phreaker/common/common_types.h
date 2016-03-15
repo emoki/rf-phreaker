@@ -20,7 +20,9 @@ typedef int64_t time_type;
 enum scheduling_algorithm_type {
 	tech_based,
 	collection_round_based,
-	packet_based
+	packet_based,
+	sweep_first_collection_round_based,
+	sweep_first_packet_based
 };
 
 enum specifier

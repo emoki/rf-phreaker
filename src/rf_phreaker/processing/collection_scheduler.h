@@ -19,16 +19,23 @@ collection_scheduler(const collection_scheduler &a)
 	, settings_(a.settings_)
 	, include_first_position_(a.include_first_position_)
 	, is_done_(a.is_done_)
-	, has_multiple_scans_(a.has_multiple_scans_) {}
+	, has_multiple_scans_(a.has_multiple_scans_)
+	, first_iteration_(a.first_iteration_) {}
 
 collection_scheduler(collection_info_containers *containers, const settings *s_settings, bool has_multiple_scans_ = true)
 	: settings_(s_settings)
 	, include_first_position_(true)
-	, is_done_(false) 
-	, has_multiple_scans_(has_multiple_scans_) {
+	, is_done_(false)
+	, has_multiple_scans_(has_multiple_scans_)
+	, first_iteration_(true) {
+	create_schedule(containers);
+}
+
+void create_schedule(collection_info_containers *containers) {
+	first_iteration_ = true;
 	switch(settings_->scheduling_algorithm_) {
 	case tech_based:
-		for(auto &i : *containers) 
+		for(auto &i : *containers)
 			details_group_.emplace_back(container_details(&i, 1));
 		create_tech_based_order();
 		break;
@@ -38,6 +45,12 @@ collection_scheduler(collection_info_containers *containers, const settings *s_s
 			details_group_.emplace_back(container_details(&i, calculate_priority(i)));
 		create_packet_or_collection_round_based_order();
 		break;
+	case sweep_first_collection_round_based:
+	case sweep_first_packet_based:
+		for(auto &i : *containers) 
+			details_group_.emplace_back(container_details(&i, calculate_priority(i)));
+		create_sweep_first_order();
+		break;
 	default:
 		throw rf_phreaker_error("Unknown scheduling algorithm.");
 	}
@@ -46,6 +59,7 @@ collection_scheduler(collection_info_containers *containers, const settings *s_s
 void reset() {
 	ordered_containers_it_ = ordered_containers_.begin();
 	include_first_position_ = true;
+	first_iteration_ = true;
 	is_done_ = false;
 	for(auto &c : details_group_)
 		c.container_->reset();
@@ -55,7 +69,10 @@ bool update() {
 	bool needs_update = false;
 	// We only update if we've reached the beginning of the containers.
 	// This simplifies handling the ordered_container_iterator (we just set it to the beginning after modifying the order.
-	if(ordered_containers_it_ == ordered_containers_.begin()) {
+	// Do not update if we are prioritizing sweep and it's still the first iteration.
+	if(ordered_containers_it_ == ordered_containers_.begin() && 
+		!(first_iteration_ && (settings_->scheduling_algorithm_ == sweep_first_collection_round_based
+			|| settings_->scheduling_algorithm_ == sweep_first_packet_based))) {
 		for(auto &c : details_group_) {
 			if(c.container_->collection_info_group_.size() != c.current_collection_round_size_) {
 				needs_update = true;
@@ -65,12 +82,11 @@ bool update() {
 		if(needs_update) {
 			for(auto &c : details_group_) {
 				c.current_collection_round_size_ = c.container_->collection_info_group_.size();
-				if(settings_->scheduling_algorithm_ == collection_round_based)
-					c.priority_ = calculate_priority(*c.container_);
+				c.priority_ = calculate_priority(*c.container_);
 			}
 			if(settings_->scheduling_algorithm_ == tech_based)
 				create_tech_based_order();
-			else
+			else // handle all other type of algorithms (after the first iteration they are all the same)
 				create_packet_or_collection_round_based_order();
 		}
 	}
@@ -128,11 +144,23 @@ void create_packet_or_collection_round_based_order() {
 	include_first_position_ = true;
 }
 
+void create_sweep_first_order() {
+	for(auto &i : details_group_) {
+		if(i.specs_.has_spec(GSM_SWEEP) || i.specs_.has_spec(UMTS_SWEEP) || i.specs_.has_spec(LTE_SWEEP))
+			ordered_containers_.push_back(i.container_);
+	}
+	ordered_containers_it_ = ordered_containers_.begin();
+	include_first_position_ = true;
+
+	if(ordered_containers_it_ == ordered_containers_.end())
+		create_packet_or_collection_round_based_order();
+}
+
 double calculate_priority(const collection_info_container &container) const {
 	// If the scheduling algorithm is collection_round_based and(!) the container is not a sweep container then
 	// we make sure the priority is calculated using the the current number of channels specified in a collection round.  
 	auto modifier = 1.0;
-	if(settings_->scheduling_algorithm_ == collection_round_based && 
+	if((settings_->scheduling_algorithm_ == collection_round_based || settings_->scheduling_algorithm_ == sweep_first_collection_round_based) && 
 		!(container.has_specifier(GSM_SWEEP) || container.has_specifier(UMTS_SWEEP) || container.has_specifier(LTE_SWEEP))) {
 		modifier = container.collection_info_group_.size();
 	}
@@ -173,10 +201,27 @@ double calculate_priority(double p, double group_size = 1) const {
 
 bool get_next_collection_info(collection_info &c) {
 	while(!is_done_) {
-		auto container = settings_->scheduling_algorithm_ == tech_based ? get_container_for_tech_based() : get_next_container();
+		collection_info_container *container;
+		switch(settings_->scheduling_algorithm_) {
+		case tech_based:
+			container = get_container_for_tech_based();
+			break;
+		case collection_round_based:
+		case packet_based:
+		case sweep_first_collection_round_based:
+		case sweep_first_packet_based:
+			container = get_next_container();
+			break;
+		default:
+			throw rf_phreaker_error("Unknown scheduling algorithm.");
+		}
 		if(container->get_auto_info(c))
 			break;
 	}
+	// After we have gotten the next packet check to see if collection round has increased.
+	if((*ordered_containers_it_)->collection_round() > 0)
+		first_iteration_ = false;
+
 	return !is_done_;
 }
 
@@ -187,6 +232,7 @@ collection_info_container* get_container_for_tech_based() {
 
 	if((*ordered_containers_it_)->is_finished()) {
 		if(++ordered_containers_it_ == ordered_containers_.end()) {
+			first_iteration_ = false;
 			ordered_containers_it_ = ordered_containers_.begin();
 			if(has_multiple_scans_) {
 				for(auto &c : details_group_)
@@ -249,6 +295,7 @@ private:
 	bool include_first_position_;
 	bool is_done_;
 	bool has_multiple_scans_;
+	bool first_iteration_;
 };
 
 }}

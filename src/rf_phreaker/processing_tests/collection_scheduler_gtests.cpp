@@ -68,14 +68,14 @@ protected:
 	collection_info info_c4d;
 	collection_info info_c4e;
 
-	bool verify(const std::vector<collection_info> &g, collection_info_container &con, int num) {
+	bool verify(const std::vector<collection_info> &g, collection_info_container &con, int num, bool check_freq = true) {
 		bool is_good = true;
 		auto count = 0;
 		auto it = con.collection_info_group_.begin();
 		std::for_each(g.begin(), g.end(), [&](const collection_info &i) {
 			if(i.specs_.front() == con.specs_.front()) {
 				++count;
-				if(it->freq_ != i.freq_)
+				if(check_freq && it->freq_ != i.freq_)
 					is_good = false;
 				if(++it == con.collection_info_group_.end())
 					it = con.collection_info_group_.begin();
@@ -330,3 +330,46 @@ TEST_F(CollectionScheduler, TestCRBasedEmptyContainer) {
 	EXPECT_TRUE(verify(group, c4, 2));
 }
 
+TEST_F(CollectionScheduler, TestSweepFirstPacketPriority) {
+	collection_info_containers containers;
+	containers.push_back(c1);
+	containers.push_back(c2);
+	containers.push_back(c3);
+	containers.push_back(c4);
+
+	settings s;
+	s.umts_layer_3_collection_.priority_ = 10;
+	s.lte_layer_3_collection_.priority_ = 5;
+	s.gsm_layer_3_collection_.priority_ = 7;
+	s.gsm_sweep_collection_.priority_ = 1;
+	s.scheduling_algorithm_ = sweep_first_packet_based;
+
+	collection_scheduler scheduler(&containers, &s);
+	std::vector<collection_info> group;
+	collection_info info;
+	auto sweep_size = containers[3].collection_info_group_.size();
+	for(size_t i = 0; i < sweep_size; ++i) {
+		scheduler.update();
+		scheduler.get_next_collection_info(info);
+		group.push_back(info);
+		info_c1a.freq_ = i * 100;
+		if(i == 0)
+			containers[0].adjust(add_collection_info(info_c1a));
+	}
+	EXPECT_TRUE(verify(group, c4, sweep_size));
+
+	// Collect another so that it rolls collection round over.
+	scheduler.get_next_collection_info(info);
+
+	group.clear();
+	for(int i = 0; i < 23; ++i) {
+		scheduler.update();
+		scheduler.get_next_collection_info(info);
+		group.push_back(info);
+	}
+	// The freq order for c1 and c4 will be off so don't check it.
+	EXPECT_TRUE(verify(group, c1, 10, false));
+	EXPECT_TRUE(verify(group, c2, 5));
+	EXPECT_TRUE(verify(group, c3, 7));
+	EXPECT_TRUE(verify(group, c4, 1, false));
+}
