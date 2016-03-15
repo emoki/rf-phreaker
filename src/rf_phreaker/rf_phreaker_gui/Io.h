@@ -154,6 +154,7 @@ public:
 				default:
 					qDebug() << "Unknown protobuf message.";
 				}
+				proto.Clear();
 			}
 		}
 	}
