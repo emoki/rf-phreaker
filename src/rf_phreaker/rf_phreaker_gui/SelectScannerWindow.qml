@@ -82,7 +82,7 @@ Window {
             }
 
             TableViewColumn {
-                role: modelData
+                //role: modelData
                 title: "Scanner Serial"
                 width: scannerList.width
             }

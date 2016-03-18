@@ -19,8 +19,9 @@ ScrollView {
 
     Component.onCompleted: loader.sourceComponent = scrollView.analysisSelection
 
-    property DataWorksheet dataWorksheet: Component { DataWorksheet {} }
-
+    property DataWorksheet dataWorksheet : Component { DataWorksheet {} }
+    property OverviewChart overviewChart : Component { OverviewChart {} }
+    property BarChart barChart : Component { BarChart{} }
     Flickable {
         id: flick
         anchors.fill: parent
@@ -47,11 +48,19 @@ ScrollView {
             DataAnalysisLabel {
                 id: dataAnalayisOverview
                 source: "qrc:/icons/icons/ic_insert_chart_black_48dp.png"
-                text: "OverView"
+                text: "Spectrum Overview"
+                MouseArea {
+                    anchors.fill: parent
+                    onClicked: {
+                        mainGrid.enabled = false;
+                        mainGrid.visible = false;
+                        loader.sourceComponent = overviewChart;
+                    }
+                }
             }
             DataAnalysisLabel {
                 source: "qrc:/icons/icons/ic_insert_chart_black_48dp.png"
-                text: "Worksheet"
+                text: "Spreadsheet"
                 MouseArea {
                     anchors.fill: parent
                     onClicked: {
@@ -64,6 +73,14 @@ ScrollView {
             DataAnalysisLabel {
                 source: "qrc:/icons/icons/ic_insert_chart_black_48dp.png"
                 text: "Bar Graph"
+                MouseArea {
+                    anchors.fill: parent
+                    onClicked: {
+                        mainGrid.enabled = false;
+                        mainGrid.visible = false;
+                        loader.sourceComponent = barChart;
+                    }
+                }
             }
             DataAnalysisLabel {
                 source: "qrc:/icons/icons/ic_insert_chart_black_48dp.png"

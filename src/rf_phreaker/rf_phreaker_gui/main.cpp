@@ -14,7 +14,7 @@ int main(int argc, char *argv[])
 	app.setApplicationName("rf_phreaker");
 
 	registerQmlTypes();
-
+	QGuiApplication::setAttribute(Qt::AA_EnableHighDpiScaling);
 	QQmlApplicationEngine engine;
 	if (qgetenv("QT_QUICK_CONTROLS_STYLE").isEmpty()) {
 		qputenv("QT_QUICK_CONTROLS_STYLE", "Flat");

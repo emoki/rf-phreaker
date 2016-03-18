@@ -16,6 +16,14 @@
         <file>DataAnalysisLabel.qml</file>
         <file>DataWorksheet.qml</file>
         <file>WorkbenchPage.qml</file>
+        <file>OverviewChart.qml</file>
+        <file>SweepLine.qml</file>
+        <file>SweepLines.qml</file>
+        <file>ChannelSweepLine.qml</file>
+        <file>ChannelSweepLines.qml</file>
+        <file>BarChart.qml</file>
+        <file>ChannelBarLine.qml</file>
+        <file>ChannelBarLines.qml</file>
     </qresource>
     <qresource prefix="/icons">
         <file>icons/ic_developer_board_black_48dp.png</file>

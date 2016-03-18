@@ -82,6 +82,7 @@ ScrollView {
                         Layout.alignment: Qt.AlignRight
 
                         Button {
+                            style: CustomFlatButtonStyle {}
                             text: "Disconnect"
                             enabled: Api.connectionStatus === ApiTypes.CONNECTED
                             onClicked: {
@@ -89,6 +90,7 @@ ScrollView {
                             }
                         }
                         Button {
+                            style: CustomFlatButtonStyle {}
                             text: "Connect"
                             enabled: Api.connectionStatus === ApiTypes.DISCONNECTED
                             onClicked: {
@@ -317,6 +319,7 @@ ScrollView {
                         }
                     }
                     Button {
+                        style: CustomFlatButtonStyle {}
                         Layout.column: 1
                         Layout.row: 1
                         Layout.alignment: Qt.AlignRight | Qt.AlignVCenter
@@ -334,7 +337,7 @@ ScrollView {
     property FileDialog fileDialog: FileDialog {
         id: fileDialog
         title: "Choose license file"
-        folder: shortcuts.home
+        //folder: FileDialog.shortcuts.home
         nameFilters: [ "License files (*.lic)", "All files (*)" ]
         selectMultiple: false
         sidebarVisible: true

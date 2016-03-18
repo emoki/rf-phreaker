@@ -9,6 +9,7 @@ import QtQml.Models 2.2
 import QtQml.StateMachine 1.0 as DSM
 import QtQml 2.2
 import Qt.labs.settings 1.0
+//import Qt.labs.controls 1.0
 import RfPhreaker 1.0
 
 ApplicationWindow {
@@ -31,7 +32,7 @@ ApplicationWindow {
     property ScannerPage scannerPage: Component { ScannerPage {} }
     property MapPage mapPage: Component { MapPage {} }
     property ScanConfigurationPage scanConfigurationPage: Component { ScanConfigurationPage {} }
-    property DataAnalysisPage dataAnalysisPage: Component { DataAnalysisPage {} }
+    property DataAnalysisPage dataAnalysisPage/*: Component { DataAnalysisPage {} }*/
     property WorkbenchPage workbenchPage: Component { WorkbenchPage {} }
 
     onClosing: {
@@ -200,9 +201,9 @@ ApplicationWindow {
                     style: CustomFlatButtonStyle { textPixelSize: 25}
                     enabled: Api.deviceStatus === ApiTypes.SCANNING || Api.deviceStatus === ApiTypes.RECORDING
                     onClicked: {
-						Api.stopCollection();
-						Api.closeCollectionFile();
-					}
+                        Api.stopCollection();
+                        Api.closeCollectionFile();
+                    }
                 }
                 Button {
                     id: recordButton
@@ -259,6 +260,37 @@ ApplicationWindow {
                     onClicked: contentLoader.sourceComponent = scanConfigurationPage;
                 }
             }
+            ListView {
+                id: smallChannelView
+                Layout.minimumHeight: 0
+                Layout.maximumHeight: scannerDetailsPixelSize * rowCount
+                Layout.preferredHeight: scannerDetailsPixelSize * rowCount
+                Layout.fillHeight: true;
+                Layout.fillWidth: true
+                property int rowCount: Api.scanList.size
+                property var scanList: Api.scanList
+                model: scanList.list
+                delegate: Row {
+                    id: smallChannelViewDelegate
+                    width: smallChannelView.width
+                    property CollectionInfo ci: smallChannelView.scanList.at(index)
+                    Text {
+                        width: smallChannelViewDelegate.width * .2
+                        horizontalAlignment: Text.AlignRight
+                        text: ci.isSweep ? "Sweeping" : "Full Scan";
+                    }
+                    Text {
+                        width: smallChannelViewDelegate.width * .4
+                        horizontalAlignment: Text.AlignHCenter
+                        text: ci.isSweep ? ci.band : ci.channels;
+                    }
+                    Text {
+                        width: smallChannelViewDelegate.width * .4
+                        horizontalAlignment: Text.AlignHCenter
+                        text: ci.freqs;
+                    }
+                }
+            }
             Rectangle {
                 border.width: 2
                 border.color: "black"
@@ -269,7 +301,7 @@ ApplicationWindow {
                 Layout.preferredHeight: sideBarIconSize
                 Layout.fillWidth: true
                 defaultImageSource: "qrc:/icons/icons/ic_insert_chart_black_48dp.png"
-                text: "Data Analysis"
+                text: "Data View"
                 MouseArea {
                     anchors.fill: parent
                     onClicked: {
@@ -288,7 +320,7 @@ ApplicationWindow {
                 Layout.preferredHeight: sideBarIconSize
                 Layout.fillWidth: true
                 defaultImageSource: "qrc:/icons/icons/ic_map_black_48dp.png"
-                text: "Mapping"
+                text: "Navigation"
                 MouseArea {
                     anchors.fill: parent
                     onClicked: contentLoader.sourceComponent = mapPage;
@@ -333,7 +365,8 @@ ApplicationWindow {
             Loader {
                 id: contentLoader
                 anchors.fill: parent
-                sourceComponent: scannerPage
+                sourceComponent: scanConfigurationPage
+                focus: true
             }
         }
     }
