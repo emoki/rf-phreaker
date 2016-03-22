@@ -6,6 +6,7 @@
 #include "hash_utility/sha256.h"
 #include "rf_phreaker/common/exception_types.h"
 #include "rf_phreaker/common/common_utility.h"
+#include "rf_phreaker/common/log.h"
 
 namespace rf_phreaker {
 
@@ -34,8 +35,8 @@ public:
 			}
 			return true;
 		}
-		catch(const std::exception &) {
-			//LOG(LERROR) << "Error while serializing object.";
+		catch(const std::exception &err) {
+			LOG(LWARNING) << "Error while serializing object. " << err.what();
 		}
 		return false;
 	}
