@@ -1056,7 +1056,8 @@ license blade_rf_controller::read_license() {
 	auto bytes = read_flash(meta_ee.license_addressing());
 
 	license lic;
-	lic.init(bytes);
+	if(!lic.init(bytes))
+		delegate_sink::instance().log_error(std::string("License failed initialization."), hardware_info_error_type, LICENSE_ERROR);
 	return lic;
 }
 
