@@ -1023,7 +1023,7 @@ calibration blade_rf_controller::read_calibration()
 
 	calibration cal;
 	if(!cal.init(bytes))
-		throw hardware_info_error("Calibration failed verification.", CALIBRATION_ERROR);
+		throw hardware_info_error("Calibration failed initialization.", CALIBRATION_ERROR);
 	return cal;
 }
 
