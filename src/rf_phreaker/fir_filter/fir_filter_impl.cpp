@@ -226,7 +226,7 @@ int fir_filter_impl::filter(const Ipp32fc *in, int num_input_samples_to_filter,
 
 int fir_filter_impl::num_input_samples_required(int num_output_samples_desired) const
 {
-	int num_iterations = (num_output_samples_desired/m_DownFactor);
+	int num_iterations = (num_output_samples_desired / m_UpFactor);
 	if ( (num_output_samples_desired % m_DownFactor) > 0 )
 		num_iterations++;
 	return (num_iterations * m_DownFactor) + (m_ZeroDelay ? m_InputDelay : 0);
