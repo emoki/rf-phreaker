@@ -30,6 +30,8 @@ static const int settings_umts_general_full_scan_interval_default = 1;
 static const int settings_umts_general_num_coherent_slots_default = 2;
 static const double settings_lte_general_sync_quality_confidence_threshold_default = -10.5;
 static const int settings_lte_general_full_scan_interval_default = 100;
+static const double settings_lte_general_pbch_decoding_threshold_default = -20;
+static const double settings_lte_general_minimum_relative_peak_threshold_default = 1.0/9.0;
 static const bool settings_output_default = false;
 static const int gps_collection_period_ms_default = 800;
 static const int num_items_in_flight_default = 0;
@@ -109,6 +111,8 @@ class lte_general_settings {
 public:
 	double sync_quality_confidence_threshold_;
 	int full_scan_interval_;
+	double pbch_decoding_threshold_;
+	double minimum_relative_peak_threshold_;
 };
 
 class gsm_general_settings {

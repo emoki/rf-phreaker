@@ -10,8 +10,6 @@ namespace rf_phreaker {
 #define FALSE							0
 #define PI								3.1415926
 
-#define NUM_ADDITIONAL_SLOTS_NEEDED_FOR_PROCESSING 15
-
 #define ZEROS             0
 #define ONES              1
 

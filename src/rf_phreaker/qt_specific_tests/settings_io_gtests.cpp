@@ -167,6 +167,8 @@ TEST(QtSpecific, TestSettingsIO)
 
 	EXPECT_EQ(settings_lte_general_full_scan_interval_default, set.lte_layer_3_general_.full_scan_interval_);
 	EXPECT_EQ(settings_lte_general_sync_quality_confidence_threshold_default, set.lte_layer_3_general_.sync_quality_confidence_threshold_);
+	EXPECT_EQ(settings_lte_general_pbch_decoding_threshold_default, set.lte_layer_3_general_.pbch_decoding_threshold_);
+	EXPECT_EQ(settings_lte_general_minimum_relative_peak_threshold_default, set.lte_layer_3_general_.minimum_relative_peak_threshold_);
 
 	EXPECT_EQ(initial_frequency_correction_offset_start_default, set.frequency_correction_settings_.initial_frequency_correction_range_start_);
 	EXPECT_EQ(initial_frequency_correction_offset_end_default, set.frequency_correction_settings_.initial_frequency_correction_range_end_);
@@ -337,8 +339,12 @@ TEST(QtSpecific, TestSettingsIO)
 	set.umts_layer_3_general_.full_scan_interval_ = tmp++;
 	set.lte_sweep_general_.sync_quality_confidence_threshold_ = tmp++;
 	set.lte_sweep_general_.full_scan_interval_ = tmp++;
+	set.lte_sweep_general_.pbch_decoding_threshold_= tmp++;
+	set.lte_sweep_general_.minimum_relative_peak_threshold_ = tmp++;
 	set.lte_layer_3_general_.sync_quality_confidence_threshold_ = tmp++;
 	set.lte_layer_3_general_.full_scan_interval_ = tmp++;
+	set.lte_layer_3_general_.pbch_decoding_threshold_ = tmp++;
+	set.lte_layer_3_general_.minimum_relative_peak_threshold_ = tmp++;
 	set.frequency_correction_settings_.initial_frequency_correction_range_start_ = tmp++;
 	set.frequency_correction_settings_.initial_frequency_correction_range_end_ = tmp++;
 	set.frequency_correction_settings_.general_settings_.full_scan_interval_ = tmp++;
@@ -522,9 +528,13 @@ TEST(QtSpecific, TestSettingsIO)
 
 	EXPECT_EQ(set.lte_sweep_general_.sync_quality_confidence_threshold_, set2.lte_sweep_general_.sync_quality_confidence_threshold_);
 	EXPECT_EQ(set.lte_sweep_general_.full_scan_interval_, set2.lte_sweep_general_.full_scan_interval_);
+	EXPECT_EQ(set.lte_sweep_general_.pbch_decoding_threshold_, set2.lte_sweep_general_.pbch_decoding_threshold_);
+	EXPECT_EQ(set.lte_sweep_general_.minimum_relative_peak_threshold_, set2.lte_sweep_general_.minimum_relative_peak_threshold_);
 
 	EXPECT_EQ(set.lte_layer_3_general_.sync_quality_confidence_threshold_, set2.lte_layer_3_general_.sync_quality_confidence_threshold_);
 	EXPECT_EQ(set.lte_layer_3_general_.full_scan_interval_, set2.lte_layer_3_general_.full_scan_interval_);
+	EXPECT_EQ(set.lte_layer_3_general_.pbch_decoding_threshold_, set2.lte_layer_3_general_.pbch_decoding_threshold_);
+	EXPECT_EQ(set.lte_layer_3_general_.minimum_relative_peak_threshold_, set2.lte_layer_3_general_.minimum_relative_peak_threshold_);
 
 	EXPECT_EQ(set.frequency_correction_settings_.initial_frequency_correction_range_start_, set2.frequency_correction_settings_.initial_frequency_correction_range_start_);
 	EXPECT_EQ(set.frequency_correction_settings_.initial_frequency_correction_range_end_, set2.frequency_correction_settings_.initial_frequency_correction_range_end_);

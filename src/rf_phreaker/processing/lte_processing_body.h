@@ -20,6 +20,8 @@ public:
 		lte_config_.sampling_rate((int)s.sampling_rate_);
 		lte_config_.clock_rate((int)s.sampling_rate_);
 		lte_config_.max_signal_length(convert_to_samples_and_mod_1024(s.collection_time_, s.sampling_rate_));
+		lte_config_.pbch_decoding_threshold_db(g.pbch_decoding_threshold_);
+		lte_config_.minimum_relative_peak_threshold(g.minimum_relative_peak_threshold_);
 	}
 	lte_general_settings general_;
 	lte_config lte_config_;

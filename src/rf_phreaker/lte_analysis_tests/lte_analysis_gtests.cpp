@@ -57,6 +57,8 @@ TEST(LteAnalysisTests, TestGeneral)
 		wanted.push_back(layer_3_information::SIB_7);
 		wanted.push_back(layer_3_information::SIB_8);
 		config.wanted_si(wanted);
+		config.pbch_decoding_threshold_db(-20);
+		config.minimum_relative_peak_threshold(1 / 9.0);
 		lte_analysis analysis(config);
 
 		for(int i = 0; i < num_iterations; ++i) {

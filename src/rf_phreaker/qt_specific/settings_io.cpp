@@ -172,6 +172,8 @@ void settings_io::read(lte_general_settings &settings, const std::string &group_
 	qsettings_->beginGroup(group_key.c_str());
 	settings.sync_quality_confidence_threshold_ = qsettings_->value(sync_quality_confidence_threshold_key.c_str(), settings_lte_general_sync_quality_confidence_threshold_default).toDouble();
 	settings.full_scan_interval_ = qsettings_->value(full_scan_interval_key.c_str(), settings_lte_general_full_scan_interval_default).toInt();
+	settings.pbch_decoding_threshold_ = qsettings_->value(pbch_decoding_threshold_key.c_str(), settings_lte_general_pbch_decoding_threshold_default).toDouble();
+	settings.minimum_relative_peak_threshold_= qsettings_->value(minimum_relative_peak_threshold_key.c_str(), settings_lte_general_minimum_relative_peak_threshold_default).toDouble();
 	qsettings_->endGroup();
 }
 
@@ -341,6 +343,8 @@ void settings_io::write(const lte_general_settings &settings, const std::string 
 	qsettings_->beginGroup(group_key.c_str());
 	qsettings_->setValue(sync_quality_confidence_threshold_key.c_str(), settings.sync_quality_confidence_threshold_);
 	qsettings_->setValue(full_scan_interval_key.c_str(), settings.full_scan_interval_);
+	qsettings_->setValue(pbch_decoding_threshold_key.c_str(), settings.pbch_decoding_threshold_);
+	qsettings_->setValue(minimum_relative_peak_threshold_key.c_str(), settings.minimum_relative_peak_threshold_);
 	qsettings_->endGroup();
 }
 

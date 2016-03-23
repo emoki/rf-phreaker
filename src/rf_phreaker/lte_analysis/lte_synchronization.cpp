@@ -132,7 +132,8 @@ int getSignalPower(const Ipp32fc *signal384, unsigned int signalLength) {
 
 void getHalfFrameTiming(LTEProc_CorrRecordType *pPSCHCorrRecord,
 	unsigned int *pNumPschPeaks, const Ipp32fc *signal192,
-	unsigned int NumHalfFramesToProcess) {
+	unsigned int NumHalfFramesToProcess,
+	double minimum_relative_peak_threshold) {
 	const unsigned int numSamplesHalfFrame192 = 9600;
 
 	Ipp32f corAll[numSamplesHalfFrame192 * 3], cor1[numSamplesHalfFrame192], maxVal, fTmp1, val1[_LTE_PROC_MAX_NUM_PSCH_PEAKS];
@@ -180,7 +181,7 @@ void getHalfFrameTiming(LTEProc_CorrRecordType *pPSCHCorrRecord,
 	pPSCHCorrRecord[0].StartSampleNum = maxIdx%numSamplesHalfFrame192;
 	*pNumPschPeaks = 1;
 
-	fTmp1 = maxVal / 9.0f;
+	fTmp1 = maxVal * minimum_relative_peak_threshold;
 	if(fTmp1 < 0.05f) fTmp1 = 0.05f;
 	//fTmp1 = 0.02f; //RB: Works for Matlab 5 Mhz File
 

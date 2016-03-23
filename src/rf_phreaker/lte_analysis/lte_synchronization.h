@@ -25,7 +25,7 @@ int getSignalPower(const Ipp32fc *signal384, unsigned int signalLength);
 
 void getHalfFrameTiming(LTEProc_CorrRecordType *pPSCHCorrRecord,
 	unsigned int *pNumPschPeaks, const Ipp32fc *signal192,
-	unsigned int NumHalfFramesToProcess);
+	unsigned int NumHalfFramesToProcess, double minimum_relative_peak_threshold);
 
 void getCPMode(CYCLICPREFIX *pCyclicPrefixMode, Ipp32fc *signal192, unsigned int PSSStartSample,
 	unsigned int numSamplesToProcess);

@@ -23,12 +23,6 @@ int lte_analysis_impl::cell_search(const rf_phreaker::raw_signal &raw_signal, lt
 	try {
 		clear_lte_measurements();
 
-		// LTE analysis oversteps the num_half_frames it is processing by NUM_ADDITIONAL_SLOTS_NEEDED_FOR_PROCESSING so we
-		// make sure to pass in that much additional signal by reducing the num of half to process.  
-		int reduced_num_half_frames = (num_half_frames * 5 - NUM_ADDITIONAL_SLOTS_NEEDED_FOR_PROCESSING) / 5;
-		if(reduced_num_half_frames < 2)
-			throw lte_analysis_error("Number of LTE half frames to process must be at least " + std::to_string(2 + NUM_ADDITIONAL_SLOTS_NEEDED_FOR_PROCESSING / 5.0) + " half frames long.");
-		
 		auto num_samples_to_process = calculate_required_num_samples_for_cell_search(num_half_frames);
 
 		int tmp_num_meas = 0;		
@@ -49,7 +43,8 @@ int lte_analysis_impl::cell_search(const rf_phreaker::raw_signal &raw_signal, lt
 			//	*avg_rms = ipp_helper::calculate_average_rms(resampled_signal_.get(), resampled_length_ - 25);
 
 			std::lock_guard<std::mutex> lock(processing_mutex);
-			status = lte_cell_search(resampled_signal_.get(), resampled_length_, reduced_num_half_frames, lte_measurements_, tmp_num_meas);
+			status = lte_cell_search(resampled_signal_.get(), resampled_length_, num_half_frames, lte_measurements_, tmp_num_meas,
+				config_.pbch_decoding_threshold_watts(), config_.minimum_relative_peak_threshold());
 
 			// Convert frame start sample num.  At this point they are based on the 1.92mhz. 
 			// we need to change it to the sampling rate of the input signal.
@@ -71,9 +66,9 @@ int lte_analysis_impl::cell_search(const rf_phreaker::raw_signal &raw_signal, lt
 			//	*avg_rms = ipp_helper::calculate_average_rms(raw_signal.get_iq().get(), raw_signal.get_iq().length());
 
 			std::lock_guard<std::mutex> lock(processing_mutex);
-			status = lte_cell_search(raw_signal.get_iq().get(), num_samples_to_process, reduced_num_half_frames, lte_measurements_, tmp_num_meas);
+			status = lte_cell_search(raw_signal.get_iq().get(), num_samples_to_process, num_half_frames, lte_measurements_, tmp_num_meas,
+				config_.pbch_decoding_threshold_watts(), config_.minimum_relative_peak_threshold());
 		}
-
 
 		for(int i = 0; i < tmp_num_meas; ++i) {			
 			// If measurement is valid transfer to output.

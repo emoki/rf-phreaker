@@ -51,7 +51,9 @@ Ipp32f hNoiseVariance[256];
 int lte_cell_search(const Ipp32fc* SignalSamples,
 					unsigned int NumSamples,
 					unsigned int NumHalfFramesToProcess,
-					lte_measurements &LteData, int &tmp_num_meas)
+					lte_measurements &LteData, int &tmp_num_meas, 
+					double pbch_decoding_threshold,
+					double min_relative_peak)
 {
 	const int record_size = 100;
 	LTEProc_CorrRecordType pschCorrRecord[record_size] = {};
@@ -87,7 +89,7 @@ int lte_cell_search(const Ipp32fc* SignalSamples,
 
 	mib_decode_status = 0;
 
-	getHalfFrameTiming(pschCorrRecord, &numPschPeaks, signal192, NumHalfFramesToProcess);
+	getHalfFrameTiming(pschCorrRecord, &numPschPeaks, signal192, NumHalfFramesToProcess, min_relative_peak);
 
 	if(numPschPeaks > LteData.size())
 		throw rf_phreaker::lte_analysis_error("Number of psch peaks exceed the maximum number of lte measurements.");
@@ -127,7 +129,7 @@ int lte_cell_search(const Ipp32fc* SignalSamples,
 
 		// Attempt PBCH decode only if we have a psch corr > threshold 
 		// and DecodeBandwidthAntennaPort == true
-		if (pschCorrRecord[ii].NormCorr >= 0.1f /*0.6f*/ /*0.8f*/ )
+		if(pschCorrRecord[ii].NormCorr >= pbch_decoding_threshold)
 		{
 			for(unsigned int antNum=0;antNum<4;antNum++)
 			{

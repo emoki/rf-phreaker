@@ -15,7 +15,9 @@ namespace rf_phreaker {
 int lte_cell_search(const Ipp32fc* SignalSamples,
 					unsigned int NumSamples,
 					unsigned int NumHalfFramesToProcess,
-					lte_measurements &LteData, int &tmp_num_meas);
+					lte_measurements &LteData, int &tmp_num_meas,
+					double pbch_decoding_threshold,
+					double min_relative_peak);
 
 int lte_decode_data(const Ipp32fc* SignalSamples,
 					unsigned int NumSamples,
