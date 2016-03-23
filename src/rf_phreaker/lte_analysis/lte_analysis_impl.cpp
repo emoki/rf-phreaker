@@ -37,7 +37,7 @@ int lte_analysis_impl::cell_search(const rf_phreaker::raw_signal &raw_signal, lt
 
 			auto &filter = get_filter_and_set_resampled_length(raw_signal.sampling_rate(), cell_search_sampling_rate_, num_samples_to_process);
 			
-			auto required_signal_length = resampled_length_ * (filter.down_factor() / filter.up_factor());
+			auto required_signal_length = filter.num_input_samples_required(resampled_length_);
 
 			if(raw_signal.get_iq().length() < required_signal_length)
 				throw lte_analysis_error("Number of LTE half frames to process requires a larger input signal.");
@@ -49,7 +49,7 @@ int lte_analysis_impl::cell_search(const rf_phreaker::raw_signal &raw_signal, lt
 			//	*avg_rms = ipp_helper::calculate_average_rms(resampled_signal_.get(), resampled_length_ - 25);
 
 			std::lock_guard<std::mutex> lock(processing_mutex);
-			status = lte_cell_search(resampled_signal_.get(), resampled_length_ - 25, reduced_num_half_frames, lte_measurements_, tmp_num_meas);
+			status = lte_cell_search(resampled_signal_.get(), resampled_length_, reduced_num_half_frames, lte_measurements_, tmp_num_meas);
 
 			// Convert frame start sample num.  At this point they are based on the 1.92mhz. 
 			// we need to change it to the sampling rate of the input signal.
