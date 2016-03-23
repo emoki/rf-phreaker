@@ -88,11 +88,13 @@ void processing_graph::start(scanner_controller_interface *sc, data_output_async
 
 			LOG(LINFO) << "lte sweep collection settings: " << config.lte_sweep_collection_.sampling_rate_ << ", " << config.lte_sweep_collection_.bandwidth_ << ", "
 				<< config.lte_sweep_collection_.collection_time_ << ", " << config.lte_sweep_collection_.overlap_time_ << ".";
-			LOG(LINFO) << "lte sweep general settings: " << config.lte_sweep_general_.sync_quality_confidence_threshold_ << ", " << config.lte_sweep_general_.full_scan_interval_ << ".";
+			LOG(LINFO) << "lte sweep general settings: " << config.lte_sweep_general_.sync_quality_confidence_threshold_ << ", " << config.lte_sweep_general_.full_scan_interval_ << ", "
+				<< config.lte_sweep_general_.pbch_decoding_threshold_ << ", " << config.lte_sweep_general_.minimum_relative_peak_threshold_ << ".";
 
 			LOG(LINFO) << "lte layer 3 collection settings: " << config.lte_layer_3_collection_.sampling_rate_ << ", " << config.lte_layer_3_collection_.bandwidth_ << ", "
 				<< config.lte_layer_3_collection_.collection_time_ << ", " << config.lte_layer_3_collection_.overlap_time_ << ".";
-			LOG(LINFO) << "lte layer 3 general settings: " << config.lte_layer_3_general_.sync_quality_confidence_threshold_ << ", " << config.lte_layer_3_general_.full_scan_interval_ << ".";
+			LOG(LINFO) << "lte layer 3 general settings: " << config.lte_layer_3_general_.sync_quality_confidence_threshold_ << ", " << config.lte_layer_3_general_.full_scan_interval_ << ", "
+				<< config.lte_sweep_general_.pbch_decoding_threshold_ << ", " << config.lte_sweep_general_.minimum_relative_peak_threshold_ << ".";
 			LOG(LINFO) << "lte layer 3 decode settings: " << config.lte_layer_3_decode_.max_update_threshold_ << ", " << config.lte_layer_3_decode_.minimum_collection_round_ << ", "
 				<< config.lte_layer_3_decode_.decode_threshold_ << ", " << config.lte_layer_3_decode_.decode_minimum_threshold_ << ", " << config.lte_layer_3_decode_.minimum_decode_count_ << ", "
 				<< config.lte_layer_3_decode_.should_prioritize_layer_3_ << ".";
