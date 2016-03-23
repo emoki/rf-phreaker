@@ -61,7 +61,7 @@ int lte_cell_search(const Ipp32fc* SignalSamples,
 
 	unsigned int signalLength384, processSignalLength,current_frame_number;
 	double delayTime1, delayTime2;
-	Ipp32fc *signal192,*signal_384;
+	Ipp32fc *signal192;
 	Ipp32fc *corr192; Ipp32f *abscorr192; // for the PssSss corr
 	unsigned int frameStartSampleIndex,subframeStartSampleIndex;
 	CORRELATIONTYPE RSStrength, RSNorm;
@@ -74,9 +74,13 @@ int lte_cell_search(const Ipp32fc* SignalSamples,
 	unsigned int sampling_factor = 1;	
 	double SampleRate;
 
-	signal_384 = ippsMalloc_32fc(NumSamples + 19200 * 2);
-	ippsZero_32fc(signal_384, NumSamples + 19200 * 2);
-	signal192 = signal_384;
+	// Buffer at least a full second's worth of data.  Doing so prevents access violations 
+	// from occurring when lte analysis oversteps.
+	static ipp_32fc_array signal_buffer(NumSamples + 19200 * 4);
+	if(signal_buffer.length() < NumSamples + 19200 * 4)
+		signal_buffer.reset(NumSamples + 19200 * 4);
+	signal_buffer.zero_out();
+	signal192 = signal_buffer.get();
 	ippsCopy_32fc(SignalSamples, signal192, NumSamples);
 
 	unsigned int num_filter_output =0;
@@ -156,7 +160,7 @@ int lte_cell_search(const Ipp32fc* SignalSamples,
 		LteData[ii].RsRecord.NormCorr = 0;
 		LteData[ii].RsRecord.RMSCorr = 0;
 
-		bTrue = calculateRSValues(signal_384, sschCorrRecord[ii].ID, sschCorrRecord[ii].StartSampleNum, cyclicPrefixMode[ii], &RSStrength, &RSNorm, &(LteData[ii].AvgDigitalVoltage));
+		bTrue = calculateRSValues(signal192, sschCorrRecord[ii].ID, sschCorrRecord[ii].StartSampleNum, cyclicPrefixMode[ii], &RSStrength, &RSNorm, &(LteData[ii].AvgDigitalVoltage));
 
 		//std::cout << "Lte Calculate RS Values Time elapsed: " << lte_diffclock(end,begin) << " ms\n";
 
@@ -187,9 +191,6 @@ int lte_cell_search(const Ipp32fc* SignalSamples,
 
     	
 	tmp_num_meas = num_cell_id;
-	
-	ippsFree(signal_384);
-
 	
 
 	return 0;
