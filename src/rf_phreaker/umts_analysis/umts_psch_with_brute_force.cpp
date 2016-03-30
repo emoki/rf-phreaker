@@ -1,6 +1,6 @@
 #include "rf_phreaker/umts_analysis/umts_psch_with_brute_force.h"
+#include "rf_phreaker/common/sort_peaks.h"
 #include "rf_phreaker/umts_analysis/umts_utilities.h"
-#include "rf_phreaker/umts_analysis/sort_peaks.h"
 #include "rf_phreaker/umts_analysis/psch_container.h"
 #include "boost/math/special_functions.hpp"
 #include <map>

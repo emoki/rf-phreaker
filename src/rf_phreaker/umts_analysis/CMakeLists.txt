@@ -11,8 +11,6 @@ set (umts_analysis_VERSION_TWEAK 0)
 
 # Set the source files.
 set (umts_analysis_SRCS 
-	cross_correlation_incoherent_and_coherent_addition.cpp
-	cross_correlation_incoherent_and_coherent_addition.h
 	cpich_generator.cpp
 	cpich_generator.h
 	cpich_table_container.cpp
@@ -21,7 +19,6 @@ set (umts_analysis_SRCS
 	psch_container.h
 	psch_generator.cpp
 	psch_generator.h
-	sort_peaks.h
 	spur_nullifier.cpp
 	spur_nullifier.h
 	umts_analysis.cpp
