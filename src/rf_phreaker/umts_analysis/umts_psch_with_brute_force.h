@@ -1,6 +1,6 @@
 #pragma once
 
-#include "rf_phreaker/umts_analysis/cross_correlation_incoherent_and_coherent_addition.h"
+#include "rf_phreaker/common/cross_correlation_incoherent_and_coherent_addition.h"
 #include "rf_phreaker/umts_analysis/spur_nullifier.h"
 #include "rf_phreaker/umts_analysis/cpich_table_container.h"
 #include "rf_phreaker/umts_analysis/umts_types.h"

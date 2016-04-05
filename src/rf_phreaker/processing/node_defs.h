@@ -22,22 +22,6 @@ public:
 	bool can_remove_;
 };
 
-class power_info {
-public:
-	power_info()
-		: freq_(-1)
-		, bandwidth_(-1)
-		, avg_rms_(0) {}
-	power_info(frequency_type freq, bandwidth_type bw, double rms)
-		: freq_(freq)
-		, bandwidth_(bw)
-		, avg_rms_(rms) {}
-	frequency_type freq_;
-	bandwidth_type bandwidth_;
-	double avg_rms_;
-};
-typedef std::vector<power_info> power_info_group;
-
 template<typename Data>
 class analysis_data
 {

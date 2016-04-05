@@ -109,6 +109,9 @@ void settings_io::read(collection_settings &settings, const std::string &group_k
 	settings.is_streaming_ = qsettings_->value(is_streaming_key.c_str(), settings_is_streaming_default).toBool();
 	settings.overlap_time_ = qsettings_->value(overlap_time_key.c_str(), settings_overlap_time_default).toLongLong();
 	settings.priority_ = qsettings_->value(priority_key.c_str(), settings_priority_default).toInt();
+	settings.low_intermediate_frequency_ = qsettings_->value(low_intermediate_frequency_key.c_str(), settings_low_intermediate_frequency_default).toLongLong();
+	settings.high_intermediate_frequency_ = qsettings_->value(high_intermediate_frequency_key.c_str(), settings_high_intermediate_frequency_default).toLongLong();
+	settings.step_size_ = qsettings_->value(step_size_key.c_str(), settings_step_size_default).toLongLong();
 	qsettings_->endGroup();
 }
 
@@ -289,6 +292,9 @@ void settings_io::write(const collection_settings &settings, const std::string &
 	qsettings_->setValue(is_streaming_key.c_str(), settings.is_streaming_);
 	qsettings_->setValue(overlap_time_key.c_str(), settings.overlap_time_);
 	qsettings_->setValue(priority_key.c_str(), settings.priority_);
+	qsettings_->setValue(low_intermediate_frequency_key.c_str(), settings.low_intermediate_frequency_);
+	qsettings_->setValue(high_intermediate_frequency_key.c_str(), settings.high_intermediate_frequency_);
+	qsettings_->setValue(step_size_key.c_str(), settings.step_size_);
 	qsettings_->endGroup();
 }
 

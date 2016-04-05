@@ -547,7 +547,9 @@ processing::collection_info_containers cappeen_impl::create_collection_info_cont
 			// Comply with beagle_api behavior.  Adjust starting freq for operating band 8 so that it contains [921 - 925].
 			if(band == UMTS_OPERATING_BAND_8)
 				range.low_freq_hz_ = mhz(921) + khz(2400);
-			frequency_range_creation::adjust_umts_sweep_collection_info_with_adjustment(range, *it);
+			frequency_range_creation::adjust_umts_sweep_collection_info_with_adjustment(range, *it, 
+				config_.umts_sweep_collection_.low_intermediate_frequency_, config_.umts_sweep_collection_.high_intermediate_frequency_, 
+				config_.umts_sweep_collection_.step_size_);
 		}
 		else if(band >= FIRST_LTE_OPERATING_BAND && band <= LAST_LTE_OPERATING_BAND) {
 			auto it = std::find_if(containers.begin(), containers.end(), [&](const collection_info_container &c) {
@@ -562,7 +564,9 @@ processing::collection_info_containers cappeen_impl::create_collection_info_cont
 				});
 			}
 
-			frequency_range_creation::adjust_lte_sweep_collection_info(operating_bands_.get_band_freq_range(band), *it);
+			frequency_range_creation::adjust_lte_sweep_collection_info_with_adjustment(operating_bands_.get_band_freq_range(band), *it,
+				config_.lte_sweep_collection_.low_intermediate_frequency_, config_.lte_sweep_collection_.high_intermediate_frequency_,
+				config_.lte_sweep_collection_.step_size_);
 		}
 	}
 

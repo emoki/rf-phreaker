@@ -64,6 +64,14 @@ inline frequency_type round_to_nearest(num f) {
 	return static_cast<frequency_type>(std::floor((f + (nearest / 2.0)) / nearest) * nearest);
 }
 
+inline int32_t largest_pow_of_2(uint32_t length) {
+	int pos = 32;
+	while(((length << (32 - pos)) & 0x80000000) == 0 && pos >= 0) {
+		--pos;
+	}
+	return 1 << (pos - 1);
+}
+
 inline void copy_serial(const std::string &serial, char *s, size_t size) {
 	memset(s, 0, size);
 	memcpy(s, serial.c_str(), serial.size() > size ? size : serial.size());

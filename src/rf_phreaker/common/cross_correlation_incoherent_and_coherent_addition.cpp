@@ -1,4 +1,4 @@
-#include "rf_phreaker/umts_analysis/cross_correlation_incoherent_and_coherent_addition.h"
+#include "rf_phreaker/common/cross_correlation_incoherent_and_coherent_addition.h"
 #include <assert.h>
 
 namespace rf_phreaker {

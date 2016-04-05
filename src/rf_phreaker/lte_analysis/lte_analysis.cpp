@@ -13,6 +13,12 @@ lte_analysis::~lte_analysis() {
 	delete impl_;
 }
 
+int lte_analysis::cell_search_sweep(const rf_phreaker::raw_signal &raw_signal, lte_measurements &lte_meas, int num_half_frames,
+	frequency_type low_intermediate_freq, frequency_type high_intermediate_freq, power_info_group *rms_group) {
+	return impl_->cell_search_sweep(raw_signal, lte_meas, num_half_frames, low_intermediate_freq, high_intermediate_freq, rms_group);
+}
+
+
 int lte_analysis::cell_search(const rf_phreaker::raw_signal &raw_signal, lte_measurements &lte_meas, int num_half_frames, double *avg_rms) {
 	return impl_->cell_search(raw_signal, lte_meas, num_half_frames, avg_rms);
 }

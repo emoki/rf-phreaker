@@ -59,7 +59,7 @@ public:
 	//	: umts_analysis_(std::move(body.umts_analysis_))
 	//{}
 
-	umts_info operator()(measurement_package package)
+	virtual umts_info operator()(measurement_package package)
 	{
 		auto meas = *package.measurement_info_.get();
 		umts_measurements group;
@@ -151,13 +151,55 @@ public:
 		return info;
 	}
 
-private:
+protected:
 	umts_analysis analysis_;
 	umts_layer_3_tracker tracker_;
 	umts_cell_search_settings config_;
 	frequency_correction_calculator calculator_;
 	scanner::scanner_controller_interface *sc_;
 	processing_and_feedback_helper helper_;
+};
+
+class umts_sweep_processing_body : public umts_processing_body {
+public:
+	umts_sweep_processing_body(const umts_cell_search_settings &config, scanner::scanner_controller_interface *sc, frequency_type low_if, frequency_type high_if, std::atomic_bool *is_cancelled = nullptr)
+		: umts_processing_body(config, sc, is_cancelled)
+		, low_intermediate_freq_(low_if)
+		, high_intermediate_freq_(high_if) {
+		if(low_intermediate_freq_ <= -mhz(2) || low_intermediate_freq_ >= mhz(2))
+			throw processing_error("UMTS low intermediate frequency (" + std::to_string(low_intermediate_freq_) + ") is out of range.");
+		if(high_intermediate_freq_ <= -mhz(2) || high_intermediate_freq_ >= mhz(2))
+			throw processing_error("UMTS high intermediate frequency (" + std::to_string(high_intermediate_freq_) + ") is out of range.");
+		if(low_intermediate_freq_ > high_intermediate_freq_)
+			throw processing_error("UMTS intermediate frequencies are invalid.");
+	}
+	umts_info operator()(measurement_package package) {
+		auto meas = *package.measurement_info_.get();
+		umts_measurements group;
+		power_info_group rms_group;
+
+		int status = analysis_.cell_search_sweep(meas, group, config_.umts_general_.sensitivity_,
+			g_scanner_error_tracker::instance().current_error(), low_intermediate_freq_, high_intermediate_freq_, &rms_group);
+		if(status != 0)
+			throw umts_analysis_error("Error processing umts.");
+
+		if(group.size()) {
+			std::string log("UMTS sweep processing - Found ");
+			log += std::to_string(group.size()) + " UMTS measurements on frequencies: ";
+			std::set<frequency_type> freqs;
+			for(const auto &i : group)
+				freqs.insert(i.intermediate_frequency_ + meas.frequency());
+			for(const auto &i : freqs)
+				log += std::to_string(i / 1e6) + "mhz ";
+			LOG(LCOLLECTION) << log;
+		}
+
+		return umts_info(std::move(package), std::move(group), std::move(rms_group));
+	}
+
+private:
+	frequency_type low_intermediate_freq_;
+	frequency_type high_intermediate_freq_;
 };
 
 }}

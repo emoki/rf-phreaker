@@ -19,6 +19,7 @@ inline std::ostream& output_umts_meas_debug_header(std::ostream &os) {
 		<< "rms_signal" << umts_io_delimiter
 		<< "sample_num" << umts_io_delimiter
 		<< "time" << umts_io_delimiter
+		<< "intermediate_freq" << umts_io_delimiter
 		<< "mcc" << umts_io_delimiter
 		<< "mnc" << umts_io_delimiter
 		<< "lac" << umts_io_delimiter
@@ -37,6 +38,7 @@ inline std::ostream& operator<<(std::ostream &os, const umts_measurement &t)
 		<< t.rms_signal_ << umts_io_delimiter
 		<< t.sample_num_ << umts_io_delimiter
 		<< t.time_ << umts_io_delimiter
+		<< t.intermediate_frequency_ << umts_io_delimiter
 		<< t.layer_3_;
 	return os;
 }

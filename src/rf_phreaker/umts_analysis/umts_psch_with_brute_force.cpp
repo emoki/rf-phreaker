@@ -1,6 +1,6 @@
 #include "rf_phreaker/umts_analysis/umts_psch_with_brute_force.h"
+#include "rf_phreaker/common/sort_peaks.h"
 #include "rf_phreaker/umts_analysis/umts_utilities.h"
-#include "rf_phreaker/umts_analysis/sort_peaks.h"
 #include "rf_phreaker/umts_analysis/psch_container.h"
 #include "boost/math/special_functions.hpp"
 #include <map>
@@ -386,6 +386,7 @@ void umts_psch_with_brute_force::do_cpich_correlation_and_add_candidate(uint32_t
 		meas.norm_corr_ = cpich_ecio_watts;
 		meas.rms_signal_ = cpich_cross_correlator_.get_rms(peak_position);
 		meas.time_ = 0;
+		meas.intermediate_frequency_ = 0;
 		new_measurements.push_back(meas);
 	}
 }

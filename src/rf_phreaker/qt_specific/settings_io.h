@@ -90,6 +90,10 @@ static const std::string gsm_band_power_threshold_key = "band_power_threshold";
 static const std::string gsm_side_power_threshold_key = "side_power_threshold";
 static const std::string gsm_perform_sync_correlations_key = "perform_sync_correlations";
 static const std::string gsm_c_i_ratio_confidence_threshold_key = "c_i_ratio_confidence_threshold";
+static const std::string low_intermediate_frequency_key = "low_intermediate_frequency";
+static const std::string high_intermediate_frequency_key = "high_intermediate_frequency";
+static const std::string step_size_key = "step_size";
+
 
 class settings_io {
 public:

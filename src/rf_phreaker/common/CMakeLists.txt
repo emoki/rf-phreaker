@@ -21,6 +21,8 @@ set (common_SRCS
 	concurrent.h
 	config_file.cpp
 	config_file.h
+	cross_correlation_incoherent_and_coherent_addition.cpp
+	cross_correlation_incoherent_and_coherent_addition.h
 	delegate_sink.h
 	delegate_sink_tmp.h
 	delegate_sink_tmp.cpp
@@ -45,6 +47,7 @@ set (common_SRCS
 	serialization_helper.h
 	signal_slot.h
 	singleton.h
+	sort_peaks.h
 	stats_tracker.h
 	${SRC_PLATFORM_SPECIFIC}/stdafx.cpp)
 

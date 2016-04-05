@@ -27,6 +27,12 @@ umts_analysis::~umts_analysis()
 	delete impl_;
 }
 
+int umts_analysis::cell_search_sweep(const rf_phreaker::raw_signal &raw_signal, umts_measurements &umts_meas, double sensitivity, double error,
+	frequency_type low_intermediate_freq, frequency_type high_intermediate_freq, power_info_group *rms_group) {
+	return impl_->cell_search_sweep(raw_signal, umts_meas, sensitivity, error, low_intermediate_freq, high_intermediate_freq, rms_group);
+}
+
+
 int umts_analysis::cell_search(const rf_phreaker::raw_signal &raw_signal, umts_measurements &umts_meas, double sensitivity, umts_scan_type scan_type, double error, double *rms)
 {
 	return impl_->cell_search(raw_signal, umts_meas, sensitivity, scan_type, error, rms);

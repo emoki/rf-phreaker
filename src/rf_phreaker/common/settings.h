@@ -18,6 +18,9 @@ static const time_type settings_collection_time_default = (32000000);
 static const time_type settings_overlap_time_default = 10000000;
 static const bool settings_is_streaming_default = false;
 static const int settings_priority_default = 1;
+static const frequency_type settings_low_intermediate_frequency_default = 0;
+static const frequency_type settings_high_intermediate_frequency_default = 0;
+static const frequency_type settings_step_size_default = 100000;
 static const int settings_layer_3_max_update_threshold_default = 150;
 static const int settings_layer_3_min_collection_round_default = 5;
 static const int settings_layer_3_decode_threshold_default = -13;
@@ -86,6 +89,9 @@ public:
 	bool is_streaming_;
 	time_type overlap_time_;
 	int priority_;
+	frequency_type low_intermediate_frequency_;
+	frequency_type high_intermediate_frequency_;
+	frequency_type step_size_;
 };
 
 class layer_3_settings {

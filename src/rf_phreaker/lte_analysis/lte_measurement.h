@@ -48,6 +48,7 @@ public:
 	double rssi;
 	double rsrq;
 	double sync_quality;
+	frequency_type intermediate_frequency_;
 	layer_3_information::lte_rrc_message_aggregate layer_3_;
 
 	lte_measurement() { clear(); }
@@ -94,6 +95,7 @@ public:
 		std::swap(meas.rssi, rssi);
 		std::swap(meas.rsrq, rsrq);
 		std::swap(meas.sync_quality, sync_quality);
+		std::swap(meas.intermediate_frequency_, intermediate_frequency_);
 		meas.layer_3_.swap(layer_3_);
 	}
 
@@ -135,7 +137,7 @@ public:
 		sync_quality = -DBL_MAX;
 		si_window = LTE_NULL; // Needs to be LTE_NULL for decoding purposes.
 		dci_format = lte_dci_format_unknown;
-
+		intermediate_frequency_ = 0;
 
 		layer_3_.clear();
 	}

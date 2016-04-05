@@ -80,13 +80,14 @@ inline gsm_data convert_to_gsm_data(const scanner::measurement_info &info, const
 
 inline void convert_to_umts_data(umts_data &data, const scanner::measurement_info &info, const umts_measurement &umts) {
 	convert_to_basic_data(data, info, umts.rms_signal_);
+	data.carrier_frequency_ += umts.intermediate_frequency_;
 	data.cpich_ = umts.cpich_;
 	data.ecio_ = umts.ecio_;
 	data.operating_band_ = info.get_umts_band();
 	data.rscp_ = data.carrier_signal_level_ + data.ecio_;
 	data.layer_3_ = umts.layer_3_;
 	static channel_conversion conversion;
-	data.uarfcn_ = conversion.frequency_to_uarfcn(info.frequency(), info.get_umts_band()).channel_;
+	data.uarfcn_ = conversion.frequency_to_uarfcn(data.carrier_frequency_, info.get_umts_band()).channel_;
 }
 
 inline umts_data convert_to_umts_data(const scanner::measurement_info &info, const umts_measurement &umts) {
@@ -98,6 +99,7 @@ inline umts_data convert_to_umts_data(const scanner::measurement_info &info, con
 inline void convert_to_lte_data(lte_data &data, const scanner::measurement_info &info, const lte_measurement &lte, double avg_rms)
 {
 	convert_to_basic_data(data, info, avg_rms);
+	data.carrier_frequency_ += lte.intermediate_frequency_;
 	data.cyclic_prefix_ = lte.CyclicPrefix;
 	data.dl_bandwidth_ = convert_bandwidth(lte.Bandwidth);
 	data.frame_number_ = lte.frame_number;
@@ -105,7 +107,7 @@ inline void convert_to_lte_data(lte_data &data, const scanner::measurement_info 
 	data.num_antenna_ports_ = lte.NumAntennaPorts;
 	static channel_conversion conversion;
 	data.operating_band_ = info.get_lte_band();
-	data.earfcn_ = conversion.frequency_to_earfcn(info.frequency(), info.get_lte_band()).channel_;
+	data.earfcn_ = conversion.frequency_to_earfcn(data.carrier_frequency_, info.get_lte_band()).channel_;
 	data.physical_cell_id_ = lte.RsRecord.ID;
 	data.psch_id_ = lte.PschRecord.ID;
 	data.psch_quality_ = lte.PschRecord.NormCorr;
