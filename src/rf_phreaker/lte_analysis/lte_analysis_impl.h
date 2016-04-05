@@ -2,12 +2,14 @@
 #include <map>
 #include <mutex>
 #include <atomic>
-#include "rf_phreaker/lte_analysis/lte_measurement.h"
-#include "rf_phreaker/lte_analysis/lte_config.h"
+#include "rf_phreaker/common/frequency_shifter.h"
+#include "rf_phreaker/common/frequency_bin_calculator.h"
 #include "rf_phreaker/common/raw_signal.h"
-#include "rf_phreaker/fir_filter/fir_filter.h"
 #include "rf_phreaker/common/ipp_array.h"
 #include "rf_phreaker/common/common_utility.h"
+#include "rf_phreaker/fir_filter/fir_filter.h"
+#include "rf_phreaker/lte_analysis/lte_measurement.h"
+#include "rf_phreaker/lte_analysis/lte_config.h"
 #include "rf_phreaker/lte_analysis/lte_si_tracker.h"
 
 namespace rf_phreaker {
@@ -37,6 +39,9 @@ public:
 	lte_analysis_impl(const lte_config &config, std::atomic_bool *is_cancelled = nullptr);
 
 	~lte_analysis_impl();
+
+	int cell_search_sweep(const rf_phreaker::raw_signal &raw_signal, lte_measurements &lte_meas, int num_half_frames,
+		frequency_type low_intermediate_freq, frequency_type high_intermediate_freq, power_info_group *rms_group = nullptr);
 
 	int cell_search(const rf_phreaker::raw_signal &raw_signal, lte_measurements &lte_meas, int num_half_frames, double *avg_rms = nullptr);
 
@@ -96,6 +101,10 @@ private:
 	std::atomic_bool *is_cancelled_;
 
 	std::vector<layer_3_information::lte_sib_type> wanted_si_;
+
+	frequency_shifter shifter_;
+
+	frequency_bin_calculator freq_bin_calculator_;
 };
 
 }

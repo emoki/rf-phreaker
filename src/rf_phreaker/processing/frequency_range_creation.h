@@ -59,37 +59,78 @@ public:
 		c.adjust(info_to_add);
 	}
 
-	static void adjust_umts_sweep_collection_info_with_adjustment(const operating_band_range &range, collection_info_container &c)
-	{
+	static void adjust_umts_sweep_collection_info_with_adjustment(const operating_band_range &range, collection_info_container &c,
+		frequency_type low_if = 0, frequency_type high_if = 0, frequency_type step_size = khz(100)) {
+		if(step_size == 0) {
+			step_size = khz(100);
+		}
 		add_collection_info info_to_add;
-		info_to_add.add_.reserve((unsigned int)((range.high_freq_hz_ - range.low_freq_hz_) / khz(100)));
-		for(auto freq = range.low_freq_hz_ - khz(2400), end_freq = range.high_freq_hz_ + khz(2400); freq <= end_freq; freq += khz(100)) {
+		info_to_add.add_.reserve((unsigned int)((range.high_freq_hz_ - range.low_freq_hz_) / step_size));
+		for(auto freq = range.low_freq_hz_ - khz(2400), end_freq = range.high_freq_hz_ + khz(2400) + high_if;
+			freq <= end_freq; freq += step_size) {
 			if(freq % khz(200) != 0 && freq % khz(500) != 0)
-				continue;
+				freq += khz(100);
+			info_to_add.add_.emplace_back(umts_sweep_collection_info(freq, range.band_, false));
+		}
+		adjust_end(info_to_add, range.high_freq_hz_ + khz(2400), umts_sweep_collection_info(range.high_freq_hz_ + khz(2400), range.band_, false));
+		c.adjust(info_to_add);
+	}
+
+	static void adjust_umts_sweep_collection_info(const operating_band_range &range, collection_info_container &c, 
+		frequency_type low_if = 0, frequency_type high_if = 0, frequency_type step_size = khz(100)) {
+		if(step_size == 0) {
+			step_size = khz(100);
+		}
+		add_collection_info info_to_add;
+		info_to_add.add_.reserve((unsigned int)((range.high_freq_hz_ - range.low_freq_hz_) / step_size));
+		for(auto freq = range.low_freq_hz_ + low_if, end_freq = range.high_freq_hz_ + high_if;
+			freq <= end_freq; freq += step_size) {
+			if(freq % khz(200) != 0 && freq % khz(500) != 0)
+				freq += khz(100);
 			info_to_add.add_.emplace_back(umts_sweep_collection_info(freq, range.band_, false));
 		}
 		c.adjust(info_to_add);
 	}
 
-	static void adjust_umts_sweep_collection_info(const operating_band_range &range, collection_info_container &c) {
-		add_collection_info info_to_add;
-		info_to_add.add_.reserve((unsigned int)((range.high_freq_hz_ - range.low_freq_hz_) / khz(100)));
-		for(auto freq = range.low_freq_hz_, end_freq = range.high_freq_hz_; freq <= end_freq; freq += khz(100)) {
-			if(freq % khz(200) != 0 && freq % khz(500) != 0)
-				continue;
-			info_to_add.add_.emplace_back(umts_sweep_collection_info(freq, range.band_, false));
+	static void adjust_lte_sweep_collection_info_with_adjustment(const operating_band_range &range, collection_info_container &c,
+		frequency_type low_if = 0, frequency_type high_if = 0, frequency_type step_size = khz(100)) {
+		if(step_size == 0) {
+			step_size = khz(100);
 		}
+		add_collection_info info_to_add;
+		info_to_add.add_.reserve((unsigned int)((range.high_freq_hz_ - range.low_freq_hz_) / step_size));
+		for(auto freq = range.low_freq_hz_, end_freq = range.high_freq_hz_ + high_if;
+			freq <= end_freq; freq += step_size) {
+			info_to_add.add_.emplace_back(lte_sweep_collection_info(freq, lte_sweep_collection_info::bandwidth__, range.band_, false));
+		}
+		adjust_end(info_to_add, range.high_freq_hz_, lte_sweep_collection_info(range.high_freq_hz_, lte_sweep_collection_info::bandwidth__, range.band_, false));
 		c.adjust(info_to_add);
 	}
-
-	static void adjust_lte_sweep_collection_info(const operating_band_range &range, collection_info_container &c)
-	{
+	
+	static void adjust_lte_sweep_collection_info(const operating_band_range &range, collection_info_container &c,
+		frequency_type low_if = 0, frequency_type high_if = 0, frequency_type step_size = khz(100)) {
+		if(step_size == 0) {
+			step_size = khz(100);
+		}
 		add_collection_info info_to_add;
-		info_to_add.add_.reserve((unsigned int)((range.high_freq_hz_ - range.low_freq_hz_) / khz(100)));
-		for(auto freq = range.low_freq_hz_, end_freq = range.high_freq_hz_; freq <= end_freq; freq += khz(100)) {
+		info_to_add.add_.reserve((unsigned int)((range.high_freq_hz_ - range.low_freq_hz_) / step_size));
+		for(auto freq = range.low_freq_hz_ + low_if, end_freq = range.high_freq_hz_ + high_if;
+			freq <= end_freq; freq += step_size) {
 			info_to_add.add_.emplace_back(lte_sweep_collection_info(freq, lte_sweep_collection_info::bandwidth__, range.band_, false));
 		}
 		c.adjust(info_to_add);
+	}
+
+	template<typename Data>
+	static void adjust_end(rf_phreaker::processing::add_collection_info &container, frequency_type end_freq, Data &&info) {
+		auto last_freq = container.add_.rbegin()->freq_;
+		if(last_freq < end_freq) {
+			container.add_.emplace_back(info);
+		}
+		else if(last_freq > end_freq) {
+			container.add_.erase(--container.add_.end());
+			container.add_.emplace_back(info);
+		}
 	}
 };
 

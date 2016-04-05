@@ -21,6 +21,9 @@ public:
 
 	void shift_frequency(ipp_32fc_array &signal, int32_t length, double frequency_hz_to_shift)
 	{
+		if(frequency_hz_to_shift == 0)
+			return;
+
 		assert(length <= signal.length());
 
 		if(tone_.length() < signal.length())

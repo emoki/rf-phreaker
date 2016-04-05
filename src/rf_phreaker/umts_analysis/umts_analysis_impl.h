@@ -1,13 +1,16 @@
 #pragma once
 
+#include <atomic>
+#include <mutex>
+#include "rf_phreaker/common/frequency_shifter.h"
+#include "rf_phreaker/common/frequency_bin_calculator.h"
 #include "rf_phreaker/umts_analysis/umts_measurement.h"
 #include "rf_phreaker/umts_analysis/umts_config.h"
 #include "rf_phreaker/scanner/measurement_info.h"
 #include "rf_phreaker/umts_analysis/cpich_table_container.h"
 #include "rf_phreaker/umts_analysis/umts_psch_with_brute_force.h"
 #include "rf_phreaker/umts_analysis/umts_bch_decoder.h"
-#include <atomic>
-#include <mutex>
+
 
 namespace rf_phreaker {
 
@@ -17,6 +20,9 @@ public:
 	umts_analysis_impl(const umts_config &config, std::atomic_bool *is_cancelled = nullptr);
 
 	~umts_analysis_impl();
+
+	int cell_search_sweep(const rf_phreaker::raw_signal &raw_signal, umts_measurements &umts_meas, double sensitivity, double error,
+		frequency_type low_intermediate_freq, frequency_type high_intermediate_freq, power_info_group *rms_group);
 
 	int cell_search(const rf_phreaker::raw_signal &raw_signal, umts_measurements &umts_meas, double sensitivity, umts_scan_type scan_type, double error, double *rms);
 
@@ -52,6 +58,10 @@ private:
 	static std::mutex mutex_;
 
 	std::atomic_bool *is_cancelled_;
+
+	frequency_shifter shifter_;
+
+	frequency_bin_calculator freq_bin_calculator_;
 };
 
 }

@@ -386,6 +386,7 @@ void umts_psch_with_brute_force::do_cpich_correlation_and_add_candidate(uint32_t
 		meas.norm_corr_ = cpich_ecio_watts;
 		meas.rms_signal_ = cpich_cross_correlator_.get_rms(peak_position);
 		meas.time_ = 0;
+		meas.intermediate_frequency_ = 0;
 		new_measurements.push_back(meas);
 	}
 }

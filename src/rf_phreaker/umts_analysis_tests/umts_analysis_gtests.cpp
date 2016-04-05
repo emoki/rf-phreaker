@@ -1,43 +1,103 @@
 #include "gtest/gtest.h"
-#include <boost/lexical_cast.hpp>
 #include <iostream>
 #include <thread>
+#include "rf_phreaker/common/frequency_shifter.h"
 #include "rf_phreaker/umts_analysis/umts_analysis.h"
 #include "rf_phreaker/umts_analysis/umts_io.h"
 #include "rf_phreaker/scanner/measurement_info.h"
+#include "rf_phreaker/scanner/measurement_info_serialization.h"
+#include <boost/lexical_cast.hpp>
+#include "boost/archive/binary_iarchive.hpp"
+#include "boost/archive/binary_oarchive.hpp"
 
 using namespace rf_phreaker;
 
 TEST(UmtsAnalysisTests, TestGeneral)
 {
 	try {
-		const int num_iterations = 1;
-		std::string base_filename = "../../../../rf_phreaker/test_files/";
+		const int num_iterations = 10000;
+
+		// We can import measurements using a file handle directly (ascii io) or using boost::serialization. boost serialization allows 
+		// more flexibility and when in binary mode, it is faster and smaller size.
+		bool use_boost_archive = true;
+		bool apply_freq_shift = true;
+
+		std::string folder_path = 
+			//"../../../../rf_phreaker/test_files/"
+			"../../../../rf_phreaker/test_files/umts_shift/"
+			;
 		
-		std::string prefix = "umts_sweep_1397750536_";
+		std::string prefix = 
+			//"umts_sweep_1397750536_"
+			"umts_sweep_1458751660_"
+			;
 		std::string suffix = ".bin";
 		//std::string suffix = ".txt";
 
+		rf_phreaker::scanner::measurement_info info;
+
 		for(int i = 0; i < num_iterations; ++i) {
-			std::ifstream file(base_filename + prefix + boost::lexical_cast<std::string>(i) + suffix);
+			std::string full_path_and_filename = folder_path + prefix + boost::lexical_cast<std::string>(i)+suffix;
+
+			std::ifstream file(full_path_and_filename, use_boost_archive ? std::ios_base::binary : std::ios_base::in);
+
 			if(file) {
-				rf_phreaker::scanner::measurement_info info;
-				file >> info;
+				if(use_boost_archive) {
+					boost::archive::binary_iarchive ia(file);
+					ia & info;
+				}
+				else
+					file >> info;
 
 				umts_config config;
 				config.sampling_rate((int)info.sampling_rate());
 				config.clock_rate((int)info.sampling_rate());
 				config.max_signal_length(info.get_iq().length());
 				config.max_num_candidates(1000);
-				config.num_coherent_psch_slots(14);
+				config.num_coherent_psch_slots(2);
 
 				umts_analysis analysis(config);
 
 				umts_measurements group;
 				
-				int status = analysis.cell_search(info, group, -25, umts_scan_type::full_scan_type);
-				EXPECT_EQ(0, status);
-
+				if(apply_freq_shift) {
+					static std::ofstream freq_shift_file2("umts_measurements_freq_shift.txt");
+					static bool write_header = true;
+					if(write_header) {
+						freq_shift_file2 << "file_num\tfreq\tadj_freq\tavg_rms\t";
+						output_umts_meas_debug_header(freq_shift_file2) << "\n";
+						write_header = false;
+					}
+					if(info.frequency() % mhz(1) == 0) {
+						bool fs2 = false;
+						power_info_group rms_group;
+						analysis.cell_search_sweep(info, group, -20, 0, -khz(500), khz(500), &rms_group);
+						for(auto &j : group) {
+							fs2 = true;
+							freq_shift_file2 <<
+								i << "\t" << info.frequency() / 1e6 << "\t" <<
+								(info.frequency() + j.intermediate_frequency_) / 1e6 << "\t" << rms_group[0].avg_rms_
+								/*std::find_if(rms_group.begin(), rms_group.end(), [&](const power_info &p) {
+								return info.frequency() + j.intermediate_frequency_ == p.freq_;
+								})->avg_rms_*/ 
+								<< "\t" << j << std::endl;
+						}
+						if(!fs2) {
+							int k = 0;
+							freq_shift_file2 <<
+								i << "\t" << info.frequency() / 1e6 << "\t" <<
+								(info.frequency() + k) / 1e6 << "\t" << rms_group[0].avg_rms_
+								/* std::find_if(rms_group.begin(), rms_group.end(), [&](const power_info &p) {
+								return info.frequency() + k == p.freq_;
+								})->avg_rms_*/ 
+								<< "\t" << std::endl;
+						}
+					}
+				}
+				else {
+					int status = analysis.cell_search(info, group, -20, umts_scan_type::full_scan_type);
+					EXPECT_EQ(0, status);
+				}
 
 				static std::ofstream out("umts_measurements.txt");
 				static bool write_header = true;
@@ -48,7 +108,7 @@ TEST(UmtsAnalysisTests, TestGeneral)
 				}
 
 				for(auto &j : group) {
-					status = analysis.decode_layer_3(info, j);
+					int status = analysis.decode_layer_3(info, j);
 					EXPECT_EQ(0, status);
 
 					std::cout <<

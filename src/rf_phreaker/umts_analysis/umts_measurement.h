@@ -18,6 +18,7 @@ public:
 	double ecio_;
 	int32_t sample_num_;
 	int64_t time_;
+	int64_t intermediate_frequency_;
 	layer_3_information::umts_bcch_bch_message_aggregate layer_3_;
 
 	umts_measurement() 
@@ -26,7 +27,8 @@ public:
 		, rms_signal_(-DBL_MAX)
 		, ecio_(-DBL_MAX)
 		, sample_num_(-1)
-		, time_(-1) {}
+		, time_(-1)
+		, intermediate_frequency_(0) {}
 
 	umts_measurement(umts_measurement&& meas)
 		//: umts_measurement()
@@ -48,6 +50,7 @@ public:
 		std::swap(meas.ecio_, ecio_);
 		std::swap(meas.sample_num_, sample_num_);
 		std::swap(meas.time_, time_);
+		std::swap(meas.intermediate_frequency_, intermediate_frequency_);
 		meas.layer_3_.swap(layer_3_);
 	}
 };

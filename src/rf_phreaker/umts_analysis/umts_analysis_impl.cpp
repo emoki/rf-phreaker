@@ -1,4 +1,5 @@
 #include "rf_phreaker/umts_analysis/umts_analysis_impl.h"
+#include <algorithm>
 #include "rf_phreaker/umts_analysis/umts_utilities.h"
 #include "rf_phreaker/common/delegate_sink.h"
 
@@ -18,6 +19,63 @@ umts_analysis_impl::umts_analysis_impl(const umts_config &config, std::atomic_bo
 umts_analysis_impl::~umts_analysis_impl()
 {
 }
+
+int umts_analysis_impl::cell_search_sweep(const rf_phreaker::raw_signal &raw_signal, umts_measurements &umts_meas, double sensitivity, double error,
+	frequency_type low_intermediate_freq, frequency_type high_intermediate_freq, power_info_group *rms_group) {
+	int status = 0;
+
+	try {
+		umts_meas.clear();
+		for(auto i = low_intermediate_freq; i <= high_intermediate_freq; i += khz(100)) {
+			// Only channels that are on valid offsets.  Assumes 0 IF is valid and included within range.
+			if((raw_signal.frequency() + i) % khz(200) != 0 && (raw_signal.frequency() + i) % khz(500) != 0)
+				continue;
+			auto tmp_sig = raw_signal;
+			shifter_.shift_frequency(tmp_sig.get_iq(), tmp_sig.get_iq().length(), -(double)i);
+			tmp_sig.frequency(raw_signal.frequency() + i);
+			// Don't bother with filtering right now.
+			umts_measurements tmp_umts_meas;
+			double rms = 0;
+			auto status = cell_search(tmp_sig, tmp_umts_meas, sensitivity, full_scan_type, error, &rms);
+			for(auto &j : tmp_umts_meas)
+				j.intermediate_frequency_ = i;
+			umts_meas.insert(umts_meas.end(), tmp_umts_meas.begin(), tmp_umts_meas.end());
+		}
+		if(rms_group) {
+			double rms = ipp_helper::calculate_average_rms(raw_signal.get_iq().get(), raw_signal.get_iq().length());
+			rms_group->push_back(power_info(raw_signal.frequency(), raw_signal.bandwidth(), rms));
+		}
+		//if(rms_group) {
+		//	int length;
+		//	if(raw_signal.get_iq().length() >= (1 << 15))
+		//		length = 1 << 15;
+		//	else
+		//		length = largest_pow_of_2(raw_signal.get_iq().length());
+
+		//	freq_bin_calculator_.calculate_power_in_bins(raw_signal.get_iq(), raw_signal.sampling_rate(), mhz(1), length);
+
+		//	for(auto i = low_intermediate_freq; i <= high_intermediate_freq; i += step_size) {
+		//		double power = 0;
+		//		//for(int j = -khz(1750); j <= khz(1750); j += khz(500))
+		//			power += freq_bin_calculator_.get_power_in_bin(i);
+		//		rms_group->push_back(power_info(raw_signal.frequency() + i, mhz(1), power));
+		//	}
+		//}
+	}
+	catch(const rf_phreaker_error &err) {
+		rf_phreaker::delegate_sink::instance().log_error(err);
+		std::cout << err.what() << std::endl;
+		status = -1;
+	}
+	catch(const std::exception &err) {
+		rf_phreaker::delegate_sink::instance().log_error(err.what(), generic_error_type, STD_EXCEPTION_ERROR);
+		std::cout << err.what() << std::endl;
+		status = -2;
+	}
+
+	return status;
+}
+
 
 int umts_analysis_impl::cell_search(const rf_phreaker::raw_signal &raw_signal, umts_measurements &umts_meas, double sensitivity, umts_scan_type scan_type, double error, double *rms)
 {

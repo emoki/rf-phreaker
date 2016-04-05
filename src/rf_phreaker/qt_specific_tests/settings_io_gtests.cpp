@@ -74,6 +74,9 @@ TEST(QtSpecific, TestSettingsIO)
 	EXPECT_EQ(settings_is_streaming_default, set.gsm_sweep_collection_.is_streaming_);
 	EXPECT_EQ(settings_overlap_time_default, set.gsm_sweep_collection_.overlap_time_);
 	EXPECT_EQ(settings_priority_default, set.gsm_sweep_collection_.priority_);
+	EXPECT_EQ(settings_low_intermediate_frequency_default, set.gsm_sweep_collection_.low_intermediate_frequency_);
+	EXPECT_EQ(settings_high_intermediate_frequency_default, set.gsm_sweep_collection_.high_intermediate_frequency_);
+	EXPECT_EQ(settings_step_size_default, set.gsm_sweep_collection_.step_size_);
 
 	EXPECT_EQ(settings_sampling_rate_default, set.gsm_layer_3_collection_.sampling_rate_);
 	EXPECT_EQ(settings_bandwidth_default, set.gsm_layer_3_collection_.bandwidth_);
@@ -81,6 +84,9 @@ TEST(QtSpecific, TestSettingsIO)
 	EXPECT_EQ(settings_is_streaming_default, set.gsm_layer_3_collection_.is_streaming_);
 	EXPECT_EQ(settings_overlap_time_default, set.gsm_layer_3_collection_.overlap_time_);
 	EXPECT_EQ(settings_priority_default, set.gsm_layer_3_collection_.priority_);
+	EXPECT_EQ(settings_low_intermediate_frequency_default, set.gsm_layer_3_collection_.low_intermediate_frequency_);
+	EXPECT_EQ(settings_high_intermediate_frequency_default, set.gsm_layer_3_collection_.high_intermediate_frequency_);
+	EXPECT_EQ(settings_step_size_default, set.gsm_layer_3_collection_.step_size_);
 
 	EXPECT_EQ(settings_sampling_rate_default, set.umts_sweep_collection_.sampling_rate_);
 	EXPECT_EQ(settings_bandwidth_default, set.umts_sweep_collection_.bandwidth_);
@@ -88,6 +94,9 @@ TEST(QtSpecific, TestSettingsIO)
 	EXPECT_EQ(settings_is_streaming_default, set.umts_sweep_collection_.is_streaming_);
 	EXPECT_EQ(settings_overlap_time_default, set.umts_sweep_collection_.overlap_time_);
 	EXPECT_EQ(settings_priority_default, set.umts_sweep_collection_.priority_);
+	EXPECT_EQ(settings_low_intermediate_frequency_default, set.umts_sweep_collection_.low_intermediate_frequency_);
+	EXPECT_EQ(settings_high_intermediate_frequency_default, set.umts_sweep_collection_.high_intermediate_frequency_);
+	EXPECT_EQ(settings_step_size_default, set.umts_sweep_collection_.step_size_);
 
 	EXPECT_EQ(settings_sampling_rate_default, set.umts_layer_3_collection_.sampling_rate_);
 	EXPECT_EQ(settings_bandwidth_default, set.umts_layer_3_collection_.bandwidth_);
@@ -95,6 +104,9 @@ TEST(QtSpecific, TestSettingsIO)
 	EXPECT_EQ(settings_is_streaming_default, set.umts_layer_3_collection_.is_streaming_);
 	EXPECT_EQ(settings_overlap_time_default, set.umts_layer_3_collection_.overlap_time_);
 	EXPECT_EQ(settings_priority_default, set.umts_layer_3_collection_.priority_);
+	EXPECT_EQ(settings_low_intermediate_frequency_default, set.umts_layer_3_collection_.low_intermediate_frequency_);
+	EXPECT_EQ(settings_high_intermediate_frequency_default, set.umts_layer_3_collection_.high_intermediate_frequency_);
+	EXPECT_EQ(settings_step_size_default, set.umts_layer_3_collection_.step_size_);
 
 	EXPECT_EQ(settings_sampling_rate_default, set.lte_sweep_collection_.sampling_rate_);
 	EXPECT_EQ(settings_bandwidth_default, set.lte_sweep_collection_.bandwidth_);
@@ -102,6 +114,9 @@ TEST(QtSpecific, TestSettingsIO)
 	EXPECT_EQ(settings_is_streaming_default, set.lte_sweep_collection_.is_streaming_);
 	EXPECT_EQ(settings_overlap_time_default, set.lte_sweep_collection_.overlap_time_);
 	EXPECT_EQ(settings_priority_default, set.lte_sweep_collection_.priority_);
+	EXPECT_EQ(settings_low_intermediate_frequency_default, set.lte_sweep_collection_.low_intermediate_frequency_);
+	EXPECT_EQ(settings_high_intermediate_frequency_default, set.lte_sweep_collection_.high_intermediate_frequency_);
+	EXPECT_EQ(settings_step_size_default, set.lte_sweep_collection_.step_size_);
 
 	EXPECT_EQ(settings_sampling_rate_default, set.lte_layer_3_collection_.sampling_rate_);
 	EXPECT_EQ(settings_bandwidth_default, set.lte_layer_3_collection_.bandwidth_);
@@ -109,6 +124,9 @@ TEST(QtSpecific, TestSettingsIO)
 	EXPECT_EQ(settings_is_streaming_default, set.lte_layer_3_collection_.is_streaming_);
 	EXPECT_EQ(settings_overlap_time_default, set.lte_layer_3_collection_.overlap_time_);
 	EXPECT_EQ(settings_priority_default, set.lte_layer_3_collection_.priority_);
+	EXPECT_EQ(settings_low_intermediate_frequency_default, set.lte_layer_3_collection_.low_intermediate_frequency_);
+	EXPECT_EQ(settings_high_intermediate_frequency_default, set.lte_layer_3_collection_.high_intermediate_frequency_);
+	EXPECT_EQ(settings_step_size_default, set.lte_layer_3_collection_.step_size_);
 
 	EXPECT_EQ(settings_sampling_rate_default, set.sweep_collection_.sampling_rate_);
 	EXPECT_EQ(settings_bandwidth_default, set.sweep_collection_.bandwidth_);
@@ -116,6 +134,9 @@ TEST(QtSpecific, TestSettingsIO)
 	EXPECT_EQ(settings_is_streaming_default, set.sweep_collection_.is_streaming_);
 	EXPECT_EQ(settings_overlap_time_default, set.sweep_collection_.overlap_time_);
 	EXPECT_EQ(settings_priority_default, set.sweep_collection_.priority_);
+	EXPECT_EQ(settings_low_intermediate_frequency_default, set.sweep_collection_.low_intermediate_frequency_);
+	EXPECT_EQ(settings_high_intermediate_frequency_default, set.sweep_collection_.high_intermediate_frequency_);
+	EXPECT_EQ(settings_step_size_default, set.sweep_collection_.step_size_);
 
 	EXPECT_EQ(settings_layer_3_max_update_threshold_default, set.gsm_layer_3_decode_.max_update_threshold_);
 	EXPECT_EQ(settings_layer_3_min_collection_round_default, set.gsm_layer_3_decode_.minimum_collection_round_);
@@ -234,42 +255,63 @@ TEST(QtSpecific, TestSettingsIO)
 	set.gsm_sweep_collection_.is_streaming_ = true;
 	set.gsm_sweep_collection_.overlap_time_ = tmp++;
 	set.gsm_sweep_collection_.priority_ = tmp++;
+	set.gsm_sweep_collection_.low_intermediate_frequency_ = tmp++;
+	set.gsm_sweep_collection_.high_intermediate_frequency_ = tmp++;
+	set.gsm_sweep_collection_.step_size_ = tmp++;
 	set.gsm_layer_3_collection_.sampling_rate_ = tmp++;
 	set.gsm_layer_3_collection_.bandwidth_ = tmp++;
 	set.gsm_layer_3_collection_.collection_time_ = tmp++;
 	set.gsm_layer_3_collection_.is_streaming_ = true;
 	set.gsm_layer_3_collection_.overlap_time_ = tmp++;
 	set.gsm_layer_3_collection_.priority_ = tmp++;
+	set.gsm_layer_3_collection_.low_intermediate_frequency_ = tmp++;
+	set.gsm_layer_3_collection_.high_intermediate_frequency_ = tmp++;
+	set.gsm_layer_3_collection_.step_size_ = tmp++;
 	set.umts_sweep_collection_.sampling_rate_ = tmp++;
 	set.umts_sweep_collection_.bandwidth_ = tmp++;
 	set.umts_sweep_collection_.collection_time_ = tmp++;
 	set.umts_sweep_collection_.is_streaming_ = true;
 	set.umts_sweep_collection_.overlap_time_ = tmp++;
 	set.umts_sweep_collection_.priority_ = tmp++;
+	set.umts_sweep_collection_.low_intermediate_frequency_ = tmp++;
+	set.umts_sweep_collection_.high_intermediate_frequency_ = tmp++;
+	set.umts_sweep_collection_.step_size_ = tmp++;
 	set.umts_layer_3_collection_.sampling_rate_ = tmp++;
 	set.umts_layer_3_collection_.bandwidth_ = tmp++;
 	set.umts_layer_3_collection_.collection_time_ = tmp++;
 	set.umts_layer_3_collection_.is_streaming_ = true;
 	set.umts_layer_3_collection_.overlap_time_ = tmp++;
 	set.umts_layer_3_collection_.priority_ = tmp++;
+	set.umts_layer_3_collection_.low_intermediate_frequency_ = tmp++;
+	set.umts_layer_3_collection_.high_intermediate_frequency_ = tmp++;
+	set.umts_layer_3_collection_.step_size_ = tmp++;
 	set.lte_sweep_collection_.sampling_rate_ = tmp++;
 	set.lte_sweep_collection_.bandwidth_ = tmp++;
 	set.lte_sweep_collection_.collection_time_ = tmp++;
 	set.lte_sweep_collection_.is_streaming_ = true;
 	set.lte_sweep_collection_.overlap_time_ = tmp++;
 	set.lte_sweep_collection_.priority_ = tmp++;
+	set.lte_sweep_collection_.low_intermediate_frequency_ = tmp++;
+	set.lte_sweep_collection_.high_intermediate_frequency_ = tmp++;
+	set.lte_sweep_collection_.step_size_ = tmp++;
 	set.lte_layer_3_collection_.sampling_rate_ = tmp++;
 	set.lte_layer_3_collection_.bandwidth_ = tmp++;
 	set.lte_layer_3_collection_.collection_time_ = tmp++;
 	set.lte_layer_3_collection_.is_streaming_ = true;
 	set.lte_layer_3_collection_.overlap_time_ = tmp++;
 	set.lte_layer_3_collection_.priority_ = tmp++;
+	set.lte_layer_3_collection_.low_intermediate_frequency_ = tmp++;
+	set.lte_layer_3_collection_.high_intermediate_frequency_ = tmp++;
+	set.lte_layer_3_collection_.step_size_ = tmp++;
 	set.sweep_collection_.sampling_rate_ = tmp++;
 	set.sweep_collection_.bandwidth_ = tmp++;
 	set.sweep_collection_.collection_time_ = tmp++;
 	set.sweep_collection_.is_streaming_ = true;
 	set.sweep_collection_.overlap_time_ = tmp++;
 	set.sweep_collection_.priority_ = tmp++;
+	set.sweep_collection_.low_intermediate_frequency_ = tmp++;
+	set.sweep_collection_.high_intermediate_frequency_ = tmp++;
+	set.sweep_collection_.step_size_ = tmp++;
 	set.gsm_layer_3_decode_.max_update_threshold_ = tmp++;
 	set.gsm_layer_3_decode_.minimum_collection_round_ = tmp++;
 	set.gsm_layer_3_decode_.decode_threshold_ = tmp++;
@@ -423,6 +465,9 @@ TEST(QtSpecific, TestSettingsIO)
 	EXPECT_EQ(set.gsm_sweep_collection_.is_streaming_, set2.gsm_sweep_collection_.is_streaming_);
 	EXPECT_EQ(set.gsm_sweep_collection_.overlap_time_, set2.gsm_sweep_collection_.overlap_time_);
 	EXPECT_EQ(set.gsm_sweep_collection_.priority_, set2.gsm_sweep_collection_.priority_);
+	EXPECT_EQ(set.gsm_sweep_collection_.low_intermediate_frequency_, set2.gsm_sweep_collection_.low_intermediate_frequency_);
+	EXPECT_EQ(set.gsm_sweep_collection_.high_intermediate_frequency_, set2.gsm_sweep_collection_.high_intermediate_frequency_);
+	EXPECT_EQ(set.gsm_sweep_collection_.step_size_, set2.gsm_sweep_collection_.step_size_);
 
 	EXPECT_EQ(set.gsm_layer_3_collection_.sampling_rate_, set2.gsm_layer_3_collection_.sampling_rate_);
 	EXPECT_EQ(set.gsm_layer_3_collection_.bandwidth_, set2.gsm_layer_3_collection_.bandwidth_);
@@ -430,6 +475,9 @@ TEST(QtSpecific, TestSettingsIO)
 	EXPECT_EQ(set.gsm_layer_3_collection_.is_streaming_, set2.gsm_layer_3_collection_.is_streaming_);
 	EXPECT_EQ(set.gsm_layer_3_collection_.overlap_time_, set2.gsm_layer_3_collection_.overlap_time_);
 	EXPECT_EQ(set.gsm_layer_3_collection_.priority_, set2.gsm_layer_3_collection_.priority_);
+	EXPECT_EQ(set.gsm_layer_3_collection_.low_intermediate_frequency_, set2.gsm_layer_3_collection_.low_intermediate_frequency_);
+	EXPECT_EQ(set.gsm_layer_3_collection_.high_intermediate_frequency_, set2.gsm_layer_3_collection_.high_intermediate_frequency_);
+	EXPECT_EQ(set.gsm_layer_3_collection_.step_size_, set2.gsm_layer_3_collection_.step_size_);
 
 	EXPECT_EQ(set.umts_sweep_collection_.sampling_rate_, set2.umts_sweep_collection_.sampling_rate_);
 	EXPECT_EQ(set.umts_sweep_collection_.bandwidth_, set2.umts_sweep_collection_.bandwidth_);
@@ -437,6 +485,9 @@ TEST(QtSpecific, TestSettingsIO)
 	EXPECT_EQ(set.umts_sweep_collection_.is_streaming_, set2.umts_sweep_collection_.is_streaming_);
 	EXPECT_EQ(set.umts_sweep_collection_.overlap_time_, set2.umts_sweep_collection_.overlap_time_);
 	EXPECT_EQ(set.umts_sweep_collection_.priority_, set2.umts_sweep_collection_.priority_);
+	EXPECT_EQ(set.umts_sweep_collection_.low_intermediate_frequency_, set2.umts_sweep_collection_.low_intermediate_frequency_);
+	EXPECT_EQ(set.umts_sweep_collection_.high_intermediate_frequency_, set2.umts_sweep_collection_.high_intermediate_frequency_);
+	EXPECT_EQ(set.umts_sweep_collection_.step_size_, set2.umts_sweep_collection_.step_size_);
 
 	EXPECT_EQ(set.umts_layer_3_collection_.sampling_rate_, set2.umts_layer_3_collection_.sampling_rate_);
 	EXPECT_EQ(set.umts_layer_3_collection_.bandwidth_, set2.umts_layer_3_collection_.bandwidth_);
@@ -444,6 +495,9 @@ TEST(QtSpecific, TestSettingsIO)
 	EXPECT_EQ(set.umts_layer_3_collection_.is_streaming_, set2.umts_layer_3_collection_.is_streaming_);
 	EXPECT_EQ(set.umts_layer_3_collection_.overlap_time_, set2.umts_layer_3_collection_.overlap_time_);
 	EXPECT_EQ(set.umts_layer_3_collection_.priority_, set2.umts_layer_3_collection_.priority_);
+	EXPECT_EQ(set.umts_layer_3_collection_.low_intermediate_frequency_, set2.umts_layer_3_collection_.low_intermediate_frequency_);
+	EXPECT_EQ(set.umts_layer_3_collection_.high_intermediate_frequency_, set2.umts_layer_3_collection_.high_intermediate_frequency_);
+	EXPECT_EQ(set.umts_layer_3_collection_.step_size_, set2.umts_layer_3_collection_.step_size_);
 
 	EXPECT_EQ(set.lte_sweep_collection_.sampling_rate_, set2.lte_sweep_collection_.sampling_rate_);
 	EXPECT_EQ(set.lte_sweep_collection_.bandwidth_, set2.lte_sweep_collection_.bandwidth_);
@@ -451,6 +505,9 @@ TEST(QtSpecific, TestSettingsIO)
 	EXPECT_EQ(set.lte_sweep_collection_.is_streaming_, set2.lte_sweep_collection_.is_streaming_);
 	EXPECT_EQ(set.lte_sweep_collection_.overlap_time_, set2.lte_sweep_collection_.overlap_time_);
 	EXPECT_EQ(set.lte_sweep_collection_.priority_, set2.lte_sweep_collection_.priority_);
+	EXPECT_EQ(set.lte_sweep_collection_.low_intermediate_frequency_, set2.lte_sweep_collection_.low_intermediate_frequency_);
+	EXPECT_EQ(set.lte_sweep_collection_.high_intermediate_frequency_, set2.lte_sweep_collection_.high_intermediate_frequency_);
+	EXPECT_EQ(set.lte_sweep_collection_.step_size_, set2.lte_sweep_collection_.step_size_);
 
 	EXPECT_EQ(set.lte_layer_3_collection_.sampling_rate_, set2.lte_layer_3_collection_.sampling_rate_);
 	EXPECT_EQ(set.lte_layer_3_collection_.bandwidth_, set2.lte_layer_3_collection_.bandwidth_);
@@ -458,6 +515,9 @@ TEST(QtSpecific, TestSettingsIO)
 	EXPECT_EQ(set.lte_layer_3_collection_.is_streaming_, set2.lte_layer_3_collection_.is_streaming_);
 	EXPECT_EQ(set.lte_layer_3_collection_.overlap_time_, set2.lte_layer_3_collection_.overlap_time_);
 	EXPECT_EQ(set.lte_layer_3_collection_.priority_, set2.lte_layer_3_collection_.priority_);
+	EXPECT_EQ(set.lte_layer_3_collection_.low_intermediate_frequency_, set2.lte_layer_3_collection_.low_intermediate_frequency_);
+	EXPECT_EQ(set.lte_layer_3_collection_.high_intermediate_frequency_, set2.lte_layer_3_collection_.high_intermediate_frequency_);
+	EXPECT_EQ(set.lte_layer_3_collection_.step_size_, set2.lte_layer_3_collection_.step_size_);
 
 	EXPECT_EQ(set.sweep_collection_.sampling_rate_, set2.sweep_collection_.sampling_rate_);
 	EXPECT_EQ(set.sweep_collection_.bandwidth_, set2.sweep_collection_.bandwidth_);
@@ -465,6 +525,9 @@ TEST(QtSpecific, TestSettingsIO)
 	EXPECT_EQ(set.sweep_collection_.is_streaming_, set2.sweep_collection_.is_streaming_);
 	EXPECT_EQ(set.sweep_collection_.overlap_time_, set2.sweep_collection_.overlap_time_);
 	EXPECT_EQ(set.sweep_collection_.priority_, set2.sweep_collection_.priority_);
+	EXPECT_EQ(set.sweep_collection_.low_intermediate_frequency_, set2.sweep_collection_.low_intermediate_frequency_);
+	EXPECT_EQ(set.sweep_collection_.high_intermediate_frequency_, set2.sweep_collection_.high_intermediate_frequency_);
+	EXPECT_EQ(set.sweep_collection_.step_size_, set2.sweep_collection_.step_size_);
 
 	EXPECT_EQ(set.gsm_layer_3_decode_.max_update_threshold_, set2.gsm_layer_3_decode_.max_update_threshold_);
 	EXPECT_EQ(set.gsm_layer_3_decode_.minimum_collection_round_, set2.gsm_layer_3_decode_.minimum_collection_round_);

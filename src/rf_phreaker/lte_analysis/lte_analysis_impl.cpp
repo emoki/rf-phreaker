@@ -16,6 +16,57 @@ lte_analysis_impl::lte_analysis_impl(const lte_config &config, std::atomic_bool 
 lte_analysis_impl::~lte_analysis_impl()
 {}
 
+int lte_analysis_impl::cell_search_sweep(const rf_phreaker::raw_signal &raw_signal, lte_measurements &lte_meas, int num_half_frames,
+	frequency_type low_intermediate_freq, frequency_type high_intermediate_freq, power_info_group *rms_group) {
+	int status = 0;
+
+	try {
+		lte_meas.clear();
+		for(auto i = low_intermediate_freq; i <= high_intermediate_freq; i += khz(100)) {
+			auto tmp_sig = raw_signal;
+			shifter_.shift_frequency(tmp_sig.get_iq(), tmp_sig.get_iq().length(), -(double)i);
+			tmp_sig.frequency(raw_signal.frequency() + i);
+			// Don't bother with filtering right now.
+			lte_measurements tmp_lte_meas;
+			double rms = 0;
+			auto status = cell_search(tmp_sig, tmp_lte_meas, num_half_frames, &rms);
+			if(i == 0 && rms_group)
+				rms_group->push_back(power_info(raw_signal.frequency(), raw_signal.bandwidth(), rms));
+			for(auto &j : tmp_lte_meas)
+				j.intermediate_frequency_ = i;
+			lte_meas.insert(lte_meas.end(), tmp_lte_meas.begin(), tmp_lte_meas.end());
+		}
+		//if(rms_group) {
+		//	int length;
+		//	if(raw_signal.get_iq().length() >= (1 << 15))
+		//		length = 1 << 15;
+		//	else
+		//		length = largest_pow_of_2(raw_signal.get_iq().length());
+
+		//	freq_bin_calculator_.calculate_power_in_bins(raw_signal.get_iq(), raw_signal.sampling_rate(), mhz(1), length);
+
+		//	for(auto i = low_intermediate_freq; i <= high_intermediate_freq; i += step_size) {
+		//		double power = 0;
+		//		//for(int j = -khz(1750); j <= khz(1750); j += khz(500))
+		//			power += freq_bin_calculator_.get_power_in_bin(i);
+		//		rms_group->push_back(power_info(raw_signal.frequency() + i, mhz(1), power));
+		//	}
+		//}
+	}
+	catch(const rf_phreaker_error &err) {
+		rf_phreaker::delegate_sink::instance().log_error(err);
+		std::cout << err.what() << std::endl;
+		status = -1;
+	}
+	catch(const std::exception &err) {
+		rf_phreaker::delegate_sink::instance().log_error(err.what(), generic_error_type, STD_EXCEPTION_ERROR);
+		std::cout << err.what() << std::endl;
+		status = -2;
+	}
+
+	return status;
+}
+
 int lte_analysis_impl::cell_search(const rf_phreaker::raw_signal &raw_signal, lte_measurements &lte_meas, int num_half_frames, double *avg_rms)
 {
 	int status = 0;
@@ -122,7 +173,7 @@ rf_phreaker::fir_filter& lte_analysis_impl::get_filter_and_set_resampled_length(
 
 int lte_analysis_impl::calculate_required_num_samples_for_cell_search(int num_half_frames)
 {
-	return rf_phreaker::convert_to_samples(milli_to_nano(5 * num_half_frames), cell_search_sampling_rate_);
+	return rf_phreaker::convert_to_samples(milli_to_nano(5 * num_half_frames), cell_search_sampling_rate_) + 128; // pss template length
 }
 
 void lte_analysis_impl::clear_lte_measurements()

@@ -21,6 +21,7 @@ TEST(LteAnalysisTests, TestGeneral)
 		// We can import measurements using a file handle directly (ascii io) or using boost::serialization. boost serialization allows 
 		// more flexibility and when in binary mode, it is faster and smaller size.
 		bool use_boost_archive = true;
+		bool apply_freq_shift = true;
 
 		// We are using a relative path to load the test files.  It follows the convention of a out-of-source build using cmake.  
 		// The build directory is located on the same level as the git root directory.  The git root directory's name is lte_phreaker
@@ -84,17 +85,56 @@ TEST(LteAnalysisTests, TestGeneral)
 					//continue;
 				}
 
-				lte_measurements lte_meas;
-				
-				int status = analysis.cell_search(info, lte_meas, int(info.time_ns() / 1e6 / 5));
-				EXPECT_EQ(0, status);
 
-				for(int j = 0; j < (int)lte_meas.size(); ++j) {
-					if(lte_meas[j].NumAntennaPorts != LteNumAntennaPorts::LteAntPorts_Unknown) {
-						status = analysis.decode_layer_3(info, lte_meas, int(info.time_ns() / 1e6 / 5), j);
-						EXPECT_EQ(0, status);
+
+				lte_measurements lte_meas;
+
+				if(apply_freq_shift) {
+					static std::ofstream freq_shift_file2("lte_measurements_freq_shift.txt");
+					static bool write_header = true;
+					if(write_header) {
+						freq_shift_file2 << "filename\tfile_num\tfreq\tfreq_shift\tadj_freq\t";
+						output_lte_meas_debug_header(freq_shift_file2) << "\n";
+						write_header = false;
 					}
+					if(info.frequency() % mhz(1) == 0) {
+						bool fs2 = false;
+						power_info_group rms_group;
+						analysis.cell_search_sweep(info, lte_meas, int(info.time_ns() / 1e6 / 5), -khz(500), khz(500), &rms_group);
+						for(auto &j : lte_meas) {
+							fs2 = true;
+							freq_shift_file2 <<
+								full_path_and_filename << "\t" << i << "\t" << info.frequency() / 1e6 << "\t" <<
+								(info.frequency() + j.intermediate_frequency_) / 1e6 << "\t" << rms_group[0].avg_rms_
+								/*std::find_if(rms_group.begin(), rms_group.end(), [&](const power_info &p) {
+								return info.frequency() + j.intermediate_frequency_ == p.freq_;
+								})->avg_rms_*/
+								<< "\t" << j << std::endl;
+						}
+						if(!fs2) {
+							int k = 0;
+							freq_shift_file2 <<
+								i << "\t" << info.frequency() / 1e6 << "\t" <<
+								(info.frequency() + k) / 1e6 << "\t" << rms_group[0].avg_rms_
+								/* std::find_if(rms_group.begin(), rms_group.end(), [&](const power_info &p) {
+								return info.frequency() + k == p.freq_;
+								})->avg_rms_*/
+								<< "\t" << std::endl;
+						}
+					}
+
 				}
+				else {
+					int status = analysis.cell_search(info, lte_meas, int(info.time_ns() / 1e6 / 5));
+					EXPECT_EQ(0, status);
+				}
+
+				//for(int j = 0; j < (int)lte_meas.size(); ++j) {
+				//	if(lte_meas[j].NumAntennaPorts != LteNumAntennaPorts::LteAntPorts_Unknown) {
+				//		status = analysis.decode_layer_3(info, lte_meas, int(info.time_ns() / 1e6 / 5), j);
+				//		EXPECT_EQ(0, status);
+				//	}
+				//}
 				static std::ofstream output_file("lte_measurements.txt");
 				static bool write_header = true;
 				if(write_header) {
