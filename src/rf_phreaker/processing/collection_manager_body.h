@@ -14,6 +14,18 @@
 
 namespace rf_phreaker { namespace processing {
 
+class exit_count {
+public:
+	exit_count(int num_tokens) : count_(num_tokens), is_counting_(false) {}
+	exit_count(const exit_count &ex) : count_(ex.count_), is_counting_(ex.is_counting_) {}
+	void start_counting() { is_counting_ = true; }
+	void update() { if(is_counting_) --count_; }
+	bool can_exit() const { return count_ <= 0; }
+	int current_count() const { return count_; }
+private:
+	int count_;
+	bool is_counting_;
+};
 
 class collection_manager_body
 {
@@ -32,11 +44,12 @@ public:
 		, lte_layer_3_(a.lte_layer_3_)
 		, timestamp_(a.timestamp_)
 		, scheduler_(&containers_, &settings_, a.scheduler_.has_multiple_scans())
-		, token_count_(0) {}
+		, token_count_(0)
+		, exit_count_(a.exit_count_) {}
 
 
 	collection_manager_body(tbb::flow::graph *graph, rf_phreaker::scanner::scanner_controller_interface *sc, const collection_info_containers &info, 
-		const output_settings &p_output, const settings &s_settings, bool do_multiple_scans = true)
+		const output_settings &p_output, const settings &s_settings, int num_items_in_flight, bool do_multiple_scans = true)
 		: scanner_interface_(sc)
 		, graph_(graph)
 		, containers_(info)
@@ -50,6 +63,7 @@ public:
 		, lte_sweep_(0)
 		, lte_layer_3_(0)
 		, token_count_(0)
+		, exit_count_(num_items_in_flight)
 	{}
 
 	void operator()(add_remove_collection_info info, collection_manager_node::output_ports_type &out)
@@ -123,12 +137,6 @@ public:
 			}
 			LOG(LCOLLECTION) << log;
 		}
-		else {
-			// If scanning has finished for all containers then we will not process any packets this time thru which 
-			// means we need to send a continue msg to the limiter node directly.
-			//if(std::get<LIMITER_PORT>(out).try_put(tbb::flow::continue_msg())) ++token_count_;
-			send_msg<LIMITER_PORT>(out, tbb::flow::continue_msg());
-		}
 
 		if(scheduler_.is_done())
 			finished_scanning();
@@ -161,9 +169,13 @@ protected:
 	}
 
 	virtual void finished_scanning() { 
-		graph_->root_task()->cancel_group_execution();
-		delegate_sink::instance().log_message("Collection finished.", processing_error_type, COLLECTION_FINISHED);
-		LOG(LVERBOSE) << "Collection finished.  Stopping root task.";
+		exit_count_.start_counting();
+		exit_count_.update();
+		if(exit_count_.can_exit()) {
+			graph_->root_task()->cancel_group_execution();
+			delegate_sink::instance().log_message("Collection finished.", processing_error_type, COLLECTION_FINISHED);
+			LOG(LVERBOSE) << "Collection finished.  Stopping root task.";
+		}
 	}
 
 	rf_phreaker::scanner::scanner_controller_interface *scanner_interface_;
@@ -186,6 +198,8 @@ protected:
 	collection_scheduler scheduler_;
 
 	int token_count_;
+
+	exit_count exit_count_;
 };
 
 class freq_correction_collection_manager_body : public collection_manager_body
