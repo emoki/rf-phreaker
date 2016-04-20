@@ -58,6 +58,9 @@ namespace cappeen_scanner {
 	{
 		switch(*it)
 		{
+			case 12:
+				tech_bands.push_back(LTE_BAND_12);
+				break;
 			case 20:
 				tech_bands.push_back(LTE_BAND_20);
 				break;
