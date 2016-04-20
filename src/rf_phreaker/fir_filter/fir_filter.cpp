@@ -83,6 +83,10 @@ int fir_filter::num_output_samples_required(int num_input_samples_desired) const
 	return impl_->num_output_samples_required(num_input_samples_desired);
 }
 
+int fir_filter::ensure_output_samples_large_enough(int num_output_samples_desired) const {
+	return impl_->ensure_output_samples_large_enough(num_output_samples_desired);
+}
+
 int fir_filter::num_iterations_required(int num_input_samples_desired) const{
 	return impl_->num_iterations_required(num_input_samples_desired);
 }
