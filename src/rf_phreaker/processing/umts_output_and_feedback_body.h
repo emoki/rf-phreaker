@@ -27,7 +27,8 @@ public:
 		helper_.remove_futures();
 
 		// Output basic tech.
-		helper_.track_future(io_->output(convert_to_basic_data(meas, info.power_info_group_[0].avg_rms_), std::vector<umts_data>()));
+		for(auto &i : info.power_info_group_)
+			helper_.track_future(io_->output(convert_to_basic_data(meas, i), std::vector<umts_data>()));
 
 		if(info.processed_data_.size()) {
 			std::get<0>(out).try_put(add_collection_info(umts_layer_3_collection_info(meas.frequency(), meas.get_umts_band(), true)));
@@ -57,7 +58,8 @@ public:
 		helper_.remove_futures();
 
 		// Output basic tech.
-		helper_.track_future(io_->output(convert_to_basic_data(meas, info.power_info_group_[0].avg_rms_), std::vector<umts_data>()));
+		for(auto &i : info.power_info_group_)
+			helper_.track_future(io_->output(convert_to_basic_data(meas, i), std::vector<umts_data>()));
 
 		if(info.processed_data_.size()) {
 			std::set<frequency_type> freqs;

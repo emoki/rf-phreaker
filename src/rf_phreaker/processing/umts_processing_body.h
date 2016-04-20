@@ -33,7 +33,6 @@ public:
 		: analysis_(config.umts_config_, is_cancelled)
 		, tracker_(config.layer_3_.max_update_threshold_, config.layer_3_.minimum_collection_round_, config.layer_3_.minimum_decode_count_)
 		, config_(config)
-		, calculator_(config.umts_config_.sampling_rate())
 		, sc_(sc) {
 		if(config.layer_3_.wanted_layer_3_.empty()) {
 			LOG(LVERBOSE) << "Defaulting to decoding all UMTS SIBs.";
@@ -51,7 +50,6 @@ public:
 		: analysis_(body.config_.umts_config_)
 		, tracker_(body.tracker_.max_update_, body.tracker_.min_collection_round_, body.tracker_.min_decode_count_, body.tracker_.wanted_layer_3())
 		, config_(body.config_)
-		, calculator_(body.config_.umts_config_.sampling_rate()) 
 		, sc_(body.sc_) 
 	{}
 
@@ -184,7 +182,8 @@ public:
 			throw umts_analysis_error("Error processing umts.");
 
 		if(group.size()) {
-			std::string log("UMTS sweep processing - Found ");
+			std::string log("UMTS sweep processing on center freq (");
+			log += std::to_string(meas.frequency()/1e6) + "mhz) - Found ";
 			log += std::to_string(group.size()) + " UMTS measurements on frequencies: ";
 			std::set<frequency_type> freqs;
 			for(const auto &i : group)

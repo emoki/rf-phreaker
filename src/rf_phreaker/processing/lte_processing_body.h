@@ -5,6 +5,7 @@
 #include "rf_phreaker/lte_analysis/lte_analysis.h"
 #include "rf_phreaker/common/settings.h"
 #include "rf_phreaker/common/log.h"
+#include "rf_phreaker/common/correlation_utility.h"
 #include "tbb/flow_graph.h"
 
 namespace rf_phreaker { namespace processing {
@@ -243,44 +244,86 @@ public:
 		: lte_processing_body(config, is_cancelled)
 		, low_intermediate_freq_(low_if)
 		, high_intermediate_freq_(high_if) {
-		if(low_intermediate_freq_ <= -mhz(2) || low_intermediate_freq_ >= mhz(2))
+		if(low_intermediate_freq_ <= -mhz(4) || low_intermediate_freq_ > mhz(0))
 			throw processing_error("LTE low intermediate frequency (" + std::to_string(low_intermediate_freq_) + ") is out of range.");
-		if(high_intermediate_freq_ <= -mhz(2) || high_intermediate_freq_ >= mhz(2))
+		if(high_intermediate_freq_ < mhz(0) || high_intermediate_freq_ >= mhz(4))
 			throw processing_error("LTE high intermediate frequency (" + std::to_string(high_intermediate_freq_) + ") is out of range.");
 		if(low_intermediate_freq_ > high_intermediate_freq_)
 			throw processing_error("LTE intermediate frequencies are invalid.");
 	}
+
+	virtual ~lte_sweep_processing_body() {}
+
 	lte_info operator()(measurement_package package) {
 		auto meas = *package.measurement_info_.get();
 		lte_measurements group;
 		power_info_group rms_group;
-		double avg_rms = 0;
 
 		int status = analysis_.cell_search_sweep(meas, group, calculate_num_half_frames(meas.time_ns() > milli_to_nano(50) ? milli_to_nano(50) : meas.time_ns()), 
-			low_intermediate_freq_, high_intermediate_freq_, 0/*&rms_group*/);
+			low_intermediate_freq_, high_intermediate_freq_, khz(100), &rms_group);
 		if(status != 0)
 			throw lte_analysis_error("Error processing lte.");
 	
+		if(0) {
+			static std::ofstream f("lte_sweep_output.txt");
+			static bool header = true;
+			if(header) {
+				f << "center_freq\tadj_freq\t";
+				output_lte_meas_debug_header(f);
+				f << std::endl;
+				header = false;
+			}
+			for(auto &i : group)
+				f << meas.frequency() / 1e6 << "\t" << (meas.frequency() + i.intermediate_frequency_) / 1e6 << "\t" << i << std::endl;
+		}
+
+		lte_measurement pss0, pss1, pss2;
+		pss0.PschRecord.NormCorr = -99;
+		pss1.PschRecord.NormCorr = -99;
+		pss2.PschRecord.NormCorr = -99;
+		for(const auto &k : group) {
+			if(k.PschRecord.ID == 0 && k.PschRecord.NormCorr > pss0.PschRecord.NormCorr)
+				pss0 = k;
+			else if(k.PschRecord.ID == 1 && k.PschRecord.NormCorr > pss1.PschRecord.NormCorr)
+				pss1 = k;
+			else if(k.PschRecord.ID == 2 && k.PschRecord.NormCorr > pss2.PschRecord.NormCorr)
+				pss2 = k;
+		}
+		group.clear();
+		if(pss0.PschRecord.NormCorr > -99)
+			group.push_back(pss0);
+		if(pss1.PschRecord.NormCorr > -99)
+			group.push_back(pss1);
+		if(pss2.PschRecord.NormCorr > -99)
+			group.push_back(pss2);
+
+
 		// Remove any measurements that are lower than are confidence threshold.  Note we should always keep measurements
 		// that have a PBCH decoded.
+		auto hf = calculate_num_half_frames(meas.time_ns() > milli_to_nano(50) ? milli_to_nano(50) : meas.time_ns());
+		double sensitivity = correlation_utility::calculate_correlation_ecio_threshold(12, 1, hf, 128);
 		group.erase(std::remove_if(group.begin(), group.end(), [&](const lte_measurement& m) {
-			return m.sync_quality < config_.general_.sync_quality_confidence_threshold_ && !this->is_valid_measurement(m);
+			return m.sync_quality < sensitivity && !this->is_valid_measurement(m);
 		}), group.end());
 
-		avg_rms = ipp_helper::calculate_average_rms(meas.get_iq().get(), meas.get_iq().length());
+		LOG(LCOLLECTION) << log_measurements(meas, group);
 
+		return lte_info(std::move(package), std::move(group), std::move(rms_group));
+	}
+
+	std::string log_measurements(const rf_phreaker::scanner::measurement_info &meas, const lte_measurements &group) const {
+		std::string log;
 		if(group.size()) {
-			std::string log("LTE sweep processing - Found ");
+			log = ("LTE sweep processing on center freq (");
+			log += std::to_string(meas.frequency() / 1e6) + "mhz) - Found ";
 			log += std::to_string(group.size()) + " LTE measurements on frequencies: ";
 			std::set<frequency_type> freqs;
 			for(const auto &i : group)
 				freqs.insert(i.intermediate_frequency_ + meas.frequency());
 			for(const auto &i : freqs)
 				log += std::to_string(i / 1e6) + "mhz ";
-			LOG(LCOLLECTION) << log;
 		}
-
-		return lte_info(std::move(package), std::move(group), power_info_group{{meas.frequency(), meas.bandwidth(), avg_rms}});
+		return log;
 	}
 
 protected:

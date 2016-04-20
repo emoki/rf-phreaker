@@ -4,6 +4,8 @@
 #include <mutex>
 #include "rf_phreaker/common/frequency_shifter.h"
 #include "rf_phreaker/common/frequency_bin_calculator.h"
+#include "rf_phreaker/common/filters.h"
+#include "rf_phreaker/fir_filter/fir_filter.h"
 #include "rf_phreaker/umts_analysis/umts_measurement.h"
 #include "rf_phreaker/umts_analysis/umts_config.h"
 #include "rf_phreaker/scanner/measurement_info.h"
@@ -62,6 +64,12 @@ private:
 	frequency_shifter shifter_;
 
 	frequency_bin_calculator freq_bin_calculator_;
+
+	filters filters_;
+
+	ipp_32fc_array resampled_signal_;
+
+	const int umts_cell_search_sampling_rate = 4875000;
 };
 
 }

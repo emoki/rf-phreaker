@@ -16,7 +16,8 @@ static std::string lte_io_spacer = " | ";
 
 inline std::ostream& output_lte_meas_debug_header(std::ostream &os)
 {
-	os << "psch_id" << lte_io_delimiter
+	os << "intermediate_frequency" << lte_io_delimiter
+		<< "psch_id" << lte_io_delimiter
 		<< "psch_norm_corr" << lte_io_delimiter
 		<< "psch_rms_corr" << lte_io_delimiter
 		<< "psch_start_sample" << lte_io_delimiter
@@ -263,7 +264,8 @@ inline std::ostream& operator<<( std::ostream &os, const LteNumResourceBlocks &t
 
 inline std::ostream& operator<<( std::ostream &os, const lte_measurement &t)
 {
-	os << t.PschRecord << lte_io_delimiter
+	os << t.intermediate_frequency_ << lte_io_delimiter
+		<< t.PschRecord << lte_io_delimiter
 		<< t.SschRecord << lte_io_delimiter
 		<< t.RsRecord << lte_io_delimiter
 		<< t.NumAntennaPorts << lte_io_delimiter

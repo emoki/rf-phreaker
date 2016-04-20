@@ -13,6 +13,7 @@ umts_analysis_impl::umts_analysis_impl(const umts_config &config, std::atomic_bo
 	: config_(config)
 	, is_cancelled_(is_cancelled)
 {
+	config_.sampling_rate(umts_cell_search_sampling_rate);
 	brute_force_.reset(new umts_psch_with_brute_force(config_, brute_force_cpich_table_ptr()->cpich_table_ptr(), is_cancelled));
 }
 
@@ -30,37 +31,21 @@ int umts_analysis_impl::cell_search_sweep(const rf_phreaker::raw_signal &raw_sig
 			// Only channels that are on valid offsets.  Assumes 0 IF is valid and included within range.
 			if((raw_signal.frequency() + i) % khz(200) != 0 && (raw_signal.frequency() + i) % khz(500) != 0)
 				continue;
-			auto tmp_sig = raw_signal;
-			shifter_.shift_frequency(tmp_sig.get_iq(), tmp_sig.get_iq().length(), -(double)i);
-			tmp_sig.frequency(raw_signal.frequency() + i);
-			// Don't bother with filtering right now.
+			auto shifted_sig = raw_signal;
+			shifter_.shift_frequency(shifted_sig.get_iq(), shifted_sig.get_iq().length(), -(double)i, shifted_sig.sampling_rate());
+			shifted_sig.frequency(raw_signal.frequency() + i);
+
 			umts_measurements tmp_umts_meas;
 			double rms = 0;
-			auto status = cell_search(tmp_sig, tmp_umts_meas, sensitivity, full_scan_type, error, &rms);
+			auto status = cell_search(shifted_sig, tmp_umts_meas, sensitivity, full_scan_type, error, &rms);
 			for(auto &j : tmp_umts_meas)
 				j.intermediate_frequency_ = i;
 			umts_meas.insert(umts_meas.end(), tmp_umts_meas.begin(), tmp_umts_meas.end());
+			
+			if(rms_group) {
+				rms_group->push_back(power_info(raw_signal.frequency() + i, config_.sampling_rate(), rms));
+			}
 		}
-		if(rms_group) {
-			double rms = ipp_helper::calculate_average_rms(raw_signal.get_iq().get(), raw_signal.get_iq().length());
-			rms_group->push_back(power_info(raw_signal.frequency(), raw_signal.bandwidth(), rms));
-		}
-		//if(rms_group) {
-		//	int length;
-		//	if(raw_signal.get_iq().length() >= (1 << 15))
-		//		length = 1 << 15;
-		//	else
-		//		length = largest_pow_of_2(raw_signal.get_iq().length());
-
-		//	freq_bin_calculator_.calculate_power_in_bins(raw_signal.get_iq(), raw_signal.sampling_rate(), mhz(1), length);
-
-		//	for(auto i = low_intermediate_freq; i <= high_intermediate_freq; i += step_size) {
-		//		double power = 0;
-		//		//for(int j = -khz(1750); j <= khz(1750); j += khz(500))
-		//			power += freq_bin_calculator_.get_power_in_bin(i);
-		//		rms_group->push_back(power_info(raw_signal.frequency() + i, mhz(1), power));
-		//	}
-		//}
 	}
 	catch(const rf_phreaker_error &err) {
 		rf_phreaker::delegate_sink::instance().log_error(err);
@@ -121,7 +106,17 @@ int umts_analysis_impl::cell_search(const rf_phreaker::raw_signal &raw_signal, u
 			// Do not set num_iterations.
 		}
 
-		umts_meas = brute_force_->process(raw_signal.get_iq(), umts_meas_container_.get_meas(raw_signal.frequency()), num_cpich_chips, scan_type);
+		const ipp_32fc_array *sig = &raw_signal.get_iq();
+		if(raw_signal.sampling_rate() != config_.sampling_rate()) {
+			auto &filter = filters_.get_filter(raw_signal.sampling_rate(), config_.sampling_rate());
+			auto resampled_length = filter.num_output_samples_required(sig->length());
+			if(resampled_signal_.length() != resampled_length)
+				resampled_signal_.reset(resampled_length);
+			filter.filter(sig->get(), resampled_signal_.get(), filter.num_iterations_required(sig->length()));
+			sig = &resampled_signal_;
+		}
+
+		umts_meas = brute_force_->process(*sig, umts_meas_container_.get_meas(raw_signal.frequency()), num_cpich_chips, scan_type);
 
 		consolidate_measurements(umts_meas);
 
@@ -189,6 +184,7 @@ int umts_analysis_impl::decode_layer_3(const rf_phreaker::raw_signal &raw_signal
 
 int umts_analysis_impl::set_num_coherent_slots_for_psch(int num_coherent_slots)
 {
+	config_.num_coherent_psch_slots(num_coherent_slots);
 	brute_force_->set_num_coherent_psch_slots_and_reset_iterations(num_coherent_slots);
 	return 0;
 }
