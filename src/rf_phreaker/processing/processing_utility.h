@@ -39,7 +39,7 @@ inline bandwidth_type determine_bandwidth_for_collection(LteChannelBandwidth bw)
 	case LteBandwidth_10MHZ:
 		return mhz(10);
 	case LteBandwidth_15MHZ:
-		return mhz(20);
+		return mhz(14);
 	case LteBandwidth_20MHZ:
 		return mhz(20);
 	case LteBandwidth_3MHZ:
