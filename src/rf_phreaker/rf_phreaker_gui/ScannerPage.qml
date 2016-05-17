@@ -129,7 +129,7 @@ ScrollView {
                         font.family: Flat.FlatStyle.fontFamily
                         font.pixelSize: scannerDetailsPixelSize
                         renderType: Text.QtRendering
-                        text: Api.gps.utcDateTime
+                        text: Api.gps.utcDateTimeStr
                     }
                     Label {
                         font.family: Flat.FlatStyle.fontFamily
