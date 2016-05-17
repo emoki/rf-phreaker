@@ -7,6 +7,20 @@ SET(CMAKE_COLOR_MAKEFILE ON)
 
 set(CMAKE_POSITION_INDEPENDENT_CODE ON)
 
+cmake_policy(SET CMP0054 NEW) # Variables/keywords should be unquoted.
+cmake_policy(SET CMP0020 NEW) # This should also be specified in any project that uses QT.
+
+set (CMAKE_RUNTIME_OUTPUT_DIRECTORY "${PROJECT_SOURCE_DIR}/../../output")
+set (CMAKE_LIBRARY_OUTPUT_DIRECTORY "${PROJECT_SOURCE_DIR}/../../output")
+set (CMAKE_ARCHIVE_OUTPUT_DIRECTORY "${PROJECT_SOURCE_DIR}/../../output")
+
+# Path to QT
+set (CMAKE_INCLUDE_CURRENT_DIR ON)
+set (qt_INSTALL_PATH "e:/bin/qt/5.6/msvc2013" CACHE STRING "Path to QT.")
+set (CMAKE_PREFIX_PATH ${qt_INSTALL_PATH} ${CMAKE_PREFIX_PATH})
+# All qt packages must be found within top level dir.
+find_package (Qt5 COMPONENTS Core Quick Widgets)
+
 # Let CMake find the correct library dir instead of
 # relying on the obsolete LIB_SUFFIX parameter
 include(GNUInstallDirs)
@@ -309,14 +323,33 @@ endif()
 
 ############################################################
 # Uninstall stuff
-CONFIGURE_FILE(
-    "${CMAKE_CURRENT_SOURCE_DIR}/cmake/templates/cmake_uninstall.cmake.in"
-    "${CMAKE_CURRENT_BINARY_DIR}/cmake_uninstall.cmake"
-    IMMEDIATE @ONLY)
+# CONFIGURE_FILE(
+    # "${CMAKE_CURRENT_SOURCE_DIR}/cmake/templates/cmake_uninstall.cmake.in"
+    # "${CMAKE_CURRENT_BINARY_DIR}/cmake_uninstall.cmake"
+    # IMMEDIATE @ONLY)
 
-ADD_CUSTOM_TARGET(uninstall
-    "${CMAKE_COMMAND}" -P "${CMAKE_CURRENT_BINARY_DIR}/cmake_uninstall.cmake")
+# ADD_CUSTOM_TARGET(uninstall
+    # "${CMAKE_COMMAND}" -P "${CMAKE_CURRENT_BINARY_DIR}/cmake_uninstall.cmake")
 
 include(MarbleCPackOptions)
 
 marble_feature_summary(WHAT ALL)
+
+add_custom_target(
+	copy_data
+	DEPENDS ${CMAKE_CURRENT_SOURCE_DIR}/data
+)
+
+add_custom_command(
+	TARGET copy_data POST_BUILD
+	COMMAND ${CMAKE_COMMAND} -E copy_directory
+		${CMAKE_CURRENT_SOURCE_DIR}/data
+		${CMAKE_RUNTIME_OUTPUT_DIRECTORY}/${CMAKE_CFG_INTDIR}/data
+)
+
+add_custom_command(
+	TARGET copy_data POST_BUILD
+	COMMAND ${CMAKE_COMMAND} -E copy_if_different
+		${CMAKE_CURRENT_SOURCE_DIR}/../zlib_win/bin/zlib.dll
+		${CMAKE_RUNTIME_OUTPUT_DIRECTORY}/${CMAKE_CFG_INTDIR}
+)

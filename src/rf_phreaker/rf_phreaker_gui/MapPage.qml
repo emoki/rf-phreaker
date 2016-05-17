@@ -8,93 +8,107 @@ import QtQml.Models 2.2
 import QtPositioning 5.3
 import QtLocation 5.3
 import RfPhreaker 1.0
+import org.kde.edu.marble 0.20
 
-ScrollView {
-    id: scannerScrollView
+
+Rectangle {
+    id: root
     anchors.fill: parent
-    horizontalScrollBarPolicy: Qt.ScrollBarAlwaysOff
+    color: "transparent"
 
-    Flickable {
+//    function centerOnGps() {
+//        if(Api.gps.gpsLock && MarbleManager.isTracking) {
+//            marble.centerOn(Api.gps.longitude, Api.gps.latitude);
+//            if(marble.zoom() > 50)
+//                marble.setZoom(20, )
+//        }
+
+//    }
+
+//    Timer {
+//        interval: 1000
+//        repeat: true
+//        onTriggered: {
+//        }
+//    }
+
+    // Change to MarbleItem after Marble has developed it more.
+    ColumnLayout {
         anchors.fill: parent
-   //     contentWidth: viewport.width
+        RowLayout {
+            id: row
+            Layout.preferredHeight: 30
+            CheckBox {
+                id: breadCrumb
+                text: "Show Bread Crumb"
+            }
 
-        property variant location: QtPositioning.coordinate(Api.gps.gpsLock ? Api.gps.latitude : 0, Api.gps.gpsLock ? Api.gps.longitude : 0)
-        //! [Initialize Plugin]
-        Plugin {
-            id: myPlugin
-            name: "osm"
-            //specify plugin parameters if necessary
-            //PluginParameter {...}
-            //PluginParameter {...}
-            //...
+            Button {
+                id: trackMe
+                text: "Where am I?!?"
+                onClicked: MarbleManager.isTracking = true;
+            }
+            Button {
+                id: downloadButton
+                text: "Download"
+                onClicked: {
+                    MarbleManager.downloadMapRegion(marble.marbleMap);
+                }
+            }
+            ProgressBar {
+                value: MarbleManager.downloadProgess;
+            }
         }
-        //! [Initialize Plugin]
 
-        //! [Current Location]
-//        PositionSource {
-//            id: positionSource
-//            property variant lastSearchPosition: location
-//            active: true
-//            updateInterval: 500//120000 // 2 mins
-//            onPositionChanged:  {
-//                var currentPosition = positionSource.position.coordinate
-//                map.center = currentPosition
-//                var distance = currentPosition.distanceTo(lastSearchPosition)
-//                if (distance > 500) {
-//                    // 500m from last performed pizza search
-//                    lastSearchPosition = currentPosition
-//                    searchModel.searchArea = QtPositioning.circle(currentPosition)
-//                    searchModel.update()
-//                }
-//            }
-//        }
-        //! [Current Location]
+        MarbleWidget {
+            id: marble
+            Layout.fillHeight: true
+            Layout.fillWidth: true
+            visible: true
+            focus: true
 
-        //! [PlaceSearchModel]
-//        PlaceSearchModel {
-//            id: searchModel
+            Component.onCompleted: {
+                // Our position provider is added manually wihtin MarbleManager init.
+                MarbleManager.marbleMap = marble.marbleMap;
+                marble.positionProvider = "RfPhreakerPositioning"
+//				positionSource.map = marble;
+//				tracking.map = marble;
+            }
 
-//            plugin: myPlugin
+            PinchArea
+            {
+                anchors.fill: parent
+                enabled: true
+                objectName: "pinchArea"
+                onPinchStarted: { marble.handlePinchStart(pinch.center) }
+                onPinchUpdated: { marble.handlePinchUpdate(pinch.center, pinch.scale) }
+                onPinchFinished:{ marble.handlePinchEnd(pinch.center, false) }
+            }
+            showFrameRate: false
+            projection: MarbleItem.Mercator
+            mapThemeId: "earth/openstreetmap/openstreetmap.dgml"
+            showAtmosphere: false
+            showCompass: false
+            showClouds: false
+            showCrosshairs: false
+            showGrid: false
+            showOverviewMap: false
+            showOtherPlaces: false
+            showScaleBar: false
+            showBackground: false
 
-//            searchTerm: "Pizza"
-//            //initially show Brisbane
-//            searchArea: QtPositioning.circle(location)
-
-//            Component.onCompleted: update()
-//        }
-        //! [PlaceSearchModel]
-
-        //! [Places MapItemView]
-        Map {
-            id: map
-            anchors.fill: parent
-            plugin: myPlugin;
-            center: QtPositioning.coordinate(Api.gps.gpsLock ? Api.gps.latitude : 0, Api.gps.gpsLock ? Api.gps.longitude : 0)
-            zoomLevel: 13
-
-//            MapItemView {
-//                model: searchModel
-//                delegate: MapQuickItem {
-//                    coordinate: place.location.coordinate
-
-//                    anchorPoint.x: image.width * 0.5
-//                    anchorPoint.y: image.height
-
-//                    sourceItem: Image {
-//                        id: image
-//                        source: "marker.png"
-//                    }
-//                }
-//            }
-        }
-        //! [Places MapItemView]
-
-//        Connections {
-//            target: searchModel
-//            onStatusChanged: {
-//                if (searchModel.status == PlaceSearchModel.Error)
-//                    console.log(searchModel.errorString());
-//            }
-//        }
+       }
+        //			 Tracking {
+        //				id: tracking
+        //				showTrack: true
+        //				autoCenter: true
+        //				autoZoom: true
+        //				positionMarkerType: Tracking.Circle
+        //				positionSource: PositionSource {
+        //					id: positionSource
+        //					source: "RfPhreakerPositioning"
+        //					active: true
+        //				}
+        //			}
     }
 }

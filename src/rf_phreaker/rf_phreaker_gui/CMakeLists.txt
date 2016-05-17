@@ -32,9 +32,12 @@ set (rf_phreaker_gui_SRCS
 	Gsm.h
 	IO.h
 	Lte.h
+	MarbleManager.h
 	MeasurementIndex.h
 	MeasurementModel.h
 	ProxyMeasurementModel.h
+	RpPositionProviderPlugin.cpp
+	RpPositionProviderPlugin.h
 	Serialization.h
 	Settings.h
 	Stats.h
@@ -78,6 +81,26 @@ include_directories (${qt_PRIVATE_GUI})
 include_directories (${qt_PRIVATE_CORE})
 include_directories (${qt_PRIVATE_GUIP})
 include_directories (${qt_PRIVATE_COREP})
+include_directories (${CMAKE_SOURCE_DIR}/third_party/marble/src/lib)
+include_directories (${CMAKE_SOURCE_DIR}/third_party/marble/src/lib/marble)
+include_directories (${CMAKE_SOURCE_DIR}/third_party/marble/src/lib/marble/blendings)
+include_directories (${CMAKE_SOURCE_DIR}/third_party/marble/src/lib/marble/cloudsync)
+include_directories (${CMAKE_SOURCE_DIR}/third_party/marble/src/lib/marble/declarative)
+include_directories (${CMAKE_SOURCE_DIR}/third_party/marble/src/lib/marble/geodata)
+include_directories (${CMAKE_SOURCE_DIR}/third_party/marble/src/lib/marble/geodata/data)
+include_directories (${CMAKE_SOURCE_DIR}/third_party/marble/src/lib/marble/geodata/graphicsitem)
+include_directories (${CMAKE_SOURCE_DIR}/third_party/marble/src/lib/marble/geodata/scene)
+include_directories (${CMAKE_SOURCE_DIR}/third_party/marble/src/lib/marble/geodata/handlers)
+include_directories (${CMAKE_SOURCE_DIR}/third_party/marble/src/lib/marble/geodata/handlers/kml)
+include_directories (${CMAKE_SOURCE_DIR}/third_party/marble/src/lib/marble/geodata/handlers/dgml)
+include_directories (${CMAKE_SOURCE_DIR}/third_party/marble/src/lib/marble/geodata/parser)
+include_directories (${CMAKE_SOURCE_DIR}/third_party/marble/src/lib/marble/graphicsview)
+include_directories (${CMAKE_SOURCE_DIR}/third_party/marble/src/lib/marble/htmlfeatures)
+include_directories (${CMAKE_SOURCE_DIR}/third_party/marble/src/lib/marble/layers)
+include_directories (${CMAKE_SOURCE_DIR}/third_party/marble/src/lib/marble/osm)
+include_directories (${CMAKE_SOURCE_DIR}/third_party/marble/src/lib/marble/projections)
+include_directories (${CMAKE_SOURCE_DIR}/third_party/marble/src/lib/marble/routing)
+include_directories (${CMAKE_SOURCE_DIR}/third_party/marble/src/lib/marble/webpopup)
 
 set (rf_phreaker_gui_QRCS
 	qml.qrc)
@@ -93,6 +116,18 @@ add_executable (rf_phreaker_gui  ${rf_phreaker_gui_SRCS} ${rf_phreaker_gui_QMLS}
 target_link_libraries (rf_phreaker_gui Qt5::Core)
 target_link_libraries (rf_phreaker_gui Qt5::Widgets)
 target_link_libraries (rf_phreaker_gui Qt5::Quick)
-#target_link_libraries (rf_phreaker_gui Qt5::XmlListModel)
 target_link_libraries (rf_phreaker_gui rf_phreaker_api)
 
+# Marble libraries should be built and placed in the output directory
+if(MSVC)
+  add_definitions(-D_USE_MATH_DEFINES=1)
+endif(MSVC)
+
+target_link_libraries (rf_phreaker_gui 
+	debug ${CMAKE_LIBRARY_OUTPUT_DIRECTORY}/${CMAKE_CFG_INTDIR}/marblewidget-qt5d.lib
+	optimized ${CMAKE_LIBRARY_OUTPUT_DIRECTORY}/${CMAKE_CFG_INTDIR}/marblewidget-qt5.lib
+)
+target_link_libraries (rf_phreaker_gui 
+	debug ${CMAKE_LIBRARY_OUTPUT_DIRECTORY}/${CMAKE_CFG_INTDIR}/marbledeclaratived.lib 
+	optimized ${CMAKE_LIBRARY_OUTPUT_DIRECTORY}/${CMAKE_CFG_INTDIR}/marbledeclarative.lib
+)

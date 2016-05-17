@@ -16,6 +16,7 @@
 #include "rf_phreaker/rf_phreaker_gui/FileSaveDialog.h"
 #include "rf_phreaker/rf_phreaker_gui/MeasurementModel.h"
 #include "rf_phreaker/rf_phreaker_gui/ProxyMeasurementModel.h"
+#include "rf_phreaker/rf_phreaker_gui/MarbleManager.h"
 
 //namespace rf_phreaker { namespace gui {
 
@@ -32,11 +33,18 @@ QObject* ApiInterfaceSingletonTypeProvider(QQmlEngine *engine, QJSEngine *script
 	return Api::instance();
 }
 
+QObject* MarbleManagerSingletonTypeProvider(QQmlEngine *engine, QJSEngine *scriptEngine) {
+	Q_UNUSED(engine);
+	Q_UNUSED(scriptEngine);
+	return MarbleManager::instance();
+}
+
 void registerQmlTypes()
 {
 	QLatin1String uri("RfPhreaker");
 
 	qmlRegisterSingletonType<Api>(uri.latin1(), 1, 0, "Api", ApiInterfaceSingletonTypeProvider);
+	qmlRegisterSingletonType<MarbleManager>(uri.latin1(), 1, 0, "MarbleManager", MarbleManagerSingletonTypeProvider);
 	qmlRegisterType<ApiTypes>(uri.latin1(), 1, 0, "ApiTypes");
 	qmlRegisterType<ChannelFreq>(uri.latin1(), 1, 0, "ChannelFreq");
 	qmlRegisterType<CollectionInfo>(uri.latin1(), 1, 0, "CollectionInfo");
