@@ -2,8 +2,9 @@
 # Installation Notes
 # Make sure to turn BUILD_SHARED_LIBS for google_mock and google_test. 
 # Specify the path to boost libraries using boost_USER_PATH. (apt-get or www.boost.org) 
-# QT 5.2 should be installed from www.qt-project.org.
+# QT 5.6 should be installed from www.qt-project.org.
 # IPP 7 or 8 does not have to be installed, however you need to set IPP_ROOT appropriately.  Look to gonzales/users/public/public documents/installations/intel ipp'. 
+# Marble is built separately.
 # Windows specific -
 # IP
 # Ubuntu Environment Setup -----------
@@ -29,8 +30,8 @@ cmake_policy(SET CMP0020 NEW) # This should also be specified in any project tha
 
 set (CMAKE_MODULE_PATH "${PROJECT_SOURCE_DIR}/cmake" ${CMAKE_MODULE_PATH})
 set (CMAKE_RUNTIME_OUTPUT_DIRECTORY "${PROJECT_SOURCE_DIR}/output")
-set (CMAKE_LIBRARY_OUTPUT_DIRECTORY ${PROJECT_SOURCE_DIR}/output)
-set (CMAKE_ARCHIVE_OUTPUT_DIRECTORY ${PROJECT_SOURCE_DIR}/output)
+set (CMAKE_LIBRARY_OUTPUT_DIRECTORY "${PROJECT_SOURCE_DIR}/output")
+set (CMAKE_ARCHIVE_OUTPUT_DIRECTORY "${PROJECT_SOURCE_DIR}/output")
 
 # Find TBB.
 if (MSVC)
@@ -62,7 +63,7 @@ find_package (Boost 1.56.0 COMPONENTS system filesystem thread date_time timer c
 	
 # Set QT
 set (CMAKE_INCLUDE_CURRENT_DIR ON)
-set (qt_INSTALL_PATH "c:/bin/qt/5.3/msvc2013_opengl" CACHE STRING "Path to QT.")
+set (qt_INSTALL_PATH "c:/bin/qt/5.6/msvc2013" CACHE STRING "Path to QT.")
 set (CMAKE_PREFIX_PATH ${qt_INSTALL_PATH} ${CMAKE_PREFIX_PATH})
 # All qt packages must be found within top level dir.
 find_package (Qt5 COMPONENTS Core Quick Widgets)
