@@ -224,7 +224,12 @@ typedef struct rp_gps {
 	int32_t tracking_satellites_;
 	double latitude_;
 	double longitude_;
-	int32_t speed_;
+	double altitude_;
+	double angle_;
+	double speed_;
+	double dilution_of_precision_;
+	double horizontal_accuracy_meters_;
+	double vertical_accuracy_meters_;
 	int64_t raw_status_;
 } rp_gps;
 

@@ -160,6 +160,13 @@ message rp_device_info {
 	// TODO - expose license.
 }
 
+message rp_satellite {
+	int32 prn = 1;
+	double snr = 2;
+	double elevation = 3;
+	double azimuth = 4;
+}
+
 message rp_gps {
 	string serial = 1;
 	bool lock = 2;
@@ -168,8 +175,14 @@ message rp_gps {
 	int32 tracking_satellites = 5;
 	double latitude = 6;
 	double longitude = 7;
-	int32 speed = 8;
-	int64 raw_status = 9;
+	double altitude = 8;
+	double angle = 9;
+	double speed = 10;
+	double dilution_of_precision = 11;
+	double horizontal_accuracy_meters = 12;
+	double vertical_accuracy_meters = 13;
+	int64 raw_status = 14;
+	repeated rp_satellite satellites = 15;
 }
 
 message rp_base {

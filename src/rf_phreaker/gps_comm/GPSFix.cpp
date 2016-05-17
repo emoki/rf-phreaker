@@ -338,18 +338,28 @@ namespace rf_phreaker { namespace gps_comm {
 
 	GPSFix::operator gps(){
 		gps raw;
-
+		raw.serial_ = scanningDeviceSerial;		//blade serial number...
 		raw.lock_ = haslock;
 		raw.coordinated_universal_time_ = timestamp.gettimet();		//will truncate the milliseconds...
-		raw.serial_ = scanningDeviceSerial;		//blade serial number...
-		raw.raw_status_ = status;		// ?? not sure what that is, putting the Origin status 'A'/'V' here
-
-		raw.latitude_ = latitude;
-		raw.longitude_ = longitude;
-		raw.speed_ = (int32_t)round(speed);
 		raw.tracking_satellites_ = trackingSatellites;
 		raw.visible_satellites_ = visibleSatellites;
-
+		raw.latitude_ = latitude;
+		raw.longitude_ = longitude;
+		raw.altitude_ = altitude;
+		raw.angle_ = travelAngle;
+		raw.speed_ = speed;
+		raw.dilution_of_precision_ = dilution;
+		raw.horizontal_accuracy_meters_ = horizontalAccuracy();
+		raw.vertical_accuracy_meters_ = verticalAccuracy();
+		raw.raw_status_ = status;		// ?? not sure what that is, putting the Origin status 'A'/'V' here
+		for(auto &i : almanac.satellites) {
+			gps::satellite sat;
+			sat.prn_ = i.prn;
+			sat.snr_ = i.snr;
+			sat.elevation_ = i.elevation;
+			sat.azimuth_ = i.azimuth;
+			raw.satellites_.emplace_back(std::move(sat));
+		}
 		return raw;
 	}
 

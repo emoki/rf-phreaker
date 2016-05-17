@@ -120,8 +120,22 @@ public:
 		t.tracking_satellites_ = pb.tracking_satellites();
 		t.latitude_ = pb.latitude();
 		t.longitude_ = pb.longitude();
+		t.altitude_ = pb.altitude();
+		t.angle_ = pb.angle();
 		t.speed_ = pb.speed();
+		t.dilution_of_precision_ = pb.dilution_of_precision();
+		t.horizontal_accuracy_meters_ = pb.horizontal_accuracy_meters();
+		t.vertical_accuracy_meters_ = pb.vertical_accuracy_meters();
 		t.raw_status_ = pb.raw_status();
+		t.satellites_.resize(pb.satellites_size());
+		auto j = 0;
+		for(auto &i : t.satellites_) {
+			auto sat = pb.satellites().Get(j++);
+			i.prn_ = sat.prn();
+			i.snr_ = sat.snr();
+			i.elevation_ = sat.elevation();
+			i.azimuth_ = sat.azimuth();
+		}
 	}
 	static void populate(const gps &t, rp_gps *pb) {
 		pb->set_serial(t.serial_);
@@ -131,8 +145,20 @@ public:
 		pb->set_tracking_satellites(t.tracking_satellites_);
 		pb->set_latitude(t.latitude_);
 		pb->set_longitude(t.longitude_);
+		pb->set_altitude(t.altitude_);
+		pb->set_angle(t.angle_);
 		pb->set_speed(t.speed_);
+		pb->set_dilution_of_precision(t.dilution_of_precision_);
+		pb->set_horizontal_accuracy_meters(t.horizontal_accuracy_meters_);
+		pb->set_vertical_accuracy_meters(t.vertical_accuracy_meters_);
 		pb->set_raw_status(t.raw_status_);
+		for(auto &i : t.satellites_) {
+			auto k = pb->add_satellites();
+			k->set_prn(i.prn_);
+			k->set_snr(i.snr_);
+			k->set_elevation(i.elevation_);
+			k->set_azimuth(i.azimuth_);
+		}
 	}
 };
 

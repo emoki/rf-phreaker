@@ -84,6 +84,7 @@ class rp_pcid_group;
 class rp_plmn;
 class rp_raw_data;
 class rp_raw_layer_3;
+class rp_satellite;
 class rp_update;
 class rp_wcdma;
 class rp_wcdma_gsm_neighbor;
@@ -1044,6 +1045,105 @@ class rp_device_info : public ::google::protobuf::Message {
 };
 // -------------------------------------------------------------------
 
+class rp_satellite : public ::google::protobuf::Message {
+ public:
+  rp_satellite();
+  virtual ~rp_satellite();
+
+  rp_satellite(const rp_satellite& from);
+
+  inline rp_satellite& operator=(const rp_satellite& from) {
+    CopyFrom(from);
+    return *this;
+  }
+
+  static const ::google::protobuf::Descriptor* descriptor();
+  static const rp_satellite& default_instance();
+
+  void Swap(rp_satellite* other);
+
+  // implements Message ----------------------------------------------
+
+  inline rp_satellite* New() const { return New(NULL); }
+
+  rp_satellite* New(::google::protobuf::Arena* arena) const;
+  void CopyFrom(const ::google::protobuf::Message& from);
+  void MergeFrom(const ::google::protobuf::Message& from);
+  void CopyFrom(const rp_satellite& from);
+  void MergeFrom(const rp_satellite& from);
+  void Clear();
+  bool IsInitialized() const;
+
+  int ByteSize() const;
+  bool MergePartialFromCodedStream(
+      ::google::protobuf::io::CodedInputStream* input);
+  void SerializeWithCachedSizes(
+      ::google::protobuf::io::CodedOutputStream* output) const;
+  ::google::protobuf::uint8* SerializeWithCachedSizesToArray(::google::protobuf::uint8* output) const;
+  int GetCachedSize() const { return _cached_size_; }
+  private:
+  void SharedCtor();
+  void SharedDtor();
+  void SetCachedSize(int size) const;
+  void InternalSwap(rp_satellite* other);
+  private:
+  inline ::google::protobuf::Arena* GetArenaNoVirtual() const {
+    return _internal_metadata_.arena();
+  }
+  inline void* MaybeArenaPtr() const {
+    return _internal_metadata_.raw_arena_ptr();
+  }
+  public:
+
+  ::google::protobuf::Metadata GetMetadata() const;
+
+  // nested types ----------------------------------------------------
+
+  // accessors -------------------------------------------------------
+
+  // optional int32 prn = 1;
+  void clear_prn();
+  static const int kPrnFieldNumber = 1;
+  ::google::protobuf::int32 prn() const;
+  void set_prn(::google::protobuf::int32 value);
+
+  // optional double snr = 2;
+  void clear_snr();
+  static const int kSnrFieldNumber = 2;
+  double snr() const;
+  void set_snr(double value);
+
+  // optional double elevation = 3;
+  void clear_elevation();
+  static const int kElevationFieldNumber = 3;
+  double elevation() const;
+  void set_elevation(double value);
+
+  // optional double azimuth = 4;
+  void clear_azimuth();
+  static const int kAzimuthFieldNumber = 4;
+  double azimuth() const;
+  void set_azimuth(double value);
+
+  // @@protoc_insertion_point(class_scope:rf_phreaker.protobuf.rp_satellite)
+ private:
+
+  ::google::protobuf::internal::InternalMetadataWithArena _internal_metadata_;
+  bool _is_default_instance_;
+  double snr_;
+  double elevation_;
+  double azimuth_;
+  ::google::protobuf::int32 prn_;
+  mutable int _cached_size_;
+  friend void  protobuf_AddDesc_rf_5fphreaker_2eproto();
+  friend void protobuf_AssignDesc_rf_5fphreaker_2eproto();
+  friend void protobuf_ShutdownFile_rf_5fphreaker_2eproto();
+
+  void InitAsDefaultInstance();
+  static rp_satellite* default_instance_;
+};
+// -------------------------------------------------------------------
+
 class rp_gps : public ::google::protobuf::Message {
  public:
   rp_gps();
@@ -1147,17 +1247,59 @@ class rp_gps : public ::google::protobuf::Message {
   double longitude() const;
   void set_longitude(double value);
 
-  // optional int32 speed = 8;
-  void clear_speed();
-  static const int kSpeedFieldNumber = 8;
-  ::google::protobuf::int32 speed() const;
-  void set_speed(::google::protobuf::int32 value);
+  // optional double altitude = 8;
+  void clear_altitude();
+  static const int kAltitudeFieldNumber = 8;
+  double altitude() const;
+  void set_altitude(double value);
 
-  // optional int64 raw_status = 9;
+  // optional double angle = 9;
+  void clear_angle();
+  static const int kAngleFieldNumber = 9;
+  double angle() const;
+  void set_angle(double value);
+
+  // optional double speed = 10;
+  void clear_speed();
+  static const int kSpeedFieldNumber = 10;
+  double speed() const;
+  void set_speed(double value);
+
+  // optional double dilution_of_precision = 11;
+  void clear_dilution_of_precision();
+  static const int kDilutionOfPrecisionFieldNumber = 11;
+  double dilution_of_precision() const;
+  void set_dilution_of_precision(double value);
+
+  // optional double horizontal_accuracy_meters = 12;
+  void clear_horizontal_accuracy_meters();
+  static const int kHorizontalAccuracyMetersFieldNumber = 12;
+  double horizontal_accuracy_meters() const;
+  void set_horizontal_accuracy_meters(double value);
+
+  // optional double vertical_accuracy_meters = 13;
+  void clear_vertical_accuracy_meters();
+  static const int kVerticalAccuracyMetersFieldNumber = 13;
+  double vertical_accuracy_meters() const;
+  void set_vertical_accuracy_meters(double value);
+
+  // optional int64 raw_status = 14;
   void clear_raw_status();
-  static const int kRawStatusFieldNumber = 9;
+  static const int kRawStatusFieldNumber = 14;
   ::google::protobuf::int64 raw_status() const;
   void set_raw_status(::google::protobuf::int64 value);
+
+  // repeated .rf_phreaker.protobuf.rp_satellite satellites = 15;
+  int satellites_size() const;
+  void clear_satellites();
+  static const int kSatellitesFieldNumber = 15;
+  const ::rf_phreaker::protobuf::rp_satellite& satellites(int index) const;
+  ::rf_phreaker::protobuf::rp_satellite* mutable_satellites(int index);
+  ::rf_phreaker::protobuf::rp_satellite* add_satellites();
+  ::google::protobuf::RepeatedPtrField< ::rf_phreaker::protobuf::rp_satellite >*
+      mutable_satellites();
+  const ::google::protobuf::RepeatedPtrField< ::rf_phreaker::protobuf::rp_satellite >&
+      satellites() const;
 
   // @@protoc_insertion_point(class_scope:rf_phreaker.protobuf.rp_gps)
  private:
@@ -1169,10 +1311,16 @@ class rp_gps : public ::google::protobuf::Message {
   bool lock_;
   ::google::protobuf::int32 visible_satellites_;
   double latitude_;
-  ::google::protobuf::int32 tracking_satellites_;
-  ::google::protobuf::int32 speed_;
   double longitude_;
+  double altitude_;
+  double angle_;
+  double speed_;
+  double dilution_of_precision_;
+  double horizontal_accuracy_meters_;
+  double vertical_accuracy_meters_;
   ::google::protobuf::int64 raw_status_;
+  ::google::protobuf::RepeatedPtrField< ::rf_phreaker::protobuf::rp_satellite > satellites_;
+  ::google::protobuf::int32 tracking_satellites_;
   mutable int _cached_size_;
   friend void  protobuf_AddDesc_rf_5fphreaker_2eproto();
   friend void protobuf_AssignDesc_rf_5fphreaker_2eproto();
@@ -7510,6 +7658,66 @@ rp_device_info::frequency_paths() const {
 
 // -------------------------------------------------------------------
 
+// rp_satellite
+
+// optional int32 prn = 1;
+inline void rp_satellite::clear_prn() {
+  prn_ = 0;
+}
+inline ::google::protobuf::int32 rp_satellite::prn() const {
+  // @@protoc_insertion_point(field_get:rf_phreaker.protobuf.rp_satellite.prn)
+  return prn_;
+}
+inline void rp_satellite::set_prn(::google::protobuf::int32 value) {
+  
+  prn_ = value;
+  // @@protoc_insertion_point(field_set:rf_phreaker.protobuf.rp_satellite.prn)
+}
+
+// optional double snr = 2;
+inline void rp_satellite::clear_snr() {
+  snr_ = 0;
+}
+inline double rp_satellite::snr() const {
+  // @@protoc_insertion_point(field_get:rf_phreaker.protobuf.rp_satellite.snr)
+  return snr_;
+}
+inline void rp_satellite::set_snr(double value) {
+  
+  snr_ = value;
+  // @@protoc_insertion_point(field_set:rf_phreaker.protobuf.rp_satellite.snr)
+}
+
+// optional double elevation = 3;
+inline void rp_satellite::clear_elevation() {
+  elevation_ = 0;
+}
+inline double rp_satellite::elevation() const {
+  // @@protoc_insertion_point(field_get:rf_phreaker.protobuf.rp_satellite.elevation)
+  return elevation_;
+}
+inline void rp_satellite::set_elevation(double value) {
+  
+  elevation_ = value;
+  // @@protoc_insertion_point(field_set:rf_phreaker.protobuf.rp_satellite.elevation)
+}
+
+// optional double azimuth = 4;
+inline void rp_satellite::clear_azimuth() {
+  azimuth_ = 0;
+}
+inline double rp_satellite::azimuth() const {
+  // @@protoc_insertion_point(field_get:rf_phreaker.protobuf.rp_satellite.azimuth)
+  return azimuth_;
+}
+inline void rp_satellite::set_azimuth(double value) {
+  
+  azimuth_ = value;
+  // @@protoc_insertion_point(field_set:rf_phreaker.protobuf.rp_satellite.azimuth)
+}
+
+// -------------------------------------------------------------------
+
 // rp_gps
 
 // optional string serial = 1;
@@ -7639,21 +7847,91 @@ inline void rp_gps::set_longitude(double value) {
   // @@protoc_insertion_point(field_set:rf_phreaker.protobuf.rp_gps.longitude)
 }
 
-// optional int32 speed = 8;
+// optional double altitude = 8;
+inline void rp_gps::clear_altitude() {
+  altitude_ = 0;
+}
+inline double rp_gps::altitude() const {
+  // @@protoc_insertion_point(field_get:rf_phreaker.protobuf.rp_gps.altitude)
+  return altitude_;
+}
+inline void rp_gps::set_altitude(double value) {
+  
+  altitude_ = value;
+  // @@protoc_insertion_point(field_set:rf_phreaker.protobuf.rp_gps.altitude)
+}
+
+// optional double angle = 9;
+inline void rp_gps::clear_angle() {
+  angle_ = 0;
+}
+inline double rp_gps::angle() const {
+  // @@protoc_insertion_point(field_get:rf_phreaker.protobuf.rp_gps.angle)
+  return angle_;
+}
+inline void rp_gps::set_angle(double value) {
+  
+  angle_ = value;
+  // @@protoc_insertion_point(field_set:rf_phreaker.protobuf.rp_gps.angle)
+}
+
+// optional double speed = 10;
 inline void rp_gps::clear_speed() {
   speed_ = 0;
 }
-inline ::google::protobuf::int32 rp_gps::speed() const {
+inline double rp_gps::speed() const {
   // @@protoc_insertion_point(field_get:rf_phreaker.protobuf.rp_gps.speed)
   return speed_;
 }
-inline void rp_gps::set_speed(::google::protobuf::int32 value) {
+inline void rp_gps::set_speed(double value) {
   
   speed_ = value;
   // @@protoc_insertion_point(field_set:rf_phreaker.protobuf.rp_gps.speed)
 }
 
-// optional int64 raw_status = 9;
+// optional double dilution_of_precision = 11;
+inline void rp_gps::clear_dilution_of_precision() {
+  dilution_of_precision_ = 0;
+}
+inline double rp_gps::dilution_of_precision() const {
+  // @@protoc_insertion_point(field_get:rf_phreaker.protobuf.rp_gps.dilution_of_precision)
+  return dilution_of_precision_;
+}
+inline void rp_gps::set_dilution_of_precision(double value) {
+  
+  dilution_of_precision_ = value;
+  // @@protoc_insertion_point(field_set:rf_phreaker.protobuf.rp_gps.dilution_of_precision)
+}
+
+// optional double horizontal_accuracy_meters = 12;
+inline void rp_gps::clear_horizontal_accuracy_meters() {
+  horizontal_accuracy_meters_ = 0;
+}
+inline double rp_gps::horizontal_accuracy_meters() const {
+  // @@protoc_insertion_point(field_get:rf_phreaker.protobuf.rp_gps.horizontal_accuracy_meters)
+  return horizontal_accuracy_meters_;
+}
+inline void rp_gps::set_horizontal_accuracy_meters(double value) {
+  
+  horizontal_accuracy_meters_ = value;
+  // @@protoc_insertion_point(field_set:rf_phreaker.protobuf.rp_gps.horizontal_accuracy_meters)
+}
+
+// optional double vertical_accuracy_meters = 13;
+inline void rp_gps::clear_vertical_accuracy_meters() {
+  vertical_accuracy_meters_ = 0;
+}
+inline double rp_gps::vertical_accuracy_meters() const {
+  // @@protoc_insertion_point(field_get:rf_phreaker.protobuf.rp_gps.vertical_accuracy_meters)
+  return vertical_accuracy_meters_;
+}
+inline void rp_gps::set_vertical_accuracy_meters(double value) {
+  
+  vertical_accuracy_meters_ = value;
+  // @@protoc_insertion_point(field_set:rf_phreaker.protobuf.rp_gps.vertical_accuracy_meters)
+}
+
+// optional int64 raw_status = 14;
 inline void rp_gps::clear_raw_status() {
   raw_status_ = GOOGLE_LONGLONG(0);
 }
@@ -7665,6 +7943,36 @@ inline void rp_gps::set_raw_status(::google::protobuf::int64 value) {
   
   raw_status_ = value;
   // @@protoc_insertion_point(field_set:rf_phreaker.protobuf.rp_gps.raw_status)
+}
+
+// repeated .rf_phreaker.protobuf.rp_satellite satellites = 15;
+inline int rp_gps::satellites_size() const {
+  return satellites_.size();
+}
+inline void rp_gps::clear_satellites() {
+  satellites_.Clear();
+}
+inline const ::rf_phreaker::protobuf::rp_satellite& rp_gps::satellites(int index) const {
+  // @@protoc_insertion_point(field_get:rf_phreaker.protobuf.rp_gps.satellites)
+  return satellites_.Get(index);
+}
+inline ::rf_phreaker::protobuf::rp_satellite* rp_gps::mutable_satellites(int index) {
+  // @@protoc_insertion_point(field_mutable:rf_phreaker.protobuf.rp_gps.satellites)
+  return satellites_.Mutable(index);
+}
+inline ::rf_phreaker::protobuf::rp_satellite* rp_gps::add_satellites() {
+  // @@protoc_insertion_point(field_add:rf_phreaker.protobuf.rp_gps.satellites)
+  return satellites_.Add();
+}
+inline ::google::protobuf::RepeatedPtrField< ::rf_phreaker::protobuf::rp_satellite >*
+rp_gps::mutable_satellites() {
+  // @@protoc_insertion_point(field_mutable_list:rf_phreaker.protobuf.rp_gps.satellites)
+  return &satellites_;
+}
+inline const ::google::protobuf::RepeatedPtrField< ::rf_phreaker::protobuf::rp_satellite >&
+rp_gps::satellites() const {
+  // @@protoc_insertion_point(field_list:rf_phreaker.protobuf.rp_gps.satellites)
+  return satellites_;
 }
 
 // -------------------------------------------------------------------
@@ -12633,6 +12941,8 @@ rp_raw_data::mutable_samples() {
 }
 
 #endif  // !PROTOBUF_INLINE_NOT_IN_HEADERS
+// -------------------------------------------------------------------
+
 // -------------------------------------------------------------------
 
 // -------------------------------------------------------------------

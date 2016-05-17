@@ -30,8 +30,20 @@ namespace rf_phreaker {
 		int32_t tracking_satellites_;
 		double latitude_;
 		double longitude_;
-		int32_t speed_;
+		double altitude_;
+		double angle_;
+		double speed_;
+		double dilution_of_precision_;
+		double horizontal_accuracy_meters_;
+		double vertical_accuracy_meters_;
 		int64_t raw_status_;
+		struct satellite {
+			int32_t prn_;
+			double snr_;
+			double elevation_;
+			double azimuth_;
+		};
+		std::vector<satellite> satellites_;
 	};
 
 

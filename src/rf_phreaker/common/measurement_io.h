@@ -83,9 +83,20 @@ inline std::ostream& header(std::ostream &os, const gps &t) {
 		<< "tracking_satellites" << delimiter
 		<< "latitude" << delimiter
 		<< "longitude" << delimiter
+		<< "altitude" << delimiter
+		<< "angle_degrees" << delimiter
 		<< "speed" << delimiter
-		<< "raw_status";
-	return os;
+		<< "dilution_of_precision" << delimiter
+		<< "horizontal_accuracy_meters" << delimiter
+		<< "vertical_accuracy_meters" << delimiter
+		<< "raw_status" << delimiter
+		<< "num_satellite_info" << delimiter;
+		for(auto i = 0; i < 32; ++i)
+			os << "sat_prn_" << i << delimiter
+			<< "sat_snr_" << i << delimiter
+			<< "sat_elevation_" << i << delimiter
+			<< "sat_azimuth_" << i;
+		return os;
 }
 
 inline std::ostream& operator<<(std::ostream &os, const gps &t) {
@@ -96,8 +107,20 @@ inline std::ostream& operator<<(std::ostream &os, const gps &t) {
 		<< t.tracking_satellites_ << delimiter
 		<< t.latitude_ << delimiter
 		<< t.longitude_ << delimiter
+		<< t.altitude_ << delimiter
+		<< t.angle_ << delimiter
 		<< t.speed_ << delimiter
-		<< std::setw(4) << std::setfill('0') << std::hex << t.raw_status_ << std::dec;
+		<< t.dilution_of_precision_ << delimiter
+		<< t.horizontal_accuracy_meters_ << delimiter
+		<< t.vertical_accuracy_meters_ << delimiter
+		<< std::setw(4) << std::setfill('0') << std::hex << t.raw_status_ << std::dec << delimiter
+		<< t.satellites_.size();
+	
+	for(auto &i : t.satellites_)
+		os << delimiter << i.prn_ << delimiter
+			<< i.snr_ << delimiter
+			<< i.elevation_ << delimiter
+			<< i.azimuth_;
 	return os;
 }
 
