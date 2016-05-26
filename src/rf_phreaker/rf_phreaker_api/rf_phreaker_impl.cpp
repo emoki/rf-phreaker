@@ -785,6 +785,9 @@ rp_status rf_phreaker_impl::start_collection(rp_device *device, const rp_collect
 				return status;
 		}
 
+		if(containers_.empty())
+			throw rf_phreaker_api_error("rp_collection_info is empty", RP_STATUS_INVALID_PARAMETER);
+
 		processing_graph_->start(&device->async_, data_output_.get(), containers_, config_);
 	}
 	catch(const rf_phreaker_error &err) {
