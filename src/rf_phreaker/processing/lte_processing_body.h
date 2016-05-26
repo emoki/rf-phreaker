@@ -6,6 +6,7 @@
 #include "rf_phreaker/common/settings.h"
 #include "rf_phreaker/common/log.h"
 #include "rf_phreaker/common/correlation_utility.h"
+#include "rf_phreaker/common/frequency_bin_calculator.h"
 #include "tbb/flow_graph.h"
 
 namespace rf_phreaker { namespace processing {
@@ -14,10 +15,10 @@ namespace rf_phreaker { namespace processing {
 class lte_processing_settings
 {
 public:
-	lte_processing_settings(const collection_settings &s, const layer_3_settings &l, const lte_general_settings &g)
+	lte_processing_settings(const collection_settings &s, const layer_3_settings &l, const lte_general_settings &g, bool have_common_sweep_output)
 		: layer_3_(l)
 		, general_(g)
-	{
+		, have_common_sweep_output_(have_common_sweep_output) {
 		lte_config_.sampling_rate((int)s.sampling_rate_);
 		lte_config_.clock_rate((int)s.sampling_rate_);
 		lte_config_.max_signal_length(convert_to_samples_and_mod_1024(s.collection_time_, s.sampling_rate_));
@@ -27,6 +28,7 @@ public:
 	lte_general_settings general_;
 	lte_config lte_config_;
 	layer_3_settings layer_3_;
+	bool have_common_sweep_output_;
 };
 
 class lte_processing_body
@@ -104,7 +106,8 @@ public:
 			int data_element = 0;
 			for(auto &data : info.processed_data_) {
 				if(is_valid_measurement(data)) {
-					if((!tracker_.is_fully_decoded(freq, data) && (data.sync_quality > config_.layer_3_.decode_threshold_ || tracker_.in_history(freq, data)))) {
+					if((!tracker_.is_fully_decoded(freq, data) && (data.sync_quality > config_.layer_3_.decode_threshold_ 
+						|| (config_.layer_3_.should_prioritize_layer_3_ && tracker_.in_history(freq, data))))) {
 						int status = analysis_.decode_layer_3(meas, info.processed_data_, calculate_num_half_frames(meas.time_ns()), data_element);
 						if(status != 0)
 							throw lte_analysis_error("Error decoding lte layer 3.");
@@ -260,7 +263,7 @@ public:
 		power_info_group rms_group;
 
 		int status = analysis_.cell_search_sweep(meas, group, calculate_num_half_frames(meas.time_ns() > milli_to_nano(50) ? milli_to_nano(50) : meas.time_ns()), 
-			low_intermediate_freq_, high_intermediate_freq_, khz(100), &rms_group);
+			low_intermediate_freq_, high_intermediate_freq_, khz(100), /*config_.have_common_sweep_output_ ? nullptr :*/ &rms_group);
 		if(status != 0)
 			throw lte_analysis_error("Error processing lte.");
 	
@@ -301,10 +304,16 @@ public:
 		// Remove any measurements that are lower than are confidence threshold.  Note we should always keep measurements
 		// that have a PBCH decoded.
 		auto hf = calculate_num_half_frames(meas.time_ns() > milli_to_nano(50) ? milli_to_nano(50) : meas.time_ns());
-		double sensitivity = correlation_utility::calculate_correlation_ecio_threshold(12, 1, hf, 128);
+		double sensitivity = correlation_utility::calculate_correlation_ecio_threshold(config_.general_.psch_margin_, 1, hf, 128);
 		group.erase(std::remove_if(group.begin(), group.end(), [&](const lte_measurement& m) {
 			return m.sync_quality < sensitivity && !this->is_valid_measurement(m);
 		}), group.end());
+
+		//if(config_.have_common_sweep_output_) {
+		//	auto length = meas.get_iq().length() > (1 << 16) ? (1 << 16) : meas.get_iq().length();
+		//	rms_group = freq_bin_calculator_.calculate_power_info_group(meas, mhz(2), khz(100), low_intermediate_freq_, high_intermediate_freq_,
+		//		rf_phreaker::largest_pow_of_2(length));
+		//}
 
 		LOG(LCOLLECTION) << log_measurements(meas, group);
 
@@ -329,6 +338,7 @@ public:
 protected:
 	frequency_type low_intermediate_freq_;
 	frequency_type high_intermediate_freq_;
+	frequency_bin_calculator freq_bin_calculator_;
 };
 
 

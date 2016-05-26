@@ -160,6 +160,8 @@ void rf_phreaker_impl::read_settings() {
 	settings_io io("rf_phreaker_api", qt_utility::app_name());
 
 	io.read(config_);
+	config_.offload_umts_full_scan_ = true;
+	config_.have_common_sweep_output_ = false;
 }
 
 rp_status rf_phreaker_impl::clean_up() {
@@ -575,16 +577,25 @@ rp_status rf_phreaker_impl::add_sweep_operating_band(rp_device *device, rp_opera
 
 		if(band >= FIRST_UMTS_OPERATING_BAND && band <= LAST_UMTS_OPERATING_BAND) {
 			it = add_sweep(UMTS_SWEEP, UMTS_LAYER_3_DECODE);
-			frequency_range_creation::adjust_umts_sweep_collection_info(range, *it);
+			auto sweep = UMTS_SWEEP;
+			frequency_range_creation::adjust_umts_sweep_collection_info_with_adjustment(range, *it,
+				find_collection_settings(sweep, config_).low_intermediate_frequency_,
+				find_collection_settings(sweep, config_).high_intermediate_frequency_,
+				find_collection_settings(sweep, config_).step_size_);
 		}
 		else if(band >= FIRST_LTE_OPERATING_BAND && band <= LAST_LTE_OPERATING_BAND) {
 			it = add_sweep(LTE_SWEEP, LTE_LAYER_3_DECODE);
-			frequency_range_creation::adjust_lte_sweep_collection_info(range, *it);
+			auto sweep = LTE_SWEEP;
+			frequency_range_creation::adjust_lte_sweep_collection_info_with_adjustment(range, *it,
+				find_collection_settings(sweep, config_).low_intermediate_frequency_,
+				find_collection_settings(sweep, config_).high_intermediate_frequency_,
+				find_collection_settings(sweep, config_).step_size_);
 		}
 		else if(band >= FIRST_GSM_OPERATING_BAND && band <= LAST_GSM_OPERATING_BAND) {
 			throw rf_phreaker_api_error("GSM not supported.");
+			auto sweep = GSM_SWEEP;
 			it = add_sweep(GSM_SWEEP, GSM_LAYER_3_DECODE);
-			//frequency_range_creation::adjust_gsm_sweep_collection_info(range, *it);
+			//frequency_range_creation::adjust_gsm_sweep_collection_info_with_adjustmenet(range, *it);
 		}
 
 		// We sort the sweep items to make sure they are in ascending order.  This makes the graphs look pretty in the output.
@@ -677,13 +688,19 @@ void rf_phreaker_impl::remove_sweep(operating_band band, specifier sweep) {
 		collection_info_container tmp;
 		switch(sweep) {
 		case UMTS_SWEEP:
-			frequency_range_creation::adjust_umts_sweep_collection_info(range, tmp);
+			frequency_range_creation::adjust_umts_sweep_collection_info_with_adjustment(range, tmp,
+				find_collection_settings(sweep, config_).low_intermediate_frequency_,
+				find_collection_settings(sweep, config_).high_intermediate_frequency_,
+				find_collection_settings(sweep, config_).step_size_);
 			break;
 		case LTE_SWEEP:
-			frequency_range_creation::adjust_lte_sweep_collection_info(range, tmp);
+			frequency_range_creation::adjust_lte_sweep_collection_info_with_adjustment(range, tmp, 
+				find_collection_settings(sweep, config_).low_intermediate_frequency_, 
+				find_collection_settings(sweep, config_).high_intermediate_frequency_, 
+				find_collection_settings(sweep, config_).step_size_);
 			break;
 		case GSM_SWEEP:
-			frequency_range_creation::adjust_gsm_sweep_collection_info(range, tmp);
+			frequency_range_creation::adjust_gsm_sweep_collection_info_with_adjustment(range, tmp);
 			break;
 		default:
 			;

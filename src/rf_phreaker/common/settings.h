@@ -177,6 +177,8 @@ public:
 	bool simultaneous_collection_;
 	int eeprom_update_period_for_1pps_calibration_minutes_;
 	scheduling_algorithm_type scheduling_algorithm_;
+	bool offload_umts_full_scan_;
+	bool have_common_sweep_output_;
 
 	blade_settings blade_settings_;
 

@@ -120,50 +120,50 @@ void processing_graph::start(scanner_controller_interface *sc, data_output_async
 			auto limiter = std::make_shared<limiter_node>(*graph_, max_limit);
 
 			auto gsm_sweep_cell_search = std::make_shared<gsm_cell_search_node>(*graph_, tbb::flow::serial, gsm_processing_body(
-				gsm_cell_search_settings(config.gsm_sweep_collection_, config.gsm_sweep_general_, config.gsm_layer_3_decode_)));
+				gsm_cell_search_settings(config.gsm_sweep_collection_, config.gsm_sweep_general_, config.gsm_layer_3_decode_, config.have_common_sweep_output_)));
 			auto gsm_sweep_output_feedback = std::make_shared<gsm_output_and_feedback_node>(*graph_, tbb::flow::serial, gsm_sweep_output_and_feedback_body(out));
 			auto gsm_layer_3_cell_search = std::make_shared<gsm_cell_search_node>(*graph_, tbb::flow::serial, gsm_processing_body(
-				gsm_cell_search_settings(config.gsm_layer_3_collection_, config.gsm_layer_3_general_, config.gsm_layer_3_decode_)));
+				gsm_cell_search_settings(config.gsm_layer_3_collection_, config.gsm_layer_3_general_, config.gsm_layer_3_decode_, false)));
 			auto gsm_layer_3_decode = std::make_shared<gsm_layer_3_decode_node>(*graph_, tbb::flow::serial, gsm_processing_body(
-				gsm_cell_search_settings(config.gsm_layer_3_collection_, config.gsm_layer_3_general_, config.gsm_layer_3_decode_)));
+				gsm_cell_search_settings(config.gsm_layer_3_collection_, config.gsm_layer_3_general_, config.gsm_layer_3_decode_, false)));
 			auto gsm_layer_3_output_feedback = std::make_shared<gsm_output_and_feedback_node>(*graph_, tbb::flow::serial, gsm_layer_3_output_and_feedback_body(out));
 
 			std::shared_ptr<umts_cell_search_node> umts_sweep_cell_search;
 			std::shared_ptr<umts_output_and_feedback_node> umts_sweep_output_feedback;
 			if(config.umts_sweep_collection_.low_intermediate_frequency_ || config.umts_sweep_collection_.high_intermediate_frequency_) {
 				umts_sweep_cell_search = std::make_shared<umts_cell_search_node>(*graph_, tbb::flow::serial, umts_sweep_processing_body(
-					umts_cell_search_settings(config.umts_sweep_collection_, config.umts_layer_3_decode_, config.umts_sweep_general_, 5), sc,
+					umts_cell_search_settings(config.umts_sweep_collection_, config.umts_layer_3_decode_, config.umts_sweep_general_, 5, config.have_common_sweep_output_, false), sc,
 					config.umts_sweep_collection_.low_intermediate_frequency_, config.umts_sweep_collection_.high_intermediate_frequency_));
 				umts_sweep_output_feedback = std::make_shared<umts_output_and_feedback_node>(*graph_, tbb::flow::serial, umts_sweep_if_output_and_feedback_body(out));
 			}
 			else {
 				umts_sweep_cell_search = std::make_shared<umts_cell_search_node>(*graph_, tbb::flow::serial, umts_processing_body(
-					umts_cell_search_settings(config.umts_sweep_collection_, config.umts_layer_3_decode_, config.umts_sweep_general_, 5), sc));
+					umts_cell_search_settings(config.umts_sweep_collection_, config.umts_layer_3_decode_, config.umts_sweep_general_, 5, false, false), sc));
 				umts_sweep_output_feedback = std::make_shared<umts_output_and_feedback_node>(*graph_, tbb::flow::serial, umts_sweep_output_and_feedback_body(out));
 			}
 			auto umts_layer_3_cell_search = std::make_shared<umts_cell_search_node>(*graph_, tbb::flow::serial, umts_processing_body(
-				umts_cell_search_settings(config.umts_layer_3_collection_, config.umts_layer_3_decode_, config.umts_layer_3_general_, 100), sc, &is_cancelled_));
+				umts_cell_search_settings(config.umts_layer_3_collection_, config.umts_layer_3_decode_, config.umts_layer_3_general_, 100, false, config.offload_umts_full_scan_), sc, &is_cancelled_));
 			auto umts_layer_3_decode = std::make_shared<umts_layer_3_decode_node>(*graph_, tbb::flow::serial, umts_processing_body(
-				umts_cell_search_settings(config.umts_layer_3_collection_, config.umts_layer_3_decode_, config.umts_layer_3_general_, 100), sc));
+				umts_cell_search_settings(config.umts_layer_3_collection_, config.umts_layer_3_decode_, config.umts_layer_3_general_, 100, false, false), sc));
 			auto umts_layer_3_output_feedback = std::make_shared<umts_output_and_feedback_node>(*graph_, tbb::flow::serial, umts_layer_3_output_and_feedback_body(out));
 
 			std::shared_ptr<lte_cell_search_node> lte_sweep_cell_search;
 			std::shared_ptr<lte_output_and_feedback_node> lte_sweep_output_feedback;
 			if(config.lte_sweep_collection_.low_intermediate_frequency_ || config.lte_sweep_collection_.high_intermediate_frequency_) {
 				lte_sweep_cell_search = std::make_shared<lte_cell_search_node>(*graph_, tbb::flow::serial, lte_sweep_processing_body(
-					lte_processing_settings(config.lte_sweep_collection_, config.lte_layer_3_decode_, config.lte_sweep_general_), 
+					lte_processing_settings(config.lte_sweep_collection_, config.lte_layer_3_decode_, config.lte_sweep_general_, config.have_common_sweep_output_),
 					config.lte_sweep_collection_.low_intermediate_frequency_, config.lte_sweep_collection_.high_intermediate_frequency_));
 				lte_sweep_output_feedback = std::make_shared<lte_output_and_feedback_node>(*graph_, tbb::flow::serial, lte_sweep_if_output_and_feedback_body(out));
 			}
 			else {
 				lte_sweep_cell_search = std::make_shared<lte_cell_search_node>(*graph_, tbb::flow::serial, lte_processing_body(
-					lte_processing_settings(config.lte_sweep_collection_, config.lte_layer_3_decode_, config.lte_sweep_general_)));
+					lte_processing_settings(config.lte_sweep_collection_, config.lte_layer_3_decode_, config.lte_sweep_general_, false)));
 				lte_sweep_output_feedback = std::make_shared<lte_output_and_feedback_node>(*graph_, tbb::flow::serial, lte_sweep_output_and_feedback_body(out));
 			}
 			auto lte_layer_3_cell_search = std::make_shared<lte_cell_search_node>(*graph_, tbb::flow::serial, lte_processing_body(
-				lte_processing_settings(config.lte_layer_3_collection_, config.lte_layer_3_decode_, config.lte_layer_3_general_)));
+				lte_processing_settings(config.lte_layer_3_collection_, config.lte_layer_3_decode_, config.lte_layer_3_general_, false)));
 			auto lte_layer_3_decode = std::make_shared<lte_layer_3_decode_node>(*graph_, tbb::flow::serial, lte_processing_body(
-				lte_processing_settings(config.lte_layer_3_collection_, config.lte_layer_3_decode_, config.lte_layer_3_general_), &is_cancelled_));
+				lte_processing_settings(config.lte_layer_3_collection_, config.lte_layer_3_decode_, config.lte_layer_3_general_, false), &is_cancelled_));
 			auto lte_layer_3_output_feedback = std::make_shared<lte_output_and_feedback_node>(*graph_, tbb::flow::serial, lte_layer_3_output_and_feedback_body(out, config.lte_layer_3_decode_.minimum_collection_round_));
 
 			auto collection_queue = std::make_shared<queue_node>(*graph_);

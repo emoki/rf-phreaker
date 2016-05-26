@@ -191,6 +191,8 @@ void cappeen_impl::read_settings(bool perform_quick_scan)
 	config_.umts_layer_3_decode_.minimum_decode_count_ = config_.umts_layer_3_decode_.minimum_collection_round_;
 	config_.lte_layer_3_decode_.should_prioritize_layer_3_ = true;
 	config_.lte_layer_3_decode_.minimum_decode_count_ = config_.lte_layer_3_decode_.minimum_collection_round_;
+	config_.offload_umts_full_scan_ = false;
+	config_.have_common_sweep_output_ = false;
 }
 
 long cappeen_impl::clean_up()
