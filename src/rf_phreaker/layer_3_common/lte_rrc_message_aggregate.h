@@ -324,6 +324,24 @@ public:
 		}
 	}
 
+	virtual void update_info(const lte_rrc_message_aggregate &a) {
+		bcch_bch_message_aggregate::update_info(a);
+		if(sib1_.is_decoded())
+			sib1_ = a.sib1_;
+		if(sib3_.is_decoded())
+			sib3_ = a.sib3_;
+		if(sib4_.is_decoded())
+			sib4_ = a.sib4_;
+		if(sib5_.is_decoded())
+			sib5_ = a.sib5_;
+		if(sib6_.is_decoded())
+			sib6_ = a.sib6_;
+		if(sib7_.is_decoded())
+			sib7_ = a.sib7_;
+		if(sib8_.is_decoded())
+			sib8_ = a.sib8_;
+	}
+	
 	lte_sib1_type sib1_;
 	lte_sib3_type sib3_;
 	lte_sib4_type sib4_;
