@@ -1,0 +1,53 @@
+<!DOCTYPE RCC>
+<RCC version="1.0">
+
+<qresource>
+	<file>BarChart.qml</file>
+	<file>ChannelBarLine.qml</file>
+	<file>ChannelBarLines.qml</file>
+	<file>ChannelList.qml</file>
+	<file>ChannelSweepLine.qml</file>
+	<file>ChannelSweepLines.qml</file>
+	<file>CircularButton.qml</file>
+	<file>CustomFlatButtonStyle.qml</file>
+	<file>DataAnalysisLabel.qml</file>
+	<file>DataAnalysisPage.qml</file>
+	<file>DataOverviewPage.qml</file>
+	<file>DataWorksheet.qml</file>
+	<file>DevicePage.qml</file>
+	<file>ErrorWindow.qml</file>
+	<file>MapPage.qml</file>
+	<file>MarblePlacemarkList.qml</file>
+	<file>OverviewChart.qml</file>
+	<file>PositionButton.qml</file>
+	<file>PositionMarker.qml</file>
+	<file>ScanConfigurationPage.qml</file>
+	<file>ScannerPage.qml</file>
+	<file>SelectScannerWindow.qml</file>
+	<file>SideBarLabel.qml</file>
+	<file>StateMachine.qml</file>
+	<file>SuggestionTextField.qml</file>
+	<file>SuggestionView.qml</file>
+	<file>SweepLine.qml</file>
+	<file>SweepLines.qml</file>
+	<file>WorkbenchPage.qml</file>
+	<file>icons\action_help.svg</file>
+	<file>icons\action_highlight_off.svg</file>
+	<file>icons\action_settings.svg</file>
+	<file>icons\alert_error.svg</file>
+	<file>icons\alert_warning.svg</file>
+	<file>icons\device_gps_fixed.svg</file>
+	<file>icons\device_gps_not_fixed.svg</file>
+	<file>icons\device_gps_off.svg</file>
+	<file>icons\device_usb.svg</file>
+	<file>icons\editor_insert_chart.svg</file>
+	<file>icons\hardware_developer_board.svg</file>
+	<file>icons\maps_map.svg</file>
+	<file>icons\navigation_arrow_drop_up.svg</file>
+	<file>icons\scanning_idle.png</file>
+	<file>icons\scanning_sprite.png</file>
+	<file>main.qml</file>
+	<file>qtlabscontrols.conf</file>
+</qresource>
+
+</RCC>
