@@ -38,6 +38,7 @@ public:
 		populate(s, str, pb_.get());
 	}
 	static void populate(const ::rp_status s, const std::string& str, rp_message *pb) {
+		pb->Clear();
 		pb->set_status((rp_status)s);
 		pb->set_msg(str.c_str());
 	}
@@ -53,6 +54,7 @@ public:
 		populate(str, pb_.get());
 	}
 	static void populate(const std::string& str, rp_log *pb) {
+		pb->Clear();
 		pb->set_msg(str.c_str());
 	}
 };
@@ -138,6 +140,7 @@ public:
 		}
 	}
 	static void populate(const gps &t, rp_gps *pb) {
+		pb->Clear();
 		pb->set_serial(t.serial_);
 		pb->set_lock(t.lock_);
 		pb->set_coordinated_universal_time(t.coordinated_universal_time_);
@@ -389,6 +392,7 @@ public:
 	}
 
 	static void populate(const gsm_data &t, rp_gsm *pb) {
+		pb->Clear();
 		base_pb::populate(t, pb->mutable_base());
 		pb->set_arfcn(t.arfcn_);
 		pb->set_operating_band((rp_operating_band)t.operating_band_);
@@ -607,6 +611,7 @@ public:
 	}
 
 	static void populate(const umts_data &t, rp_wcdma *pb) {
+		pb->Clear();
 		base_pb::populate(t, pb->mutable_base());
 		pb->set_uarfcn(t.uarfcn_);
 		pb->set_operating_band((rp_operating_band)t.operating_band_);
@@ -869,6 +874,7 @@ public:
 	}
 
 	static void populate(const lte_data &t, rp_lte *pb) {
+		pb->Clear();
 		base_pb::populate(t, pb->mutable_base());
 		pb->set_earfcn(t.earfcn_);
 		pb->set_operating_band((rp_operating_band)t.operating_band_);
