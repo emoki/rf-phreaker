@@ -119,6 +119,7 @@ public:
 	int full_scan_interval_;
 	double pbch_decoding_threshold_;
 	double minimum_relative_peak_threshold_;
+	double psch_margin_;
 };
 
 class gsm_general_settings {

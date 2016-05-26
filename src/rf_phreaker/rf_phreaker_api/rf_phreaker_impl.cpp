@@ -160,6 +160,8 @@ void rf_phreaker_impl::read_settings() {
 	settings_io io("rf_phreaker_api", qt_utility::app_name());
 
 	io.read(config_);
+	config_.lte_sweep_general_.psch_margin_ = 13;
+	config_.lte_layer_3_general_.psch_margin_ = 13; // not used
 	config_.offload_umts_full_scan_ = true;
 	config_.have_common_sweep_output_ = false;
 }
