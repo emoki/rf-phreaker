@@ -404,11 +404,13 @@ void MarbleDefaultInputHandler::handleMouseButtonPress(QMouseEvent *event)
 {
     if (event->button() == Qt::LeftButton )
     {
+	   emit mouseEventDoubleClickOrWheelSeen();
        handleLeftMouseButtonPress(event);
     }
 
     if ( event->button() == Qt::MidButton )
     {
+	   emit mouseEventDoubleClickOrWheelSeen();
        handleMiddleMouseButtonPress(event);
     }
 

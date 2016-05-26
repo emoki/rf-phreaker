@@ -94,6 +94,8 @@ class MARBLE_EXPORT MarbleInputHandler  : public QObject
      */
     void mouseClickGeoPosition( qreal, qreal, GeoDataCoordinates::Unit );
 
+	void mouseEventDoubleClickOrWheelSeen();
+
  protected Q_SLOTS:
     void restoreViewContext();
 
