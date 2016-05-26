@@ -1,7 +1,34 @@
 #include <iostream>
 #include <functional>
+#include <vector>
+#include <atomic>
 #include "rf_phreaker/rf_phreaker_api/rf_phreaker_api.h"
 #include "rf_phreaker/protobuf_specific/rf_phreaker.pb.h"
+
+class api_helper {
+public:
+	static api_helper& instance() {
+		static api_helper helper;
+		return helper;
+	}
+	void wait(std::chrono::seconds secs) {
+		device_has_updated_ = false;
+		error_has_occurred_ = false;
+		auto start = std::chrono::high_resolution_clock::now();
+		while(std::chrono::high_resolution_clock::now() - start < secs) {
+			std::this_thread::sleep_for(std::chrono::milliseconds(500));
+			if(device_has_updated_ || error_has_occurred_)
+				break;
+		}
+	}
+	void set_device_has_updated(bool b) { device_has_updated_ = b; }
+	void set_error_has_occurred(bool b) { error_has_occurred_ = b; }
+private:
+	api_helper() {};
+	std::atomic_bool device_has_updated_;
+	std::atomic_bool error_has_occurred_;
+};
+
 
 void RP_CALLCONV rp_update(const int8_t *bytes, int32_t size) {
 	rf_phreaker::protobuf::rp_update u;
@@ -14,9 +41,15 @@ void RP_CALLCONV rp_update(const int8_t *bytes, int32_t size) {
 		break;
 	case rf_phreaker::protobuf::rp_update::UpdateCase::kDevice:
 		std::cout << u.device().serial() << "\t" << u.device().device_communication() << std::endl;
+		api_helper::instance().set_device_has_updated(true);
 		break;
 	case rf_phreaker::protobuf::rp_update::UpdateCase::kGps:
 		std::cout << u.gps().lock() << "\t" << u.gps().latitude() << "\t" << u.gps().longitude() << "\t" << std::endl;
+		break;
+	case rf_phreaker::protobuf::rp_update::UpdateCase::kMsg:
+		std::cout << u.msg().msg() << std::endl;
+		if(u.msg().status() < 0)
+			api_helper::instance().set_error_has_occurred(true);
 		break;
 	}
 }
@@ -53,18 +86,21 @@ void RP_CALLCONV rp_raw_data_update(const rp_raw_data, int num_raw_data) {}
 class api_output {
 public:
 	api_output() {
+		memset(&cbs_, 0, sizeof(cbs_));
 		cbs_.rp_update = &rp_update;
-		cbs_.rp_log_update = &rp_log_update;
-		cbs_.rp_message_update = &rp_message_update;
-		cbs_.rp_device_info_update = &rp_device_info_update;
-		cbs_.rp_gps_update = &rp_gps_update;
-		cbs_.rp_gsm_full_scan_update = &rp_gsm_update;
-		cbs_.rp_wcdma_full_scan_update = &rp_wcdma_update;
-		cbs_.rp_lte_full_scan_update = &rp_lte_update;
-		cbs_.rp_gsm_sweep_update = &rp_gsm_sweep_update;
-		cbs_.rp_wcdma_sweep_update = &rp_wcdma_sweep_update;
-		cbs_.rp_lte_sweep_update = &rp_lte_sweep_update;
-		cbs_.rp_raw_data_update = &rp_raw_data_update;
+		//cbs_.rp_log_update = &rp_log_update;
+		//cbs_.rp_message_update = &rp_message_update;
+		//cbs_.rp_device_info_update = &rp_device_info_update;
+		//cbs_.rp_gps_update = &rp_gps_update;
+		//cbs_.rp_gsm_full_scan_update = &rp_gsm_update;
+		//cbs_.rp_wcdma_full_scan_update = &rp_wcdma_update;
+		//cbs_.rp_lte_full_scan_update = &rp_lte_update;
+		//cbs_.rp_gsm_sweep_update = &rp_gsm_sweep_update;
+		//cbs_.rp_wcdma_sweep_update = &rp_wcdma_sweep_update;
+		//cbs_.rp_lte_sweep_update = &rp_lte_sweep_update;
+		//cbs_.rp_raw_data_update = &rp_raw_data_update;
 	}
+	
+
 	rp_callbacks cbs_;
 };	
