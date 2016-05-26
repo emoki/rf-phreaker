@@ -633,6 +633,11 @@ void GeoDataFeaturePrivate::initializeDefaultStyles()
         = GeoDataStyle::Ptr(new GeoDataStyle( MarbleDirs::path( "bitmaps/satellite.png" ),
               QFont( defaultFamily, defaultSize, 50, false ), s_defaultLabelColor ));
 
+	s_defaultStyle[GeoDataFeature::Styled]
+		= GeoDataStyle::Ptr(new GeoDataStyle(MarbleDirs::path("bitmaps/default_location.png"),
+		QFont(defaultFamily, defaultSize, 50, false), s_defaultLabelColor));
+
+
     s_defaultFont = QFont( QStringLiteral("Sans Serif") );
 
     QFont tmp;
@@ -944,8 +949,9 @@ QString GeoDataFeature::visualCategoryName(GeoDataFeature::GeoDataVisualCategory
         s_visualCategoryNames[RailwayMonorail] = "RailwayMonorail";
         s_visualCategoryNames[RailwayFunicular] = "RailwayFunicular";
         s_visualCategoryNames[PowerTower] = "PowerTower";
-        s_visualCategoryNames[Satellite] = "Satellite";
-        s_visualCategoryNames[LastIndex] = "LastIndex";
+		s_visualCategoryNames[Satellite] = "Satellite";
+		s_visualCategoryNames[Styled] = "Styled";
+		s_visualCategoryNames[LastIndex] = "LastIndex";
     }
 
     Q_ASSERT(s_visualCategoryNames.contains(category));

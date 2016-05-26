@@ -30,8 +30,9 @@ GeoLineStringGraphicsItem::GeoLineStringGraphicsItem( const GeoDataFeature *feat
     QStringList paintLayers;
     paintLayers << QString("LineString/%1/outline").arg(category);
     paintLayers << QString("LineString/%1/inline").arg(category);
-    paintLayers << QString("LineString/%1/label").arg(category);
-    setPaintLayers(paintLayers);
+	paintLayers << QString("LineString/%1/label").arg(category);
+	paintLayers << QString("LineString/%1/Styled").arg(category);
+	setPaintLayers(paintLayers);
 }
 
 
@@ -51,9 +52,14 @@ void GeoLineStringGraphicsItem::paint(GeoPainter* painter, const ViewportParams*
         paintOutline(painter, viewport);
     } else if (layer.endsWith("/label")) {
         paintLabel(painter, viewport);
-    } else if (layer.endsWith("/inline")) {
-        paintInline(painter, viewport);
-    } else {
+	}
+	else if(layer.endsWith("/inline")) {
+		paintInline(painter, viewport);
+	}
+	else if(layer.endsWith("/Styled")) {
+		paintInline(painter, viewport);
+	}
+	else {
         painter->drawPolyline(*m_lineString);
     }
 }

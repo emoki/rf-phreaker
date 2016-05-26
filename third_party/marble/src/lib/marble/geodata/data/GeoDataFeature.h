@@ -399,6 +399,11 @@ class GEODATA_EXPORT GeoDataFeature : public GeoDataObject
 
         Satellite,
 
+		// This is used to apply styles to (only?) track items that would otherwise be default 
+		// which due to commit ae7ac56e99f0 the GeoLineStringGraphicsItem ignores it's 
+		// style.
+		Styled,
+
         // Important: Make sure that this is always the last
         // item and just use it to specify the array size
         LastIndex
