@@ -9,6 +9,25 @@ namespace rf_phreaker {
 class umts_utilities
 {
 public:
+	static void consolidate_measurements(umts_measurements &group) {
+		std::sort(group.begin(), group.end(), [=](const umts_measurement &a, const umts_measurement &b) {
+			if(a.cpich_ == b.cpich_)
+				return a.ecio_ > b.ecio_;
+			else
+				return a.cpich_ < b.cpich_;
+		});
+
+		group.erase(std::unique(group.begin(), group.end(), [=](const umts_measurement &a, const umts_measurement &b) {
+			return a.cpich_ == b.cpich_;
+		}), group.end());
+	}
+
+	static void update_time(const std::chrono::milliseconds &origin_time, umts_measurements &group) {
+		for(auto &i : group) {
+			i.time_ = origin_time.count();
+		}
+	}
+
 	static double calculate_correlation_ecio_threshold(double margin, double num_slots_coherently_combined, double num_slots_incoherently_combined, double number_chips_in_slot) {
 		// Margin is usually somewhere between 11 and 12.
 		double log_tmp1 = log10((double)num_slots_coherently_combined) / log10(2.0);

@@ -19,6 +19,8 @@ namespace rf_phreaker {
 class umts_psch_with_brute_force 
 {
 public:
+	umts_psch_with_brute_force(const umts_psch_with_brute_force& a);
+
 	umts_psch_with_brute_force(const umts_config &config, const /*cpich_table_container &*/Ipp32fc* cpich_table, std::atomic_bool *is_cancelled = nullptr);
 	
 	umts_measurements process(const ipp_32fc_array &signal, const umts_measurements &tracking_measurements, uint32_t num_cpich_chips, umts_scan_type scanning_method = full_scan_type);

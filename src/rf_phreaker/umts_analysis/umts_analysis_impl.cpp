@@ -1,6 +1,5 @@
 #include "rf_phreaker/umts_analysis/umts_analysis_impl.h"
 #include <algorithm>
-#include "rf_phreaker/umts_analysis/umts_utilities.h"
 #include "rf_phreaker/common/delegate_sink.h"
 
 namespace rf_phreaker {
@@ -14,7 +13,7 @@ umts_analysis_impl::umts_analysis_impl(const umts_config &config, std::atomic_bo
 	, is_cancelled_(is_cancelled)
 {
 	config_.sampling_rate(umts_cell_search_sampling_rate);
-	brute_force_.reset(new umts_psch_with_brute_force(config_, brute_force_cpich_table_ptr()->cpich_table_ptr(), is_cancelled));
+	brute_force_ = std::make_unique<umts_psch_with_brute_force>(config_, brute_force_cpich_table_ptr()->cpich_table_ptr(), is_cancelled);
 }
 
 umts_analysis_impl::~umts_analysis_impl()
@@ -61,8 +60,8 @@ int umts_analysis_impl::cell_search_sweep(const rf_phreaker::raw_signal &raw_sig
 	return status;
 }
 
-
-int umts_analysis_impl::cell_search(const rf_phreaker::raw_signal &raw_signal, umts_measurements &umts_meas, double sensitivity, umts_scan_type scan_type, double error, double *rms)
+int umts_analysis_impl::cell_search(const rf_phreaker::raw_signal &raw_signal, umts_measurements &umts_meas, double sensitivity, umts_scan_type scan_type, 
+	double error, double *rms)
 {
 	int status = 0;
 
@@ -73,8 +72,7 @@ int umts_analysis_impl::cell_search(const rf_phreaker::raw_signal &raw_signal, u
 		if(sensitivity > 0.0)
 			throw rf_phreaker::umts_analysis_error("UMTS sensitivity threshold is invalid.");
 
-		if(scan_type == full_scan_type)
-			umts_meas_container_.clear_meas(raw_signal.frequency());
+		umts_meas_container_.remove_old_meas(raw_signal.frequency(), raw_signal.origin_time_pc(), config_.expiration_time());
 
 		if(!brute_force_)
 			brute_force_.reset(new umts_psch_with_brute_force(config_, brute_force_cpich_table_ptr()->cpich_table_ptr()));
@@ -116,12 +114,18 @@ int umts_analysis_impl::cell_search(const rf_phreaker::raw_signal &raw_signal, u
 			sig = &resampled_signal_;
 		}
 
-		umts_meas = brute_force_->process(*sig, umts_meas_container_.get_meas(raw_signal.frequency()), num_cpich_chips, scan_type);
+		auto freq = raw_signal.frequency();
+		auto origin_time = raw_signal.origin_time_pc();
+		auto container = umts_meas_container_.get_meas(freq);
 
-		consolidate_measurements(umts_meas);
+		umts_meas = brute_force_->process(*sig, container, num_cpich_chips, scan_type);
 
-		umts_meas_container_.update_meas(raw_signal.frequency(), umts_meas);
-		
+		umts_utilities::consolidate_measurements(umts_meas);
+
+		umts_utilities::update_time(origin_time, umts_meas);
+
+		umts_meas_container_.update_meas(freq, umts_meas);
+
 		if(rms != nullptr)
 			*rms = brute_force_->average_rms();
 
@@ -138,20 +142,6 @@ int umts_analysis_impl::cell_search(const rf_phreaker::raw_signal &raw_signal, u
 	}
 
 	return status;
-}
-
-void umts_analysis_impl::consolidate_measurements(umts_measurements &group)
-{
-	std::sort(group.begin(), group.end(), [=](const umts_measurement &a, const umts_measurement &b) {
-		if(a.cpich_ == b.cpich_)
-			return a.ecio_ > b.ecio_;
-		else
-			return a.cpich_ < b.cpich_;
-	});
-
-	group.erase(std::unique(group.begin(), group.end(), [=](const umts_measurement &a, const umts_measurement &b) {
-		return a.cpich_ == b.cpich_;
-	}), group.end());
 }
 
 int umts_analysis_impl::decode_layer_3(const rf_phreaker::raw_signal &raw_signal, umts_measurement &umts_meas)
