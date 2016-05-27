@@ -78,6 +78,8 @@ public:
 	rp_status update_license(rp_device *device, const char *filename);
 
 private:
+	rp_status add_gsm_collection_frequencies(rp_device *device, const rp_frequency_band_group &gsm_freqs);
+
 	void general_checks(rp_device *device);
 
 	void check_calibration(hardware hw, frequency_type freq);

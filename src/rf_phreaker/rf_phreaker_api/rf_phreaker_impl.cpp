@@ -6,6 +6,7 @@
 #include "rf_phreaker/common/log.h"
 #include "rf_phreaker/processing/collection_info_container.h"
 #include "rf_phreaker/processing/frequency_range_creation.h"
+#include "rf_phreaker/processing/processing_utility.h"
 #include "rf_phreaker/qt_specific/settings_io.h"
 #include "rf_phreaker/qt_specific/file_path_validation.h"
 #include "rf_phreaker/qt_specific/qt_utility.h"
@@ -442,6 +443,81 @@ rp_status rf_phreaker_impl::get_device_info(rp_device *device, rp_device_info *d
 	return s;
 }
 
+rp_status rf_phreaker_impl::add_gsm_collection_frequencies(rp_device *device, const rp_frequency_band_group &rp_gsm) {
+	using namespace ::rf_phreaker::processing;
+	rp_status s = RP_STATUS_OK;
+	try {
+		std::lock_guard<std::recursive_mutex> lock(mutex_);
+
+		if(rp_gsm.size_ == 0)
+			return s;
+
+		general_checks(device);
+
+		auto hw = device->async_.get_scanner().get()->get_hardware();
+
+		// Verify license and calibration and add for sorting.
+		std::vector<std::pair<operating_band, frequency_type>> gsm_freqs;
+		for(int i = 0; i < rp_gsm.size_; ++i) {
+			LOG(LINFO) << "Adding frequency (" << rp_gsm.e_[i].freq_ << ").";
+			check_calibration(hw, rp_gsm.e_[i].freq_);
+			// Check for license.
+			gsm_freqs.push_back(std::make_pair(to_operating_band(rp_gsm.e_[i].band_), rp_gsm.e_[i].freq_));
+		}
+
+		// Sort the gsm freqs that are to be added.
+		std::sort(std::begin(gsm_freqs), std::end(gsm_freqs), [&](const std::pair<operating_band, frequency_type> &a, const std::pair<operating_band, frequency_type> &b) {
+			if(a.first == b.first) return a.second < b.second;
+			else return a.first < b.first;
+		});
+
+		gsm_frequency_tracker tracker;
+		std::vector<std::pair<operating_band, frequency_type>> new_gsm;
+		auto i = gsm_freqs.begin();
+		while(i != gsm_freqs.end()) {
+			if(tracker.do_we_add_freq(i->second)) {
+				auto freq = tracker.calculate_closest_freq(i->second, i->first);
+				// Because we're adjusting the freq there is a chance the adjusted freq is not in the cali table
+				// If so, add the original file (which has already been checked) and continue.
+				if(!rf_phreaker::is_within_freq_paths(hw.frequency_paths_, freq))
+					freq = i->second;
+				new_gsm.push_back(std::make_pair(i->first, freq));
+				tracker.insert(freq);
+			}
+			++i;
+		}
+
+		auto specifier = GSM_LAYER_3_DECODE;
+		auto it = std::find_if(containers_.begin(), containers_.end(), [&](const collection_info_container &c) {
+			return c.has_specifier(specifier);
+		});
+
+		if(it == containers_.end()) {
+			// If simultaneous collection is enabled we do not want to stop collection after one iteration of freqs.
+			containers_.push_back(collection_info_container(specifier, find_collection_settings(specifier, config_).is_streaming_));
+			it = std::find_if(containers_.begin(), containers_.end(), [&](const collection_info_container &c) {
+				return c.has_specifier(specifier);
+			});
+		}
+
+		add_collection_info ci;
+		for(auto &i : new_gsm)
+			ci.add_.push_back(create_tech_collection_info(specifier, i.second, i.first));
+
+		it->adjust(ci);
+	}
+	catch(const rf_phreaker_error &err) {
+		s = to_rp_status(err);
+	}
+	catch(const std::exception &) {
+		s = RP_STATUS_GENERIC_ERROR;
+	}
+	catch(...) {
+		s = RP_STATUS_UNKNOWN_ERROR;
+	}
+	return s;
+}
+
 rp_status rf_phreaker_impl::add_collection_frequency(rp_device *device, rp_frequency_type freq, rp_operating_band rp_band) {
 	using namespace ::rf_phreaker::processing;
 	rp_status s = RP_STATUS_OK;
@@ -594,10 +670,9 @@ rp_status rf_phreaker_impl::add_sweep_operating_band(rp_device *device, rp_opera
 				find_collection_settings(sweep, config_).step_size_);
 		}
 		else if(band >= FIRST_GSM_OPERATING_BAND && band <= LAST_GSM_OPERATING_BAND) {
-			throw rf_phreaker_api_error("GSM not supported.");
 			auto sweep = GSM_SWEEP;
 			it = add_sweep(GSM_SWEEP, GSM_LAYER_3_DECODE);
-			//frequency_range_creation::adjust_gsm_sweep_collection_info_with_adjustmenet(range, *it);
+			frequency_range_creation::adjust_gsm_sweep_collection_info_with_adjustment(range, *it);
 		}
 
 		// We sort the sweep items to make sure they are in ascending order.  This makes the graphs look pretty in the output.
@@ -757,12 +832,10 @@ rp_status rf_phreaker_impl::start_collection(rp_device *device, const rp_collect
 		read_settings();
 		processing::initialize_collection_info_defaults(config_);
 
+		// GSM is a special case because it's usually a range of 200khz channels that are added which means we have to determine
+		// the freqs to dwell on.
+		add_gsm_collection_frequencies(device, info->gsm_);
 
-		for(int i = 0; i < info->gsm_.size_; ++i) {
-			rp_status status = add_collection_frequency(device, info->gsm_.e_[i].freq_, info->gsm_.e_[i].band_);
-			if(status != RP_STATUS_OK)
-				return status;
-		}
 		for(int i = 0; i < info->wcdma_.size_; ++i) {
 			rp_status status = add_collection_frequency(device, info->wcdma_.e_[i].freq_, info->wcdma_.e_[i].band_);
 			if(status != RP_STATUS_OK)
