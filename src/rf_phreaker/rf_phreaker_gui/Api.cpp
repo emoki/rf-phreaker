@@ -81,12 +81,14 @@ Api::Api(QObject *parent)
 	, backgroundScanList_(new CollectionInfoList(this))
 	, thread_(new ApiThread)
 	, updateTimer_(new QTimer(this))
-	, lowestFreq_(lowestFreqDefault_)
-	, highestFreq_(highestFreqDefault_)
 	, canUpdateLog_(false)
 	, canUpdateMessages_(false)
 	, canUpdateDevice_(false)
-	, canUpdateGps_(false) {
+	, canUpdateGps_(false)
+	, allTechModels_(highestCellPerChannelModel_, ApiTypes::FIRST_GSM_OPERATING_BAND, ApiTypes::LAST_LTE_OPERATING_BAND)
+	, gsmModels_(highestCellPerChannelModel_, ApiTypes::FIRST_GSM_OPERATING_BAND, ApiTypes::LAST_GSM_OPERATING_BAND)
+	, wcdmaModels_(highestCellPerChannelModel_, ApiTypes::FIRST_UMTS_OPERATING_BAND, ApiTypes::LAST_UMTS_OPERATING_BAND)
+	, lteModels_(highestCellPerChannelModel_, ApiTypes::FIRST_LTE_OPERATING_BAND, ApiTypes::LAST_LTE_OPERATING_BAND) {
 	canRecordData_ = false;
 	callbacks_.rp_update = rp_update;
 	callbacks_.rp_log_update = nullptr;
@@ -110,8 +112,9 @@ Api::Api(QObject *parent)
 }
 
 Api::~Api() {
-	settingsIO_.writeSettings(settings_);
-	settingsIO_.writeScanList(scanList_->qlist());
+	SettingsIO settingsIO;
+	settingsIO.writeSettings(settings_);
+	settingsIO.writeScanList(scanList_->qlist());
 	thread_->quit();
 	thread_->wait();
 	rp_clean_up();
@@ -120,8 +123,9 @@ Api::~Api() {
 
 void Api::initializeApi() {
 	QCoreApplication::postEvent(thread_->worker(), new InitializeApiEvent(&callbacks_));
-	settingsIO_.readSettings(settings_);
-	scanList_->setList(settingsIO_.readScanList());
+	SettingsIO settingsIO;
+	settingsIO.readSettings(settings_);
+	scanList_->setList(settingsIO.readScanList());
 }
 
 void Api::cleanUpApi() {
@@ -148,12 +152,7 @@ void Api::disconnectDevice() {
 void Api::startCollection() {
 	qDebug() << "Starting collection.";
 
-	gsmFullScanModel_.clear();
-	wcdmaFullScanModel_.clear();
-	lteFullScanModel_.clear();
-	highestCellPerChannelModel_.clear();
-	sweepModelList_.clear();
-	sweepModels_.clear();
+	clearModels();
 
 	// Create storage for all possible techs.  Note, QMap automatically inserts a default item if it is empty.
 	api_storage<rp_operating_band, rp_operating_band_group> sweep;
@@ -168,7 +167,7 @@ void Api::startCollection() {
 			// Add operating band to sweep models
 			auto sweepModel = sweepModels_.insert(cf->band(), std::make_shared<MeasurementModel>());
 			QQmlEngine::setObjectOwnership(sweepModel->get(), QQmlEngine::CppOwnership);
-			sweepModelList_.push_back(sweepModel->get());
+//			sweepModelList_.push_back(sweepModel->get());
 		}
 		else if(cf->tech() == ApiTypes::RAW_DATA) {
 			raw_data.push_back(cf->toRpFreq());
@@ -178,48 +177,34 @@ void Api::startCollection() {
 		}
 	}
 
-	// Alert the GUI that the sweep models have changed.
-	emit sweepModelListChanged();
+	updateModels();
 
 	QCoreApplication::postEvent(thread_->worker(), new StartCollectionEvent(sweep, raw_data, techs));
 }
 
-void Api::findFreqMinMax() {
-	int low;
-	int high;
-	auto list = scanList_->qlist();
-	if(list.empty()) {
-		low = lowestFreqDefault_;
-		high = highestFreqDefault_;
-	}
-	else {
-		low = list[0]->channelFreqLow()->freqMhz();
-		high = list[0]->isSweep() ? list[0]->channelFreqHigh()->freqMhz() : list[0]->channelFreqLow()->freqMhz();
-		foreach(const auto &ci, list) {
-			if(ci->channelFreqLow()->freqMhz() < low)
-				low = ci->channelFreqLow()->freqMhz();
-			if(ci->isSweep() && ci->channelFreqHigh()->freqMhz() > high)
-				high = ci->channelFreqHigh()->freqMhz();
-			else if(ci->channelFreqLow()->freqMhz() > high)
-				high = ci->channelFreqLow()->freqMhz();
-		}
-		// Add some additional clearance due to bandwidth of LTE channels.
-		low -= 15;
-		high += 15;
-		// Make it look more consistent.
-		low = low - (low % 20);
-		high = high + (20 - high % 20);
-	}
-	if(low != lowestFreq_) {
-		lowestFreq_ = low;
-		emit lowestFreqChanged();
-	}
-	if(high != highestFreq_) {
-		highestFreq_ = high;
-		emit highestFreqChanged();
-	}
+void Api::clearModels() {
+	allTechModels_.clear();
+	gsmModels_.clear();
+	wcdmaModels_.clear();
+	lteModels_.clear();
+	highestCellPerChannelModel_.clear();
+	sweepModels_.clear();
+}
 
-	}
+void Api::updateModels() {
+	allTechModels_.setSweepModels(sweepModels_);
+	gsmModels_.setSweepModels(sweepModels_);
+	wcdmaModels_.setSweepModels(sweepModels_);
+	lteModels_.setSweepModels(sweepModels_);
+}
+
+void Api::findFreqMinMax() {
+	auto list = scanList_->qlist();
+	allTechModels_.findFreqMinMax(list);
+	gsmModels_.findFreqMinMax(list);
+	wcdmaModels_.findFreqMinMax(list);
+	lteModels_.findFreqMinMax(list);
+}
 
 void Api::stopCollection() {
 	QCoreApplication::postEvent(thread_->worker(), new StopCollectionEvent());
@@ -294,11 +279,11 @@ bool Api::event(QEvent *e) {
 		case rf_phreaker::protobuf::rp_update::UpdateCase::kGsmFullScan: {
 			auto &t = update_pb_.get_gsm_full_scan();
 			if(t.empty()) {
-				auto &k = update_pb_.get_gsm_full_scan_basic();
-				gsmFullScanModel_.update_with_basic_data(k, ApiTypes::GSM_FULL_SCAN);
+				//auto &k = update_pb_.get_gsm_full_scan_basic();
+				//gsmFullScanModel_.update_with_basic_data(k, ApiTypes::GSM_FULL_SCAN);
 			}
 			else {
-				gsmFullScanModel_.update(t);
+				gsmModels_.fullScanModel()->update(t);
 				highestCellPerChannelModel_.update_freq_using_highest<less_than_cell_sl>(t);
 			}
 			break;
@@ -306,11 +291,11 @@ bool Api::event(QEvent *e) {
 		case rf_phreaker::protobuf::rp_update::UpdateCase::kWcdmaFullScan: {
 			auto &t = update_pb_.get_wcdma_full_scan();
 			if(t.empty()) {
-				auto &k = update_pb_.get_wcdma_full_scan_basic();
-				wcdmaFullScanModel_.update_with_basic_data(k, ApiTypes::WCDMA_FULL_SCAN);
+				//auto &k = update_pb_.get_wcdma_full_scan_basic();
+				//wcdmaFullScanModel_.update_with_basic_data(k, ApiTypes::WCDMA_FULL_SCAN);
 			}
 			else {
-				wcdmaFullScanModel_.update(t);
+				wcdmaModels_.fullScanModel()->update(t);
 				highestCellPerChannelModel_.update_freq_using_highest<less_than_cell_sl>(t);
 			}
 			break;
@@ -318,11 +303,11 @@ bool Api::event(QEvent *e) {
 		case rf_phreaker::protobuf::rp_update::UpdateCase::kLteFullScan: {
 			auto &t = update_pb_.get_lte_full_scan();
 			if(t.empty()) {
-				auto &k = update_pb_.get_lte_full_scan_basic();
-				lteFullScanModel_.update_with_basic_data(k, ApiTypes::LTE_FULL_SCAN);
+				//auto &k = update_pb_.get_lte_full_scan_basic();
+				//lteFullScanModel_.update_with_basic_data(k, ApiTypes::LTE_FULL_SCAN);
 			}
 			else {
-				lteFullScanModel_.update(t);
+				lteModels_.fullScanModel()->update(t);
 				highestCellPerChannelModel_.update_freq_using_highest<less_than_cell_sl>(t);
 			}
 			break;
@@ -435,8 +420,9 @@ void Api::handle_message(rp_status status, const QString &s) {
 }
 
 bool Api::openCollectionFile(){
+	QUrl url(collectionFilename_);
+	collectionFilename_ = url.toLocalFile();
 	qDebug() << "Opening collection file. " << collectionFilename_ << ".";
-	collectionFilename_.remove("file:///");
 	output_qfile_.setFileName(collectionFilename_);
 	if(!output_qfile_.open(QIODevice::WriteOnly | QIODevice::Unbuffered)) {
 		qDebug() << "Failed to open collection file. " << output_qfile_.errorString();

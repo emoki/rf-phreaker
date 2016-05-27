@@ -3,8 +3,9 @@
 #include <QList>
 #include <QString>
 #include "rf_phreaker/rf_phreaker_gui/Serialization.h"
+#include "rf_phreaker/rf_phreaker_gui/CollectionInfo.h"
 
-//namespace rf_phreaker { namespace gui { 
+//namespace rf_phreaker { namespace gui {
 
 static const QString api_output_key("api_output");
 
@@ -15,8 +16,8 @@ public:
 
 class SettingsIO {
 public:
-	SettingsIO() 
-		: qs_(QSettings::IniFormat, QSettings::UserScope, "rf_phreaker", "gui") {}
+	SettingsIO()
+	    : qs_(QSettings::IniFormat, QSettings::UserScope, "rf_phreaker", "gui") {}
 
 	void readSettings(Settings &settings) {
 		settings.api_output_ = qs_.value("api_output", false).toBool();
@@ -37,6 +38,10 @@ public:
 		}
 		qs_.endArray();
 	}
+	QStringList readMarbleLayers() {
+		return qs_.value("previous_marble_layers").toStringList();
+	}
+
 	void writeSettings(const Settings &settings) {
 		qs_.setValue("api_output", settings.api_output_);
 
@@ -55,6 +60,9 @@ public:
 		}
 		qs_.endArray();
 
+	}
+	void writeMarbleLayers(const QStringList &list) {
+		qs_.setValue("previous_marble_layers", list);
 	}
 
 private:

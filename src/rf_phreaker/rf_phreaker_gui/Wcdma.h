@@ -62,6 +62,16 @@ public:
 			wcdma_.rscp_ = a.rscp_;
 			emit rscpChanged();
 		}
+		if(wcdma_.layer_3_.raw_layer_3_.size() ||
+				wcdma_.layer_3_.mib_.is_decoded() ||
+				wcdma_.layer_3_.sib1_.is_decoded() ||
+				wcdma_.layer_3_.sib3_.is_decoded() ||
+				wcdma_.layer_3_.sib4_.is_decoded() ||
+				wcdma_.layer_3_.sib11_.is_decoded() ||
+				wcdma_.layer_3_.sib11_bis_.is_decoded()) {
+			wcdma_.layer_3_.update_info(a.layer_3_);
+			emit cellLayer3Changed();
+		}
 	}
 
 	ApiTypes::OperatingBand cellBand() const { return ApiTypes::toOperatingBand(wcdma_.operating_band_); }
@@ -69,6 +79,32 @@ public:
 	int32_t cellChannel() const { return wcdma_.uarfcn_; }
 	double cellSignalLevel() const { return wcdma_.rscp_; }
 	double cellInterference() const { return wcdma_.ecio_; }
+	virtual QString cellMccStr() const {
+		if(wcdma_.layer_3_.mib_.is_decoded())
+			return QString(wcdma_.layer_3_.mib_.plmn_.mcc_.to_string());
+		else
+			return "";
+	}
+	virtual QString cellMncStr() const {
+		if(wcdma_.layer_3_.mib_.is_decoded())
+			return QString(wcdma_.layer_3_.mib_.plmn_.mnc_.to_string());
+		else
+			return "";
+	}
+	virtual QString cellLacTacStr() const {
+		if(wcdma_.layer_3_.sib1_.is_decoded())
+			return QString::number(wcdma_.layer_3_.sib1_.lac_);
+		else
+			return "";
+	}
+	virtual QString cellCidStr() const {
+		if(wcdma_.layer_3_.sib1_.is_decoded())
+			return QString::number(wcdma_.layer_3_.sib3_.cid_);
+		else if(wcdma_.layer_3_.sib4_.is_decoded())
+			return QString::number(wcdma_.layer_3_.sib4_.cid_);
+		else
+			return "";
+	}
 
 	int32_t uarfcn() const { return wcdma_.uarfcn_; }
 	int32_t cpich() const { return wcdma_.cpich_; }

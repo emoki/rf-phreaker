@@ -33,8 +33,10 @@ set (rf_phreaker_gui_SRCS
 	IO.h
 	Lte.h
 	MarbleManager.h
+	MarbleProxyModel.h
 	MeasurementIndex.h
 	MeasurementModel.h
+	ModelGroup.h
 	ProxyMeasurementModel.h
 	RpPositionProviderPlugin.cpp
 	RpPositionProviderPlugin.h
@@ -48,19 +50,25 @@ set (rf_phreaker_gui_SRCS
 	${SRC_PLATFORM_SPECIFIC}/stdafx.cpp)
 
 set (rf_phreaker_gui_QMLS
+	BarChart.qml
 	ChannelBarLine.qml
 	ChannelBarLines.qml
+	ChannelList.qml
 	ChannelSweepLine.qml
 	ChannelSweepLines.qml
-	ChannelList.qml
+	CircularButton.qml
 	CustomFlatButtonStyle.qml
 	DataAnalysisLabel.qml
 	DataAnalysisPage.qml
+	DataOverviewPage.qml
 	DataWorksheet.qml
 	ErrorWindow.qml
 	main.qml
 	MapPage.qml
+	MarblePlacemarkList.qml
 	OverviewChart.qml
+	PositionButton.qml
+	PositionMarker.qml
 	ScanConfigurationPage.qml
 	ScannerPage.qml
 	SelectScannerWindow.qml
@@ -70,7 +78,22 @@ set (rf_phreaker_gui_QMLS
 	SuggestionView.qml
 	SweepLine.qml
 	SweepLines.qml
-	WorkbenchPage.qml)
+	WorkbenchPage.qml
+	icons/action_settings.svg
+	icons/alert_error.svg
+	icons/alert_warning.svg
+	icons/device_gps_fixed.svg
+	icons/device_gps_not_fixed.svg
+	icons/device_gps_off.svg
+	icons/device_usb.svg
+	icons/editor_insert_chart.svg
+	icons/hardware_developer_board.svg
+	icons/maps_map.svg
+	icons/navigation_arrow_drop_up.svg
+	icons/scanning_idle.png
+	icons/scanning_sprite.png
+	qtlabscontrols.conf
+	)
 
 set (qt_PRIVATE_GUI "C:/bin/qt/5.5/msvc2013/include/QtGui/5.5.1" CACHE STRING "Path to private QT GUI.")
 set (qt_PRIVATE_CORE "C:/bin/qt/5.5/msvc2013/include/QtCore/5.5.1" CACHE STRING "Path to private QT Core.")
@@ -103,7 +126,7 @@ include_directories (${CMAKE_SOURCE_DIR}/third_party/marble/src/lib/marble/routi
 include_directories (${CMAKE_SOURCE_DIR}/third_party/marble/src/lib/marble/webpopup)
 
 set (rf_phreaker_gui_QRCS
-	qml.qrc)
+	_.qrc)
 
 set (CMAKE_AUTOMOC ON)
 set (CMAKE_AUTORCC ON)

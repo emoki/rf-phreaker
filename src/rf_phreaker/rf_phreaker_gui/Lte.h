@@ -123,6 +123,18 @@ public:
 			lte_.frame_number_ = a.frame_number_;
 			emit frameNumberChanged();
 		}
+		if(lte_.layer_3_.raw_layer_3_.size() ||
+				lte_.layer_3_.sib1_.is_decoded() ||
+				lte_.layer_3_.sib3_.is_decoded() ||
+				lte_.layer_3_.sib4_.is_decoded() ||
+				lte_.layer_3_.sib5_.is_decoded() ||
+				lte_.layer_3_.sib6_.is_decoded() ||
+				lte_.layer_3_.sib7_.is_decoded() ||
+				lte_.layer_3_.sib8_.is_decoded()) {
+			lte_.layer_3_.update_info(a.layer_3_);
+			emit cellLayer3Changed();
+		}
+
 	}
 
 	ApiTypes::OperatingBand cellBand() const { return ApiTypes::toOperatingBand(lte_.operating_band_); }
@@ -130,6 +142,30 @@ public:
 	int32_t cellChannel() const { return lte_.earfcn_; }
 	double cellSignalLevel() const { return syncSignalLevel(); }
 	double cellInterference() const { return lte_.sync_quality_; }
+	virtual QString cellMccStr() const {
+		if(lte_.layer_3_.sib1_.is_decoded())
+			return QString(lte_.layer_3_.sib1_.multiple_plmn_.at(0).mcc_.to_string());
+		else
+			return "";
+	}
+	virtual QString cellMncStr() const {
+		if(lte_.layer_3_.sib1_.is_decoded())
+			return QString(lte_.layer_3_.sib1_.multiple_plmn_.at(0).mnc_.to_string());
+		else
+			return "";
+	}
+	virtual QString cellLacTacStr() const {
+		if(lte_.layer_3_.sib1_.is_decoded())
+			return QString::number(lte_.layer_3_.sib1_.tracking_area_code_);
+		else
+			return "";
+	}
+	virtual QString cellCidStr() const {
+		if(lte_.layer_3_.sib1_.is_decoded())
+			return QString::number(lte_.layer_3_.sib1_.cell_id_);
+		else
+			return "";
+	}
 
 	int32_t earfcn() const { return lte_.earfcn_; }
 	ApiTypes::OperatingBand band() const { return ApiTypes::toOperatingBand(lte_.operating_band_); }

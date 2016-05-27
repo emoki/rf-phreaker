@@ -72,7 +72,7 @@ GeoDataCoordinates RpPositionProviderPlugin::position() const {
 
 GeoDataAccuracy RpPositionProviderPlugin::accuracy() const {
 	if(d->m_status == PositionProviderStatusAvailable && d->gps_.gpsLock())
-		return GeoDataAccuracy(GeoDataAccuracy::Detailed);
+		return GeoDataAccuracy(GeoDataAccuracy::Detailed, d->gps_.horizontalAccuracyMeters(), d->gps_.verticalAccuracyMeters());
 	else
 		return GeoDataAccuracy();
 }

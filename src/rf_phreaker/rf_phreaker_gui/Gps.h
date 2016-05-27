@@ -30,6 +30,7 @@ public:
 	explicit Gps(QObject *parent = 0)
 		: QObject(parent) {
 		dt_.setTimeSpec(Qt::UTC);
+		gps_.lock_ = false;
 	}
 	explicit Gps(const rf_phreaker::gps& gps, QObject *parent = 0)
 		: QObject(parent)
@@ -118,12 +119,12 @@ public:
 		else
 			return "Unknown";
 	}
-	int altitude() { return gps_.altitude_; }
-	int angle() { return gps_.angle_; }
-	int speed() { return gps_.speed_; }
-	int dilutionOfPrecision() { return gps_.dilution_of_precision_; }
-	int horizontalAccuracyMeters() { return gps_.horizontal_accuracy_meters_; }
-	int verticalAccuracyMeters() { return gps_.vertical_accuracy_meters_; }
+	double altitude() { return gps_.altitude_; }
+	double angle() { return gps_.angle_; }
+	double speed() { return gps_.speed_; }
+	double dilutionOfPrecision() { return gps_.dilution_of_precision_; }
+	double horizontalAccuracyMeters() { return gps_.horizontal_accuracy_meters_; }
+	double verticalAccuracyMeters() { return gps_.vertical_accuracy_meters_; }
 
 signals:
 	void serialChanged();

@@ -1,5 +1,5 @@
-import QtQuick 2.5
-import QtQuick.Layouts 1.1
+import QtQuick 2.6
+import QtQuick.Layouts 1.3
 import QtQuick.Dialogs 1.2
 import QtQuick.Controls 1.4
 import QtQuick.Controls.Styles.Flat 1.0 as Flat
@@ -9,7 +9,6 @@ import QtQml.Models 2.2
 import QtQml.StateMachine 1.0 as DSM
 import QtQml 2.2
 import Qt.labs.settings 1.0
-//import Qt.labs.controls 1.0
 import RfPhreaker 1.0
 
 ApplicationWindow {
@@ -94,7 +93,7 @@ ApplicationWindow {
                             target: connectionStatusSideBar;
                             text: Api.deviceStatus === ApiTypes.ERROR ? Api.connectedDevice.serialShort + " Disconnected" : "Disconnected"
                             componentIndex: 0
-                            defaultImageSource: "qrc:/icons/icons/ic_no_connection_black_48dp.png"
+                            defaultImageSource: "qrc:/icons/actions_help.svg"
                         }
                     },
                     State {
@@ -111,7 +110,7 @@ ApplicationWindow {
                             target: connectionStatusSideBar;
                             text: Api.connectedDevice.serialShort + " Connected"
                             componentIndex: 0
-                            defaultImageSource: "qrc:/icons/icons/ic_usb_black_48dp.png"
+                            defaultImageSource: "qrc:/icons/device_usb.svg"
                         }
                     }
                 ]
@@ -139,7 +138,7 @@ ApplicationWindow {
                             activated: true
                             text: "ERROR"
                             componentIndex: defaultImageIndex
-                            defaultImageSource: "qrc:/icons/icons/ic_error_outline_black_48dp.png"
+                            defaultImageSource: "qrc:/icons/alert_error.svg"
                         }
                     },
                     State {
@@ -149,7 +148,7 @@ ApplicationWindow {
                             activated: true
                             text: "IDLE"
                             componentIndex: defaultImageIndex
-                            defaultImageSource: "qrc:/icons/icons/ic_settings_input_antenna_black_disconnected_48dp.png"
+                            defaultImageSource: "qrc:/icons/scanning_idle.png"
                         }
                     },
                     State {
@@ -158,7 +157,7 @@ ApplicationWindow {
                             target: deviceStatusSB;
                             text: "SCANNING"
                             componentIndex: deviceStatusSB.animatedSpriteIndex
-                            animatedSpriteSource: "qrc:/icons/icons/ic_settings_input_antenna_black_48dp_sprite.png"
+                            animatedSpriteSource: "qrc:/icons/scanning_idle.png"
                         }
                     },
                     State {
@@ -167,7 +166,7 @@ ApplicationWindow {
                             target: deviceStatusSB;
                             text: "RECORDING"
                             componentIndex: deviceStatusSB.animatedSpriteIndex
-                            animatedSpriteSource: "qrc:/icons/icons/ic_settings_input_antenna_black_48dp_sprite.png"
+                            animatedSpriteSource: "qrc:/icons/scanning_sprite.png"
                         }
                     },
                     State {
@@ -176,7 +175,7 @@ ApplicationWindow {
                             target: deviceStatusSB;
                             text: "RECORDING"
                             componentIndex: deviceStatusSB.animatedSpriteIndex
-                            animatedSpriteSource: "qrc:/icons/icons/ic_settings_input_antenna_black_48dp_sprite.png"
+                            animatedSpriteSource: "qrc:/icons/scanning_sprite.png"
                         }
                     }
                 ]
@@ -189,7 +188,7 @@ ApplicationWindow {
                 Layout.preferredHeight: iconSize
                 Layout.fillWidth: true
                 activated: Api.connectionStatus !== ApiTypes.DISCONNECTED && Api.connectionStatus !== ApiTypes.CONNECTING
-                defaultImageSource: Api.gps.gpsLock ? "qrc:/icons/icons/ic_gps_fixed_black_48dp.png" : "qrc:/icons/icons/ic_gps_not_fixed_black_48dp.png";
+                defaultImageSource: Api.gps.gpsLock ? "qrc:/icons/device_gps_fixed.svg" : "qrc:/icons/device_gps_not_fixed.svg";
                 text: Api.gps.gpsLock ? "Position Locked" : "Position Not Locked"
             }
             RowLayout {
@@ -236,7 +235,7 @@ ApplicationWindow {
             SideBarLabel {
                 Layout.preferredHeight: sideBarIconSize
                 Layout.fillWidth: true
-                defaultImageSource: "qrc:/icons/icons/ic_developer_board_black_48dp.png"
+                defaultImageSource: "qrc:/icons/hardware_developer_board.svg"
                 text: "Scanner"
                 MouseArea {
                     anchors.fill: parent
@@ -254,7 +253,7 @@ ApplicationWindow {
                 Layout.preferredHeight: sideBarIconSize
                 Layout.fillWidth: true
                 text: "Scan Configuration"
-                defaultImageSource: "qrc:/icons/icons/ic_developer_board_black_48dp.png"
+                defaultImageSource: "qrc:/icons/hardware_developer_board.svg"
                 MouseArea {
                     anchors.fill: parent
                     onClicked: contentLoader.sourceComponent = scanConfigurationPage;
@@ -300,7 +299,7 @@ ApplicationWindow {
             SideBarLabel {
                 Layout.preferredHeight: sideBarIconSize
                 Layout.fillWidth: true
-                defaultImageSource: "qrc:/icons/icons/ic_insert_chart_black_48dp.png"
+                defaultImageSource: "qrc:/icons/editor_insert_chart.svg"
                 text: "Data View"
                 MouseArea {
                     anchors.fill: parent
@@ -319,7 +318,7 @@ ApplicationWindow {
             SideBarLabel {
                 Layout.preferredHeight: sideBarIconSize
                 Layout.fillWidth: true
-                defaultImageSource: "qrc:/icons/icons/ic_map_black_48dp.png"
+                defaultImageSource: "qrc:/icons/maps_map.svg"
                 text: "Navigation"
                 MouseArea {
                     anchors.fill: parent
@@ -336,7 +335,7 @@ ApplicationWindow {
                 id: testBenchIcon
                 Layout.preferredHeight: sideBarIconSize
                 Layout.fillWidth: true
-                defaultImageSource: "qrc:/icons/icons/ic_developer_board_black_48dp.png"
+                defaultImageSource: "qrc:/icons/hardware_developer_board.svg"
                 text: "WorkBench"
                 MouseArea {
                     anchors.fill: parent

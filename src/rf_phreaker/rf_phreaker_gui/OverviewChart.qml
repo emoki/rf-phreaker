@@ -1,4 +1,4 @@
-import QtQuick 2.5
+import QtQuick 2.6
 import QtQuick.Controls 1.3
 import QtQuick.Layouts 1.1
 import QtCharts 2.1
@@ -10,11 +10,13 @@ ChartView {
     property var xMax: Api.highestFreq
     property var yMin: -130
     property var yMax: 0
+    property alias sweepModelList: sweepLines.sourceModel
+    property alias channelModel: channelSweepLines.sourceModel
 
-    title: "Spectrum Overview"
+    //title: "Spectrum Overview"
     antialiasing: true
     animationOptions: ChartView.NoAnimation
-    theme: ChartView.ChartThemeDark
+    //theme: ChartView.ChartThemeDark
     legend.visible: false
     focus: true
 
@@ -36,15 +38,15 @@ ChartView {
 
     ValueAxis {
         id: overviewAxisX
-        min: 700
-        max: 2200
+        min: xMin
+        max: xMax
         gridVisible: true
         minorGridVisible: true
     }
     ValueAxis {
         id: overviewAxisY
-        min: -120
-        max: 10
+        min: yMin
+        max: yMax
         gridVisible: true
         minorGridVisible: true
     }
@@ -58,14 +60,14 @@ ChartView {
         chart: overviewChart
         mainAxisX: overviewAxisX
         mainAxisY: overviewAxisY
-        sourceModel: Api.sweepModelList
+        //sourceModel: Api.sweepModelList
     }
     ChannelSweepLines {
         id: channelSweepLines
         chart: overviewChart
         mainAxisX: overviewAxisX
         mainAxisY: overviewAxisY
-        sourceModel: Api.highestCellPerChannelModel
+        //sourceModel: Api.highestCellPerChannelModel
     }
 
     Rectangle {
@@ -89,7 +91,7 @@ ChartView {
         anchors.fill:parent
         acceptedButtons: Qt.LeftButton | Qt.RightButton | Qt.MiddleButton
         onWheel: {
-            console.debug("onwheel");
+            //console.debug("onwheel");
             if (wheel.angleDelta.y > 0)
                 overviewChart.zoom(1.25);
             else
@@ -111,8 +113,8 @@ ChartView {
             if(zoomRect.inUse) {
                 zoomRect.xScale = mouse.x - zoomRect.x;
                 zoomRect.yScale = mouse.y - zoomRect.y;
-                console.debug(mouse.button);
-                console.debug(mouse.buttons);
+                //console.debug(mouse.button);
+                //console.debug(mouse.buttons);
                 if(mouse.buttons & Qt.MiddleButton) {
                     overviewChart.scrollRight(zoomRect.x - mouse.x);
                     overviewChart.scrollUp(mouse.y - zoomRect.y);
@@ -132,7 +134,7 @@ ChartView {
             if(mouse.button === Qt.LeftButton)
                 overviewChart.zoomIn(Qt.rect(x, y, width, height));
             else if(mouse.button == Qt.RightButton) {
-                console.debug(width * height, " ", overviewChart.width * overviewChart.height, " ", (width * height) / (overviewChart.width * overviewChart.height))
+                //console.debug(width * height, " ", overviewChart.width * overviewChart.height, " ", (width * height) / (overviewChart.width * overviewChart.height))
                 overviewChart.zoom(Math.min(.6, Math.max(.9, 100 * (width * height) / (overviewChart.width * overviewChart.height))));
             }
             zoomRect.visible = false;
@@ -141,7 +143,7 @@ ChartView {
     }
 
     Keys.onPressed: {
-        console.debug("fucking key bitch!");
+       // console.debug("fucking key bitch!");
         if(event.key === Qt.Key_Plus) {
             overviewChart.zoom(1.5);
             event.accepted = true;

@@ -1,0 +1,14 @@
+out: icons
+icons:
+  - action/help
+  - action/settings
+  - alert/warning
+  - alert/error
+  - device/gps_fixed
+  - device/gps_not_fixed
+  - device/gps_off
+  - device/usb
+  - editor/insert_chart
+  - hardware/developer_board
+  - maps/map
+  - navigation/arrow_drop_up

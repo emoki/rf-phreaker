@@ -2,6 +2,7 @@
 #include <QDataStream>
 #include "rf_phreaker/common/common_types.h"
 #include "rf_phreaker/rf_phreaker_api/rf_phreaker_api.h"
+#include "rf_phreaker/rf_phreaker_gui/ApiTypes.h"
 
 //namespace rf_phreaker { namespace gui {
 

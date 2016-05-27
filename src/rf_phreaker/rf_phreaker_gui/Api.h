@@ -16,6 +16,7 @@
 #include "rf_phreaker/rf_phreaker_gui/Settings.h"
 #include "rf_phreaker/rf_phreaker_gui/IO.h"
 #include "rf_phreaker/rf_phreaker_gui/Stats.h"
+#include "rf_phreaker/rf_phreaker_gui/ModelGroup.h"
 #include "rf_phreaker/rf_phreaker_gui/MeasurementModel.h"
 #include "rf_phreaker/rf_phreaker_gui/ProxyMeasurementModel.h"
 #include "rf_phreaker/protobuf_specific/rf_phreaker_serialization.h"
@@ -36,16 +37,13 @@ class Api : public QObject {
 	Q_PROPERTY(QStringList messages READ messages NOTIFY messagesChanged)
 	Q_PROPERTY(Device* connectedDevice READ connectedDevice NOTIFY connectedDeviceChanged)
 	Q_PROPERTY(Gps* gps READ gps NOTIFY gpsChanged)
-	Q_PROPERTY(MeasurementModel* highestCellPerChannelModel READ highestCellPerChannelModel NOTIFY highestCellPerChannelModelChanged)
-	Q_PROPERTY(MeasurementModel* gsmFullScanModel READ gsmFullScanModel NOTIFY gsmFullScanModelChanged)
-	Q_PROPERTY(MeasurementModel* wcdmaFullScanModel READ wcdmaFullScanModel NOTIFY wcdmaFullScanModelChanged)
-	Q_PROPERTY(MeasurementModel* lteFullScanModel READ lteFullScanModel NOTIFY lteFullScanModelChanged)
 	Q_PROPERTY(QStringList availableDevices READ availableDevices NOTIFY availableDevicesChanged)
 	Q_PROPERTY(QString deviceSerial READ deviceSerial WRITE setDeviceSerial NOTIFY deviceSerialChanged)
 	Q_PROPERTY(QString collectionFilename READ collectionFilename WRITE setCollectionFilename NOTIFY collectionFilenameChanged)
-	Q_PROPERTY(QList<QObject*> sweepModelList READ sweepModelList NOTIFY sweepModelListChanged)
-	Q_PROPERTY(int lowestFreq READ lowestFreq NOTIFY lowestFreqChanged)
-	Q_PROPERTY(int highestFreq READ highestFreq NOTIFY highestFreqChanged)
+	Q_PROPERTY(ModelGroup* allTechModels READ allTechModels NOTIFY allTechModelsChanged)
+	Q_PROPERTY(ModelGroup* gsmModels READ gsmModels NOTIFY gsmModelsChanged)
+	Q_PROPERTY(ModelGroup* wcdmaModels READ wcdmaModels NOTIFY wcdmaModelsChanged)
+	Q_PROPERTY(ModelGroup* lteModels READ lteModels NOTIFY lteModelsChanged)
 
 public:
 	Q_INVOKABLE void initializeApi();
@@ -74,15 +72,13 @@ signals:
 	void availableDevicesChanged();
 	void connectedDeviceChanged();
 	void gpsChanged();
-	void highestCellPerChannelModelChanged();
-	void gsmFullScanModelChanged();
-	void wcdmaFullScanModelChanged();
-	void lteFullScanModelChanged();
-	void sweepModelListChanged();
 	void deviceSerialChanged();
 	void collectionFilenameChanged();
-	void lowestFreqChanged();
-	void highestFreqChanged();
+	void allTechModelsChanged();
+	void gsmModelsChanged();
+	void wcdmaModelsChanged();
+	void lteModelsChanged();
+
 
 	// Signals for state machine
 	void numDevicesConnected(int numDevices);
@@ -116,13 +112,10 @@ public:
 	Device* connectedDevice() { return &connectedDevice_; }
 	Gps* gps() { return &gps_; }
 	QStringList availableDevices() { return availableDevices_; }
-	MeasurementModel* highestCellPerChannelModel() { return &highestCellPerChannelModel_; }
-	MeasurementModel* gsmFullScanModel() { return &gsmFullScanModel_; }
-	MeasurementModel* wcdmaFullScanModel() { return &wcdmaFullScanModel_; }
-	MeasurementModel* lteFullScanModel() { return &lteFullScanModel_; }
-	QList<QObject*> sweepModelList() { return sweepModelList_; }
-	int lowestFreq() { return lowestFreq_; }
-	int highestFreq() { return highestFreq_; }
+	ModelGroup* allTechModels() { return &allTechModels_; }
+	ModelGroup* gsmModels() { return &gsmModels_; }
+	ModelGroup* wcdmaModels() { return &wcdmaModels_; }
+	ModelGroup* lteModels() { return &lteModels_; }
 
 	void setScanList(const CollectionInfoList *list) {
 		scanList_->setList(list->qlist());
@@ -174,6 +167,8 @@ private:
 	explicit Api(QObject *parent = 0);
 	void handle_message(rp_status status, const QString &s);
 	void close_collection_file(); // Handled internally using the event loop so we don't have to worry about threading issues.
+	void clearModels();
+	void updateModels();
 
 	static Api *instance_;
 	static QMutex instance_mutex_;
@@ -210,24 +205,18 @@ private:
 	std::unique_ptr<google::protobuf::io::FileOutputStream> output_file_;
 
 	Settings settings_;
-	SettingsIO settingsIO_;
 
 	IO api_debug_output_;
 
 	Stats stats_;
 
-	MeasurementModel highestCellPerChannelModel_;
-	MeasurementModel gsmFullScanModel_;
-	MeasurementModel wcdmaFullScanModel_;
-	MeasurementModel lteFullScanModel_;
-	QMap<ApiTypes::OperatingBand, std::shared_ptr<MeasurementModel>> sweepModels_;
-	QList<QObject*> sweepModelList_;
 	rf_phreaker::operating_band_range_specifier band_specifier_;
-
-	static const int lowestFreqDefault_ = 700;
-	static const int highestFreqDefault_ = 2600;
-	int highestFreq_;
-	int lowestFreq_;
+	MeasurementModel highestCellPerChannelModel_;
+	QMap<ApiTypes::OperatingBand, std::shared_ptr<MeasurementModel>> sweepModels_;
+	ModelGroup allTechModels_;
+	ModelGroup gsmModels_;
+	ModelGroup wcdmaModels_;
+	ModelGroup lteModels_;
 };
 
 //}}

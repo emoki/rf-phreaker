@@ -25,6 +25,10 @@ class Base : public QObject
 	Q_PROPERTY(QString carrierFreqStr READ carrierFreqStr NOTIFY carrierFreqChanged)
 	Q_PROPERTY(QString carrierBandwidthStr READ carrierBandwidthStr NOTIFY carrierBandwidthChanged)
 	Q_PROPERTY(QString carrierSignalLevelStr READ carrierSignalLevelStr NOTIFY carrierSignalLevelChanged)
+	Q_PROPERTY(QString cellMccStr READ cellMccStr NOTIFY cellLayer3Changed)
+	Q_PROPERTY(QString cellMncStr READ cellMncStr NOTIFY cellLayer3Changed)
+	Q_PROPERTY(QString cellLacTacStr READ cellLacTacStr NOTIFY cellLayer3Changed)
+	Q_PROPERTY(QString cellCidStr READ cellCidStr NOTIFY cellLayer3Changed)
 
 
 public:
@@ -69,8 +73,12 @@ public:
 	virtual ApiTypes::OperatingBand cellBand() const { return ApiTypes::OPERATING_BAND_UNKNOWN; }
 	virtual int32_t cellChannel() const { return -1; }
 	virtual int32_t cellId() const { return -1; }
-	virtual double cellSignalLevel() const { return -1; }
-	virtual double cellInterference() const { return -1; }
+	virtual double cellSignalLevel() const { return -9999; }
+	virtual double cellInterference() const { return -9999; }
+	virtual QString cellMccStr() const { return ""; }
+	virtual QString cellMncStr() const { return ""; }
+	virtual QString cellLacTacStr() const { return ""; }
+	virtual QString cellCidStr() const { return ""; }
 
 	QTime timeElapsed() const { return timeElapsed_; }
 	QString serial() const { return base_.serial_.c_str(); }
@@ -93,6 +101,7 @@ signals:
 	void cellChannelChanged();
 	void cellSignalLevelChanged();
 	void cellInterferenceChanged();
+	void cellLayer3Changed();
 
 protected:
 	rf_phreaker::basic_data &base_;

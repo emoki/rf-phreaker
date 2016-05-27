@@ -1,0 +1,22 @@
+<!DOCTYPE RCC>
+<RCC version="1.0">
+
+<qresource prefix="/icons">
+	<file>action_help.svg</file>
+	<file>action_highlight_off.svg</file>
+	<file>action_settings.svg</file>
+	<file>alert_error.svg</file>
+	<file>alert_warning.svg</file>
+	<file>device_gps_fixed.svg</file>
+	<file>device_gps_not_fixed.svg</file>
+	<file>device_gps_off.svg</file>
+	<file>device_usb.svg</file>
+	<file>editor_insert_chart.svg</file>
+	<file>hardware_developer_board.svg</file>
+	<file>maps_map.svg</file>
+	<file>navigation_arrow_drop_up.svg</file>
+	<file>scanning_idle.png</file>
+	<file>scanning_sprite.png</file>
+</qresource>
+
+</RCC>

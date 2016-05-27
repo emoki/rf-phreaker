@@ -22,9 +22,9 @@ int main(int argc, char *argv[])
 
 	QGuiApplication::setAttribute(Qt::AA_EnableHighDpiScaling);
 	QQmlApplicationEngine engine;
-	if (qgetenv("QT_QUICK_CONTROLS_STYLE").isEmpty()) {
-		qputenv("QT_QUICK_CONTROLS_STYLE", "Material");
-	}
+	//if (qgetenv("QT_QUICK_CONTROLS_STYLE").isEmpty()) {
+	//	qputenv("QT_QUICK_CONTROLS_STYLE", "Material");
+	//}
 	declarativePlugin.initializeEngine(&engine, marbleUri);
 	engine.load(QUrl(QStringLiteral("qrc:/main.qml")));
 
