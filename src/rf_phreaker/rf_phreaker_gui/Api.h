@@ -7,7 +7,7 @@
 #include <QTimer>
 #include <QFile>
 #include "rf_phreaker/rf_phreaker_gui/CollectionInfoList.h"
-#include "rf_phreaker/rf_phreaker_gui/Device.h"
+#include "rf_phreaker/rf_phreaker_gui/RpDevice.h"
 #include "rf_phreaker/rf_phreaker_gui/Gps.h"
 #include "rf_phreaker/rf_phreaker_gui/Gsm.h"
 #include "rf_phreaker/rf_phreaker_gui/Wcdma.h"
@@ -31,11 +31,11 @@ class Api : public QObject {
 	Q_PROPERTY(QString deviceStatusStr READ deviceStatusStr NOTIFY deviceStatusStrChanged)
 	Q_PROPERTY(ApiTypes::ConnectionStatus connectionStatus READ connectionStatus WRITE setConnectionStatus NOTIFY connectionStatusChanged)
 	Q_PROPERTY(QString connectionStatusStr READ connectionStatusStr NOTIFY connectionStatusStrChanged)
-	Q_PROPERTY(CollectionInfoList* scanList READ scanList WRITE setScanList NOTIFY scanListChanged)
-	Q_PROPERTY(CollectionInfoList* backgroundScanList READ backgroundScanList WRITE setBackgroundScanList NOTIFY backgroundScanListChanged)
+	Q_PROPERTY(CollectionInfoList* scanList READ scanList NOTIFY scanListChanged)
+	Q_PROPERTY(CollectionInfoList* backgroundScanList READ backgroundScanList NOTIFY backgroundScanListChanged)
 	Q_PROPERTY(QStringList log READ log NOTIFY logChanged)
 	Q_PROPERTY(QStringList messages READ messages NOTIFY messagesChanged)
-	Q_PROPERTY(Device* connectedDevice READ connectedDevice NOTIFY connectedDeviceChanged)
+	Q_PROPERTY(RpDevice* connectedDevice READ connectedDevice NOTIFY connectedDeviceChanged)
 	Q_PROPERTY(Gps* gps READ gps NOTIFY gpsChanged)
 	Q_PROPERTY(QStringList availableDevices READ availableDevices NOTIFY availableDevicesChanged)
 	Q_PROPERTY(QString deviceSerial READ deviceSerial WRITE setDeviceSerial NOTIFY deviceSerialChanged)
@@ -103,13 +103,13 @@ public:
 	QString deviceStatusStr() { return ApiTypes::toQString(deviceStatus_); }
 	ApiTypes::ConnectionStatus connectionStatus() { return connectionStatus_; }
 	QString connectionStatusStr() { return ApiTypes::toQString(connectionStatus_); }
-	CollectionInfoList* scanList() { return scanList_; }
-	CollectionInfoList* backgroundScanList() { return backgroundScanList_; }
+	CollectionInfoList* scanList() { return &scanList_; }
+	CollectionInfoList* backgroundScanList() { return &backgroundScanList_; }
 	QStringList log() { return log_; }
 	QStringList messages() { return messages_; }
 	QString deviceSerial() const { return deviceSerial_; }
 	QString collectionFilename() const { return collectionFilename_; }
-	Device* connectedDevice() { return &connectedDevice_; }
+	RpDevice* connectedDevice() { return &connectedDevice_; }
 	Gps* gps() { return &gps_; }
 	QStringList availableDevices() { return availableDevices_; }
 	ModelGroup* allTechModels() { return &allTechModels_; }
@@ -117,15 +117,15 @@ public:
 	ModelGroup* wcdmaModels() { return &wcdmaModels_; }
 	ModelGroup* lteModels() { return &lteModels_; }
 
-	void setScanList(const CollectionInfoList *list) {
-		scanList_->setList(list->qlist());
-		emit scanListChanged();
-	}
+//	void setScanList(const CollectionInfoList *list) {
+//		scanList_->setList(list->list());
+//		emit scanListChanged();
+//	}
 
-	void setBackgroundScanList(const CollectionInfoList *list) {
-		backgroundScanList_->setList(list->qlist());
-		emit backgroundScanListChanged();
-	}
+//	void setBackgroundScanList(const CollectionInfoList *list) {
+//		backgroundScanList_->setList(list->list());
+//		emit backgroundScanListChanged();
+//	}
 
 	void setDeviceStatus(ApiTypes::DeviceStatus s) {
 		if(deviceStatus_ != s) {
@@ -174,15 +174,15 @@ private:
 	static QMutex instance_mutex_;
 	ApiTypes::DeviceStatus deviceStatus_;
 	ApiTypes::ConnectionStatus connectionStatus_;
-	CollectionInfoList *scanList_;
-	CollectionInfoList *backgroundScanList_;
+	CollectionInfoList scanList_;
+	CollectionInfoList backgroundScanList_;
 	QStringList availableDevices_;
 	QStringList log_;
 	QStringList messages_;
 	QStringList error_messages_;
 	QString deviceSerial_;
 	QString collectionFilename_;
-	Device connectedDevice_;
+	RpDevice connectedDevice_;
 	Gps gps_;
 
 	// Perhaps in the future we allow for multiple devices.

@@ -17,6 +17,13 @@ ChartView {
     legend.visible: false
     focus: true
 
+    margins {
+        right: 0
+        left: 0
+        top: 0
+        bottom: 0
+    }
+
     ValueAxis {
         id: barAxisX
         min: slMin
@@ -24,6 +31,7 @@ ChartView {
         gridVisible: true
         minorGridVisible: true
         tickCount: 5
+        //labelsFont: graphingLabel.font
     }
 
     LineSeries{

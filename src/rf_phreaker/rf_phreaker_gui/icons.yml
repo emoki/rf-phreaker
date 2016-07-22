@@ -4,11 +4,26 @@ icons:
   - action/settings
   - alert/warning
   - alert/error
+  - av/play_arrow
+  - av/stop
+  - content/add
+  - content/remove
   - device/gps_fixed
   - device/gps_not_fixed
   - device/gps_off
   - device/usb
   - editor/insert_chart
   - hardware/developer_board
+  - file/file_download
+  - maps/layers
+  - maps/layers_clear
   - maps/map
   - navigation/arrow_drop_up
+  - navigation/arrow_drop_down
+  - navigation/arrow_downward
+  - navigation/arrow_upward
+  - navigation/cancel
+  - navigation/close
+  - navigation/expand_more
+  - navigation/expand_less
+  - navigation/more_vert

@@ -112,7 +112,7 @@ protected:
 class GenericMeasurement : public Base {
 public:
 	explicit GenericMeasurement(QObject *parent = 0)
-		: Base(meas_, ApiTypes::UNKNOWN_TECH) {}
+		: Base(meas_, ApiTypes::UNKNOWN_TECH, parent) {}
 
 	explicit GenericMeasurement(const rf_phreaker::basic_data &base, ApiTypes::Tech tech, QObject *parent = 0)
 		: Base(meas_, tech, parent)

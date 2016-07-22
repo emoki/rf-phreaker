@@ -22,19 +22,19 @@ public:
 	void readSettings(Settings &settings) {
 		settings.api_output_ = qs_.value("api_output", false).toBool();
 	}
-	QList<CollectionInfo*> readScanList() {
+	QList<CollectionInfo*> readScanList(QObject *parent) {
 		QList<CollectionInfo*> list;
-		readCollectionInfoList(list, "scan_list");
+		readCollectionInfoList(list, "scan_list", parent);
 		return list;
 	}
-	void readCollectionInfoList(QList<CollectionInfo*> &list, const QString &descrip) {
+	void readCollectionInfoList(QList<CollectionInfo*> &list, const QString &descrip, QObject *parent) {
 		auto size = qs_.beginReadArray(descrip);
 		for(auto i = 0; i < size; ++i) {
 			qs_.setArrayIndex(i);
 			auto low = qs_.value("channel_freq_low").value<rf_phreaker::channel_freq>();
 			auto high = qs_.value("channel_freq_high").value<rf_phreaker::channel_freq>();
 			auto tech = (ApiTypes::Tech)qs_.value("tech").value<ApiTypes::Tech>();
-			list.append(new CollectionInfo(low, high, tech));
+			list.append(new CollectionInfo(low, high, tech, parent));
 		}
 		qs_.endArray();
 	}

@@ -80,6 +80,11 @@ public:
 		roles_[CellIdRole] = "cellId";
 		roles_[CellSignalLevelRole] = "cellSignalLevel";
 		roles_[CellInterferenceRole] = "cellInterference";
+		roles_[CellMccRole] = "mcc";
+		roles_[CellMncRole] = "mnc";
+		roles_[CellLacTacRole] = "lactac";
+		roles_[CellCidRole] = "cid";
+		roles_[LteDownlinkBandwidthRole] = "lteDownlinkBandwidth";
 	}
 
 	~MeasurementModel() {

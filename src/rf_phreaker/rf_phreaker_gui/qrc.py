@@ -43,4 +43,3 @@ def create_qrc(dirname, prefix=None):
 
 if __name__ == '__main__':
     create_qrc('./', '')
-    create_qrc('./icons', 'icons')

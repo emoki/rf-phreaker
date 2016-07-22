@@ -7,7 +7,7 @@
 
 //namespace rf_phreaker { namespace gui {
 
-class Device : public QObject
+class RpDevice : public QObject
 {
 	Q_OBJECT
 	Q_PROPERTY(QString serial READ serial NOTIFY serialChanged)
@@ -24,21 +24,21 @@ class Device : public QObject
 	//	Q_PROPERTY( READ WRITE set NOTIFY Changed)
 
 public:
-	explicit Device(QObject *parent = 0)
+	explicit RpDevice(QObject *parent = 0)
 		:QObject(parent)
 	{
 		device_.device_communication_ = rf_phreaker::UNKNOWN_SPEED;
 		device_.frequency_correction_calibration_date_  = 0;
 		device_.rf_calibration_date_ = 0;
 	}
-	explicit Device(const rf_phreaker::hardware &device, QObject *parent = 0)
+	explicit RpDevice(const rf_phreaker::hardware &device, QObject *parent = 0)
 		: QObject(parent)
 		, device_(device)
 	{}
 
-	~Device() {}
+	~RpDevice() {}
 
-	void copy(const Device &a) {
+	void copy(const RpDevice &a) {
 		if(device_.serial_ != a.device_.serial_) {
 			device_.serial_ = a.device_.serial_;
 			emit serialChanged();
@@ -101,16 +101,16 @@ public:
 	QDate freqCorrectionDate() { return dt_.fromTime_t(device_.frequency_correction_calibration_date_).date(); }
 	QString freqCorrectionDateStr() {
 		if(device_.frequency_correction_calibration_date_)
-			return dt_.fromTime_t(device_.frequency_correction_calibration_date_, Qt::UTC).toString(Qt::TextDate);
+			return dt_.fromTime_t(device_.frequency_correction_calibration_date_, Qt::UTC).toString("MMM d yyyy");
 		else
-			return "Unknown";
+			return "";
 	}
 	QDate rfCalibrationDate() { return dt_.fromTime_t(device_.rf_calibration_date_).date(); }
 	QString rfCalibrationDateStr() {
 		if(device_.rf_calibration_date_)
-			return dt_.fromTime_t(device_.rf_calibration_date_, Qt::UTC).toString(Qt::TextDate);
+			return dt_.fromTime_t(device_.rf_calibration_date_, Qt::UTC).toString("MMM d yyyy");
 		else
-			return "Unknown";
+			return "";
 	}
 	QStringList calibratedFreqList() { return calibratedFreqList_; }
 	QList<QObject*> licenseList() { return licenseList_; }

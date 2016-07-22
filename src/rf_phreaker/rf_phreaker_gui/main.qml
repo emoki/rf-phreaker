@@ -93,7 +93,7 @@ ApplicationWindow {
                             target: connectionStatusSideBar;
                             text: Api.deviceStatus === ApiTypes.ERROR ? Api.connectedDevice.serialShort + " Disconnected" : "Disconnected"
                             componentIndex: 0
-                            defaultImageSource: "qrc:/icons/actions_help.svg"
+                            defaultImageSource: "qrc:/icons/action_help.svg"
                         }
                     },
                     State {

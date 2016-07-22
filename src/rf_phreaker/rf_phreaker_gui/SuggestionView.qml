@@ -1,9 +1,10 @@
 import QtQuick 2.0
-import QtQuick.Controls 1.3
+import QtQuick.Controls 1.4 as Controls
 import QtQuick.Layouts 1.1
+import Material 0.3
 import RfPhreaker 1.0
 
-TableView {
+Controls.TableView {
     id: s
 
     property alias suggestionModel: s.model
@@ -11,36 +12,22 @@ TableView {
 
     height: 400
     width: sTextField.width
-    visible: rowCount > 0
     headerVisible: false
     alternatingRowColors: false
     horizontalScrollBarPolicy: Qt.ScrollBarAlwaysOff
-    selectionMode: SelectionMode.SingleSelection
+    selectionMode: Controls.SelectionMode.SingleSelection
 
+    signal close
 
-    function sendCurrentSelection() {
-        if(currentRow !== -1) {
-            console.debug("Sending current selection (", suggestionModel[currentRow], ".")
-            sTextField.update(suggestionModel[currentRow]);
+    function sendCurrentSelection(row) {
+        if(row !== -1) {
+            console.debug("Sending current selection (", suggestionModel[row], ".")
+            sTextField.update(suggestionModel[row]);
         }
+        close();
     }
 
-    Keys.onPressed: {
-        if(event.key === Qt.Key_Up && currentRow === 0) {
-            sTextField.focus = true;
-            event.accepted = true;
-        }
-        else if(event.key === Qt.Key_Down && currentRow === rowCount - 1) {
-            sTextField.focus = true;
-            event.accepted = true;
-        }
-        else if(event.key === Qt.Key_Return) {
-            sendCurrentSelection();
-            sTextField.focus = true;
-            event.accepted = true;
-        }
-    }
-
-    onDoubleClicked: sendCurrentSelection()
+    onClicked: sendCurrentSelection(row)
+    onDoubleClicked: sendCurrentSelection(row)
 }
 

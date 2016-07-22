@@ -4,7 +4,7 @@ import QtQuick.Controls.Styles 1.3
 import QtQuick.Window 2.2
 
 Item {
-    id: CircularButton
+    id: root
 
     readonly property int diameter: Screen.pixelDensity * 9
     property alias iconSource: icon.source

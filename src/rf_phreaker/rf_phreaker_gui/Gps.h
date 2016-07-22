@@ -11,6 +11,7 @@ class Gps : public QObject
 {
 	Q_OBJECT
 	Q_PROPERTY(QString serial READ serial NOTIFY serialChanged)
+	Q_PROPERTY(bool init READ init NOTIFY initChanged)
 	Q_PROPERTY(bool gpsLock READ gpsLock NOTIFY gpsLockChanged)
 	Q_PROPERTY(int visibleSatellites READ visibleSatellites NOTIFY visibleSatellitesChanged)
 	Q_PROPERTY(int trackingSatellites READ trackingSatellites NOTIFY trackingSatellitesChanged)
@@ -28,23 +29,31 @@ class Gps : public QObject
 
 public:
 	explicit Gps(QObject *parent = 0)
-		: QObject(parent) {
+		: QObject(parent)
+		, init_(false) {
 		dt_.setTimeSpec(Qt::UTC);
 		gps_.lock_ = false;
 	}
 	explicit Gps(const rf_phreaker::gps& gps, QObject *parent = 0)
 		: QObject(parent)
-		, gps_(gps) {
+		, gps_(gps)
+		, init_(true) {
 		dt_.setTimeSpec(Qt::UTC);
 	}
 
 	~Gps() {}
+
+	void clear() { init_ = false; }
 
 	void copy(const Gps &a) {
 		copy(a.gps_);
 	}
 
 	void copy(const rf_phreaker::gps &a) {
+		if(!init_) {
+			init_ = true;
+			emit initChanged();
+		}
 		if(gps_.serial_ != a.serial_) {
 			gps_.serial_ = a.serial_;
 			emit serialChanged();
@@ -100,6 +109,7 @@ public:
 	}
 
 	QString serial() { return gps_.serial_.c_str(); }
+	bool init() { return init_; }
 	bool gpsLock() { return gps_.lock_; }
 	int visibleSatellites() { return gps_.visible_satellites_; }
 	int trackingSatellites() { return gps_.tracking_satellites_; }
@@ -128,6 +138,7 @@ public:
 
 signals:
 	void serialChanged();
+	void initChanged();
 	void gpsLockChanged();
 	void visibleSatellitesChanged();
 	void trackingSatellitesChanged();
@@ -146,6 +157,7 @@ public slots:
 private:
 	rf_phreaker::gps gps_;
 	QDateTime dt_;
+	bool init_;
 };
 
 //}}

@@ -1,5 +1,6 @@
 import QtQuick 2.5
 import QtGraphicalEffects 1.0
+import Material 0.3
 
 Item {
     id: root
@@ -33,7 +34,7 @@ Item {
         ColorOverlay {
                 anchors.fill: image
                 source: image
-                color: "#e61728bf"
+                color: Theme.primaryColor
         }
     }
 
@@ -41,7 +42,7 @@ Item {
         id: innerCircle
         width: root.width * .30
         height: root.height * .30
-        color: "#e61728bf"
+        color: Theme.primaryColor
         radius: width * .5
         anchors.centerIn: parent
     }

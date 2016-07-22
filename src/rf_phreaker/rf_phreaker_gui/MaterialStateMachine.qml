@@ -118,12 +118,12 @@ DSM.StateMachine {
                         connecting();
                     }
                     else {
-                        selectScannerWindow.showNormal();
+                        openScannerDialog.show();
                     }
                 }
                 DSM.SignalTransition {
                     targetState: smConnecting
-                    signal: selectScannerWindow.accepted
+                    signal: openScannerDialog.accepted
                 }
                 DSM.SignalTransition {
                     targetState: smConnecting
@@ -131,7 +131,7 @@ DSM.StateMachine {
                 }
                 DSM.SignalTransition {
                     targetState: smWait
-                    signal: selectScannerWindow.canceled
+                    signal: openScannerDialog.rejected
                 }
             }
         }
@@ -250,7 +250,6 @@ DSM.StateMachine {
                     Api.startCollection();
                 }
                 onExited: {
-                    Api.closeCollectionFile();
                 }
                 DSM.SignalTransition {
                     targetState: smIdle

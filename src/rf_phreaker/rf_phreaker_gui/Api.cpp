@@ -77,8 +77,6 @@ Api::Api(QObject *parent)
 	: QObject(parent)
 	, deviceStatus_(ApiTypes::OFF)
 	, connectionStatus_(ApiTypes::DISCONNECTED)
-	, scanList_(new CollectionInfoList(this))
-	, backgroundScanList_(new CollectionInfoList(this))
 	, thread_(new ApiThread)
 	, updateTimer_(new QTimer(this))
 	, canUpdateLog_(false)
@@ -106,7 +104,10 @@ Api::Api(QObject *parent)
 	connect(updateTimer_, SIGNAL(timeout()), this, SLOT(emitSignals()));
 	updateTimer_->start(800);
 
-	connect(scanList_, SIGNAL(listChanged()), this, SLOT(findFreqMinMax()));
+	connect(&scanList_, SIGNAL(dataChanged(QModelIndex, QModelIndex, QVector<int>)), this, SLOT(findFreqMinMax()));
+	connect(&scanList_, SIGNAL(modelReset()), this, SLOT(findFreqMinMax()));
+	connect(&scanList_, SIGNAL(rowsInserted(QModelIndex, int, int)), this, SLOT(findFreqMinMax()));
+	connect(&scanList_, SIGNAL(rowsRemoved(QModelIndex, int, int)), this, SLOT(findFreqMinMax()));
 
 	thread_->start();
 }
@@ -114,7 +115,7 @@ Api::Api(QObject *parent)
 Api::~Api() {
 	SettingsIO settingsIO;
 	settingsIO.writeSettings(settings_);
-	settingsIO.writeScanList(scanList_->qlist());
+	settingsIO.writeScanList(scanList_.list());
 	thread_->quit();
 	thread_->wait();
 	rp_clean_up();
@@ -125,7 +126,8 @@ void Api::initializeApi() {
 	QCoreApplication::postEvent(thread_->worker(), new InitializeApiEvent(&callbacks_));
 	SettingsIO settingsIO;
 	settingsIO.readSettings(settings_);
-	scanList_->setList(settingsIO.readScanList());
+	scanList_.setList(settingsIO.readScanList(this));
+
 }
 
 void Api::cleanUpApi() {
@@ -159,7 +161,7 @@ void Api::startCollection() {
 	api_storage<rp_frequency_type, rp_frequency_group> raw_data;
 	QMap<ApiTypes::Tech, api_storage<rp_frequency_band, rp_frequency_band_group>> techs;
 
-	foreach(const auto &ci, scanList_->qlist()) {
+	foreach(const auto &ci, scanList_.list()) {
 		auto cf = ci->channelFreqLow();
 		if(ci->isSweep()) {
 			sweep.push_back(cf->toRpBand());
@@ -199,7 +201,7 @@ void Api::updateModels() {
 }
 
 void Api::findFreqMinMax() {
-	auto list = scanList_->qlist();
+	auto list = scanList_.list();
 	allTechModels_.findFreqMinMax(list);
 	gsmModels_.findFreqMinMax(list);
 	wcdmaModels_.findFreqMinMax(list);
@@ -363,6 +365,8 @@ bool Api::event(QEvent *e) {
 	}
 	else if(e->type() == DeviceDisconnectedEvent::getType()) {
 		deviceDisconnected();
+		gps_.clear();
+		clearModels();
 		e->accept();
 		return true;
 	}

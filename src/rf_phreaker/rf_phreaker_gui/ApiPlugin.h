@@ -5,7 +5,7 @@
 #include "rf_phreaker/rf_phreaker_gui/ChannelFreq.h"
 #include "rf_phreaker/rf_phreaker_gui/CollectionInfoList.h"
 #include "rf_phreaker/rf_phreaker_gui/CollectionInfoSearch.h"
-#include "rf_phreaker/rf_phreaker_gui/Device.h"
+#include "rf_phreaker/rf_phreaker_gui/RpDevice.h"
 #include "rf_phreaker/rf_phreaker_gui/Gps.h"
 #include "rf_phreaker/rf_phreaker_gui/Gsm.h"
 #include "rf_phreaker/rf_phreaker_gui/Wcdma.h"
@@ -22,6 +22,7 @@
 
 //namespace rf_phreaker { namespace gui {
 
+Q_DECLARE_METATYPE(CollectionInfo*)
 Q_DECLARE_METATYPE(Base*)
 Q_DECLARE_METATYPE(GenericMeasurement*)
 Q_DECLARE_METATYPE(Gsm*)
@@ -46,7 +47,7 @@ void registerQmlTypes()
 	qmlRegisterType<CollectionInfo>(uri.latin1(), 1, 0, "CollectionInfo");
 	qmlRegisterType<CollectionInfoList>(uri.latin1(), 1, 0, "CollectionInfoList");
 	qmlRegisterType<CollectionInfoSearch>(uri.latin1(), 1, 0, "CollectionInfoSearch");
-	qmlRegisterType<Device>(uri.latin1(), 1, 0, "Device");
+	qmlRegisterType<RpDevice>(uri.latin1(), 1, 0, "Device");
 	qmlRegisterType<Gps>(uri.latin1(), 1, 0, "Gps");
 	qmlRegisterType<Gsm>(uri.latin1(), 1, 0, "Gsm");
 	qmlRegisterType<Wcdma>(uri.latin1(), 1, 0, "Wcdma");

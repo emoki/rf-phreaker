@@ -21,6 +21,7 @@ Item {
         gridVisible: false
         reverse: Qt.Vertical
         lineVisible: false
+        //labelsFont: graphingLabel.font
     }
 
     Repeater {

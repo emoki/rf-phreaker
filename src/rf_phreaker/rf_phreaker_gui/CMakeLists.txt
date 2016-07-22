@@ -24,7 +24,6 @@ set (rf_phreaker_gui_SRCS
 	CollectionInfoList.h
 	CollectionInfoSearch.cpp
 	CollectionInfoSearch.h
-	Device.h
 	Events.h
 	FileSaveDialog.cpp
 	FileSaveDialog.h
@@ -38,6 +37,7 @@ set (rf_phreaker_gui_SRCS
 	MeasurementModel.h
 	ModelGroup.h
 	ProxyMeasurementModel.h
+	RpDevice.h
 	RpPositionProviderPlugin.cpp
 	RpPositionProviderPlugin.h
 	Serialization.h
@@ -62,10 +62,28 @@ set (rf_phreaker_gui_QMLS
 	DataAnalysisPage.qml
 	DataOverviewPage.qml
 	DataWorksheet.qml
-	ErrorWindow.qml
+	DevicePage.qml
 	main.qml
 	MapPage.qml
 	MarblePlacemarkList.qml
+	MaterialCard.qml
+	MaterialDashboardPage.qml
+	MaterialExpansionButton.qml
+	MaterialHeaderDelegate.qml
+	MaterialItemDelegate.qml
+	MaterialMain.qml
+	MaterialMarblePlacemarkList.qml
+	MaterialMeasurementsPage.qml
+	MaterialMeasurementTable.qml
+	MaterialMenuTableView.qml
+	MaterialNavigationPage.qml
+	MaterialOpenScannerDialog.qml
+	MaterialRowDelegate.qml
+	MaterialScanConfigurationPage.qml
+	MaterialScanList.qml
+	MaterialScannerInfoPage.qml
+	MaterialStateMachine.qml
+	MaterialTabbedNavigationDrawerPage.qml
 	OverviewChart.qml
 	PositionButton.qml
 	PositionMarker.qml
@@ -79,19 +97,6 @@ set (rf_phreaker_gui_QMLS
 	SweepLine.qml
 	SweepLines.qml
 	WorkbenchPage.qml
-	icons/action_settings.svg
-	icons/alert_error.svg
-	icons/alert_warning.svg
-	icons/device_gps_fixed.svg
-	icons/device_gps_not_fixed.svg
-	icons/device_gps_off.svg
-	icons/device_usb.svg
-	icons/editor_insert_chart.svg
-	icons/hardware_developer_board.svg
-	icons/maps_map.svg
-	icons/navigation_arrow_drop_up.svg
-	icons/scanning_idle.png
-	icons/scanning_sprite.png
 	qtlabscontrols.conf
 	)
 
@@ -125,16 +130,19 @@ include_directories (${CMAKE_SOURCE_DIR}/third_party/marble/src/lib/marble/proje
 include_directories (${CMAKE_SOURCE_DIR}/third_party/marble/src/lib/marble/routing)
 include_directories (${CMAKE_SOURCE_DIR}/third_party/marble/src/lib/marble/webpopup)
 
-set (rf_phreaker_gui_QRCS
-	_.qrc)
-
 set (CMAKE_AUTOMOC ON)
 set (CMAKE_AUTORCC ON)
 set (CMAKE_AUTOUIC ON)
 
 set (AUTOGEN_TARGET_DEPENDS ${rf_phreaker_gui_SRCS})
 
-add_executable (rf_phreaker_gui  ${rf_phreaker_gui_SRCS} ${rf_phreaker_gui_QMLS} ${rf_phreaker_gui_QRCS})
+set (rf_phreaker_gui_MAIN_QRC
+	rf_phreaker.qrc
+	${PROJECT_SOURCE_DIR}/icons/icons.qrc
+	)
+
+#${rf_phreaker_gui_QMLS}
+add_executable (rf_phreaker_gui  ${rf_phreaker_gui_SRCS} ${rf_phreaker_gui_MAIN_QRC})
 
 target_link_libraries (rf_phreaker_gui Qt5::Core)
 target_link_libraries (rf_phreaker_gui Qt5::Widgets)
@@ -153,4 +161,8 @@ target_link_libraries (rf_phreaker_gui
 target_link_libraries (rf_phreaker_gui 
 	debug ${CMAKE_LIBRARY_OUTPUT_DIRECTORY}/${CMAKE_CFG_INTDIR}/marbledeclaratived.lib 
 	optimized ${CMAKE_LIBRARY_OUTPUT_DIRECTORY}/${CMAKE_CFG_INTDIR}/marbledeclarative.lib
+)
+target_link_libraries (rf_phreaker_gui 
+	debug ${CMAKE_LIBRARY_OUTPUT_DIRECTORY}/${CMAKE_CFG_INTDIR}/materiald.lib 
+	optimized ${CMAKE_LIBRARY_OUTPUT_DIRECTORY}/${CMAKE_CFG_INTDIR}/material.lib
 )

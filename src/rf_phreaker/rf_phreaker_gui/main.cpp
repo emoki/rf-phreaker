@@ -9,6 +9,7 @@
 
 int main(int argc, char *argv[])
 {
+	//qputenv("QML_IMPORT_TRACE", "1");
 	QApplication app(argc, argv);
 	//app.setOrganizationName("Cappeen");
 	app.setOrganizationDomain("cappeen.com");
@@ -22,11 +23,13 @@ int main(int argc, char *argv[])
 
 	QGuiApplication::setAttribute(Qt::AA_EnableHighDpiScaling);
 	QQmlApplicationEngine engine;
-	//if (qgetenv("QT_QUICK_CONTROLS_STYLE").isEmpty()) {
-	//	qputenv("QT_QUICK_CONTROLS_STYLE", "Material");
-	//}
+//	if (qgetenv("QT_QUICK_CONTROLS_STYLE").isEmpty()) {
+//		qputenv("QT_QUICK_CONTROLS_STYLE", "Material");
+//	}
+//	engine.addImportPath("/Material/");
 	declarativePlugin.initializeEngine(&engine, marbleUri);
-	engine.load(QUrl(QStringLiteral("qrc:/main.qml")));
+	//engine.load(QUrl(QStringLiteral("qrc:/main.qml")));
+	engine.load(QUrl(QStringLiteral("qrc:/MaterialMain.qml")));
 
 	return app.exec();
 }

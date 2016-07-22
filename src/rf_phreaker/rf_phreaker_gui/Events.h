@@ -2,7 +2,7 @@
 #include <QDebug>
 #include <QEvent>
 #include "rf_phreaker/rf_phreaker_api/rf_phreaker_api.h"
-#include "rf_phreaker/rf_phreaker_gui/Device.h"
+#include "rf_phreaker/rf_phreaker_gui/RpDevice.h"
 #include "rf_phreaker/rf_phreaker_gui/Gps.h"
 #include "rf_phreaker/rf_phreaker_gui/Gsm.h"
 #include "rf_phreaker/rf_phreaker_gui/Wcdma.h"

@@ -10,6 +10,7 @@ def download_icon(name, out_dirname):
     group, name = name.split('/')
     url = ('https://raw.githubusercontent.com/google/material-design-icons/master/{}/svg/production/ic_{}_48px.svg'
            .format(group, name))
+    print(url)
     filename = os.path.join(out_dirname, group + '_' + name + '.svg')
 
     if not os.path.exists(filename):
