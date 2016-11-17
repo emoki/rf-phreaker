@@ -67,6 +67,7 @@ public:
 
 	~MarbleManager() {
 		storePreviousLayers();
+		storeLastKnownCoordinate();
 	}
 
 	Q_INVOKABLE void downloadMapRegion() {
@@ -299,7 +300,15 @@ private:
 		QFileInfo rpFile(MarbleDirs::path("rf_phreaker/rf_phreaker.kml"));
 		//if(!rpFile.exists())
 		//	 Signal error
-		map()->model()->addGeoDataFile(rpFile.absoluteFilePath());		
+		map()->model()->addGeoDataFile(rpFile.absoluteFilePath());
+
+		SettingsIO settingsIO;
+		auto coordinate = settingsIO.readLastKnownCoordinate();
+		this->centerOn(coordinate);
+		qDebug() << "zoom: " << this->zoom();
+		this->setZoom(3250);
+		setIsTrackingEnabled(true);
+		qDebug() << "zoom: " << this->zoom();
 	}
 
 	void mouseEventDoubleClickOrWheelSeen() {
@@ -368,6 +377,13 @@ private:
 		}
 		SettingsIO s;
 		s.writeMarbleLayers(placemarkList);
+	}
+
+	void storeLastKnownCoordinate() {
+		auto c = currentPosition_->coordinate();
+		SettingsIO sIO;
+		if(c.isValid())
+			sIO.writeLastKnownCoordinate(c);
 	}
 
 	void createTrackingDocument() {

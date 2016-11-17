@@ -4,10 +4,12 @@
 #include <QString>
 #include "rf_phreaker/rf_phreaker_gui/Serialization.h"
 #include "rf_phreaker/rf_phreaker_gui/CollectionInfo.h"
+#include "marble/geodata/data/GeoDataCoordinates.h"
 
 //namespace rf_phreaker { namespace gui {
 
 static const QString api_output_key("api_output");
+static const QString last_known_coordinates_key("last_known_coordinates");
 
 class Settings {
 public:
@@ -20,13 +22,26 @@ public:
 	    : qs_(QSettings::IniFormat, QSettings::UserScope, "rf_phreaker", "gui") {}
 
 	void readSettings(Settings &settings) {
-		settings.api_output_ = qs_.value("api_output", false).toBool();
+		settings.api_output_ = qs_.value(api_output_key, false).toBool();
 	}
+
+	Marble::GeoDataCoordinates readLastKnownCoordinate() {
+		bool success = false;
+		Marble::GeoDataCoordinates coordinate;
+		auto s = qs_.value(last_known_coordinates_key, "").toString();
+		coordinate = Marble::GeoDataCoordinates::fromString(s, success);
+		if(!success) {
+			coordinate.set(74.0059, 40.7128, 0);
+		}
+		return coordinate;
+	}
+
 	QList<CollectionInfo*> readScanList(QObject *parent) {
 		QList<CollectionInfo*> list;
 		readCollectionInfoList(list, "scan_list", parent);
 		return list;
 	}
+
 	void readCollectionInfoList(QList<CollectionInfo*> &list, const QString &descrip, QObject *parent) {
 		auto size = qs_.beginReadArray(descrip);
 		for(auto i = 0; i < size; ++i) {
@@ -38,6 +53,7 @@ public:
 		}
 		qs_.endArray();
 	}
+
 	QStringList readMarbleLayers() {
 		return qs_.value("previous_marble_layers").toStringList();
 	}
@@ -46,9 +62,16 @@ public:
 		qs_.setValue("api_output", settings.api_output_);
 
 	}
+
+	void writeLastKnownCoordinate(const Marble::GeoDataCoordinates &coordinate) {
+		auto s = coordinate.toString(Marble::GeoDataCoordinates::Notation::Decimal);
+		qs_.setValue(last_known_coordinates_key, s);
+	}
+
 	void writeScanList(const QList<CollectionInfo*> &list) {
 		writeCollectionInfoList(list, "scan_list");
 	}
+
 	void writeCollectionInfoList(const QList<CollectionInfo*> &list, const QString &descrip) {
 		qs_.beginWriteArray(descrip);
 		int i = 0;
@@ -61,6 +84,7 @@ public:
 		qs_.endArray();
 
 	}
+
 	void writeMarbleLayers(const QStringList &list) {
 		qs_.setValue("previous_marble_layers", list);
 	}
