@@ -20,7 +20,6 @@ set (rf_phreaker_gui_SRCS
 	Base.h
 	ChannelFreq.h
 	CollectionInfo.h
-	CollectionInfoList.cpp
 	CollectionInfoList.h
 	CollectionInfoSearch.cpp
 	CollectionInfoSearch.h
