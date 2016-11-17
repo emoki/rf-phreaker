@@ -228,19 +228,17 @@ private:
     static const int mergedDim;
     static const int hoveredDim;
     static const QColor regularColor;
-    static const QColor selectedColor;
     static const QColor mergedColor;
-    static const QColor hoveredColor;
 
     const ViewportParams *m_viewport;
     bool m_regionsInitialized;
     bool m_busy;
 
-    QList<PolylineNode>          m_outerNodesList;
-    QList<PolylineNode>          m_outerVirtualNodes;
-    QList< QList<PolylineNode> > m_innerNodesList;
-    QList< QList<PolylineNode> > m_innerVirtualNodes;
-    QList<QRegion>              m_boundariesList;
+    QVector<PolylineNode>            m_outerNodesList;
+    QVector<PolylineNode>            m_outerVirtualNodes;
+    QVector< QVector<PolylineNode> > m_innerNodesList;
+    QVector< QVector<PolylineNode> > m_innerVirtualNodes;
+    QVector<QRegion>                 m_boundariesList;
 
     // Used in the Editing state
     enum EditingInteractingObject {

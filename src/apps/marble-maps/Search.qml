@@ -9,10 +9,10 @@
 //
 
 import QtQuick 2.3
-import QtQuick.Controls 1.3
+import QtQuick.Controls 2.0
 import QtQuick.Window 2.2
 
-import org.kde.edu.marble 0.20
+import org.kde.marble 0.20
 
 Item {
     id: root
@@ -31,9 +31,14 @@ Item {
         }
     }
 
-    SystemPalette{
+    SystemPalette {
         id: palette
         colorGroup: SystemPalette.Active
+    }
+
+    SystemPalette {
+        id: paletteDisabled
+        colorGroup: SystemPalette.Disabled
     }
 
     SearchResults {
@@ -50,21 +55,144 @@ Item {
             backend.setSelectedPlacemark(index);
             root.itemSelected();
             searchResults.visible = false;
-            searchField.focus = true;
             if (routingManager) {
                 routingManager.addSearchResultAsPlacemark(backend.selectedPlacemark);
             }
             placemarkDialog.placemark = backend.selectedPlacemark;
-            itemStack.state = "place"
         }
+    }
 
-        MouseArea{
-            anchors.fill: parent
-            propagateComposedEvents: true
-            onPressed: {
-                searchField.focus = true;
-                mouse.accepted = false;
+    Rectangle {
+        id: background
+        visible: searchField.hasFocus && searchField.query === ""
+        anchors.top: searchField.bottom
+        anchors.left: searchField.left
+        width: searchField.width
+        height: childrenRect.height + 2 * itemSpacing
+        color: palette.base
+
+        property int delegateHeight: 0
+
+        property double itemSpacing: Screen.pixelDensity * 1
+
+        Column {
+            anchors.top: parent.top
+            anchors.topMargin: background.itemSpacing
+            anchors.left: parent.left
+            anchors.right: parent.right
+            anchors.margins: background.itemSpacing
+            spacing: background.itemSpacing
+
+            ListView {
+                id: bookmarksView
+                anchors.left: parent.left
+                anchors.right: parent.right
+                height: background.delegateHeight * Math.min(6, model.count)
+                clip: true
+                ScrollIndicator.vertical: ScrollIndicator { }
+
+                model: bookmarks.model
+                delegate: Row {
+                    width: bookmarksView.width
+                    height: background.itemSpacing + Math.max(bookmarkIcon.height, bookmarkText.height)
+                    spacing: background.itemSpacing
+
+                    Image {
+                        id: bookmarkIcon
+                        anchors.verticalCenter: parent.verticalCenter
+                        source: iconPath.substr(0,1) === '/' ? "file://" + iconPath : iconPath
+                        width: Screen.pixelDensity * 4
+                        height: width
+                        sourceSize.width: width
+                        sourceSize.height: height
+                    }
+
+                    Text {
+                        id: bookmarkText
+                        anchors.verticalCenter: parent.verticalCenter
+                        anchors.leftMargin: Screen.pixelDensity * 2
+                        width: bookmarksView.width - bookmarksView.spacing - bookmarkIcon.width
+                        text: display
+                        font.pointSize: 18
+                        color: palette.text
+                        elide: Text.ElideMiddle
+
+                        MouseArea {
+                            anchors.fill: parent
+                            onClicked: {
+                                bookmarksView.currentIndex = index
+                                placemarkDialog.placemark = bookmarks.placemark(index);
+                                marbleMaps.centerOn(placemarkDialog.placemark.longitude, placemarkDialog.placemark.latitude)
+                                dialogContainer.focus = true
+                            }
+                        }
+                    }
+
+                    onHeightChanged: {
+                        if( background.delegateHeight !== height ) {
+                            background.delegateHeight = height;
+                        }
+                    }
+                }
             }
+
+            Row {
+                visible: bookmarksView.model.count === 0
+                width: parent.width
+
+                Text {
+                    anchors.bottom: parent.bottom
+                    width: 0.8 * parent.width
+                    font.pointSize: 18
+                    color: paletteDisabled.text
+                    text: qsTr("Your bookmarks will appear here.")
+                    wrapMode: Text.WrapAtWordBoundaryOrAnywhere
+                    elide: Text.ElideRight
+                }
+
+                Image {
+                    anchors.bottom: parent.bottom
+                    width: 0.2 * parent.width
+                    fillMode: Image.PreserveAspectFit
+                    source: "qrc:/konqi/books.png"
+                }
+            }
+
+            Rectangle {
+                height: 1
+                width: parent.width
+                color: "gray"
+            }
+
+            Text {
+                font.pointSize: 18
+                color: palette.text
+                width: parent.width
+                text: qsTr("About Marble Maps…")
+                elide: Text.ElideRight
+                MouseArea {
+                    anchors.fill: parent
+                    onClicked: {
+                        dialogContainer.currentIndex = dialogContainer.about
+                        dialogContainer.focus = true
+                    }
+                }
+            }
+
+            /*
+            Text {
+                font.pointSize: 18
+                color: palette.text
+                text: qsTr("Settings")
+                MouseArea {
+                    anchors.fill: parent
+                    onClicked: {
+                        dialogContainer.currentIndex = dialogContainer.settings
+                        dialogContainer.focus = true
+                    }
+                }
+            }
+            */
         }
     }
 
@@ -74,7 +202,6 @@ Item {
         onSearchResultChanged: {
             searchResults.model = model;
             searchResults.visible = true;
-            searchField.focus = true;
         }
         onSearchFinished: searchField.busy = false
     }
@@ -93,5 +220,10 @@ Item {
         onSearchRequested: backend.search(query)
         onCompletionRequested: backend.setCompletionPrefix(query)
         onCleared: searchResults.visible = false
+    }
+
+    Bookmarks {
+        id: bookmarks
+        map: root.marbleQuickItem
     }
 }

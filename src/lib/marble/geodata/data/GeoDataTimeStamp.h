@@ -11,19 +11,19 @@
 #ifndef MARBLE_GEODATATIMESTAMP_H
 #define MARBLE_GEODATATIMESTAMP_H
 
-#include <QString>
-#include <QDateTime>
-
-#include "GeoDataObject.h"
 #include "GeoDataTimePrimitive.h"
 
 #include "geodata_export.h"
+
+class QDateTime;
 
 namespace Marble
 {
 
 class GeoDataTimeStampPrivate;
 
+/**
+ */
 class GEODATA_EXPORT GeoDataTimeStamp : public GeoDataTimePrimitive
 {
   public:

@@ -18,7 +18,7 @@ namespace Marble
 class CachePlugin : public ParseRunnerPlugin
 {
     Q_OBJECT
-    Q_PLUGIN_METADATA( IID "org.kde.edu.marble.CachePlugin" )
+    Q_PLUGIN_METADATA(IID "org.kde.marble.CachePlugin")
     Q_INTERFACES( Marble::ParseRunnerPlugin )
 
 public:
@@ -34,7 +34,7 @@ public:
 
     QString copyrightYears() const;
 
-    QList<PluginAuthor> pluginAuthors() const;
+    QVector<PluginAuthor> pluginAuthors() const override;
 
     QString fileFormatDescription() const;
 

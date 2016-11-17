@@ -30,12 +30,12 @@ public:
                         QWidget *parent = 0 );
     ~EditPolylineDialog();
 
-public slots:
+public Q_SLOTS:
     void handleAddingNode( const GeoDataCoordinates &node );
     void handleItemMoving( GeoDataPlacemark *item );
     void handleChangingStyle();
 
-signals:
+Q_SIGNALS:
     void polylineUpdated( GeoDataFeature *feature );
 
     /**
@@ -43,9 +43,9 @@ signals:
      * created( or modified ) within the relation editor
      * @param relation the relation's osmData
      */
-    void relationCreated( OsmPlacemarkData relation );
+    void relationCreated( const OsmPlacemarkData &relation );
 
-private slots:
+private Q_SLOTS:
     void updatePolyline();
     void updateLinesDialog( const QColor &color );
     void restoreInitial( int result );

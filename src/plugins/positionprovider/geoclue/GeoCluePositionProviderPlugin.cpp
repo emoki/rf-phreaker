@@ -23,7 +23,7 @@ QString GeoCluePositionProviderPlugin::name() const
 
 QString GeoCluePositionProviderPlugin::nameId() const
 {
-    return QString::fromLatin1( "GeoClue" );
+    return QStringLiteral("GeoClue");
 }
 
 QString GeoCluePositionProviderPlugin::guiString() const
@@ -103,9 +103,5 @@ void GeoCluePositionProviderPlugin::updateStatus(GeoCute::Status newStatus)
 
     emit statusChanged(m_status);
 }
-
-Q_EXPORT_PLUGIN2( GeoCluePositionProviderPlugin, Marble::GeoCluePositionProviderPlugin )
-
-
 
 #include "moc_GeoCluePositionProviderPlugin.cpp"

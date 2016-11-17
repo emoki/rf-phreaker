@@ -23,11 +23,11 @@
 #include "MarbleDebug.h"
 #include "RenderPlugin.h"
 #include "PositionProviderPlugin.h"
-#include "AbstractFloatItem.h"
 #include "ParseRunnerPlugin.h"
 #include "ReverseGeocodingRunnerPlugin.h"
 #include "RoutingRunnerPlugin.h"
 #include "SearchRunnerPlugin.h"
+#include "config-marble.h"
 
 namespace Marble
 {
@@ -51,11 +51,16 @@ class PluginManagerPrivate
     QList<const ReverseGeocodingRunnerPlugin *> m_reverseGeocodingRunnerPlugins;
     QList<RoutingRunnerPlugin *> m_routingRunnerPlugins;
     QList<const ParseRunnerPlugin *> m_parsingRunnerPlugins;
+    static QStringList m_blacklist;
+    static QStringList m_whitelist;
 
 #ifdef Q_OS_ANDROID
     QStringList m_pluginPaths;
 #endif
 };
+
+QStringList PluginManagerPrivate::m_blacklist;
+QStringList PluginManagerPrivate::m_whitelist;
 
 PluginManagerPrivate::~PluginManagerPrivate()
 {
@@ -154,6 +159,16 @@ void PluginManager::addParseRunnerPlugin( const ParseRunnerPlugin *plugin )
     emit parseRunnerPluginsChanged();
 }
 
+void PluginManager::blacklistPlugin(const QString &filename)
+{
+    PluginManagerPrivate::m_blacklist << MARBLE_SHARED_LIBRARY_PREFIX + filename;
+}
+
+void PluginManager::whitelistPlugin(const QString &filename)
+{
+    PluginManagerPrivate::m_whitelist << MARBLE_SHARED_LIBRARY_PREFIX + filename;
+}
+
 /** Append obj to the given plugins list if it inherits both T and U */
 template<class T, class U>
 bool appendPlugin( QObject * obj, QPluginLoader* &loader, QList<T*> &plugins )
@@ -211,6 +226,16 @@ void PluginManagerPrivate::loadPlugins()
     Q_ASSERT( m_parsingRunnerPlugins.isEmpty() );
 
     foreach( const QString &fileName, pluginFileNameList ) {
+        QString const baseName = QFileInfo(fileName).baseName();
+        if (!m_whitelist.isEmpty() && !m_whitelist.contains(baseName)) {
+            mDebug() << "Ignoring non-whitelisted plugin " << fileName;
+            continue;
+        }
+        if (m_blacklist.contains(baseName)) {
+            mDebug() << "Ignoring blacklisted plugin " << fileName;
+            continue;
+        }
+
         // mDebug() << fileName << " - " << MarbleDirs::pluginPath( fileName );
         QString const path = MarbleDirs::pluginPath( fileName );
 #ifdef Q_OS_ANDROID
@@ -264,13 +289,20 @@ void PluginManagerPrivate::loadPlugins()
         QDir pluginHome(MarbleDirs::localPath());
         pluginHome.mkpath(MarbleDirs::pluginLocalPath());
         pluginHome.setCurrent(MarbleDirs::pluginLocalPath());
+
+        QStringList pluginNameFilter = QStringList() << "lib*.so";
+        QStringList const existingPlugins = QDir(MarbleDirs::pluginLocalPath()).entryList(pluginNameFilter, QDir::Files);
+        foreach(const QString &existingPlugin, existingPlugins) {
+            QFile::remove(existingPlugin);
+        }
+
         foreach (const QString & file, copyList) {
-            QString const target = MarbleDirs::pluginLocalPath() + '/' + file;
-            if (QFileInfo(MarbleDirs::pluginSystemPath() + '/' + file).isDir()) {
+            QString const target = MarbleDirs::pluginLocalPath() + QLatin1Char('/') + file;
+            if (QFileInfo(MarbleDirs::pluginSystemPath() + QLatin1Char('/') + file).isDir()) {
                 pluginHome.mkpath(target);
             }
             else {
-                QFile temporaryFile(MarbleDirs::pluginSystemPath() + '/' + file);
+                QFile temporaryFile(MarbleDirs::pluginSystemPath() + QLatin1Char('/') + file);
                 temporaryFile.copy(target);
                 QFileInfo targetFile(target);
                 d->m_pluginPaths << targetFile.canonicalFilePath();

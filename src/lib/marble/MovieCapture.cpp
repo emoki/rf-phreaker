@@ -15,6 +15,9 @@
 
 #include <QProcess>
 #include <QMessageBox>
+#include <QTimer>
+#include <QTime>
+#include <QFile>
 
 namespace Marble
 {
@@ -106,20 +109,20 @@ QString MovieCapture::destination() const
     return d->destinationFile;
 }
 
-QList<MovieFormat> MovieCapture::availableFormats()
+QVector<MovieFormat> MovieCapture::availableFormats()
 {
     Q_D(MovieCapture);
-    static QList<MovieFormat> availableFormats;
+    static QVector<MovieFormat> availableFormats;
     if ( availableFormats.isEmpty() && checkToolsAvailability() ) {
         QProcess encoder(this);
         foreach ( const MovieFormat &format, m_supportedFormats ) {
             QString type = format.type();
             QStringList args;
-            args << "-h" << "muxer=" + type;
+            args << "-h" << QLatin1String("muxer=") + type;
             encoder.start( d->encoderExec, args );
             encoder.waitForFinished();
             QString output = encoder.readAll();
-            bool isFormatAvailable = !output.contains( "Unknown format" );
+            bool isFormatAvailable = !output.contains(QLatin1String("Unknown format"));
             if( isFormatAvailable ) {
                 availableFormats << format;
             }

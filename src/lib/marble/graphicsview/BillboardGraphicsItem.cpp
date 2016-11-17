@@ -19,28 +19,28 @@
 namespace Marble
 {
 
-class Q_DECL_HIDDEN BillboardGraphicsItem::Private : public MarbleGraphicsItemPrivate
+class BillboardGraphicsItemPrivate : public MarbleGraphicsItemPrivate
 {
  public:
-    Private( BillboardGraphicsItem *parent ) :
-        MarbleGraphicsItemPrivate( parent ),
+    BillboardGraphicsItemPrivate(BillboardGraphicsItem *parent)
+        : MarbleGraphicsItemPrivate(parent),
         m_alignment( Qt::AlignHCenter | Qt::AlignVCenter )
     {
     }
 
-    QList<QPointF> positions() const
+    QVector<QPointF> positions() const override
     {
         return m_positions;
     }
 
-    QList<QPointF> absolutePositions() const
+    QVector<QPointF> absolutePositions() const override
     {
         return m_positions;
     }
 
     Qt::Alignment m_alignment;
 
-    void setProjection( const ViewportParams *viewport )
+    void setProjection(const ViewportParams *viewport) override
     {
         m_positions.clear();
 
@@ -54,6 +54,7 @@ class Q_DECL_HIDDEN BillboardGraphicsItem::Private : public MarbleGraphicsItemPr
         // Don't display items if they are on the far side of the globe.
         if (globeHidesPoint) return;
 
+        m_positions.reserve(pointRepeatNumber);
         for ( int i = 0; i < pointRepeatNumber; ++i ) {
             // handle vertical alignment
             qint32 topY = ( viewport->height() - m_size.height() ) / 2;
@@ -84,34 +85,41 @@ class Q_DECL_HIDDEN BillboardGraphicsItem::Private : public MarbleGraphicsItemPr
     }
 
     GeoDataCoordinates m_coordinates;
-    QList<QPointF> m_positions;
+    QVector<QPointF> m_positions;
 };
 
 BillboardGraphicsItem::BillboardGraphicsItem()
-    : MarbleGraphicsItem( new Private( this ) )
+    : MarbleGraphicsItem(new BillboardGraphicsItemPrivate(this))
 {
 }
 
 GeoDataCoordinates BillboardGraphicsItem::coordinate() const
 {
-    return p()->m_coordinates;
+    Q_D(const BillboardGraphicsItem);
+    return d->m_coordinates;
 }
 
 void BillboardGraphicsItem::setCoordinate( const GeoDataCoordinates &coordinates )
 {
-    p()->m_coordinates = coordinates;
+    Q_D(BillboardGraphicsItem);
+    d->m_coordinates = coordinates;
 }
 
-QList<QPointF> BillboardGraphicsItem::positions() const
+QVector<QPointF> BillboardGraphicsItem::positions() const
 {
-    return p()->positions();
+    Q_D(const BillboardGraphicsItem);
+    return d->positions();
 }
 
-QList<QRectF> BillboardGraphicsItem::boundingRects() const
+QVector<QRectF> BillboardGraphicsItem::boundingRects() const
 {
-    QList<QRectF> rects;
-    QSizeF const size = p()->m_size;
-    foreach(const QPointF &point, p()->m_positions) {
+    Q_D(const BillboardGraphicsItem);
+
+    QVector<QRectF> rects;
+    rects.reserve(d->m_positions.size());
+
+    QSizeF const size = d->m_size;
+    foreach (const QPointF &point, d->m_positions) {
         rects << QRectF(point, size);
     }
     return rects;
@@ -129,22 +137,14 @@ QRectF BillboardGraphicsItem::containsRect( const QPointF &point ) const
 
 Qt::Alignment BillboardGraphicsItem::alignment() const
 {
-    return p()->m_alignment;
+    Q_D(const BillboardGraphicsItem);
+    return d->m_alignment;
 }
 
 void BillboardGraphicsItem::setAlignment(Qt::Alignment alignment)
 {
-    p()->m_alignment = alignment;
-}
-
-BillboardGraphicsItem::Private *BillboardGraphicsItem::p()
-{
-    return static_cast<Private *>( d );
-}
-
-const BillboardGraphicsItem::Private *BillboardGraphicsItem::p() const
-{
-    return static_cast<Private *>( d );
+    Q_D(BillboardGraphicsItem);
+    d->m_alignment = alignment;
 }
 
 } // Marble namespace

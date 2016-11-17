@@ -17,7 +17,6 @@
 #include "OsmElementDictionary.h"
 #include "GeoDataDocument.h"
 #include "GeoWriter.h"
-#include "GeoDataPlacemark.h"
 #include "GeoDataGeometry.h"
 #include "GeoDataPoint.h"
 #include "GeoDataPolygon.h"
@@ -25,10 +24,10 @@
 #include "GeoDataTypes.h"
 #include "osm/OsmPlacemarkData.h"
 #include "osm/OsmObjectManager.h"
+#include "OsmRelationTagWriter.h"
+#include "OsmConverter.h"
 
-
-//Qt
-#include <QVector>
+#include <QDebug>
 
 namespace Marble
 {
@@ -38,79 +37,28 @@ static GeoTagWriterRegistrar s_writerDocument( GeoTagWriter::QualifiedName( GeoD
                                                new OsmDocumentTagTranslator() );
 
 
-bool OsmDocumentTagTranslator::writeMid( const GeoNode *node, GeoWriter& writer ) const
+bool OsmDocumentTagTranslator::write( const GeoNode *node, GeoWriter& writer ) const
 {
     const GeoDataDocument *document = static_cast<const GeoDataDocument*>(node);
 
-    // Creating separate lists, to improve efficiency
-    QList<const GeoDataObject*> polylines, polygons;
-    QList<OsmBound> bounds;
+    OsmConverter converter;
+    converter.read(document);
+    OsmNodeTagWriter::writeAllNodes(converter.nodes(), writer);
 
-    // Writing all the component nodes ( points, nodes of polylines, nodes of polygons )
-    foreach ( GeoDataFeature* feature, document->featureList() ) {
-
-        if ( feature->nodeType() != GeoDataTypes::GeoDataPlacemarkType ) {
-            continue;
+    qint64 lastId = 0;
+    foreach(const auto &way, converter.ways()) {
+        if (way.second.id() != lastId) {
+            OsmWayTagWriter::writeWay(*way.first, way.second, writer);
+            lastId = way.second.id();
         }
-        GeoDataPlacemark* placemark = static_cast<GeoDataPlacemark*>( feature );
-
-        // If the placemark's osmData is not complete, it is initialized by the OsmObjectManager
-        OsmObjectManager::initializeOsmData( placemark );
-
-        const OsmPlacemarkData osmData = placemark->osmData();
-
-        if ( placemark->geometry()->nodeType() == GeoDataTypes::GeoDataPointType ) {
-            writeElement( placemark, writer );
-        }
-        else if ( placemark->geometry()->nodeType() == GeoDataTypes::GeoDataLineStringType ) {
-            // Writing all the lineString nodes directly from the hash, as order is irrelevant
-            OsmNodeTagWriter::writeAllNodes( osmData, writer );
-            polylines.append( placemark );
-        }
-        else if ( placemark->geometry()->nodeType() == GeoDataTypes::GeoDataPolygonType ) {
-            const GeoDataPolygon *polygon = static_cast<const GeoDataPolygon*>( placemark->geometry() );
-            int index = -1;
-
-            // Writing all the outerRing's nodes
-            const GeoDataLinearRing &outerRing = polygon->outerBoundary();
-            const OsmPlacemarkData outerRingOsmData = osmData.memberReference( index );
-            OsmNodeTagWriter::writeAllNodes( outerRingOsmData, writer );
-            bounds.append( OsmBound( &outerRing, outerRingOsmData ) );
-
-            // Writing all nodes for each innerRing
-            foreach ( const GeoDataLinearRing &innerRing, polygon->innerBoundaries() ) {
-                ++index;
-                const OsmPlacemarkData innerRingOsmData = osmData.memberReference( index );
-                OsmNodeTagWriter::writeAllNodes( innerRingOsmData, writer );
-                bounds.append( OsmBound( &innerRing, innerRingOsmData ) );
-            }
-            polygons.append( placemark );
-        }
-    }
-
-
-    // Writing the ways
-    foreach ( const GeoDataObject* polyline, polylines ) {
-        writeElement( polyline, writer );
-    }
-
-    // Writing the bounds ( innerBounds and outerBounds, part of polygons )
-    foreach ( OsmBound bound, bounds ) {
-        OsmWayTagWriter::writeWay( *bound.first, bound.second, writer );
     }
 
     // Writing polygons
-    foreach ( const GeoDataObject* polygon, polygons ) {
-        writeElement( polygon, writer );
+    foreach (const auto& polygon, converter.polygons()) {
+        OsmRelationTagWriter::writeMultipolygon(*polygon.first, polygon.second, writer );
     }
 
     return true;
-}
-
-
-OsmDocumentTagTranslator::OsmDocumentTagTranslator():
-    OsmFeatureTagTranslator() {
-    //nothing to do
 }
 
 }

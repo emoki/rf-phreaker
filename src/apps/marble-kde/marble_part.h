@@ -16,9 +16,7 @@
 
 #include <kparts/readonlypart.h>
 #include <QHash>
-#include <QDateTime>
 #include "MarbleGlobal.h"
-#include "cloudsync/CloudSyncManager.h"
 #include <krecentfilesaction.h>
 #include <QDomNode>
 
@@ -31,9 +29,7 @@ class KConfigDialog;
 class KToolBar;
 
 class QLabel;
-class QPrinter;
 class QProgressBar;
-class QStandardItemModel;
 
 namespace KParts
 {
@@ -46,7 +42,6 @@ namespace Marble
 class MovieCaptureDialog;
 class ControlView;
 class DownloadRegionDialog;
-class RoutingProfilesWidget;
 class SunControlWidget;
 class TimeControlWidget;
 class GeoDataFolder;
@@ -199,7 +194,7 @@ class MarblePart: public KParts::ReadOnlyPart
 
   private:
     // All the functionality is provided by this widget.
-    ControlView       *m_controlView; // MarbleControlBox and MarbleWidget
+    ControlView       *m_controlView;
     SunControlWidget  *m_sunControlDialog;
     TimeControlWidget *m_timeControlDialog;
     DownloadRegionDialog *m_downloadRegionDialog;
@@ -260,10 +255,6 @@ class MarblePart: public KParts::ReadOnlyPart
     QProgressBar *m_downloadProgressBar;
 
     KParts::StatusBarExtension *m_statusBarExtension;
-
-    // Information about the graphics system
-    GraphicsSystem m_initialGraphicsSystem;
-    GraphicsSystem m_previousGraphicsSystem;
 
     QHash< int, int > m_timezone;
     QMap<int, QString> m_externalEditorMapping;

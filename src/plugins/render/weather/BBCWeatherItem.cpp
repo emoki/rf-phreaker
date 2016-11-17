@@ -17,8 +17,6 @@
 #include "MarbleDebug.h"
 
 // Qt
-#include <QFile>
-#include <QTime>
 #include <QUrl>
 
 using namespace Marble;
@@ -37,13 +35,13 @@ BBCWeatherItem::~BBCWeatherItem()
 
 bool BBCWeatherItem::request( const QString& type )
 {
-    if ( type == "bbcobservation" ) {
+    if (type == QLatin1String("bbcobservation")) {
         if ( !m_observationRequested ) {
             m_observationRequested = true;
             return true;
         }
     }
-    else if ( type == "bbcforecast" ) {
+    else if (type == QLatin1String("bbcforecast")) {
         if ( !m_forecastRequested ) {
             m_forecastRequested = true;
             return true;
@@ -59,7 +57,7 @@ QString BBCWeatherItem::service() const
 
 void BBCWeatherItem::addDownloadedFile( const QString& url, const QString& type )
 {
-    if( type == "bbcobservation" || type == "bbcforecast" ) {
+    if (type == QLatin1String("bbcobservation") || type == QLatin1String("bbcforecast")) {
         BBCParser::instance()->scheduleRead( url, this, type );
     }
 }
@@ -72,7 +70,7 @@ quint32 BBCWeatherItem::bbcId() const
 void BBCWeatherItem::setBbcId( quint32 id )
 {
     m_bbcId = id;
-    setId( QString( "bbc" ) + QString::number( id ) );
+    setId(QLatin1String("bbc") + QString::number(id));
 }
 
 QUrl BBCWeatherItem::observationUrl() const

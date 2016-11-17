@@ -13,9 +13,10 @@
 #define MARBLE_BOOKMARKMANAGER_H
 
 #include <QObject>
-#include <QString>
 #include <QVector>
 #include "MarbleGlobal.h"
+
+class QString;
 
 namespace Marble
 {
@@ -26,6 +27,7 @@ namespace Marble
     class GeoDataPlacemark;
     class GeoDataFolder;
     class GeoDataTreeModel;
+    class StyleBuilder;
 /**
  * This class is responsible for loading the
  * book mark objects from the files and various
@@ -95,6 +97,11 @@ class MARBLE_EXPORT BookmarkManager : public QObject
       * @brief remove all folders and bookmarks except default folder
       */
     void removeAllBookmarks();
+
+    /**
+     * @since 0.26.0
+     */
+    void setStyleBuilder(const StyleBuilder* styleBuilder);
 
 public Q_SLOTS:
     void setShowBookmarks( bool visible );

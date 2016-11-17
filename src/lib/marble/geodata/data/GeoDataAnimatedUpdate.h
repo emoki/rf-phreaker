@@ -12,14 +12,16 @@
 #ifndef MARBLE_GEODATAANIMATEDUPDATE_H
 #define MARBLE_GEODATAANIMATEDUPDATE_H
 
-#include "GeoDataUpdate.h"
 #include "GeoDataTourPrimitive.h"
 #include "MarbleGlobal.h"
 
 namespace Marble {
 
 class GeoDataAnimatedUpdatePrivate;
+class GeoDataUpdate;
 
+/**
+ */
 class GEODATA_EXPORT GeoDataAnimatedUpdate: public GeoDataTourPrimitive
 {
 public:

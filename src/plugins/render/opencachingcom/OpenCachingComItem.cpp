@@ -21,22 +21,20 @@
 #include "ui_CacheDetailsDialog.h"
 #include "OpenCachingComModel.h"
 
-#include <QFontMetrics>
 #include <QPixmap>
 #include <QAction>
 #include <QDialog>
 #include <QDateTime>
 #include <QFile>
-#include <QScriptEngine>
-#include <QScriptValue>
 #include <QDesktopServices>
+#include <QJsonDocument>
 
 #include <QDebug>
 
 namespace Marble
 {
 
-OpenCachingComItem::OpenCachingComItem( QVariantMap cache, OpenCachingComModel *parent )
+OpenCachingComItem::OpenCachingComItem( const QVariantMap& cache, OpenCachingComModel *parent )
     : AbstractDataPluginItem( parent )
      , m_ui( 0 )
      , m_model( parent )
@@ -47,8 +45,7 @@ OpenCachingComItem::OpenCachingComItem( QVariantMap cache, OpenCachingComModel *
     setCoordinate( GeoDataCoordinates( cache["location"].toMap()["lon"].toReal(), cache["location"].toMap()["lat"].toReal(), 0.0, GeoDataCoordinates::Degree ) );
 
     // Opencaching.Com does (in effect) this, so as do we..
-    if ( m_cache["type"].toString() == "Unknown Cache" )
-    {
+    if (m_cache["type"].toString() == QLatin1String("Unknown Cache")) {
         m_cache["type"] = QString("Puzzle");
     }
 
@@ -86,24 +83,24 @@ void OpenCachingComItem::showInfoDialog()
 
     dialog.setWindowTitle( tr("Cache Details for %1").arg(id() ));
 
-    m_ui->labelIcon->setPixmap(QPixmap(":/" + iconName() + ".png"));
-    m_ui->labelHeader->setText(QString("<big><strong>" + m_cache["name"].toString() + "</strong></big>"));
+    m_ui->labelIcon->setPixmap(QPixmap(QLatin1String(":/") + iconName() + QLatin1String(".png")));
+    m_ui->labelHeader->setText(QLatin1String("<big><strong>") + m_cache["name"].toString() + QLatin1String("</strong></big>"));
 
-    m_ui->buttonWww->setIcon( QIcon( ":/internet.png" ) );
+    m_ui->buttonWww->setIcon(QIcon(QStringLiteral(":/internet.png")));
     m_ui->buttonWww->setToolTip( tr("Click to open this cache's page in a browser") );
     connect( m_ui->buttonWww, SIGNAL(clicked()), SLOT(openWww()) );
 
     // basic details
-    QString details = "<table><tr><td colspan=\"2\" valign=\"middle\">"
-        + tr(m_cache["type"].toString().toUtf8())
-        + "<br/>" + id() + "<br/>" + coordinate().toString() + "</td></tr>"
-        + "<tr><td align=\"right\">" + tr("Size:") + " </td><td>" + ratingNumberString(m_cache["size"]) + "</td></tr>"
-        + "<tr><td align=\"right\">" + tr("Difficulty:") + " </td><td>" + ratingNumberString(m_cache["difficulty"]) + "</td></tr>"
-        + "<tr><td align=\"right\">" + tr("Terrain:") + " </td><td>" + ratingNumberString(m_cache["terrain"]) + "</td></tr>"
-        + "<tr><td align=\"right\">" + tr("Awsomeness:") + " </td><td>" + ratingNumberString(m_cache["awsomeness"]) + "</td></tr>"
-        + "<tr><td align=\"right\">" + tr("Hidden by:") + " </td><td>" + m_cache["hidden_by"].toMap()["name"].toString() + "</td></tr>"
-        + "<tr><td align=\"right\">" + tr("Hidden:") + " </td><td>" + dateString(m_cache["hidden"]) + "</td></tr>"
-        + "<tr><td align=\"right\">" + tr("Last found:") + " </td><td>" + dateString(m_cache["last_found"]) + "</td></tr>";
+    QString details = QLatin1String("<table><tr><td colspan=\"2\" valign=\"middle\">") +
+        tr(m_cache["type"].toString().toUtf8().constData()) +
+        QLatin1String("<br/>") + id() + QLatin1String("<br/>") + coordinate().toString() + QLatin1String("</td></tr>"
+        "<tr><td align=\"right\">") + tr("Size:") + QLatin1String(" </td><td>") + ratingNumberString(m_cache["size"]) + QLatin1String("</td></tr>"
+        "<tr><td align=\"right\">") + tr("Difficulty:") + QLatin1String(" </td><td>") + ratingNumberString(m_cache["difficulty"]) + QLatin1String("</td></tr>"
+        "<tr><td align=\"right\">") + tr("Terrain:") + QLatin1String(" </td><td>") + ratingNumberString(m_cache["terrain"]) + QLatin1String("</td></tr>"
+        "<tr><td align=\"right\">") + tr("Awsomeness:") + QLatin1String(" </td><td>") + ratingNumberString(m_cache["awsomeness"]) + QLatin1String("</td></tr>"
+        "<tr><td align=\"right\">") + tr("Hidden by:") + QLatin1String(" </td><td>") + m_cache["hidden_by"].toMap()["name"].toString() + QLatin1String("</td></tr>"
+        "<tr><td align=\"right\">") + tr("Hidden:") + QLatin1String(" </td><td>") + dateString(m_cache["hidden"]) + QLatin1String("</td></tr>"
+        "<tr><td align=\"right\">") + tr("Last found:") + QLatin1String(" </td><td>") + dateString(m_cache["last_found"]) + QLatin1String("</td></tr>");
 
     // list of tags
     // ### cache the translated cache string. Necessary??
@@ -115,23 +112,23 @@ void OpenCachingComItem::showInfoDialog()
         {
             if (i)
             {
-                strTags += ", ";
+                strTags += QLatin1String(", ");
             }
-            strTags += tr(tags[i].toUtf8());
+            strTags += tr(tags[i].toUtf8().constData());
         }
         m_cache["strTags"] = strTags;
     }
     QString strTags = m_cache["strTags"].toString();
     if (!strTags.isEmpty())
     {
-        details += "<tr><td align=\"right\">" + tr("Tags:") + " </td><td>" + strTags + "</td></tr>";
+        details += QLatin1String("<tr><td align=\"right\">") + tr("Tags:") + QLatin1String(" </td><td>") + strTags + QLatin1String("</td></tr>");
     }
 
     // "series" - name of a series that this cache belongs to
     QString series = m_cache["series"].toString();
     if (!series.isEmpty())
     {
-        details += "<tr><td align=\"right\">" + tr("Series:") + " </td><td>" + series + "</td></tr>";
+        details += QLatin1String("<tr><td align=\"right\">") + tr("Series:") + QLatin1String(" </td><td>") + series + QLatin1String("</td></tr>");
     }
 
     // verification options translated
@@ -149,7 +146,7 @@ void OpenCachingComItem::showInfoDialog()
         if (verifyOpts["code_phrase"].isValid())
             verifyOptsStrings << tr("code phrase");
 
-        details += "<tr><td align=\"right\">" + tr("Verification:") + " </td><td>" + verifyOptsStrings.join(", ") + "</td></tr>";
+        details += QLatin1String("<tr><td align=\"right\">") + tr("Verification:") + QLatin1String(" </td><td>") + verifyOptsStrings.join(QStringLiteral(", ")) + QLatin1String("</td></tr>");
     }
 
     // show a distance to the cache, either from current position if we know,
@@ -162,7 +159,7 @@ void OpenCachingComItem::showInfoDialog()
         if (location.isValid())
         {
             QString dist = formatDistance( distanceSphere(location, coordinate()) );
-            details += "<tr><td align=\"right\">" + tr("Distance:") + " </td><td>" + dist + "</td></tr>";
+            details += QLatin1String("<tr><td align=\"right\">") + tr("Distance:") + QLatin1String(" </td><td>") + dist + QLatin1String("</td></tr>");
             hasposition = true;
         }
     }
@@ -172,7 +169,7 @@ void OpenCachingComItem::showInfoDialog()
         if ( homelocation.isValid() )
         {
             QString dist = formatDistance( distanceSphere(homelocation, coordinate()) );
-            details += "<tr><td align=\"right\">" + tr("Distance from home:") + " </td><td>" + dist + "</td></tr>";
+            details += QLatin1String("<tr><td align=\"right\">") + tr("Distance from home:") + QLatin1String(" </td><td>") + dist + QLatin1String("</td></tr>");
         }
     }
 
@@ -187,11 +184,11 @@ void OpenCachingComItem::showInfoDialog()
         QString tagiconshtml;
         for (int i=0; i<numtags;i++)
         {
-            tagiconshtml += QString("<img src=\":/%1.png\" alt=\"%2\">")
+            tagiconshtml += QStringLiteral("<img src=\":/%1.png\" alt=\"%2\">")
                 .arg(tags.at(i).toLower().replace(QLatin1Char(' '),QLatin1Char('-'))).arg(tags.at(i));
             if (0 == (i+1)%tagrows)
             {
-                tagiconshtml += "<br/>";
+                tagiconshtml += QLatin1String("<br/>");
             }
         }
         ui.labelTagIcons->setText(tagiconshtml);
@@ -201,7 +198,7 @@ void OpenCachingComItem::showInfoDialog()
     QString description = m_cache["description"].toString();
     if ( description.isEmpty() )
     {
-        QString url("http://www.opencaching.com/api/geocache/" + id() + "?Authorization=" + AUTHKEY);
+        const QUrl url(QLatin1String("http://www.opencaching.com/api/geocache/") + id() + QLatin1String("?Authorization=") + AUTHKEY);
         m_model->fetchData( url, "description_and_logs", this );
     } else {
         fillDialogTabs();
@@ -218,7 +215,7 @@ void OpenCachingComItem::showInfoDialog()
 
 void OpenCachingComItem::paint( QPainter *painter )
 {
-    QPixmap pm(":/" + iconName() + "-m.png");
+    QPixmap pm(QLatin1String(":/") + iconName() + QLatin1String("-m.png"));
     painter->drawPixmap( 0, 0, pm );
 }
 
@@ -249,22 +246,22 @@ void OpenCachingComItem::updateTooltip()
 //             }
 //         }
 
-        QString html = "<table cellpadding=\"2\">";
-        html += "<tr><td colspan=\"2\"><table cellpadding=\"3\"><tr><td><img src=\":/" + iconName() + "\"></td>"
-            + "<td valign=\"middle\"><big><strong>" + m_cache["name"].toString() + "</strong></big></td></tr></table></td></tr>"
-            + "<tr><td align=\"left\">"
-            + tr(m_cache["type"].toString().toUtf8())
-            + "<br/>" + tr( "by <em>" ) + m_cache["hidden_by"].toMap()["name"].toString() + "</em>"
-            + "<br/>" + coordinate().lonToString()
-            + "<br/>" + coordinate().latToString()
-            + "</td><td align=\"right\">"
-            + tr( "Difficulty") + ": <span style=\"background:#1e4381;color:white;\">&nbsp;" + ratingNumberString(m_cache["difficulty"]) + "&nbsp;</span>"
-            + "<br/>" + tr( "Terrain" ) + ": <span style=\"background:#dda24d;color:white;\">&nbsp;" + ratingNumberString(m_cache["terrain"]) + "&nbsp;</span>"
-            + "<br/>" + tr( "Awsomeness" ) + ": <span style=\"background:#e27c31;color:white;\">&nbsp;" + ratingNumberString(m_cache["awsomeness"]) + "&nbsp;</span>"
-            + "<br/>" + tr( "Size" ) + ": <span style=\"background:#807f39;color:white;\">&nbsp;" + ratingNumberString(m_cache["size"]) + "&nbsp;</span></td></tr>"
-            + "<tr><td colspan=\"2\">" + tr("Last found: ") + dateString(m_cache["last_found"]) + "</td></tr>"
+        const QString html = QLatin1String("<table cellpadding=\"2\">"
+            "<tr><td colspan=\"2\"><table cellpadding=\"3\"><tr><td><img src=\":/") + iconName() + QLatin1String("\"></td>"
+            "<td valign=\"middle\"><big><strong>") + m_cache["name"].toString() + QLatin1String("</strong></big></td></tr></table></td></tr>"
+            "<tr><td align=\"left\">") +
+            tr(m_cache["type"].toString().toUtf8().constData()) +
+            QLatin1String("<br/>") + tr("by <em>") + m_cache["hidden_by"].toMap()["name"].toString() + QLatin1String("</em>"
+            "<br/>") + coordinate().lonToString() +
+            QLatin1String("<br/>") + coordinate().latToString() +
+            QLatin1String("</td><td align=\"right\">") +
+            tr( "Difficulty") + QLatin1String(": <span style=\"background:#1e4381;color:white;\">&nbsp;") + ratingNumberString(m_cache["difficulty"]) + QLatin1String("&nbsp;</span>"
+            "<br/>") + tr("Terrain") + QLatin1String(": <span style=\"background:#dda24d;color:white;\">&nbsp;") + ratingNumberString(m_cache["terrain"]) + QLatin1String("&nbsp;</span>"
+            "<br/>") + tr("Awsomeness") + QLatin1String(": <span style=\"background:#e27c31;color:white;\">&nbsp;") + ratingNumberString(m_cache["awsomeness"]) + QLatin1String("&nbsp;</span>"
+            "<br/>") + tr("Size") + QLatin1String(": <span style=\"background:#807f39;color:white;\">&nbsp;") + ratingNumberString(m_cache["size"]) + QLatin1String("&nbsp;</span></td></tr>"
+            "<tr><td colspan=\"2\">") + tr("Last found: ") + dateString(m_cache["last_found"]) + QLatin1String("</td></tr>"
 //             + "<tr><td colspan=\"2\">" + strDist + "</td></tr>"
-            + "</table>";
+            "</table>");
         setToolTip( html );
     }
 }
@@ -276,19 +273,15 @@ bool OpenCachingComItem::operator<( const AbstractDataPluginItem *other ) const
 
 void OpenCachingComItem::addDownloadedFile( const QString &url, const QString &type )
 {
-    if (type == "description_and_logs")
-    {
+    if (type == QLatin1String("description_and_logs")) {
         QFile file( url );
         if (! file.open( QIODevice::ReadOnly | QIODevice::Text ) )
         {
             return;
         }
 
-        QScriptEngine engine;
-
-        // Qt requires parentheses around json code
-        QScriptValue data = engine.evaluate( '(' + QString::fromUtf8( file.readAll() ) + ')' );
-        QVariantMap cache = data.toVariant().toMap();
+        QJsonDocument jsonDoc = QJsonDocument::fromJson(file.readAll());
+        QVariantMap cache = jsonDoc.toVariant().toMap();
 
         m_cache["description"] = cache["description"];
         m_cache["logs"] = cache["logs"];
@@ -297,7 +290,7 @@ void OpenCachingComItem::addDownloadedFile( const QString &url, const QString &t
         QVariantList images = m_cache["images"].toList();
         for (int i = 0; i < images.size(); i++) {
             QVariantMap image = images.at(i).toMap();
-            QString url =  "http://www.opencaching.com/api/geocache/" + id() + "/" + image["caption"].toString();
+            const QString url = QLatin1String("http://www.opencaching.com/api/geocache/") + id() + QLatin1Char('/') + image["caption"].toString();
 //            qDebug()<<"Adding image: "<<url;
             m_images << url;
         }
@@ -321,7 +314,7 @@ QString OpenCachingComItem::dateString(const QVariant& ms)
     }
     else
     {
-        result = '-';
+        result = QStringLiteral("-");
     }
     return result;
 }
@@ -339,7 +332,7 @@ QString OpenCachingComItem::iconName() const
     return "unknown";
 }
 
-const QString OpenCachingComItem::ratingNumberString(QVariant number)
+const QString OpenCachingComItem::ratingNumberString(const QVariant& number)
 {
     return QString::number(number.toDouble(), 'f', 1);
 }
@@ -355,7 +348,7 @@ QString OpenCachingComItem::formatDistance(qreal spheredistance) const
     locale->meterToTargetUnit(distance, measurementSystem, convertedMeters, unit);
     QString unitString = locale->unitAbbreviation(unit);
 
-    return QString("%L1 %2").arg(convertedMeters, 8, 'f', 1, QChar(' '))
+    return QString("%L1 %2").arg(convertedMeters, 8, 'f', 1, QLatin1Char(' '))
                             .arg(unitString);
 }
 
@@ -371,10 +364,10 @@ void OpenCachingComItem::fillDialogTabs()
             if (m_images.size() > i)
             {
                 // ### what about spoiler images? (don't display, but then what?)
-                html.append(
-                    "<p><img src=\"" + m_images.at(i) + "\" width=\"100%\" height=\"auto\"/><br/>"
-                    + m_cache["images"].toList().at(i).toMap()["name"].toString()
-                    + "</p>");
+                html +=
+                    QLatin1String("<p><img src=\"") + m_images.at(i) + QLatin1String("\" width=\"100%\" height=\"auto\"/><br/>") +
+                    m_cache["images"].toList().at(i).toMap()["name"].toString() +
+                    QLatin1String("</p>");
             }
         }
 
@@ -394,12 +387,13 @@ void OpenCachingComItem::fillDialogTabs()
             QVariantMap log = logs.at(i).toMap();
             if ( i )
             {
-                logtext += "<hr>";
+                logtext += QLatin1String("<hr>");
             }
-            logtext += tr("User: ") + log["user"].toMap()["name"].toString() + "<br/>";
-            logtext += tr("Type: ") + log["type"].toString() + "<br/>";
-            logtext += tr("Date: ") + dateString(log["log_time"]) + "<br/><br/>";
-            logtext += log["comment"].toString() + "<br/>";
+            logtext +=
+                tr("User: ") + log["user"].toMap()["name"].toString() + QLatin1String("<br/>") +
+                tr("Type: ") + log["type"].toString() + QLatin1String("<br/>") +
+                tr("Date: ") + dateString(log["log_time"]) + QLatin1String("<br/><br/>") +
+                log["comment"].toString() + QLatin1String("<br/>");
 
             // TODO images
         }
@@ -409,7 +403,7 @@ void OpenCachingComItem::fillDialogTabs()
 
 void OpenCachingComItem::openWww()
 {
-    QDesktopServices::openUrl( QUrl( "http://www.opencaching.com/#!geocache/" + m_cache["oxcode"].toString() ) );
+    QDesktopServices::openUrl(QUrl(QLatin1String("http://www.opencaching.com/#!geocache/") + m_cache[QStringLiteral("oxcode")].toString()));
 }
 
 } // namespace Marble

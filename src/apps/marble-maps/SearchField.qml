@@ -19,6 +19,7 @@ Item {
     height: field.height
 
     property alias query: field.text
+    property alias hasFocus: field.activeFocus
 
     property alias completionModel: completion.model
     property bool busy: false
@@ -31,7 +32,7 @@ Item {
         routing.clearSearchResultPlacemarks();
         query = query.trim();
         if(query.toLowerCase() === "ok marble") {
-            developerDialog.visible = true;
+            dialogContainer.currentIndex = dialogContainer.developer;
         } else if(query !== "") {
             root.busy = true;
             searchRequested(query);
@@ -100,11 +101,11 @@ Item {
             MouseArea {
                 anchors.fill: parent
                 onClicked: {
+                    placemarkDialog.placemark = null;
+                    dialogContainer.currentIndex = dialogContainer.none
+                    routing.clearSearchResultPlacemarks();
                     field.text = "";
                     field.focus = true;
-                    placemarkDialog.placemark = null;
-                    itemStack.state = "";
-                    routing.clearSearchResultPlacemarks();
                     cleared();
                 }
             }

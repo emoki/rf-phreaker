@@ -22,7 +22,7 @@ namespace Marble {
 GeoUriParser::GeoUriParser( const QString& geoUri )
     : m_geoUri( geoUri ),
       m_coordinates(),
-      m_planet( PlanetFactory::construct( "earth" ) )
+      m_planet(PlanetFactory::construct(QStringLiteral("earth")))
 {
 }
 
@@ -30,7 +30,7 @@ void GeoUriParser::setGeoUri( const QString &geoUri )
 {
     m_geoUri = geoUri;
     m_coordinates = GeoDataCoordinates();
-    m_planet = PlanetFactory::construct( "earth" );
+    m_planet = PlanetFactory::construct(QStringLiteral("earth"));
 }
 
 QString GeoUriParser::geoUri() const
@@ -80,7 +80,7 @@ bool GeoUriParser::parse()
             // this is not a bug! The '<=' was intended, otherwise we would skip that last Cgroups's data!
             for ( int i = 4; i <= geoUriRegexp.captureCount(); ++i )
             {
-                if ( geoUriRegexp.capturedTexts()[i] == "crs" ) {
+                if (geoUriRegexp.capturedTexts()[i] == QLatin1String("crs")) {
                     foreach ( const QString& str, PlanetFactory::planetList()) {
                         if ( geoUriRegexp.captureCount() < i+1 ) {
                             i = geoUriRegexp.captureCount() + 1;
@@ -92,7 +92,7 @@ bool GeoUriParser::parse()
                         }
                     }
                     ++i;
-                } else if ( geoUriRegexp.capturedTexts()[i] == "u" ) {
+                } else if (geoUriRegexp.capturedTexts()[i] == QLatin1String("u")) {
                     mDebug() << "Captured uncertainity parameter, but this is not supported by Marble (yet).";
                     ++i;
                 }
@@ -104,8 +104,8 @@ bool GeoUriParser::parse()
             return true;
         }
     }
-    if ( m_geoUri.startsWith("worldwind://goto/") ) {
-        m_geoUri = m_geoUri.replace("goto/", "goto/?");
+    if ( m_geoUri.startsWith(QLatin1String("worldwind://goto/")) ) {
+        m_geoUri.replace(QStringLiteral("goto/"), QStringLiteral("goto/?"));
         QUrl worldwindUrl( m_geoUri );
 
         double lat = queryValue(worldwindUrl, "lat", "latitude").toDouble();

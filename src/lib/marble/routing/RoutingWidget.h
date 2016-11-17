@@ -11,13 +11,12 @@
 #ifndef MARBLE_ROUTINGWIDGET_H
 #define MARBLE_ROUTINGWIDGET_H
 
-#include "GeoDataCoordinates.h"
-#include "GeoDataLineString.h"
 #include "RoutingManager.h"
 #include "marble_export.h"
 
-#include <QModelIndex>
 #include <QWidget>
+
+class QModelIndex;
 
 namespace Marble
 {
@@ -26,6 +25,7 @@ class MarbleWidget;
 class RoutingInputWidget;
 class RoutingWidgetPrivate;
 class RouteSyncManager;
+class GeoDataCoordinates;
 
 /**
   * A widget consisting of input fields for places / routing destinations,
@@ -147,6 +147,8 @@ private Q_SLOTS:
     void clearTour();
 
     void toggleRoutePlay();
+
+    void handlePlanetChange();
 
 protected:
     bool eventFilter( QObject *o, QEvent *e );

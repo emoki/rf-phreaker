@@ -3,10 +3,13 @@ if(MSVC)
   add_definitions(-D_USE_MATH_DEFINES=1)
 endif(MSVC)
 
-if(BUILD_WITH_DBUS)
-add_definitions(-DMARBLE_DBUS)
-endif(BUILD_WITH_DBUS)
+if(NOT MARBLE_NO_DBUS)
+  add_definitions(-DMARBLE_DBUS)
+endif()
 
+# disabled for now:
+# no public Marble QML plugins are installed, libmarbledeclarative is only a shared lib
+if (FALSE)
 if( Qt5Quick_FOUND )
   OPTION(IGNORE_CMAKE_INSTALL_PREFIX_FOR_DECLARATIVE_PLUGINS "Install Marble Qt Declarative plugins to QT_IMPORTS_DIR even if that is out of the CMAKE_INSTALL_PREFIX")
   IF(QT_IMPORTS_DIR)
@@ -36,6 +39,7 @@ if( Qt5Quick_FOUND )
     ENDIF()
   ENDIF()
 ENDIF()
+endif()
 
 macro_optional_find_package(ZLIB QUIET)
 marble_set_package_properties(ZLIB PROPERTIES DESCRIPTION "general-purpose lossless data-compression library")
@@ -47,6 +51,7 @@ if(NOT ZLIB_FOUND)
   set(ZLIB_INCLUDE_DIRS "${CMAKE_CURRENT_SOURCE_DIR}/3rdparty/zlib" "${CMAKE_CURRENT_BINARY_DIR}/3rdparty/zlib")
 endif()
 
+add_subdirectory( 3rdparty/o5mreader )
 add_subdirectory( 3rdparty/sgp4 )
 add_subdirectory( lib/marble )
 add_subdirectory( lib/astro )
@@ -71,8 +76,6 @@ if(APPLE)
   add_subdirectory( mac )
 endif(APPLE)
 
-# FIXME ktimezonewidget.h is gone
-#add_subdirectory( plasmoid )
-
+add_subdirectory( plasma )
 add_subdirectory( plasmarunner )
 add_subdirectory( thumbnailer )

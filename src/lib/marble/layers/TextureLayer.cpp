@@ -55,8 +55,8 @@ public:
     void updateTextureLayers();
     void updateTile( const TileId &tileId, const QImage &tileImage );
 
-    void addGroundOverlays( QModelIndex parent, int first, int last );
-    void removeGroundOverlays( QModelIndex parent, int first, int last );
+    void addGroundOverlays( const QModelIndex& parent, int first, int last );
+    void removeGroundOverlays( const QModelIndex& parent, int first, int last );
     void resetGroundOverlaysCache();
 
     void updateGroundOverlays();
@@ -175,7 +175,7 @@ bool TextureLayer::Private::drawOrderLessThan( const GeoDataGroundOverlay* o1, c
     return o1->drawOrder() < o2->drawOrder();
 }
 
-void TextureLayer::Private::addGroundOverlays( QModelIndex parent, int first, int last )
+void TextureLayer::Private::addGroundOverlays( const QModelIndex& parent, int first, int last )
 {
     for ( int i = first; i <= last; ++i ) {
         QModelIndex index = m_groundOverlayModel.index( i, 0, parent );
@@ -194,7 +194,7 @@ void TextureLayer::Private::addGroundOverlays( QModelIndex parent, int first, in
     m_parent->reset();
 }
 
-void TextureLayer::Private::removeGroundOverlays( QModelIndex parent, int first, int last )
+void TextureLayer::Private::removeGroundOverlays( const QModelIndex& parent, int first, int last )
 {
     for ( int i = first; i <= last; ++i ) {
         QModelIndex index = m_groundOverlayModel.index( i, 0, parent );
@@ -232,6 +232,7 @@ void TextureLayer::Private::updateGroundOverlays()
 
 void TextureLayer::Private::addCustomTextures()
 {
+    m_textures.reserve(m_textures.size() + m_customTextures.size());
     foreach (GeoSceneTextureTileDataset *t, m_customTextures)
     {
         m_textures.append(t);
@@ -265,7 +266,7 @@ TextureLayer::~TextureLayer()
 
 QStringList TextureLayer::renderPosition() const
 {
-    return QStringList() << "SURFACE";
+    return QStringList(QStringLiteral("SURFACE"));
 }
 
 void TextureLayer::addSeaDocument( const GeoDataDocument *seaDocument )
@@ -304,7 +305,8 @@ bool TextureLayer::render( GeoPainter *painter, ViewportParams *viewport,
 {
     Q_UNUSED( renderPos );
     Q_UNUSED( layer );
-    d->m_renderState = RenderState( "Texture Tiles" );
+    d->m_runtimeTrace = QStringLiteral("Texture Cache: %1 ").arg(d->m_tileLoader.tileCount());
+    d->m_renderState = RenderState(QStringLiteral("Texture Tiles"));
 
     // Stop repaint timer if it is already running
     d->m_repaintTimer.stop();
@@ -349,7 +351,6 @@ bool TextureLayer::render( GeoPainter *painter, ViewportParams *viewport,
     const QRect dirtyRect = QRect( QPoint( 0, 0), viewport->size() );
     d->m_texmapper->mapTexture( painter, viewport, d->m_tileZoomLevel, dirtyRect, d->m_texcolorizer );
     d->m_renderState.addChild( d->m_tileLoader.renderState() );
-    d->m_runtimeTrace = QString("Texture Cache: %1 ").arg(d->m_tileLoader.tileCount());
     return true;
 }
 
@@ -396,7 +397,7 @@ void TextureLayer::setShowTileId( bool show )
 
 void TextureLayer::setProjection( Projection projection )
 {
-    if ( d->m_textures.isEmpty() || textureLayerCount() == 0 ) {
+    if ( d->m_textures.isEmpty() ) {
         return;
     }
 
@@ -411,7 +412,7 @@ void TextureLayer::setProjection( Projection projection )
             d->m_texmapper = new EquirectScanlineTextureMapper( &d->m_tileLoader );
             break;
         case Mercator:
-            if ( d->m_tileLoader.tileProjection() == GeoSceneTileDataset::Mercator ) {
+            if (d->m_textures.at(0)->tileProjectionType() == GeoSceneAbstractTileProjection::Mercator) {
                 d->m_texmapper = new TileScalingTextureMapper( &d->m_tileLoader );
             } else {
                 d->m_texmapper = new MercatorScanlineTextureMapper( &d->m_tileLoader );
@@ -498,9 +499,9 @@ QSize TextureLayer::tileSize() const
     return d->m_layerDecorator.tileSize();
 }
 
-GeoSceneTileDataset::Projection TextureLayer::tileProjection() const
+GeoSceneAbstractTileProjection::Type TextureLayer::tileProjectionType() const
 {
-    return d->m_layerDecorator.tileProjection();
+    return d->m_layerDecorator.tileProjectionType();
 }
 
 int TextureLayer::tileColumnCount( int level ) const

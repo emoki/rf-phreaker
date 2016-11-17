@@ -13,13 +13,14 @@
 #include <QPainter>
 #include <QPaintDevice>
 #include <QtMath>
+#include <QQmlContext>
+#include <QSettings>
 
 #include <MarbleModel.h>
 #include <MarbleMap.h>
 #include <ViewportParams.h>
 #include <GeoPainter.h>
 #include <GeoDataLookAt.h>
-#include <MarbleLocale.h>
 #include <Planet.h>
 #include <MarbleAbstractPresenter.h>
 #include <AbstractFloatItem.h>
@@ -29,7 +30,14 @@
 #include <PluginManager.h>
 #include <RenderPlugin.h>
 #include <MarbleMath.h>
+#include <GeoDataLatLonAltBox.h>
 #include <GeoDataCoordinates.h>
+#include <GeoDataTypes.h>
+#include <ReverseGeocodingRunnerManager.h>
+#include <routing/RoutingManager.h>
+#include <routing/RoutingModel.h>
+#include <routing/Route.h>
+#include <BookmarkManager.h>
 
 namespace Marble
 {
@@ -68,8 +76,17 @@ namespace Marble
             (void)handlePinch(center, scale, state);
         }
 
-    private slots:
-        void showLmbMenu(int, int) {}
+        void handleMouseButtonPressAndHold(const QPoint &position)
+        {
+            m_marbleQuick->reverseGeocoding(position);
+        }
+
+    private Q_SLOTS:
+        void showLmbMenu(int x, int y)
+        {
+            m_marbleQuick->selectPlacemarkAt(x, y);
+        }
+
         void showRmbMenu(int, int) {}
         void openItemToolTip() {}
         void setCursor(const QCursor &cursor)
@@ -77,7 +94,7 @@ namespace Marble
             m_marbleQuick->setCursor(cursor);
         }
 
-    private slots:
+    private Q_SLOTS:
         void installPluginEventFilter(RenderPlugin *) {}
 
     private:
@@ -140,7 +157,12 @@ namespace Marble
             m_map(&m_model),
             m_presenter(&m_map),
             m_positionVisible(false),
-            m_inputHandler(&m_presenter, marble)
+            m_currentPosition(marble),
+            m_inputHandler(&m_presenter, marble),
+            m_placemarkDelegate(nullptr),
+            m_placemarkItem(nullptr),
+            m_placemark(nullptr),
+            m_reverseGeocoding(&m_model)
         {
             m_currentPosition.setName(QObject::tr("Current Location"));
         }
@@ -155,25 +177,38 @@ namespace Marble
         Placemark m_currentPosition;
 
         MarbleQuickInputHandler m_inputHandler;
+        QQmlComponent* m_placemarkDelegate;
+        QQuickItem* m_placemarkItem;
+        Placemark* m_placemark;
+        ReverseGeocodingRunnerManager m_reverseGeocoding;
     };
 
     MarbleQuickItem::MarbleQuickItem(QQuickItem *parent) : QQuickPaintedItem(parent)
       ,d(new MarbleQuickItemPrivate(this))
     {
+        setRenderTarget(QQuickPaintedItem::FramebufferObject);
+        setOpaquePainting(true);
+        qRegisterMetaType<Placemark*>("Placemark*");
+
         foreach (AbstractFloatItem *item, d->m_map.floatItems()) {
-            if (item->nameId() == "license") {
+            if (item->nameId() == QLatin1String("license")) {
                 item->setPosition(QPointF(5.0, -10.0));
             } else {
                 item->hide();
             }
         }
 
+        d->m_model.positionTracking()->setTrackVisible(false);
+
         connect(&d->m_map, SIGNAL(repaintNeeded(QRegion)), this, SLOT(update()));
         connect(this, SIGNAL(widthChanged()), this, SLOT(resizeMap()));
         connect(this, SIGNAL(heightChanged()), this, SLOT(resizeMap()));
         connect(&d->m_map, SIGNAL(visibleLatLonAltBoxChanged(GeoDataLatLonAltBox)), this, SLOT(updatePositionVisibility()));
         connect(&d->m_map, SIGNAL(visibleLatLonAltBoxChanged(GeoDataLatLonAltBox)), this, SIGNAL(visibleLatLonAltBoxChanged()));
+        connect(&d->m_map, SIGNAL(radiusChanged(int)), this, SIGNAL(radiusChanged(int)));
         connect(&d->m_map, SIGNAL(radiusChanged(int)), this, SIGNAL(zoomChanged()));
+        connect(&d->m_reverseGeocoding, SIGNAL(reverseGeocodingFinished(GeoDataCoordinates,GeoDataPlacemark)),
+                this, SLOT(handleReverseGeocoding(GeoDataCoordinates,GeoDataPlacemark)));
 
         setAcceptedMouseButtons(Qt::AllButtons);
         installEventFilter(&d->m_inputHandler);
@@ -192,13 +227,14 @@ namespace Marble
     }
 
     void MarbleQuickItem::positionDataStatusChanged(PositionProviderStatus status)
-        {
-            if (status == PositionProviderStatusAvailable) {
-                emit positionAvailableChanged(true);
-            }
-            else {
-                emit positionAvailableChanged(false);
-            }
+    {
+        if (status == PositionProviderStatusAvailable) {
+            emit positionAvailableChanged(true);
+        }
+        else {
+            emit positionAvailableChanged(false);
+        }
+        updatePositionVisibility();
     }
 
     void MarbleQuickItem::positionChanged(const GeoDataCoordinates &, GeoDataAccuracy)
@@ -208,6 +244,7 @@ namespace Marble
 
     void MarbleQuickItem::updatePositionVisibility()
     {
+        updatePlacemarks();
         bool isVisible = false;
         if ( positionAvailable() ) {
             if ( d->m_map.viewport()->viewLatLonAltBox().contains(d->m_model.positionTracking()->currentLocation()) ) {
@@ -223,8 +260,45 @@ namespace Marble
 
     void MarbleQuickItem::updateCurrentPosition(const GeoDataCoordinates &coordinates)
     {
-        d->m_currentPosition.coordinate()->setCoordinates(coordinates);
+        d->m_currentPosition.placemark().setCoordinate(coordinates);
         emit currentPositionChanged(&d->m_currentPosition);
+    }
+
+    void MarbleQuickItem::updatePlacemarks()
+    {
+        if (!d->m_placemarkDelegate || !d->m_placemark) {
+            return;
+        }
+
+        if (!d->m_placemarkItem) {
+            QQmlContext * context = new QQmlContext(qmlContext(d->m_placemarkDelegate));
+            QObject * component = d->m_placemarkDelegate->create(context);
+            d->m_placemarkItem = qobject_cast<QQuickItem*>( component );
+            if (d->m_placemarkItem) {
+                d->m_placemarkItem->setParentItem( this );
+                d->m_placemarkItem->setProperty("placemark", QVariant::fromValue(d->m_placemark));
+            } else {
+                delete component;
+                return;
+            }
+        }
+
+        qreal x = 0;
+        qreal y = 0;
+        const bool visible = d->m_map.viewport()->screenCoordinates(d->m_placemark->placemark().coordinate(), x, y);
+        d->m_placemarkItem->setVisible(visible);
+        if (visible) {
+            d->m_placemarkItem->setProperty("xPos", QVariant(x));
+            d->m_placemarkItem->setProperty("yPos", QVariant(y));
+        }
+    }
+
+    void MarbleQuickItem::handleReverseGeocoding(const GeoDataCoordinates &coordinates, const GeoDataPlacemark &placemark)
+    {
+        if (d->m_placemark && d->m_placemark->placemark().coordinate() == coordinates) {
+            d->m_placemark->setGeoDataPlacemark(placemark);
+            updatePlacemarks();
+        }
     }
 
     void MarbleQuickItem::paint(QPainter *painter)
@@ -322,7 +396,7 @@ namespace Marble
     {
         QList<RenderPlugin *> plugins = d->m_map.renderPlugins();
         foreach (const RenderPlugin * plugin, plugins) {
-            if (plugin->nameId() == "positionMarker") {
+            if (plugin->nameId() == QLatin1String("positionMarker")) {
                 return plugin->visible();
             }
         }
@@ -363,6 +437,24 @@ namespace Marble
         return d->m_inputHandler.inertialEarthRotationEnabled();
     }
 
+    QQmlComponent *MarbleQuickItem::placemarkDelegate() const
+    {
+        return d->m_placemarkDelegate;
+    }
+
+    void MarbleQuickItem::reverseGeocoding(const QPoint &point)
+    {
+        qreal lon, lat;
+        d->m_map.viewport()->geoCoordinates(point.x(), point.y(), lon, lat);
+        auto const coordinates = GeoDataCoordinates(lon, lat, 0.0, GeoDataCoordinates::Degree);
+        delete d->m_placemarkItem;
+        d->m_placemarkItem = nullptr;
+        delete d->m_placemark;
+        d->m_placemark = new Placemark(this);
+        d->m_placemark->placemark().setCoordinate(coordinates);
+        d->m_reverseGeocoding.reverseGeocoding(coordinates);
+    }
+
     qreal MarbleQuickItem::speed() const
     {
         return d->m_model.positionTracking()->speed();
@@ -370,7 +462,14 @@ namespace Marble
 
     qreal MarbleQuickItem::angle() const
     {
-        return d->m_model.positionTracking()->direction();
+        bool routeExists = d->m_model.routingManager()->routingModel()->route().distance() != 0;
+        bool onRoute = !d->m_model.routingManager()->routingModel()->deviatedFromRoute();
+        if ( routeExists && onRoute) {
+            GeoDataCoordinates curPoint = d->m_model.positionTracking()->positionProviderPlugin()->position();
+            return d->m_model.routingManager()->routingModel()->route().currentSegment().projectedDirection(curPoint);
+        } else {
+            return d->m_model.positionTracking()->direction();
+        }
     }
 
     bool MarbleQuickItem::positionAvailable() const
@@ -423,6 +522,11 @@ namespace Marble
         return QPointF(x, y);
     }
 
+    void MarbleQuickItem::setRadius(int radius)
+    {
+        d->m_map.setRadius(radius);
+    }
+
     void MarbleQuickItem::setZoom(int newZoom, FlyToMode mode)
     {
         d->m_presenter.setZoom(newZoom, mode);
@@ -468,7 +572,51 @@ namespace Marble
 
         d->m_presenter.centerOn(coordinates, true);
         if (d->m_presenter.zoom() < 3000) {
-            d->m_presenter.setZoom(3250);
+            d->m_presenter.setZoom(3500);
+        }
+    }
+
+    void MarbleQuickItem::selectPlacemarkAt(int x, int y)
+    {
+        auto features = d->m_map.whichFeatureAt(QPoint(x, y));
+        if (features.empty()) {
+            features = d->m_map.whichBuildingAt(QPoint(x, y));
+        }
+        QVector<GeoDataPlacemark const *> placemarks;
+        foreach(auto feature, features) {
+            if (feature->nodeType() == GeoDataTypes::GeoDataPlacemarkType) {
+                placemarks << static_cast<const GeoDataPlacemark*>(feature);
+            }
+        }
+
+        // Select bookmarks only if nothing else is found
+        qSort(placemarks.begin(), placemarks.end(), [] (GeoDataPlacemark const *a, GeoDataPlacemark const *b) {
+            int const left = a->visualCategory() == GeoDataPlacemark::Bookmark ? -1 : a->visualCategory();
+            int const right = b->visualCategory() == GeoDataPlacemark::Bookmark ? -1 : b->visualCategory();
+            return left > right;
+        });
+
+        foreach(auto placemark, placemarks) {
+            if (d->m_placemark && placemark->coordinate() == d->m_placemark->placemark().coordinate()) {
+                d->m_placemark->deleteLater();
+                d->m_placemark = nullptr;
+            } else {
+                d->m_placemark->deleteLater();
+                d->m_placemark = new Placemark(this);
+                d->m_placemark->setGeoDataPlacemark(*placemark);
+            }
+            delete d->m_placemarkItem;
+            d->m_placemarkItem = nullptr;
+            updatePlacemarks();
+            return;
+        }
+
+        if (d->m_placemark) {
+            d->m_placemark->deleteLater();
+            d->m_placemark = nullptr;
+            delete d->m_placemarkItem;
+            d->m_placemarkItem = nullptr;
+            updatePlacemarks();
         }
     }
 
@@ -544,7 +692,7 @@ namespace Marble
         emit projectionChanged(projection);
     }
 
-    void MarbleQuickItem::setMapThemeId(QString mapThemeId)
+    void MarbleQuickItem::setMapThemeId(const QString& mapThemeId)
     {
         if (this->mapThemeId() == mapThemeId) {
             return;
@@ -666,7 +814,7 @@ namespace Marble
 
         QList<RenderPlugin *> plugins = d->m_map.renderPlugins();
         foreach ( RenderPlugin * plugin, plugins ) {
-            if ( plugin->nameId() == "positionMarker" ) {
+            if (plugin->nameId() == QLatin1String("positionMarker")) {
                 plugin->setVisible(showPositionMarker);
                 break;
             }
@@ -740,12 +888,74 @@ namespace Marble
         update();
     }
 
+    void MarbleQuickItem::setShowDebugPolygons(bool showDebugPolygons)
+    {
+        d->m_map.setShowDebugPolygons(showDebugPolygons);
+        update();
+    }
+
+    void MarbleQuickItem::setShowDebugPlacemarks(bool showDebugPlacemarks)
+    {
+        d->m_map.setShowDebugPlacemarks(showDebugPlacemarks);
+        update();
+    }
+
+    void MarbleQuickItem::setShowDebugBatches(bool showDebugBatches)
+    {
+        d->m_map.setShowDebugBatchRender(showDebugBatches);
+        update();
+    }
+
+    void MarbleQuickItem::setPlacemarkDelegate(QQmlComponent *placemarkDelegate)
+    {
+        if (d->m_placemarkDelegate == placemarkDelegate) {
+            return;
+        }
+
+        delete d->m_placemarkItem;
+        d->m_placemarkItem = nullptr;
+        d->m_placemarkDelegate = placemarkDelegate;
+        emit placemarkDelegateChanged(placemarkDelegate);
+    }
+
+    void MarbleQuickItem::loadSettings()
+    {
+        QSettings settings;
+        settings.beginGroup(QStringLiteral("MarbleQuickItem"));
+        double lon = settings.value(QStringLiteral("centerLon"), QVariant(0.0)).toDouble();
+        double lat = settings.value(QStringLiteral("centerLat"), QVariant(0.0)).toDouble();
+        if (lat == 0.0 && lon == 0.0) {
+            centerOnCurrentPosition();
+        } else {
+            centerOn(lon, lat);
+        }
+        int const zoom = settings.value(QStringLiteral("zoom"), QVariant(0)).toInt();
+        if (zoom > 0) {
+            setZoom(zoom);
+        }
+        settings.endGroup();
+        d->m_model.routingManager()->readSettings();
+        d->m_model.bookmarkManager()->loadFile(QStringLiteral("bookmarks/bookmarks.kml"));
+        d->m_model.bookmarkManager()->setShowBookmarks(true);
+    }
+
+    void MarbleQuickItem::writeSettings()
+    {
+        QSettings settings;
+        settings.beginGroup(QStringLiteral("MarbleQuickItem"));
+        settings.setValue(QStringLiteral("centerLon"), QVariant(d->m_map.centerLongitude()));
+        settings.setValue(QStringLiteral("centerLat"), QVariant(d->m_map.centerLatitude()));
+        settings.setValue(QStringLiteral("zoom"), QVariant(zoom()));
+        settings.endGroup();
+        d->m_model.routingManager()->writeSettings();
+    }
+
     QObject *MarbleQuickItem::getEventFilter() const
     {   //We would want to install the same event filter for abstract layer QuickItems such as PinchArea
         return &d->m_inputHandler;
     }
 
-    void MarbleQuickItem::pinch(QPointF center, qreal scale, Qt::GestureState state)
+    void MarbleQuickItem::pinch(const QPointF& center, qreal scale, Qt::GestureState state)
     {
         d->m_inputHandler.pinch(center, scale, state);
     }
@@ -753,6 +963,11 @@ namespace Marble
     MarbleInputHandler *MarbleQuickItem::inputHandler()
     {
         return &d->m_inputHandler;
+    }
+
+    int MarbleQuickItem::radius() const
+    {
+        return d->m_map.radius();
     }
 
     int MarbleQuickItem::zoom() const

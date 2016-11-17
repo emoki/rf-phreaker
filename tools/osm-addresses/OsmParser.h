@@ -16,18 +16,16 @@
 #include "OsmPlacemark.h"
 #include "OsmRegionTree.h"
 
-#include "GeoDataLineString.h"
-#include "GeoDataPolygon.h"
-
 #include <QObject>
 #include <QFileInfo>
-#include <QMap>
 #include <QHash>
 #include <QList>
 #include <QPair>
 
 namespace Marble
 {
+
+class GeoDataLineString;
 
 enum ElementType {
     NoType,
@@ -182,7 +180,7 @@ private:
     QList< QList<Way> > merge( const QList<Way> &ways ) const;
 
     template<class T, class S>
-    bool contains( const T &outer, const T &inner ) const {
+    bool contains( const T &outer, const S &inner ) const {
         for ( int i = 0; i < inner.size(); ++i ) {
             if ( !outer.contains( inner[i] ) ) {
                 bool onBorder = false;

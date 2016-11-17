@@ -38,8 +38,8 @@ class MainWindow : public KXmlGuiWindow
     ControlView* marbleControl() const;
     MarbleWidget* marbleWidget() const;
 
- public slots:
-    void setMapTitle();
+ public Q_SLOTS:
+    void updateWindowTitle();
     void changeViewSize( QAction* );
 
  protected:

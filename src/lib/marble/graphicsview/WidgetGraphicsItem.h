@@ -15,9 +15,6 @@
 #include "ScreenGraphicsItem.h"
 #include "marble_export.h"
 
-// Qt
-#include <QList>
-
 class QWidget;
 
 namespace Marble
@@ -45,8 +42,7 @@ class MARBLE_EXPORT WidgetGraphicsItem : public ScreenGraphicsItem
 
  private:
     Q_DISABLE_COPY( WidgetGraphicsItem )
-
-    WidgetGraphicsItemPrivate * const d;
+    Q_DECLARE_PRIVATE(WidgetGraphicsItem)
 };
 
 } // Namespace Marble

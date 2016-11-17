@@ -12,6 +12,7 @@
 #include "GeoDataLabelStyle.h"
 
 #include <QFont>
+#include <QColor>
 #include <QDataStream>
 
 #include "GeoDataTypes.h"
@@ -120,7 +121,7 @@ GeoDataLabelStyle::Alignment GeoDataLabelStyle::alignment() const
     return d->m_alignment;
 }
 
-void GeoDataLabelStyle::setScale( const float &scale )
+void GeoDataLabelStyle::setScale(float scale)
 {
     d->m_scale = scale;
 }

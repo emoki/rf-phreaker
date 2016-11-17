@@ -12,19 +12,15 @@
 
 #include "GameMainWindow.h"
 
-#include <MapThemeManager.h>
-#include <MarbleDirs.h>
-#include <MarbleDebug.h>
-#include <MarbleLocale.h>
-#include <MarbleGlobal.h>
+#include <marble/MarbleDirs.h>
+#include <marble/MarbleDebug.h>
+#include <marble/MarbleLocale.h>
+#include <marble/MarbleGlobal.h>
 
 #include <QApplication>
-#include <QFile>
 #include <QDir>
 #include <QLocale>
-#include <QSettings>
 #include <QTranslator>
-#include <QProcessEnvironment>
 #include <QDebug>
 
 using namespace Marble;
@@ -32,14 +28,14 @@ using namespace Marble;
 int main(int argc, char *argv[])
 {
     QApplication app(argc, argv);
-    app.setApplicationName( "Marble Game" );
-    app.setOrganizationName( "KDE" );
-    app.setOrganizationDomain( "kde.org" );
+    app.setApplicationName(QStringLiteral("Marble Game"));
+    app.setOrganizationName(QStringLiteral("KDE"));
+    app.setOrganizationDomain(QStringLiteral("kde.org"));
     // Widget translation
 
-    QString      lang = QLocale::system().name().section('_', 0, 0);
+    QString      lang = QLocale::system().name().section(QLatin1Char('_'), 0, 0);
     QTranslator  translator;
-    translator.load( "marble-" + lang, MarbleDirs::path(QString("lang") ) );
+    translator.load(QLatin1String("marble-") + lang, MarbleDirs::path(QStringLiteral("lang")));
     app.installTranslator(&translator);
 
     // For non static builds on mac and win
@@ -49,7 +45,7 @@ int main(int argc, char *argv[])
 
 #ifdef Q_WS_WIN
     QApplication::addLibraryPath( QApplication::applicationDirPath()
-                                  + QDir::separator() + "plugins" );
+                                  + QDir::separator() + QLatin1String("plugins"));
 #endif
 
     QString marbleDataPath;
@@ -58,7 +54,7 @@ int main(int argc, char *argv[])
 
     QStringList args = QApplication::arguments();
 
-    if ( args.contains( "-h" ) || args.contains( "--help" ) ) {
+    if (args.contains(QStringLiteral("-h")) || args.contains(QStringLiteral("--help"))) {
         qWarning() << "Usage: marble [options]";
         qWarning();
         qWarning() << "general options:";

@@ -12,16 +12,15 @@
 #define MARBLE_AUTONAVIGATION_H
 
 #include "marble_export.h"
-#include "GeoDataCoordinates.h"
+#include "MarbleGlobal.h"
 
-#include <QWidget>
+#include <QObject>
 
 namespace Marble
 {
 
 class GeoDataCoordinates;
 class MarbleModel;
-class PositionTracking;
 class ViewportParams;
 
 class MARBLE_EXPORT AutoNavigation : public QObject

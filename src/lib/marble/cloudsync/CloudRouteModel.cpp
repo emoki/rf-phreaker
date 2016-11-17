@@ -10,14 +10,17 @@
 
 #include "CloudRouteModel.h"
 
+#include "RouteItem.h"
+
 #include "MarbleDebug.h"
 #include "MarbleDirs.h"
 
+#include <QIcon>
+#include <QUrl>
 #include <QSet>
 #include <QVector>
-#include <QScriptValue>
-#include <QScriptEngine>
-#include <QScriptValueIterator>
+#include <QNetworkRequest>
+#include <QNetworkReply>
 #include <QNetworkAccessManager>
 
 namespace Marble {
@@ -44,7 +47,7 @@ CloudRouteModel::Private::Private() :
     m_totalSize( -1 ),
     m_downloadedSize( 0 )
 {
-    m_cacheDir = MarbleDirs::localPath() + "/cloudsync/cache/routes/";
+    m_cacheDir = MarbleDirs::localPath() + QLatin1String("/cloudsync/cache/routes/");
 }
 
 CloudRouteModel::CloudRouteModel( QObject* parent ) :
@@ -105,7 +108,7 @@ void CloudRouteModel::setItems( const QVector<RouteItem> &items )
 
 bool CloudRouteModel::isCached( const QModelIndex &index ) const
 {
-    QFileInfo cacheDir( d->m_cacheDir + index.data( Timestamp ).toString() + ".kml"  );
+    QFileInfo cacheDir(d->m_cacheDir + index.data(Timestamp).toString() + QLatin1String(".kml"));
     return cacheDir.exists();
 }
 

@@ -36,11 +36,9 @@
 
 #include <QDebug>
 #include <QVector>
-#include <QFileInfo>
 #include <QFile>
 #include <QDataStream>
 #include <QApplication>
-#include <QTreeView>
  
 #include <MarbleWidget.h>
 #include <MarbleModel.h>
@@ -58,7 +56,8 @@
 #include <GeoDataPolygon.h>
 #include <GeoDataPoint.h>
 #include <GeoDataGeometry.h>
- 
+#include <GeoDataMultiGeometry.h>
+
 using namespace Marble;
 
 qreal epsilon   =   1.0;
@@ -220,7 +219,7 @@ int main(int argc, char** argv)
     }
 
     GeoDataSchema schema = document->schema( QString("default") );
-    if ( schema.simpleField("mapcolor13").name() == QString("mapcolor13") ) {
+    if (schema.simpleField("mapcolor13").name() == QLatin1String("mapcolor13")) {
         isMapColorField = true;
     }
 

@@ -11,9 +11,7 @@
 #include <QObject>
 
 #include <GeoDataDocument.h>
-#include <GeoDataTour.h>
 #include <MarbleDebug.h>
-#include <GeoDataFolder.h>
 #include <GeoDataCamera.h>
 #include "TestUtils.h"
 
@@ -22,7 +20,7 @@ using namespace Marble;
 class TestCamera : public QObject
 {
     Q_OBJECT
-private slots:
+private Q_SLOTS:
     void initTestCase();
     void simpleParseTest();
 };

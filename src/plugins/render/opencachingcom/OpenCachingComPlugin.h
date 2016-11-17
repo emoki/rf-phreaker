@@ -12,12 +12,6 @@
 #define OPENCACHINGCOMPLUGIN_H
 
 #include "AbstractDataPlugin.h"
-#include "RenderPlugin.h"
-#include "RenderPluginInterface.h"
-
-#include <QHash>
-#include <QIcon>
-#include <QAbstractButton>
 
 namespace Ui
 {
@@ -33,7 +27,7 @@ namespace Marble
 class OpenCachingComPlugin : public AbstractDataPlugin
 {
     Q_OBJECT
-    Q_PLUGIN_METADATA( IID "org.kde.edu.marble.OpenCachingComPlugin" )
+    Q_PLUGIN_METADATA(IID "org.kde.marble.OpenCachingComPlugin")
 
     Q_INTERFACES( Marble::RenderPluginInterface )
 
@@ -61,7 +55,7 @@ public:
 
     QString copyrightYears() const;
 
-    QList<PluginAuthor> pluginAuthors() const;
+    QVector<PluginAuthor> pluginAuthors() const override;
 
     QIcon icon() const;
 

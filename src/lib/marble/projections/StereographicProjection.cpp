@@ -22,6 +22,7 @@
 #include "MarbleGlobal.h"
 #include "AzimuthalProjection_p.h"
 
+#include <QIcon>
 #include <qmath.h>
 
 #define SAFE_DISTANCE
@@ -73,7 +74,7 @@ QString StereographicProjection::description() const
 
 QIcon StereographicProjection::icon() const
 {
-    return QIcon(":/icons/map-globe.png");
+    return QIcon(QStringLiteral(":/icons/map-globe.png"));
 }
 
 qreal StereographicProjection::clippingRadius() const

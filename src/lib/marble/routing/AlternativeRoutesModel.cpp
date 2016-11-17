@@ -10,9 +10,11 @@
 
 #include "AlternativeRoutesModel.h"
 
+#include "GeoDataLatLonAltBox.h"
 #include "GeoDataDocument.h"
 #include "GeoDataFolder.h"
 #include "GeoDataExtendedData.h"
+#include "GeoDataLineString.h"
 #include "GeoDataPlacemark.h"
 #include "MarbleMath.h"
 
@@ -260,7 +262,7 @@ qreal AlternativeRoutesModel::Private::instructionScore( const GeoDataDocument* 
         if ( !blacklist.contains( placemark->name() ) ) {
             hasInstructions = true;
 
-            if ( placemark->extendedData().contains( "turnType" ) ) {
+            if (placemark->extendedData().contains(QStringLiteral("turnType"))) {
                 return 1.0;
             }
         }

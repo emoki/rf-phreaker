@@ -15,7 +15,7 @@
 #include "GeoDataLineString.h"
 #include "GeoDataLatLonBox.h"
 
-#include <Qt>
+#include <QtGlobal>
 
 namespace Marble
 {
@@ -50,6 +50,8 @@ public:
     qreal distanceTo( const GeoDataCoordinates &point, GeoDataCoordinates &closest, GeoDataCoordinates &interpolated ) const;
 
     qreal minimalDistanceTo( const GeoDataCoordinates &point ) const;
+
+    qreal projectedDirection(const GeoDataCoordinates &point) const;
 
     bool operator==( const RouteSegment &other ) const;
 

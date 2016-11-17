@@ -14,9 +14,7 @@
 #include "RenderPlugin.h"
 #include "DialogConfigurationInterface.h"
 
-#include <QtCore/QObject>
-#include <QMenu>
-#include <QActionGroup>
+class QMenu;
 
 namespace Ui {
     class EclipsesConfigDialog;
@@ -41,7 +39,7 @@ class EclipsesPlugin : public RenderPlugin,
                        public DialogConfigurationInterface
 {
     Q_OBJECT
-    Q_PLUGIN_METADATA( IID "org.kde.edu.marble.EclipsesPlugin" )
+    Q_PLUGIN_METADATA(IID "org.kde.marble.EclipsesPlugin")
 
     Q_INTERFACES( Marble::RenderPluginInterface )
     Q_INTERFACES( Marble::DialogConfigurationInterface )
@@ -64,7 +62,7 @@ public:
     QString version() const;
     QString description() const;
     QString copyrightYears() const;
-    QList<PluginAuthor> pluginAuthors() const;
+    QVector<PluginAuthor> pluginAuthors() const override;
     QIcon icon() const;
     RenderPlugin::RenderType renderType() const;
     QList<QActionGroup*>* actionGroups() const;

@@ -19,6 +19,7 @@
 #include "GeoDataCoordinates.h"
 #include "osm/OsmPlacemarkData.h"
 #include "osm/OsmObjectManager.h"
+#include "GeoWriter.h"
 
 
 namespace Marble
@@ -42,6 +43,16 @@ void OsmWayTagWriter::writeWay( const GeoDataLineString& lineString,
         writer.writeStartElement( osm::osmTag_nd );
         writer.writeAttribute( "ref", ndId );
         writer.writeEndElement();
+    }
+
+    if (!lineString.isEmpty() && lineString.isClosed()) {
+        auto const startId = osmData.nodeReference(lineString.first()).id();
+        auto const endId = osmData.nodeReference(lineString.last()).id();
+        if (startId != endId) {
+            writer.writeStartElement( osm::osmTag_nd );
+            writer.writeAttribute( "ref", QString::number(startId));
+            writer.writeEndElement();
+        }
     }
 
     writer.writeEndElement();

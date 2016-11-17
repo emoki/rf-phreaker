@@ -24,16 +24,17 @@
 #include <QFileInfo>
 #include <QMetaType>
 #include <QImage>
+#include <QUrl>
 
 #include "GeoSceneTextureTileDataset.h"
 #include "GeoSceneTileDataset.h"
 #include "GeoSceneTypes.h"
 #include "GeoSceneVectorTileDataset.h"
 #include "GeoDataDocument.h"
-#include "GeoDataContainer.h"
 #include "HttpDownloadManager.h"
 #include "MarbleDebug.h"
 #include "MarbleDirs.h"
+#include "TileId.h"
 #include "TileLoaderHelper.h"
 #include "ParseRunnerPlugin.h"
 #include "ParsingRunner.h"
@@ -212,7 +213,7 @@ TileLoader::TileStatus TileLoader::tileStatus( GeoSceneTileDataset const *tileDa
 
 void TileLoader::updateTile( QByteArray const & data, QString const & idStr )
 {
-    QStringList const components = idStr.split( ':', QString::SkipEmptyParts );
+    QStringList const components = idStr.split(QLatin1Char(':'), QString::SkipEmptyParts);
     Q_ASSERT( components.size() == 5 );
 
     QString const origin = components[0];
@@ -234,7 +235,7 @@ void TileLoader::updateTile( QByteArray const & data, QString const & idStr )
 
 void TileLoader::updateTile(const QString &fileName, const QString &idStr)
 {
-    QStringList const components = idStr.split( ':', QString::SkipEmptyParts );
+    QStringList const components = idStr.split(QLatin1Char(':'), QString::SkipEmptyParts);
     Q_ASSERT( components.size() == 5 );
 
     QString const origin = components[0];

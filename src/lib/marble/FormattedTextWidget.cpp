@@ -15,15 +15,10 @@
 
 //Qt
 #include <QFileDialog>
-#include <QMessageBox>
-#include <QFileInfo>
 #include <QColorDialog>
-#include <QCheckBox>
-#include <QToolBar>
-#include <QTextEdit>
 #include <QFontComboBox>
-#include <QPushButton>
 #include <QLineEdit>
+#include <QPointer>
 
 //Marble
 #include "MarbleWidget.h"

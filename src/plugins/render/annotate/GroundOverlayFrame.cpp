@@ -13,14 +13,18 @@
 
 // Marble
 #include "GeoDataPlacemark.h"
+#include "GeoDataGroundOverlay.h"
 #include "GeoDataTypes.h"
+#include "GeoDataLinearRing.h"
+#include "GeoDataPolygon.h"
 #include "GeoPainter.h"
 #include "ViewportParams.h"
 #include "SceneGraphicsTypes.h"
+#include "TextureLayer.h"
 #include "MarbleDirs.h"
 
 // Qt
-#include <QtCore/qmath.h>
+#include <qmath.h>
 
 
 namespace Marble
@@ -39,56 +43,58 @@ GroundOverlayFrame::GroundOverlayFrame( GeoDataPlacemark *placemark,
     m_previousRotation( 0.0 ),
     m_viewport( 0 )
 {
+    m_resizeIcons.reserve(16);
     // NorthWest
-    m_resizeIcons.append( QImage( MarbleDirs::systemPath() + "/bitmaps/editarrows/arrow-diagonal-topleft.png" ) );
-    m_resizeIcons.append( QImage( MarbleDirs::systemPath() + "/bitmaps/editarrows/arrow-diagonal-topleft-active.png" ) );
+    m_resizeIcons.append(QImage(MarbleDirs::systemPath() + QLatin1String("/bitmaps/editarrows/arrow-diagonal-topleft.png")));
+    m_resizeIcons.append(QImage(MarbleDirs::systemPath() + QLatin1String("/bitmaps/editarrows/arrow-diagonal-topleft-active.png")));
     // SouthWest
-    m_resizeIcons.append( QImage( MarbleDirs::systemPath() + "/bitmaps/editarrows/arrow-diagonal-topright.png" ) );
-    m_resizeIcons.append( QImage( MarbleDirs::systemPath() + "/bitmaps/editarrows/arrow-diagonal-topright-active.png" ) );
+    m_resizeIcons.append(QImage(MarbleDirs::systemPath() + QLatin1String("/bitmaps/editarrows/arrow-diagonal-topright.png")));
+    m_resizeIcons.append(QImage(MarbleDirs::systemPath() + QLatin1String("/bitmaps/editarrows/arrow-diagonal-topright-active.png")));
     // SouthEast
-    m_resizeIcons.append( QImage( MarbleDirs::systemPath() + "/bitmaps/editarrows/arrow-diagonal-topleft.png" ) );
-    m_resizeIcons.append( QImage( MarbleDirs::systemPath() + "/bitmaps/editarrows/arrow-diagonal-topleft-active.png" ) );
+    m_resizeIcons.append(QImage(MarbleDirs::systemPath() + QLatin1String("/bitmaps/editarrows/arrow-diagonal-topleft.png")));
+    m_resizeIcons.append(QImage(MarbleDirs::systemPath() + QLatin1String("/bitmaps/editarrows/arrow-diagonal-topleft-active.png")));
     // NorthEast
-    m_resizeIcons.append( QImage( MarbleDirs::systemPath() + "/bitmaps/editarrows/arrow-diagonal-topright.png" ) );
-    m_resizeIcons.append( QImage( MarbleDirs::systemPath() + "/bitmaps/editarrows/arrow-diagonal-topright-active.png" ) );
+    m_resizeIcons.append(QImage(MarbleDirs::systemPath() + QLatin1String("/bitmaps/editarrows/arrow-diagonal-topright.png")));
+    m_resizeIcons.append(QImage(MarbleDirs::systemPath() + QLatin1String("/bitmaps/editarrows/arrow-diagonal-topright-active.png")));
     // North
-    m_resizeIcons.append( QImage( MarbleDirs::systemPath() + "/bitmaps/editarrows/arrow-vertical.png" ) );
-    m_resizeIcons.append( QImage( MarbleDirs::systemPath() + "/bitmaps/editarrows/arrow-vertical-active.png" ) );
+    m_resizeIcons.append(QImage(MarbleDirs::systemPath() + QLatin1String("/bitmaps/editarrows/arrow-vertical.png")));
+    m_resizeIcons.append(QImage(MarbleDirs::systemPath() + QLatin1String("/bitmaps/editarrows/arrow-vertical-active.png")));
     // South
-    m_resizeIcons.append( QImage( MarbleDirs::systemPath() + "/bitmaps/editarrows/arrow-vertical.png" ) );
-    m_resizeIcons.append( QImage( MarbleDirs::systemPath() + "/bitmaps/editarrows/arrow-vertical-active.png" ) );
+    m_resizeIcons.append(QImage(MarbleDirs::systemPath() + QLatin1String("/bitmaps/editarrows/arrow-vertical.png")));
+    m_resizeIcons.append(QImage(MarbleDirs::systemPath() + QLatin1String("/bitmaps/editarrows/arrow-vertical-active.png")));
     // East
-    m_resizeIcons.append( QImage( MarbleDirs::systemPath() + "/bitmaps/editarrows/arrow-horizontal.png" ) );
-    m_resizeIcons.append( QImage( MarbleDirs::systemPath() + "/bitmaps/editarrows/arrow-horizontal-active.png" ) );
+    m_resizeIcons.append(QImage(MarbleDirs::systemPath() + QLatin1String("/bitmaps/editarrows/arrow-horizontal.png")));
+    m_resizeIcons.append(QImage(MarbleDirs::systemPath() + QLatin1String("/bitmaps/editarrows/arrow-horizontal-active.png")));
     // West
-    m_resizeIcons.append( QImage( MarbleDirs::systemPath() + "/bitmaps/editarrows/arrow-horizontal.png" ) );
-    m_resizeIcons.append( QImage( MarbleDirs::systemPath() + "/bitmaps/editarrows/arrow-horizontal-active.png" ) );
+    m_resizeIcons.append(QImage(MarbleDirs::systemPath() + QLatin1String("/bitmaps/editarrows/arrow-horizontal.png")));
+    m_resizeIcons.append(QImage(MarbleDirs::systemPath() + QLatin1String("/bitmaps/editarrows/arrow-horizontal-active.png")));
 
 
+    m_rotateIcons.reserve(16);
     // NorthWest
-    m_rotateIcons.append( QImage( MarbleDirs::systemPath() + "/bitmaps/editarrows/arrow-rotation-topleft.png" ) );
-    m_rotateIcons.append( QImage( MarbleDirs::systemPath() + "/bitmaps/editarrows/arrow-rotation-topleft-active.png" ) );
+    m_rotateIcons.append(QImage(MarbleDirs::systemPath() + QLatin1String("/bitmaps/editarrows/arrow-rotation-topleft.png")));
+    m_rotateIcons.append(QImage(MarbleDirs::systemPath() + QLatin1String("/bitmaps/editarrows/arrow-rotation-topleft-active.png")));
     // SouthWest
-    m_rotateIcons.append( QImage( MarbleDirs::systemPath() + "/bitmaps/editarrows/arrow-rotation-bottomleft.png" ) );
-    m_rotateIcons.append( QImage( MarbleDirs::systemPath() + "/bitmaps/editarrows/arrow-rotation-bottomleft-active.png" ) );
+    m_rotateIcons.append(QImage(MarbleDirs::systemPath() + QLatin1String("/bitmaps/editarrows/arrow-rotation-bottomleft.png")));
+    m_rotateIcons.append(QImage(MarbleDirs::systemPath() + QLatin1String("/bitmaps/editarrows/arrow-rotation-bottomleft-active.png")));
     // SouthEast
-    m_rotateIcons.append( QImage( MarbleDirs::systemPath() + "/bitmaps/editarrows/arrow-rotation-bottomright.png" ) );
-    m_rotateIcons.append( QImage( MarbleDirs::systemPath() + "/bitmaps/editarrows/arrow-rotation-bottomright-active.png" ) );
+    m_rotateIcons.append(QImage(MarbleDirs::systemPath() + QLatin1String("/bitmaps/editarrows/arrow-rotation-bottomright.png")));
+    m_rotateIcons.append(QImage(MarbleDirs::systemPath() + QLatin1String("/bitmaps/editarrows/arrow-rotation-bottomright-active.png")));
     // NorthEast
-    m_rotateIcons.append( QImage( MarbleDirs::systemPath() + "/bitmaps/editarrows/arrow-rotation-topright.png" ) );
-    m_rotateIcons.append( QImage( MarbleDirs::systemPath() + "/bitmaps/editarrows/arrow-rotation-topright-active.png" ) );
+    m_rotateIcons.append(QImage(MarbleDirs::systemPath() + QLatin1String("/bitmaps/editarrows/arrow-rotation-topright.png")));
+    m_rotateIcons.append(QImage(MarbleDirs::systemPath() + QLatin1String("/bitmaps/editarrows/arrow-rotation-topright-active.png")));
     // North
-    m_rotateIcons.append( QImage( MarbleDirs::systemPath() + "/bitmaps/editarrows/arrow-horizontal.png" ) );
-    m_rotateIcons.append( QImage( MarbleDirs::systemPath() + "/bitmaps/editarrows/arrow-horizontal-active.png" ) );
+    m_rotateIcons.append(QImage(MarbleDirs::systemPath() + QLatin1String("/bitmaps/editarrows/arrow-horizontal.png")));
+    m_rotateIcons.append(QImage(MarbleDirs::systemPath() + QLatin1String("/bitmaps/editarrows/arrow-horizontal-active.png")));
     // South
-    m_rotateIcons.append( QImage( MarbleDirs::systemPath() + "/bitmaps/editarrows/arrow-horizontal.png" ) );
-    m_rotateIcons.append( QImage( MarbleDirs::systemPath() + "/bitmaps/editarrows/arrow-horizontal-active.png" ) );
+    m_rotateIcons.append(QImage(MarbleDirs::systemPath() + QLatin1String("/bitmaps/editarrows/arrow-horizontal.png")));
+    m_rotateIcons.append(QImage(MarbleDirs::systemPath() + QLatin1String("/bitmaps/editarrows/arrow-horizontal-active.png")));
     // East
-    m_rotateIcons.append( QImage( MarbleDirs::systemPath() + "/bitmaps/editarrows/arrow-vertical.png" ) );
-    m_rotateIcons.append( QImage( MarbleDirs::systemPath() + "/bitmaps/editarrows/arrow-vertical-active.png" ) );
+    m_rotateIcons.append(QImage(MarbleDirs::systemPath() + QLatin1String("/bitmaps/editarrows/arrow-vertical.png")));
+    m_rotateIcons.append(QImage(MarbleDirs::systemPath() + QLatin1String("/bitmaps/editarrows/arrow-vertical-active.png")));
     // West
-    m_rotateIcons.append( QImage( MarbleDirs::systemPath() + "/bitmaps/editarrows/arrow-vertical.png" ) );
-    m_rotateIcons.append( QImage( MarbleDirs::systemPath() + "/bitmaps/editarrows/arrow-vertical-active.png" ) );
+    m_rotateIcons.append(QImage(MarbleDirs::systemPath() + QLatin1String("/bitmaps/editarrows/arrow-vertical.png")));
+    m_rotateIcons.append(QImage(MarbleDirs::systemPath() + QLatin1String("/bitmaps/editarrows/arrow-vertical-active.png")));
 
     update();
     setPaintLayers(QStringList() << "GroundOverlayFrame");
@@ -104,7 +110,8 @@ void GroundOverlayFrame::paint(GeoPainter *painter, const ViewportParams *viewpo
     if ( placemark()->geometry()->nodeType() == GeoDataTypes::GeoDataPolygonType ) {
         GeoDataPolygon *polygon = static_cast<GeoDataPolygon*>( placemark()->geometry() );
         GeoDataLinearRing &ring = polygon->outerBoundary();
-        QList<GeoDataCoordinates> coordinateList;
+        QVector<GeoDataCoordinates> coordinateList;
+        coordinateList.reserve(8);
 
         coordinateList.append( ring.at( NorthWest ) );
         coordinateList.append( ring.at( SouthWest ) );
@@ -125,6 +132,7 @@ void GroundOverlayFrame::paint(GeoPainter *painter, const ViewportParams *viewpo
         coordinateList.append( ring.at( NorthEast ).interpolate( ring.at( SouthEast ), 0.5 ) );
         coordinateList.append( ring.at( NorthWest ).interpolate( ring.at( SouthWest ), 0.5 ) );
 
+        m_regionList.reserve(9);
         m_regionList.append( painter->regionFromEllipse( coordinateList.at( NorthWest ), 16, 16 ) );
         m_regionList.append( painter->regionFromEllipse( coordinateList.at( SouthWest ), 16, 16 ) );
         m_regionList.append( painter->regionFromEllipse( coordinateList.at( SouthEast ), 16, 16 ) );

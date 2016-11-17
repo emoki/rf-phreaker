@@ -12,14 +12,13 @@
 #define FOURSQUAREPLUGIN_H
 
 #include "AbstractDataPlugin.h"
-#include <QUrl>
 
 namespace Marble {
 
 class FoursquarePlugin : public AbstractDataPlugin
 {
     Q_OBJECT
-    Q_PLUGIN_METADATA( IID "org.kde.edu.marble.FoursquarePlugin" )
+    Q_PLUGIN_METADATA(IID "org.kde.marble.FoursquarePlugin" )
     Q_INTERFACES( Marble::RenderPluginInterface )
     MARBLE_PLUGIN( FoursquarePlugin )
 
@@ -42,7 +41,7 @@ public:
 
     QString copyrightYears() const;
 
-    QList<PluginAuthor> pluginAuthors() const;
+    QVector<PluginAuthor> pluginAuthors() const override;
 
     QIcon icon() const;
 

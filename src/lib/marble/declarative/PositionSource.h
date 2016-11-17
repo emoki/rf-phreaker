@@ -14,15 +14,16 @@
 #include "Coordinate.h"
 
 #include <QObject>
-#include <QtQml/qqml.h>
 
-class MarbleWidget;
+namespace Marble {
+
+class MarbleQuickItem;
 
 class PositionSource : public QObject
 {
     Q_OBJECT
 
-    Q_PROPERTY( MarbleWidget* map READ map WRITE setMap NOTIFY mapChanged )
+    Q_PROPERTY( MarbleQuickItem* map READ map WRITE setMap NOTIFY mapChanged )
     Q_PROPERTY( bool active READ active WRITE setActive NOTIFY activeChanged )
     Q_PROPERTY( QString source READ source WRITE setSource NOTIFY sourceChanged )
     Q_PROPERTY( bool hasPosition READ hasPosition NOTIFY hasPositionChanged )
@@ -44,9 +45,9 @@ public:
 
     Coordinate* position();
 
-    MarbleWidget *map();
+    MarbleQuickItem *map();
 
-    void setMap( MarbleWidget *map );
+    void setMap( MarbleQuickItem *map );
 
     qreal speed() const;
 
@@ -77,9 +78,11 @@ private:
 
     Coordinate m_position;
 
-    QPointer<MarbleWidget> m_marbleWidget;
+    QPointer<MarbleQuickItem> m_marbleQuickItem;
 
     qreal m_speed;
 };
+
+}
 
 #endif

@@ -10,6 +10,7 @@
 
 
 #include "GeoDataTreeModel.h"
+#include "GeoDataAccuracy.h"
 #include "PositionProviderPlugin.h"
 #include "PositionTracking.h"
 #include "TestUtils.h"
@@ -35,7 +36,7 @@ public:
     QString description() const    { return "plugin for testing"; }
     QIcon icon() const             { return QIcon(); }
     QString copyrightYears() const { return "2012"; }
-    QList<Marble::PluginAuthor> pluginAuthors() const { return QList<Marble::PluginAuthor>(); }
+    QVector<Marble::PluginAuthor> pluginAuthors() const { return QVector<Marble::PluginAuthor>(); }
     void initialize() {}
     bool isInitialized() const     { return true; }
 

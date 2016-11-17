@@ -19,8 +19,7 @@
 #include <QDebug>
 #include <QString>
 #include <QUrl>
-#include <QScriptEngine>
-#include <QScriptValue>
+#include <QJsonDocument>
 
 namespace Marble {
 
@@ -55,8 +54,7 @@ OpenCachingComModel::~OpenCachingComModel()
 
 void OpenCachingComModel::getAdditionalItems( const GeoDataLatLonAltBox& box, qint32 number )
 {
-    if( marbleModel()->planetId() != "earth" )
-    {
+    if (marbleModel()->planetId() != QLatin1String("earth")) {
         return;
     }
 
@@ -66,20 +64,20 @@ void OpenCachingComModel::getAdditionalItems( const GeoDataLatLonAltBox& box, qi
     }
 
     QString url("http://www.opencaching.com/api/geocache/?Authorization=");
-    url += AUTHKEY + QString("&bbox=%1,%2,%3,%4")
+    url += AUTHKEY + QStringLiteral("&bbox=%1,%2,%3,%4")
         .arg( box.south( GeoDataCoordinates::Degree ) )
         .arg( box.west(GeoDataCoordinates::Degree ) )
         .arg( box.north(GeoDataCoordinates::Degree ) )
         .arg( box.east(GeoDataCoordinates::Degree ) );
     if(!m_previousbox.isNull())
     {
-        url += QString("&exclude_bbox=%1,%2,%3,%4")
+        url += QStringLiteral("&exclude_bbox=%1,%2,%3,%4")
             .arg( m_previousbox.south( GeoDataCoordinates::Degree ) )
             .arg( m_previousbox.west(GeoDataCoordinates::Degree ) )
             .arg( m_previousbox.north(GeoDataCoordinates::Degree ) )
             .arg( m_previousbox.east(GeoDataCoordinates::Degree ) );
     }
-    url += "&limit=" + QString::number( number );
+    url += QLatin1String("&limit=") + QString::number(number);
     // TODO Limit to user set tags/types/difficulty - when there is a config dialog...
 
     m_previousbox = box;
@@ -90,11 +88,8 @@ void OpenCachingComModel::getAdditionalItems( const GeoDataLatLonAltBox& box, qi
 
 void OpenCachingComModel::parseFile( const QByteArray& file )
 {
-    QScriptEngine engine;
-
-    // Qt requires parentheses around json code
-    QScriptValue data = engine.evaluate( '(' + QString::fromUtf8( file ) + ')' );
-    QVariantList caches = data.toVariant().toList();
+    QJsonDocument jsonDoc = QJsonDocument::fromJson(file);
+    QVariantList caches = jsonDoc.toVariant().toList();
 
 //     qDebug()<<"parsing "<<caches.size()<<" items";
     QList<AbstractDataPluginItem*> items;
@@ -109,7 +104,7 @@ void OpenCachingComModel::parseFile( const QByteArray& file )
     addItemsToList(items);
 }
 
-void OpenCachingComModel::fetchData(const QString& url, const QString &type, OpenCachingComItem *item)
+void OpenCachingComModel::fetchData(const QUrl& url, const QString &type, OpenCachingComItem *item)
 {
     downloadItem(url, type, item);
 }

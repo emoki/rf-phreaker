@@ -25,9 +25,9 @@
 // Qt
 #include <QString>
 #include <QUrl>
-#include <QScriptEngine>
-#include <QScriptValue>
-#include <QScriptValueIterator>
+#include <QJsonDocument>
+#include <QJsonArray>
+#include <QJsonObject>
 
 #include <QUrlQuery>
 
@@ -44,7 +44,7 @@ PostalCodeModel::~PostalCodeModel() {
 void PostalCodeModel::getAdditionalItems( const GeoDataLatLonAltBox& box,
                                           qint32 number )
 {
-    if( marbleModel()->planetId() != "earth" ) {
+    if (marbleModel()->planetId() != QLatin1String("earth")) {
         return;
     }
 
@@ -66,37 +66,34 @@ void PostalCodeModel::getAdditionalItems( const GeoDataLatLonAltBox& box,
 
 void PostalCodeModel::parseFile( const QByteArray& file )
 {
-    QScriptValue data;
-    QScriptEngine engine;
-
-    // Qt requires parentheses around json code
-    data = engine.evaluate( '(' + QString::fromUtf8( file ) + ')' );
+    QJsonDocument jsonDoc = QJsonDocument::fromJson(file);
+    QJsonValue postalCodesValue = jsonDoc.object().value(QStringLiteral("postalCodes"));
 
     // Parse if any result exists
-    if ( data.property( "postalCodes" ).isArray() ) {
-        QScriptValueIterator iterator( data.property( "postalCodes" ) );
-
+    if (postalCodesValue.isArray()) {
         // Add items to the list
         QList<AbstractDataPluginItem*> items;
-        while ( iterator.hasNext() ) {
-            iterator.next();
 
-            QString const placeName = iterator.value().property( "placeName" ).toString();
-            QString const adminName1 = iterator.value().property( "adminName1" ).toString();
-            QString const adminName2 = iterator.value().property( "adminName2" ).toString();
-            QString const adminName3 = iterator.value().property( "adminName3" ).toString();
-            QString const postalCode = iterator.value().property( "postalCode" ).toString();
-            QString const countryCode = iterator.value().property( "countryCode" ).toString();
-            double const longitude = iterator.value().property( "lng" ).toNumber();
-            double const latitude = iterator.value().property( "lat" ).toNumber();
+        QJsonArray postalCodesArray = postalCodesValue.toArray();
+        for (int index = 0; index < postalCodesArray.size(); ++index) {
+            QJsonObject postalCodeObject = postalCodesArray[index].toObject();
 
-            QString const id = "postalCode_" + countryCode + postalCode;
+            QString const placeName = postalCodeObject.value(QStringLiteral("placeName")).toString();
+            QString const adminName1 = postalCodeObject.value(QStringLiteral("adminName1")).toString();
+            QString const adminName2 = postalCodeObject.value(QStringLiteral("adminName2")).toString();
+            QString const adminName3 = postalCodeObject.value(QStringLiteral("adminName3")).toString();
+            QString const postalCode = postalCodeObject.value(QStringLiteral("postalCode")).toString();
+            QString const countryCode = postalCodeObject.value(QStringLiteral("countryCode")).toString();
+            double const longitude = postalCodeObject.value(QStringLiteral("lng")).toDouble();
+            double const latitude = postalCodeObject.value(QStringLiteral("lat")).toDouble();
+
+            QString const id = QLatin1String("postalCode_") + countryCode + postalCode;
 
             if ( !id.isEmpty() ) {
                 QString tooltip;
 
                 if ( !placeName.isEmpty() ) {
-                    tooltip += placeName + ' ';
+                    tooltip += placeName + QLatin1Char(' ');
                 }
 
                 addLine( &tooltip, postalCode );
@@ -128,7 +125,7 @@ void PostalCodeModel::addLine(QString *string, const QString &line)
 {
     Q_ASSERT( string );
     if ( !line.isEmpty() ) {
-        *string += line + '\n';
+        *string += line + QLatin1Char('\n');
     }
 }
 

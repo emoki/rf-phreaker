@@ -18,14 +18,7 @@
 #include "OsmPlacemark.h"
 #include "OsmRegionTree.h"
 
-#include "GeoDataLineString.h"
-#include "GeoDataPolygon.h"
-
-#include <QObject>
 #include <QFileInfo>
-#include <QMap>
-#include <QList>
-#include <QPair>
 #include <QXmlDefaultHandler>
 
 namespace Marble

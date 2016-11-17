@@ -12,6 +12,7 @@
 #define POLYLINEANNOTATION_H
 
 #include <QColor>
+#include <QPointer>
 
 #include "SceneGraphicsItem.h"
 #include "GeoDataCoordinates.h"
@@ -203,17 +204,15 @@ private:
     static const int mergedDim;
     static const int hoveredDim;
     static const QColor regularColor;
-    static const QColor selectedColor;
     static const QColor mergedColor;
-    static const QColor hoveredColor;
 
     const ViewportParams *m_viewport;
     bool m_regionsInitialized;
     bool m_busy;
 
-    QList<PolylineNode> m_nodesList;
-    QList<PolylineNode> m_virtualNodesList;
-    QRegion             m_polylineRegion;
+    QVector<PolylineNode> m_nodesList;
+    QVector<PolylineNode> m_virtualNodesList;
+    QRegion               m_polylineRegion;
 
     // Used in Editing state
     enum EditingInteractingObject {

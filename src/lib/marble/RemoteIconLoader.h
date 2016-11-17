@@ -15,6 +15,8 @@
 
 class QString;
 class QByteArray;
+class QImage;
+class QUrl;
 
 namespace Marble
 {
@@ -31,7 +33,7 @@ public:
         * Handles the icon request for passed url( whether icon is available
         * in cache or on disk or it should gor for a download
         */
-    QImage load( const QString& url );
+    QImage load( const QUrl& url );
 
 Q_SIGNALS:
     /**

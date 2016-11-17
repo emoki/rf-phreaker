@@ -11,16 +11,19 @@
 #ifndef GEODATAITEMICON_H
 #define GEODATAITEMICON_H
 
-#include <QImage>
 #include <QFlags>
 
 #include "GeoDataObject.h"
+
+class QImage;
 
 namespace Marble
 {
 
 class GeoDataItemIconPrivate;
 
+/**
+ */
 class GEODATA_EXPORT GeoDataItemIcon : public GeoDataObject
 {
     Q_FLAGS( ItemIconState ItemIconStates )
@@ -49,7 +52,7 @@ public:
     Q_DECLARE_FLAGS( ItemIconStates, ItemIconState )
 
     ItemIconStates state() const;
-    void setState( const ItemIconStates &state );
+    void setState(ItemIconStates state);
 
     QString iconPath() const;
     void setIconPath( const QString &path );

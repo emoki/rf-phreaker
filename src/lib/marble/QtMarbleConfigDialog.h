@@ -12,7 +12,6 @@
 #define MARBLE_QTMARBLECONFIGDIALOG_H
 
 #include <QDialog>
-#include <QLocale>
 
 #include "marble_export.h"
 #include "MarbleGlobal.h"
@@ -43,10 +42,6 @@ class MARBLE_EXPORT QtMarbleConfigDialog : public QDialog
     Marble::MapQuality stillQuality() const;
     Marble::MapQuality animationQuality() const;
     QFont mapFont() const;
-
-    // View
-    Marble::GraphicsSystem graphicsSystem() const;
-
 
     // Navigation Settings
     int onStartup() const;

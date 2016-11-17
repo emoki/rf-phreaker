@@ -10,17 +10,18 @@
 
 #include "TourPlayback.h"
 
-#include <QTimer>
 #include <QList>
-#include <QSlider>
-#include <qurl.h>
-#include <QtCore/qnamespace.h>
+#include <QUrl>
 #include <QPointer>
 
 #include "MarbleDebug.h"
 #include "MarbleWidget.h"
 #include "PopupLayer.h"
+#include "GeoDataPoint.h"
+#include "GeoDataPlacemark.h"
+#include "GeoDataPlaylist.h"
 #include "GeoDataTour.h"
+#include "GeoDataWait.h"
 #include "GeoDataFlyTo.h"
 #include "GeoDataLookAt.h"
 #include "GeoDataTourControl.h"
@@ -114,7 +115,7 @@ void TourPlayback::showBalloon( GeoDataPlacemark* placemark )
     d->m_widget->popupLayer()->setCoordinates( point->coordinates(), Qt::AlignRight | Qt::AlignVCenter );
     d->m_widget->popupLayer()->setContent( placemark->description(), d->m_baseUrl );
     d->m_widget->popupLayer()->setVisible( true );
-    d->m_widget->popupLayer()->setSize( QSizeF( 480, 500 ) );
+    d->m_widget->popupLayer()->setSize(QSizeF(500, 520));
 }
 
 void TourPlayback::hideBalloon()

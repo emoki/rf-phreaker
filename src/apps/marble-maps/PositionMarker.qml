@@ -10,31 +10,73 @@
 
 
 import QtQuick 2.3
+import QtQuick.Window 2.2
 
 Item {
     id: root
 
-    property alias angle: rotation.angle
-    property int posX: 0
-    property int posY: 0
+    property real angle: 0
+    property bool showAccuracy: true
+    property real radius: 100
+    property bool allowRadiusAnimation: true
+    property bool allowPositionAnimation: true
+    property real speed: 0
 
-    width: 100
-    height: 100
-    x: posX - width * 0.5
-    y: posY - height * 0.5
+    Behavior on radius {
+        enabled: allowRadiusAnimation
+        NumberAnimation { duration: 200 }
+    }
+
+    Behavior on angle {
+        RotationAnimation {
+          duration: 200
+          direction: RotationAnimation.Shortest
+        }
+    }
+    Behavior on x {
+        enabled: allowPositionAnimation
+        SmoothedAnimation { duration: 200 }
+    }
+    Behavior on y {
+        enabled: allowPositionAnimation
+        SmoothedAnimation { duration: 200 }
+    }
+
+    Rectangle {
+        width: 2 * root.radius
+        height: 2 * root.radius
+        anchors.centerIn: parent
+        visible: root.showAccuracy
+        color: "#40ff0000"
+        border.color: "#ff0000"
+        border.width: 2
+        radius: root.radius
+    }
+
+    Rectangle {
+        id: circleIndicator
+        visible: root.speed < 0.4
+        width: Screen.pixelDensity * 3.5
+        height: width
+        anchors.centerIn: parent
+        radius: width/2
+        border {
+          color: "#f2f2f2"
+          width: 4
+        }
+        color: "#004a96"
+    }
 
     Image {
-        id: image
-        source: "qrc:///navigation_blue.png"
-        width: 100
-        height: 100
+        id: arrowIndicator
+        width: Screen.pixelDensity * 6
+        height: width
         anchors.centerIn: parent
-        transform: Rotation {
-            id: rotation
-            origin {
-                x: image.width * 0.5
-                y: image.height * 0.5
-            }
-        }
+        visible: root.speed >= 0.4
+        source: "qrc:///navigation_blue.svg"
+        sourceSize.width: width
+        sourceSize.height: height
+        smooth: true
+        rotation: root.angle
     }
 }

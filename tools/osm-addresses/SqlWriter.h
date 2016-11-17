@@ -13,8 +13,8 @@
 
 #include "Writer.h"
 
-#include <QMap>
 #include <QPair>
+#include <QHash>
 #include <QSqlQuery>
 
 namespace Marble

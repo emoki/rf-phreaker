@@ -31,12 +31,12 @@ QString OpenLocationCodeSearchPlugin::guiString() const
 
 QString OpenLocationCodeSearchPlugin::nameId() const
 {
-    return "openlocation-code-search";
+    return QStringLiteral("openlocation-code-search");
 }
 
 QString OpenLocationCodeSearchPlugin::version() const
 {
-    return "1.0";
+    return QStringLiteral("1.0");
 }
 
 QString OpenLocationCodeSearchPlugin::description() const
@@ -46,13 +46,13 @@ QString OpenLocationCodeSearchPlugin::description() const
 
 QString OpenLocationCodeSearchPlugin::copyrightYears() const
 {
-    return "2015";
+    return QStringLiteral("2015");
 }
 
-QList<PluginAuthor> OpenLocationCodeSearchPlugin::pluginAuthors() const
+QVector<PluginAuthor> OpenLocationCodeSearchPlugin::pluginAuthors() const
 {
-    return QList<PluginAuthor>()
-            << PluginAuthor( QString::fromUtf8( "Constantin Mihalache" ), "mihalache.c94@gmail.com" );
+    return QVector<PluginAuthor>()
+            << PluginAuthor(QStringLiteral("Constantin Mihalache"), QStringLiteral("mihalache.c94@gmail.com"));
 }
 
 SearchRunner* OpenLocationCodeSearchPlugin::newRunner() const
@@ -61,7 +61,5 @@ SearchRunner* OpenLocationCodeSearchPlugin::newRunner() const
 }
 
 }
-
-Q_EXPORT_PLUGIN2( OpenLocationCodeSearchPlugin, Marble::OpenLocationCodeSearchPlugin )
 
 #include "moc_OpenLocationCodeSearchPlugin.cpp"

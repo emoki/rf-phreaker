@@ -16,9 +16,11 @@
 #include "MarbleWidget.h"
 #include "MarbleModel.h"
 #include "MarblePlacemarkModel.h"
+#include "GeoDataLookAt.h"
 #include "GeoDataTreeModel.h"
 #include "GeoDataDocument.h"
 #include "GeoDataFolder.h"
+#include "GeoDataPlacemark.h"
 #include "PositionTracking.h"
 #include "SearchRunnerManager.h"
 #include "routing/RoutingManager.h"
@@ -26,7 +28,6 @@
 
 #include <QAbstractListModel>
 #include <QTimer>
-#include <QPushButton>
 #include <QPainter>
 
 namespace Marble
@@ -34,6 +35,7 @@ namespace Marble
 
 class TargetModel : public QAbstractListModel
 {
+    Q_OBJECT
 public:
     TargetModel( MarbleModel* marbleModel, QObject * parent = 0 );
 
@@ -94,7 +96,7 @@ public:
 
     void startSearch();
 
-    void updateSearchResult( QVector<GeoDataPlacemark*> placemarks );
+    void updateSearchResult( const QVector<GeoDataPlacemark*>& placemarks );
 
     void updateSearchMode();
 
@@ -166,7 +168,7 @@ QVariant TargetModel::currentLocationData ( int role ) const
         GeoDataCoordinates currentLocation = tracking->currentLocation();
         switch( role ) {
         case Qt::DisplayRole: return tr( "Current Location: %1" ).arg( currentLocation.toString() ) ;
-        case Qt::DecorationRole: return QIcon( ":/icons/gps.png" );
+        case Qt::DecorationRole: return QIcon(QStringLiteral(":/icons/gps.png"));
         case MarblePlacemarkModel::CoordinateRole: {
             return qVariantFromValue( currentLocation );
         }
@@ -195,7 +197,7 @@ QVariant TargetModel::homeData ( int role ) const
 {
     switch( role ) {
     case Qt::DisplayRole: return tr( "Home" );
-    case Qt::DecorationRole: return QIcon( ":/icons/go-home.png" );
+    case Qt::DecorationRole: return QIcon(QStringLiteral(":/icons/go-home.png"));
     case MarblePlacemarkModel::CoordinateRole: {
         qreal lon( 0.0 ), lat( 0.0 );
         int zoom( 0 );
@@ -218,7 +220,7 @@ QVariant TargetModel::bookmarkData ( int index, int role ) const
             return QString(folder->name() + QLatin1String(" / ") + m_bookmarks[index]->name());
         }
     }
-    case Qt::DecorationRole: return QIcon( ":/icons/bookmarks.png" );
+    case Qt::DecorationRole: return QIcon(QStringLiteral(":/icons/bookmarks.png"));
     case MarblePlacemarkModel::CoordinateRole: return qVariantFromValue( m_bookmarks[index]->lookAt()->coordinates() );
     }
 
@@ -334,7 +336,7 @@ void GoToDialogPrivate::startSearch()
     updateResultMessage( 0 );
 }
 
-void GoToDialogPrivate::updateSearchResult( QVector<GeoDataPlacemark*> placemarks )
+void GoToDialogPrivate::updateSearchResult( const QVector<GeoDataPlacemark*>& placemarks )
 {
     m_searchResultModel.setRootDocument( 0 );
     m_searchResult->clear();
@@ -439,9 +441,12 @@ void GoToDialogPrivate::stopProgressAnimation()
 
 void GoToDialogPrivate::updateResultMessage( int results )
 {
-    descriptionLabel->setText( QObject::tr( "%n results found.", "Number of search results", results ) );
+    //~ singular %n result found.
+    //~ plural %n results found.
+    descriptionLabel->setText( QObject::tr( "%n result(s) found.", "Number of search results", results ) );
 }
 
 }
 
-#include "moc_GoToDialog.cpp"
+#include "moc_GoToDialog.cpp" // needed for private slots in header
+#include "GoToDialog.moc" // needed for Q_OBJECT here in source

@@ -15,6 +15,8 @@
 
 #include <qmath.h>
 #include <QThreadPool>
+#include <QGuiApplication>
+#include <QScreen>
 
 #include "VectorTileModel.h"
 #include "GeoPainter.h"
@@ -24,6 +26,8 @@
 #include "MarbleDebug.h"
 #include "TileLoader.h"
 #include "ViewportParams.h"
+#include "RenderState.h"
+#include "GeoDataDocument.h"
 #include "GeoDataLatLonAltBox.h"
 #include "HttpDownloadManager.h"
 
@@ -49,6 +53,7 @@ public:
     QVector<VectorTileModel *> m_texmappers;
     QVector<VectorTileModel *> m_activeTexmappers;
     const GeoSceneGroup *m_textureLayerSettings;
+    int m_averageScreenArea;
 
     // TreeModel for displaying GeoDataDocuments
     GeoDataTreeModel *const m_treeModel;
@@ -65,6 +70,7 @@ VectorTileLayer::Private::Private(HttpDownloadManager *downloadManager,
     m_texmappers(),
     m_activeTexmappers(),
     m_textureLayerSettings( 0 ),
+    m_averageScreenArea(0),
     m_treeModel( treeModel )
 {
     m_threadPool.setMaxThreadCount( 1 );
@@ -114,6 +120,14 @@ VectorTileLayer::VectorTileLayer(HttpDownloadManager *downloadManager,
     qRegisterMetaType<GeoDataDocument*>( "GeoDataDocument*" );
 
     connect(&d->m_loader, SIGNAL(tileCompleted(TileId, GeoDataDocument*)), this, SLOT(updateTile(TileId, GeoDataDocument*)));
+
+    d->m_averageScreenArea = 0;
+    foreach (QScreen *screen, QGuiApplication::screens()) {
+        d->m_averageScreenArea += screen->availableSize().width() * screen->availableSize().height();
+    }
+    d->m_averageScreenArea /= qMax(1, QGuiApplication::screens().size());
+    // any screen size lower than 1024x768 is treated as 1024x768
+    d->m_averageScreenArea = qMax(1024*768, d->m_averageScreenArea);
 }
 
 VectorTileLayer::~VectorTileLayer()
@@ -123,12 +137,12 @@ VectorTileLayer::~VectorTileLayer()
 
 QStringList VectorTileLayer::renderPosition() const
 {
-    return QStringList() << "SURFACE";
+    return QStringList(QStringLiteral("SURFACE"));
 }
 
 RenderState VectorTileLayer::renderState() const
 {
-    return RenderState( "Vector Tiles" );
+    return RenderState(QStringLiteral("Vector Tiles"));
 }
 
 int VectorTileLayer::tileZoomLevel() const
@@ -147,7 +161,7 @@ QString VectorTileLayer::runtimeTrace() const
         tiles += mapper->cachedDocuments();
     }
     int const layers = d->m_activeTexmappers.size();
-    return QString("Vector Tiles: %1 tiles in %2 layers").arg(tiles).arg(layers);
+    return QStringLiteral("Vector Tiles: %1 tiles in %2 layers").arg(tiles).arg(layers);
 }
 
 bool VectorTileLayer::render( GeoPainter *painter, ViewportParams *viewport,
@@ -159,8 +173,10 @@ bool VectorTileLayer::render( GeoPainter *painter, ViewportParams *viewport,
 
     int const oldLevel = tileZoomLevel();
     int level = 0;
+    qreal const referenceArea = 1600.0 * 1200.0;
+    qreal const adjustedRadius = viewport->radius() * referenceArea / d->m_averageScreenArea;
     foreach ( VectorTileModel *mapper, d->m_activeTexmappers ) {
-        mapper->setViewport( viewport->viewLatLonAltBox(), viewport->radius() );
+        mapper->setViewport( viewport->viewLatLonAltBox(), adjustedRadius );
         level = qMax(level, mapper->tileZoomLevel());
     }
     if (oldLevel != level) {

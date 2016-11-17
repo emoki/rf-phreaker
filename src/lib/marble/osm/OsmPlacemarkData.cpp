@@ -11,18 +11,15 @@
 // Self
 #include "osm/OsmPlacemarkData.h"
 
-// Qt
-#include <QVariant>
-
 // Marble
-#include "GeoDataPlacemark.h"
 #include "GeoDataExtendedData.h"
+
+#include <QXmlStreamAttributes>
 
 namespace Marble
 {
 
 const QString OsmPlacemarkData::osmDataKey = "osm_data";
-const char* OsmPlacemarkData::osmPlacemarkDataType = "OsmPlacemarkDataType";
 
 OsmPlacemarkData::OsmPlacemarkData():
     m_id( 0 )
@@ -33,6 +30,12 @@ OsmPlacemarkData::OsmPlacemarkData():
 qint64 OsmPlacemarkData::id() const
 {
     return m_id;
+}
+
+qint64 OsmPlacemarkData::oid() const
+{
+    auto const value = m_tags.value(QStringLiteral("mx:oid")).toLong();
+    return value > 0 ? value : m_id;
 }
 
 QString OsmPlacemarkData::changeset() const
@@ -138,6 +141,11 @@ bool OsmPlacemarkData::containsTagKey( const QString &key ) const
     return m_tags.contains( key );
 }
 
+QHash<QString, QString>::const_iterator OsmPlacemarkData::findTag(const QString &key) const
+{
+    return m_tags.constFind(key);
+}
+
 QHash< QString, QString >::const_iterator OsmPlacemarkData::tagsBegin() const
 {
     return m_tags.begin();
@@ -181,6 +189,11 @@ void OsmPlacemarkData::changeNodeReference( const GeoDataCoordinates &oldKey, co
 {
     m_nodeReferences.insert( newKey, m_nodeReferences.value( oldKey ) );
     m_nodeReferences.remove( oldKey );
+}
+
+QHash<GeoDataCoordinates, OsmPlacemarkData> &OsmPlacemarkData::nodeReferences()
+{
+    return m_nodeReferences;
 }
 
 QHash< GeoDataCoordinates, OsmPlacemarkData >::const_iterator OsmPlacemarkData::nodeReferencesBegin() const
@@ -234,6 +247,11 @@ bool OsmPlacemarkData::containsMemberReference( int key ) const
     return m_memberReferences.contains( key );
 }
 
+QHash<int, OsmPlacemarkData> &OsmPlacemarkData::memberReferences()
+{
+    return m_memberReferences;
+}
+
 QHash< int, OsmPlacemarkData >::const_iterator OsmPlacemarkData::memberReferencesBegin() const
 {
     return m_memberReferences.begin();
@@ -279,23 +297,36 @@ bool OsmPlacemarkData::isNull() const
     return !m_id;
 }
 
+bool OsmPlacemarkData::isEmpty() const
+{
+    return m_tags.isEmpty() &&
+            m_nodeReferences.isEmpty() &&
+            m_memberReferences.isEmpty() &&
+            m_relationReferences.isEmpty() &&
+            m_version.isEmpty() &&
+            m_changeset.isEmpty() &&
+            m_uid.isEmpty() &&
+            m_user.isEmpty() &&
+            m_timestamp.isEmpty();
+}
+
 OsmPlacemarkData OsmPlacemarkData::fromParserAttributes( const QXmlStreamAttributes &attributes )
 {
     OsmPlacemarkData osmData;
-    osmData.setId( attributes.value( "id" ).toLongLong() );
-    osmData.setVersion( attributes.value( "version" ).toString() );
-    osmData.setChangeset( attributes.value( "changeset" ).toString() );
-    osmData.setUser( attributes.value( "user" ).toString() );
-    osmData.setUid( attributes.value( "uid" ).toString() );
-    osmData.setVisible( attributes.value( "visible" ).toString() );
-    osmData.setTimestamp( attributes.value( "timestamp" ).toString() );
-    osmData.setAction( attributes.value( "action" ).toString() );
+    osmData.setId(attributes.value(QLatin1String("id")).toLongLong());
+    osmData.setVersion(attributes.value(QLatin1String("version")).toString());
+    osmData.setChangeset(attributes.value(QLatin1String("changeset")).toString());
+    osmData.setUser(attributes.value(QLatin1String("user")).toString());
+    osmData.setUid(attributes.value(QLatin1String("uid")).toString());
+    osmData.setVisible(attributes.value(QLatin1String("visible")).toString());
+    osmData.setTimestamp(attributes.value(QLatin1String("timestamp")).toString());
+    osmData.setAction(attributes.value(QLatin1String("action")).toString());
     return osmData;
 }
 
 const char *OsmPlacemarkData::nodeType() const
 {
-    return osmPlacemarkDataType;
+    return "OsmPlacemarkDataType";
 }
 
 }

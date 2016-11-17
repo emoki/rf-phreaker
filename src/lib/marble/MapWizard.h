@@ -26,7 +26,6 @@ class QNetworkReply;
 namespace Marble {
 
 class GeoSceneDocument;
-class GeoSceneHead;
 
 class MapWizardPrivate;
 
@@ -44,8 +43,8 @@ public:
     QStringList staticUrlServers() const;
     void setStaticUrlServers( const QStringList& uris );
 
-    static QString createArchive( QWidget *parent, QString mapId );
-    static void deleteArchive( QString mapId );
+    static QString createArchive( QWidget *parent, const QString& mapId );
+    static void deleteArchive( const QString& mapId );
 
     // QWizard's functions
     virtual void accept();

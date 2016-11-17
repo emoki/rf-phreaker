@@ -22,6 +22,7 @@
 #include "MarbleGlobal.h"
 #include "AzimuthalProjection_p.h"
 
+#include <QIcon>
 #include <qmath.h>
 
 #define SAFE_DISTANCE
@@ -67,7 +68,7 @@ QString AzimuthalEquidistantProjection::description() const
 
 QIcon AzimuthalEquidistantProjection::icon() const
 {
-    return QIcon(":/icons/map-globe.png");
+    return QIcon(QStringLiteral(":/icons/map-globe.png"));
 }
 
 AzimuthalEquidistantProjectionPrivate::AzimuthalEquidistantProjectionPrivate( AzimuthalEquidistantProjection * parent )
@@ -98,7 +99,7 @@ bool AzimuthalEquidistantProjection::screenCoordinates( const GeoDataCoordinates
 
     qreal c = qAcos(cosC);
 
-    qreal k = c / qSin( c );
+    qreal k = cosC == 1 ? 1 : c / qSin( c );
 
     // Let (x, y) be the position on the screen of the placemark..
     x = ( qCos( phi ) * qSin( lambda - lambdaPrime ) ) * k;

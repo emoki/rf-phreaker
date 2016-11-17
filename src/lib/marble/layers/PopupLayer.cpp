@@ -19,6 +19,7 @@
 #include "PopupItem.h"
 #include "ViewportParams.h"
 #include "RenderPlugin.h"
+#include "RenderState.h"
 
 #include <QSizeF>
 
@@ -63,7 +64,7 @@ PopupLayer::PopupLayer( MarbleWidget *marbleWidget, QObject *parent ) :
     d( new Private( marbleWidget, this ) )
 {
     foreach (const RenderPlugin *renderPlugin, d->m_widget->renderPlugins()) {
-        if( renderPlugin->nameId() == "crosshairs" ) {
+        if (renderPlugin->nameId() == QLatin1String("crosshairs")) {
             d->m_hasCrosshairsPlugin = true;
             break;
         }
@@ -80,7 +81,7 @@ PopupLayer::~PopupLayer()
 
 QStringList PopupLayer::renderPosition() const
 {
-    return QStringList( "ALWAYS_ON_TOP" );
+    return QStringList(QStringLiteral("ALWAYS_ON_TOP"));
 }
 
 bool PopupLayer::render( GeoPainter *painter, ViewportParams *viewport,
@@ -106,7 +107,7 @@ qreal PopupLayer::zValue() const
 
 RenderState PopupLayer::renderState() const
 {
-    return RenderState( "Popup Window" );
+    return RenderState(QStringLiteral("Popup Window"));
 }
 
 bool PopupLayer::visible() const

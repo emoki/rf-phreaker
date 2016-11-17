@@ -12,6 +12,9 @@
 
 #include "GpsdThread.h"
 #include "MarbleDebug.h"
+
+#include <QIcon>
+
 #include <cmath>
 
 using namespace Marble;
@@ -24,7 +27,7 @@ QString GpsdPositionProviderPlugin::name() const
 
 QString GpsdPositionProviderPlugin::nameId() const
 {
-    return QString::fromLatin1( "Gpsd" );
+    return QStringLiteral("Gpsd");
 }
 
 QString GpsdPositionProviderPlugin::guiString() const
@@ -34,7 +37,7 @@ QString GpsdPositionProviderPlugin::guiString() const
 
 QString GpsdPositionProviderPlugin::version() const
 {
-    return "1.0";
+    return QStringLiteral("1.0");
 }
 
 QString GpsdPositionProviderPlugin::description() const
@@ -44,13 +47,13 @@ QString GpsdPositionProviderPlugin::description() const
 
 QString GpsdPositionProviderPlugin::copyrightYears() const
 {
-    return "2009";
+    return QStringLiteral("2009");
 }
 
-QList<PluginAuthor> GpsdPositionProviderPlugin::pluginAuthors() const
+QVector<PluginAuthor> GpsdPositionProviderPlugin::pluginAuthors() const
 {
-    return QList<PluginAuthor>()
-            << PluginAuthor( QString::fromUtf8( "Eckhart Wörner" ), "ewoerner@kde.org" );
+    return QVector<PluginAuthor>()
+            << PluginAuthor(QStringLiteral("Eckhart Wörner"), QStringLiteral("ewoerner@kde.org"));
 
 }
 
@@ -187,10 +190,5 @@ QString GpsdPositionProviderPlugin::error() const
 {
     return m_thread->error();
 }
-
-
-Q_EXPORT_PLUGIN2( GpsdPositionProviderPlugin, Marble::GpsdPositionProviderPlugin )
-
-
 
 #include "moc_GpsdPositionProviderPlugin.cpp"

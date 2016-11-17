@@ -10,7 +10,6 @@
 
 #include "Routing.h"
 
-#include "MarbleDeclarativeWidget.h"
 #include <MarbleMap.h>
 #include <MarbleModel.h>
 #include "MarbleDirs.h"
@@ -18,6 +17,7 @@
 #include "routing/RoutingManager.h"
 #include "routing/RouteRequest.h"
 #include "routing/RoutingProfilesModel.h"
+#include <GeoDataLatLonAltBox.h>
 #include <GeoPainter.h>
 #include <routing/Route.h>
 #include <declarative/RouteRequestModel.h>
@@ -25,8 +25,10 @@
 #include <PositionTracking.h>
 
 #include <QDebug>
-#include <QPainter>
 #include <QQmlContext>
+#include <QOpenGLPaintDevice>
+#include <QSGGeometryNode>
+#include <QSGFlatColorMaterial>
 
 namespace Marble {
 
@@ -56,8 +58,9 @@ RoutingPrivate::RoutingPrivate(QObject *parent) :
 }
 
 Routing::Routing( QQuickItem *parent) :
-    QQuickPaintedItem( parent ), d( new RoutingPrivate(this) )
+    QQuickItem( parent ), d( new RoutingPrivate(this) )
 {
+    setFlag(ItemHasContents, true);
     d->m_routeRequestModel->setRouting(this);
     connect(d->m_routeRequestModel, SIGNAL(rowsInserted(QModelIndex,int,int)), this, SLOT(updateWaypointItems()));
     connect(d->m_routeRequestModel, SIGNAL(rowsMoved(QModelIndex,int,int,QModelIndex,int)), this, SLOT(updateWaypointItems()));
@@ -71,37 +74,64 @@ Routing::~Routing()
     delete d;
 }
 
-void Routing::paint(QPainter *painter)
-{
+QSGNode * Routing::updatePaintNode(QSGNode *oldNode, UpdatePaintNodeData *) {
     if (!d->m_marbleMap) {
-        return;
+        return 0;
     }
 
-    QPaintDevice *paintDevice = painter->device();
-    painter->end();
-    {
-        Marble::GeoPainter geoPainter(paintDevice, d->m_marbleMap->viewport(), d->m_marbleMap->mapQuality());
+    QOpenGLPaintDevice paintDevice(QSize(width(), height()));
+    Marble::GeoPainter geoPainter(&paintDevice, d->m_marbleMap->viewport(), d->m_marbleMap->mapQuality());
 
-        RoutingManager const * const routingManager = d->m_marbleMap->model()->routingManager();
-        GeoDataLineString const waypoints = routingManager->routingModel()->route().path();
+    RoutingManager const * const routingManager = d->m_marbleMap->model()->routingManager();
+    GeoDataLineString const & waypoints = routingManager->routingModel()->route().path();
 
-        int const dpi = qMax(paintDevice->logicalDpiX(), paintDevice->logicalDpiY());
-        QPen standardRoutePen( routingManager->routeColorStandard().darker( 200 ) );
-        qreal const width = 2.5 * MM2M * M2IN * dpi;
-        standardRoutePen.setWidthF( width );
-        geoPainter.setPen( standardRoutePen );
-        geoPainter.drawPolyline( waypoints );
+    if (waypoints.isEmpty()) {
+      return 0;
+    }
 
-        standardRoutePen.setColor( routingManager->routeColorStandard() );
-        standardRoutePen.setWidthF( width - 4.0 );
-        if ( routingManager->state() == RoutingManager::Downloading ) {
-            standardRoutePen.setStyle( Qt::DotLine );
+    int const dpi = qMax(paintDevice.logicalDpiX(), paintDevice.logicalDpiY());
+    qreal const width = 2.5 * MM2M * M2IN * dpi;
+
+    QColor standardRouteColor = routingManager->state() == RoutingManager::Downloading ?
+                                routingManager->routeColorStandard() :
+                                routingManager->routeColorStandard().darker( 200 );
+
+    QVector<QPolygonF*> polygons;
+    geoPainter.polygonsFromLineString( waypoints, polygons);
+
+    if (!polygons.isEmpty()) {
+        delete oldNode;
+        oldNode = new QSGNode;
+        QSGFlatColorMaterial *material = new QSGFlatColorMaterial;
+        material->setColor(standardRouteColor);
+
+        foreach(const QPolygonF* itPolygon, polygons) {
+
+            int segmentCount = itPolygon->size() - 1;
+
+            QSGGeometryNode * lineNode = new QSGGeometryNode;
+
+            QSGGeometry * lineNodeGeo = new QSGGeometry(QSGGeometry::defaultAttributes_Point2D(), 2*segmentCount);
+            lineNodeGeo->setLineWidth(width);
+            lineNodeGeo->setDrawingMode(GL_LINE_STRIP);
+            lineNodeGeo->setLineWidth(width);
+            lineNodeGeo->allocate(2*segmentCount);
+
+            lineNode->setGeometry(lineNodeGeo);
+            lineNode->setFlag(QSGNode::OwnsGeometry);
+            lineNode->setMaterial(material);
+            lineNode->setFlag(QSGNode::OwnsMaterial);
+
+            for(int i = 0; i < segmentCount; ++i) {
+                lineNodeGeo->vertexDataAsPoint2D()[2*i].set(itPolygon->at(i).x(), itPolygon->at(i).y());
+                lineNodeGeo->vertexDataAsPoint2D()[2*i+1].set(itPolygon->at(i+1).x(), itPolygon->at(i+1).y());
+            }
+            oldNode->appendChildNode(lineNode);
         }
-        geoPainter.setPen( standardRoutePen );
-        geoPainter.drawPolyline( waypoints );
     }
 
-    painter->begin(paintDevice);
+    qDeleteAll(polygons);
+    return oldNode;
 }
 
 QObject* Routing::waypointModel()
@@ -137,7 +167,7 @@ void Routing::updateWaypointItems()
 
         for (int i = d->m_waypointItems.keys().size()-1; i >= d->m_routeRequestModel->rowCount(); i--) {
             QQuickItem* item = d->m_waypointItems[i];
-            item->setProperty("visible", QVariant::fromValue(false) );
+            item->setProperty("visible", QVariant(false) );
             d->m_waypointItems.erase(d->m_waypointItems.find(i));
             item->deleteLater();
         }
@@ -154,19 +184,19 @@ void Routing::updateWaypointItems()
             if ( item ) {
                 item->setVisible( visible );
                 if ( visible ) {
-                    item->setProperty("xPos", QVariant::fromValue(x));
-                    item->setProperty("yPos", QVariant::fromValue(y));
+                    item->setProperty("xPos", QVariant(x));
+                    item->setProperty("yPos", QVariant(y));
                     if (iter.key() == 0 && waypointCount() == 1) {
-                        item->setProperty("type", QVariant::fromValue(QString("departure")));
+                        item->setProperty("type", QVariant(QStringLiteral("departure")));
                     }
                     else if (iter.key() == d->m_waypointItems.keys().size()-1) {
-                            item->setProperty("type", QVariant::fromValue(QString("destination")));
+                        item->setProperty("type", QVariant(QStringLiteral("destination")));
                     }
                     else if (iter.key() > 0) {
-                        item->setProperty("type", QVariant::fromValue(QString("waypoint")));
+                        item->setProperty("type", QVariant(QStringLiteral("waypoint")));
                     }
                     else {
-                        item->setProperty("type", QVariant::fromValue(QString("departure")));
+                        item->setProperty("type", QVariant(QStringLiteral("departure")));
                     }
                 }
             }
@@ -179,7 +209,7 @@ int Routing::addSearchResultPlacemark(Placemark *placemark)
 {
     if ( d->m_marbleMap ) {
         for (int i = 0; i < d->m_searchResultItems.size(); i++) {
-            if (d->m_searchResultPlacemarks[i]->coordinate()->coordinates() == placemark->coordinate()->coordinates()) {
+            if (d->m_searchResultPlacemarks[i]->placemark().coordinate() == placemark->placemark().coordinate()) {
                 return i;
             }
         }
@@ -214,7 +244,7 @@ void Routing::updateSearchResultPlacemarks()
         if ( item ) {
             item->setParentItem( this );
             item->setProperty("index", i);
-            item->setProperty("type", QVariant::fromValue(QString("searchResult")));
+            item->setProperty("type", QVariant(QStringLiteral("searchResult")));
             item->setProperty("placemark", QVariant::fromValue(d->m_searchResultPlacemarks[i]));
             d->m_searchResultItems[i] = item;
         } else {
@@ -224,7 +254,7 @@ void Routing::updateSearchResultPlacemarks()
 
     for (int i = d->m_searchResultItems.keys().size()-1; i >= d->m_searchResultPlacemarks.size(); i--) {
         QQuickItem* item = d->m_searchResultItems[i];
-        item->setProperty("visible", QVariant::fromValue(false) );
+        item->setProperty("visible", QVariant(false) );
         d->m_searchResultItems.erase(d->m_searchResultItems.find(i));
         item->deleteLater();
     }
@@ -232,16 +262,16 @@ void Routing::updateSearchResultPlacemarks()
     for (int i = 0; i < d->m_searchResultItems.keys().size() && i < d->m_searchResultPlacemarks.size(); i++) {
         qreal x = 0;
         qreal y = 0;
-        const qreal lon = d->m_searchResultPlacemarks[i]->coordinate()->longitude();
-        const qreal lat = d->m_searchResultPlacemarks[i]->coordinate()->latitude();
-        const bool visible = d->m_marbleMap->viewport()->screenCoordinates(lon * DEG2RAD, lat * DEG2RAD, x, y);
+        const qreal lon = d->m_searchResultPlacemarks[i]->placemark().coordinate().longitude();
+        const qreal lat = d->m_searchResultPlacemarks[i]->placemark().coordinate().latitude();
+        const bool visible = d->m_marbleMap->viewport()->screenCoordinates(lon, lat, x, y);
 
         QQuickItem * item = d->m_searchResultItems[i];
         if ( item ) {
             item->setVisible( visible );
             if ( visible ) {
-                item->setProperty("xPos", QVariant::fromValue(x));
-                item->setProperty("yPos", QVariant::fromValue(y));
+                item->setProperty("xPos", QVariant(x));
+                item->setProperty("yPos", QVariant(y));
             }
         }
     }
@@ -277,9 +307,9 @@ void Routing::setMarbleMap( MarbleMap* marbleMap )
         QList<Marble::RoutingProfile> profiles = routingManager->profilesModel()->profiles();
         if ( profiles.size() == 4 ) {
             /** @todo FIXME: Restrictive assumptions on available plugins and certain profile loading implementation */
-            d->m_profiles["Motorcar"] = profiles.at( 0 );
-            d->m_profiles["Bicycle"] = profiles.at( 2 );
-            d->m_profiles["Pedestrian"] = profiles.at( 3 );
+            d->m_profiles[QStringLiteral("Motorcar")] = profiles.at( 0 );
+            d->m_profiles[QStringLiteral("Bicycle")] = profiles.at( 2 );
+            d->m_profiles[QStringLiteral("Pedestrian")] = profiles.at( 3 );
         } else {
             qDebug() << "Unexpected size of default routing profiles: " << profiles.size();
         }
@@ -356,7 +386,7 @@ void Routing::addViaAtIndex(int index, qreal lon, qreal lat)
 
 void Routing::addViaByPlacemark(Placemark *placemark)
 {
-    if ( d->m_marbleMap ) {
+    if (d->m_marbleMap && placemark) {
         Marble::RouteRequest * request = d->m_marbleMap->model()->routingManager()->routeRequest();
         request->addVia(placemark->placemark());
         updateRoute();
@@ -365,7 +395,7 @@ void Routing::addViaByPlacemark(Placemark *placemark)
 
 void Routing::addViaByPlacemarkAtIndex(int index, Placemark *placemark)
 {
-    if ( d->m_marbleMap ) {
+    if (d->m_marbleMap && placemark) {
         Marble::RouteRequest * request = d->m_marbleMap->model()->routingManager()->routeRequest();
         request->insert(index, placemark->placemark());
         updateRoute();

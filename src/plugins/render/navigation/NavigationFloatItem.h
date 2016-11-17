@@ -12,7 +12,6 @@
 #ifndef NAVIGATION_FLOAT_ITEM_H
 #define NAVIGATION_FLOAT_ITEM_H
 
-#include <QObject>
 #include <QMenu>
 
 #include "MarbleGlobal.h"
@@ -37,7 +36,7 @@ class WidgetGraphicsItem;
 class NavigationFloatItem: public AbstractFloatItem
 {
     Q_OBJECT
-    Q_PLUGIN_METADATA( IID "org.kde.edu.marble.NavigationFloatItem" )
+    Q_PLUGIN_METADATA(IID "org.kde.marble.NavigationFloatItem")
 
     Q_INTERFACES( Marble::RenderPluginInterface )
 
@@ -61,7 +60,7 @@ MARBLE_PLUGIN( NavigationFloatItem )
 
     QString copyrightYears() const;
 
-    QList<PluginAuthor> pluginAuthors() const;
+    QVector<PluginAuthor> pluginAuthors() const override;
 
     QIcon icon () const;
 
@@ -84,7 +83,7 @@ MARBLE_PLUGIN( NavigationFloatItem )
 
  private Q_SLOTS:
     /** Map theme was changed, adjust controls */
-    void selectTheme( QString theme );
+    void selectTheme( const QString& theme );
 
     /** Enable/disable zoom in/out buttons */
     void updateButtons( int zoomValue );

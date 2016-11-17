@@ -19,7 +19,9 @@ namespace Marble {
 
 class GeoDataLinkPrivate;
 
-class MARBLE_EXPORT GeoDataLink: public GeoDataObject
+/**
+ */
+class GEODATA_EXPORT GeoDataLink: public GeoDataObject
 {
 public:
     enum RefreshMode {
@@ -50,7 +52,7 @@ public:
 
     QString href() const;
 
-    void setHref( QString href );
+    void setHref( const QString& href );
 
     RefreshMode refreshMode() const;
 

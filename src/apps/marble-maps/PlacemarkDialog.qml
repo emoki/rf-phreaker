@@ -13,19 +13,33 @@ import QtQuick.Controls 1.3
 import QtQuick.Window 2.2
 import QtQuick.Layouts 1.1
 
-import org.kde.edu.marble 0.20
+import org.kde.marble 0.20
 
 Item {
     id: root
 
     property var placemark: null
-    property string actionIconSource: viaGroup.current === addDestinationButton ? routeEditor.currentProfileIcon : "qrc:///add.png"
+    property string actionIconSource: routeEditor.currentProfileIcon
+    property alias map: bookmarks.map
 
-    height: placemark === null ? 0 : Screen.pixelDensity * 4 + Math.max(infoLayout.height, actionsLayout.height)
+    height: placemark === null ? 0 : Screen.pixelDensity * 6 +
+                                 (infoLayout.height > bookmarkButton.height ? infoLayout.height : bookmarkButton.height)
 
     function addToRoute() {
-        viaGroup.current.execute()
-        itemStack.state = "routing"
+        ensureRouteHasDeparture()
+        routing.addViaByPlacemarkAtIndex(routing.waypointCount(), placemark)
+        routing.clearSearchResultPlacemarks()
+        placemark = null
+        dialogContainer.currentIndex = dialogContainer.routing
+    }
+
+    onPlacemarkChanged: {
+        if (placemark) {
+            bookmarkButton.bookmark = bookmarks.isBookmark(placemark.longitude, placemark.latitude)
+            dialogContainer.currentIndex = dialogContainer.place
+        } else {
+            dialogContainer.currentIndex = dialogContainer.none
+        }
     }
 
     SystemPalette {
@@ -38,97 +52,103 @@ Item {
         color: palette.base
     }
 
+    Bookmarks {
+        id: bookmarks
+    }
+
     Column {
         id: infoLayout
-        clip: true
         anchors {
             top: parent.top
             left: parent.left
-            right: actionsLayout.left
+            right: bookmarkButton.left
             margins: Screen.pixelDensity * 2
         }
-        height: nameLabel.height + (addressLabel.text == "" ? 0 : addressLabel.height)
 
-        Text {
-            id: nameLabel
+        IconText {
+            id: name
             width: parent.width
+            visible: text.length > 0
             text: placemark === null ? "" : placemark.name
-            wrapMode: Text.WordWrap
-            elide: Text.ElideRight
             maximumLineCount: 2
             font.pointSize: 20
         }
 
-        Text {
-            id: addressLabel
+        IconText {
             width: parent.width
+            visible: text.length > 0
+            text: placemark === null ? "" : placemark.description
+        }
+
+        IconText {
+            width: parent.width
+            visible: text.length > 0
             text: placemark === null ? "" : placemark.address
-            wrapMode: Text.WordWrap
-            elide: Text.ElideRight
             maximumLineCount: 4
-            font.pointSize: 14
+        }
+
+        IconText {
+            width: parent.width
+            visible: url.length > 0
+            property string url: placemark === null ? "" : placemark.website
+            text: "<a href=\"" + url + "\">" + url + "</a>"
+            icon: "qrc:/material/browser.svg"
+            maximumLineCount: 4
+            onLinkActivated: Qt.openUrlExternally(link)
+        }
+
+        IconText {
+            width: parent.width
+            visible: url.length > 0
+            property string url: placemark === null ? "" : placemark.wikipedia
+            text:  "<a href=\"" + url + "\">Wikipedia</a>"
+            icon: "qrc:/material/browser.svg"
+            maximumLineCount: 4
+            onLinkActivated: Qt.openUrlExternally(link)
+        }
+
+        IconText {
+            width: parent.width
+            visible: text.length > 0
+            text: placemark === null ? "" : placemark.openingHours
+            icon: "qrc:/material/access_time.svg"
+        }
+
+        IconText {
+            width: parent.width
+            visible: text.length > 0
+            text: placemark === null ? "" : "<a href=\"#\"#>" + placemark.coordinates + "</a>"
+            icon: "qrc:/material/place.svg"
+            linkColor: palette.text
+            onLinkActivated: marbleMaps.centerOnCoordinates(placemark.longitude, placemark.latitude)
         }
     }
 
-    Column {
-        id: actionsLayout
-        width: rowLayout.width
-        height: spacer.height + rowLayout.height
-        spacing: Screen.pixelDensity * 2
-        anchors {
-            right: parent.right
-            rightMargin: Screen.pixelDensity * 2
-        }
+    Image {
+        id: bookmarkButton
+        anchors.right: parent.right
+        anchors.top: parent.top
+        anchors.margins: Screen.pixelDensity * 2
+        visible: root.height > 0
 
-        Item {
-            id: spacer
-            height: Screen.pixelDensity * 5
-            width: 1
-        }
+        property bool bookmark: false
 
-        Row {
-            id: rowLayout
-            anchors.right: parent.right
-            spacing: 0
+        width: Screen.pixelDensity * 6
+        height: width
+        sourceSize.height: height
+        sourceSize.width: width
+        source: bookmark ? "qrc:/material/star.svg" : "qrc:/material/star_border.svg"
 
-            ExclusiveGroup {
-                id: viaGroup
-            }
-
-            RouteProfileRadioButton {
-                anchors.margins: 0
-                visible: routing.routeRequestModel.count === 0
-                exclusiveGroup: viaGroup
-                imageSource: "qrc:///ic_place_departure.png"
-                function execute() {
-                    routing.addViaByPlacemarkAtIndex(0, placemark);
-                    routing.removeSearchResultPlacemark(placemark);
-                    placemark = null;
+        MouseArea {
+            id: touchArea
+            anchors.fill: parent
+            onClicked: {
+                if (bookmarkButton.bookmark) {
+                    bookmarks.removeBookmark(root.placemark.longitude, root.placemark.latitude)
+                } else {
+                    bookmarks.addBookmark(root.placemark, "Default")
                 }
-            }
-            RouteProfileRadioButton {
-                anchors.margins: 0
-                exclusiveGroup: viaGroup
-                imageSource: "qrc:///ic_place_via.png"
-                function execute() {
-                    ensureRouteHasDeparture()
-                    routing.addViaByPlacemark(placemark)
-                    routing.clearSearchResultPlacemarks();
-                    placemark = null;
-                }
-            }
-            RouteProfileRadioButton {
-                id: addDestinationButton
-                anchors.margins: 0
-                checked: true
-                exclusiveGroup: viaGroup
-                imageSource: "qrc:///ic_place_arrival.png"
-                function execute() {
-                    ensureRouteHasDeparture()
-                    routing.addViaByPlacemarkAtIndex(routing.waypointCount(), placemark)
-                    routing.clearSearchResultPlacemarks();
-                    placemark = null;
-                }
+                bookmarkButton.bookmark = !bookmarkButton.bookmark
             }
         }
     }

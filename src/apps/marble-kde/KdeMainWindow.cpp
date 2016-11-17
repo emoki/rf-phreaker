@@ -13,14 +13,13 @@
 #include "KdeMainWindow.h"
 
 // Qt
-#include <QProgressBar>
-#include <QToolBar>
 #include <QAction>
 #include <QActionGroup>
 #include <QCoreApplication>
 #include <QCloseEvent>
 
-// KDE
+// KF
+#include <klocalizedstring.h>
 #include <kactioncollection.h>
 #include <kparts/part.h>
 #include <kxmlguifactory.h>
@@ -70,7 +69,8 @@ MainWindow::MainWindow( const QString& marbleDataPath, QWidget *parent )
     setAutoSaveSettings();
 
     connect( marbleWidget(), SIGNAL(themeChanged(QString)),
-            this, SLOT(setMapTitle()));
+            this, SLOT(updateWindowTitle()));
+    updateWindowTitle();
 }
 
 MainWindow::~MainWindow()
@@ -89,12 +89,10 @@ MarbleWidget* MainWindow::marbleWidget() const
     return m_part->controlView()->marbleWidget();
 }
 
-void MainWindow::setMapTitle()
+void MainWindow::updateWindowTitle()
 {
     GeoSceneDocument *mapTheme = marbleWidget()->mapTheme();
-    if ( mapTheme ) {
-        setWindowTitle(tr("Marble Virtual Globe") + " - " + mapTheme->head()->name());
-    }
+    setWindowTitle(mapTheme ? mapTheme->head()->name() : QString());
 }
 
 void MainWindow::changeViewSize( QAction* action )

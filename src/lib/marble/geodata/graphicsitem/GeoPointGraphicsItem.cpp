@@ -10,41 +10,34 @@
 
 #include "GeoPointGraphicsItem.h"
 
+#include "GeoDataPlacemark.h"
+#include "GeoDataPoint.h"
 #include "GeoPainter.h"
-#include "GeoDataFeature.h"
+#include "StyleBuilder.h"
 
 namespace Marble
 {
 
-GeoPointGraphicsItem::GeoPointGraphicsItem( const GeoDataFeature *feature )
-        : GeoGraphicsItem( feature )
+GeoPointGraphicsItem::GeoPointGraphicsItem(const GeoDataPlacemark *placemark, const GeoDataPoint *point) :
+    GeoGraphicsItem(placemark),
+    m_point(point)
 {
-    if (feature) {
-        QString const paintLayer = QString("Point/%1").arg(GeoDataFeature::visualCategoryName(feature->visualCategory()));
+    if (placemark) {
+        QString const paintLayer = QLatin1String("Point/") + StyleBuilder::visualCategoryName(placemark->visualCategory());
         setPaintLayers(QStringList() << paintLayer);
     }
-}
-
-void GeoPointGraphicsItem::setPoint( const GeoDataPoint& point )
-{
-    m_point = point;
-}
-
-GeoDataPoint GeoPointGraphicsItem::point() const
-{
-    return m_point;
 }
 
 void GeoPointGraphicsItem::paint(GeoPainter* painter, const ViewportParams* viewport , const QString &layer)
 {
     Q_UNUSED(viewport);
     Q_UNUSED(layer);
-    painter->drawPoint( m_point );
+    painter->drawPoint(*m_point);
 }
 
 const GeoDataLatLonAltBox& GeoPointGraphicsItem::latLonAltBox() const
 {
-    return m_point.latLonAltBox();
+    return m_point->latLonAltBox();
 }
 
 }

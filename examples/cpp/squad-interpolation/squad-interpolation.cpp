@@ -10,16 +10,18 @@
 
 #include "squad-interpolation.h"
 
-#include <MarbleWidget.h>
-#include <MarbleGlobal.h>
-#include <GeoDataDocument.h>
-#include <GeoDataPlacemark.h>
-#include <GeoDataLineString.h>
-#include <GeoDataTreeModel.h>
-#include <MarblePlacemarkModel.h>
-#include <GeoDataTypes.h>
-#include <MarbleMath.h>
-#include <ViewportParams.h>
+#include <marble/MarbleWidget.h>
+#include <marble/MarbleGlobal.h>
+#include <marble/GeoDataLatLonAltBox.h>
+#include <marble/GeoDataDocument.h>
+#include <marble/GeoDataPlacemark.h>
+#include <marble/GeoDataLineString.h>
+#include <marble/GeoDataTreeModel.h>
+#include <marble/MarblePlacemarkModel.h>
+#include <marble/GeoDataLinearRing.h>
+#include <marble/GeoDataTypes.h>
+#include <marble/MarbleMath.h>
+#include <marble/ViewportParams.h>
 
 #include <QApplication>
 #include <QTimer>
@@ -43,7 +45,7 @@ MyPaintLayer::MyPaintLayer ( MarbleWidget *widget ) :
 
 QStringList MyPaintLayer::renderPosition() const
 {
-    return QStringList() << "USER_TOOLS";
+    return QStringList(QStringLiteral("USER_TOOLS"));
 }
 
 bool MyPaintLayer::render ( GeoPainter *painter, ViewportParams *viewport, const QString &, GeoSceneLayer * )
@@ -73,12 +75,12 @@ bool MyPaintLayer::render ( GeoPainter *painter, ViewportParams *viewport, const
         painter->drawEllipse ( a2, 8, 8 );
         qreal x, y;
         if ( viewport->screenCoordinates ( a2, x, y ) ) {
-            painter->drawText( x+5, y, "A" );
+            painter->drawText(x+5, y, QStringLiteral("A"));
         }
         GeoDataCoordinates b1 = basePoint( m_cities[1], m_cities[2], m_cities[3] );
         painter->drawEllipse ( b1, 8, 8 );
         if ( viewport->screenCoordinates ( b1, x, y ) ) {
-            painter->drawText( x+5, y, "B" );
+            painter->drawText(x+5, y, QStringLiteral("B"));
         }
 
         QPen grapePen = Marble::Oxygen::grapeViolet4;
@@ -102,7 +104,7 @@ bool MyPaintLayer::render ( GeoPainter *painter, ViewportParams *viewport, const
     QPen greenPen = Marble::Oxygen::forestGreen4;
     greenPen.setWidth ( 3 );
     painter->setPen ( greenPen );
-    painter->drawPolyline ( m_interpolated, "Squad\nInterpolation", LineEnd );
+    painter->drawPolyline ( m_interpolated, QStringLiteral("Squad\nInterpolation"), LineEnd );
 
     // Increasing city indices with some transparency effect for readability
     QFont font = painter->font();
@@ -153,7 +155,7 @@ void MyPaintLayer::addRandomCity ( double minDistance, double maxDistance )
         Q_ASSERT ( object );
         if ( object->nodeType() == GeoDataTypes::GeoDataDocumentType ) {
             GeoDataDocument* document = static_cast<GeoDataDocument*> ( object );
-            if ( document->name() == "cityplacemarks" ) {
+            if (document->name() == QLatin1String("cityplacemarks")) {
                 QVector<GeoDataPlacemark*> placemarks = document->placemarkList();
                 for ( int i = qrand() % placemarks.size(); i < placemarks.size(); ++i ) {
                     double const distance = EARTH_RADIUS * distanceSphere ( m_cities.last(), placemarks[i]->coordinate() );
@@ -219,7 +221,7 @@ int main ( int argc, char** argv )
     using namespace Marble;
     QApplication app ( argc, argv );
     MarbleWidget *mapWidget = new MarbleWidget;
-    mapWidget->setWindowTitle( "Marble - Squad Interpolation" );
+    mapWidget->setWindowTitle(QStringLiteral("Marble - Squad Interpolation"));
 
     // Create and register our paint layer
     MyPaintLayer* layer = new MyPaintLayer ( mapWidget );
@@ -227,7 +229,7 @@ int main ( int argc, char** argv )
     mapWidget->centerOn ( layer->center() );
 
     // Finish widget creation.
-    mapWidget->setMapThemeId( "earth/plain/plain.dgml" );
+    mapWidget->setMapThemeId(QStringLiteral("earth/plain/plain.dgml"));
     mapWidget->setShowCities( false );
     mapWidget->setShowCrosshairs( false );
     mapWidget->setShowOtherPlaces( false );

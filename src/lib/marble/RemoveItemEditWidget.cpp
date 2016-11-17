@@ -12,13 +12,13 @@
 #include <QLabel>
 #include <QHBoxLayout>
 #include <QComboBox>
-#include <QLineEdit>
 
 #include "RemoveItemEditWidget.h"
 #include "MarbleWidget.h"
 #include "geodata/data/GeoDataAnimatedUpdate.h"
-#include "geodata/data/GeoDataFeature.h"
 #include "GeoDataTypes.h"
+#include "GeoDataUpdate.h"
+#include "GeoDataDelete.h"
 #include "MarblePlacemarkModel.h"
 
 namespace Marble {
@@ -33,7 +33,7 @@ RemoveItemEditWidget::RemoveItemEditWidget( const QModelIndex &index, QWidget *p
     layout->setSpacing( 5 );
 
     QLabel* iconLabel = new QLabel;
-    iconLabel->setPixmap( QPixmap( ":/icons/remove.png" ) );
+    iconLabel->setPixmap(QPixmap(QStringLiteral(":/icons/remove.png")));
     layout->addWidget( iconLabel );
 
     QLabel* comboBoxLabel = new QLabel;
@@ -42,7 +42,7 @@ RemoveItemEditWidget::RemoveItemEditWidget( const QModelIndex &index, QWidget *p
 
     layout->addWidget( m_comboBox );
 
-    m_button->setIcon( QIcon( ":/marble/document-save.png" ) );
+    m_button->setIcon(QIcon(QStringLiteral(":/marble/document-save.png")));
     connect(m_button, SIGNAL(clicked()), this, SLOT(save()));
     layout->addWidget( m_button );
 

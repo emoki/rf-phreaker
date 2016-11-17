@@ -9,7 +9,13 @@
 //
 
 #include "GeoDataUpdate.h"
+
+#include "GeoDataCreate.h"
+#include "GeoDataDelete.h"
+#include "GeoDataChange.h"
 #include "GeoDataTypes.h"
+
+#include <QString>
 
 namespace Marble
 {
@@ -25,7 +31,7 @@ public:
 };
 
 GeoDataUpdatePrivate::GeoDataUpdatePrivate() :
-    m_create( 0 ), m_delete( 0 ), m_change( 0 ), m_targetHref( "" )
+    m_create( 0 ), m_delete( 0 ), m_change( 0 )
 {
 }
 

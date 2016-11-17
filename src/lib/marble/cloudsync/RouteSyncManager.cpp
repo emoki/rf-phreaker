@@ -16,22 +16,18 @@
 #include "GeoDataFolder.h"
 #include "GeoDataDocument.h"
 #include "GeoDataPlacemark.h"
+#include "CloudRouteModel.h"
 #include "CloudRoutesDialog.h"
 #include "CloudSyncManager.h"
 #include "OwncloudSyncBackend.h"
+#include "RouteItem.h"
 #include "RoutingManager.h"
 
 #include <QDir>
 #include <QUrl>
 #include <QFile>
-#include <QTimer>
+#include <QIcon>
 #include <QPointer>
-#include <QScriptValue>
-#include <QScriptEngine>
-#include <QNetworkReply>
-#include <QTemporaryFile>
-#include <QNetworkRequest>
-#include <QNetworkAccessManager>
 
 namespace Marble
 {
@@ -60,7 +56,7 @@ RouteSyncManager::Private::Private( CloudSyncManager *cloudSyncManager ) :
     m_model( new CloudRouteModel() ),
     m_owncloudBackend( cloudSyncManager )
 {
-    m_cacheDir = QDir( MarbleDirs::localPath() + "/cloudsync/cache/routes/" );
+    m_cacheDir = QDir(MarbleDirs::localPath() + QLatin1String("/cloudsync/cache/routes/"));
 }
 
 RouteSyncManager::RouteSyncManager(CloudSyncManager *cloudSyncManager) :
@@ -119,7 +115,7 @@ QString RouteSyncManager::saveDisplayedToCache() const
     d->m_cacheDir.mkpath( d->m_cacheDir.absolutePath() );
     
     const QString timestamp = generateTimestamp();
-    const QString filename = d->m_cacheDir.absolutePath() + '/' + timestamp + ".kml";
+    const QString filename = d->m_cacheDir.absolutePath() + QLatin1Char('/') + timestamp + QLatin1String(".kml");
     d->m_routingManager->saveRoute( filename );
     return timestamp;
 }
@@ -136,12 +132,12 @@ QVector<RouteItem> RouteSyncManager::cachedRouteList() const
     QVector<RouteItem> routeList;
     QStringList cachedRoutes = d->m_cacheDir.entryList( QStringList() << "*.kml", QDir::Files );
     foreach ( const QString &routeFilename, cachedRoutes ) {
-        QFile file( d->m_cacheDir.absolutePath() + '/' + routeFilename );
+        QFile file(d->m_cacheDir.absolutePath() + QLatin1Char('/') + routeFilename);
         file.open( QFile::ReadOnly );
 
         GeoDataParser parser( GeoData_KML );
         if( !parser.read( &file ) ) {
-            mDebug() << "Could not read " + routeFilename;
+            mDebug() << QLatin1String("Could not read ") + routeFilename;
         }
 
         file.close();
@@ -152,15 +148,14 @@ QVector<RouteItem> RouteSyncManager::cachedRouteList() const
         if ( container && container->size() > 0 ) {
             GeoDataFolder *folder = container->folderList().at( 0 );
             foreach ( GeoDataPlacemark *placemark, folder->placemarkList() ) {
-                routeName.append( placemark->name() );
-                routeName.append( " - " );
+                routeName += placemark->name() + QLatin1String(" - ");
             }
         }
 
         routeName = routeName.left( routeName.length() - 3 );
         QString timestamp = routeFilename.left( routeFilename.length() - 4 );
-        QString distance = QString('0');
-        QString duration = QString('0');
+        QString distance(QLatin1Char('0'));
+        QString duration(QLatin1Char('0'));
 
         QString previewPath = QString( "%0/preview/%1.jpg" ).arg( d->m_cacheDir.absolutePath(), timestamp );
         QIcon preview;

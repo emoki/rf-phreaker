@@ -17,7 +17,7 @@
 #include <QFile>
 #include <QString>
 #include <QStringList>
-#include <QApplication>
+#include <QCoreApplication>
 
 #include <stdlib.h>
 
@@ -41,9 +41,9 @@ using namespace Marble;
 
 namespace
 {
-    QString runTimeMarbleDataPath = "";
+    QString runTimeMarbleDataPath;
 
-    QString runTimeMarblePluginPath = "";
+    QString runTimeMarblePluginPath;
 }
 
 MarbleDirs::MarbleDirs()
@@ -54,8 +54,8 @@ MarbleDirs::MarbleDirs()
 
 QString MarbleDirs::path( const QString& relativePath )
 { 
-    QString  localpath = localPath() + '/' + relativePath;	// local path
-    QString  systempath  = systemPath() + '/' + relativePath;	// system path
+    QString  localpath = localPath() + QLatin1Char('/') + relativePath;	// local path
+    QString  systempath  = systemPath() + QLatin1Char('/') + relativePath;	// system path
 
 
     QString fullpath = systempath;
@@ -68,8 +68,8 @@ QString MarbleDirs::path( const QString& relativePath )
 
 QString MarbleDirs::pluginPath( const QString& relativePath )
 { 
-    QString  localpath = pluginLocalPath() + QDir::separator() + relativePath;    // local path
-    QString  systempath  = pluginSystemPath() + QDir::separator() + relativePath; // system path
+    const QString localpath = pluginLocalPath() + QDir::separator() + relativePath;    // local path
+    const QString systempath  = pluginSystemPath() + QDir::separator() + relativePath; // system path
 
 
     QString fullpath = systempath;
@@ -82,8 +82,8 @@ QString MarbleDirs::pluginPath( const QString& relativePath )
 
 QStringList MarbleDirs::entryList( const QString& relativePath, QDir::Filters filters )
 {
-    QStringList filesLocal = QDir( MarbleDirs::localPath() + '/' + relativePath ).entryList(filters);
-    QStringList filesSystem = QDir( MarbleDirs::systemPath() + '/' + relativePath ).entryList(filters);
+    QStringList filesLocal = QDir(MarbleDirs::localPath() + QLatin1Char('/') + relativePath).entryList(filters);
+    QStringList filesSystem = QDir(MarbleDirs::systemPath() + QLatin1Char('/') + relativePath).entryList(filters);
     QStringList allFiles( filesLocal );
     allFiles << filesSystem;
 
@@ -101,8 +101,8 @@ QStringList MarbleDirs::entryList( const QString& relativePath, QDir::Filters fi
 
 QStringList MarbleDirs::pluginEntryList( const QString& relativePath, QDir::Filters filters )
 {
-    QStringList filesLocal = QDir( MarbleDirs::pluginLocalPath() + '/' + relativePath ).entryList(filters);
-    QStringList filesSystem = QDir( MarbleDirs::pluginSystemPath() + '/' + relativePath ).entryList(filters);
+    QStringList filesLocal = QDir(MarbleDirs::pluginLocalPath() + QLatin1Char('/') + relativePath).entryList(filters);
+    QStringList filesSystem = QDir(MarbleDirs::pluginSystemPath() + QLatin1Char('/') + relativePath).entryList(filters);
     QStringList allFiles( filesLocal );
     allFiles << filesSystem;
 
@@ -127,7 +127,7 @@ QString MarbleDirs::systemPath()
     QString systempath;
 
 #ifdef Q_OS_WIN
-	return QCoreApplication::applicationDirPath() + QDir::separator() + "data";
+	return QCoreApplication::applicationDirPath() + QDir::separator() + QLatin1String("data");
 #endif
 
 #ifdef Q_OS_MACX
@@ -143,9 +143,8 @@ QString MarbleDirs::systemPath()
     CFRelease(myMacPath);
     //do some magick so that we can still find data dir if
     //marble was not built as a bundle
-    if (myPath.contains(".app"))  //its a bundle!
-    {
-      systempath = myPath + "/Contents/Resources/data";
+    if (myPath.contains(QLatin1String(".app"))) {  //its a bundle!
+      systempath = myPath + QLatin1String("/Contents/Resources/data");
     }
 
     if ( QFile::exists( systempath ) ){ 
@@ -168,6 +167,7 @@ QString MarbleDirs::systemPath()
 
     return QDir( QCoreApplication::applicationDirPath() 
 
+// TODO: QTONLY definition was removed during Qt5/KF5 port, check what code should do
 #if defined(QTONLY)
                      + QLatin1String( "/data" )
 #else
@@ -197,9 +197,8 @@ QString MarbleDirs::pluginSystemPath()
     QString myPath(mypPathPtr);
     //do some magick so that we can still find data dir if
     //marble was not built as a bundle
-    if (myPath.contains(".app"))  //its a bundle!
-    {
-      systempath = myPath + "/Contents/Resources/plugins";
+    if (myPath.contains(QLatin1String(".app"))) {  //its a bundle!
+      systempath = myPath + QLatin1String("/Contents/Resources/plugins");
     }
 
     if ( QFile::exists( systempath ) ){ 
@@ -208,7 +207,7 @@ QString MarbleDirs::pluginSystemPath()
 #endif   // mac bundle
 
 #ifdef Q_OS_WIN
-	return QCoreApplication::applicationDirPath() + QDir::separator() + "plugins";
+	return QCoreApplication::applicationDirPath() + QDir::separator() + QLatin1String("plugins");
 #endif
 
 #ifdef Q_OS_ANDROID
@@ -225,6 +224,7 @@ QString MarbleDirs::pluginSystemPath()
 
     return QDir( QCoreApplication::applicationDirPath() 
 
+// TODO: QTONLY definition was removed during Qt5/KF5 port, check what code should do
 #if defined(QTONLY)
                      + QLatin1String( "/plugins" )
 #else
@@ -238,11 +238,11 @@ QString MarbleDirs::localPath()
 #ifndef Q_OS_WIN
     QString dataHome = getenv( "XDG_DATA_HOME" );
     if( dataHome.isEmpty() )
-        dataHome = QDir::homePath() + "/.local/share";
+        dataHome = QDir::homePath() + QLatin1String("/.local/share");
 
-    return dataHome + "/marble"; // local path
+    return dataHome + QLatin1String("/marble"); // local path
 #else
-	return QStandardPaths::writableLocation(QStandardPaths::GenericDataLocation) + "/.marble/data";
+	return QStandardPaths::writableLocation(QStandardPaths::GenericDataLocation) + QLatin1String("/.marble/data");
 #endif
 }
 
@@ -251,14 +251,14 @@ QStringList MarbleDirs::oldLocalPaths()
     QStringList possibleOldPaths;
 
 #ifndef Q_OS_WIN
-    QString oldDefault = QDir::homePath() + "/.marble/data";
+    const QString oldDefault = QDir::homePath() + QLatin1String("/.marble/data");
     possibleOldPaths.append( oldDefault );
 
-    QString xdgDefault = QDir::homePath() + "/.local/share/marble";
+    const QString xdgDefault = QDir::homePath() + QLatin1String("/.local/share/marble");
     possibleOldPaths.append( xdgDefault );
 
     QString xdg = getenv( "XDG_DATA_HOME" );
-    xdg += "/marble/";
+    xdg += QLatin1String("/marble/");
     possibleOldPaths.append( xdg );
 #endif
 
@@ -269,7 +269,7 @@ QStringList MarbleDirs::oldLocalPaths()
 	SHGetSpecialFolderPathW(hwnd, appdata_path, CSIDL_APPDATA, 0);
 	QString appdata = QString::fromUtf16(reinterpret_cast<ushort*>(appdata_path));
 	delete[] appdata_path;
-	possibleOldPaths << QString(QDir::fromNativeSeparators(appdata) + "/.marble/data"); // local path
+	possibleOldPaths << QString(QDir::fromNativeSeparators(appdata) + QLatin1String("/.marble/data")); // local path
 #endif
 
     QString currentLocalPath = QDir( MarbleDirs::localPath() ).canonicalPath();
@@ -293,9 +293,9 @@ QStringList MarbleDirs::oldLocalPaths()
 QString MarbleDirs::pluginLocalPath() 
 {
 #ifndef Q_OS_WIN
-    return QString( QDir::homePath() + "/.marble/plugins" ); // local path
+    return QDir::homePath() + QLatin1String("/.marble/plugins"); // local path
 #else
-	return QStandardPaths::writableLocation(QStandardPaths::GenericDataLocation) + "/.marble/plugins";
+	return QStandardPaths::writableLocation(QStandardPaths::GenericDataLocation) + QLatin1String("/.marble/plugins");
 #endif
 }
 

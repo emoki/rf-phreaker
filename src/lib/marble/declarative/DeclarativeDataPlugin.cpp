@@ -16,12 +16,13 @@
 
 #include "MarbleDebug.h"
 #include "MarbleModel.h"
+#include "RenderState.h"
+#include "GeoDataCoordinates.h"
 
 #include <QAbstractListModel>
 #include <QMetaObject>
 #include <QMetaProperty>
-#include <QScriptValue>
-#include <QScriptValueIterator>
+#include <QIcon>
 
 using namespace Marble;
 
@@ -35,7 +36,7 @@ public:
     QString m_guiString;
     QString m_copyrightYears;
     QString m_description;
-    QList<Marble::PluginAuthor> m_authors;
+    QVector<Marble::PluginAuthor> m_authors;
     QString m_aboutText;
     bool m_isInitialized;
     QList<AbstractDataPluginItem *> m_items;
@@ -59,7 +60,7 @@ public:
 int DeclarativeDataPluginPrivate::m_global_counter = 0;
 
 DeclarativeDataPluginPrivate::DeclarativeDataPluginPrivate( DeclarativeDataPlugin* parent ) :
-    q( parent ), m_planet( "earth"), m_isInitialized( false ), m_delegate( 0 ), m_counter( m_global_counter )
+    q(parent), m_planet(QStringLiteral("earth")), m_isInitialized(false), m_delegate(0), m_counter(m_global_counter)
 {
     ++m_global_counter;
 }
@@ -73,7 +74,7 @@ void DeclarativeDataPluginPrivate::parseChunk( DeclarativeDataPluginItem *item, 
     } else if( key == "alt" || key == "altitude" ) {
         coordinates.setAltitude( value.toDouble() );
     } else {
-        item->setProperty( key.toLatin1(), value );
+        item->setProperty(key.toLatin1().constData(), value);
     }
 }
 
@@ -122,9 +123,11 @@ void DeclarativeDataPluginPrivate::parseObject( QObject *object )
     for( int i = 0; i < meta->methodCount(); ++i ) {
         if( meta->method(i).methodSignature() == "get(int)" ) {
             for( int j=0; j < count; ++j ) {
-                QScriptValue value;
-                meta->method(i).invoke( object, Qt::AutoConnection, Q_RETURN_ARG( QScriptValue , value), Q_ARG( int, j ) );
-                QObject * propertyObject = value.toQObject();
+                QVariant value;
+                meta->method(i).invoke(object, Qt::AutoConnection, Q_RETURN_ARG(QVariant, value), Q_ARG(int, j));
+
+                // TODO: does this casting to QObject work? needs testing!
+                QObject * propertyObject = value.value<QObject*>();
                 GeoDataCoordinates coordinates;
                 DeclarativeDataPluginItem * item = new DeclarativeDataPluginItem( q );
                 if ( propertyObject ) {
@@ -133,11 +136,12 @@ void DeclarativeDataPluginPrivate::parseObject( QObject *object )
                         QVariant const value = propertyObject->metaObject()->property( k ).read( propertyObject );
                         parseChunk( item, coordinates, propertyName, value );
                     }
-                } else {
-                    QScriptValueIterator it( value );
-                    while ( it.hasNext() ) {
-                        it.next();
-                        parseChunk( item, coordinates, it.name(), it.value().toVariant() );
+                } else if (value.canConvert<QVariantHash>()) {
+                    QAssociativeIterable iterable = value.value<QAssociativeIterable>();
+                    QAssociativeIterable::const_iterator it = iterable.begin();
+                    const QAssociativeIterable::const_iterator end = iterable.end();
+                    for ( ; it != end; ++it) {
+                        parseChunk(item, coordinates, it.key().toString(), it.value());
                     }
                 }
                 addItem( item, coordinates );
@@ -201,7 +205,7 @@ void DeclarativeDataPlugin::setPlanet( const QString &planet )
 
 QString DeclarativeDataPlugin::name() const
 {
-    return d->m_name.isEmpty() ? "Anonymous DeclarativeDataPlugin" : d->m_name;
+    return d->m_name.isEmpty() ? QStringLiteral("Anonymous DeclarativeDataPlugin") : d->m_name;
 }
 
 QString DeclarativeDataPlugin::guiString() const
@@ -211,12 +215,12 @@ QString DeclarativeDataPlugin::guiString() const
 
 QString DeclarativeDataPlugin::nameId() const
 {
-    return d->m_nameId.isEmpty() ? QString( "DeclarativeDataPlugin_%1" ).arg( d->m_counter ) : d->m_nameId;
+    return d->m_nameId.isEmpty() ? QStringLiteral("DeclarativeDataPlugin_%1").arg(d->m_counter) : d->m_nameId;
 }
 
 QString DeclarativeDataPlugin::version() const
 {
-    return d->m_version.isEmpty() ? "1.0" : d->m_version;
+    return d->m_version.isEmpty() ? QStringLiteral("1.0") : d->m_version;
 }
 
 QString DeclarativeDataPlugin::description() const
@@ -229,7 +233,7 @@ QString DeclarativeDataPlugin::copyrightYears() const
     return d->m_copyrightYears;
 }
 
-QList<PluginAuthor> DeclarativeDataPlugin::pluginAuthors() const
+QVector<PluginAuthor> DeclarativeDataPlugin::pluginAuthors() const
 {
     return d->m_authors;
 }
@@ -293,7 +297,7 @@ void DeclarativeDataPlugin::setCopyrightYears( const QString & copyrightYears )
     }
 }
 
-void DeclarativeDataPlugin::setDescription( const QString description )
+void DeclarativeDataPlugin::setDescription( const QString & description )
 {
     if( d->m_description != description ) {
         d->m_description = description;
@@ -350,7 +354,7 @@ bool DeclarativeDataPlugin::isInitialized() const
 
 RenderState DeclarativeDataPlugin::renderState() const
 {
-    return RenderState( "Declarative Data" );
+    return RenderState(QStringLiteral("Declarative Data"));
 }
 
 void DeclarativeDataPlugin::setDeclarativeModel( const QVariant &model )
@@ -361,7 +365,7 @@ void DeclarativeDataPlugin::setDeclarativeModel( const QVariant &model )
     QObject* object = model.value<QObject*>();
     if( qobject_cast< QAbstractListModel* >( object ) ) {
         d->parseListModel( qobject_cast< QAbstractListModel *>( object ) );
-    } else {
+    } else if (object) {
         d->parseObject( object );
     }
 

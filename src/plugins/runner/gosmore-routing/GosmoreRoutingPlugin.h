@@ -20,7 +20,7 @@ namespace Marble
 class GosmorePlugin : public RoutingRunnerPlugin
 {
     Q_OBJECT
-    Q_PLUGIN_METADATA( IID "org.kde.edu.marble.GosmoreRoutingPlugin" )
+    Q_PLUGIN_METADATA(IID "org.kde.marble.GosmoreRoutingPlugin")
     Q_INTERFACES( Marble::RoutingRunnerPlugin )
 
 public:
@@ -38,7 +38,7 @@ public:
 
     QString copyrightYears() const;
 
-    QList<PluginAuthor> pluginAuthors() const;
+    QVector<PluginAuthor> pluginAuthors() const override;
 
     virtual RoutingRunner *newRunner() const;
 

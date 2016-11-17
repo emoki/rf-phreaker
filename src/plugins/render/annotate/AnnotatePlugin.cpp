@@ -16,9 +16,6 @@
 // Qt
 #include <QFileDialog>
 #include <QAction>
-#include <QNetworkAccessManager>
-#include <QNetworkReply>
-#include <QNetworkRequest>
 #include <QMessageBox>
 #include <QtAlgorithms>
 #include <QColor>
@@ -26,7 +23,6 @@
 
 // Marble
 #include "MarbleDebug.h"
-#include "AbstractProjection.h"
 #include "EditGroundOverlayDialog.h"
 #include "EditPlacemarkDialog.h"
 #include "EditPolygonDialog.h"
@@ -36,9 +32,15 @@
 #include "GeoDataParser.h"
 #include "GeoDataPlacemark.h"
 #include "GeoDataStyle.h"
+#include "GeoDataLabelStyle.h"
+#include "GeoDataLineStyle.h"
+#include "GeoDataPolyStyle.h"
 #include "GeoDataTreeModel.h"
 #include "GeoDataTypes.h"
 #include "GeoPainter.h"
+#include "GeoDataLatLonAltBox.h"
+#include "GeoDataLinearRing.h"
+#include "GeoDataPolygon.h"
 #include "GeoWriter.h"
 #include "KmlElementDictionary.h"
 #include "MarbleDirs.h"
@@ -66,12 +68,12 @@ AnnotatePlugin::AnnotatePlugin( const MarbleModel *model )
       m_isInitialized( false ),
       m_widgetInitialized( false ),
       m_marbleWidget( 0 ),
-      m_overlayRmbMenu( new QMenu( m_marbleWidget ) ),
-      m_polygonRmbMenu( new QMenu( m_marbleWidget ) ),
-      m_nodeRmbMenu( new QMenu( m_marbleWidget ) ),
-      m_textAnnotationRmbMenu( new QMenu( m_marbleWidget ) ),
-      m_polylineRmbMenu( new QMenu( m_marbleWidget ) ),
-      m_annotationDocument( new GeoDataDocument ),
+      m_overlayRmbMenu(nullptr),
+      m_polygonRmbMenu(nullptr),
+      m_nodeRmbMenu(nullptr),
+      m_textAnnotationRmbMenu(nullptr),
+      m_polylineRmbMenu(nullptr),
+      m_annotationDocument(nullptr),
       m_movedItem( 0 ),
       m_focusItem( 0 ),
       m_polylinePlacemark( 0 ),
@@ -85,40 +87,6 @@ AnnotatePlugin::AnnotatePlugin( const MarbleModel *model )
     setEnabled( true );
     setVisible( true );
     connect( this, SIGNAL(visibilityChanged(bool,QString)), SLOT(enableModel(bool)) );
-
-    m_annotationDocument->setName( tr("Annotations") );
-    m_annotationDocument->setDocumentRole( UserDocument );
-
-    // Default polygon style
-    GeoDataStyle::Ptr defaultPolygonStyle(new GeoDataStyle);
-    GeoDataPolyStyle polyStyle;
-    GeoDataLineStyle edgeStyle;
-    GeoDataLabelStyle labelStyle;
-    QColor polygonColor = QApplication::palette().highlight().color();
-    QColor edgeColor = QApplication::palette().light().color();
-    QColor labelColor = QApplication::palette().brightText().color();
-    polygonColor.setAlpha( 80 );
-    polyStyle.setColor( polygonColor );
-    edgeStyle.setColor( edgeColor );
-    labelStyle.setColor( labelColor );
-    defaultPolygonStyle->setId( "polygon" );
-    defaultPolygonStyle->setPolyStyle( polyStyle );
-    defaultPolygonStyle->setLineStyle( edgeStyle );
-    defaultPolygonStyle->setLabelStyle( labelStyle );
-    m_annotationDocument->addStyle( defaultPolygonStyle );
-
-
-    // Default polyline style
-    GeoDataStyle::Ptr defaultPolylineStyle(new GeoDataStyle);
-    GeoDataLineStyle lineStyle;
-    QColor polylineColor = Qt::white;
-    lineStyle.setColor( polylineColor );
-    lineStyle.setWidth( 1 );
-    defaultPolylineStyle->setId( "polyline" );
-    defaultPolylineStyle->setLineStyle( lineStyle );
-    defaultPolylineStyle->setLabelStyle( labelStyle );
-    m_annotationDocument->addStyle( defaultPolylineStyle );
-
 }
 
 AnnotatePlugin::~AnnotatePlugin()
@@ -144,17 +112,17 @@ AnnotatePlugin::~AnnotatePlugin()
 
 QStringList AnnotatePlugin::backendTypes() const
 {
-    return QStringList( "annotation" );
+    return QStringList(QStringLiteral("annotation"));
 }
 
 QString AnnotatePlugin::renderPolicy() const
 {
-    return QString( "ALWAYS" );
+    return QStringLiteral("ALWAYS");
 }
 
 QStringList AnnotatePlugin::renderPosition() const
 {
-    return QStringList() << "ALWAYS_ON_TOP";
+    return QStringList(QStringLiteral("ALWAYS_ON_TOP"));
 }
 
 QString AnnotatePlugin::name() const
@@ -169,7 +137,7 @@ QString AnnotatePlugin::guiString() const
 
 QString AnnotatePlugin::nameId() const
 {
-    return QString( "annotation" );
+    return QStringLiteral("annotation");
 }
 
 QString AnnotatePlugin::description() const
@@ -179,25 +147,25 @@ QString AnnotatePlugin::description() const
 
 QString AnnotatePlugin::version() const
 {
-    return "1.0";
+    return QStringLiteral("1.0");
 }
 
 QString AnnotatePlugin::copyrightYears() const
 {
-    return "2009, 2013";
+    return QStringLiteral("2009, 2013");
 }
 
-QList<PluginAuthor> AnnotatePlugin::pluginAuthors() const
+QVector<PluginAuthor> AnnotatePlugin::pluginAuthors() const
 {
-    return QList<PluginAuthor>()
-            << PluginAuthor( "Andrew Manson", "<g.real.ate@gmail.com>" )
-            << PluginAuthor( "Thibaut Gridel", "<tgridel@free.fr>" )
-            << PluginAuthor( "Calin Cruceru", "<crucerucalincristian@gmail.com>" );
+    return QVector<PluginAuthor>()
+            << PluginAuthor(QStringLiteral("Andrew Manson"), QStringLiteral("g.real.ate@gmail.com"))
+            << PluginAuthor(QStringLiteral("Thibaut Gridel"), QStringLiteral("tgridel@free.fr"))
+            << PluginAuthor(QStringLiteral("Calin Cruceru"), QStringLiteral("crucerucalincristian@gmail.com"));
 }
 
 QIcon AnnotatePlugin::icon() const
 {
-    return QIcon( ":/icons/draw-placemark.png");
+    return QIcon(QStringLiteral(":/icons/draw-placemark.png"));
 }
 
 void AnnotatePlugin::initialize()
@@ -215,6 +183,42 @@ void AnnotatePlugin::initialize()
         m_drawingPolyline = false;
         m_addingPlacemark = false;
 
+        delete m_annotationDocument;
+        m_annotationDocument = new GeoDataDocument;
+
+        m_annotationDocument->setName( tr("Annotations") );
+        m_annotationDocument->setDocumentRole( UserDocument );
+
+        // Default polygon style
+        GeoDataStyle::Ptr defaultPolygonStyle(new GeoDataStyle);
+        GeoDataPolyStyle polyStyle;
+        GeoDataLineStyle edgeStyle;
+        GeoDataLabelStyle labelStyle;
+        QColor polygonColor = QApplication::palette().highlight().color();
+        QColor edgeColor = QApplication::palette().light().color();
+        QColor labelColor = QApplication::palette().brightText().color();
+        polygonColor.setAlpha( 80 );
+        polyStyle.setColor( polygonColor );
+        edgeStyle.setColor( edgeColor );
+        labelStyle.setColor( labelColor );
+        defaultPolygonStyle->setId(QStringLiteral("polygon"));
+        defaultPolygonStyle->setPolyStyle( polyStyle );
+        defaultPolygonStyle->setLineStyle( edgeStyle );
+        defaultPolygonStyle->setLabelStyle( labelStyle );
+        m_annotationDocument->addStyle( defaultPolygonStyle );
+
+
+        // Default polyline style
+        GeoDataStyle::Ptr defaultPolylineStyle(new GeoDataStyle);
+        GeoDataLineStyle lineStyle;
+        QColor polylineColor = Qt::white;
+        lineStyle.setColor( polylineColor );
+        lineStyle.setWidth( 1 );
+        defaultPolylineStyle->setId(QStringLiteral("polyline"));
+        defaultPolylineStyle->setLineStyle( lineStyle );
+        defaultPolylineStyle->setLabelStyle( labelStyle );
+        m_annotationDocument->addStyle( defaultPolylineStyle );
+
         m_isInitialized = true;
     }
 }
@@ -226,7 +230,7 @@ bool AnnotatePlugin::isInitialized() const
 
 QString AnnotatePlugin::runtimeTrace() const
 {
-    return QString("Annotate Items: %1").arg( m_annotationDocument->size() );
+    return QStringLiteral("Annotate Items: %1").arg(m_annotationDocument->size());
 }
 
 const QList<QActionGroup*> *AnnotatePlugin::actionGroups() const
@@ -330,9 +334,9 @@ void AnnotatePlugin::removeFocusItem()
         disableFocusActions();
 
         m_graphicsItems.removeAll( m_focusItem );
-        m_marbleWidget->model()->treeModel()->removeFeature( m_focusItem->feature() );
+        m_marbleWidget->model()->treeModel()->removeFeature( m_focusItem->placemark() );
 
-        delete m_focusItem->feature();
+        delete m_focusItem->placemark();
         delete m_focusItem;
         m_movedItem = 0;
         m_focusItem = 0;
@@ -372,10 +376,10 @@ void AnnotatePlugin::saveAnnotationFile()
     if ( !filename.isNull() ) {
         GeoWriter writer;
         // FIXME: This should be consistent with the way the loading is done.
-        if ( filename.endsWith( ".kml", Qt::CaseInsensitive ) ) {
+        if (filename.endsWith(QLatin1String(".kml"), Qt::CaseInsensitive)) {
             writer.setDocumentType( kml::kmlTag_nameSpaceOgc22 );
         }
-        else if ( filename.endsWith( ".osm", Qt::CaseInsensitive ) ) {
+        else if (filename.endsWith(QLatin1String(".osm"), Qt::CaseInsensitive)) {
             // "0.6" is the current version of osm, it is used to identify the osm writer
             // The reference value is kept in plugins/runner/osm/OsmElementDictionary.hz
             writer.setDocumentType( "0.6" );
@@ -881,63 +885,63 @@ void AnnotatePlugin::setupActions( MarbleWidget *widget )
     group->setExclusive( true );
 
 
-    QAction *selectItem = new QAction( QIcon(":/icons/edit-select.png"),
+    QAction *selectItem = new QAction( QIcon(QStringLiteral(":/icons/edit-select.png")),
                                        tr("Select Item"),
                                        this );
     selectItem->setCheckable( true );
     selectItem->setChecked( true );
 
-    QAction *drawPolygon = new QAction( QIcon(":/icons/draw-polygon.png"),
+    QAction *drawPolygon = new QAction( QIcon(QStringLiteral(":/icons/draw-polygon.png")),
                                         tr("Add Polygon"),
                                         this );
     connect( drawPolygon, SIGNAL(triggered()), this, SLOT(addPolygon()) );
 
-    QAction *addHole = new QAction( QIcon(":/icons/polygon-draw-hole.png"),
+    QAction *addHole = new QAction( QIcon(QStringLiteral(":/icons/polygon-draw-hole.png")),
                                     tr("Add Polygon Hole"),
                                     this );
     addHole->setCheckable( true );
     addHole->setEnabled( false );
     connect( addHole, SIGNAL(toggled(bool)), this, SLOT(setAddingPolygonHole(bool)) );
 
-    QAction *addNodes = new QAction( QIcon(":/icons/polygon-add-nodes.png"),
+    QAction *addNodes = new QAction( QIcon(QStringLiteral(":/icons/polygon-add-nodes.png")),
                                      tr("Add Nodes"),
                                      this );
     addNodes->setCheckable( true );
     addNodes->setEnabled( false );
     connect( addNodes, SIGNAL(toggled(bool)), this, SLOT(setAddingNodes(bool)) );
 
-    QAction *addTextAnnotation = new QAction( QIcon(":/icons/add-placemark.png"),
+    QAction *addTextAnnotation = new QAction( QIcon(QStringLiteral(":/icons/add-placemark.png")),
                                               tr("Add Placemark"),
                                               this );
     connect( addTextAnnotation, SIGNAL(triggered()), this, SLOT(addTextAnnotation()) );
 
-    QAction *addPath = new QAction( QIcon(":/icons/draw-path.png" ),
+    QAction *addPath = new QAction( QIcon(QStringLiteral(":/icons/draw-path.png")),
                                     tr("Add Path"),
                                     this );
     connect( addPath, SIGNAL(triggered()), this, SLOT(addPolyline()) );
 
-    QAction *addOverlay = new QAction( QIcon( ":/icons/draw-overlay.png"),
+    QAction *addOverlay = new QAction( QIcon(QStringLiteral(":/icons/draw-overlay.png")),
                                        tr("Add Ground Overlay"),
                                        this );
     connect( addOverlay, SIGNAL(triggered()), this, SLOT(addOverlay()) );
 
-    QAction *removeItem = new QAction( QIcon( ":/icons/edit-delete-shred.png"),
+    QAction *removeItem = new QAction( QIcon(QStringLiteral(":/icons/edit-delete-shred.png")),
                                        tr("Remove Item"),
                                        this );
     removeItem->setEnabled( false );
     connect( removeItem, SIGNAL(triggered()), this, SLOT(askToRemoveFocusItem()) );
 
-    QAction *loadAnnotationFile = new QAction( QIcon( ":/icons/open-for-editing.png"),
+    QAction *loadAnnotationFile = new QAction( QIcon(QStringLiteral(":/icons/open-for-editing.png")),
                                                tr("Load Annotation File" ),
                                                this );
     connect( loadAnnotationFile, SIGNAL(triggered()), this, SLOT(loadAnnotationFile()) );
 
-    QAction *saveAnnotationFile = new QAction( QIcon( ":/icons//document-save-as.png"),
+    QAction *saveAnnotationFile = new QAction( QIcon(QStringLiteral(":/icons/document-save-as.png")),
                                                tr("Save Annotation File"),
                                                this );
     connect( saveAnnotationFile, SIGNAL(triggered()), this, SLOT(saveAnnotationFile()) );
 
-    QAction *clearAnnotations = new QAction( QIcon( ":/icons/remove.png"),
+    QAction *clearAnnotations = new QAction( QIcon(QStringLiteral(":/icons/remove.png")),
                                              tr("Clear all Annotations"),
                                              this );
     connect( drawPolygon, SIGNAL(toggled(bool)), clearAnnotations, SLOT(setDisabled(bool)) );
@@ -1035,6 +1039,9 @@ void AnnotatePlugin::addContextItems()
 
 void AnnotatePlugin::setupTextAnnotationRmbMenu()
 {
+    delete m_textAnnotationRmbMenu;
+    m_textAnnotationRmbMenu = new QMenu;
+
     QAction *cutItem = new QAction( tr( "Cut"), m_textAnnotationRmbMenu );
     m_textAnnotationRmbMenu->addAction( cutItem );
     connect( cutItem, SIGNAL(triggered()), this, SLOT(cutItem()) );
@@ -1156,6 +1163,9 @@ void AnnotatePlugin::setupGroundOverlayModel()
 
 void AnnotatePlugin::setupOverlayRmbMenu()
 {
+    delete m_overlayRmbMenu;
+    m_overlayRmbMenu = new QMenu;
+
     QAction *editOverlay = new QAction( tr( "Properties" ), m_overlayRmbMenu );
     m_overlayRmbMenu->addAction( editOverlay );
     connect( editOverlay, SIGNAL(triggered()), this, SLOT(editOverlay()) );
@@ -1236,7 +1246,7 @@ void AnnotatePlugin::displayOverlayFrame( GeoDataGroundOverlay *overlay )
     GeoDataPlacemark *rectangle_placemark = new GeoDataPlacemark;
     rectangle_placemark->setGeometry( polygon );
     rectangle_placemark->setParent( m_annotationDocument );
-    rectangle_placemark->setStyleUrl( "#polygon" );
+    rectangle_placemark->setStyleUrl(QStringLiteral("#polygon"));
 
     m_marbleWidget->model()->treeModel()->addFeature( m_annotationDocument, rectangle_placemark );
 
@@ -1278,6 +1288,9 @@ void AnnotatePlugin::clearOverlayFrames()
 
 void AnnotatePlugin::setupPolygonRmbMenu()
 {
+    delete m_polygonRmbMenu;
+    m_polygonRmbMenu = new QMenu;
+
     QAction *deselectNodes = new QAction( tr( "Deselect All Nodes" ), m_polygonRmbMenu );
     m_polygonRmbMenu->addAction( deselectNodes );
     connect( deselectNodes, SIGNAL(triggered()), this, SLOT(deselectNodes()) );
@@ -1336,7 +1349,7 @@ void AnnotatePlugin::addPolygon()
     m_polygonPlacemark = new GeoDataPlacemark;
     m_polygonPlacemark->setGeometry( poly );
     m_polygonPlacemark->setParent( m_annotationDocument );
-    m_polygonPlacemark->setStyleUrl( "#polygon" );
+    m_polygonPlacemark->setStyleUrl(QStringLiteral("#polygon"));
 
     m_marbleWidget->model()->treeModel()->addFeature( m_annotationDocument, m_polygonPlacemark );
 
@@ -1457,6 +1470,9 @@ void AnnotatePlugin::editPolygon()
 
 void AnnotatePlugin::setupNodeRmbMenu()
 {
+    delete m_nodeRmbMenu;
+    m_nodeRmbMenu = new QMenu;
+
     QAction *selectNode = new QAction( tr( "Select Node" ), m_nodeRmbMenu );
     m_nodeRmbMenu->addAction( selectNode );
     connect( selectNode, SIGNAL(triggered()), this, SLOT(selectNode()) );
@@ -1523,6 +1539,9 @@ void AnnotatePlugin::deleteNode()
 
 void AnnotatePlugin::setupPolylineRmbMenu()
 {
+    delete m_polylineRmbMenu;
+    m_polylineRmbMenu = new QMenu;
+
     QAction *deselectNodes = new QAction( tr( "Deselect All Nodes" ), m_polylineRmbMenu );
     m_polylineRmbMenu->addAction( deselectNodes );
     connect( deselectNodes, SIGNAL(triggered()), this, SLOT(deselectNodes()) );
@@ -1595,7 +1614,7 @@ void AnnotatePlugin::addPolyline()
     m_polylinePlacemark = new GeoDataPlacemark;
     m_polylinePlacemark->setGeometry( new GeoDataLineString( Tessellate ) );
     m_polylinePlacemark->setParent( m_annotationDocument );
-    m_polylinePlacemark->setStyleUrl( "#polyline" );
+    m_polylinePlacemark->setStyleUrl(QStringLiteral("#polyline"));
 
     m_marbleWidget->model()->treeModel()->addFeature( m_annotationDocument, m_polylinePlacemark );
 
@@ -1678,7 +1697,7 @@ void AnnotatePlugin::cutItem()
     // If there is already an item copied/cut, free its memory and replace it with this one.
     // The same applies when copying.
     if ( m_clipboardItem ) {
-        delete m_clipboardItem->feature();
+        delete m_clipboardItem->placemark();
         delete m_clipboardItem;
         m_clipboardItem = 0;
     }
@@ -1687,7 +1706,7 @@ void AnnotatePlugin::cutItem()
     m_pasteGraphicItem->setVisible( true );
 
     m_graphicsItems.removeAll( m_focusItem );
-    m_marbleWidget->model()->treeModel()->removeFeature( m_focusItem->feature() );
+    m_marbleWidget->model()->treeModel()->removeFeature( m_focusItem->placemark() );
 
     m_focusItem = 0;
 }
@@ -1695,7 +1714,7 @@ void AnnotatePlugin::cutItem()
 void AnnotatePlugin::copyItem()
 {
     if ( m_clipboardItem ) {
-        delete m_clipboardItem->feature();
+        delete m_clipboardItem->placemark();
         delete m_clipboardItem;
         m_clipboardItem = 0;
     }
@@ -1747,7 +1766,5 @@ const GeoDataCoordinates AnnotatePlugin::mouseGeoDataCoordinates( QMouseEvent *m
 }
 
 }
-
-Q_EXPORT_PLUGIN2( AnnotatePlugin, Marble::AnnotatePlugin )
 
 #include "moc_AnnotatePlugin.cpp"

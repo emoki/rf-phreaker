@@ -20,7 +20,7 @@ namespace Marble
 class OpenRouteServicePlugin : public RoutingRunnerPlugin
 {
     Q_OBJECT
-    Q_PLUGIN_METADATA( IID "org.kde.edu.marble.OpenRouteServicePlugin" )
+    Q_PLUGIN_METADATA(IID "org.kde.marble.OpenRouteServicePlugin")
     Q_INTERFACES( Marble::RoutingRunnerPlugin )
 
 public:
@@ -38,7 +38,7 @@ public:
 
     QString copyrightYears() const;
 
-    QList<PluginAuthor> pluginAuthors() const;
+    QVector<PluginAuthor> pluginAuthors() const override;
 
     virtual RoutingRunner *newRunner() const;
 

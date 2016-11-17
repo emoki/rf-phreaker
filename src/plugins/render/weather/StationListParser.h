@@ -12,8 +12,6 @@
 #define STATIONLISTPARSER_H
 
 // Qt
-#include <QHash>
-#include <QStringList>
 #include <QList>
 #include <QThread>
 #include <QXmlStreamReader>
@@ -36,7 +34,7 @@ public:
 
     QList<BBCStation> stationList() const;
 
-    void setPath( QString path );
+    void setPath( const QString& path );
 
 protected:
     void run();

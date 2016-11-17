@@ -16,13 +16,15 @@
 #define MARBLE_GEOSCENETILEDATASET_H
 
 #include <QList>
-#include <QStringList>
-#include <QUrl>
 #include <QVector>
 #include <QSize>
 
 #include "GeoSceneAbstractDataset.h"
+#include "GeoSceneAbstractTileProjection.h"
 #include "MarbleGlobal.h"
+
+class QStringList;
+class QUrl;
 
 /**
  * @short Tiled dataset stored in a layer. TextureTile and VectorTile layes inherit from this class.
@@ -35,7 +37,6 @@
 
 namespace Marble
 {
-class Blending;
 class DownloadPolicy;
 class ServerLayout;
 class TileId;
@@ -44,7 +45,6 @@ class GEODATA_EXPORT GeoSceneTileDataset : public GeoSceneAbstractDataset
 {
  public:
     enum StorageLayout { Marble, OpenStreetMap, TileMapService };
-    enum Projection { Equirectangular, Mercator };
 
     explicit GeoSceneTileDataset( const QString& name );
     ~GeoSceneTileDataset();
@@ -83,8 +83,10 @@ class GEODATA_EXPORT GeoSceneTileDataset : public GeoSceneAbstractDataset
     const QSize tileSize() const;
     void setTileSize( const QSize &tileSize );
 
-    Projection projection() const;
-    void setProjection( const Projection );
+    void setTileProjection(GeoSceneAbstractTileProjection::Type projectionType);
+
+    const GeoSceneAbstractTileProjection * tileProjection() const;
+    GeoSceneAbstractTileProjection::Type tileProjectionType() const;
 
     QString blending() const;
     void setBlending( const QString &name );
@@ -119,7 +121,7 @@ class GEODATA_EXPORT GeoSceneTileDataset : public GeoSceneAbstractDataset
     int m_maximumTileLevel;
     QVector<int> m_tileLevels;
     mutable QSize m_tileSize;
-    Projection m_projection;
+    GeoSceneAbstractTileProjection *m_tileProjection;
     QString m_blending;
 
     /// List of Urls which are used in a round robin fashion

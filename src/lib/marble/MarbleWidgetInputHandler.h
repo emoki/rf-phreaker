@@ -24,14 +24,16 @@ class MarbleWidget;
 class RenderPlugin;
 class MarbleWidgetInputHandlerPrivate;
 
-class MarbleWidgetInputHandler : public MarbleDefaultInputHandler
+class MARBLE_EXPORT MarbleWidgetInputHandler : public MarbleDefaultInputHandler
 {
     Q_OBJECT
 
 public:
     MarbleWidgetInputHandler(MarbleAbstractPresenter *marblePresenter, MarbleWidget *marbleWidget);
 
-private slots:
+    void setDebugModeEnabled(bool enabled);
+
+private Q_SLOTS:
     void installPluginEventFilter(RenderPlugin *renderPlugin);
     void showLmbMenu(int x, int y);
     void showRmbMenu(int x, int y);
@@ -39,6 +41,7 @@ private slots:
     void setCursor(const QCursor &cursor);
 
 private:
+    bool handleKeyPress(QKeyEvent* event);
     AbstractSelectionRubber *selectionRubber();
     bool layersEventFilter(QObject *o, QEvent *e);
 

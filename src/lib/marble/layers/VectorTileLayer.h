@@ -16,30 +16,21 @@
 
 #include "LayerInterface.h"
 #include <QObject>
-#include <QRunnable>
 
 #include "MarbleGlobal.h"
-#include "MarbleModel.h"
-#include "GeoDataDocument.h"
-#include "GeoDataLatLonAltBox.h"
-#include "TileId.h"
-
-#include <QSize>
-
-class QImage;
-class QRegion;
-class QRect;
 
 namespace Marble
 {
 
 class GeoPainter;
+class GeoDataDocument;
 class GeoSceneGroup;
 class GeoSceneVectorTileDataset;
+class GeoDataTreeModel;
+class PluginManager;
 class HttpDownloadManager;
-class SunLocator;
-class TileLoader;
 class ViewportParams;
+class TileId;
 
 class VectorTileLayer : public QObject, public LayerInterface
 {
@@ -60,14 +51,14 @@ class VectorTileLayer : public QObject, public LayerInterface
 
     QString runtimeTrace() const;
 
-Q_SIGNALS:
-    void tileLevelChanged(int tileLevel);
-
- public Q_SLOTS:
     bool render( GeoPainter *painter, ViewportParams *viewport,
                  const QString &renderPos = QLatin1String("NONE"),
                  GeoSceneLayer *layer = 0 );
 
+Q_SIGNALS:
+    void tileLevelChanged(int tileLevel);
+
+ public Q_SLOTS:
     void setMapTheme( const QVector<const GeoSceneVectorTileDataset *> &textures, const GeoSceneGroup *textureLayerSettings );
 
     void reset();

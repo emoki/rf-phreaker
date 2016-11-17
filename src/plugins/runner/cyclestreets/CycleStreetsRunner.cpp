@@ -13,7 +13,9 @@
 #include "MarbleDebug.h"
 #include "GeoDataDocument.h"
 #include "GeoDataExtendedData.h"
+#include "GeoDataData.h"
 #include "GeoDataPlacemark.h"
+#include "GeoDataLineString.h"
 #include "HttpDownloadManager.h"
 #include "routing/Maneuver.h"
 #include "routing/RouteRequest.h"
@@ -22,8 +24,6 @@
 #include <QTimer>
 #include <QNetworkReply>
 #include <QDomDocument>
-#include <QVector>
-#include <QPair>
 
 #include <QUrlQuery>
 
@@ -67,19 +67,19 @@ void CycleStreetsRunner::retrieveRoute( const RouteRequest *route )
         return;
     }
 
-    QHash<QString, QVariant> settings = route->routingProfile().pluginSettings()["cyclestreets"];
+    QHash<QString, QVariant> settings = route->routingProfile().pluginSettings()[QStringLiteral("cyclestreets")];
 
     QUrl url("http://www.cyclestreets.net/api/journey.xml");
     QMap<QString, QString> queryStrings;
     queryStrings["key"] = "cdccf13997d59e70";
-    queryStrings["useDom"] = '1';
-    queryStrings["plan"] = settings["plan"].toString();
-    queryStrings["speed"] = settings["speed"].toString();
+    queryStrings["useDom"] = QLatin1Char('1');
+    queryStrings["plan"] = settings[QStringLiteral("plan")].toString();
+    queryStrings["speed"] = settings[QStringLiteral("speed")].toString();
     GeoDataCoordinates::Unit const degree = GeoDataCoordinates::Degree;
     QString itinerarypoints;
-    itinerarypoints.append( QString::number( route->source().longitude( degree ), 'f', 6 ) + ',' + QString::number( route->source().latitude( degree ), 'f', 6 ) );
+    itinerarypoints.append(QString::number(route->source().longitude(degree), 'f', 6) + QLatin1Char(',') + QString::number(route->source().latitude(degree), 'f', 6));
     for ( int i=1; i<route->size(); ++i ) {
-        itinerarypoints.append( '|' +  QString::number( route->at( i ).longitude( degree ), 'f', 6 ) + ',' + QString::number( route->at( i ).latitude( degree ), 'f', 6 ) );
+        itinerarypoints.append(QLatin1Char('|') +  QString::number(route->at(i).longitude(degree), 'f', 6) + QLatin1Char(',') + QString::number(route->at(i).latitude(degree), 'f', 6));
     }
     queryStrings["itinerarypoints"] = itinerarypoints;
 
@@ -149,26 +149,26 @@ GeoDataDocument *CycleStreetsRunner::parse( const QByteArray &content ) const
         return 0;
     }
     GeoDataDocument *result = new GeoDataDocument();
-    result->setName( "CycleStreets" );
+    result->setName(QStringLiteral("CycleStreets"));
     GeoDataPlacemark *routePlacemark = new GeoDataPlacemark;
-    routePlacemark->setName( "Route" );
+    routePlacemark->setName(QStringLiteral("Route"));
 
     GeoDataLineString *routeWaypoints = new GeoDataLineString;
-    QDomNodeList features = xml.elementsByTagName( "gml:featureMember" );
+    QDomNodeList features = xml.elementsByTagName(QStringLiteral("gml:featureMember"));
 
     if ( features.isEmpty() ) {
         return 0;
     }
     QDomElement route = features.at( 0 ).toElement().firstChild().toElement();
-    QDomElement lineString = route.elementsByTagName( "gml:LineString" ).at( 0 ).toElement();
-    QDomElement coordinates = lineString.toElement().elementsByTagName( "gml:coordinates" ).at( 0 ).toElement();
-    QStringList coordinatesList = coordinates.text().split( ' ' );
+    QDomElement lineString = route.elementsByTagName(QStringLiteral("gml:LineString")).at(0).toElement();
+    QDomElement coordinates = lineString.toElement().elementsByTagName(QStringLiteral("gml:coordinates")).at(0).toElement();
+    QStringList coordinatesList = coordinates.text().split(QLatin1Char(' '));
 
     QStringList::iterator iter = coordinatesList.begin();
     QStringList::iterator end = coordinatesList.end();
 
     for( ; iter != end; ++iter) {
-        QStringList coordinate =  iter->split(',');
+        const QStringList coordinate =  iter->split(QLatin1Char(','));
         if ( coordinate.size() == 2 ) {
             double const lon = coordinate.at( 0 ).toDouble();
             double const lat = coordinate.at( 1 ).toDouble();
@@ -178,7 +178,7 @@ GeoDataDocument *CycleStreetsRunner::parse( const QByteArray &content ) const
     }
     routePlacemark->setGeometry( routeWaypoints );
 
-    QDomElement durationElement = route.elementsByTagName( "cs:time" ).at(0).toElement();
+    QDomElement durationElement = route.elementsByTagName(QStringLiteral("cs:time")).at(0).toElement();
     QTime duration;
     duration = duration.addSecs( durationElement.text().toInt() );
     qreal length = routeWaypoints->length( EARTH_RADIUS );
@@ -190,14 +190,14 @@ GeoDataDocument *CycleStreetsRunner::parse( const QByteArray &content ) const
     result->append( routePlacemark );
 
     int i;
-    for ( i = 1; i < features.count() && features.at( i ).firstChildElement().tagName() != "cs:segment"; ++i );
+    for (i = 1; i < features.count() && features.at( i ).firstChildElement().tagName() != QLatin1String("cs:segment"); ++i);
     for ( ; i < features.count(); ++i) {
         QDomElement segment = features.at( i ).toElement();
 
-        QString name = segment.elementsByTagName( "cs:name" ).at( 0 ).toElement().text();
-        QString maneuver = segment.elementsByTagName( "cs:turn" ).at( 0 ).toElement().text();
-        QStringList points = segment.elementsByTagName( "cs:points" ).at( 0 ).toElement().text().split( ' ' );
-        QStringList const elevation = segment.elementsByTagName( "cs:elevations" ).at( 0 ).toElement().text().split( ',' );
+        QString name = segment.elementsByTagName(QStringLiteral("cs:name")).at(0).toElement().text();
+        QString maneuver = segment.elementsByTagName(QStringLiteral("cs:turn")).at(0).toElement().text();
+        QStringList points = segment.elementsByTagName(QStringLiteral("cs:points")).at(0).toElement().text().split(QLatin1Char(' '));
+        QStringList const elevation = segment.elementsByTagName(QStringLiteral("cs:elevations")).at(0).toElement().text().split(QLatin1Char(','));
 
         GeoDataPlacemark *instructions = new GeoDataPlacemark;
         QString instructionName;
@@ -206,14 +206,14 @@ GeoDataDocument *CycleStreetsRunner::parse( const QByteArray &content ) const
         } else {
             instructionName = "Straight";
         }
-        if ( name != "Short un-named link" && name != "Un-named link" ){
-            instructionName.append( " into " + name );
+        if (name != QLatin1String("Short un-named link") && name != QLatin1String("Un-named link")) {
+            instructionName.append(QLatin1String(" into ") + name);
         }
         instructions->setName( instructionName );
 
         GeoDataExtendedData extendedData;
         GeoDataData turnType;
-        turnType.setName( "turnType" );
+        turnType.setName(QStringLiteral("turnType"));
         turnType.setValue( maneuverType( maneuver ) );
         extendedData.addValue( turnType );
 
@@ -222,7 +222,7 @@ GeoDataDocument *CycleStreetsRunner::parse( const QByteArray &content ) const
         QStringList::iterator iter = points.begin();
         QStringList::iterator end = points.end();
         for  ( int j=0; iter != end; ++iter, ++j ) {
-            QStringList coordinate = iter->split( ',' );
+            const QStringList coordinate = iter->split(QLatin1Char(','));
             if ( coordinate.size() == 2 ) {
                 double const lon = coordinate.at( 0 ).toDouble();
                 double const lat = coordinate.at( 1 ).toDouble();

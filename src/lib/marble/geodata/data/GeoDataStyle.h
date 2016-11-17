@@ -14,27 +14,25 @@
 #define MARBLE_GEODATASTYLE_H
 
 
-#include <QMetaType>
-#include <QPoint>
-#include <QColor>
-#include <QPixmap>
-#include <QFont>
-
 #include "GeoDataStyleSelector.h"
-#include "GeoDataIconStyle.h"
-#include "GeoDataLabelStyle.h"
-#include "GeoDataPolyStyle.h"
-#include "GeoDataLineStyle.h"
-#include "GeoDataBalloonStyle.h"
-#include "GeoDataListStyle.h"
 
 #include "geodata_export.h"
 
 #include <QSharedPointer>
+#include <QMetaType>
+
+class QFont;
+class QColor;
 
 namespace Marble
 {
 
+class GeoDataBalloonStyle;
+class GeoDataIconStyle;
+class GeoDataLabelStyle;
+class GeoDataLineStyle;
+class GeoDataListStyle;
+class GeoDataPolyStyle;
 class GeoDataStylePrivate;
 
 /**

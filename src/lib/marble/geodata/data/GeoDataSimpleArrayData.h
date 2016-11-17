@@ -13,12 +13,14 @@
 
 #include "GeoDataObject.h"
 
-#include <QVariant>
+class QVariant;
 
 namespace Marble {
 
 class GeoDataSimpleArrayDataPrivate;
 
+/**
+ */
 class GEODATA_EXPORT GeoDataSimpleArrayData : public GeoDataObject
 {
 

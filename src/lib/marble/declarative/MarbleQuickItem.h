@@ -14,14 +14,17 @@
 #include "marble_declarative_export.h"
 #include <QSharedPointer>
 #include <QQuickPaintedItem>
-#include "GeoDataPlacemark.h"
+#include "GeoDataAccuracy.h"
 #include "MarbleGlobal.h"
-#include "PositionProviderPlugin.h"
+#include "PositionProviderPluginInterface.h"
 #include "MarbleMap.h"
 #include "Placemark.h"
+#include "Coordinate.h"
 
 namespace Marble
 {
+    class GeoDataLatLonBox;
+    class GeoDataPlacemark;
     class MarbleModel;
     class MarbleInputHandler;
     class MarbleQuickItemPrivate;
@@ -36,6 +39,7 @@ namespace Marble
         Q_PROPERTY(int mapWidth READ mapWidth WRITE setMapWidth NOTIFY mapWidthChanged)
         Q_PROPERTY(int mapHeight READ mapHeight WRITE setMapHeight NOTIFY mapHeightChanged)
         Q_PROPERTY(int zoom READ zoom WRITE setZoom NOTIFY zoomChanged)
+        Q_PROPERTY(int radius READ radius WRITE setRadius NOTIFY radiusChanged)
         Q_PROPERTY(bool showFrameRate READ showFrameRate WRITE setShowFrameRate NOTIFY showFrameRateChanged)
         Q_PROPERTY(Projection projection READ projection WRITE setProjection NOTIFY projectionChanged)
         Q_PROPERTY(QString mapThemeId READ mapThemeId WRITE setMapThemeId NOTIFY mapThemeIdChanged)
@@ -57,6 +61,7 @@ namespace Marble
         Q_PROPERTY(qreal speed READ speed NOTIFY speedChanged)
         Q_PROPERTY(qreal angle READ angle NOTIFY angleChanged)
         Q_PROPERTY(bool inertialGlobeRotation READ inertialGlobeRotation WRITE setInertialGlobeRotation NOTIFY inertialGlobeRotationChanged)
+        Q_PROPERTY(QQmlComponent* placemarkDelegate READ placemarkDelegate WRITE setPlacemarkDelegate NOTIFY placemarkDelegateChanged)
 
     public:
         explicit MarbleQuickItem(QQuickItem *parent = 0);
@@ -75,17 +80,20 @@ namespace Marble
 
         MarbleInputHandler *inputHandler();
         int zoom() const;
+        int radius() const;
 
-    public slots:
+    public Q_SLOTS:
         void goHome();
         void setZoom(int zoom, FlyToMode mode = Instant);
         Q_INVOKABLE void setZoomToMaximumLevel();
+        void setRadius(int radius);
         void centerOn(const GeoDataPlacemark& placemark, bool animated = false);
         void centerOn(const GeoDataLatLonBox& box, bool animated = false);
         void centerOn(const GeoDataCoordinates& coordinate);
         void centerOn(qreal longitude, qreal latitude);
         Q_INVOKABLE void centerOnCoordinates(qreal longitude, qreal latitude);
         Q_INVOKABLE void centerOnCurrentPosition();
+        Q_INVOKABLE void selectPlacemarkAt(int x, int y);
 
         void zoomIn(FlyToMode mode = Automatic);
         void zoomOut(FlyToMode mode = Automatic);
@@ -98,7 +106,7 @@ namespace Marble
         void setMapHeight(int mapHeight);
         void setShowFrameRate(bool showFrameRate);
         void setProjection(Projection projection);
-        void setMapThemeId(QString mapThemeId);
+        void setMapThemeId(const QString& mapThemeId);
         void setShowAtmosphere(bool showAtmosphere);
         void setShowCompass(bool showCompass);
         void setShowClouds(bool showClouds);
@@ -119,6 +127,14 @@ namespace Marble
         bool isPropertyEnabled(const QString &property) const;
 
         Q_INVOKABLE void setShowRuntimeTrace(bool showRuntimeTrace);
+        Q_INVOKABLE void setShowDebugPolygons(bool showDebugPolygons);
+        Q_INVOKABLE void setShowDebugPlacemarks(bool showDebugPlacemarks);
+        Q_INVOKABLE void setShowDebugBatches(bool showDebugBatches);
+
+        void setPlacemarkDelegate(QQmlComponent* placemarkDelegate);
+
+        Q_INVOKABLE void loadSettings();
+        Q_INVOKABLE void writeSettings();
 
     public:
         void paint(QPainter *painter);
@@ -163,13 +179,15 @@ namespace Marble
         const MarbleMap* map() const;
 
         bool inertialGlobeRotation() const;
+        QQmlComponent* placemarkDelegate() const;
+        void reverseGeocoding(const QPoint &point);
 
-    signals:
+    Q_SIGNALS:
         void mapWidthChanged(int mapWidth);
         void mapHeightChanged(int mapHeight);
         void showFrameRateChanged(bool showFrameRate);
         void projectionChanged(Projection projection);
-        void mapThemeIdChanged(QString mapThemeId);
+        void mapThemeIdChanged(const QString& mapThemeId);
         void showAtmosphereChanged(bool showAtmosphere);
         void showCompassChanged(bool showCompass);
         void showCloudsChanged(bool showClouds);
@@ -189,18 +207,22 @@ namespace Marble
         void angleChanged();
         void speedChanged();
         void zoomChanged();
+        void radiusChanged(int radius);
         void inertialGlobeRotationChanged(bool inertialGlobeRotation);
+        void placemarkDelegateChanged(QQmlComponent* placemarkDelegate);
 
     protected:
         QObject *getEventFilter() const;
-        void pinch(QPointF center, qreal scale, Qt::GestureState state);
+        void pinch(const QPointF& center, qreal scale, Qt::GestureState state);
 
-    private slots:
+    private Q_SLOTS:
         void resizeMap();
         void positionDataStatusChanged(PositionProviderStatus status);
         void positionChanged(const GeoDataCoordinates &, GeoDataAccuracy);
         void updatePositionVisibility();
         void updateCurrentPosition(const GeoDataCoordinates & coordinates);
+        void updatePlacemarks();
+        void handleReverseGeocoding(const GeoDataCoordinates &coordinates, const GeoDataPlacemark &placemark);
 
     private:
         typedef QSharedPointer<MarbleQuickItemPrivate> MarbleQuickItemPrivatePtr;

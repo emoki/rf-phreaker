@@ -11,17 +11,18 @@
 #ifndef MARBLE_GEODATATRACK_H
 #define MARBLE_GEODATATRACK_H
 
-#include "GeoDataCoordinates.h"
 #include "GeoDataGeometry.h"
 
-#include <QDateTime>
 #include <QList>
+
+class QDateTime;
 
 namespace Marble {
 
 class GeoDataTrackPrivate;
 class GeoDataExtendedData;
 class GeoDataLineString;
+class GeoDataCoordinates;
 
 /**
  * @class GeoDataTrack
@@ -102,13 +103,14 @@ public:
      * Returns the coordinates of all the points in the map, sorted by their
      * time value
      */
-    QList<GeoDataCoordinates> coordinatesList() const;
+    QVector<GeoDataCoordinates> coordinatesList() const;
 
     /**
      * Returns the time value of all the points in the map, in chronological
      * order.
+     * @since 0.26.0
      */
-    QList<QDateTime> whenList() const;
+    QVector<QDateTime> whenList() const;
 
     /**
      * If interpolate() is true, return the coordinates interpolated from the
@@ -173,7 +175,8 @@ public:
     /**
      * Return the ExtendedData assigned to the feature.
      */
-    GeoDataExtendedData& extendedData() const;
+    const GeoDataExtendedData& extendedData() const;
+    GeoDataExtendedData& extendedData();
 
     /**
      * Sets the ExtendedData of the feature.
@@ -186,7 +189,7 @@ public:
     virtual void unpack( QDataStream& stream );
 
 private:
-    GeoDataTrackPrivate *p() const;
+    Q_DECLARE_PRIVATE(GeoDataTrack)
 };
 
 }

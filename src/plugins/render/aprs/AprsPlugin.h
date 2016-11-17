@@ -11,8 +11,6 @@
 #ifndef APRSPLUGIN_H
 #define APRSPLUGIN_H
 
-#include <QObject>
-#include <QMutex>
 #include <QDialog>
 
 #include "RenderPlugin.h"
@@ -22,6 +20,8 @@
 #include "GeoDataLatLonAltBox.h"
 
 #include "ui_AprsConfigWidget.h"
+
+class QMutex;
 
 namespace Ui
 {
@@ -38,7 +38,7 @@ namespace Marble
     class AprsPlugin : public RenderPlugin, public DialogConfigurationInterface
     {
         Q_OBJECT
-    Q_PLUGIN_METADATA( IID "org.kde.edu.marble.AprsPlugin" )
+        Q_PLUGIN_METADATA(IID "org.kde.marble.AprsPlugin")
         Q_INTERFACES( Marble::RenderPluginInterface )
         Q_INTERFACES( Marble::DialogConfigurationInterface )
         MARBLE_PLUGIN( AprsPlugin )
@@ -59,7 +59,7 @@ namespace Marble
 
         QString copyrightYears() const;
 
-        QList<PluginAuthor> pluginAuthors() const;
+        QVector<PluginAuthor> pluginAuthors() const override;
 
         QIcon icon () const;
 

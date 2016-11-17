@@ -15,6 +15,8 @@
 #include "FrameGraphicsItem.h"
 #include "marble_export.h"
 
+#include <QSize>
+
 class QImage;
 class QIcon;
 
@@ -55,8 +57,7 @@ class MARBLE_EXPORT LabelGraphicsItem : public FrameGraphicsItem
 
  private:
     Q_DISABLE_COPY( LabelGraphicsItem )
-
-    LabelGraphicsItemPrivate * const d;
+    Q_DECLARE_PRIVATE(LabelGraphicsItem)
 };
 
 } // namespace Marble

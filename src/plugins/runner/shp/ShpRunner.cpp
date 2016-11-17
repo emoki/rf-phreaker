@@ -12,6 +12,9 @@
 #include "GeoDataDocument.h"
 #include "GeoDataPlacemark.h"
 #include "GeoDataPolygon.h"
+#include "GeoDataLinearRing.h"
+#include "GeoDataPoint.h"
+#include "GeoDataMultiGeometry.h"
 #include "GeoDataSchema.h"
 #include "GeoDataSimpleField.h"
 #include "GeoDataStyle.h"
@@ -37,15 +40,15 @@ ShpRunner::~ShpRunner()
 GeoDataDocument *ShpRunner::parseFile(const QString &fileName, DocumentRole role, QString &error)
 {
     QFileInfo fileinfo( fileName );
-    if( fileinfo.suffix().compare( "shp", Qt::CaseInsensitive ) != 0 ) {
-        error = QString("File %1 does not have a shp suffix").arg(fileName);
+    if (fileinfo.suffix().compare(QLatin1String("shp"), Qt::CaseInsensitive) != 0) {
+        error = QStringLiteral("File %1 does not have a shp suffix").arg(fileName);
         mDebug() << error;
         return nullptr;
     }
 
     SHPHandle handle = SHPOpen( fileName.toStdString().c_str(), "rb" );
     if ( !handle ) {
-        error = QString("Failed to read %1").arg(fileName);
+        error = QStringLiteral("Failed to read %1").arg(fileName);
         mDebug() << error;
         return nullptr;
     }
@@ -66,9 +69,9 @@ GeoDataDocument *ShpRunner::parseFile(const QString &fileName, DocumentRole role
 
     if ( mapColorField != -1 ) {
         GeoDataSchema schema;
-        schema.setId("default");
+        schema.setId(QStringLiteral("default"));
         GeoDataSimpleField simpleField;
-        simpleField.setName("mapcolor13");
+        simpleField.setName(QStringLiteral("mapcolor13"));
         simpleField.setType( GeoDataSimpleField::Double );
         schema.addSimpleField( simpleField );
         document->addSchema( schema );
@@ -80,13 +83,15 @@ GeoDataDocument *ShpRunner::parseFile(const QString &fileName, DocumentRole role
         document->append( placemark );
 
         SHPObject *shape = SHPReadObject( handle, i );
-        if( nameField ) {
+        if (nameField != -1) {
             const char* info = DBFReadStringAttribute( dbfhandle, i, nameField );
+            // TODO: defaults to utf-8 encoding, but could be also something else, optionally noted in a .cpg file
             placemark->setName( info );
             mDebug() << "name " << placemark->name();
         }
-        if( noteField ) {
+        if (noteField != -1) {
             const char* note = DBFReadStringAttribute( dbfhandle, i, noteField );
+            // TODO: defaults to utf-8 encoding, see comment for name
             placemark->setDescription( note );
             mDebug() << "desc " << placemark->description();
         }

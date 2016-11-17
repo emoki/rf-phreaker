@@ -20,8 +20,8 @@
 #include "GeoDataData.h"
 #include "GeoDataExtendedData.h"
 #include "GeoDataPlacemark.h"
+#include "GeoDataLineString.h"
 
-#include <QProcess>
 #include <QTime>
 #include <QLocalSocket>
 
@@ -155,7 +155,7 @@ int MonavRunnerPrivate::retrieveRoute( const Marble::RouteRequest* route, QVecto
             QString road = reply.nameStrings[reply.pathEdges[i].name];
             QString type = reply.typeStrings[reply.pathEdges[i].type];
             RoutingWaypoint::JunctionType junction = RoutingWaypoint::Other;
-            if ( type == "roundabout" && reply.pathEdges[i].branchingPossible ) {
+            if (type == QLatin1String("roundabout") && reply.pathEdges[i].branchingPossible) {
                 junction = RoutingWaypoint::Roundabout;
             }
             for ( unsigned int l = 0; l < reply.pathEdges[i].length; ++k, ++l ) {
@@ -174,11 +174,11 @@ int MonavRunnerPrivate::retrieveRoute( const Marble::RouteRequest* route, QVecto
             GeoDataPlacemark* placemark = new GeoDataPlacemark( directions[i].instructionText() );
             GeoDataExtendedData extendedData;
             GeoDataData turnType;
-            turnType.setName( "turnType" );
+            turnType.setName(QStringLiteral("turnType"));
             turnType.setValue( qVariantFromValue<int>( int( directions[i].turnType() ) ) );
             extendedData.addValue( turnType );
             GeoDataData roadName;
-            roadName.setName( "roadName" );
+            roadName.setName(QStringLiteral("roadName"));
             roadName.setValue( directions[i].roadName() );
             extendedData.addValue( roadName );
             placemark->setExtendedData( extendedData );
@@ -207,7 +207,7 @@ GeoDataDocument* MonavRunnerPrivate::createDocument( Marble::GeoDataLineString* 
 
     GeoDataDocument* result = new GeoDataDocument;
     GeoDataPlacemark* routePlacemark = new GeoDataPlacemark;
-    routePlacemark->setName( "Route" );
+    routePlacemark->setName(QStringLiteral("Route"));
     routePlacemark->setGeometry( geometry );
     routePlacemark->setExtendedData( data );
     result->append( routePlacemark );

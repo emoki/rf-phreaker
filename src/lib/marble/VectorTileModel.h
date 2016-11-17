@@ -18,6 +18,7 @@
 #include <QMap>
 
 #include "TileId.h"
+#include "GeoDataLatLonBox.h"
 
 class QThreadPool;
 
@@ -25,7 +26,6 @@ namespace Marble
 {
 
 class GeoDataDocument;
-class GeoDataLatLonBox;
 class GeoDataTreeModel;
 class GeoSceneVectorTileDataset;
 class GeoDataObject;
@@ -80,10 +80,7 @@ private Q_SLOTS:
 
 private:
     void removeTilesOutOfView(const GeoDataLatLonBox &boundingBox);
-    void setViewport( int tileZoomLevel, unsigned int minX, unsigned int minY, unsigned int maxX, unsigned int maxY );
-
-    static unsigned int lon2tileX( qreal lon, unsigned int maxTileX );
-    static unsigned int lat2tileY( qreal lat, unsigned int maxTileY );
+    void queryTiles( int tileZoomLevel, unsigned int minX, unsigned int minY, unsigned int maxX, unsigned int maxY );
 
 private:
     struct CacheDocument
@@ -111,6 +108,7 @@ private:
     QList<TileId> m_pendingDocuments;
     QList<GeoDataDocument*> m_garbageQueue;
     QMap<TileId, QSharedPointer<CacheDocument> > m_documents;
+    bool m_deleteDocumentsLater;
 };
 
 }

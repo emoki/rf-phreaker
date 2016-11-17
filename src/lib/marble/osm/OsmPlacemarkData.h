@@ -15,18 +15,16 @@
 #include <QHash>
 #include <QMetaType>
 #include <QString>
-#include <QXmlStreamAttributes>
 
 // Marble
 #include "GeoDataCoordinates.h"
 #include <marble_export.h>
 #include "GeoDocument.h"
 
+class QXmlStreamAttributes;
+
 namespace Marble
 {
-
-class GeoDataGeometry;
-class GeoDataPlacemark;
 
 /**
  * This class is used to encapsulate the osm data fields kept within a placemark's extendedData.
@@ -56,6 +54,7 @@ public:
     OsmPlacemarkData();
 
     qint64 id() const;
+    qint64 oid() const;
     QString version() const;
     QString changeset() const;
     QString uid() const;
@@ -106,6 +105,12 @@ public:
     bool containsTagKey( const QString& key ) const;
 
     /**
+     * @brief tagValue returns a pointer to the tag that has @p key as key
+     * or the end iterator if there is no such tag
+     */
+    QHash<QString, QString>::const_iterator findTag(const QString &key) const;
+
+    /**
      * @brief iterators for the tags hash.
      */
     QHash< QString, QString >::const_iterator tagsBegin() const;
@@ -137,6 +142,7 @@ public:
     /**
      * @brief iterators for the reference hashes.
      */
+    QHash< GeoDataCoordinates, OsmPlacemarkData > & nodeReferences();
     QHash< GeoDataCoordinates, OsmPlacemarkData >::const_iterator nodeReferencesBegin() const;
     QHash< GeoDataCoordinates, OsmPlacemarkData >::const_iterator nodeReferencesEnd() const;
 
@@ -160,6 +166,7 @@ public:
     void removeMemberReference( int key );
     bool containsMemberReference( int key ) const;
 
+    QHash< int, OsmPlacemarkData > & memberReferences();
     QHash< int, OsmPlacemarkData >::const_iterator memberReferencesBegin() const;
     QHash< int, OsmPlacemarkData >::const_iterator memberReferencesEnd() const;
 
@@ -181,10 +188,15 @@ public:
     static QString osmHashKey();
 
     /**
-     * @brief isNull returns false if the the osmData is loaded from a source
+     * @brief isNull returns false if the osmData is loaded from a source
      * or true if its just default constructed
      */
     bool isNull() const;
+
+    /**
+     * @brief isEmpty returns true if no attribute other than the id has been set
+     */
+    bool isEmpty() const;
 
     /**
      * @brief fromParserAttributes is a convenience function that parses all osm-related
@@ -192,11 +204,6 @@ public:
      * @return an OsmPlacemarkData object containing all the necessary data
      */
     static OsmPlacemarkData fromParserAttributes( const QXmlStreamAttributes &attributes );
-
-    /**
-     * @brief osmPlacemarkDataType used for identifying OsmPlacemarkData objects as GeoNodes
-     */
-    static const char* osmPlacemarkDataType;
 
 private:
     qint64 m_id;

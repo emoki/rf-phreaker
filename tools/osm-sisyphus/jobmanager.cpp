@@ -14,7 +14,6 @@
 #include <QFile>
 #include <QTextStream>
 #include <QDebug>
-#include <QProcess>
 #include <QDomDocument>
 
 JobManager::JobManager(QObject *parent) :
@@ -75,19 +74,19 @@ void JobManager::setRegionsFile(const QString &filename)
             region.setPbfFile(node.namedItem("pbf").toElement().text());
         }
         if (!node.namedItem("transport").isNull()) {
-            QStringList input = node.namedItem("transport").toElement().text().split(',', QString::SkipEmptyParts);
+            QStringList input = node.namedItem("transport").toElement().text().split(QLatin1Char(','), QString::SkipEmptyParts);
             foreach( const QString &value, input ) {
                 if (!region.continent().isEmpty() && !region.name().isEmpty()) {
                     PendingJob job;
                     job.m_region = region;
                     job.m_transport = value.trimmed();
-                    if (job.m_transport == "Motorcar") {
+                    if (job.m_transport == QLatin1String("Motorcar")) {
                         job.m_profile = "motorcar";
                         m_pendingJobs << job;
-                    } else if (job.m_transport == "Bicycle") {
+                    } else if (job.m_transport == QLatin1String("Bicycle")) {
                         job.m_profile = "bicycle";
                         m_pendingJobs << job;
-                    } else if (job.m_transport == "Pedestrian") {
+                    } else if (job.m_transport == QLatin1String("Pedestrian")) {
                         job.m_profile = "foot";
                         m_pendingJobs << job;
                     } else {

@@ -17,7 +17,7 @@ namespace Marble
 TravelingSalesmanPlugin::TravelingSalesmanPlugin( QObject *parent ) : RunnerPlugin( parent )
 {
     setCapabilities( Routing );
-    setSupportedCelestialBodies( QStringList() << "earth" );
+    setSupportedCelestialBodies(QStringList(QStringLiteral("earth")));
     setCanWorkOffline( true );
     setName( tr( "Traveling Salesman" ) );
     setNameId( "travelingsalesman" );
@@ -31,7 +31,5 @@ MarbleAbstractRunner* TravelingSalesmanPlugin::newRunner() const
 }
 
 }
-
-Q_EXPORT_PLUGIN2( TravelingSalesmanPlugin, Marble::TravelingSalesmanPlugin )
 
 #include "moc_TravelingSalesmanPlugin.cpp"

@@ -11,16 +11,17 @@
 #ifndef CLOUDROUTEMODEL_H
 #define CLOUDROUTEMODEL_H
 
-#include "RouteItem.h"
-
 #include "marble_export.h"
 
 #include <QModelIndex>
-#include <QNetworkReply>
 #include <QAbstractListModel>
+
+class QNetworkReply;
 
 namespace Marble
 {
+
+class RouteItem;
 
 class MARBLE_EXPORT CloudRouteModel : public QAbstractListModel
 {
@@ -98,7 +99,7 @@ public:
      */
     QIcon preview( const QModelIndex &index ) const;
 
-public slots:
+public Q_SLOTS:
     void updateProgress( qint64 currentSize, qint64 totalSize );
     void setPreview( QNetworkReply *reply );
 

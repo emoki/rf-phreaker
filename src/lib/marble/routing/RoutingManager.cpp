@@ -19,6 +19,7 @@
 #include "GeoWriter.h"
 #include "GeoDataDocument.h"
 #include "GeoDataExtendedData.h"
+#include "GeoDataData.h"
 #include "GeoDataFolder.h"
 #include "GeoDataParser.h"
 #include "GeoDataPlacemark.h"
@@ -131,7 +132,7 @@ RoutingManagerPrivate::RoutingManagerPrivate( MarbleModel *model, RoutingManager
 GeoDataFolder* RoutingManagerPrivate::routeRequest() const
 {
     GeoDataFolder* result = new GeoDataFolder;
-    result->setName( "Route Request" );
+    result->setName(QStringLiteral("Route Request"));
     for ( int i=0; i<m_routeRequest.size(); ++i ) {
         GeoDataPlacemark* placemark = new GeoDataPlacemark( m_routeRequest[i] );
         result->append( placemark );
@@ -172,7 +173,7 @@ void RoutingManagerPrivate::saveRoute(const QString &filename)
     }
 
     GeoDataDocument container;
-    container.setName( "Route" );
+    container.setName(QStringLiteral("Route"));
     GeoDataFolder* request = routeRequest();
     if ( request ) {
         container.append( request );
@@ -408,16 +409,16 @@ void RoutingManagerPrivate::importPlacemark( RouteSegment &outline, QVector<Rout
             maneuver.setInstructionText( placemark->name() );
             maneuver.setPosition( lineString->at( 0 ) );
 
-            if ( placemark->extendedData().contains( "turnType" ) ) {
-                QVariant turnType = placemark->extendedData().value( "turnType" ).value();
+            if (placemark->extendedData().contains(QStringLiteral("turnType"))) {
+                QVariant turnType = placemark->extendedData().value(QStringLiteral("turnType")).value();
                 // The enum value is converted to/from an int in the QVariant
                 // because only a limited set of data types can be serialized with QVariant's
                 // toString() method (which is used to serialize <ExtendedData>/<Data> values)
                 maneuver.setDirection( Maneuver::Direction( turnType.toInt() ) );
             }
 
-            if ( placemark->extendedData().contains( "roadName" ) ) {
-                QVariant roadName = placemark->extendedData().value( "roadName" ).value();
+            if (placemark->extendedData().contains(QStringLiteral("roadName"))) {
+                QVariant roadName = placemark->extendedData().value(QStringLiteral("roadName")).value();
                 maneuver.setRoadName( roadName.toString() );
             }
 
@@ -464,17 +465,17 @@ RoutingProfile RoutingManager::defaultProfile( RoutingProfile::TransportType tra
     switch ( transportType ) {
     case RoutingProfile::Motorcar:
         tpl = RoutingProfilesModel::CarFastestTemplate;
-        profile.setName( "Motorcar" );
+        profile.setName(QStringLiteral("Motorcar"));
         profile.setTransportType( RoutingProfile::Motorcar );
         break;
     case RoutingProfile::Bicycle:
         tpl = RoutingProfilesModel::BicycleTemplate;
-        profile.setName( "Bicycle" );
+        profile.setName(QStringLiteral("Bicycle"));
         profile.setTransportType( RoutingProfile::Bicycle );
         break;
     case RoutingProfile::Pedestrian:
         tpl = RoutingProfilesModel::PedestrianTemplate;
-        profile.setName( "Pedestrian" );
+        profile.setName(QStringLiteral("Pedestrian"));
         profile.setTransportType( RoutingProfile::Pedestrian );
         break;
     }
@@ -505,11 +506,11 @@ void RoutingManager::setGuidanceModeEnabled( bool enabled )
         d->saveRoute( d->stateFile( "guidance.kml" ) );
 
         if ( d->m_guidanceModeWarning ) {
-            QString text = "<p>" + tr( "Caution: Driving instructions may be incomplete or wrong." );
-            text += ' ' + tr( "Road construction, weather and other unforeseen variables can result in the suggested route not to be the most expedient or safest route to your destination." );
-            text += ' ' + tr( "Please use common sense while navigating." ) + "</p>";
-            text += "<p>" + tr( "The Marble development team wishes you a pleasant and safe journey." ) + "</p>";
-            QPointer<QMessageBox> messageBox = new QMessageBox( QMessageBox::Information, tr( "Guidance Mode - Marble" ), text, QMessageBox::Ok );
+            QString text = QLatin1String("<p>") + tr("Caution: Driving instructions may be incomplete or wrong.") +
+                QLatin1Char(' ') + tr("Road construction, weather and other unforeseen variables can result in the suggested route not to be the most expedient or safest route to your destination.") +
+                QLatin1Char(' ') + tr("Please use common sense while navigating.") + QLatin1String("</p>") +
+                QLatin1String("<p>") + tr("The Marble development team wishes you a pleasant and safe journey.") + QLatin1String("</p>");
+            QPointer<QMessageBox> messageBox = new QMessageBox(QMessageBox::Information, tr("Guidance Mode"), text, QMessageBox::Ok);
             QCheckBox *showAgain = new QCheckBox( tr( "Show again" ) );
             showAgain->setChecked( true );
             showAgain->blockSignals( true ); // otherwise it'd close the dialog
@@ -603,7 +604,7 @@ QString RoutingManager::lastSavePath() const
     return d->m_lastSavePath;
 }
 
-void RoutingManager::setRouteColorStandard( QColor color )
+void RoutingManager::setRouteColorStandard( const QColor& color )
 {
     d->m_routeColorStandard = color;
 }
@@ -613,7 +614,7 @@ QColor RoutingManager::routeColorStandard() const
     return d->m_routeColorStandard;
 }
 
-void RoutingManager::setRouteColorHighlighted( QColor color )
+void RoutingManager::setRouteColorHighlighted( const QColor& color )
 {
     d->m_routeColorHighlighted = color;
 }
@@ -623,7 +624,7 @@ QColor RoutingManager::routeColorHighlighted() const
     return d->m_routeColorHighlighted;
 }
 
-void RoutingManager::setRouteColorAlternative( QColor color )
+void RoutingManager::setRouteColorAlternative( const QColor& color )
 {
     d->m_routeColorAlternative = color;
 }

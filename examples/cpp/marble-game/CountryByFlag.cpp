@@ -14,24 +14,22 @@
 // Qt
 #include <QTime>
 #include <QImage>
-#include <QPixmap>
 #include <QString>
 #include <QVector>
 #include <QVariant>
 #include <QVariantList>
 
 // Marble
-#include <MarbleWidget.h>
-#include <MarbleModel.h>
-#include <GeoDataTreeModel.h>
-#include <MarbleDirs.h>
-#include <MarbleDebug.h>
-#include <MarblePlacemarkModel.h>
+#include <marble/MarbleWidget.h>
+#include <marble/MarbleModel.h>
+#include <marble/GeoDataTreeModel.h>
+#include <marble/MarbleDirs.h>
+#include <marble/MarbleDebug.h>
+#include <marble/MarblePlacemarkModel.h>
 
-#include <GeoDataDocument.h>
-#include <GeoDataPlacemark.h>
-
-#include <GeoDataTypes.h>
+#include <marble/GeoDataDocument.h>
+#include <marble/GeoDataPlacemark.h>
+#include <marble/GeoDataTypes.h>
 
 namespace Marble
 {
@@ -43,10 +41,15 @@ public:
       m_parent( 0 ),
       m_countryNames( 0 )
     {
-        m_continentsAndOceans << "Asia" << "Africa" << "North America" << "South America"
-        << "Antarctica" << "Europe" << "Australia" << "Arctic Ocean" << "Indian Ocean"
-        << "North Atlantic Ocean" << "North Pacific Ocean" << "South Pacific Ocean"
-        << "South Atlantic Ocean" << "Southern Ocean" ;
+        m_continentsAndOceans
+            << QStringLiteral("Asia") << QStringLiteral("Africa")
+            << QStringLiteral("North America") << QStringLiteral("South America")
+            << QStringLiteral("Antarctica") << QStringLiteral("Europe")
+            << QStringLiteral("Australia")
+            << QStringLiteral("Arctic Ocean") << QStringLiteral("Indian Ocean")
+            << QStringLiteral("North Atlantic Ocean") << QStringLiteral("North Pacific Ocean")
+            << QStringLiteral("South Pacific Ocean") << QStringLiteral("South Atlantic Ocean")
+            << QStringLiteral("Southern Ocean");
     }
 
     MarbleWidget *m_marbleWidget;
@@ -98,7 +101,7 @@ void CountryByFlag::initiateGame()
             if ( object->nodeType() == GeoDataTypes::GeoDataDocumentType ) {
                 GeoDataDocument *doc = static_cast<GeoDataDocument*>( object );
                 QFileInfo fileInfo( doc->fileName() );
-                if ( fileInfo.fileName() == QString("boundaryplacemarks.cache") ) {
+                if (fileInfo.fileName() == QLatin1String("boundaryplacemarks.cache")) {
                     d->m_countryNames = doc;
                     break;
                 }
@@ -138,10 +141,11 @@ void CountryByFlag::postQuestion( QObject *gameObject )
         placemark = countryPlacemarks[randomIndex];
 
         if ( !d->m_continentsAndOceans.contains(placemark->name(), Qt::CaseSensitive) ) {
-            flagPath = MarbleDirs::path( QString("flags/flag_%1.svg").arg(placemark->countryCode().toLower()) );
+            const QString countryCode = placemark->countryCode().toLower();
+            flagPath = MarbleDirs::path(QLatin1String("flags/flag_") + countryCode + QLatin1String(".svg"));
             QImage flag = QFile::exists( flagPath ) ? QImage( flagPath ) : QImage();
             if ( !flag.isNull() ) {
-                flagPath = QString("%1flag_%2.svg").arg("../../../data/flags/").arg(placemark->countryCode().toLower());
+                flagPath = QLatin1String("../../../data/flags/flag_") + countryCode + QLatin1String(".svg");
                 found = true;
             }
         }
@@ -159,9 +163,9 @@ void CountryByFlag::postQuestion( QObject *gameObject )
     }
     if ( gameObject ) {
         QMetaObject::invokeMethod( gameObject, "countryByFlagQuestion",
-                                   Q_ARG(QVariant, QVariant::fromValue(answerOptions)),
-                                   Q_ARG(QVariant, QVariant::fromValue(flagPath)),
-                                   Q_ARG(QVariant, QVariant::fromValue(placemark->name())) );
+                                   Q_ARG(QVariant, QVariant(answerOptions)),
+                                   Q_ARG(QVariant, QVariant(flagPath)),
+                                   Q_ARG(QVariant, QVariant(placemark->name())) );
     }
 }
 

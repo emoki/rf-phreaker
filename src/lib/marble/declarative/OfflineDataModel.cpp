@@ -17,7 +17,7 @@
 OfflineDataModel::OfflineDataModel( QObject *parent ) : QSortFilterProxyModel( parent ),
     m_vehicleTypeFilter( Any )
 {
-    m_newstuffModel.setTargetDirectory( Marble::MarbleDirs::localPath() + "/maps" );
+    m_newstuffModel.setTargetDirectory(Marble::MarbleDirs::localPath() + QLatin1String("/maps"));
     m_newstuffModel.setRegistryFile( QDir::homePath() + "/.kde/share/apps/knewstuff3/marble-offline-data.knsregistry", Marble::NewstuffModel::NameTag );
     m_newstuffModel.setProvider( "http://files.kde.org/marble/newstuff/maps-monav.xml" );
 
@@ -48,11 +48,11 @@ QHash<int, QByteArray> OfflineDataModel::roleNames() const
 QVariant OfflineDataModel::data(const QModelIndex &index, int role) const
 {
     if ( index.isValid() && index.row() >= 0 && index.row() < rowCount() && role == Qt::DisplayRole ) {
-        QStringList const data = QSortFilterProxyModel::data( index, role ).toString().split( '/' );
+        QStringList const data = QSortFilterProxyModel::data(index, role).toString().split(QLatin1Char('/'));
         if ( data.size() > 1 ) {
             QString result = data.at( 1 );
             for ( int i=2; i<data.size(); ++i ) {
-                result += " / " + data.at( i );
+                result += QLatin1String(" / ") + data.at(i);
             }
             result.remove( QLatin1String( " (Motorcar)" ) );
             result.remove( QLatin1String( " (Pedestrian)" ) );
@@ -62,7 +62,7 @@ QVariant OfflineDataModel::data(const QModelIndex &index, int role) const
     }
 
     if ( index.isValid() && index.row() >= 0 && index.row() < rowCount() && role == Qt::UserRole+17 ) {
-        QStringList const data = QSortFilterProxyModel::data( index, Qt::DisplayRole ).toString().split( '/' );
+        QStringList const data = QSortFilterProxyModel::data(index, Qt::DisplayRole).toString().split(QLatin1Char('/'));
         if ( data.size() > 1 ) {
             return data.first().trimmed();
         }
@@ -128,11 +128,11 @@ bool OfflineDataModel::filterAcceptsRow( int source_row, const QModelIndex &sour
     if ( QSortFilterProxyModel::filterAcceptsRow( source_row, source_parent ) ) {
         QModelIndex const index = sourceModel()->index( source_row, 0, source_parent );
         QString const data = sourceModel()->data( index, Qt::DisplayRole ).toString();
-        if ( ( m_vehicleTypeFilter & Motorcar ) && data.contains( "(Motorcar)" ) ) {
+        if ((m_vehicleTypeFilter & Motorcar) && data.contains(QLatin1String("(Motorcar)"))) {
             return true;
-        } else if ( ( m_vehicleTypeFilter & Bicycle ) && data.contains( "(Bicycle)" ) ) {
+        } else if ((m_vehicleTypeFilter & Bicycle) && data.contains(QLatin1String("(Bicycle)"))) {
             return true;
-        } else if ( ( m_vehicleTypeFilter & Pedestrian ) && data.contains( "(Pedestrian)" ) ) {
+        } else if ((m_vehicleTypeFilter & Pedestrian) && data.contains(QLatin1String("(Pedestrian)"))) {
             return true;
         }
     }

@@ -18,8 +18,6 @@
 #include <QCoreApplication>
 #include <QMetaType>
 #include <QVector>
-#include <QString>
-#include <QHash>
 
 #include <cmath>
 
@@ -30,6 +28,8 @@
 
 #include "geodata_export.h"
 #include "MarbleGlobal.h"
+
+class QString;
 
 namespace Marble
 {
@@ -157,9 +157,8 @@ class GEODATA_EXPORT GeoDataCoordinates
     * @param unit units that lon and lat get measured in
     * (default for Radian: north pole at pi/2, southpole at -pi/2)
     */
-    void geoCoordinates( qreal& lon, qreal& lat,
-                         GeoDataCoordinates::Unit unit = GeoDataCoordinates::Radian )
-                                                                const;
+    void geoCoordinates(qreal& lon, qreal& lat, GeoDataCoordinates::Unit unit) const;
+    void geoCoordinates(qreal& lon, qreal& lat) const;
 
     /**
     * @brief use this function to get the longitude, latitude and altitude
@@ -170,9 +169,8 @@ class GEODATA_EXPORT GeoDataCoordinates
     * @param unit units that lon and lat get measured in
     * (default for Radian: north pole at pi/2, southpole at -pi/2)
     */
-    void geoCoordinates( qreal& lon, qreal& lat, qreal& alt,
-                         GeoDataCoordinates::Unit unit = GeoDataCoordinates::Radian )
-                                                                const;
+    void geoCoordinates(qreal& lon, qreal& lat, qreal& alt, GeoDataCoordinates::Unit unit) const;
+    void geoCoordinates(qreal& lon, qreal& lat, qreal& alt) const;
 
     /**
     * @brief set the longitude in a GeoDataCoordinates object
@@ -190,8 +188,8 @@ class GEODATA_EXPORT GeoDataCoordinates
     * (default for Radian: north pole at pi/2, southpole at -pi/2)
     * @return longitude
     */
-    qreal longitude( GeoDataCoordinates::Unit unit = GeoDataCoordinates::Radian )
-                                                                const;
+    qreal longitude(GeoDataCoordinates::Unit unit) const;
+    qreal longitude() const;
 
     /**
     * @brief retrieves the latitude of the GeoDataCoordinates object
@@ -200,8 +198,8 @@ class GEODATA_EXPORT GeoDataCoordinates
     * (default for Radian: north pole at pi/2, southpole at -pi/2)
     * @return latitude
     */
-    qreal latitude( GeoDataCoordinates::Unit unit = GeoDataCoordinates::Radian )
-                                                                const;
+    qreal latitude( GeoDataCoordinates::Unit unit ) const;
+    qreal latitude() const;
 
     /**
     * @brief set the longitude in a GeoDataCoordinates object
@@ -255,13 +253,13 @@ class GEODATA_EXPORT GeoDataCoordinates
     * @brief return the detail flag
     * detail range: 0 for most important points, 5 for least important
     */
-    int detail() const;
+    quint8 detail() const;
 
     /**
     * @brief set the detail flag
     * @param det detail
     */
-    void setDetail( const int detail );
+    void setDetail(quint8 detail);
 
     /**
      * @brief Rotates one coordinate around another.
@@ -406,21 +404,22 @@ class GEODATA_EXPORT GeoDataCoordinates
      * convenience function that uses the default notation
      */
     QString latToString() const;
-    
-    virtual bool operator==( const GeoDataCoordinates& ) const;
-    virtual bool operator !=( const GeoDataCoordinates& ) const;
+
+    bool operator==(const GeoDataCoordinates &other) const;
+    bool operator!=(const GeoDataCoordinates &other) const;
+
     GeoDataCoordinates& operator=( const GeoDataCoordinates &other );
 
     /** Serialize the contents of the feature to @p stream. */
-    virtual void pack( QDataStream& stream ) const;
+    void pack(QDataStream &stream) const;
     /** Unserialize the contents of the feature from @p stream. */
-    virtual void unpack( QDataStream& stream );
-
-    virtual void detach();
- protected:
-    GeoDataCoordinatesPrivate* d;
+    void unpack(QDataStream &stream);
 
  private:
+    void detach();
+
+    GeoDataCoordinatesPrivate *d;
+
     static GeoDataCoordinates::Notation s_notation;
     static const GeoDataCoordinates null;
 };

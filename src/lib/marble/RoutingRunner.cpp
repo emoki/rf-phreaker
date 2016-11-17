@@ -9,12 +9,14 @@
 
 #include "RoutingRunner.h"
 
-#include "GeoDataPlacemark.h"
 #include "GeoDataExtendedData.h"
+#include "GeoDataData.h"
 #include "MarbleGlobal.h"
 #include "MarbleLocale.h"
 
+#include <QTime>
 #include <QString>
+#include <QVariant>
 
 namespace Marble
 {
@@ -84,11 +86,11 @@ const GeoDataExtendedData RoutingRunner::routeData(qreal length, const QTime& du
 {
     GeoDataExtendedData result;
     GeoDataData lengthData;
-    lengthData.setName( "length" );
+    lengthData.setName(QStringLiteral("length"));
     lengthData.setValue( length );
     result.addValue( lengthData );
     GeoDataData durationData;
-    durationData.setName( "duration" );
+    durationData.setName(QStringLiteral("duration"));
     durationData.setValue( duration.toString( Qt::ISODate ) );
     result.addValue( durationData );
     return result;

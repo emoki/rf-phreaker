@@ -11,10 +11,9 @@
 #ifndef MARBLE_KMLOVERLAYTAGWRITER_H
 #define MARBLE_KMLOVERLAYTAGWRITER_H
 
-#include "GeoTagWriter.h"
 #include "KmlFeatureTagWriter.h"
 
-#include <QString>
+class QString;
 
 namespace Marble
 {

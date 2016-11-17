@@ -14,7 +14,7 @@ import QtQuick.Controls 1.3
 import QtQuick.Window 2.2
 import QtQuick.Layouts 1.1
 
-import org.kde.edu.marble 0.20
+import org.kde.marble 0.20
 
 Item {
     id: root
@@ -63,7 +63,7 @@ Item {
             id: helpText
             visible: waypointList.count < 2
             color: "gray"
-            text: "Search for places to integrate them into a route."
+            text: qsTr("Search for places to integrate them into a route.")
         }
 
         ListView {
@@ -161,7 +161,6 @@ Item {
 
             ScrollBar {
                 id: scrollBar
-                anchors.left: waypointList.right-12
                 flickableItem: waypointList
             }
         }

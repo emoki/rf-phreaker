@@ -17,17 +17,14 @@
 #include <QDialog>
 #include <QVector>
 
-#include "TileCoordsPyramid.h"
 #include "marble_export.h"
-
-class QHideEvent;
-class QShowEvent;
 
 namespace Marble
 {
 class GeoDataLatLonAltBox;
+class TileCoordsPyramid;
 class MarbleWidget;
-class ViewportParams;
+
 class MARBLE_EXPORT DownloadRegionDialog: public QDialog
 {
     Q_OBJECT

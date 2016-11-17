@@ -9,8 +9,7 @@
 //
 
 #include <QApplication>
-#include <QtQuick/QQuickView>
-#include <QFileInfo>
+#include <QQuickView>
 
 #include <marble/declarative/MarbleQuickItem.h>
 #include <marble/MarbleMap.h>
@@ -30,14 +29,14 @@ public:
 
     void componentComplete()
     {
-        QQuickItem *pinch = findChild<QQuickItem*>("pinchArea");
+        QQuickItem *pinch = findChild<QQuickItem*>(QStringLiteral("pinchArea"));
         if (pinch)
         {
             pinch->installEventFilter(getEventFilter());
         }
     }
 
-public slots:
+public Q_SLOTS:
 
     void handlePinchStart(QPointF center)
     {
@@ -69,8 +68,8 @@ public:
     void start()
     {
         MarbleDeclarativePlugin plugin;
-        plugin.registerTypes("org.kde.edu.marble");
-        setSource(QUrl("qrc:/main.qml"));
+        plugin.registerTypes("org.kde.marble");
+        setSource(QUrl(QStringLiteral("qrc:/main.qml")));
 
         if(status()!=QQuickView::Ready)
             qDebug("can't initialise view");
@@ -80,7 +79,7 @@ public:
         setFormat(format);
         setClearBeforeRendering(true);
         setColor(QColor(Qt::transparent));
-        setTitle("Marble in QML 2.0 demo");
+        setTitle(QStringLiteral("Marble in QML 2.0 demo"));
 
         show();
     }

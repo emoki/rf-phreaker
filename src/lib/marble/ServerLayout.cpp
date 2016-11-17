@@ -12,6 +12,7 @@
 #include "ServerLayout.h"
 
 #include "GeoSceneTileDataset.h"
+#include "GeoDataLatLonBox.h"
 #include "MarbleGlobal.h"
 #include "TileId.h"
 
@@ -41,8 +42,8 @@ QUrl MarbleServerLayout::downloadUrl( const QUrl &prototypeUrl, const TileId &id
     const QString path = QString( "%1/%2/%3/%3_%4.%5" )
         .arg( prototypeUrl.path() )
         .arg( id.zoomLevel() )
-        .arg( id.y(), tileDigits, 10, QChar('0') )
-        .arg( id.x(), tileDigits, 10, QChar('0') )
+        .arg(id.y(), tileDigits, 10, QLatin1Char('0'))
+        .arg(id.x(), tileDigits, 10, QLatin1Char('0'))
         .arg( m_textureLayer->fileFormat().toLower() );
 
     QUrl url = prototypeUrl;
@@ -94,7 +95,8 @@ CustomServerLayout::CustomServerLayout( GeoSceneTileDataset *texture )
 
 QUrl CustomServerLayout::downloadUrl( const QUrl &prototypeUrl, const TileId &id ) const
 {
-    const GeoDataLatLonBox bbox = id.toLatLonBox( m_textureLayer );
+    GeoDataLatLonBox bbox;
+    m_textureLayer->tileProjection()->geoCoordinates(id, bbox);
 
     QString urlStr = prototypeUrl.toString( QUrl::DecodeReserved );
 
@@ -122,7 +124,8 @@ WmsServerLayout::WmsServerLayout( GeoSceneTileDataset *texture )
 
 QUrl WmsServerLayout::downloadUrl( const QUrl &prototypeUrl, const Marble::TileId &tileId ) const
 {
-    GeoDataLatLonBox box = tileId.toLatLonBox( m_textureLayer );
+    GeoDataLatLonBox box;
+    m_textureLayer->tileProjection()->geoCoordinates(tileId, box);
 
     QUrlQuery url(prototypeUrl.query());
     url.addQueryItem( "service", "WMS" );
@@ -131,10 +134,10 @@ QUrl WmsServerLayout::downloadUrl( const QUrl &prototypeUrl, const Marble::TileI
     if ( !url.hasQueryItem( "styles" ) )
         url.addQueryItem( "styles", "" );
     if ( !url.hasQueryItem( "format" ) ) {
-        if ( m_textureLayer->fileFormat().toLower() == "jpg" )
+        if (m_textureLayer->fileFormat().toLower() == QLatin1String("jpg"))
             url.addQueryItem( "format", "image/jpeg" );
         else
-            url.addQueryItem( "format", "image/" + m_textureLayer->fileFormat().toLower() );
+            url.addQueryItem("format", QLatin1String("image/") + m_textureLayer->fileFormat().toLower());
     }
     if ( !url.hasQueryItem( "srs" ) ) {
         url.addQueryItem( "srs", epsgCode() );
@@ -159,10 +162,10 @@ QString WmsServerLayout::name() const
 
 QString WmsServerLayout::epsgCode() const
 {
-    switch ( m_textureLayer->projection() ) {
-        case GeoSceneTileDataset::Equirectangular:
+    switch (m_textureLayer->tileProjectionType()) {
+        case GeoSceneAbstractTileProjection::Equirectangular:
             return "EPSG:4326";
-        case GeoSceneTileDataset::Mercator:
+        case GeoSceneAbstractTileProjection::Mercator:
             return "EPSG:3785";
     }
 

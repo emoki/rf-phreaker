@@ -11,6 +11,8 @@
 #include "OpenCachingComPlugin.h"
 #include "OpenCachingComModel.h"
 
+#include <QIcon>
+
 namespace Marble {
 
 OpenCachingComPlugin::OpenCachingComPlugin()
@@ -42,7 +44,7 @@ bool OpenCachingComPlugin::isInitialized() const
 
 QStringList OpenCachingComPlugin::backendTypes() const
 {
-    return QStringList("opencaching.com");
+    return QStringList(QStringLiteral("opencaching.com"));
 }
 
 QString OpenCachingComPlugin::name() const
@@ -57,12 +59,12 @@ QString OpenCachingComPlugin::guiString() const
 
 QString OpenCachingComPlugin::nameId() const
 {
-    return QString( "opencaching.com" );
+    return QStringLiteral("opencaching.com");
 }
 
 QString OpenCachingComPlugin::version() const
 {
-    return QString( "1.0" );
+    return QStringLiteral("1.0");
 }
 
 QString OpenCachingComPlugin::description() const
@@ -72,22 +74,20 @@ QString OpenCachingComPlugin::description() const
 
 QString OpenCachingComPlugin::copyrightYears() const
 {
-    return QString( "2012" );
+    return QStringLiteral("2012");
 }
 
-QList<PluginAuthor> OpenCachingComPlugin::pluginAuthors() const
+QVector<PluginAuthor> OpenCachingComPlugin::pluginAuthors() const
 {
-    return QList<PluginAuthor>()
-        << PluginAuthor( "Anders Lund", "anders@alweb.dk" );
+    return QVector<PluginAuthor>()
+        << PluginAuthor(QStringLiteral("Anders Lund"), QStringLiteral("anders@alweb.dk"));
 }
 
 QIcon OpenCachingComPlugin::icon() const
 {
-    return QIcon(":/occlogo.png");
+    return QIcon(QStringLiteral(":/occlogo.png"));
 }
 
 }
-
-Q_EXPORT_PLUGIN2( OpenCachingComPlugin, Marble::OpenCachingComPlugin )
 
 #include "moc_OpenCachingComPlugin.cpp"

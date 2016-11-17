@@ -17,9 +17,6 @@
 #ifndef MARBLE_MARBLELEGENDBROWSER_H
 #define MARBLE_MARBLELEGENDBROWSER_H
 
-
-#include <QString>
-
 #ifdef MARBLE_NO_WEBKITWIDGETS
 #include "NullMarbleWebView.h"
 #else
@@ -30,6 +27,7 @@
 
 class QEvent;
 class QUrl;
+class QString;
 
 namespace Marble
 {
@@ -48,13 +46,13 @@ class MARBLE_EXPORT MarbleLegendBrowser : public MarbleWebView
     void setMarbleModel( MarbleModel *marbleModel );
     QSize sizeHint() const;
 
- public slots:
+ public Q_SLOTS:
     void setCheckedProperty( const QString& name, bool checked );
     void setRadioCheckedProperty( const QString& value,const QString& name, bool checked );
 
 
- signals:
-    void toggledShowProperty( QString, bool );
+ Q_SIGNALS:
+    void toggledShowProperty( const QString&, bool );
     void tourLinkClicked( const QString &url );
 
  private Q_SLOTS:

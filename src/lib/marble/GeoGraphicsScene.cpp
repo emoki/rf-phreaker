@@ -11,9 +11,7 @@
 #include "GeoGraphicsScene.h"
 
 #include "GeoDataFeature.h"
-#include "GeoDataGroundOverlay.h"
-#include "GeoDataLatLonBox.h"
-#include "GeoDataPhotoOverlay.h"
+#include "GeoDataLatLonAltBox.h"
 #include "GeoDataStyle.h"
 #include "GeoDataStyleMap.h"
 #include "GeoDataPlacemark.h"
@@ -23,7 +21,9 @@
 #include "TileId.h"
 #include "TileCoordsPyramid.h"
 #include "MarbleDebug.h"
+
 #include <QMap>
+#include <QRect>
 
 namespace Marble
 {
@@ -58,8 +58,8 @@ GeoDataStyle::Ptr GeoGraphicsScenePrivate::highlightStyle( const GeoDataDocument
                                                        const GeoDataStyleMap &styleMap )
 {
     // @todo Consider QUrl parsing when external styles are suppported
-    QString highlightStyleId = styleMap.value("highlight");
-    highlightStyleId.remove('#');
+    QString highlightStyleId = styleMap.value(QStringLiteral("highlight"));
+    highlightStyleId.remove(QLatin1Char('#'));
     if ( !highlightStyleId.isEmpty() ) {
         GeoDataStyle::Ptr highlightStyle(new GeoDataStyle( *document->style(highlightStyleId) ));
         return highlightStyle;
@@ -108,13 +108,7 @@ QList< GeoGraphicsItem* > GeoGraphicsScene::items( const GeoDataLatLonBox &box, 
         right.setNorth( box.north() );
         right.setSouth( box.south() );
 
-        QList< GeoGraphicsItem* > allItems = items( left, zoomLevel );
-        foreach( GeoGraphicsItem* item, items( right, zoomLevel ) ) {
-            if ( !allItems.contains( item ) ) {
-                allItems << item;
-            }
-        }
-        return allItems;
+        return items(left, zoomLevel) + items(right, zoomLevel);
     }
 
     QList< GeoGraphicsItem* > result;
@@ -139,11 +133,15 @@ QList< GeoGraphicsItem* > GeoGraphicsScene::items( const GeoDataLatLonBox &box, 
         int x1, y1, x2, y2;
         coords.getCoords( &x1, &y1, &x2, &y2 );
         for ( int x = x1; x <= x2; ++x ) {
+            bool const isBorderX = x == x1 || x == x2;
             for ( int y = y1; y <= y2; ++y ) {
+                bool const isBorder = isBorderX || y == y1 || y == y2;
                 const TileId tileId = TileId( 0, level, x, y );
                 foreach(GeoGraphicsItem *object, d->m_items.value( tileId )) {
                     if (object->minZoomLevel() <= zoomLevel && object->visible()) {
-                        result.push_back(object);
+                        if (!isBorder || object->latLonAltBox().intersects(box)) {
+                            result.push_back(object);
+                        }
                     }
                 }
             }
@@ -187,7 +185,7 @@ void GeoGraphicsScene::applyHighlight( const QVector< GeoDataPlacemark* > &selec
                         if ( parent->nodeType() == GeoDataTypes::GeoDataDocumentType ) {
                             GeoDataDocument *doc = static_cast<GeoDataDocument*>( parent );
                             QString styleUrl = placemark->styleUrl();
-                            styleUrl.remove('#');
+                            styleUrl.remove(QLatin1Char('#'));
                             if ( !styleUrl.isEmpty() ) {
                                 GeoDataStyleMap const &styleMap = doc->styleMap( styleUrl );
                                 GeoDataStyle::Ptr style = d->highlightStyle( doc, styleMap );
@@ -225,7 +223,7 @@ void GeoGraphicsScene::applyHighlight( const QVector< GeoDataPlacemark* > &selec
 void GeoGraphicsScene::removeItem( const GeoDataFeature* feature )
 {
     QList<TileId> keys = d->m_features.values( feature );
-    foreach( TileId key, keys ) {
+    foreach( const TileId& key, keys ) {
         QList< GeoGraphicsItem* >& tileList = d->m_items[key];
         foreach( GeoGraphicsItem* item, tileList ) {
             if( item->feature() == feature ) {

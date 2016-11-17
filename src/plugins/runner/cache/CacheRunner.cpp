@@ -11,11 +11,13 @@
 
 #include "GeoDataDocument.h"
 #include "GeoDataExtendedData.h"
+#include "GeoDataData.h"
 #include "GeoDataPlacemark.h"
 #include "MarbleDebug.h"
 
 #include <QFile>
 #include <QDataStream>
+#include <QSet>
 
 namespace Marble
 {
@@ -35,7 +37,7 @@ GeoDataDocument* CacheRunner::parseFile( const QString &fileName, DocumentRole r
 {
     QFile file( fileName );
     if ( !file.exists() ) {
-        error = QString("File %1 does not exist").arg(fileName);
+        error = QStringLiteral("File %1 does not exist").arg(fileName);
         mDebug() << error;
         return nullptr;
     }
@@ -54,7 +56,7 @@ GeoDataDocument* CacheRunner::parseFile( const QString &fileName, DocumentRole r
     qint32 version;
     in >> version;
     if ( version < 015 ) {
-        error = QString("Bad cache file %1: Version %2 is too old, need 15 or later").arg(fileName).arg(version);
+        error = QStringLiteral("Bad cache file %1: Version %2 is too old, need 15 or later").arg(fileName).arg(version);
         mDebug() << error;
         return nullptr;
     }
@@ -81,28 +83,33 @@ GeoDataDocument* CacheRunner::parseFile( const QString &fileName, DocumentRole r
     qint8    tmpint8;
     qint16   tmpint16;
 
+    // share string data on the heap at least for this file
+    QSet<QString> stringPool;
+    const QString gmtId = QStringLiteral("gmt");
+    const QString dstId = QStringLiteral("dst");
+
     while ( !in.atEnd() ) {
         GeoDataPlacemark *mark = new GeoDataPlacemark;
-        in >> tmpstr;
+        in >> tmpstr; tmpstr = *stringPool.insert(tmpstr);
         mark->setName( tmpstr );
         in >> lon >> lat >> alt;
         mark->setCoordinate( (qreal)(lon), (qreal)(lat), (qreal)(alt) );
-        in >> tmpstr;
+        in >> tmpstr; tmpstr = *stringPool.insert(tmpstr);
         mark->setRole( tmpstr );
-        in >> tmpstr;
+        in >> tmpstr; tmpstr = *stringPool.insert(tmpstr);
         mark->setDescription( tmpstr );
-        in >> tmpstr;
+        in >> tmpstr; tmpstr = *stringPool.insert(tmpstr);
         mark->setCountryCode( tmpstr );
-        in >> tmpstr;
+        in >> tmpstr; tmpstr = *stringPool.insert(tmpstr);
         mark->setState( tmpstr );
         in >> area;
         mark->setArea( (qreal)(area) );
         in >> tmpint64;
         mark->setPopulation( tmpint64 );
         in >> tmpint16;
-        mark->extendedData().addValue( GeoDataData( "gmt", int( tmpint16 ) ) );
+        mark->extendedData().addValue(GeoDataData(gmtId, int(tmpint16)));
         in >> tmpint8;
-        mark->extendedData().addValue( GeoDataData( "dst", int( tmpint8 ) ) );
+        mark->extendedData().addValue(GeoDataData(dstId, int(tmpint8)));
 
         document->append( mark );
     }

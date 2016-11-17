@@ -19,6 +19,7 @@
 #include "FlyToEditWidget.h"
 #include "MarbleWidget.h"
 #include "geodata/data/GeoDataFlyTo.h"
+#include "GeoDataLookAt.h"
 #include "GeoDataTypes.h"
 #include "GeoDataCamera.h"
 #include "MarblePlacemarkModel.h"
@@ -36,7 +37,7 @@ FlyToEditWidget::FlyToEditWidget( const QModelIndex &index, MarbleWidget* widget
     layout->setSpacing( 5 );
 
     QLabel* iconLabel = new QLabel;
-    iconLabel->setPixmap( QPixmap( ":/marble/flag.png" ) );
+    iconLabel->setPixmap(QPixmap(QStringLiteral(":/marble/flag.png")));
     layout->addWidget( iconLabel );
 
     QHBoxLayout *pairLayout = new QHBoxLayout;
@@ -80,12 +81,12 @@ FlyToEditWidget::FlyToEditWidget( const QModelIndex &index, MarbleWidget* widget
     layout->addLayout( pairLayout );
 
     QToolButton* flyToPinCenter = new QToolButton;
-    flyToPinCenter->setIcon(QIcon(":/marble/places.png"));
+    flyToPinCenter->setIcon(QIcon(QStringLiteral(":/marble/places.png")));
     flyToPinCenter->setToolTip(tr("Current map center"));
     connect(flyToPinCenter, SIGNAL(clicked()), this, SLOT(updateCoordinates()));
     layout->addWidget(flyToPinCenter);
 
-    m_button->setIcon( QIcon( ":/marble/document-save.png" ) );
+    m_button->setIcon(QIcon(QStringLiteral(":/marble/document-save.png")));
     connect(m_button, SIGNAL(clicked()), this, SLOT(save()));
     layout->addWidget( m_button );
 
@@ -134,9 +135,9 @@ void FlyToEditWidget::save()
 
     flyToElement()->setDuration(m_durationSpin->value());
 
-    if( m_modeCombo->currentText() == "Smooth" ){
+    if (m_modeCombo->currentIndex() == 0) {
         flyToElement()->setFlyToMode( GeoDataFlyTo::Smooth );
-    } else if( m_modeCombo->currentText() == "Bounce" ){
+    } else if (m_modeCombo->currentIndex() == 1) {
         flyToElement()->setFlyToMode( GeoDataFlyTo::Bounce );
     }
 

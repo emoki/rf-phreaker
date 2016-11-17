@@ -15,7 +15,6 @@
 #ifndef MARBLEGPSINFO_H
 #define MARBLEGPSINFO_H
 
-#include <QObject>
 #include <QHash>
 
 #include "AbstractFloatItem.h"
@@ -37,7 +36,7 @@ class MarbleLocale;
 class GpsInfo : public AbstractFloatItem
 {
     Q_OBJECT
-    Q_PLUGIN_METADATA( IID "org.kde.edu.marble.GpsInfo" )
+    Q_PLUGIN_METADATA(IID "org.kde.marble.GpsInfo")
     Q_INTERFACES( Marble::RenderPluginInterface )
     MARBLE_PLUGIN( GpsInfo )
     
@@ -60,7 +59,7 @@ class GpsInfo : public AbstractFloatItem
 
     QString copyrightYears() const;
 
-    QList<PluginAuthor> pluginAuthors() const;
+    QVector<PluginAuthor> pluginAuthors() const override;
 
     QIcon icon () const;
 
@@ -70,8 +69,8 @@ class GpsInfo : public AbstractFloatItem
 
     void forceRepaint();
 
- private slots:
-    void updateLocation( GeoDataCoordinates coordinates, qreal speed);
+ private Q_SLOTS:
+    void updateLocation( const GeoDataCoordinates& coordinates, qreal speed);
 
  private:
     MarbleLocale* m_locale;

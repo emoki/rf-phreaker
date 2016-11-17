@@ -15,15 +15,17 @@
 #include <QAbstractItemModel>
 #include <QList>
 #include <QPoint>
-#include <QVector>
 #include <QVectorIterator>
 #include <QFont>
 #include <QFontMetrics>
 #include <QItemSelectionModel>
 #include <qmath.h>
 
+#include "GeoDataLatLonAltBox.h"
 #include "GeoDataPlacemark.h"
 #include "GeoDataStyle.h"
+#include "GeoDataIconStyle.h"
+#include "GeoDataLabelStyle.h"
 #include "GeoDataTypes.h"
 #include "OsmPlacemarkData.h"
 
@@ -38,17 +40,18 @@
 #include "TileCoordsPyramid.h"
 #include "VisiblePlacemark.h"
 #include "MathHelper.h"
+#include <StyleBuilder.h>
 
 namespace
 {   //Helper function that checks for available room for the label
-    bool hasRoomFor(const QVector<Marble::VisiblePlacemark*> & placemarks, const QRectF &labelRect)
+    bool hasRoomFor(const QVector<Marble::VisiblePlacemark*> & placemarks, const QRectF &boundingBox)
     {
         // Check if there is another label or symbol that overlaps.
         QVector<Marble::VisiblePlacemark*>::const_iterator beforeItEnd = placemarks.constEnd();
         for ( QVector<Marble::VisiblePlacemark*>::ConstIterator beforeIt = placemarks.constBegin();
               beforeIt != beforeItEnd; ++beforeIt )
         {
-            if ( labelRect.intersects( (*beforeIt)->labelRect() ) ) {
+            if ( boundingBox.intersects( (*beforeIt)->boundingBox() ) ) {
                 return false;
             }
         }
@@ -59,93 +62,43 @@ namespace
 namespace Marble
 {
 
-QSet<GeoDataFeature::GeoDataVisualCategory> acceptedVisualCategories()
+QSet<GeoDataPlacemark::GeoDataVisualCategory> acceptedVisualCategories()
 {
-    QSet<GeoDataFeature::GeoDataVisualCategory> visualCategories;
+    QSet<GeoDataPlacemark::GeoDataVisualCategory> visualCategories;
 
     visualCategories
-        << GeoDataFeature::SmallCity
-        << GeoDataFeature::SmallCountyCapital  
-        << GeoDataFeature::SmallStateCapital   
-        << GeoDataFeature::SmallNationCapital
-        << GeoDataFeature::MediumCity
-        << GeoDataFeature::MediumCountyCapital
-        << GeoDataFeature::MediumStateCapital
-        << GeoDataFeature::MediumNationCapital
-        << GeoDataFeature::BigCity
-        << GeoDataFeature::BigCountyCapital
-        << GeoDataFeature::BigStateCapital
-        << GeoDataFeature::BigNationCapital
-        << GeoDataFeature::LargeCity
-        << GeoDataFeature::LargeCountyCapital
-        << GeoDataFeature::LargeStateCapital
-        << GeoDataFeature::LargeNationCapital
-        << GeoDataFeature::Nation
-        << GeoDataFeature::Mountain
-        << GeoDataFeature::Volcano
-        << GeoDataFeature::Mons
-        << GeoDataFeature::Valley
-        << GeoDataFeature::Continent
-        << GeoDataFeature::Ocean
-        << GeoDataFeature::OtherTerrain
-        << GeoDataFeature::Crater
-        << GeoDataFeature::Mare
-        << GeoDataFeature::GeographicPole
-        << GeoDataFeature::MagneticPole
-        << GeoDataFeature::ShipWreck
-        << GeoDataFeature::AirPort
-        << GeoDataFeature::Observatory
-        << GeoDataFeature::AccomodationCamping
-        << GeoDataFeature::AccomodationHostel
-        << GeoDataFeature::AccomodationHotel
-        << GeoDataFeature::AccomodationMotel
-        << GeoDataFeature::AccomodationYouthHostel
-        << GeoDataFeature::AmenityLibrary
-        << GeoDataFeature::EducationCollege
-        << GeoDataFeature::EducationSchool
-        << GeoDataFeature::EducationUniversity
-        << GeoDataFeature::FoodBar
-        << GeoDataFeature::FoodBiergarten
-        << GeoDataFeature::FoodCafe
-        << GeoDataFeature::FoodFastFood
-        << GeoDataFeature::FoodPub
-        << GeoDataFeature::FoodRestaurant
-        << GeoDataFeature::HealthDoctors
-        << GeoDataFeature::HealthHospital
-        << GeoDataFeature::HealthPharmacy
-        << GeoDataFeature::MoneyBank
-        << GeoDataFeature::NaturalPeak
-        << GeoDataFeature::ShopBeverages
-        << GeoDataFeature::ShopHifi
-        << GeoDataFeature::ShopSupermarket
-        << GeoDataFeature::TouristAlpineHut
-        << GeoDataFeature::TouristAttraction
-        << GeoDataFeature::TouristCastle
-        << GeoDataFeature::TouristCinema
-        << GeoDataFeature::TouristMonument
-        << GeoDataFeature::TouristMuseum
-        << GeoDataFeature::TouristRuin
-        << GeoDataFeature::TouristTheatre
-        << GeoDataFeature::TouristThemePark
-        << GeoDataFeature::TouristViewPoint
-        << GeoDataFeature::TouristZoo
-        << GeoDataFeature::TransportAerodrome
-        << GeoDataFeature::TransportAirportTerminal
-        << GeoDataFeature::TransportBusStation
-        << GeoDataFeature::TransportBusStop
-        << GeoDataFeature::TransportCarShare
-        << GeoDataFeature::TransportFuel
-        << GeoDataFeature::TransportParking
-        << GeoDataFeature::TransportTrainStation
-        << GeoDataFeature::ReligionPlaceOfWorship
-        << GeoDataFeature::ReligionBahai
-        << GeoDataFeature::ReligionBuddhist
-        << GeoDataFeature::ReligionChristian
-        << GeoDataFeature::ReligionHindu
-        << GeoDataFeature::ReligionJain
-        << GeoDataFeature::ReligionJewish
-        << GeoDataFeature::ReligionShinto
-        << GeoDataFeature::ReligionSikh;
+        << GeoDataPlacemark::SmallCity
+        << GeoDataPlacemark::SmallCountyCapital
+        << GeoDataPlacemark::SmallStateCapital
+        << GeoDataPlacemark::SmallNationCapital
+        << GeoDataPlacemark::MediumCity
+        << GeoDataPlacemark::MediumCountyCapital
+        << GeoDataPlacemark::MediumStateCapital
+        << GeoDataPlacemark::MediumNationCapital
+        << GeoDataPlacemark::BigCity
+        << GeoDataPlacemark::BigCountyCapital
+        << GeoDataPlacemark::BigStateCapital
+        << GeoDataPlacemark::BigNationCapital
+        << GeoDataPlacemark::LargeCity
+        << GeoDataPlacemark::LargeCountyCapital
+        << GeoDataPlacemark::LargeStateCapital
+        << GeoDataPlacemark::LargeNationCapital
+        << GeoDataPlacemark::Nation
+        << GeoDataPlacemark::Mountain
+        << GeoDataPlacemark::Volcano
+        << GeoDataPlacemark::Mons
+        << GeoDataPlacemark::Valley
+        << GeoDataPlacemark::Continent
+        << GeoDataPlacemark::Ocean
+        << GeoDataPlacemark::OtherTerrain
+        << GeoDataPlacemark::Crater
+        << GeoDataPlacemark::Mare
+        << GeoDataPlacemark::GeographicPole
+        << GeoDataPlacemark::MagneticPole
+        << GeoDataPlacemark::ShipWreck
+        << GeoDataPlacemark::PlaceSuburb
+        << GeoDataPlacemark::PlaceHamlet
+        << GeoDataPlacemark::PlaceLocality;
 
     return visualCategories;
 }
@@ -154,6 +107,7 @@ QSet<GeoDataFeature::GeoDataVisualCategory> acceptedVisualCategories()
 PlacemarkLayout::PlacemarkLayout( QAbstractItemModel  *placemarkModel,
                                   QItemSelectionModel *selectionModel,
                                   MarbleClock *clock,
+                                  const StyleBuilder *styleBuilder,
                                   QObject* parent )
     : QObject( parent ),
       m_placemarkModel(placemarkModel),
@@ -168,7 +122,8 @@ PlacemarkLayout::PlacemarkLayout( QAbstractItemModel  *placemarkModel,
       m_showCraters( false ),
       m_showMaria( false ),
       m_maxLabelHeight(maxLabelHeight()),
-      m_styleResetRequested( true )
+      m_styleResetRequested( true ),
+      m_styleBuilder(styleBuilder)
 {
     Q_ASSERT(m_placemarkModel);
 
@@ -251,8 +206,7 @@ QVector<const GeoDataFeature*> PlacemarkLayout::whichPlacemarkAt( const QPoint& 
     QVector<const GeoDataFeature*> ret;
 
     foreach( VisiblePlacemark* mark, m_paintOrder ) {
-        if ( mark->labelRect().contains( curpos )
-             || QRect( mark->symbolPosition(), mark->symbolPixmap().size() ).contains( curpos ) ) {
+        if ( mark->labelRect().contains( curpos ) || mark->symbolRect().contains( curpos ) ) {
             ret.append( mark->placemark() );
         }
     }
@@ -262,12 +216,12 @@ QVector<const GeoDataFeature*> PlacemarkLayout::whichPlacemarkAt( const QPoint& 
 
 int PlacemarkLayout::maxLabelHeight() const
 {
-    QFont const standardFont(QStringLiteral("Arial"));
+    QFont const standardFont(QStringLiteral("Sans Serif"));
     return QFontMetrics(standardFont).height();
 }
 
 /// feed an internal QMap of placemarks with TileId as key when model changes
-void PlacemarkLayout::addPlacemarks( QModelIndex parent, int first, int last )
+void PlacemarkLayout::addPlacemarks( const QModelIndex& parent, int first, int last )
 {
     Q_ASSERT( first < m_placemarkModel->rowCount() );
     Q_ASSERT( last < m_placemarkModel->rowCount() );
@@ -297,7 +251,7 @@ void PlacemarkLayout::addPlacemarks( QModelIndex parent, int first, int last )
     emit repaintNeeded();
 }
 
-void PlacemarkLayout::removePlacemarks( QModelIndex parent, int first, int last )
+void PlacemarkLayout::removePlacemarks( const QModelIndex& parent, int first, int last )
 {
     Q_ASSERT( first < m_placemarkModel->rowCount() );
     Q_ASSERT( last < m_placemarkModel->rowCount() );
@@ -336,7 +290,7 @@ void PlacemarkLayout::resetCacheData()
 
 QSet<TileId> PlacemarkLayout::visibleTiles( const ViewportParams *viewport )
 {
-    int zoomLevel = qLn( viewport->radius() *4 / 256 ) / qLn( 2.0 );
+    int zoomLevel = qLn( viewport->radius()/64.0 ) / qLn( 2.0 );
 
     /*
      * rely on m_placemarkCache to find the placemarks for the tiles which
@@ -410,11 +364,11 @@ QVector<VisiblePlacemark *> PlacemarkLayout::generateLayout( const ViewportParam
     // First handle the selected placemarks as they have the highest priority.
 
     const QModelIndexList selectedIndexes = m_selectionModel->selection().indexes();
+    auto const viewLatLonAltBox = viewport->viewLatLonAltBox();
 
     for ( int i = 0; i < selectedIndexes.count(); ++i ) {
         const QModelIndex index = selectedIndexes.at( i );
-        const GeoDataPlacemark *placemark = dynamic_cast<GeoDataPlacemark*>(qvariant_cast<GeoDataObject*>(index.data( MarblePlacemarkModel::ObjectPointerRole ) ));
-        Q_ASSERT(placemark);
+        const GeoDataPlacemark *placemark = static_cast<GeoDataPlacemark*>(qvariant_cast<GeoDataObject*>(index.data( MarblePlacemarkModel::ObjectPointerRole ) ));
         const GeoDataCoordinates coordinates = placemarkIconCoordinates( placemark );
 
         if ( !coordinates.isValid() ) {
@@ -424,14 +378,13 @@ QVector<VisiblePlacemark *> PlacemarkLayout::generateLayout( const ViewportParam
         qreal x = 0;
         qreal y = 0;
 
-        if ( !viewport->viewLatLonAltBox().contains( coordinates ) ||
+        if ( !viewLatLonAltBox.contains( coordinates ) ||
              ! viewport->screenCoordinates( coordinates, x, y ))
             {
-                delete m_visiblePlacemarks.take( placemark );
                 continue;
             }
 
-        if( layoutPlacemark( placemark, x, y, true) ) {
+        if( layoutPlacemark( placemark, coordinates, x, y, true) ) {
             // Make sure not to draw more placemarks on the screen than
             // specified by placemarksOnScreenLimit().
             if ( placemarksOnScreenLimit( viewport->size() ) )
@@ -450,7 +403,6 @@ QVector<VisiblePlacemark *> PlacemarkLayout::generateLayout( const ViewportParam
     }
     qSort(placemarkList.begin(), placemarkList.end(), GeoDataPlacemark::placemarkLayoutOrderCompare);
 
-    auto const viewLatLonAltBox = viewport->viewLatLonAltBox();
     foreach ( const GeoDataPlacemark *placemark, placemarkList ) {
         const GeoDataCoordinates coordinates = placemarkIconCoordinates( placemark );
         if ( !coordinates.isValid() ) {
@@ -458,7 +410,7 @@ QVector<VisiblePlacemark *> PlacemarkLayout::generateLayout( const ViewportParam
         }
 
         int zoomLevel = placemark->zoomLevel();
-        if ( zoomLevel > 18 ) {
+        if ( zoomLevel > 20 ) {
             break;
         }
 
@@ -467,7 +419,6 @@ QVector<VisiblePlacemark *> PlacemarkLayout::generateLayout( const ViewportParam
 
         if ( !viewLatLonAltBox.contains( coordinates ) ||
              ! viewport->screenCoordinates( coordinates, x, y )) {
-                delete m_visiblePlacemarks.take( placemark );
                 continue;
             }
 
@@ -475,45 +426,45 @@ QVector<VisiblePlacemark *> PlacemarkLayout::generateLayout( const ViewportParam
             continue;
         }
 
-        const GeoDataFeature::GeoDataVisualCategory visualCategory = placemark->visualCategory();
+        const GeoDataPlacemark::GeoDataVisualCategory visualCategory = placemark->visualCategory();
 
         // Skip city marks if we're not showing cities.
         if ( !m_showCities
-             && visualCategory >= GeoDataFeature::SmallCity
-             && visualCategory <= GeoDataFeature::Nation )
+             && visualCategory >= GeoDataPlacemark::SmallCity
+             && visualCategory <= GeoDataPlacemark::Nation )
             continue;
 
         // Skip terrain marks if we're not showing terrain.
         if ( !m_showTerrain
-             && visualCategory >= GeoDataFeature::Mountain
-             && visualCategory <= GeoDataFeature::OtherTerrain )
+             && visualCategory >= GeoDataPlacemark::Mountain
+             && visualCategory <= GeoDataPlacemark::OtherTerrain )
             continue;
 
         // Skip other places if we're not showing other places.
         if ( !m_showOtherPlaces
-             && visualCategory >= GeoDataFeature::GeographicPole
-             && visualCategory <= GeoDataFeature::Observatory )
+             && visualCategory >= GeoDataPlacemark::GeographicPole
+             && visualCategory <= GeoDataPlacemark::Observatory )
             continue;
 
         // Skip landing sites if we're not showing landing sites.
         if ( !m_showLandingSites
-             && visualCategory >= GeoDataFeature::MannedLandingSite
-             && visualCategory <= GeoDataFeature::UnmannedHardLandingSite )
+             && visualCategory >= GeoDataPlacemark::MannedLandingSite
+             && visualCategory <= GeoDataPlacemark::UnmannedHardLandingSite )
             continue;
 
         // Skip craters if we're not showing craters.
         if ( !m_showCraters
-             && visualCategory == GeoDataFeature::Crater )
+             && visualCategory == GeoDataPlacemark::Crater )
             continue;
 
         // Skip maria if we're not showing maria.
         if ( !m_showMaria
-             && visualCategory == GeoDataFeature::Mare )
+             && visualCategory == GeoDataPlacemark::Mare )
             continue;
 
         if ( !m_showPlaces
-             && visualCategory >= GeoDataFeature::GeographicPole
-             && visualCategory <= GeoDataFeature::Observatory )
+             && visualCategory >= GeoDataPlacemark::GeographicPole
+             && visualCategory <= GeoDataPlacemark::Observatory )
             continue;
 
         // We handled selected placemarks already, so we skip them here...
@@ -521,7 +472,7 @@ QVector<VisiblePlacemark *> PlacemarkLayout::generateLayout( const ViewportParam
         // we check for the selected state after all other filters
         bool isSelected = false;
         foreach ( const QModelIndex &index, selection.indexes() ) {
-            const GeoDataPlacemark *mark = dynamic_cast<GeoDataPlacemark*>(qvariant_cast<GeoDataObject*>(index.data( MarblePlacemarkModel::ObjectPointerRole ) ));
+            const GeoDataPlacemark *mark = static_cast<GeoDataPlacemark*>(qvariant_cast<GeoDataObject*>(index.data( MarblePlacemarkModel::ObjectPointerRole ) ));
             if (mark == placemark ) {
                 isSelected = true;
                 break;
@@ -530,7 +481,7 @@ QVector<VisiblePlacemark *> PlacemarkLayout::generateLayout( const ViewportParam
         if ( isSelected )
             continue;
 
-        if( layoutPlacemark( placemark, x, y, isSelected ) ) {
+        if( layoutPlacemark( placemark, coordinates, x, y, isSelected ) ) {
             // Make sure not to draw more placemarks on the screen than
             // specified by placemarksOnScreenLimit().
             if ( placemarksOnScreenLimit( viewport->size() ) )
@@ -538,7 +489,20 @@ QVector<VisiblePlacemark *> PlacemarkLayout::generateLayout( const ViewportParam
         }
     }
 
-    m_runtimeTrace = QString("Placemarks: %1 Drawn: %2").arg( placemarkList.count() ).arg( m_paintOrder.size() );
+    if (m_visiblePlacemarks.size() > qMax(100, 4 * m_paintOrder.size())) {
+        auto const extendedBox = viewLatLonAltBox.scaled(2.0, 2.0);
+        QVector<VisiblePlacemark*> outdated;
+        for (auto placemark: m_visiblePlacemarks) {
+            if (!extendedBox.contains(placemark->coordinates())) {
+                outdated << placemark;
+            }
+        }
+        for (auto placemark: outdated) {
+            delete m_visiblePlacemarks.take(placemark->placemark());
+        }
+    }
+
+    m_runtimeTrace = QStringLiteral("Placemarks: %1 Drawn: %2").arg(placemarkList.count()).arg(m_paintOrder.size());
     return m_paintOrder;
 }
 
@@ -547,77 +511,87 @@ QString PlacemarkLayout::runtimeTrace() const
     return m_runtimeTrace;
 }
 
-bool PlacemarkLayout::layoutPlacemark( const GeoDataPlacemark *placemark, qreal x, qreal y, bool selected )
+QList<VisiblePlacemark *> PlacemarkLayout::visiblePlacemarks() const
 {
-    // Choose Section
+    return m_visiblePlacemarks.values();
+}
 
-    // Find out whether the area around the placemark is covered already.
-    // If there's not enough space free don't add a VisiblePlacemark here.
-    GeoDataStyle::ConstPtr style = placemark->style();
-
-    QRectF labelRect;
-    if( !placemark->displayName().isEmpty() ) {
-        labelRect = roomForLabel( style, x, y, placemark->name() );
-        if ( labelRect.isNull() ) {
-            return false;
-        }
-    }
-
+bool PlacemarkLayout::layoutPlacemark( const GeoDataPlacemark *placemark, const GeoDataCoordinates &coordinates, qreal x, qreal y, bool selected )
+{
     // Find the corresponding visible placemark
     VisiblePlacemark *mark = m_visiblePlacemarks.value( placemark );
     if ( !mark ) {
         // If there is no visible placemark yet for this index,
         // create a new one...
-        mark = new VisiblePlacemark( placemark );
+        StyleParameters parameters;
+        // @todo: Set / adjust to tile level
+        parameters.placemark = placemark;
+
+        auto style = m_styleBuilder->createStyle(parameters);
+        mark = new VisiblePlacemark(placemark, coordinates, style);
         m_visiblePlacemarks.insert( placemark, mark );
         connect( mark, SIGNAL(updateNeeded()), this, SIGNAL(repaintNeeded()) );
     }
+    GeoDataStyle::ConstPtr style = mark->style();
 
-    // Finally save the label position on the map.
+    // Choose Section
+
     QPointF hotSpot = mark->hotSpot();
+    mark->setSelected(selected);
+    mark->setSymbolPosition(QPointF(x - hotSpot.x(), y - hotSpot.y()));
 
-    if( mark->selected() != selected ) {
-        mark->setSelected( selected );
+    // Find out whether the area around the placemark is covered already.
+    // If there's not enough space free don't add a VisiblePlacemark here.
+
+    QRectF labelRect;
+
+    const QString labelText = placemark->displayName();
+    if (!labelText.isEmpty()) {
+        labelRect = roomForLabel(style, x, y, labelText, mark);
     }
-    mark->setSymbolPosition( QPoint( x - qRound( hotSpot.x() ),
-                                     y - qRound( hotSpot.y() ) ) );
-    mark->setLabelRect( labelRect );
+    if (labelRect.isNull() && (mark->symbolPixmap().isNull() || !hasRoomForPixmap(y, mark))) {
+        return false;
+    }
 
-    if ( !labelRect.isEmpty() ) {
-        // Add the current placemark to the matching row and its
-        // direct neighbors.
-        int idx = y / m_maxLabelHeight;
-        if ( idx - 1 >= 0 )
-            m_rowsection[ idx - 1 ].append( mark );
-        m_rowsection[ idx ].append( mark );
-        if ( idx + 1 < m_rowsection.size() )
-            m_rowsection[ idx + 1 ].append( mark );
+    mark->setLabelRect( labelRect );
+    // Add the current placemark to the matching row and its
+    // direct neighbors.
+    int idx = y / m_maxLabelHeight;
+    if ( idx - 1 >= 0 ) {
+        m_rowsection[ idx - 1 ].append( mark );
+    }
+    m_rowsection[ idx ].append( mark );
+    if ( idx + 1 < m_rowsection.size() ) {
+        m_rowsection[ idx + 1 ].append( mark );
     }
 
     m_paintOrder.append( mark );
-    m_labelArea += labelRect.width() * labelRect.height();
-    m_maxLabelHeight = qMax(m_maxLabelHeight, qCeil(labelRect.height()));
+    QRectF const boundingBox = mark->boundingBox();
+    Q_ASSERT(!boundingBox.isEmpty());
+    m_labelArea += boundingBox.width() * boundingBox.height();
+    m_maxLabelHeight = qMax(m_maxLabelHeight, qCeil(boundingBox.height()));
     return true;
 }
 
 GeoDataCoordinates PlacemarkLayout::placemarkIconCoordinates( const GeoDataPlacemark *placemark ) const
 {
-    bool ok;
-    GeoDataCoordinates coordinates = placemark->coordinate( m_clock->dateTime(), &ok );
-    if ( !ok && m_acceptedVisualCategories.contains(placemark->visualCategory()) ) {
-        ok = true;
+    GeoDataCoordinates coordinates = placemark->coordinate( m_clock->dateTime());
+    if (!m_acceptedVisualCategories.contains(placemark->visualCategory())) {
+        StyleParameters parameters;
+        parameters.placemark = placemark;
+        auto style = m_styleBuilder->createStyle(parameters);
+        if (style->iconStyle().icon().isNull()) {
+            return GeoDataCoordinates();
+        }
     }
 
-    if ( ok ) {
-        return coordinates;
-    }
-
-    return GeoDataCoordinates();
+    return coordinates;
 }
 
 QRectF PlacemarkLayout::roomForLabel( const GeoDataStyle::ConstPtr &style,
                                       const qreal x, const qreal y,
-                                      const QString &labelText ) const
+                                      const QString &labelText,
+                                      const VisiblePlacemark* placemark) const
 {
     QFont labelFont = style->labelStyle().scaledFont();
     int textHeight = QFontMetrics( labelFont ).height();
@@ -632,6 +606,7 @@ QRectF PlacemarkLayout::roomForLabel( const GeoDataStyle::ConstPtr &style,
     }
 
     const QVector<VisiblePlacemark*> currentsec = m_rowsection.at( y / m_maxLabelHeight );
+    QRectF const symbolRect = placemark->symbolRect();
 
     if ( style->labelStyle().alignment() == GeoDataLabelStyle::Corner ) {
         const int symbolWidth = style->iconStyle().scaledIcon().size().width();
@@ -644,45 +619,52 @@ QRectF PlacemarkLayout::roomForLabel( const GeoDataStyle::ConstPtr &style,
                                               y - textHeight;
             const QRectF labelRect = QRectF( xPos, yPos, textWidth, textHeight );
 
-            if (hasRoomFor(currentsec, labelRect)) {
+            if (hasRoomFor(currentsec, labelRect.united(symbolRect))) {
                 // claim the place immediately if it hasn't been used yet
                 return labelRect;
             }
         }
     }
     else if ( style->labelStyle().alignment() == GeoDataLabelStyle::Center ) {
-        int const offsetY = style->iconStyle().scaledIcon().height() / 1.5;
-        QRectF  labelRect( x - textWidth / 2, offsetY + y - textHeight / 2,
+        int const offsetY = style->iconStyle().scaledIcon().height() / 2.0;
+        QRectF  labelRect = QRectF( x - textWidth / 2, y - offsetY - textHeight,
                           textWidth, textHeight );
 
-        if (hasRoomFor(currentsec, labelRect)) {
+        if (hasRoomFor(currentsec, labelRect.united(symbolRect))) {
             // claim the place immediately if it hasn't been used yet 
             return labelRect;
         }
     }
     else if (style->labelStyle().alignment() == GeoDataLabelStyle::Right)
     {
+        const int symbolWidth = style->iconStyle().icon().width();
+        const qreal startY = y - textHeight/2;
+        const qreal xPos = x + symbolWidth / 2 + 1;
+
         // Check up to seven vertical positions (center, +3, -3 from center)
         for(int i=0; i<7; ++i)
         {
-            const int symbolWidth = style->iconStyle().icon().width();
-            const qreal startY = y - textHeight/2;
             const qreal increase = (i/2) * (textHeight + 1); //intentional integer arithmetics
             const qreal direction = (i%2 == 0 ? 1 : -1);
-            const qreal xPos = x + symbolWidth / 2 + 1;
             const qreal yPos = startY + increase*direction;
 
             const QRectF labelRect = QRectF(xPos, yPos, textWidth, textHeight);
 
-            if (hasRoomFor(currentsec, labelRect))
+            if (hasRoomFor(currentsec, labelRect.united(symbolRect)))
             {
                 return labelRect;
             }
         }
     }
 
-    return QRectF(); // At this point there is no space left
-                     // for the rectangle anymore.
+    // At this point there is no space left for the rectangle anymore.
+    return QRectF();
+}
+
+bool PlacemarkLayout::hasRoomForPixmap(const qreal y, const VisiblePlacemark *placemark) const
+{
+    const QVector<VisiblePlacemark*> currentsec = m_rowsection.at(y / m_maxLabelHeight);
+    return hasRoomFor(currentsec, placemark->symbolRect());
 }
 
 bool PlacemarkLayout::placemarksOnScreenLimit( const QSize &screenSize ) const

@@ -12,9 +12,12 @@
 #define GPSDPOSITIONPROVIDERPLUGIN_H
 
 #include "PositionProviderPlugin.h"
+#include "GeoDataCoordinates.h"
+#include "GeoDataAccuracy.h"
+
+#include <QDateTime>
 
 #include <libgpsmm.h>
-
 
 
 namespace Marble
@@ -25,7 +28,7 @@ class GpsdThread;
 class GpsdPositionProviderPlugin: public PositionProviderPlugin
 {
     Q_OBJECT
-    Q_PLUGIN_METADATA( IID "org.kde.edu.marble.GpsdPositionProviderPlugin" )
+    Q_PLUGIN_METADATA(IID "org.kde.marble.GpsdPositionProviderPlugin")
     Q_INTERFACES( Marble::PositionProviderPluginInterface )
 
  public:
@@ -38,7 +41,7 @@ class GpsdPositionProviderPlugin: public PositionProviderPlugin
     virtual QString version() const;
     virtual QString description() const;
     virtual QString copyrightYears() const;
-    virtual QList<PluginAuthor> pluginAuthors() const;
+    QVector<PluginAuthor> pluginAuthors() const override;
     virtual QIcon icon() const;
     virtual void initialize();
     virtual bool isInitialized() const;
@@ -62,7 +65,7 @@ class GpsdPositionProviderPlugin: public PositionProviderPlugin
     qreal m_track;
     QDateTime m_timestamp;
 
- private slots:
+ private Q_SLOTS:
     void update(gps_data_t data);
 };
 

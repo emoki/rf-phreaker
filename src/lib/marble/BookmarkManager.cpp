@@ -17,10 +17,12 @@
 #include "GeoDataFolder.h"
 #include "GeoDataPlacemark.h"
 #include "GeoDataTreeModel.h"
-#include "GeoWriter.h"
+#include "GeoDataDocumentWriter.h"
+#include "GeoDataIconStyle.h"
 #include "KmlElementDictionary.h"
 #include "MarbleDebug.h"
 #include "MarbleDirs.h"
+#include "StyleBuilder.h"
 #include <QFile>
 
 namespace Marble
@@ -29,7 +31,8 @@ namespace Marble
 BookmarkManagerPrivate::BookmarkManagerPrivate( GeoDataTreeModel *treeModel ) :
     m_treeModel( treeModel ),
     m_bookmarkDocument( 0 ),
-    m_bookmarkFileRelativePath( "bookmarks/bookmarks.kml" )
+    m_bookmarkFileRelativePath( "bookmarks/bookmarks.kml" ),
+    m_styleBuilder(nullptr)
 {
     resetBookmarkDocument();
 }
@@ -66,7 +69,7 @@ void BookmarkManagerPrivate::setVisualCategory( GeoDataContainer *container ) {
         setVisualCategory( folder );
     }
     foreach( GeoDataPlacemark* placemark, container->placemarkList() ) {
-        placemark->setVisualCategory( GeoDataFeature::Bookmark );
+        placemark->setVisualCategory(GeoDataPlacemark::Bookmark);
         placemark->setZoomLevel( 1 );
     }
 
@@ -132,8 +135,16 @@ bool BookmarkManager::loadFile( const QString &relativeFilePath )
 void BookmarkManager::addBookmark( GeoDataContainer *container, const GeoDataPlacemark &placemark )
 {
     GeoDataPlacemark *bookmark = new GeoDataPlacemark( placemark );
-    bookmark->setVisualCategory( GeoDataDocument::Bookmark );
+    bookmark->setVisualCategory(GeoDataPlacemark::Bookmark);
     bookmark->setZoomLevel( 1 );
+    if (bookmark->name().isEmpty()) {
+        bookmark->setName(bookmark->coordinate().toString(GeoDataCoordinates::Decimal).trimmed());
+    }
+    if (d->m_styleBuilder && bookmark->style()->iconStyle().iconPath().isEmpty()) {
+        StyleParameters style;
+        style.placemark = bookmark;
+        bookmark->setStyle(GeoDataStyle::Ptr(new GeoDataStyle(*d->m_styleBuilder->createStyle(style))));
+    }
     d->m_treeModel->addFeature( container, bookmark );
 
     updateBookmarkFile();
@@ -229,16 +240,17 @@ void BookmarkManager::removeAllBookmarks()
     updateBookmarkFile();
 }
 
+void BookmarkManager::setStyleBuilder(const StyleBuilder *styleBuilder)
+{
+    d->m_styleBuilder = styleBuilder;
+}
+
 bool BookmarkManager::updateBookmarkFile()
 {
-    QString absoluteLocalFilePath = MarbleDirs::localPath() + '/' + d->m_bookmarkFileRelativePath ;
+    const QString absoluteLocalFilePath = MarbleDirs::localPath() + QLatin1Char('/') + d->m_bookmarkFileRelativePath;
 
     if ( ! d->m_bookmarkFileRelativePath.isNull() ) {
-        GeoWriter writer;
-        writer.setDocumentType( kml::kmlTag_nameSpaceOgc22 );
-
         QFile file( absoluteLocalFilePath );
-
         if ( !file.exists() ) {
             // Extracting directory of file : for bookmarks it will be MarbleDirs::localPath()+/bookmarks/
             QFileInfo fileInfo( absoluteLocalFilePath );
@@ -249,9 +261,7 @@ bool BookmarkManager::updateBookmarkFile()
             directory.mkpath( directoryPath );
         }
 
-        file.open( QIODevice::WriteOnly );
-
-        if ( !writer.write( &file, d->m_bookmarkDocument ) ) {
+        if (!GeoDataDocumentWriter::write(absoluteLocalFilePath, *d->m_bookmarkDocument)) {
             mDebug() << "Could not write the bookmarks file" << absoluteLocalFilePath;
             file.close();
             return false;

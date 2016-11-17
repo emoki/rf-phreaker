@@ -32,9 +32,10 @@ public:
     ~SearchWidget();
 
 private:
-    Q_PRIVATE_SLOT( d, void setSearchResult( QVector<GeoDataPlacemark*> ) )
+    Q_PRIVATE_SLOT( d, void setSearchResult( const QVector<GeoDataPlacemark*>& ) )
     Q_PRIVATE_SLOT( d, void search( const QString &searchTerm, SearchMode searchMode ) )
     Q_PRIVATE_SLOT( d, void centerMapOn( const QModelIndex &index ) )
+    Q_PRIVATE_SLOT( d, void handlePlanetChange() )
 
     SearchWidgetPrivate* const d;
 

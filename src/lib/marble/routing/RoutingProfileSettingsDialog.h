@@ -16,7 +16,6 @@
 
 #include "RoutingRunnerPlugin.h"
 
-class QModelIndex;
 class QStandardItemModel;
 class QHBoxLayout;
 class Ui_RoutingProfileSettingsDialog;
@@ -35,7 +34,7 @@ public:
 
     void editProfile( int profileIndex );
 
-private slots:
+private Q_SLOTS:
     void updateConfigWidget();
 
     void openConfigDialog();

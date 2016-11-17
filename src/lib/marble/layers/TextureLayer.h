@@ -17,12 +17,9 @@
 #include "MarbleGlobal.h"
 #include "GeoSceneTileDataset.h"
 
-#include <QSize>
-
 class QAbstractItemModel;
 class QImage;
-class QRegion;
-class QRect;
+class QSize;
 
 namespace Marble
 {
@@ -82,7 +79,7 @@ class MARBLE_EXPORT TextureLayer : public QObject, public LayerInterface
 
     QSize tileSize() const;
 
-    GeoSceneTileDataset::Projection tileProjection() const;
+    GeoSceneAbstractTileProjection::Type tileProjectionType() const;
 
     int tileColumnCount( int level ) const;
     int tileRowCount( int level ) const;
@@ -135,8 +132,8 @@ public Q_SLOTS:
     Q_PRIVATE_SLOT( d, void requestDelayedRepaint() )
     Q_PRIVATE_SLOT( d, void updateTextureLayers() )
     Q_PRIVATE_SLOT( d, void updateTile( const TileId &tileId, const QImage &tileImage ) )
-    Q_PRIVATE_SLOT( d, void addGroundOverlays( QModelIndex parent, int first, int last ) )
-    Q_PRIVATE_SLOT( d, void removeGroundOverlays( QModelIndex parent, int first, int last ) )
+    Q_PRIVATE_SLOT( d, void addGroundOverlays( const QModelIndex& parent, int first, int last ) )
+    Q_PRIVATE_SLOT( d, void removeGroundOverlays( const QModelIndex& parent, int first, int last ) )
     Q_PRIVATE_SLOT( d, void resetGroundOverlaysCache() )
 
  private:

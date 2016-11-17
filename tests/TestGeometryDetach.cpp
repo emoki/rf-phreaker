@@ -13,6 +13,7 @@
 #include "GeoDataMultiTrack.h"
 #include "GeoDataPoint.h"
 #include "GeoDataPolygon.h"
+#include "GeoDataLinearRing.h"
 #include "GeoDataTrack.h"
 #include "GeoDataMultiGeometry.h"
 #include "TestUtils.h"
@@ -25,7 +26,7 @@ class TestGeometryDetach : public QObject
 {
     Q_OBJECT
 
-private slots:
+private Q_SLOTS:
     void initTestCase();
 
     /**

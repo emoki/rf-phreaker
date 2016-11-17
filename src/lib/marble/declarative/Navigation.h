@@ -12,27 +12,19 @@
 #define MARBLE_DECLARATIVE_NAVIGATION_H
 
 #include <QObject>
-#include <QtQml/qqml.h>
-
-class QAbstractItemModel;
-
-class MarbleWidget;
+#include <QtQml>
 
 namespace Marble {
-class MarbleQuickItem;
-class MarbleModel;
-}
 
+class MarbleQuickItem;
 class NavigationPrivate;
 
 class Navigation : public QObject
 {
     Q_OBJECT
-    Q_PROPERTY(MarbleWidget* map READ map WRITE setMap NOTIFY mapChanged)
     Q_PROPERTY(Marble::MarbleQuickItem * marbleQuickItem READ marbleQuickItem WRITE setMarbleQuickItem NOTIFY marbleQuickItemChanged)
     Q_PROPERTY(bool guidanceModeEnabled READ guidanceModeEnabled WRITE setGuidanceModeEnabled NOTIFY guidanceModeEnabledChanged)
     Q_PROPERTY(bool muted READ muted WRITE setMuted NOTIFY mutedChanged)
-    Q_PROPERTY(bool soundEnabled READ soundEnabled WRITE setSoundEnabled NOTIFY soundEnabledChanged)
     Q_PROPERTY(QString speaker READ speaker WRITE setSpeaker NOTIFY speakerChanged)
     Q_PROPERTY(QString nextInstructionText READ nextInstructionText NOTIFY nextInstructionTextChanged)
     Q_PROPERTY(QString nextRoad READ nextRoad NOTIFY nextRoadChanged)
@@ -41,15 +33,13 @@ class Navigation : public QObject
     Q_PROPERTY(qreal destinationDistance READ destinationDistance NOTIFY destinationDistanceChanged)
     Q_PROPERTY(QString voiceNavigationAnnouncement READ voiceNavigationAnnouncement NOTIFY voiceNavigationAnnouncementChanged)
     Q_PROPERTY(bool deviated READ deviated NOTIFY deviationChanged)
+    Q_PROPERTY(double screenAccuracy READ screenAccuracy NOTIFY screenAccuracyChanged)
+    Q_PROPERTY(QPointF screenPosition READ screenPosition NOTIFY screenPositionChanged)
 
 public:
     explicit Navigation( QObject* parent = 0 );
 
     ~Navigation();
-
-    MarbleWidget* map();
-
-    void setMap( MarbleWidget* widget );
 
     bool guidanceModeEnabled() const;
 
@@ -75,17 +65,15 @@ public:
 
     void setSpeaker( const QString &speaker );
 
-    bool soundEnabled() const;
-
-    void setSoundEnabled( bool soundEnabled );
-
     bool deviated() const;
 
     Marble::MarbleQuickItem * marbleQuickItem() const;
 
-    Q_INVOKABLE QPointF positionOnRoute() const;
+    double screenAccuracy() const;
 
-public slots:
+    QPointF screenPosition() const;
+
+public Q_SLOTS:
     void setMarbleQuickItem(Marble::MarbleQuickItem * marbleQuickItem);
 
 Q_SIGNALS:
@@ -115,11 +103,18 @@ Q_SIGNALS:
 
     void marbleQuickItemChanged(Marble::MarbleQuickItem * marbleQuickItem);
 
+    void screenAccuracyChanged();
+
+    void screenPositionChanged();
+
 private Q_SLOTS:
     void update();
+    void updateScreenPosition();
 
 private:
     NavigationPrivate* const d;
 };
+
+}
 
 #endif

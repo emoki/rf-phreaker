@@ -15,7 +15,6 @@
 #include "ElevationProfileContextMenu.h"
 #include "ui_ElevationProfileConfigWidget.h"
 
-#include "MarbleLocale.h"
 #include "MarbleModel.h"
 #include "MarbleWidget.h"
 #include "GeoDataPlacemark.h"
@@ -72,9 +71,9 @@ ElevationProfileFloatItem::ElevationProfileFloatItem( const MarbleModel *marbleM
     setPadding( 1 );
 
     m_markerDocument.setDocumentRole( UnknownDocument );
-    m_markerDocument.setName( "Elevation Profile" );
+    m_markerDocument.setName(QStringLiteral("Elevation Profile"));
 
-    m_markerPlacemark->setName( "Elevation Marker" );
+    m_markerPlacemark->setName(QStringLiteral("Elevation Marker"));
     m_markerPlacemark->setVisible( false );
     m_markerDocument.append( m_markerPlacemark );
 
@@ -89,7 +88,7 @@ ElevationProfileFloatItem::~ElevationProfileFloatItem()
 
 QStringList ElevationProfileFloatItem::backendTypes() const
 {
-    return QStringList( "elevationprofile" );
+    return QStringList(QStringLiteral("elevationprofile"));
 }
 
 qreal ElevationProfileFloatItem::zValue() const
@@ -109,12 +108,12 @@ QString ElevationProfileFloatItem::guiString() const
 
 QString ElevationProfileFloatItem::nameId() const
 {
-    return QString( "elevationprofile" );
+    return QStringLiteral("elevationprofile");
 }
 
 QString ElevationProfileFloatItem::version() const
 {
-    return "1.2"; // TODO: increase to 1.3 ?
+    return QStringLiteral("1.2"); // TODO: increase to 1.3 ?
 }
 
 QString ElevationProfileFloatItem::description() const
@@ -124,20 +123,20 @@ QString ElevationProfileFloatItem::description() const
 
 QString ElevationProfileFloatItem::copyrightYears() const
 {
-    return "2011, 2012, 2013";
+    return QStringLiteral("2011, 2012, 2013");
 }
 
-QList<PluginAuthor> ElevationProfileFloatItem::pluginAuthors() const
+QVector<PluginAuthor> ElevationProfileFloatItem::pluginAuthors() const
 {
-    return QList<PluginAuthor>()
-            << PluginAuthor( QString::fromUtf8 ( "Florian Eßer" ), "f.esser@rwth-aachen.de" )
-            << PluginAuthor( "Bernhard Beschow", "bbeschow@cs.tu-berlin.de" )
-            << PluginAuthor( "Roman Karlstetter", "roman.karlstetter@googlemail.com" );
+    return QVector<PluginAuthor>()
+            << PluginAuthor(QStringLiteral("Florian Eßer"),QStringLiteral("f.esser@rwth-aachen.de"))
+            << PluginAuthor(QStringLiteral("Bernhard Beschow"), QStringLiteral("bbeschow@cs.tu-berlin.de"))
+            << PluginAuthor(QStringLiteral("Roman Karlstetter"), QStringLiteral("roman.karlstetter@googlemail.com"));
 }
 
 QIcon ElevationProfileFloatItem::icon () const
 {
-    return QIcon(":/icons/elevationprofile.png");
+    return QIcon(QStringLiteral(":/icons/elevationprofile.png"));
 }
 
 void ElevationProfileFloatItem::initialize ()
@@ -233,7 +232,7 @@ void ElevationProfileFloatItem::paintContent( QPainter *painter )
     dashedPen.setColor( Oxygen::aluminumGray4 );
     QRect labelRect( 0, 0, m_leftGraphMargin - 1, m_fontHeight + 2 );
     lastStringEnds = m_eleGraphHeight + m_fontHeight;
-//     painter->drawText( m_leftGraphMargin + 1, m_fontHeight, "[" + m_axisY.unit() + "]" );
+//     painter->drawText(m_leftGraphMargin + 1, m_fontHeight, QLatin1Char('[') + m_axisY.unit() + QLatin1Char(']'));
     foreach ( const AxisTick &tick, m_axisY.ticks() ) {
         const int posY = m_eleGraphHeight - tick.position;
         painter->setPen( dashedPen );
@@ -265,7 +264,7 @@ void ElevationProfileFloatItem::paintContent( QPainter *painter )
 
         intervalStr.setNum( tick.value * m_axisX.scale() );
         if ( tick.position == m_axisX.ticks().last().position ) {
-            intervalStr += ' ' + m_axisX.unit();
+            intervalStr += QLatin1Char(' ') + m_axisX.unit();
         }
         labelRect.setWidth( QFontMetricsF( font() ).width( intervalStr ) * 1.5 );
         labelRect.moveCenter( QPoint( posX, labelRect.center().y() ) );
@@ -367,13 +366,13 @@ void ElevationProfileFloatItem::paintContent( QPainter *painter )
         painter->drawLine( m_leftGraphMargin + m_cursorPositionX - 5, ypos,
                            m_leftGraphMargin + m_cursorPositionX + 5, ypos );
         intervalStr.setNum( xpos * m_axisX.scale(), 'f', 2 );
-        intervalStr += ' ' + m_axisX.unit();
+        intervalStr += QLatin1Char(' ') + m_axisX.unit();
         int currentStringBegin = m_leftGraphMargin + m_cursorPositionX
                              - QFontMetricsF( font() ).width( intervalStr ) / 2;
         painter->drawText( currentStringBegin, contentSize().height() - 1.5 * m_fontHeight, intervalStr );
 
         intervalStr.setNum( currentPoint.altitude(), 'f', 1 );
-        intervalStr += ' ' + m_axisY.unit();
+        intervalStr += QLatin1Char(' ') + m_axisY.unit();
         if ( m_cursorPositionX + QFontMetricsF( font() ).width( intervalStr ) + m_leftGraphMargin
                 < m_eleGraphWidth ) {
             currentStringBegin = ( m_leftGraphMargin + m_cursorPositionX + 5 + 2 );
@@ -504,7 +503,7 @@ bool ElevationProfileFloatItem::eventFilter( QObject *object, QEvent *e )
     return AbstractFloatItem::eventFilter(object,e);
 }
 
-void ElevationProfileFloatItem::handleDataUpdate(const GeoDataLineString &points, QList<QPointF> eleData)
+void ElevationProfileFloatItem::handleDataUpdate(const GeoDataLineString &points, const QVector<QPointF> &eleData)
 {
     m_eleData = eleData;
     m_points = points;
@@ -571,7 +570,7 @@ void ElevationProfileFloatItem::updateVisiblePoints()
     return;
 }
 
-void ElevationProfileFloatItem::calculateStatistics( const QList<QPointF> &eleData )
+void ElevationProfileFloatItem::calculateStatistics(const QVector<QPointF> &eleData)
 {
     // This basically calculates the important peaks of the moving average filtered elevation and
     // calculates the elevation data based on this points.
@@ -717,14 +716,14 @@ void ElevationProfileFloatItem::switchToTrackDataSource(int index)
 
 void ElevationProfileFloatItem::switchDataSource(ElevationProfileDataSource* source)
 {
-    disconnect(m_activeDataSource, SIGNAL(dataUpdated(GeoDataLineString,QList<QPointF>)),0,0);
+    if (m_activeDataSource) {
+        disconnect(m_activeDataSource, SIGNAL(dataUpdated(GeoDataLineString,QVector<QPointF>)),0,0);
+    }
     m_activeDataSource = source;
-    connect(m_activeDataSource, SIGNAL(dataUpdated(GeoDataLineString,QList<QPointF>)), this, SLOT(handleDataUpdate(GeoDataLineString,QList<QPointF>)));
+    connect(m_activeDataSource, SIGNAL(dataUpdated(GeoDataLineString,QVector<QPointF>)), this, SLOT(handleDataUpdate(GeoDataLineString,QVector<QPointF>)));
     m_activeDataSource->requestUpdate();
 }
 
 }
-
-Q_EXPORT_PLUGIN2(ElevationProfileFloatItem, Marble::ElevationProfileFloatItem)
 
 #include "moc_ElevationProfileFloatItem.cpp"

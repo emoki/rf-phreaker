@@ -15,16 +15,15 @@
 #include "SearchRunner.h"
 
 #include <QString>
-#include <QHostInfo>
 #include <QNetworkAccessManager>
 #include <QNetworkRequest>
 
 class QNetworkReply;
-class QDomNodeList;
 class QDomNode;
 
 namespace Marble
 {
+class GeoDataExtendedData;
 
 class OsmNominatimRunner : public SearchRunner
 {

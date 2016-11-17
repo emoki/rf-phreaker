@@ -30,10 +30,10 @@
 #include "TileLoaderHelper.h"
 #include "TextureTile.h"
 #include "TileLoader.h"
+#include "RenderState.h"
 
 #include "GeoDataCoordinates.h"
 
-#include <QMutexLocker>
 #include <QPointer>
 #include <QPainter>
 
@@ -104,7 +104,7 @@ void MergedLayerDecorator::setTextureLayers( const QVector<const GeoSceneTexture
         d->m_levelZeroColumns = firstTexture->levelZeroColumns();
         d->m_levelZeroRows = firstTexture->levelZeroRows();
         d->m_blendingFactory.setLevelZeroLayout( d->m_levelZeroColumns, d->m_levelZeroRows );
-        d->m_themeId = "maps/" + firstTexture->sourceDir();
+        d->m_themeId = QLatin1String("maps/") + firstTexture->sourceDir();
     }
 
     d->m_textureLayers = textureLayers;
@@ -146,11 +146,11 @@ int MergedLayerDecorator::tileRowCount( int level ) const
     return TileLoaderHelper::levelToRow( levelZeroRows, level );
 }
 
-GeoSceneTileDataset::Projection MergedLayerDecorator::tileProjection() const
+GeoSceneAbstractTileProjection::Type MergedLayerDecorator::tileProjectionType() const
 {
     Q_ASSERT( !d->m_textureLayers.isEmpty() );
 
-    return d->m_textureLayers.at( 0 )->projection();
+    return d->m_textureLayers.at( 0 )->tileProjectionType();
 }
 
 QSize MergedLayerDecorator::tileSize() const
@@ -218,7 +218,8 @@ void MergedLayerDecorator::Private::renderGroundOverlays( QImage *tileImage, con
     /* All tiles are covering the same area. Pick one. */
     const TileId tileId = tiles.first()->id();
 
-    GeoDataLatLonBox tileLatLonBox = tileId.toLatLonBox( findRelevantTextureLayers( tileId ).first() );
+    GeoDataLatLonBox tileLatLonBox;
+    findRelevantTextureLayers(tileId).first()->tileProjection()->geoCoordinates(tileId, tileLatLonBox);
 
     /* Map the ground overlay to the image. */
     for ( int i =  0; i < m_groundOverlays.size(); ++i ) {
@@ -246,13 +247,14 @@ void MergedLayerDecorator::Private::renderGroundOverlays( QImage *tileImage, con
         const qreal rad2Pixel = global_height / M_PI;
 
         qreal latPixelPosition = rad2Pixel/2 * gdInv(tileLatLonBox.north());
+        const bool isMercatorTileProjection = (m_textureLayers.at( 0 )->tileProjectionType() ==  GeoSceneAbstractTileProjection::Mercator);
 
         for ( int y = 0; y < tileImage->height(); ++y ) {
              QRgb *scanLine = ( QRgb* ) ( tileImage->scanLine( y ) );
 
              qreal lat = 0;
 
-             if (m_textureLayers.at( 0 )->projection() ==  GeoSceneTileDataset::Mercator) {
+             if (isMercatorTileProjection) {
                   lat = gd(2 * (latPixelPosition - y) * pixel2Rad );
              }
              else {
@@ -306,6 +308,7 @@ StackedTile *MergedLayerDecorator::loadTile( const TileId &stackedTileId )
 {
     const QVector<const GeoSceneTextureTileDataset *> textureLayers = d->findRelevantTextureLayers( stackedTileId );
     QVector<QSharedPointer<TextureTile> > tiles;
+    tiles.reserve(textureLayers.size());
 
     foreach ( const GeoSceneTextureTileDataset *layer, textureLayers ) {
         const TileId tileId( layer->sourceDir(), stackedTileId.zoomLevel(),
@@ -504,8 +507,8 @@ void MergedLayerDecorator::Private::paintSunShading( QImage *tileImage, const Ti
 void MergedLayerDecorator::Private::paintTileId( QImage *tileImage, const TileId &id ) const
 {
     QString filename = QString( "%1_%2.jpg" )
-            .arg( id.x(), tileDigits, 10, QChar('0') )
-            .arg( id.y(), tileDigits, 10, QChar('0') );
+            .arg(id.x(), tileDigits, 10, QLatin1Char('0'))
+            .arg(id.y(), tileDigits, 10, QLatin1Char('0'));
 
     QPainter painter( tileImage );
 
@@ -533,7 +536,7 @@ void MergedLayerDecorator::Private::paintTileId( QImage *tileImage, const TileId
     painter.drawRect( strokeWidth / 2, strokeWidth / 2,
                       tileImage->width()  - strokeWidth,
                       tileImage->height() - strokeWidth );
-    QFont testFont( "Sans", 12 );
+    QFont testFont(QStringLiteral("Sans Serif"), 12);
     QFontMetrics testFm( testFont );
     painter.setFont( testFont );
 
@@ -583,10 +586,16 @@ QVector<const GeoSceneTextureTileDataset *> MergedLayerDecorator::Private::findR
         if ( !candidate->hasMaximumTileLevel() ||
              candidate->maximumTileLevel() >= stackedTileId.zoomLevel() ) {
             //check if the tile intersects with texture bounds
-            if ( candidate->latLonBox().isNull()
-                || candidate->latLonBox().intersects( stackedTileId.toLatLonBox( candidate ) ) )
-            {
-                result.append( candidate );
+            if (candidate->latLonBox().isNull()) {
+                result.append(candidate);
+            }
+            else {
+                GeoDataLatLonBox bbox;
+                candidate->tileProjection()->geoCoordinates(stackedTileId, bbox);
+
+                if (candidate->latLonBox().intersects(bbox)) {
+                    result.append( candidate );
+                }
             }
         }
     }

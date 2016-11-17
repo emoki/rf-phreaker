@@ -26,6 +26,8 @@ namespace Marble
 
 class MapItemDelegate : public QStyledItemDelegate
 {
+    Q_OBJECT
+
 public:
     MapItemDelegate( QListView* view, NewstuffModel* newstuffModel, MarbleWidget* marbleWidget );
     void paint( QPainter *painter, const QStyleOptionViewItem &option, const QModelIndex &index ) const;
@@ -74,9 +76,9 @@ MapThemeDownloadDialog::MapThemeDownloadDialog( MarbleWidget* marbleWidget ) :
 {
     d->setupUi( this );
 
-    d->m_model.setTargetDirectory( MarbleDirs::localPath() + "/maps" );
+    d->m_model.setTargetDirectory(MarbleDirs::localPath() + QLatin1String("/maps"));
     d->m_model.setProvider( "https://marble.kde.org/maps-v3.xml" );
-    d->m_model.setRegistryFile( MarbleDirs::localPath() + "/newstuff/marble-map-themes.knsregistry", Marble::NewstuffModel::NameTag );
+    d->m_model.setRegistryFile(MarbleDirs::localPath() + QLatin1String("/newstuff/marble-map-themes.knsregistry"), Marble::NewstuffModel::NameTag);
 
     d->listView->setIconSize( QSize( 130, 130 ) );
     d->listView->setAlternatingRowColors( true );
@@ -104,7 +106,7 @@ MapItemDelegate::MapItemDelegate( QListView *view , NewstuffModel *newstuffModel
 
 void MapItemDelegate::paint( QPainter *painter, const QStyleOptionViewItem &option, const QModelIndex &index ) const
 {
-    QStyleOptionViewItemV4 styleOption = option;
+    QStyleOptionViewItem styleOption = option;
     styleOption.text = QString();
     QApplication::style()->drawControl(QStyle::CE_ItemViewItem, &styleOption, painter);
 
@@ -142,7 +144,7 @@ void MapItemDelegate::paint( QPainter *painter, const QStyleOptionViewItem &opti
         progressBarOption.minimum = 0;
         progressBarOption.maximum = 100;
         progressBarOption.progress = ( 100.0 * progress / total );
-        progressBarOption.text = QString::number( progressBarOption.progress ) + '%';
+        progressBarOption.text = QString::number(progressBarOption.progress) + QLatin1Char('%');
         progressBarOption.textVisible = true;
         QApplication::style()->drawControl(QStyle::CE_ProgressBar, &progressBarOption, painter);
 
@@ -275,17 +277,17 @@ QStyleOptionButton MapItemDelegate::button( Element element, const QStyleOptionV
     switch (element) {
     case InstallButton:
         result.text = tr( "Install" );
-        result.icon = QIcon( ":/marble/dialog-ok.png" );
+        result.icon = QIcon(QStringLiteral(":/marble/dialog-ok.png"));
         result.iconSize = QSize( m_iconSize, m_iconSize );
         break;
     case UpgradeButton:
         result.text = tr( "Update" );
-        result.icon = QIcon( ":/marble/system-software-update.png" );
+        result.icon = QIcon(QStringLiteral(":/marble/system-software-update.png"));
         result.iconSize = QSize( m_iconSize, m_iconSize );
         break;
     case OpenButton:
         result.text = tr( "Open" );
-        result.icon = QIcon( ":/marble/document-open.png" );
+        result.icon = QIcon(QStringLiteral(":/marble/document-open.png"));
         result.iconSize = QSize( m_iconSize, m_iconSize );
         break;
     case CancelButton:
@@ -293,7 +295,7 @@ QStyleOptionButton MapItemDelegate::button( Element element, const QStyleOptionV
         break;
     case RemoveButton:
         result.text = tr( "Remove" );
-        result.icon = QIcon( ":/marble/edit-delete.png" );
+        result.icon = QIcon(QStringLiteral(":/marble/edit-delete.png"));
         result.iconSize = QSize( m_iconSize, m_iconSize );
         break;
     default:
@@ -363,4 +365,4 @@ QString MapItemDelegate::text( const QModelIndex &index )
 
 }
 
-#include "moc_MapThemeDownloadDialog.cpp"
+#include "MapThemeDownloadDialog.moc" // needed for Q_OBJECT here in source
