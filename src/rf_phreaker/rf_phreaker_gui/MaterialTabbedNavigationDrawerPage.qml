@@ -30,11 +30,11 @@ TabbedPage {
     property var page
 
 
-    Connections {
-        target: page.snackbar ? page.snackbar : navPage.snacky
-        onClicked: snacky.clicked
-        onOpen: snacky.open(text)
-    }
+//    Connections {
+//        target: navPage.page.snackbar ? navPage.page.snackbar : navPage.snacky
+//        onClicked: snacky.clicked
+//        onOpen: snacky.open(text)
+//    }
 
     function navigate(page) {
         stackView.push({ item: page, replace: true })
@@ -51,8 +51,8 @@ TabbedPage {
         anchors.fill: parent
     }
 
-    Snackbar {
-        id: snacky
-    }
+//    Snackbar {
+//        id: snacky
+//    }
 
 }

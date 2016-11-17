@@ -97,9 +97,9 @@ Rectangle {
                         }
                     }
                 }
-                Tooltip {
-                    text: "Doubleclick to center on layer"
-                }
+//                Tooltip {
+//                    text: "Doubleclick to center on layer"
+//                }
             }
             Controls.TableViewColumn {
                 width: placemarkView.width - layers.width - dp(5)
