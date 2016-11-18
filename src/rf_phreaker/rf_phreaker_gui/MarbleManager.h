@@ -65,7 +65,8 @@ public:
 		: Marble::MarbleQuickItem(parent)
 		, numDownloadJobs_(0)
 		, currentDownloadJobValue_(0)
-		, rpDoc_(nullptr) {
+		, rpDoc_(nullptr)
+		, positionDoc_(nullptr) {
 		loadSettings();
 		init();
 	}
