@@ -253,10 +253,25 @@ public:
 	QAbstractItemModel* proxyTreeViewModel() { return &proxyTreeViewModel_; }
 
 	MarbleProxyModel* placemarkModel() { return &placemarkModel_; }
-	bool iscurrentPositionGloballyVisible() const { return currentPosition_->isGloballyVisible(); }
+
+	bool iscurrentPositionGloballyVisible() const {
+		auto placemark = currentPositionGeoDataPlacemark();
+		if(placemark != nullptr) {
+			return placemark->isGloballyVisible();
+		}
+		return false;
+	}
+
 	bool isTrackingEnabled() const { return isTrackingEnabled_; }
 
 	void setIsTrackingEnabled(bool t) { isTrackingEnabled_ = t; emit isTrackingEnabledChanged(); }
+
+	Marble::GeoDataPlacemark* currentPositionGeoDataPlacemark() const {
+		auto placemark = MarbleHelper::toPlacemark(placemarkModel_.data(placemarkModel_.index(0, 0), MarbleProxyModel::PlacemarkObjectPointerRole));
+		if(placemark != nullptr) 
+			Q_ASSERT(placemark->name() == QObject::tr("Current Position"));
+		return placemark;
+	}
 
 public slots:
 	void handleDownloadProgess(int active, int queued) {
@@ -346,7 +361,6 @@ private:
 		auto feature = positionDoc_->child(0);
 		if(feature != nullptr) {
 			Q_ASSERT(feature->name() == QObject::tr("Current Position"));
-			currentPosition_ = static_cast<GeoDataPlacemark*>(feature);
 			feature->setStyleUrl("#dpos");
 			feature->setVisible(true);
 			emit isCurrentPositionGloballyVisibleChanged();
@@ -380,10 +394,13 @@ private:
 	}
 
 	void storeLastKnownCoordinate() {
-		auto c = currentPosition_->coordinate();
-		SettingsIO sIO;
-		if(c.isValid())
-			sIO.writeLastKnownCoordinate(c);
+		auto position = currentPositionGeoDataPlacemark();
+		if(position != nullptr) {
+			auto c = position->coordinate();
+			SettingsIO sIO;
+			if(c.isValid())
+				sIO.writeLastKnownCoordinate(c);
+		}
 	}
 
 	void createTrackingDocument() {
@@ -406,7 +423,6 @@ private:
 	MarbleProxyModel placemarkModel_;
 	Marble::GeoDataDocument *rpDoc_;
 	Marble::GeoDataDocument *positionDoc_;
-	Marble::GeoDataPlacemark *currentPosition_;
 };
 
 

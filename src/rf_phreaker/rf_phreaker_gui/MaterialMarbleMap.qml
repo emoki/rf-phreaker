@@ -10,6 +10,11 @@ Item {
     height: 600
     width: 600
 
+    Component.onCompleted: {
+        if(Api.connectionStatus === ApiTypes.CONNECTED && marbleManager.positionAvailable)
+            manager.centerOnCurrentLocation();
+    }
+
     MarbleManager {
         id: manager
         anchors.fill: parent
@@ -59,12 +64,13 @@ Item {
                     if((Math.abs(newX - posX) > 0 || Math.abs(newY - posY) > 0) && manager.isTrackingEnabled && visible) {
                         posX = newX;
                         posY = newY;
-                        manager.centerOnCurrentPosition();
+                        manager.centerOnCoordinates(manager.currentPosition.longitude, manager.currentPosition.latitude);
                     }
                     else {
                         posX = newX;
                         posY = newY;
                     }
+                    manager.update();
                 }
             }
         }
