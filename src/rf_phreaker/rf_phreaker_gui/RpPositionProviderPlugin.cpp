@@ -1,5 +1,8 @@
 #include "RpPositionProviderPlugin.h"
 #include <QTimer>
+#include <QIcon>
+#include "GeoDataAccuracy.h"
+#include "marble_export.h"
 #include "rf_phreaker/rf_phreaker_gui/Api.h"
 #include "rf_phreaker/rf_phreaker_gui/ApiTypes.h"
 #include "rf_phreaker/rf_phreaker_gui/Gps.h"
@@ -45,8 +48,8 @@ QString RpPositionProviderPlugin::copyrightYears() const {
 	return "2016";
 }
 
-QList<PluginAuthor> RpPositionProviderPlugin::pluginAuthors() const {
-	return QList<PluginAuthor>()
+QVector<PluginAuthor> RpPositionProviderPlugin::pluginAuthors() const {
+	return QVector<PluginAuthor>()
 		<< PluginAuthor("Ethan Steffens", "esteffens.cappeen@gmail.com");
 }
 
@@ -138,6 +141,18 @@ void RpPositionProviderPlugin::update() {
 		emit positionChanged(position(), accuracy());
 }
 
+
+#if QT_VERSION >= QT_VERSION_CHECK( 5, 0, 0 )
+#if defined(Q_EXPORT_PLUGIN)
+#undef Q_EXPORT_PLUGIN
+#undef Q_EXPORT_PLUGIN2
+#endif
+
+#define Q_EXPORT_PLUGIN(a)
+#define Q_EXPORT_PLUGIN2(a, b)
+#else
+# define Q_PLUGIN_METADATA(a)
+#endif
 
 Q_EXPORT_PLUGIN2(RpPositionProviderPlugin, RpPositionProviderPlugin)
 

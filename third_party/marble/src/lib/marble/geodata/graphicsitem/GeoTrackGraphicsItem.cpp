@@ -22,10 +22,10 @@ GeoTrackGraphicsItem::GeoTrackGraphicsItem(const GeoDataPlacemark *placemark, co
     GeoLineStringGraphicsItem(placemark, track->lineString())
 {
     setTrack( track );
-    if (placemark) {
-        QString const paintLayer = QLatin1String("Track/") + StyleBuilder::visualCategoryName(placemark->visualCategory());
-        setPaintLayers(QStringList() << paintLayer);
-    }
+    //if (placemark) {
+    //    QString const paintLayer = QLatin1String("Track/") + StyleBuilder::visualCategoryName(placemark->visualCategory());
+    //    setPaintLayers(QStringList() << paintLayer);
+    //}
 }
 
 void GeoTrackGraphicsItem::setTrack( const GeoDataTrack* track )

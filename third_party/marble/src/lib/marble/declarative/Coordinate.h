@@ -11,6 +11,7 @@
 #ifndef MARBLE_DECLARATIVE_COORDINATE_H
 #define MARBLE_DECLARATIVE_COORDINATE_H
 
+#include "marble_declarative_export.h"
 #include "GeoDataCoordinates.h"
 #include <QObject>
 #include <QtQml>
@@ -20,7 +21,7 @@
   *
   * @todo: Introduce GeoDataCoordinates
   */
-class Coordinate : public QObject
+class MARBLE_DECLARATIVE_EXPORT Coordinate : public QObject
 {
     Q_OBJECT
 

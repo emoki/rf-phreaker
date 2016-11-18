@@ -52,8 +52,9 @@ Item {
             angle: manager.angle
             visible: manager.positionVisible && manager.iscurrentPositionGloballyVisible
             function update() {
-                var newX = Math.floor(manager.screenCoordinatesFromCoordinate(manager.currentPosition.coordinate).x);
-                var newY = Math.floor(manager.screenCoordinatesFromCoordinate(manager.currentPosition.coordinate).y);
+                var screenCoordinate = manager.currentPositionScreenCoordinates();
+                var newX = Math.floor(screenCoordinate.x);
+                var newY = Math.floor(screenCoordinate.y);
                 if(newX !== posX || newY !== posY) {
                     if((Math.abs(newX - posX) > 0 || Math.abs(newY - posY) > 0) && manager.isTrackingEnabled && visible) {
                         posX = newX;

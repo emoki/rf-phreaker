@@ -6,6 +6,8 @@
 #include <QObject>
 #include <QMutex>
 #include "marble/declarative/MarbleQuickItem.h"
+#include "marble/declarative/Coordinate.h"
+#include "marble/declarative/Placemark.h"
 #include "marble/MarbleGlobal.h"
 #include "marble/MarbleMap.h"
 #include "marble/MarbleWidget.h"
@@ -15,6 +17,7 @@
 #include "marble/ViewportParams.h"
 #include "marble/HttpDownloadManager.h"
 #include "marble/layers/TextureLayer.h"
+#include "marble/TileCoordsPyramid.h"
 #include "marble/FileManager.h"
 #include "marble/MarbleInputHandler.h"
 #include "marble/PluginManager.h"
@@ -26,6 +29,7 @@
 #include "marble/routing/RouteRequest.h"
 #include "marble/routing/RoutingManager.h"
 #include "marble/kdescendantsproxymodel.h"
+#include "marble/geodata/data/GeoDataPlacemark.h"
 #include "marble/geodata/data/GeoDataDocument.h"
 #include "marble/geodata/data/GeoDataStyle.h"
 #include "marble/geodata/data/GeoDataStyleMap.h"
@@ -62,19 +66,28 @@ public:
 		, numDownloadJobs_(0)
 		, currentDownloadJobValue_(0)
 		, rpDoc_(nullptr) {
+		loadSettings();
 		init();
 	}
 
 	~MarbleManager() {
+		writeSettings();
 		storePreviousLayers();
-		storeLastKnownCoordinate();
+	}
+
+	Q_INVOKABLE QPointF currentPositionScreenCoordinates() {
+		qreal x;
+		qreal y;
+		Marble::GeoDataCoordinates coord(currentPosition()->longitude(), currentPosition()->latitude(), 0, Marble::GeoDataCoordinates::Degree);
+		map()->viewport()->screenCoordinates(coord, x, y);
+		return QPointF(x,y);
 	}
 
 	Q_INVOKABLE void downloadMapRegion() {
 		numDownloadJobs_ = 0;
 		currentDownloadJobValue_ = 0;
 
-		auto geoLatLonBox = map()->viewport()->viewLatLonAltBox();
+		auto &geoLatLonBox = map()->viewport()->viewLatLonAltBox();
 		Marble::DownloadRegion region;
 		region.setTileLevelRange(1, 19);
 		region.setMarbleModel(map()->model());
@@ -109,10 +122,6 @@ public:
 			map()->model()->treeModel()->updateFeature(placemark);
 			centerOn(*placemark, true);
 		}
-	}
-
-	Q_INVOKABLE void centerOnCurrentLocation() {
-		centerOn(*currentPosition_, true);
 	}
 
 	Q_INVOKABLE void removePlacemark(int placemarkIndex) {
@@ -219,7 +228,6 @@ public:
 			placemark->setName(name);
 			placemark->setGeometry(multiTrack.get());
 			placemark->setVisible(true);
-			placemark->setVisualCategory(Marble::GeoDataFeature::Styled);
 			multiTrack.release();
 			map()->model()->treeModel()->removeDocument(rpDoc_);
 			rpDoc_->append(placemark.get());
@@ -241,10 +249,13 @@ public:
 	}
 
 	QAbstractItemModel* treeViewModel() { return map()->model()->treeModel(); }
+
 	QAbstractItemModel* proxyTreeViewModel() { return &proxyTreeViewModel_; }
+
 	MarbleProxyModel* placemarkModel() { return &placemarkModel_; }
 	bool iscurrentPositionGloballyVisible() const { return currentPosition_->isGloballyVisible(); }
 	bool isTrackingEnabled() const { return isTrackingEnabled_; }
+
 	void setIsTrackingEnabled(bool t) { isTrackingEnabled_ = t; emit isTrackingEnabledChanged(); }
 
 public slots:
@@ -260,7 +271,6 @@ public slots:
 		++currentDownloadJobValue_;
 		emit downloadProgressChanged();
 	}
-
 
 private:
 	void init() {
@@ -301,14 +311,6 @@ private:
 		//if(!rpFile.exists())
 		//	 Signal error
 		map()->model()->addGeoDataFile(rpFile.absoluteFilePath());
-
-		SettingsIO settingsIO;
-		auto coordinate = settingsIO.readLastKnownCoordinate();
-		this->centerOn(coordinate);
-		qDebug() << "zoom: " << this->zoom();
-		this->setZoom(3250);
-		setIsTrackingEnabled(true);
-		qDebug() << "zoom: " << this->zoom();
 	}
 
 	void mouseEventDoubleClickOrWheelSeen() {
@@ -347,14 +349,12 @@ private:
 			currentPosition_ = static_cast<GeoDataPlacemark*>(feature);
 			feature->setStyleUrl("#dpos");
 			feature->setVisible(true);
-			//iscurrentPositionGloballyVisible_ = true;
 			emit isCurrentPositionGloballyVisibleChanged();
 		}
 		feature = positionDoc_->child(1);
 		if(feature != nullptr) {
 			Q_ASSERT(feature->name() == QObject::tr("Current Track"));
 			feature->setStyleUrl("#ctrack");
-			feature->setVisualCategory(GeoDataFeature::Styled);
 		}
 		map()->model()->treeModel()->addDocument(positionDoc_);
 	}
@@ -402,7 +402,7 @@ private:
 	double numDownloadJobs_;
 	bool isTrackingEnabled_;
 	RpPositionProviderPlugin rpPositionProviderPlugin_;
-	KDescendantsProxyModel proxyTreeViewModel_;
+	Marble::KDescendantsProxyModel proxyTreeViewModel_;
 	MarbleProxyModel placemarkModel_;
 	Marble::GeoDataDocument *rpDoc_;
 	Marble::GeoDataDocument *positionDoc_;

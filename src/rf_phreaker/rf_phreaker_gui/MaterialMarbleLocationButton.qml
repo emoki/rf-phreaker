@@ -16,7 +16,7 @@ ActionButton {
         onTriggered: {
             marbleManager.isTrackingEnabled = true;
             marbleManager.setCurrentTrackVisible(true);
-            marbleManager.centerOnCurrentLocation();
+            marbleManager.centerOnCurrentPosition();
         }
     }
     iconName: Api.connectionStatus === ApiTypes.CONNECTED

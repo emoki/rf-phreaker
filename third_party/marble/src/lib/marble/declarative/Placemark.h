@@ -11,6 +11,7 @@
 #ifndef MARBLE_DECLARATIVE_PLACEMARK_H
 #define MARBLE_DECLARATIVE_PLACEMARK_H
 
+#include "marble_declarative_export.h"
 #include "GeoDataPlacemark.h"
 
 #include <QObject>
@@ -21,7 +22,7 @@ namespace Marble {
 /**
   * Wraps a GeoDataPlacemark for QML access
   */
-class Placemark : public QObject
+class MARBLE_DECLARATIVE_EXPORT Placemark : public QObject
 {
     Q_OBJECT
 

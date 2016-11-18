@@ -386,3 +386,17 @@ add_custom_command(
 		${CMAKE_CURRENT_SOURCE_DIR}/../zlib_win/bin/zlib.dll
 		${CMAKE_RUNTIME_OUTPUT_DIRECTORY}/${CMAKE_CFG_INTDIR}
 )
+
+add_custom_command(
+	TARGET copy_data POST_BUILD
+	COMMAND ${CMAKE_COMMAND} -E copy_if_different
+		${CMAKE_CURRENT_BINARY_DIR}/src/lib/marble/declarative/marble_declarative_export.h
+		${CMAKE_CURRENT_SOURCE_DIR}/src/lib/marble/declarative/
+)
+
+add_custom_command(
+	TARGET copy_data POST_BUILD
+	COMMAND ${CMAKE_COMMAND} -E copy_if_different
+		${CMAKE_CURRENT_BINARY_DIR}/src/lib/marble/marble_export.h
+		${CMAKE_CURRENT_SOURCE_DIR}/src/lib/marble/
+)

@@ -21,7 +21,7 @@ public:
     virtual QString version() const;
     virtual QString description() const;
     virtual QString copyrightYears() const;
-    virtual QList<Marble::PluginAuthor> pluginAuthors() const;
+    virtual QVector<Marble::PluginAuthor> pluginAuthors() const;
     virtual QIcon icon() const;
     virtual void initialize();
     virtual bool isInitialized() const;
