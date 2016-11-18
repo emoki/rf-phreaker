@@ -24,7 +24,16 @@ class GeoDataContainerPrivate : public GeoDataFeaturePrivate
     GeoDataContainerPrivate()
     {
     }
-    
+
+    GeoDataContainerPrivate(const GeoDataContainerPrivate& other)
+      : GeoDataFeaturePrivate(other)
+    {
+        m_vector.reserve(other.m_vector.size());
+        foreach (GeoDataFeature *feature, other.m_vector) {
+            m_vector.append(feature->clone());
+        }
+    }
+
     ~GeoDataContainerPrivate()
     {
         qDeleteAll( m_vector );
@@ -34,28 +43,25 @@ class GeoDataContainerPrivate : public GeoDataFeaturePrivate
     {
         GeoDataFeaturePrivate::operator=( other );
         qDeleteAll( m_vector );
+        m_vector.clear();
+        m_vector.reserve(other.m_vector.size());
         foreach( GeoDataFeature *feature, other.m_vector )
         {
-            m_vector.append( new GeoDataFeature( *feature ) );
+            m_vector.append(feature->clone());
         }
         return *this;
-    }
-
-    virtual GeoDataFeaturePrivate* copy()
-    { 
-        GeoDataContainerPrivate* copy = new GeoDataContainerPrivate;
-        *copy = *this;
-        return copy;
-    }
-
-    virtual const char* nodeType() const
-    {
-        return GeoDataTypes::GeoDataContainerType;
     }
 
     virtual EnumFeatureId featureId() const
     {
         return GeoDataFolderId;
+    }
+
+    void setParent(GeoDataObject *parent)
+    {
+        foreach (GeoDataFeature *feature, m_vector) {
+            feature->setParent(parent);
+        }
     }
 
     QVector<GeoDataFeature*> m_vector;

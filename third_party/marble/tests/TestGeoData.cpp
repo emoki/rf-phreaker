@@ -9,7 +9,6 @@
 //
 
 #include <QTest>
-#include <QList>
 #include <QDebug>
 #include "GeoDataDocument.h"
 #include "GeoDataFolder.h"
@@ -28,7 +27,7 @@ namespace Marble
 class TestGeoData : public QObject
 {
     Q_OBJECT
- private slots:
+private Q_SLOTS:
     void nodeTypeTest();
     void parentingTest();
 };

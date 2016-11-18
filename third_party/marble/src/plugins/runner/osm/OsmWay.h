@@ -13,14 +13,17 @@
 
 #include "OsmNode.h"
 #include <osm/OsmPlacemarkData.h>
-#include <GeoDataDocument.h>
+#include <StyleBuilder.h>
 
+#include <QSet>
 #include <QString>
-#include <QXmlStreamAttributes>
 
 namespace Marble {
 
-class OsmWay {
+class GeoDataDocument;
+
+class OsmWay
+{
 public:
     OsmPlacemarkData & osmData();
     void addReference(qint64 id);
@@ -28,14 +31,19 @@ public:
     const OsmPlacemarkData & osmData() const;
     const QVector<qint64> &references() const;
 
-    void create(GeoDataDocument* document, const OsmNodes &nodes) const;
+    void create(GeoDataDocument* document, const OsmNodes &nodes, QSet<qint64> &usedNodes) const;
 
 private:
     bool isArea() const;
 
+    static bool isAreaTag(const StyleBuilder::OsmTag &keyValue);
+
     OsmPlacemarkData m_osmData;
     QVector<qint64> m_references;
+
+    static QSet<StyleBuilder::OsmTag> s_areaTags;
 };
+
 typedef QHash<qint64,OsmWay> OsmWays;
 
 }

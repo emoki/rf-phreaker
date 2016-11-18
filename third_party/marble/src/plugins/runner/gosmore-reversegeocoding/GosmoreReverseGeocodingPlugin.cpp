@@ -22,7 +22,7 @@ namespace Marble
 GosmorePlugin::GosmorePlugin( QObject *parent ) :
     ReverseGeocodingRunnerPlugin( parent )
 {
-    setSupportedCelestialBodies( QStringList() << "earth" );
+    setSupportedCelestialBodies(QStringList(QStringLiteral("earth")));
     setCanWorkOffline( true );
 }
 
@@ -38,12 +38,12 @@ QString GosmorePlugin::guiString() const
 
 QString GosmorePlugin::nameId() const
 {
-    return "gosmore-reverse";
+    return QStringLiteral("gosmore-reverse");
 }
 
 QString GosmorePlugin::version() const
 {
-    return "1.0";
+    return QStringLiteral("1.0");
 }
 
 QString GosmorePlugin::description() const
@@ -53,14 +53,14 @@ QString GosmorePlugin::description() const
 
 QString GosmorePlugin::copyrightYears() const
 {
-    return "2010, 2012";
+    return QStringLiteral("2010, 2012");
 }
 
-QList<PluginAuthor> GosmorePlugin::pluginAuthors() const
+QVector<PluginAuthor> GosmorePlugin::pluginAuthors() const
 {
-    return QList<PluginAuthor>()
-            << PluginAuthor( QString::fromUtf8( "Dennis Nienhüser" ), "nienhueser@kde.org" )
-            << PluginAuthor( "Bernhard Beschow", "bbeschow@cs.tu-berlin.de" );
+    return QVector<PluginAuthor>()
+            << PluginAuthor(QStringLiteral("Dennis Nienhüser"), QStringLiteral("nienhueser@kde.org"))
+            << PluginAuthor(QStringLiteral("Bernhard Beschow"), QStringLiteral("bbeschow@cs.tu-berlin.de"));
 }
 
 ReverseGeocodingRunner* GosmorePlugin::newRunner() const
@@ -70,13 +70,11 @@ ReverseGeocodingRunner* GosmorePlugin::newRunner() const
 
 bool GosmorePlugin::canWork() const
 {
-    QDir mapDir( MarbleDirs::localPath() + "/maps/earth/gosmore/" );
+    QDir mapDir(MarbleDirs::localPath() + QLatin1String("/maps/earth/gosmore/"));
     QFileInfo mapFile = QFileInfo ( mapDir, "gosmore.pak" );
     return mapFile.exists();
 }
 
 }
-
-Q_EXPORT_PLUGIN2( GosmoreReverseGeocodingPlugin, Marble::GosmorePlugin )
 
 #include "moc_GosmoreReverseGeocodingPlugin.cpp"

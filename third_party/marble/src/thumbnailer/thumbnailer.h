@@ -20,15 +20,16 @@
 // Marble
 #include "MarbleMap.h"
 
-// KDE
+// KF
 #include <KIOWidgets/kio/thumbcreator.h>
 
 // Qt
 #include <QEventLoop>
 #include <QTimer>
 
-namespace Marble {
-class MarbleMap;
+namespace Marble
+{
+
 class GeoDataObject;
 
 
@@ -44,7 +45,7 @@ public: // ThumbCreator API
     virtual bool create(const QString &path, int width, int height, QImage &image);
     virtual Flags flags() const;
 
-private slots:
+private Q_SLOTS:
     void onGeoDataObjectAdded(GeoDataObject *object);
 
 private:

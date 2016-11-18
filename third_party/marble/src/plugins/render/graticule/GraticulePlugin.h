@@ -16,19 +16,14 @@
 #define MARBLEGRATICULEPLUGIN_H
 
 #include <QMap>
-#include <QObject>
-#include <QVector>
 #include <QHash>
 #include <QPen>
 #include <QIcon>
 #include <QColorDialog>
-#include <QAbstractButton>
 
 
 #include "DialogConfigurationInterface.h"
 #include "RenderPlugin.h"
-#include "RenderPluginInterface.h"
-
 
 #include "GeoDataCoordinates.h"
 #include "GeoDataLatLonAltBox.h"
@@ -54,7 +49,7 @@ class GeoDataLatLonAltBox;
 class GraticulePlugin : public RenderPlugin, public DialogConfigurationInterface
 {
     Q_OBJECT
-    Q_PLUGIN_METADATA( IID "org.kde.edu.marble.GraticulePlugin" )
+    Q_PLUGIN_METADATA(IID "org.kde.marble.GraticulePlugin")
     Q_INTERFACES( Marble::RenderPluginInterface )
     Q_INTERFACES( Marble::DialogConfigurationInterface )
     MARBLE_PLUGIN( GraticulePlugin )
@@ -82,7 +77,7 @@ class GraticulePlugin : public RenderPlugin, public DialogConfigurationInterface
 
     QString copyrightYears() const;
 
-    QList<PluginAuthor> pluginAuthors() const;
+    QVector<PluginAuthor> pluginAuthors() const override;
 
     QIcon icon () const;
 
@@ -158,7 +153,7 @@ class GraticulePlugin : public RenderPlugin, public DialogConfigurationInterface
      */
     void renderLatitudeLines( GeoPainter *painter, 
                               const GeoDataLatLonAltBox& viewLatLonAltBox,
-                              qreal step,
+                              qreal step, qreal skipStep,
                               LabelPositionFlags labelPositionFlags = LineCenter
                             );
 
@@ -178,7 +173,7 @@ class GraticulePlugin : public RenderPlugin, public DialogConfigurationInterface
      */
     void renderLongitudeLines( GeoPainter *painter, 
                               const GeoDataLatLonAltBox& viewLatLonAltBox, 
-                              qreal step, 
+                              qreal step, qreal skipStep,
                               qreal northPolarGap = 0.0, qreal southPolarGap = 0.0,
                               LabelPositionFlags labelPositionFlags = LineCenter
                              );

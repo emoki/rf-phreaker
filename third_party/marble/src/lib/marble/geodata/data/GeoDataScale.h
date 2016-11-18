@@ -12,14 +12,16 @@
 #ifndef GEODATASCALE_H
 #define GEODATASCALE_H
 
-#include "GeoDataGeometry.h"
+#include "GeoDataObject.h"
 #include "MarbleGlobal.h"
 
 namespace Marble {
 
 class GeoDataScalePrivate;
 
-class MARBLE_EXPORT GeoDataScale: public GeoDataObject
+/**
+ */
+class GEODATA_EXPORT GeoDataScale: public GeoDataObject
 {
 public:
     GeoDataScale();

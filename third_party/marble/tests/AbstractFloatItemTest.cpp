@@ -30,17 +30,20 @@ class NullFloatItem : public AbstractFloatItem
         AbstractFloatItem( model )
     {}
 
-    QString name() const { return "Null Float Item"; }
-    QString nameId() const { return "null"; }
-    QString version() const { return "0.0"; }
-    QString description() const { return "A null float item just for testing."; }
+    QString name() const { return QStringLiteral("Null Float Item"); }
+    QString nameId() const { return QStringLiteral("null"); }
+    QString version() const { return QStringLiteral("0.0"); }
+    QString description() const { return QStringLiteral("A null float item just for testing."); }
     QIcon icon() const { return QIcon(); }
-    QString copyrightYears() const { return "2013"; }
-    QList<PluginAuthor> pluginAuthors() const { return QList<PluginAuthor>() << PluginAuthor( "Bernhard Beschow", "bbeschow@cs.tu-berlin.de" ); }
+    QString copyrightYears() const { return QStringLiteral("2013"); }
+    QVector<PluginAuthor> pluginAuthors() const
+    {
+        return QVector<PluginAuthor>() << PluginAuthor(QStringLiteral("Bernhard Beschow"), QStringLiteral("bbeschow@cs.tu-berlin.de"));
+    }
     void initialize() {}
     bool isInitialized() const { return true; }
-    QStringList backendTypes() const { return QStringList() << "null"; }
-    QString guiString() const { return "Null"; }
+    QStringList backendTypes() const { return QStringList(QStringLiteral("null")); }
+    QString guiString() const { return QStringLiteral("Null"); }
     RenderPlugin *newInstance( const MarbleModel * ) const { return 0; }
 };
 
@@ -51,7 +54,7 @@ class AbstractFloatItemTest : public QObject
  public:
     AbstractFloatItemTest();
 
- private slots:
+ private Q_SLOTS:
     void defaultConstructor();
 
     void newInstance_data();
@@ -100,7 +103,8 @@ void AbstractFloatItemTest::newInstance_data()
     QTest::addColumn<const AbstractFloatItem *>( "factory" );
 
     foreach ( const AbstractFloatItem *factory, m_factories ) {
-        QTest::newRow( factory->nameId().toLatin1() ) << factory;
+        QTest::newRow(factory->nameId().toLatin1().constData())
+            << factory;
     }
 }
 
@@ -121,7 +125,8 @@ void AbstractFloatItemTest::setSettings_data()
     QTest::addColumn<const AbstractFloatItem *>( "factory" );
 
     foreach ( const AbstractFloatItem *factory, m_factories ) {
-        QTest::newRow( factory->nameId().toLatin1() ) << factory;
+        QTest::newRow(factory->nameId().toLatin1().constData())
+            << factory;
     }
 }
 
@@ -156,7 +161,8 @@ void AbstractFloatItemTest::setPosition_data()
     QTest::addColumn<const AbstractFloatItem *>( "factory" );
 
     foreach ( const AbstractFloatItem *factory, m_factories ) {
-        QTest::newRow( factory->nameId().toLatin1() ) << factory;
+        QTest::newRow(factory->nameId().toLatin1().constData())
+            << factory;
     }
 }
 

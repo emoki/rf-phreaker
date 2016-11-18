@@ -24,9 +24,7 @@
 #ifndef MARBLE_GEODATADOCUMENT_H
 #define MARBLE_GEODATADOCUMENT_H
 
-#include <QHash>
 #include <QMetaType>
-#include <QVector>
 
 #include "geodata_export.h"
 
@@ -47,7 +45,6 @@ enum DocumentRole {
 };
 
 
-class GeoDataStyle;
 class GeoDataStyleMap;
 class GeoDataNetworkLinkControl;
 class GeoDataSchema;
@@ -71,8 +68,14 @@ public:
     GeoDataDocument( const GeoDataDocument& other );
     ~GeoDataDocument();
 
+    GeoDataDocument& operator=(const GeoDataDocument& other);
+
     bool operator==( const GeoDataDocument &other ) const;
     bool operator!=( const GeoDataDocument &other ) const;
+
+    virtual const char* nodeType() const;
+
+    GeoDataFeature * clone() const override;
 
     /// Provides type information for downcasting a GeoData
     virtual bool isGeoDataDocument() const { return true; }
@@ -81,7 +84,7 @@ public:
     void setDocumentRole( DocumentRole role );
 
     QString property() const;
-    void setProperty( QString property );
+    void setProperty( const QString& property );
 
     /**
      * @brief The filename of the document
@@ -123,7 +126,7 @@ public:
      * @brief Add a style to the style storage
      * @param style  the new style
      */
-    void addStyle(const Marble::GeoDataStyle::Ptr &style );
+    void addStyle(const GeoDataStyle::Ptr &style);
 
     /**
      * @brief Add a style to the style storage
@@ -198,8 +201,7 @@ public:
     virtual void unpack( QDataStream& stream );
 
 private:
-    GeoDataDocumentPrivate *p();
-    const GeoDataDocumentPrivate *p() const;
+    Q_DECLARE_PRIVATE(GeoDataDocument)
 };
 
 }

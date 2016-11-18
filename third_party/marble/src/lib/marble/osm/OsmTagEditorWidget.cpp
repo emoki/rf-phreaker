@@ -16,9 +16,6 @@
 // Qt
 #include <QWidget>
 #include <QTreeWidget>
-#include <QPushButton>
-#include <QIcon>
-#include <QBitmap>
 #include <QDebug>
 
 // Marble
@@ -26,7 +23,6 @@
 #include "GeoDataPlacemark.h"
 #include "GeoDataGeometry.h"
 #include "OsmPlacemarkData.h"
-#include "OsmPresetLibrary.h"
 
 namespace Marble
 {
@@ -66,28 +62,25 @@ OsmTagEditorWidget::~OsmTagEditorWidget()
 
 
 void OsmTagEditorWidget::update()
-{   d->m_currentTagsList->clear();
+{
+    d->m_currentTagsList->clear();
     d->m_recommendedTagsList->clear();
     d->populatePresetTagsList();
     d->populateCurrentTagsList();
+
     emit placemarkChanged( d->m_placemark );
 }
 
-QString OsmTagEditorWidget::suitableTag()
+OsmPlacemarkData OsmTagEditorWidget::placemarkData() const
 {
-    /* The most suitable tag is the first tag in the list for which the OsmPresetLibrary
-     * has an assigned visual category ( a QMap entry )
-     * Maybe there's a better option.
-     */
-    for ( int index = 0; index < d->m_currentTagsList->topLevelItemCount(); ++index ) {
+    OsmPlacemarkData osmData;
+
+    for (int index = 0; index < d->m_currentTagsList->topLevelItemCount(); ++index) {
         const QTreeWidgetItem *item = d->m_currentTagsList->topLevelItem( index );
-        OsmTagEditorWidgetPrivate::OsmTag tag( item->text( 0 ), item->text( 1 ) );
-        if ( OsmPresetLibrary::hasVisualCategory( tag ) ) {
-            return tag.first + "=" + tag.second;
-        }
+        osmData.addTag(item->text(0), item->text(1));
     }
 
-    return QString();
+    return osmData;
 }
 
 void OsmTagEditorWidget::addSelectedTag()
@@ -103,7 +96,7 @@ void OsmTagEditorWidget::addSelectedTag()
     QString value = selectedTag->text( 1 );
 
     // If the value is <value>, the user has to type a value for that particular key
-    if ( value == QString( "<%1>" ).arg( tr( "value" ) ) ) {
+    if (value == QLatin1Char('<') + tr("value") + QLatin1Char('>')) {
         int lastIndex = d->m_currentTagsList->topLevelItemCount() - 1;
         QTreeWidgetItem *adderItem = d->m_currentTagsList->topLevelItem( lastIndex );
         adderItem->setText( 0, key );

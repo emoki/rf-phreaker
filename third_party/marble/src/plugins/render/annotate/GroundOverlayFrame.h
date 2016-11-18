@@ -12,11 +12,12 @@
 #define MARBLE_GROUNDOVERLAYFRAME_H
 
 #include "SceneGraphicsItem.h"
-#include "GeoDataGroundOverlay.h"
-#include "TextureLayer.h"
+#include "GeoDataCoordinates.h"
 
 namespace Marble
 {
+class TextureLayer;
+class GeoDataGroundOverlay;
 
 class GroundOverlayFrame : public SceneGraphicsItem
 {
@@ -65,7 +66,7 @@ private:
     GeoDataGroundOverlay *m_overlay;
     TextureLayer         *m_textureLayer;
 
-    QList<QRegion>     m_regionList;
+    QVector<QRegion>   m_regionList;
     GeoDataCoordinates m_movedHandleGeoCoordinates;
     QPoint             m_movedHandleScreenCoordinates;
     int                m_movedHandle;
@@ -74,8 +75,8 @@ private:
     bool               m_editStatusChangeNeeded;
     qreal              m_previousRotation;
 
-    QList<QImage>      m_resizeIcons;
-    QList<QImage>      m_rotateIcons;
+    QVector<QImage>    m_resizeIcons;
+    QVector<QImage>    m_rotateIcons;
 
     const ViewportParams *m_viewport;
 };

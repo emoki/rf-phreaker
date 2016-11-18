@@ -13,13 +13,12 @@
 
 #include "MarbleModel.h"
 #include "MarblePlacemarkModel.h"
-#include "GeoDataFeature.h"
 #include "GeoDataPlacemark.h"
 #include "GeoDataCoordinates.h"
+#include "GeoDataLatLonAltBox.h"
 
 #include "MarbleDebug.h"
 #include <QString>
-#include <QStringList>
 #include <QVector>
 
 #include <QtDebug>

@@ -17,8 +17,6 @@
 #include "DialogConfigurationInterface.h"
 #include "SatellitesModel.h"
 
-#include <QObject>
-
 namespace Marble
 {
 
@@ -32,7 +30,7 @@ class SatellitesPlugin : public RenderPlugin,
                          public DialogConfigurationInterface
 {
     Q_OBJECT
-    Q_PLUGIN_METADATA( IID "org.kde.edu.marble.SatellitesPlugin" )
+    Q_PLUGIN_METADATA(IID "org.kde.marble.SatellitesPlugin")
     Q_INTERFACES( Marble::RenderPluginInterface )
     Q_INTERFACES( Marble::DialogConfigurationInterface )
     MARBLE_PLUGIN( SatellitesPlugin )
@@ -50,7 +48,7 @@ public:
     QString version() const;
     QString description() const;
     QString copyrightYears() const;
-    QList<PluginAuthor> pluginAuthors() const;
+    QVector<PluginAuthor> pluginAuthors() const override;
     QString aboutDataText() const;
     QIcon icon() const;
     RenderType renderType() const;

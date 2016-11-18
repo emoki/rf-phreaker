@@ -11,7 +11,6 @@
 #include "MarbleDebug.h"
 #include <MarbleZipReader.h>
 
-#include <QTemporaryFile>
 #include <QDir>
 #include <QUuid>
 
@@ -21,23 +20,23 @@ bool KmzHandler::open(const QString &kmz, QString &error)
 {
     MarbleZipReader zip( kmz );
     if ( zip.status() != MarbleZipReader::NoError ) {
-        error = QString("Failed to extract %1: error code %2").arg(kmz).arg(zip.status());
+        error = QStringLiteral("Failed to extract %1: error code %2").arg(kmz).arg(zip.status());
 		mDebug() << error;
 		return false;
     }
 
 	QString const uuid = QUuid::createUuid().toString().mid(1, 8);
-	QString const filename = QString("%1/marble-kmz-%2").arg(QDir::tempPath()).arg(uuid);
+	QString const filename = QDir::tempPath() + QLatin1String("/marble-kmz-") + uuid;
 	if (!QDir::root().mkpath(filename)) {
-        error = QString("Failed to create temporary storage %1 for extracting %2").arg(filename).arg(kmz);
+        error = QStringLiteral("Failed to create temporary storage %1 for extracting %2").arg(filename).arg(kmz);
         mDebug() << error;
         return false;
     }
 
-    m_kmzPath = filename + '/';
+    m_kmzPath = filename + QLatin1Char('/');
     if (!zip.extractAll( m_kmzPath ))
     {
-        error = QString("Failed to extract kmz file contents to %1").arg(m_kmzPath);
+        error = QStringLiteral("Failed to extract kmz file contents to %1").arg(m_kmzPath);
         mDebug() << error;
         return false;
     }
@@ -46,9 +45,9 @@ bool KmzHandler::open(const QString &kmz, QString &error)
         //if (!fileInfo.isFile) {
         //    continue;
         //}
-        QString file = filename + '/' + fileInfo.filePath;
+        QString file = filename + QLatin1Char('/') + fileInfo.filePath;
         m_kmzFiles << fileInfo.filePath;
-        if (file.endsWith(".kml", Qt::CaseInsensitive)) {
+        if (file.endsWith(QLatin1String(".kml"), Qt::CaseInsensitive)) {
             if ( !m_kmlFile.isEmpty() ) {
                 mDebug() << "File" << kmz << "contains more than one .kml files";
             }

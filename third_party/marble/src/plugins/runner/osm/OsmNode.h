@@ -12,12 +12,15 @@
 #define MARBLE_OSMNODE
 
 #include <osm/OsmPlacemarkData.h>
-#include <GeoDataDocument.h>
+#include <GeoDataPlacemark.h>
 
 #include <QString>
-#include <QXmlStreamAttributes>
+
+class QXmlStreamAttributes;
 
 namespace Marble {
+
+class GeoDataDocument;
 
 class OsmNode {
 public:
@@ -30,11 +33,16 @@ public:
 
     void create(GeoDataDocument* document) const;
 
+    static int zoomLevelFor(GeoDataPlacemark::GeoDataVisualCategory category);
+    static qint64 popularityFor(GeoDataPlacemark::GeoDataVisualCategory category);
+
 private:
     int populationIndex(qint64 population) const;
 
     OsmPlacemarkData m_osmData;
     GeoDataCoordinates m_coordinates;
+    static QHash<GeoDataPlacemark::GeoDataVisualCategory, qint64> m_popularities;
+    static QHash<GeoDataPlacemark::GeoDataVisualCategory, int> m_zoomLevels;
 };
 
 typedef QHash<qint64,OsmNode> OsmNodes;

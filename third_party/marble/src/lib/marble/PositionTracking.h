@@ -22,7 +22,6 @@ namespace Marble
 {
 
 class GeoDataAccuracy;
-class GeoDataDocument;
 class GeoDataCoordinates;
 class GeoDataTreeModel;
 class PositionProviderPlugin;
@@ -112,7 +111,7 @@ public Q_SLOTS:
     void clearTrack();
 
 Q_SIGNALS:
-    void  gpsLocation( GeoDataCoordinates, qreal );
+    void  gpsLocation( const GeoDataCoordinates&, qreal );
 
     void statusChanged( PositionProviderStatus status );
 

@@ -16,9 +16,12 @@
 #include "GeoDataPlacemark.h"
 #include "GeoDataTypes.h"
 #include "GeoDataStyle.h"
+#include "GeoDataIconStyle.h"
 #include "OsmPlacemarkData.h"
 #include "GeoDataExtendedData.h"
 #include "GeoDataData.h"
+#include "GeoDataGeometry.h"
+#include "StyleBuilder.h"
 
 // Qt
 #include <QTreeWidget>
@@ -63,11 +66,11 @@ void OsmTagEditorWidgetPrivate::populateCurrentTagsList()
 
     // Other tags
     if( m_placemark->hasOsmData() ) {
-        OsmPlacemarkData osmData = m_placemark->osmData();
+        const OsmPlacemarkData& osmData = m_placemark->osmData();
         QHash< QString, QString>::const_iterator it = osmData.tagsBegin();
         QHash< QString, QString>::const_iterator end = osmData.tagsEnd();
         for ( ; it != end; ++it ) {
-            QTreeWidgetItem *tagItem = tagWidgetItem( OsmPresetLibrary::OsmTag( it.key(), it.value() ) );
+            QTreeWidgetItem *tagItem = tagWidgetItem(OsmTag(it.key(), it.value()));
             m_currentTagsList->addTopLevelItem( tagItem );
         }
     }
@@ -76,7 +79,7 @@ void OsmTagEditorWidgetPrivate::populateCurrentTagsList()
     QTreeWidgetItem *adderItem = new QTreeWidgetItem();
     adderItem->setText( 0, m_customTagAdderText );
     adderItem->setTextColor( 0, Qt::gray );
-    adderItem->setIcon( 0, QIcon( ":marble/list-add.png" ) );
+    adderItem->setIcon(0, QIcon(QStringLiteral(":marble/list-add.png")));
     adderItem->setFlags( adderItem->flags() | Qt::ItemIsEditable );
     m_currentTagsList->addTopLevelItem( adderItem );
     m_currentTagsList->resizeColumnToContents( 0 );
@@ -88,7 +91,7 @@ void OsmTagEditorWidgetPrivate::populateCurrentTagsList()
 void OsmTagEditorWidgetPrivate::populatePresetTagsList()
 {
     QList<OsmTag> tags = recommendedTags();
-    foreach ( const OsmPresetLibrary::OsmTag &tag, tags ) {
+    foreach (const OsmTag &tag, tags) {
         QTreeWidgetItem *tagItem = tagWidgetItem( tag );
         m_recommendedTagsList->addTopLevelItem( tagItem );
     }
@@ -99,26 +102,23 @@ QTreeWidgetItem *OsmTagEditorWidgetPrivate::tagWidgetItem( const OsmTag &tag ) c
     QStringList itemText;
 
     itemText << tag.first;
-    itemText << ( tag.second.isEmpty() ? QString( "<%1>" ).arg( QObject::tr( "value" ) ) : tag.second );
+    itemText << (tag.second.isEmpty() ? QLatin1Char('<') + QObject::tr("value") + QLatin1Char('>') : tag.second);
 
     QTreeWidgetItem *tagItem = new QTreeWidgetItem( itemText );
-
-    // Getting the icon preset for the tag ( if there's one available )
-    GeoDataStyle::ConstPtr style = OsmPresetLibrary::presetStyle( tag );
-    QPixmap iconPixmap = QPixmap::fromImage( style->iconStyle().icon() );
-    tagItem->setIcon( 1, QIcon( iconPixmap ) );
 
     return tagItem;
 }
 
 QList<OsmTagEditorWidgetPrivate::OsmTag> OsmTagEditorWidgetPrivate::recommendedTags() const
 {
+    static const QVector<OsmTag> additionalOsmTags = createAdditionalOsmTags();
+
     QList<OsmTag> recommendedTags;
 
     QStringList filter = generateTagFilter();
 
-    QMap<OsmTag, GeoDataFeature::GeoDataVisualCategory>::const_iterator it = OsmPresetLibrary::begin();
-    QMap<OsmTag, GeoDataFeature::GeoDataVisualCategory>::const_iterator end = OsmPresetLibrary::end();
+    QHash<OsmTag, GeoDataPlacemark::GeoDataVisualCategory>::const_iterator it = StyleBuilder::begin();
+    QHash<OsmTag, GeoDataPlacemark::GeoDataVisualCategory>::const_iterator end = StyleBuilder::end();
 
     for ( ; it != end; ++it ) {
         if ( filter.contains( it.key().first ) ) {
@@ -126,12 +126,9 @@ QList<OsmTagEditorWidgetPrivate::OsmTag> OsmTagEditorWidgetPrivate::recommendedT
         }
     }
 
-    QList<OsmTag>::const_iterator additionalIt = OsmPresetLibrary::additionalTagsBegin();
-    QList<OsmTag>::const_iterator additionalEnd = OsmPresetLibrary::additionalTagsEnd();
-
-    for ( ; additionalIt != additionalEnd; ++additionalIt ) {
-        if ( filter.contains( additionalIt->first ) ) {
-            recommendedTags += *additionalIt;
+    foreach (const auto additionalOsmTag, additionalOsmTags) {
+        if (filter.contains(additionalOsmTag.first)) {
+            recommendedTags += additionalOsmTag;
         }
     }
 
@@ -150,7 +147,7 @@ QStringList OsmTagEditorWidgetPrivate::generateTagFilter() const
     bool condition;
     QStringList tags, tagsAux;
     QString type;
-    if ( m_placemark->extendedData().value( "osmRelation" ).value().toString() == "yes" ) {
+    if (m_placemark->extendedData().value(QStringLiteral("osmRelation")).value().toString() == QLatin1String("yes")) {
         type = "Relation";
     }
     else {
@@ -196,7 +193,7 @@ QStringList OsmTagEditorWidgetPrivate::generateTagFilter() const
 
     // If the placemark is a relation, recommend type=*
     tags      = QStringList() << "type=*";
-    condition = type == "Relation";
+    condition = (type == QLatin1String("Relation"));
     if ( condition ) {
         addPattern( filter, osmData, tags );
     }
@@ -333,7 +330,7 @@ QStringList OsmTagEditorWidgetPrivate::generateTagFilter() const
 bool OsmTagEditorWidgetPrivate::containsAny( const OsmPlacemarkData &osmData, const QStringList &tags ) const
 {
     foreach ( const QString &tag, tags ) {
-        QStringList tagSplit = tag.split( '=' );
+        const QStringList tagSplit = tag.split(QLatin1Char('='));
 
         // Only "key=value" mappings should be checked
         Q_ASSERT( tagSplit.size() == 2  );
@@ -341,10 +338,10 @@ bool OsmTagEditorWidgetPrivate::containsAny( const OsmPlacemarkData &osmData, co
         QString key = tagSplit.at( 0 );
         QString value = tagSplit.at( 1 );
 
-        if ( value == "*" && osmData.containsTagKey( key ) ) {
+        if (value == QLatin1String("*") && osmData.containsTagKey(key)) {
             return true;
         }
-        else if ( value != "*" && osmData.containsTag( key, value ) ) {
+        else if (value != QLatin1String("*") && osmData.containsTag(key, value)) {
             return true;
         }
     }
@@ -354,12 +351,125 @@ bool OsmTagEditorWidgetPrivate::containsAny( const OsmPlacemarkData &osmData, co
 void OsmTagEditorWidgetPrivate::addPattern( QStringList &filter, const OsmPlacemarkData &osmData, const QStringList &tags ) const
 {
     foreach ( const QString &tag, tags ) {
-        QStringList tagSplit = tag.split( '=' );
+        const QStringList tagSplit = tag.split(QLatin1Char('='));
         QString key = tagSplit.at( 0 );
         if ( !osmData.containsTagKey( key ) ) {
             filter << key;
         }
     }
+}
+
+QVector<OsmTagEditorWidgetPrivate::OsmTag> OsmTagEditorWidgetPrivate::createAdditionalOsmTags()
+{
+    const QVector<OsmTag> additionalOsmTags = QVector<OsmTag>()
+
+        // Recommended for nodes
+        << OsmTag("power", "pole")
+        << OsmTag("power", "generator")
+        << OsmTag("barrier", "fence")
+        << OsmTag("barrier", "wall")
+        << OsmTag("barrier", "gate")
+
+        // Recommended for ways
+        << OsmTag("lanes", "")
+        << OsmTag("maxspeed", "")
+        << OsmTag("maxheight", "")
+        << OsmTag("maxweight", "")
+        << OsmTag("oneway", "yes")
+        << OsmTag("service", "driveway")
+        << OsmTag("service", "parking_aisle")
+        << OsmTag("service", "alley")
+        << OsmTag("tunnel", "yes")
+        << OsmTag("abutters", "commercial")
+        << OsmTag("abutters", "industrial")
+        << OsmTag("abutters", "mixed")
+        << OsmTag("abutters", "residential")
+
+        // Recommended for areas
+        << OsmTag("surface", "unpaved")
+        << OsmTag("surface", "paved")
+        << OsmTag("surface", "gravel")
+        << OsmTag("surface", "dirt")
+        << OsmTag("surface", "grass")
+
+        // Relations
+        << OsmTag("type", "route")
+        << OsmTag("type", "route_master")
+        << OsmTag("type", "public_transport")
+        << OsmTag("type", "destination_sign")
+        << OsmTag("type", "waterway")
+        << OsmTag("type", "enforcement")
+
+        // Relations: route
+        << OsmTag("route", "road")
+        << OsmTag("route", "bicycle")
+        << OsmTag("route", "foot")
+        << OsmTag("route", "hiking")
+        << OsmTag("route", "bus")
+        << OsmTag("route", "trolleybus")
+        << OsmTag("route", "ferry")
+        << OsmTag("route", "detour")
+        << OsmTag("route", "train")
+        << OsmTag("route", "tram")
+        << OsmTag("route", "mtb")
+        << OsmTag("route", "horse")
+        << OsmTag("route", "ski")
+        << OsmTag("roundtrip", "yes")
+        << OsmTag("network", "")
+        << OsmTag("ref", "")
+        << OsmTag("operator", "")
+
+        // Relations: route_master
+        << OsmTag("route_master", "train")
+        << OsmTag("route_master", "subway")
+        << OsmTag("route_master", "monorail")
+        << OsmTag("route_master", "tram")
+        << OsmTag("route_master", "bus")
+        << OsmTag("route_master", "trolleybus")
+        << OsmTag("route_master", "ferry")
+        << OsmTag("route_master", "bicycle")
+
+        // Relations: public_transport
+        << OsmTag("public_transport", "stop_area")
+        << OsmTag("public_transport", "stop_area_group")
+
+        // Relations: waterway
+        << OsmTag("waterway", "river")
+        << OsmTag("waterway", "stream")
+        << OsmTag("waterway", "canal")
+        << OsmTag("waterway", "drain")
+        << OsmTag("waterway", "ditch")
+
+        // Relations: enforcement
+        << OsmTag("enforcement", "maxheight")
+        << OsmTag("enforcement", "maxweight")
+        << OsmTag("enforcement", "maxspeed")
+        << OsmTag("enforcement", "mindistance")
+        << OsmTag("enforcement", "traffic_signals")
+        << OsmTag("enforcement", "check")
+        << OsmTag("enforcement", "access")
+        << OsmTag("enforcement", "toll")
+
+        // Others
+        << OsmTag("height", "")
+        << OsmTag("rooms", "")
+        << OsmTag("beds", "")
+        << OsmTag("wheelchair", "")
+        << OsmTag("website", "")
+        << OsmTag("email", "")
+        << OsmTag("fee", "")
+        << OsmTag("destination", "")
+        << OsmTag("indoor", "yes")
+
+        // Recommended for all
+        << OsmTag("addr:street", "")
+        << OsmTag("addr:housenumber", "")
+        << OsmTag("addr:postcode", "")
+        << OsmTag("addr:country", "")
+        << OsmTag("access", "private")
+        << OsmTag("access", "permissive");
+
+    return additionalOsmTags;
 }
 
 }

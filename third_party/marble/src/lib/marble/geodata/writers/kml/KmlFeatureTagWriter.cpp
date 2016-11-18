@@ -22,10 +22,13 @@
 #include "GeoDataCamera.h"
 #include "GeoWriter.h"
 #include "GeoDataRegion.h"
+#include "GeoDataLatLonAltBox.h"
 #include "KmlElementDictionary.h"
 #include "KmlObjectTagWriter.h"
 #include "KmlOsmPlacemarkDataTagWriter.h"
 #include "OsmPlacemarkData.h"
+
+#include <QDateTime>
 
 namespace Marble
 {

@@ -14,15 +14,12 @@
 #include "TinyWebBrowser.h"
 
 // Qt
-#include <QFileInfo>
 #include <QPointer>
-#include <QRegExp>
 #include <QAction>
 #include <QDesktopServices>
 #include <QPainter>
 #include <QPrintDialog>
 #include <QPrinter>
-#include <QTextFrame>
 
 // Marble
 #include "MarbleGlobal.h"
@@ -41,7 +38,7 @@ static QString guessWikipediaDomain()
 {
     const QString code = MarbleLocale::languageCode();
 
-    return QString ( "http://%1.m.wikipedia.org/" ).arg ( code );
+    return QLatin1String("https://") + code + QLatin1String(".m.wikipedia.org/");
 }
 
 TinyWebBrowser::TinyWebBrowser( QWidget* parent )
@@ -69,7 +66,7 @@ TinyWebBrowser::~TinyWebBrowser()
 
 void TinyWebBrowser::setWikipediaPath( const QString& relativeUrl )
 {
-    QUrl url = relativeUrl;
+    QUrl url(relativeUrl);
     if ( url.isRelative() )
         url = QUrl( guessWikipediaDomain() ).resolved( url );
     load( url );
@@ -98,7 +95,7 @@ QWebView *TinyWebBrowser::createWindow( QWebPage::WebWindowType type )
     return view;
 }
 
-void TinyWebBrowser::openExternalLink( QUrl url )
+void TinyWebBrowser::openExternalLink( const QUrl& url )
 {
     QDesktopServices::openUrl( url );
 }

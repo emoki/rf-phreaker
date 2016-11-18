@@ -13,9 +13,6 @@
 
 #include <QWidget>
 #include <QFileDialog>
-#include <QLineEdit>
-#include <QLabel>
-#include <QComboBox>
 #include "MarbleDebug.h"
 
 #include "MarbleGlobal.h"
@@ -119,7 +116,7 @@ void PlacemarkEditHeaderPrivate::setIconLink(const QString &iconLink)
     if( !pixmap.isNull() ) {
         QIcon icon(pixmap);
         m_iconLink->setText(iconLink);
-        iconLinkButton->setText( "" );
+        iconLinkButton->setText(QString());
         iconLinkButton->setIcon( icon );
     }
 }
@@ -156,7 +153,7 @@ QString PlacemarkEditHeaderPrivate::id() const
 
 QString PlacemarkEditHeaderPrivate::setId( const QString &id, bool isNew )
 {
-    QString newId = id.toLower().replace( ' ', '_' );
+    QString newId = id.toLower().replace(QLatin1Char(' '), QLatin1Char('_'));
     if( newId == m_idString && !isNew ) {
         return newId;
     }
@@ -306,7 +303,10 @@ void PlacemarkEditHeaderPrivate::selectAll()
 using namespace Marble;
 
 PlacemarkEditHeader::PlacemarkEditHeader(QWidget *parent, GeoDataCoordinates::Notation notation,
-                                         QString name, QString iconLink, QString id, const QStringList &idFilter)
+                                         const QString& name,
+                                         const QString& iconLink,
+                                         const QString& id,
+                                         const QStringList &idFilter)
     : QWidget( parent ), d(new PlacemarkEditHeaderPrivate(this))
 {
     d->init(this);

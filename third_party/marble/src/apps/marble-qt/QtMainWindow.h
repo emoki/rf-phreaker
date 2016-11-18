@@ -16,7 +16,6 @@
 
 
 #include <QMainWindow>
-#include <QDateTime>
 #include <QVariantMap>
 #include "ControlView.h"
 
@@ -24,7 +23,6 @@ class QActionGroup;
 class QAction;
 class QLabel;
 class QMenu;
-class QPrinter;
 class QProgressBar;
 
 namespace Marble
@@ -84,7 +82,7 @@ private Q_SLOTS:
 
     void  changeRecordingState();
 
-    void  updateApplicationTitle(const QString&);
+    void  updateWindowTitle();
 
     // File Menu
     void  openFile();

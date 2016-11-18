@@ -16,8 +16,6 @@
 
 #include "MarbleGlobal.h"
 
-#include "GeoDataObject.h"
-
 #include "geodata_export.h"
 
 #include "GeoDataLatLonBox.h"
@@ -147,7 +145,7 @@ class GEODATA_EXPORT GeoDataLatLonAltBox : public GeoDataLatLonBox
 };
 
 inline uint qHash( const GeoDataLatLonAltBox & r ){
-    return qHash( QString (r.toString()) );
+    return ::qHash(r.toString());
 }
 
 bool GEODATA_EXPORT operator==( GeoDataLatLonAltBox const& lhs, GeoDataLatLonAltBox const& rhs );

@@ -15,10 +15,10 @@
 #include "GeoDataPlacemark.h"
 #include "GeoDataData.h"
 #include "GeoDataExtendedData.h"
+#include "GeoDataLineString.h"
 #include "routing/RouteRequest.h"
 
 #include <QString>
-#include <QVector>
 #include <QUrl>
 #include <QTime>
 #include <QTimer>
@@ -55,11 +55,11 @@ void OpenRouteServiceRunner::retrieveRoute( const RouteRequest *route )
     QString request = xmlHeader();
     QString unit = "KM";
     QString preference = "Fastest";
-    if ( settings.contains( "preference" ) ) {
-        preference = settings["preference"].toString();
+    if (settings.contains(QStringLiteral("preference"))) {
+        preference = settings[QStringLiteral("preference")].toString();
     }
-    if ( preference == "Pedestrian" ) {
-        unit = 'M';
+    if (preference == QLatin1String("Pedestrian")) {
+        unit = QStringLiteral("M");
     }
 
     request += requestHeader( unit, preference );
@@ -130,35 +130,35 @@ void OpenRouteServiceRunner::handleError( QNetworkReply::NetworkError error )
 
 QString OpenRouteServiceRunner::xmlHeader()
 {
-    QString result = "<?xml version=\"1.0\" encoding=\"UTF-8\"?>\n";
-    result += "<xls:XLS xmlns:xls=\"http://www.opengis.net/xls\" xmlns:sch=\"http://www.ascc.net/xml/schematron\" ";
-    result += "xmlns:gml=\"http://www.opengis.net/gml\" xmlns:xlink=\"http://www.w3.org/1999/xlink\" ";
-    result += "xmlns:xsi=\"http://www.w3.org/2001/XMLSchema-instance\" ";
-    result += "xsi:schemaLocation=\"http://www.opengis.net/xls ";
-    result += "http://schemas.opengis.net/ols/1.1.0/RouteService.xsd\" version=\"1.1\" xls:lang=\"en\">\n";
-    result += "<xls:RequestHeader/>\n";
+    const QString result = QLatin1String("<?xml version=\"1.0\" encoding=\"UTF-8\"?>\n"
+        "<xls:XLS xmlns:xls=\"http://www.opengis.net/xls\" xmlns:sch=\"http://www.ascc.net/xml/schematron\" "
+        "xmlns:gml=\"http://www.opengis.net/gml\" xmlns:xlink=\"http://www.w3.org/1999/xlink\" "
+        "xmlns:xsi=\"http://www.w3.org/2001/XMLSchema-instance\" "
+        "xsi:schemaLocation=\"http://www.opengis.net/xls "
+        "http://schemas.opengis.net/ols/1.1.0/RouteService.xsd\" version=\"1.1\" xls:lang=\"en\">\n"
+        "<xls:RequestHeader/>\n");
     return result;
 }
 
 QString OpenRouteServiceRunner::requestHeader( const QString &unit, const QString &routePreference )
 {
-    QString result = "<xls:Request methodName=\"RouteRequest\" requestID=\"123456789\" version=\"1.1\">\n";
-    result += "<xls:DetermineRouteRequest distanceUnit=\"%1\">\n";
-    result += "<xls:RoutePlan>\n";
-    result += "<xls:RoutePreference>%2</xls:RoutePreference>\n";
-    result += "<xls:WayPointList>\n";
+    const QString result = QLatin1String("<xls:Request methodName=\"RouteRequest\" requestID=\"123456789\" version=\"1.1\">\n"
+        "<xls:DetermineRouteRequest distanceUnit=\"%1\">\n"
+        "<xls:RoutePlan>\n"
+        "<xls:RoutePreference>%2</xls:RoutePreference>\n"
+        "<xls:WayPointList>\n");
     return result.arg( unit ).arg( routePreference );
 }
 
 QString OpenRouteServiceRunner::requestPoint( PointType pointType, const GeoDataCoordinates &coordinates )
 {
-    QString result = "<xls:%1>\n";
-    result += "<xls:Position>\n";
-    result += "<gml:Point srsName=\"EPSG:4326\">\n";
-    result += "<gml:pos>%2 %3</gml:pos>\n";
-    result += "</gml:Point>\n";
-    result += "</xls:Position>\n";
-    result += "</xls:%1>\n";
+    QString result = QLatin1String("<xls:%1>\n"
+        "<xls:Position>\n"
+        "<gml:Point srsName=\"EPSG:4326\">\n"
+        "<gml:pos>%2 %3</gml:pos>\n"
+        "</gml:Point>\n"
+        "</xls:Position>\n"
+        "</xls:%1>\n");
 
     result = result.arg( pointType == StartPoint ? "StartPoint" : ( pointType == ViaPoint ? "ViaPoint" : "EndPoint" ) );
     result = result.arg( coordinates.longitude( GeoDataCoordinates::Degree ), 0, 'f', 14 );
@@ -168,24 +168,25 @@ QString OpenRouteServiceRunner::requestPoint( PointType pointType, const GeoData
 
 QString OpenRouteServiceRunner::requestFooter( const QHash<QString, QVariant>& settings )
 {
-    QString result = "</xls:WayPointList>\n";
+    QString result = QLatin1String("</xls:WayPointList>\n");
 
-    if (settings["noMotorways"].toInt() || settings["noTollways"].toInt() ) {
-        result += "<xls:AvoidList>\n";
-        if ( settings["noTollways"].toInt() ) {
-            result += "<xls:AvoidFeature>Tollway</xls:AvoidFeature>";
+    if (settings[QStringLiteral("noMotorways")].toInt() ||
+        settings[QStringLiteral("noTollways")].toInt()) {
+        result += QLatin1String("<xls:AvoidList>\n");
+        if (settings[QStringLiteral("noTollways")].toInt()) {
+            result += QLatin1String("<xls:AvoidFeature>Tollway</xls:AvoidFeature>");
         }
-        if ( settings["noMotorways"].toInt() ) {
-            result += "<xls:AvoidFeature>Highway</xls:AvoidFeature>";
+        if (settings[QStringLiteral("noMotorways")].toInt()) {
+            result += QLatin1String("<xls:AvoidFeature>Highway</xls:AvoidFeature>");
         }
-        result += "</xls:AvoidList>\n";
+        result += QLatin1String("</xls:AvoidList>\n");
     }
 
-    result += "</xls:RoutePlan>\n";
-    result += "<xls:RouteInstructionsRequest provideGeometry=\"true\" />\n";
-    result += "<xls:RouteGeometryRequest/>\n";
-    result += "</xls:DetermineRouteRequest>\n";
-    result += "</xls:Request>\n";
+    result += QLatin1String("</xls:RoutePlan>\n"
+        "<xls:RouteInstructionsRequest provideGeometry=\"true\" />\n"
+        "<xls:RouteGeometryRequest/>\n"
+        "</xls:DetermineRouteRequest>\n"
+        "</xls:Request>\n");
     return result;
 }
 
@@ -205,9 +206,9 @@ GeoDataDocument* OpenRouteServiceRunner::parse( const QByteArray &content ) cons
     QDomElement root = xml.documentElement();
 
     GeoDataDocument* result = new GeoDataDocument();
-    result->setName( "OpenRouteService" );
+    result->setName(QStringLiteral("OpenRouteService"));
 
-    QDomNodeList errors = root.elementsByTagName( "xls:Error" );
+    QDomNodeList errors = root.elementsByTagName(QStringLiteral("xls:Error"));
     if ( errors.size() > 0 ) {
         return 0;
         // Returning early because fallback routing providers are used now
@@ -216,7 +217,7 @@ GeoDataDocument* OpenRouteServiceRunner::parse( const QByteArray &content ) cons
 
         for (int i=0 ; i < errors.length(); ++i ) {
             QDomNode node = errors.item( i );
-            QString errorMessage = node.attributes().namedItem( "message" ).nodeValue();
+            QString errorMessage = node.attributes().namedItem(QStringLiteral("message")).nodeValue();
             QRegExp regexp = QRegExp( "^(.*) Please Check your Position: (-?[0-9]+.[0-9]+) (-?[0-9]+.[0-9]+) !" );
             if ( regexp.indexIn( errorMessage ) == 0 ) {
                 if ( regexp.capturedTexts().size() == 4 ) {
@@ -241,11 +242,11 @@ GeoDataDocument* OpenRouteServiceRunner::parse( const QByteArray &content ) cons
     }
 
     GeoDataPlacemark* routePlacemark = new GeoDataPlacemark;
-    routePlacemark->setName( "Route" );
+    routePlacemark->setName(QStringLiteral("Route"));
     QTime time;
-    QDomNodeList summary = root.elementsByTagName( "xls:RouteSummary" );
+    QDomNodeList summary = root.elementsByTagName(QStringLiteral("xls:RouteSummary"));
     if ( summary.size() > 0 ) {
-        QDomNodeList timeNodeList = summary.item( 0 ).toElement().elementsByTagName( "xls:TotalTime" );
+        QDomNodeList timeNodeList = summary.item(0).toElement().elementsByTagName(QStringLiteral("xls:TotalTime"));
         if ( timeNodeList.size() == 1 ) {
             QRegExp regexp = QRegExp( "^P(?:(\\d+)D)?T(?:(\\d+)H)?(?:(\\d+)M)?(\\d+)S" );
             if ( regexp.indexIn( timeNodeList.item( 0 ).toElement().text() ) == 0 ) {
@@ -274,12 +275,12 @@ GeoDataDocument* OpenRouteServiceRunner::parse( const QByteArray &content ) cons
     }
 
     GeoDataLineString* routeWaypoints = new GeoDataLineString;
-    QDomNodeList geometry = root.elementsByTagName( "xls:RouteGeometry" );
+    QDomNodeList geometry = root.elementsByTagName(QStringLiteral("xls:RouteGeometry"));
     if ( geometry.size() > 0 ) {
         QDomNodeList waypoints = geometry.item( 0 ).toElement().elementsByTagName( "gml:pos" );
         for (int i=0 ; i < waypoints.length(); ++i ) {
             QDomNode node = waypoints.item( i );
-            QStringList content = node.toElement().text().split( ' ' );
+            const QStringList content = node.toElement().text().split(QLatin1Char(' '));
             if ( content.length() == 2 ) {
                 GeoDataCoordinates position;
                 position.setLongitude( content.at( 0 ).toDouble(), GeoDataCoordinates::Degree );
@@ -298,22 +299,22 @@ GeoDataDocument* OpenRouteServiceRunner::parse( const QByteArray &content ) cons
 
     result->append( routePlacemark );
 
-    QDomNodeList instructionList = root.elementsByTagName( "xls:RouteInstructionsList" );
+    QDomNodeList instructionList = root.elementsByTagName(QStringLiteral("xls:RouteInstructionsList"));
     if ( instructionList.size() > 0 ) {
-        QDomNodeList instructions = instructionList.item( 0 ).toElement().elementsByTagName( "xls:RouteInstruction" );
+        QDomNodeList instructions = instructionList.item(0).toElement().elementsByTagName(QStringLiteral("xls:RouteInstruction"));
         for (int i=0 ; i < instructions.length(); ++i ) {
             QDomElement node = instructions.item( i ).toElement();
 
-            QDomNodeList textNodes = node.elementsByTagName( "xls:Instruction" );
-            QDomNodeList positions = node.elementsByTagName( "gml:pos" );
+            QDomNodeList textNodes = node.elementsByTagName(QStringLiteral("xls:Instruction"));
+            QDomNodeList positions = node.elementsByTagName(QStringLiteral("gml:pos"));
 
             if ( textNodes.size() > 0 && positions.size() > 0 ) {
-                QStringList content = positions.at( 0 ).toElement().text().split( ' ' );
+                const QStringList content = positions.at(0).toElement().text().split(QLatin1Char(' '));
                 if ( content.length() == 2 ) {
                     GeoDataLineString *lineString = new GeoDataLineString;
 
                     for( int i = 0; i < positions.count(); ++i ) {
-                         QStringList pointList = positions.at( i ).toElement().text().split( ' ' );
+                         const QStringList pointList = positions.at(i).toElement().text().split(QLatin1Char(' '));
                          GeoDataCoordinates position;
                          position.setLongitude( pointList.at( 0 ).toDouble(), GeoDataCoordinates::Degree );
                          position.setLatitude( pointList.at( 1 ).toDouble(), GeoDataCoordinates::Degree );
@@ -322,17 +323,17 @@ GeoDataDocument* OpenRouteServiceRunner::parse( const QByteArray &content ) cons
 
                     GeoDataPlacemark* instruction = new GeoDataPlacemark;
 
-                    QString const text = textNodes.item( 0 ).toElement().text();
+                    QString const text = textNodes.item( 0 ).toElement().text().remove(QRegExp("<[^>]*>"));
                     GeoDataExtendedData extendedData;
                     GeoDataData turnTypeData;
-                    turnTypeData.setName( "turnType" );
+                    turnTypeData.setName(QStringLiteral("turnType"));
                     QString road;
                     RoutingInstruction::TurnType turnType = parseTurnType( text, &road );
                     turnTypeData.setValue( turnType );
                     extendedData.addValue( turnTypeData );
                     if ( !road.isEmpty() ) {
                         GeoDataData roadName;
-                        roadName.setName( "roadName" );
+                        roadName.setName(QStringLiteral("roadName"));
                         roadName.setValue( road );
                         extendedData.addValue( roadName );
                     }
@@ -363,23 +364,23 @@ RoutingInstruction::TurnType OpenRouteServiceRunner::parseTurnType( const QStrin
         }
     }
 
-    if ( instruction == "Continue" ) {
+    if (instruction == QLatin1String("Continue")) {
         return RoutingInstruction::Straight;
-    } else if ( instruction == "half right" ) {
+    } else if (instruction == QLatin1String("half right")) {
         return RoutingInstruction::SlightRight;
-    } else if ( instruction == "right" ) {
+    } else if (instruction == QLatin1String("right")) {
         return RoutingInstruction::Right;
-    } else if ( instruction == "sharp right" ) {
+    } else if (instruction == QLatin1String("sharp right")) {
         return RoutingInstruction::SharpRight;
-    } else if ( instruction == "straight forward" ) {
+    } else if (instruction == QLatin1String("straight forward")) {
         return RoutingInstruction::Straight;
-    } else if ( instruction == "turn" ) {
+    } else if (instruction == QLatin1String("turn")) {
         return RoutingInstruction::TurnAround;
-    } else if ( instruction == "sharp left" ) {
+    } else if (instruction == QLatin1String("sharp left")) {
         return RoutingInstruction::SharpLeft;
-    } else if ( instruction == "left" ) {
+    } else if (instruction == QLatin1String("left")) {
         return RoutingInstruction::Left;
-    } else if ( instruction == "half left" ) {
+    } else if (instruction == QLatin1String("half left")) {
         return RoutingInstruction::SlightLeft;
     }
 

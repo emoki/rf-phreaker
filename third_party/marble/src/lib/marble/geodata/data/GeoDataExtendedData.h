@@ -12,10 +12,7 @@
 #ifndef MARBLE_GEODATAEXTENDEDDATA_H
 #define MARBLE_GEODATAEXTENDEDDATA_H
 
-#include <QString>
-
 #include "GeoDataObject.h"
-#include "GeoDataData.h"
 
 #include "geodata_export.h"
 #include <QHash>
@@ -25,6 +22,7 @@ namespace Marble
 
 class GeoDataSimpleArrayData;
 class GeoDataSchemaData;
+class GeoDataData;
 
 class GeoDataExtendedDataPrivate;
 
@@ -60,6 +58,11 @@ class GEODATA_EXPORT GeoDataExtendedData : public GeoDataObject
      * @brief add a data object to the GeoDataExtendedData with the @p key 
      */
     void addValue( const GeoDataData& data );
+
+    /**
+     * @since 0.26.0
+     */
+    void removeKey(const QString &key);
     
     /**
       * @brief return const Begin iterator for QHash

@@ -12,7 +12,6 @@
 
 #include "TestUtils.h"
 #include <GeoDataDocument.h>
-#include <GeoDataFolder.h>
 #include <MarbleDebug.h>
 #include <GeoDataGroundOverlay.h>
 #include <GeoDataLatLonQuad.h>
@@ -23,7 +22,7 @@ using namespace Marble;
 class TestLatLonQuad : public QObject
 {
     Q_OBJECT
-private slots:
+private Q_SLOTS:
     void initTestCase();
     void simpleParseTest();
 };

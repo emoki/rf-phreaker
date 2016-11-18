@@ -11,16 +11,16 @@
 #define MARBLE_FILELOADER_H
 
 #include "GeoDataDocument.h"
-#include "GeoDataStyle.h"
 
 #include <QThread>
-#include <QString>
+
+class QString;
 
 namespace Marble
 {
-class GeoDataContainer;
 class FileLoaderPrivate;
 class PluginManager;
+class GeoDataStyle;
 
 class FileLoader : public QThread
 {

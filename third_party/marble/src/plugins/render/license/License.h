@@ -12,8 +12,6 @@
 #ifndef MARBLELICENSE_H
 #define MARBLELICENSE_H
 
-#include <QObject>
-
 #include "AbstractFloatItem.h"
 
 class QLabel;
@@ -21,9 +19,7 @@ class QLabel;
 namespace Marble
 {
 
-class GeoDataCoordinates;
 class WidgetGraphicsItem;
-class MarbleLocale;
 
 /**
  * @short The class that displays copyright info
@@ -33,7 +29,7 @@ class MarbleLocale;
 class License : public AbstractFloatItem
 {
     Q_OBJECT
-    Q_PLUGIN_METADATA( IID "org.kde.edu.marble.License" )
+    Q_PLUGIN_METADATA(IID "org.kde.marble.License")
     Q_INTERFACES( Marble::RenderPluginInterface )
     MARBLE_PLUGIN( License )
 public:
@@ -47,12 +43,12 @@ public:
     QString version() const;
     QString description() const;
     QString copyrightYears() const;
-    QList<PluginAuthor> pluginAuthors() const;
+    QVector<PluginAuthor> pluginAuthors() const override;
     QIcon icon () const;
     void initialize ();
     bool isInitialized () const;
 
-private slots:
+private Q_SLOTS:
     void updateLicenseText();
     void toggleLicenseSize();
     void showAboutDialog();

@@ -12,9 +12,7 @@
 #ifndef MARBLE_GAMEMAINWINDOW_H
 #define MARBLE_GAMEMAINWINDOW_H
 
-#include <GeoDataCoordinates.h>
-
-#include <marble_export.h>
+#include <marble/GeoDataCoordinates.h>
 
 #include <QMainWindow>
 
@@ -24,7 +22,7 @@ namespace Marble
 class Private;
 class MarbleWidget;
 
-class MARBLE_EXPORT MainWindow: public QMainWindow
+class MainWindow: public QMainWindow
 {
     Q_OBJECT
 public:

@@ -14,6 +14,8 @@
 #include <QStyleOptionButton>
 #include <QPainter>
 #include <QApplication>
+#include <QListView>
+#include <QPointer>
 
 #include "TourItemDelegate.h"
 #include "MarblePlacemarkModel.h"
@@ -28,7 +30,12 @@
 #include "SoundCueEditWidget.h"
 #include "WaitEditWidget.h"
 #include "RemoveItemEditWidget.h"
+#include "GeoDataPlacemark.h"
 #include "GeoDataTypes.h"
+#include "GeoDataCreate.h"
+#include "GeoDataUpdate.h"
+#include "GeoDataDelete.h"
+#include "GeoDataChange.h"
 #include "EditPlacemarkDialog.h"
 #include "MarbleWidget.h"
 #include "GeoDataPlaylist.h"
@@ -46,7 +53,7 @@ TourItemDelegate::TourItemDelegate( QListView* view, MarbleWidget* widget, TourW
 
 void TourItemDelegate::paint( QPainter *painter, const QStyleOptionViewItem &option, const QModelIndex &index ) const
 {
-    QStyleOptionViewItemV4 styleOption = option;
+    QStyleOptionViewItem styleOption = option;
     styleOption.text = QString();
     QApplication::style()->drawControl(QStyle::CE_ItemViewItem, &styleOption, painter);
 
@@ -93,18 +100,18 @@ void TourItemDelegate::paint( QPainter *painter, const QStyleOptionViewItem &opt
         painter->setClipRect( 0, 0, labelRect.width(), labelRect.height() );
         label.documentLayout()->draw( painter, paintContext );
         painter->restore();
-        button.icon = QIcon( ":/marble/document-edit.png" );
+        button.icon = QIcon(QStringLiteral(":/marble/document-edit.png"));
 
         QRect const buttonRect = position( EditButton, option );;
         button.rect = buttonRect;
 
-        QIcon const icon = QIcon( ":/marble/media-playback-pause.png" );
+        QIcon const icon = QIcon(QStringLiteral(":/marble/media-playback-pause.png"));
         painter->drawPixmap( iconRect, icon.pixmap( iconRect.size() ) );
 
     } else if ( object->nodeType() == GeoDataTypes::GeoDataFlyToType && !m_editingIndices.contains( index ) ) {
         GeoDataCoordinates const flyToCoords = index.data( MarblePlacemarkModel::CoordinateRole ).value<GeoDataCoordinates>();
         label.setHtml( flyToCoords.toString() );
-        button.icon = QIcon( ":/marble/document-edit.png" );
+        button.icon = QIcon(QStringLiteral(":/marble/document-edit.png"));
 
         painter->save();
         painter->translate( labelRect.topLeft() );
@@ -115,7 +122,7 @@ void TourItemDelegate::paint( QPainter *painter, const QStyleOptionViewItem &opt
         QRect const buttonRect = position( EditButton, option );
         button.rect = buttonRect;
 
-        QIcon const icon = QIcon( ":/marble/flag.png" );
+        QIcon const icon = QIcon(QStringLiteral(":/marble/flag.png"));
         painter->drawPixmap( iconRect, icon.pixmap( iconRect.size() ) );
 
     } else if ( object->nodeType() == GeoDataTypes::GeoDataWaitType && !m_editingIndices.contains( index ) ) {
@@ -128,17 +135,17 @@ void TourItemDelegate::paint( QPainter *painter, const QStyleOptionViewItem &opt
         label.documentLayout()->draw( painter, paintContext );
         painter->restore();
 
-        button.icon = QIcon( ":/marble/document-edit.png" );
+        button.icon = QIcon(QStringLiteral(":/marble/document-edit.png"));
 
         QRect const buttonRect = position( EditButton, option );
         button.rect = buttonRect;
 
-        QIcon const icon = QIcon( ":/marble/player-time.png" );
+        QIcon const icon = QIcon(QStringLiteral(":/marble/player-time.png"));
         painter->drawPixmap( iconRect, icon.pixmap( iconRect.size() ) );
 
     } else if ( object->nodeType() == GeoDataTypes::GeoDataSoundCueType && !m_editingIndices.contains( index ) ) {
         GeoDataSoundCue *soundCue = static_cast<GeoDataSoundCue*>( object );
-        label.setHtml( soundCue->href().section('/', -1) );
+        label.setHtml(soundCue->href().section(QLatin1Char('/'), -1));
 
         painter->save();
         painter->translate( labelRect.topLeft() );
@@ -148,16 +155,16 @@ void TourItemDelegate::paint( QPainter *painter, const QStyleOptionViewItem &opt
 
         QStyleOptionButton playButton = button;
 
-        button.icon = QIcon( ":/marble/document-edit.png" );
+        button.icon = QIcon(QStringLiteral(":/marble/document-edit.png"));
         QRect const buttonRect = position( EditButton, option );
         button.rect = buttonRect;
 
-        playButton.icon = QIcon( ":/marble/playback-play.png" );
+        playButton.icon = QIcon(QStringLiteral(":/marble/playback-play.png"));
         QRect const playButtonRect = position( ActionButton, option );
         playButton.rect = playButtonRect;
         QApplication::style()->drawControl( QStyle::CE_PushButton, &playButton, painter );
 
-        QIcon const icon = QIcon( ":/marble/audio-x-generic.png" );
+        QIcon const icon = QIcon(QStringLiteral(":/marble/audio-x-generic.png"));
         painter->drawPixmap( iconRect, icon.pixmap( iconRect.size() ) );
     } else if ( object->nodeType() == GeoDataTypes::GeoDataAnimatedUpdateType && !m_editingIndices.contains( index ) ){
         GeoDataAnimatedUpdate *animUpdate = static_cast<GeoDataAnimatedUpdate*>( object );
@@ -172,16 +179,16 @@ void TourItemDelegate::paint( QPainter *painter, const QStyleOptionViewItem &opt
             if( container->size() > 0 ) {
                 label.setHtml( tr( "Create item %1" ).arg( container->first().id() ) );
                 ok = true;
-                iconString = ":/icons/add-placemark.png";
+                iconString = QStringLiteral(":/icons/add-placemark.png");
             }
         } else if( update && update->getDelete() && update->getDelete()->size() != 0 ){
             label.setHtml( tr( "Remove item %1" ).arg( update->getDelete()->first().targetId() ) );
             ok = true;
-            iconString = ":/icons/remove.png";
+            iconString = QStringLiteral(":/icons/remove.png");
         } else if( update && update->change() && update->change()->size() != 0 ){
             label.setHtml( tr( "Change item %1" ).arg( update->change()->first().targetId() ) );
             ok = true;
-            iconString = ":/marble/document-edit.png";
+            iconString = QStringLiteral(":/marble/document-edit.png");
         }
         if( update && !ok ) {
             label.setHtml( tr( "Update items" ) );
@@ -194,7 +201,7 @@ void TourItemDelegate::paint( QPainter *painter, const QStyleOptionViewItem &opt
         label.documentLayout()->draw( painter, paintContext );
         painter->restore();
 
-        button.icon = QIcon( ":/marble/document-edit.png" );
+        button.icon = QIcon(QStringLiteral(":/marble/document-edit.png"));
         QRect const buttonRect = position( EditButton, option );
         button.rect = buttonRect;
 
@@ -402,7 +409,7 @@ bool TourItemDelegate::editAnimatedUpdate(GeoDataAnimatedUpdate *animatedUpdate,
                 placemark = new GeoDataPlacemark( *targetPlacemark );
                 animatedUpdate->update()->change()->placemarkList().insert( 0, placemark );
                 placemark->setTargetId( defaultFeatureId() );
-                placemark->setId( "" );
+                placemark->setId(QString());
             }
         }
     }
@@ -427,7 +434,7 @@ bool TourItemDelegate::editAnimatedUpdate(GeoDataAnimatedUpdate *animatedUpdate,
     }
     bool status = dialog->exec();
     if( !create ) {
-        placemark->setId("");
+        placemark->setId(QString());
     }
     return status;
 }

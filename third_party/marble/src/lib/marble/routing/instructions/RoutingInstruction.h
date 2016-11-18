@@ -15,9 +15,10 @@
 #include "RoutingPoint.h"
 #include "marble_export.h"
 
-#include <QTextStream>
 #include <QVector>
-#include <QVariant>
+#include <QMetaType>
+
+class QTextStream;
 
 namespace Marble
 {

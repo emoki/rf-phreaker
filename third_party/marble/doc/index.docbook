@@ -876,15 +876,6 @@ If a GPS device is connected with your computer, &marble; displays longitude and
 </varlistentry>
 
 <varlistentry>
-<term><guilabel>Graphics system</guilabel></term>
-<listitem>
-<para>Specifies the graphics system - <guilabel>Native X11</guilabel> or <guilabel>Raster (Software rendering)</guilabel> - 
-that &Qt; uses to draw the map. Changing this setting might be a good idea if there are performance issues with 
-the system's graphics drivers. </para>
-</listitem>
-</varlistentry>
-
-<varlistentry>
 <term><guilabel>Place names</guilabel></term>
 <listitem>
 <para>Places often have different names in different languages. The label on the map can show the name in the user's language. Alternatively it can display the name in the official language and glyphs of that place.</para>
@@ -1465,8 +1456,8 @@ url="https://owncloud.com/">ownClowd official website</ulink>.</para>
 			 <title>Compilation and Installation</title>
 
              <para>
-                 &marble; can be compiled as a &Qt; 4-only version as well as featuring &kde; 4 support.
-                 To compile &marble; with &Qt; 4-only support check out &marble; from &kde; Git into ~/marble and just do: <command>cmake -DQTONLY=ON ~/marble</command> and <command>sudo make install</command>. To compile &marble; with &kde; support check instructions on how to compile &kde; applications at <ulink url="http://techbase.kde.org/">&kde;'s TechBase</ulink>.
+                 &marble; can be compiled as a &Qt; 5-only version as well as featuring &kde; &frameworks; 5 usage.
+                 To compile &marble; with &Qt; 5-only support check out &marble; from its &kde; Git repository into ~/marble and just do: <command>cmake -DWITH_KF5=FALSE ~/marble</command> and <command>sudo make install</command>. To compile &marble; with &kde; &frameworks; 5 usage check instructions on how to compile &kde; applications at <ulink url="http://techbase.kde.org/">&kde;'s TechBase</ulink>.
              </para> 
 		 </sect1>
 

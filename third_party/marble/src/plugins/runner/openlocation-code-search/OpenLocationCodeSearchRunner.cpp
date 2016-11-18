@@ -11,6 +11,8 @@
 //self
 #include "OpenLocationCodeSearchRunner.h"
 #include "GeoDataPlacemark.h"
+#include "GeoDataLinearRing.h"
+#include "GeoDataPolygon.h"
 #include "GeoDataStyle.h"
 #include "GeoDataLineStyle.h"
 #include "GeoDataPolyStyle.h"
@@ -123,7 +125,7 @@ bool OpenLocationCodeSearchRunner::isValidOLC( const QString& olc ) const
 {
     // It must have only one SEPARATOR located at an even index in
     // the string.
-    QChar const separator('+');
+    QChar const separator(QLatin1Char('+'));
     int separatorPos = olc.indexOf(separator);
     if( separatorPos == -1
         || separatorPos != olc.lastIndexOf(separator)
@@ -152,7 +154,7 @@ bool OpenLocationCodeSearchRunner::isValidOLC( const QString& olc ) const
     }
 
     // Test the characters before the SEPARATOR.
-    QChar const suffixPadding('0');
+    QChar const suffixPadding(QLatin1Char('0'));
     bool paddingBegun = false;
     for( int index = 0; index < separatorPos; index++ ) {
         if( paddingBegun ) {

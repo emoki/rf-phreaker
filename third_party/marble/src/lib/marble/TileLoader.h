@@ -21,26 +21,23 @@
 #define MARBLE_TILELOADER_H
 
 #include <QObject>
-#include <QString>
-#include <QImage>
 
-#include "TileId.h"
-#include "GeoDataContainer.h"
 #include "PluginManager.h"
 #include "MarbleGlobal.h"
 
 class QByteArray;
 class QImage;
 class QUrl;
+class QString;
 
 namespace Marble
 {
+class TileId;
 class HttpDownloadManager;
 class GeoDataDocument;
 class GeoSceneTileDataset;
 class GeoSceneTextureTileDataset;
 class GeoSceneVectorTileDataset;
-class ParsingRunnerManager;
 
 class TileLoader: public QObject
 {

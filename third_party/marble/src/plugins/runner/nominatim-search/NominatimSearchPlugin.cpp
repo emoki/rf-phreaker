@@ -18,7 +18,7 @@ namespace Marble
 NominatimPlugin::NominatimPlugin( QObject *parent ) :
     SearchRunnerPlugin( parent )
 {
-    setSupportedCelestialBodies( QStringList() << "earth" );
+    setSupportedCelestialBodies(QStringList(QStringLiteral("earth")));
     setCanWorkOffline( false );
 }
 
@@ -34,12 +34,12 @@ QString NominatimPlugin::guiString() const
 
 QString NominatimPlugin::nameId() const
 {
-    return "nominatim-search";
+    return QStringLiteral("nominatim-search");
 }
 
 QString NominatimPlugin::version() const
 {
-    return "1.0";
+    return QStringLiteral("1.0");
 }
 
 QString NominatimPlugin::description() const
@@ -49,14 +49,14 @@ QString NominatimPlugin::description() const
 
 QString NominatimPlugin::copyrightYears() const
 {
-    return "2010, 2012";
+    return QStringLiteral("2010, 2012");
 }
 
-QList<PluginAuthor> NominatimPlugin::pluginAuthors() const
+QVector<PluginAuthor> NominatimPlugin::pluginAuthors() const
 {
-    return QList<PluginAuthor>()
-            << PluginAuthor( QString::fromUtf8( "Dennis Nienhüser" ), "nienhueser@kde.org" )
-            << PluginAuthor( "Bernhard Beschow", "bbeschow@cs.tu-berlin.de" );
+    return QVector<PluginAuthor>()
+            << PluginAuthor(QStringLiteral("Dennis Nienhüser"), QStringLiteral("nienhueser@kde.org"))
+            << PluginAuthor(QStringLiteral("Bernhard Beschow"), QStringLiteral("bbeschow@cs.tu-berlin.de"));
 }
 
 SearchRunner* NominatimPlugin::newRunner() const
@@ -65,7 +65,5 @@ SearchRunner* NominatimPlugin::newRunner() const
 }
 
 }
-
-Q_EXPORT_PLUGIN2( NominatimSearchPlugin, Marble::NominatimPlugin )
 
 #include "moc_NominatimSearchPlugin.cpp"

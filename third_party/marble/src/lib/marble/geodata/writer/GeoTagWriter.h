@@ -20,7 +20,6 @@
 namespace Marble
 {
 
-class GeoDataObject;
 class GeoNode;
 class GeoWriter;
 
@@ -68,6 +67,7 @@ private:
 private:
     // Only our writer is allowed to access tag handlers.
     friend class GeoWriter;
+    friend class GeoDataDocumentWriter;
     static const GeoTagWriter* recognizes(const QualifiedName&);
 };
 

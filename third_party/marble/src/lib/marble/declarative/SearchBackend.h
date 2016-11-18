@@ -13,15 +13,16 @@
 
 #include <QObject>
 #include <QSortFilterProxyModel>
-#include <QCompleter>
 
 #include "MarbleQuickItem.h"
-#include "SearchRunnerManager.h"
 #include "MarblePlacemarkModel.h"
 #include "Placemark.h"
 
+class QCompleter;
+
 namespace Marble
 {
+class SearchRunnerManager;
 
 class SearchBackend : public QObject
 {
@@ -40,14 +41,14 @@ public:
     const QObject* marbleQuickItem() const;
     Placemark* selectedPlacemark();
 
-signals:
+Q_SIGNALS:
     void marbleQuickItemChanged(QObject *marbleQuickItem);
     void completionModelChanged(MarblePlacemarkModel *model);
     void searchResultChanged(MarblePlacemarkModel *model);
     void searchFinished(const QString &searchTerm);
     void selectedPlacemarkChanged(Placemark * selectedPlacemark);
 
-public slots:
+public Q_SLOTS:
     Q_INVOKABLE void setSelectedPlacemark(int placemarkIndex);
     void setMarbleQuickItem(QObject *marbleQuickItem);
     void updateSearchResult(QAbstractItemModel *result);

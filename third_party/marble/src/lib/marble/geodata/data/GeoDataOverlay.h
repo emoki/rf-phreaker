@@ -15,15 +15,16 @@
 #include "geodata_export.h"
 #include "GeoDataFeature.h"
 
-#include <QVector>
-#include <QColor>
-#include <QImage>
+class QColor;
+class QImage;
 
 namespace Marble
 {
 
 class GeoDataOverlayPrivate;
 
+/**
+ */
 class GEODATA_EXPORT GeoDataOverlay: public GeoDataFeature
 {
  public:
@@ -35,6 +36,8 @@ class GEODATA_EXPORT GeoDataOverlay: public GeoDataFeature
     GeoDataOverlay( const GeoDataOverlay &other );
 
     GeoDataOverlay& operator=( const GeoDataOverlay &other );
+
+    GeoDataFeature * clone() const override;
 
     QColor color() const;
 
@@ -59,12 +62,15 @@ class GEODATA_EXPORT GeoDataOverlay: public GeoDataFeature
       */
     QString absoluteIconFile() const;
 
-private:
-    GeoDataOverlayPrivate * const d;
-
 protected:
+    explicit GeoDataOverlay(GeoDataOverlayPrivate *priv);
+    GeoDataOverlay(const GeoDataOverlay& other, GeoDataOverlayPrivate *priv);
+
     bool equals(const GeoDataOverlay &other) const;
     using GeoDataFeature::equals;
+
+ private:
+    Q_DECLARE_PRIVATE(GeoDataOverlay)
 };
 
 }

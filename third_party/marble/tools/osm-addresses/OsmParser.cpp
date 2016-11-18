@@ -11,19 +11,19 @@
 #include "OsmParser.h"
 #include "OsmRegionTree.h"
 
+#include "GeoDataLatLonAltBox.h"
 #include "GeoDataLinearRing.h"
 #include "GeoDataLineString.h"
 #include "GeoDataPolygon.h"
 #include "GeoDataDocument.h"
-#include "GeoDataFolder.h"
 #include "GeoDataPlacemark.h"
 #include "GeoDataMultiGeometry.h"
 #include "GeoDataStyle.h"
 #include "GeoDataStyleMap.h"
 #include "GeoDataLineStyle.h"
-#include "GeoDataFeature.h"
-#include "geodata/writer/GeoWriter.h"
-#include "geodata/data/GeoDataExtendedData.h"
+#include "geodata/writer/GeoDataDocumentWriter.h"
+#include <GeoDataExtendedData.h>
+#include <GeoDataData.h>
 #include <geodata/handlers/kml/KmlElementDictionary.h>
 
 #include <QDebug>
@@ -363,7 +363,7 @@ void OsmParser::read( const QFileInfo &content, const QString &areaName )
     QSet<QString> keys = QSet<QString>::fromList( waysByName.keys() );
     foreach( const QString & key, keys ) {
         QList<QList<Way> > merged = merge( waysByName.values( key ) );
-        foreach( const QList<Way> ways, merged ) {
+        foreach( const QList<Way> & ways, merged ) {
             Q_ASSERT( !ways.isEmpty() );
             OsmPlacemark placemark = ways.first();
             ways.first().setPosition( m_coordinates, placemark );
@@ -478,12 +478,12 @@ void OsmParser::importMultipolygon( const Relation &relation )
         }
 
         GeoDataPolygon polygon;
-        polygon.setOuterBoundary( string );
+        polygon.setOuterBoundary(GeoDataLinearRing(string));
         Q_ASSERT( polygon.outerBoundary().size() > 0 );
 
         foreach( const GeoDataLineString & hole, inner ) {
             if ( contains<GeoDataLinearRing, GeoDataLineString>( polygon.outerBoundary(), hole ) ) {
-                polygon.appendInnerBoundary( hole );
+                polygon.appendInnerBoundary(GeoDataLinearRing(hole));
             }
         }
 
@@ -621,7 +621,7 @@ bool OsmParser::shouldSave( ElementType /*type*/, const QString &key, const QStr
 
 void OsmParser::setCategory( Element &element, const QString &key, const QString &value )
 {
-    QString const term = key + '/' + value;
+    QString const term = key + QLatin1Char('/') + value;
     if ( m_categoryMap.contains( term ) ) {
         if ( element.category != OsmPlacemark::UnknownCategory ) {
             qDebug() << "Overwriting category " << element.category << " with " << m_categoryMap[term] << " for " << element.name;
@@ -727,14 +727,14 @@ void OsmParser::writeKml( const QString &area, const QString &version, const QSt
     lineStyle.setColor( color );
     lineStyle.setWidth( 4 );
     style->setLineStyle( lineStyle );
-    style->setId( color.name().replace( '#', 'f' ) );
+    style->setId(color.name().replace(QLatin1Char('#'), QLatin1Char('f')));
 
     GeoDataStyleMap styleMap;
-    styleMap.setId( color.name().replace( '#', 'f' ) );
-    styleMap.insert( "normal", QString( "#" ).append( style->id() ) );
+    styleMap.setId(color.name().replace(QLatin1Char('#'), QLatin1Char('f')));
+    styleMap.insert("normal", QLatin1Char('#') + style->id());
     document->addStyle( style );
 
-    placemark->setStyleUrl( QString( "#" ).append( styleMap.id() ) );
+    placemark->setStyleUrl(QLatin1Char('#') + styleMap.id());
 
     //placemark->setGeometry( new GeoDataLinearRing( region.region.geometry().outerBoundary() ) );
     GeoDataMultiGeometry *geometry = new GeoDataMultiGeometry;
@@ -745,18 +745,9 @@ void OsmParser::writeKml( const QString &area, const QString &version, const QSt
     document->addStyleMap( styleMap );
 //    }
 
-    GeoWriter writer;
-    writer.setDocumentType( kml::kmlTag_nameSpaceOgc22 );
-
-    QFile file( filename );
-    if ( !file.open( QIODevice::WriteOnly | QIODevice::Truncate ) ) {
-        qCritical() << "Cannot write to " << file.fileName();
+    if (!GeoDataDocumentWriter::write(filename, *document)) {
+        qCritical() << "Can not write to " << filename;
     }
-
-    if ( !writer.write( &file, document ) ) {
-        qCritical() << "Can not write to " << file.fileName();
-    }
-    file.close();
 }
 
 Coordinate::Coordinate(float lon_, float lat_) : lon(lon_), lat(lat_)

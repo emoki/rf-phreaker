@@ -8,16 +8,11 @@ IF(LIBGPS_FOUND)
      ADD_SUBDIRECTORY( gpsd )
 ENDIF(LIBGPS_FOUND)
 
-macro_optional_find_package(liblocation)
-marble_set_package_properties( liblocation PROPERTIES DESCRIPTION "position information on Maemo 5 devices" )
-marble_set_package_properties( liblocation PROPERTIES URL "http://maemo.org/" )
-marble_set_package_properties( liblocation PROPERTIES TYPE OPTIONAL PURPOSE "position information via GPS/WLAN for the Nokia N900 smartphone" )
-IF(liblocation_FOUND)
-     ADD_SUBDIRECTORY( maemo )
-ENDIF(liblocation_FOUND)
-
-macro_optional_find_package(Qt5Location)
-macro_optional_find_package(Qt5Positioning)
+find_package(Qt5 ${REQUIRED_QT_VERSION}
+    COMPONENTS
+        Location
+        Positioning
+)
 marble_set_package_properties( Qt5Positioning PROPERTIES DESCRIPTION "a collection of APIs and frameworks" )
 marble_set_package_properties( Qt5Positioning PROPERTIES URL "http://qt.digia.com/" )
 marble_set_package_properties( Qt5Positioning PROPERTIES TYPE OPTIONAL PURPOSE "Required for QtLocation to work" )

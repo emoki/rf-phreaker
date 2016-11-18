@@ -24,7 +24,6 @@ namespace Marble
 {
 
 class BBCStation;
-class MarbleModel;
 
 class BBCItemGetter : public AbstractWorkerThread
 {
@@ -46,7 +45,7 @@ class BBCItemGetter : public AbstractWorkerThread
     void work();
 
  Q_SIGNALS:
-    void foundStation( BBCStation );
+    void foundStation( const BBCStation& );
 
  public:
     QList<BBCStation> m_items;

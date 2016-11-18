@@ -12,10 +12,10 @@
 #define MARBLE_ROUTINGMODEL_H
 
 #include "marble_export.h"
-#include <QAbstractListModel>
-#include <QIODevice>
 
-#include "GeoDataCoordinates.h"
+#include <QAbstractListModel>
+
+class QIODevice;
 
 /**
   * A QAbstractItemModel that contains a list of routing instructions.
@@ -30,6 +30,8 @@ class RoutingModelPrivate;
 class Route;
 class RouteRequest;
 class MarbleModel;
+class GeoDataCoordinates;
+
 class MARBLE_EXPORT RoutingModel : public QAbstractListModel
 {
     Q_OBJECT

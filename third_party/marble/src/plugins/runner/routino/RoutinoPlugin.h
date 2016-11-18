@@ -14,16 +14,13 @@
 
 #include "RoutingRunnerPlugin.h"
 
-namespace Ui {
-    class RoutinoConfigWidget;
-}
 namespace Marble
 {
 
 class RoutinoPlugin : public RoutingRunnerPlugin
 {
     Q_OBJECT
-    Q_PLUGIN_METADATA( IID "org.kde.edu.marble.RoutinoPlugin" )
+    Q_PLUGIN_METADATA(IID "org.kde.marble.RoutinoPlugin")
     Q_INTERFACES( Marble::RoutingRunnerPlugin )
 
 public:
@@ -41,7 +38,7 @@ public:
 
     QString copyrightYears() const;
 
-    QList<PluginAuthor> pluginAuthors() const;
+    QVector<PluginAuthor> pluginAuthors() const override;
 
     virtual RoutingRunner *newRunner() const;
 

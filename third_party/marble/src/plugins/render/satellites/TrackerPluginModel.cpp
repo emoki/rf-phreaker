@@ -20,8 +20,6 @@
 #include "MarbleModel.h"
 #include "TrackerPluginItem.h"
 
-#include <QTimer>
-
 namespace Marble
 {
 
@@ -33,7 +31,7 @@ public:
           m_enabled( false ),
           m_treeModel( treeModel ),
           m_document( new GeoDataDocument() ),
-          m_storagePolicy( MarbleDirs::localPath() + "/cache/" ),
+          m_storagePolicy(MarbleDirs::localPath() + QLatin1String("/cache/")),
           m_downloadManager( 0 )
     {
     }
@@ -87,7 +85,7 @@ TrackerPluginModel::TrackerPluginModel( GeoDataTreeModel *treeModel )
     : d( new TrackerPluginModelPrivate( this, treeModel ) )
 {
     d->m_document->setDocumentRole( TrackingDocument );
-    d->m_document->setName("Satellites");
+    d->m_document->setName(QStringLiteral("Satellites"));
     if( d->m_enabled ) {
         d->m_treeModel->addDocument( d->m_document );
     }

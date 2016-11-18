@@ -14,9 +14,8 @@
 #define DECLARATIVEDATAPLUGIN_H
 
 #include "AbstractDataPlugin.h"
-#include "RenderPlugin.h"
-#include "RenderPluginInterface.h"
 
+#include <QQmlComponent>
 #include <QStringList>
 
 class DeclarativeDataPluginPrivate;
@@ -72,9 +71,9 @@ public:
 
     virtual QString description() const;
 
-    void setDescription( const QString description );
+    void setDescription( const QString & description );
 
-    virtual QList<Marble::PluginAuthor> pluginAuthors() const;
+    virtual QVector<Marble::PluginAuthor> pluginAuthors() const;
 
     void setAuthors( const QStringList & pluginAuthors );
 

@@ -20,19 +20,21 @@
  */
 
 #include <QSize>
-#include <QPainterPath>
 
-#include "GeoDataLatLonAltBox.h"
-
+#include "GeoDataCoordinates.h"
 #include "Quaternion.h"
 #include "MarbleGlobal.h"
 #include "marble_export.h"
 
 class QPolygonF;
+class QPainterPath;
 
 namespace Marble
 {
 
+class GeoDataLatLonAltBox;
+class GeoDataLatLonBox;
+class GeoDataLineString;
 class AbstractProjection;
 class ViewportParamsPrivate;
 
@@ -106,11 +108,10 @@ class MARBLE_EXPORT ViewportParams
 
     void setWidth(int newWidth);
     void setHeight(int newHeight);
-    void setSize(QSize newSize);
+    void setSize(const QSize& newSize);
 
     qreal centerLongitude() const;
     qreal centerLatitude() const;
-    MARBLE_DEPRECATED( void centerCoordinates( qreal &centerLon, qreal &centerLat ) const );
 
     /**
      * @brief Get the screen coordinates corresponding to geographical coordinates in the map.

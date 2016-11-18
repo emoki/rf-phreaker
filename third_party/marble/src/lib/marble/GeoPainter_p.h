@@ -11,8 +11,6 @@
 #ifndef MARBLE_GEOPAINTERPRIVATE_H
 #define MARBLE_GEOPAINTERPRIVATE_H
 
-#include <QVector>
-
 #include "MarbleGlobal.h"
 //#include "GeoPainter.h"
 
@@ -37,7 +35,7 @@ class GeoPainterPrivate
 
 
     static void createAnnotationLayout ( qreal x, qreal y,
-                                         QSizeF bubbleSize,
+                                         const QSizeF& bubbleSize,
                                          qreal bubbleOffsetX, qreal bubbleOffsetY,
                                          qreal xRnd, qreal yRnd,
                                          QPainterPath& path, QRectF& rect );

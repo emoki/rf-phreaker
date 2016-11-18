@@ -17,6 +17,7 @@
 #include "GeoDataParser.h"
 #include "GeoDataFolder.h"
 #include "GeoDataDocument.h"
+#include "GeoDataLookAt.h"
 #include "CloudSyncManager.h"
 #include "GeoDataCoordinates.h"
 #include "OwncloudSyncBackend.h"
@@ -25,10 +26,10 @@
 
 #include <QFile>
 #include <QBuffer>
-#include <QScriptValue>
-#include <QScriptEngine>
-#include <QTemporaryFile>
+#include <QJsonDocument>
+#include <QJsonObject>
 #include <QNetworkAccessManager>
+#include <QNetworkReply>
 #include <QTimer>
 
 namespace Marble {
@@ -213,8 +214,8 @@ BookmarkSyncManager::Private::Private(BookmarkSyncManager *parent, CloudSyncMana
   m_bookmarkManager( 0 ),
   m_bookmarkSyncEnabled( false )
 {
-    m_cachePath = QString( "%0/cloudsync/cache/bookmarks" ).arg( MarbleDirs::localPath() );
-    m_localBookmarksPath = QString( "%0/bookmarks/bookmarks.kml" ).arg( MarbleDirs::localPath() );
+    m_cachePath = MarbleDirs::localPath() + QLatin1String("/cloudsync/cache/bookmarks");
+    m_localBookmarksPath = MarbleDirs::localPath() + QLatin1String("/bookmarks/bookmarks.kml");
     m_downloadEndpoint = "bookmarks/kml";
     m_uploadEndpoint = "bookmarks/update";
     m_timestampEndpoint = "bookmarks/timestamp";
@@ -278,7 +279,7 @@ void BookmarkSyncManager::startBookmarkSync()
 
 QUrl BookmarkSyncManager::Private::endpointUrl( const QString &endpoint ) const
 {
-    return QUrl( QString( "%0/%1" ).arg( m_cloudSyncManager->apiUrl().toString() ).arg( endpoint ) );
+    return QUrl(m_cloudSyncManager->apiUrl().toString() + QLatin1Char('/') + endpoint);
 }
 
 void BookmarkSyncManager::Private::uploadBookmarks()
@@ -354,7 +355,7 @@ void BookmarkSyncManager::Private::clearCache()
                 QStringList() << "*.kml",
                 QDir::NoFilter, QDir::Name );
     if( !fileInfoList.isEmpty() ) {
-        foreach ( QFileInfo fileInfo, fileInfoList ) {
+        foreach ( const QFileInfo& fileInfo, fileInfoList ) {
             QFile file( fileInfo.absoluteFilePath() );
             bool removed = file.remove();
             if( !removed ) {
@@ -653,7 +654,7 @@ GeoDataDocument* BookmarkSyncManager::Private::constructDocument( const QList<Di
 
     foreach( const DiffItem &item, mergedList ) {
         GeoDataPlacemark *placemark = new GeoDataPlacemark( item.m_placemarkA );
-        QStringList splitten = item.m_path.split( '/', QString::SkipEmptyParts );
+        QStringList splitten = item.m_path.split(QLatin1Char('/'), QString::SkipEmptyParts);
         GeoDataFolder *folder = createFolders( document, splitten );
         folder->append( placemark );
     }
@@ -707,11 +708,10 @@ void BookmarkSyncManager::Private::saveDownloadedToCache( const QByteArray &kml 
 
 void BookmarkSyncManager::Private::parseTimestamp()
 {
-    QString response = m_timestampReply->readAll();
-    QScriptEngine engine;
-    QScriptValue parsedResponse = engine.evaluate( QString( "(%0)" ).arg( response ) );
-    QString timestamp = parsedResponse.property( "data" ).toString();
-    m_cloudTimestamp = timestamp;
+    QJsonDocument jsonDoc = QJsonDocument::fromJson(m_timestampReply->readAll());
+    QJsonValue dataValue = jsonDoc.object().value(QStringLiteral("data"));
+
+    m_cloudTimestamp = dataValue.toString();
     mDebug() << "Remote bookmark timestamp is " << m_cloudTimestamp;
     continueSynchronization();
 }
@@ -795,11 +795,10 @@ void BookmarkSyncManager::Private::completeMerge()
 
 void BookmarkSyncManager::Private::completeUpload()
 {
-    QString response = m_uploadReply->readAll();
-    QScriptEngine engine;
-    QScriptValue parsedResponse = engine.evaluate( QString( "(%0)" ).arg( response ) );
-    QString timestamp = parsedResponse.property( "data" ).toString();
-    m_cloudTimestamp = timestamp;
+    QJsonDocument jsonDoc = QJsonDocument::fromJson(m_uploadReply->readAll());
+    QJsonValue dataValue = jsonDoc.object().value(QStringLiteral("data"));
+
+    m_cloudTimestamp = dataValue.toString();
     mDebug() << "Uploaded bookmarks to remote server. Timestamp is " << m_cloudTimestamp;
     copyLocalToCache();
     emit m_q->syncComplete();

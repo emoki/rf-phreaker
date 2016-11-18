@@ -11,18 +11,19 @@
 #ifndef MARBLE_GEODATADATA_H
 #define MARBLE_GEODATADATA_H
 
-#include <QString>
-#include <QVariant>
-
 #include "GeoDataObject.h"
 
 #include "geodata_export.h"
+
+class QVariant;
 
 namespace Marble
 {
 
 class GeoDataDataPrivate;
 
+/**
+ */
 class GEODATA_EXPORT GeoDataData : public GeoDataObject
 {
   public:

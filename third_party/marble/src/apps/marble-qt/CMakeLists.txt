@@ -25,13 +25,11 @@ endif (WIN32)
 
 target_link_libraries (
 marble-qt
-Qt5::Xml
 Qt5::Widgets
 Qt5::PrintSupport
 Qt5::Network
-Qt5::WebKitWidgets
 marbleui
-${MARBLEWIDGET}
+marblewidget
 astro)
 
 if(WIN32)
@@ -59,5 +57,5 @@ else (APPLE)
 endif (APPLE)
 endif(WIN32)
 if(APPS_INSTALL_DIR)
-  install(PROGRAMS marble-qt.desktop DESTINATION ${APPS_INSTALL_DIR})
+  install(PROGRAMS org.kde.marble-qt.desktop DESTINATION ${APPS_INSTALL_DIR})
 endif(APPS_INSTALL_DIR)

@@ -14,12 +14,11 @@
 #ifndef MARBLE_GEODATACOLORSTYLE_H
 #define MARBLE_GEODATACOLORSTYLE_H
 
-
-#include <QColor>
-
 #include "GeoDataObject.h"
 
 #include "geodata_export.h"
+
+class QColor;
 
 namespace Marble
 {
@@ -90,7 +89,7 @@ class GEODATA_EXPORT GeoDataColorStyle : public GeoDataObject
      * @brief  Set a new color mode
      * @param  colorMode  the new color mode value
      */
-    void setColorMode( const ColorMode &colorMode );
+    void setColorMode(ColorMode colorMode);
     /// Return the color mode
     ColorMode colorMode() const;
 

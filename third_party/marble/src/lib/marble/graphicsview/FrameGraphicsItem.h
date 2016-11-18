@@ -14,8 +14,11 @@
 // Marble
 #include "marble_export.h"
 #include "ScreenGraphicsItem.h"
-#include <QPainterPath>
+
+#include <Qt> // for Qt::PenStyle
+
 class QBrush;
+class QPainterPath;
 
 namespace Marble
 {
@@ -180,10 +183,11 @@ class MARBLE_EXPORT FrameGraphicsItem : public ScreenGraphicsItem
      */
     virtual void paintBackground( QPainter *painter );
 
+    explicit FrameGraphicsItem(FrameGraphicsItemPrivate *dd);
+
  private:
     Q_DISABLE_COPY( FrameGraphicsItem )
-
-    FrameGraphicsItemPrivate * const d;
+    Q_DECLARE_PRIVATE(FrameGraphicsItem)
 };
 
 } // namespace Marble

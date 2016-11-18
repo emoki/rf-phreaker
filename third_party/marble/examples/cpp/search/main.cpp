@@ -14,7 +14,7 @@
 #include <marble/MarbleWidget.h>
 #include <marble/MarbleModel.h>
 #include <marble/SearchRunnerManager.h>
-#include <GeoDataPlacemark.h>
+#include <marble/GeoDataPlacemark.h>
 
 using namespace Marble;
 
@@ -25,7 +25,7 @@ int main(int argc, char** argv)
     MarbleModel model;
     SearchRunnerManager manager( &model );
 
-    QVector<GeoDataPlacemark*> searchResult = manager.searchPlacemarks( "Karlsruhe" );
+    QVector<GeoDataPlacemark*> searchResult = manager.searchPlacemarks(QStringLiteral("Karlsruhe"));
     foreach( const GeoDataPlacemark* placemark, searchResult ) {
         qDebug() << "Found" << placemark->name() << "at" << placemark->coordinate().toString();
     }

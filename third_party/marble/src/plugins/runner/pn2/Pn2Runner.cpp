@@ -39,6 +39,9 @@
 #include "GeoDataPlacemark.h"
 #include "GeoDataStyle.h"
 #include "GeoDataPolyStyle.h"
+#include "GeoDataLinearRing.h"
+#include "GeoDataPolygon.h"
+#include "GeoDataMultiGeometry.h"
 #include "MarbleDebug.h"
 
 #include <QFile>
@@ -119,15 +122,15 @@ bool Pn2Runner::importPolygon( QDataStream &stream, GeoDataLineString* linestrin
 GeoDataDocument *Pn2Runner::parseFile(const QString &fileName, DocumentRole role, QString &error)
 {
     QFileInfo fileinfo( fileName );
-    if( fileinfo.suffix().compare( "pn2", Qt::CaseInsensitive ) != 0 ) {
-        error = QString("File %1 does not have a pn2 suffix").arg(fileName);
+    if (fileinfo.suffix().compare(QLatin1String("pn2"), Qt::CaseInsensitive) != 0) {
+        error = QStringLiteral("File %1 does not have a pn2 suffix").arg(fileName);
         mDebug() << error;
         return nullptr;
     }
 
     QFile  file( fileName );
     if ( !file.exists() ) {
-        error = QString("File %1 does not exist").arg(fileName);
+        error = QStringLiteral("File %1 does not exist").arg(fileName);
         mDebug() << error;
         return nullptr;
     }

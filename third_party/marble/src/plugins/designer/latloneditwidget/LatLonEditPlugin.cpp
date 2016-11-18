@@ -12,7 +12,6 @@
 
 #include "../../lib/marble/LatLonEdit.h"
 
-#include <QObject>
 #include <QString>
 #include <QtPlugin>
 #include <QWidget>
@@ -44,7 +43,7 @@ bool LatLonEditPlugin::isContainer() const
 
 QIcon LatLonEditPlugin::icon() const
 {
-    return QIcon(":/icons/marble.png");
+    return QIcon(QStringLiteral(":/icons/marble.png"));
 }
 
 QString LatLonEditPlugin::domXml() const
@@ -82,7 +81,5 @@ QWidget *LatLonEditPlugin::createWidget(QWidget *parent)
 {
     return new Marble::LatLonEdit(parent);
 }
-
-Q_EXPORT_PLUGIN2(LatLonEditPlugin, LatLonEditPlugin)
 
 #include "moc_LatLonEditPlugin.cpp"

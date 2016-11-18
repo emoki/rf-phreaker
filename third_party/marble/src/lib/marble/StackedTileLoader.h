@@ -26,20 +26,20 @@
 #define MARBLE_STACKEDTILELOADER_H
 
 #include <QObject>
-#include <QSize>
 
-#include "GeoSceneTileDataset.h"
-#include "TileId.h"
+#include "GeoSceneTextureTileDataset.h"
 #include "RenderState.h"
 
 class QImage;
 class QString;
+class QSize;
 
 namespace Marble
 {
 
 class MergedLayerDecorator;
 class StackedTile;
+class TileId;
 
 class StackedTileLoaderPrivate;
 
@@ -74,7 +74,7 @@ class StackedTileLoader : public QObject
 
         int tileRowCount( int level ) const;
 
-        GeoSceneTextureTileDataset::Projection tileProjection() const;
+        GeoSceneAbstractTileProjection::Type tileProjectionType() const;
 
         QSize tileSize() const;
 

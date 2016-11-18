@@ -16,11 +16,12 @@
 #include <QTreeView>
 
 // Marble
-#include "GeoDataPlacemark.h"
 #include "EditPolygonDialog.h"
 
 namespace Marble
 {
+
+class GeoDataPlacemark;
 
 /**
  * @brief The NodeItemDelegate class handles the NodeModel view for both the EditPolygonDialog
@@ -46,11 +47,11 @@ private:
     mutable QModelIndex m_indexBeingEdited;
     QTreeView* m_view;
 
-private slots:
+private Q_SLOTS:
     void previewNodeMove( qreal value);
     void unsetCurrentEditor( QWidget* widget );
 
-signals:
+Q_SIGNALS:
     void modelChanged( GeoDataPlacemark* placemark ) const;
     void geometryChanged() const;
 };

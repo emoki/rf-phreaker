@@ -13,7 +13,6 @@
 #ifndef MARBLE_GEODATALINESTRING_H
 #define MARBLE_GEODATALINESTRING_H
 
-#include <QFlags>
 #include <QVector>
 #include <QMetaType>
 
@@ -21,13 +20,11 @@
 
 #include "geodata_export.h"
 #include "GeoDataGeometry.h"
-#include "GeoDataCoordinates.h"
-#include "GeoDataLatLonAltBox.h"
 
 
 namespace Marble
 {
-
+class GeoDataCoordinates;
 class GeoDataLineStringPrivate;
 
 /*!
@@ -137,6 +134,11 @@ class GEODATA_EXPORT GeoDataLineString : public GeoDataGeometry
 */
     void setTessellationFlags( TessellationFlags f );
 
+/*!
+    \brief Reverses the LineString.
+    @since 0.26.0
+*/
+     void reverse();
 
 /*!
     \brief Returns the smallest latLonAltBox that contains the LineString.
@@ -238,6 +240,13 @@ class GEODATA_EXPORT GeoDataLineString : public GeoDataGeometry
     GeoDataCoordinates& operator[]( int pos );
 
 
+    /**
+      Returns a sub-string which contains elements from this vector, starting at position pos. If length is -1
+      (the default), all elements after pos are included; otherwise length elements (or all remaining elements if
+      there are less than length elements) are included.
+      */
+    GeoDataLineString mid(int pos, int length = -1) const;
+
 /*!
     \brief Returns a reference to the coordinates of a node at a given position.
     This method does not detach the returned coordinate object from the line string.
@@ -283,6 +292,12 @@ class GEODATA_EXPORT GeoDataLineString : public GeoDataGeometry
     \brief Appends a given geodesic position as a new node to the LineString.
 */
     void append ( const GeoDataCoordinates& value );
+
+
+/*!
+    \brief Appends a given geodesic position as new nodes to the LineString.
+*/
+    void append(const QVector<GeoDataCoordinates>& values);
 
 
 /*!
@@ -377,8 +392,7 @@ class GEODATA_EXPORT GeoDataLineString : public GeoDataGeometry
     explicit GeoDataLineString(GeoDataLineStringPrivate* priv);
 
  private:
-    GeoDataLineStringPrivate *p();
-    const GeoDataLineStringPrivate *p() const;
+    Q_DECLARE_PRIVATE(GeoDataLineString)
 };
 
 }

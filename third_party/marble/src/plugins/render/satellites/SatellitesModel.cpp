@@ -11,12 +11,16 @@
 #include "SatellitesModel.h"
 
 #include "MarbleDebug.h"
+#include "MarbleDirs.h"
 #include "SatellitesMSCItem.h"
 #include "SatellitesTLEItem.h"
 
 #include "MarbleClock.h"
 #include "GeoDataPlacemark.h"
 #include "GeoDataStyle.h"
+#include "GeoDataIconStyle.h"
+#include "GeoDataLabelStyle.h"
+#include "GeoDataLineStyle.h"
 
 #include <planetarySats.h>
 #include <sgp4io.h>
@@ -68,7 +72,7 @@ QColor SatellitesModel::nextColor()
 
 void SatellitesModel::loadSettings( const QHash<QString, QVariant> &settings )
 {
-    QStringList idList = settings["idList"].toStringList();
+    QStringList idList = settings[QStringLiteral("idList")].toStringList();
     m_enabledIds = idList;
 
     updateVisibility();
@@ -104,7 +108,7 @@ void SatellitesModel::updateVisibility()
         SatellitesTLEItem *eItem = dynamic_cast<SatellitesTLEItem*>(obj);
         if( eItem != NULL ) {
             // TLE satellites are always earth satellites
-            bool enabled = ( m_lcPlanet == "earth" );
+            bool enabled = (m_lcPlanet == QLatin1String("earth"));
             eItem->setEnabled( enabled );
 
             if( enabled ) {
@@ -147,7 +151,7 @@ void SatellitesModel::parseCatalog( const QString &id,
     QString line = ts.readLine();
     for( ; !line.isNull(); line = ts.readLine() ) {
 
-        if( line.trimmed().startsWith( QLatin1String( "#" ) ) ) {
+        if (line.trimmed().startsWith(QLatin1Char('#'))) {
             continue;
         }
 
@@ -195,8 +199,10 @@ void SatellitesModel::parseCatalog( const QString &id,
         style->labelStyle().setGlow( true );
 
         // use special icon for moons
-        if( category == "Moons" ) {
-            style->iconStyle().setIconPath( ":/icons/moon.png" );
+        if (category == QLatin1String("Moons")) {
+            style->iconStyle().setIconPath(QStringLiteral(":/icons/moon.png"));
+        } else {
+            style->iconStyle().setIconPath(MarbleDirs::path(QStringLiteral("bitmaps/satellite.png")));
         }
 
         item->placemark()->setStyle( style );
@@ -250,6 +256,7 @@ void SatellitesModel::parseTLE( const QString &id,
         style->lineStyle().setPenStyle( Qt::SolidLine );
         style->lineStyle().setColor( nextColor() );
         style->labelStyle().setGlow( true );
+        style->iconStyle().setIconPath(MarbleDirs::path(QStringLiteral("bitmaps/satellite.png")));
         item->placemark()->setStyle( style );
         addItem( item );
     }

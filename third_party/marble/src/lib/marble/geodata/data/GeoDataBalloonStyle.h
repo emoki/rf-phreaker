@@ -20,6 +20,8 @@ namespace Marble
 
 class GeoDataBalloonStylePrivate;
 
+/**
+ */
 class GEODATA_EXPORT GeoDataBalloonStyle : public GeoDataColorStyle
 {
 public:
@@ -52,7 +54,7 @@ public:
     void setText( const QString &text );
 
     DisplayMode displayMode() const;
-    void setDisplayMode( const DisplayMode &mode );
+    void setDisplayMode(DisplayMode mode );
 
     virtual void pack( QDataStream& stream ) const;
 

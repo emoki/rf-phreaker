@@ -15,18 +15,19 @@
 #ifndef MARBLESTARSPLUGIN_H
 #define MARBLESTARSPLUGIN_H
 
-#include <QObject>
 #include <QVector>
-#include <QVariant>
 #include <QHash>
+#include <QMap>
+#include <QVariant>
 #include <QBrush>
 
 #include "RenderPlugin.h"
 #include "Quaternion.h"
 #include "DialogConfigurationInterface.h"
 
-class QDateTime;
 class QMenu;
+class QVariant;
+
 class SolarSystem;
 
 namespace Ui
@@ -96,7 +97,7 @@ public:
      * @param  mag
      * (default for Radian: north pole at pi/2, southpole at -pi/2)
      */
-    DsoPoint(QString id, qreal rect, qreal decl) {
+    DsoPoint(const QString& id, qreal rect, qreal decl) {
         m_id = id;
         m_q = Quaternion::fromSpherical( rect, decl );
     }
@@ -126,7 +127,7 @@ class Constellation;
 class StarsPlugin : public RenderPlugin, public DialogConfigurationInterface
 {
     Q_OBJECT
-    Q_PLUGIN_METADATA( IID "org.kde.edu.marble.StarsPlugin" )
+    Q_PLUGIN_METADATA(IID "org.kde.marble.StarsPlugin")
     Q_INTERFACES(Marble::RenderPluginInterface)
     Q_INTERFACES( Marble::DialogConfigurationInterface )
     MARBLE_PLUGIN(StarsPlugin)
@@ -154,7 +155,7 @@ public:
 
     QString copyrightYears() const;
 
-    QList<PluginAuthor> pluginAuthors() const;
+    QVector<PluginAuthor> pluginAuthors() const override;
 
     QIcon icon() const;
 
@@ -177,10 +178,11 @@ protected:
 
 private Q_SLOTS:
     void requestRepaint();
-    void toggleSunMoon();
-    void togglePlanets();
-    void toggleDsos();
-    void toggleConstellations();
+    void toggleSunMoon(bool on);
+    void togglePlanets(bool on);
+    void toggleDsos(bool on);
+    void toggleConstellations(bool on);
+    void executeConfigDialog();
 
 public Q_SLOTS:
     void readSettings();
@@ -266,10 +268,10 @@ private:
 
     /* Context menu */
     QPointer<QMenu> m_contextMenu;
-    QPointer<QAction> m_constellationsAction;
-    QPointer<QAction> m_sunMoonAction;
-    QPointer<QAction> m_planetsAction;
-    QPointer<QAction> m_dsoAction;
+    QAction* m_constellationsAction;
+    QAction* m_sunMoonAction;
+    QAction* m_planetsAction;
+    QAction* m_dsoAction;
 
     bool m_doRender;
 };
@@ -282,7 +284,7 @@ public:
         m_plugin( plugin ),
         m_name( name )
     {
-        QStringList starlist = stars.split(" ");
+        const QStringList starlist = stars.split(QLatin1Char(' '));
         for (int i = 0; i < starlist.size(); ++i) {
             m_stars << starlist.at(i).toInt();
         }

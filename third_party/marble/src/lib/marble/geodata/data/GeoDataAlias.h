@@ -12,14 +12,16 @@
 #ifndef MARBLE_GEODATAALIAS_H
 #define MARBLE_GEODATAALIAS_H
 
-#include "GeoDataObject.h"
+#include "GeoDocument.h"
 #include "MarbleGlobal.h"
 
 namespace Marble {
 
 class GeoDataAliasPrivate;
 
-class MARBLE_EXPORT GeoDataAlias: public GeoNode
+/**
+ */
+class GEODATA_EXPORT GeoDataAlias: public GeoNode
 {
 
 public:

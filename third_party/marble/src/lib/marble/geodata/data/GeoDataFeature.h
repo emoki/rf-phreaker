@@ -13,11 +13,6 @@
 #ifndef MARBLE_GEODATAFEATURE_H
 #define MARBLE_GEODATAFEATURE_H
 
-
-#include <QString>
-#include <QFont>
-#include <QColor>
-
 #include "GeoDataObject.h"
 
 #include "geodata_export.h"
@@ -51,9 +46,6 @@ class GeoDataSnippet;
  * @see GeoDataPlacemark
  * @see GeoDataContainer
  */
-
-// FIXME: Later also add NetworkLink and Overlay
-
 class GEODATA_EXPORT GeoDataFeature : public GeoDataObject
 {
  public:
@@ -71,343 +63,6 @@ class GEODATA_EXPORT GeoDataFeature : public GeoDataObject
     virtual const char* nodeType() const;
 
     EnumFeatureId featureId() const;
-    /**
-     * @brief  A categorization of a placemark as defined by ...FIXME.
-     * There is an additional osm tag mapping to GeoDataVisualCategory
-     * in OsmPresetLibrary.cpp
-     */
-    enum GeoDataVisualCategory {
-        None,
-        Default,
-        Unknown,
-
-        // The order of the cities needs to stay fixed as the
-        // algorithms rely on that.
-        SmallCity,
-        SmallCountyCapital,
-        SmallStateCapital,
-        SmallNationCapital,
-        MediumCity,
-        MediumCountyCapital,
-        MediumStateCapital,
-        MediumNationCapital,
-        BigCity,
-        BigCountyCapital,
-        BigStateCapital,
-        BigNationCapital,
-        LargeCity,
-        LargeCountyCapital,
-        LargeStateCapital,
-        LargeNationCapital,
-        Nation,
-
-        PlaceCity,
-        PlaceSuburb,
-        PlaceHamlet,
-        PlaceLocality,
-        PlaceTown,
-        PlaceVillage,
-
-        // Terrain
-        Mountain,
-        Volcano,
-        Mons,                    // m
-        Valley,                  // v
-        Continent,
-        Ocean,
-        OtherTerrain,            // o
-
-        // Space Terrain
-        Crater,                  // c
-        Mare,                    // a
-
-        // Places of Interest
-        GeographicPole,
-        MagneticPole,
-        ShipWreck,
-        AirPort,
-        Observatory,
-
-        // Military
-        MilitaryDangerArea,
-
-        // Runners
-        Wikipedia,
-        OsmSite,
-        Coordinate,
-
-        // Planets
-        MannedLandingSite,       // h
-        RoboticRover,            // r
-        UnmannedSoftLandingSite, // u
-        UnmannedHardLandingSite, // i
-
-        Folder,
-        Bookmark,
-
-        NaturalWater,
-        NaturalWood,
-        NaturalBeach,
-        NaturalWetland,
-        NaturalGlacier,
-        NaturalScrub,
-        NaturalCliff,
-        NaturalHeath,
-
-        HighwayTrafficSignals,
-
-        // OpenStreetMap highways
-        HighwaySteps,
-        HighwayUnknown,
-        HighwayPath,
-        HighwayFootway,
-        HighwayTrack,
-        HighwayPedestrian,
-        HighwayCycleway,
-        HighwayService,
-        HighwayRoad,
-        HighwayResidential,
-        HighwayLivingStreet,
-        HighwayUnclassified,
-        HighwayTertiaryLink,
-        HighwayTertiary,
-        HighwaySecondaryLink,
-        HighwaySecondary,
-        HighwayPrimaryLink,
-        HighwayPrimary,
-        HighwayTrunkLink,
-        HighwayTrunk,
-        HighwayMotorwayLink,
-        HighwayMotorway,
-
-        //OSM building
-        Building,
-
-        // OpenStreetMap category Accomodation
-        AccomodationCamping,
-        AccomodationHostel,
-        AccomodationHotel,
-        AccomodationMotel,
-        AccomodationYouthHostel,
-        AccomodationGuestHouse,
-
-        // OpenStreetMap category Amenity
-        AmenityLibrary,
-
-        // OpenStreetMap category Education
-        EducationCollege,
-        EducationSchool,
-        EducationUniversity,
-
-        // OpenStreetMap category Food
-        FoodBar,
-        FoodBiergarten,
-        FoodCafe,
-        FoodFastFood,
-        FoodPub,
-        FoodRestaurant,
-
-        // OpenStreetMap category Health
-        HealthDentist,
-        HealthDoctors,
-        HealthHospital,
-        HealthPharmacy,
-        HealthVeterinary,
-
-        // OpenStreetMap category Money
-        MoneyAtm,
-        MoneyBank,
-
-        AmenityArchaeologicalSite,
-        AmenityEmbassy,
-        AmenityEmergencyPhone,
-        AmenityWaterPark,
-        AmenityCommunityCentre,
-        AmenityFountain,
-        AmenityNightClub,
-        AmenityBench,
-        AmenityCourtHouse,
-        AmenityFireStation,
-        AmenityHuntingStand,
-        AmenityPolice,
-        AmenityPostBox,
-        AmenityPostOffice,
-        AmenityPrison,
-        AmenityRecycling,
-        AmenityTelephone,
-        AmenityToilets,
-        AmenityTownHall,
-        AmenityWasteBasket,
-        AmenityDrinkingWater,
-        AmenityGraveyard,
-
-        // OpenStreetMap category Barrier
-        BarrierCityWall,
-        BarrierGate,
-        BarrierLiftGate,
-        BarrierWall,
-
-        NaturalPeak,
-        NaturalTree,
-
-        // OpenStreetMap category Shopping
-        ShopBeverages,
-        ShopHifi,
-        ShopSupermarket,
-        ShopAlcohol,
-        ShopBakery,
-        ShopButcher,
-        ShopConfectionery,
-        ShopConvenience,
-        ShopGreengrocer,
-        ShopSeafood,
-        ShopDepartmentStore,
-        ShopKiosk,
-        ShopBag,
-        ShopClothes,
-        ShopFashion,
-        ShopJewelry,
-        ShopShoes,
-        ShopVarietyStore,
-        ShopBeauty,
-        ShopChemist,
-        ShopCosmetics,
-        ShopHairdresser,
-        ShopOptician,
-        ShopPerfumery,
-        ShopDoitYourself,
-        ShopFlorist,
-        ShopHardware,
-        ShopFurniture,
-        ShopElectronics,
-        ShopMobilePhone,
-        ShopBicycle,
-        ShopCar,
-        ShopCarRepair,
-        ShopCarParts,
-        ShopMotorcycle,
-        ShopOutdoor,
-        ShopMusicalInstrument,
-        ShopPhoto,
-        ShopBook,
-        ShopGift,
-        ShopStationery,
-        ShopLaundry,
-        ShopPet,
-        ShopToys,
-        ShopTravelAgency,
-        Shop,
-
-        ManmadeBridge,
-        ManmadeLighthouse,
-        ManmadePier,
-        ManmadeWaterTower,
-        ManmadeWindMill,
-
-
-        // OpenStreetMap category Tourist
-        TouristAttraction,
-        TouristCastle,
-        TouristCinema,
-        TouristInformation,
-        TouristMonument,
-        TouristMuseum,
-        TouristRuin,
-        TouristTheatre,
-        TouristThemePark,
-        TouristViewPoint,
-        TouristZoo,
-        TouristAlpineHut,
-
-        // OpenStreetMap category Transport
-        TransportAerodrome,
-        TransportHelipad,
-        TransportAirportTerminal,
-        TransportBusStation,
-        TransportBusStop,
-        TransportCarShare,
-        TransportFuel,
-        TransportParking,
-        TransportParkingSpace,
-        TransportPlatform,
-        TransportRentalBicycle,
-        TransportRentalCar,
-        TransportTaxiRank,
-        TransportTrainStation,
-        TransportTramStop,
-        TransportBicycleParking,
-        TransportMotorcycleParking,
-        TransportSubwayEntrance,
-
-        // OpenStreetMap category religion
-        ReligionPlaceOfWorship,
-        ReligionBahai,
-        ReligionBuddhist,
-        ReligionChristian,
-        ReligionMuslim,
-        ReligionHindu,
-        ReligionJain,
-        ReligionJewish,
-        ReligionShinto,
-        ReligionSikh,
-
-        // OpenStreetMap category Leisure
-        LeisureGolfCourse,
-        LeisurePark,
-        LeisurePlayground,
-        LeisurePitch,
-        LeisureSportsCentre,
-        LeisureStadium,
-        LeisureTrack,
-        LeisureSwimmingPool,
-
-        LanduseAllotments,
-        LanduseBasin,
-        LanduseCemetery,
-        LanduseCommercial,
-        LanduseConstruction,
-        LanduseFarmland,
-        LanduseFarmyard,
-        LanduseGarages,
-        LanduseGrass,
-        LanduseIndustrial,
-        LanduseLandfill,
-        LanduseMeadow,
-        LanduseMilitary,
-        LanduseQuarry,
-        LanduseRailway,
-        LanduseReservoir,
-        LanduseResidential,
-        LanduseRetail,
-        LanduseOrchard,
-        LanduseVineyard,
-
-        RailwayRail,
-        RailwayNarrowGauge,
-        RailwayTram,
-        RailwayLightRail,
-        RailwayAbandoned,
-        RailwaySubway,
-        RailwayPreserved,
-        RailwayMiniature,
-        RailwayConstruction,
-        RailwayMonorail,
-        RailwayFunicular,
-
-        // OpenStreetMap category Power
-        PowerTower,
-
-        Satellite,
-
-		// This is used to apply styles to (only?) track items that would otherwise be default 
-		// which due to commit ae7ac56e99f0 the GeoLineStringGraphicsItem ignores it's 
-		// style.
-		Styled,
-
-        // Important: Make sure that this is always the last
-        // item and just use it to specify the array size
-        LastIndex
-    };
 
     /**
      * @brief The name of the feature
@@ -534,7 +189,8 @@ class GEODATA_EXPORT GeoDataFeature : public GeoDataObject
     /**
      * Return the ExtendedData assigned to the feature.
      */
-    GeoDataExtendedData& extendedData() const;
+    GeoDataExtendedData& extendedData();
+    const GeoDataExtendedData& extendedData() const;
 
     /**
      * Sets the ExtendedData of the feature.
@@ -545,7 +201,8 @@ class GEODATA_EXPORT GeoDataFeature : public GeoDataObject
     /**
      * Return the region assigned to the placemark.
      */
-    GeoDataRegion& region() const;
+    const GeoDataRegion& region() const;
+    GeoDataRegion& region();
     /**
      * @brief Sets the region of the placemark.
      * @param region new value for the region
@@ -553,16 +210,6 @@ class GEODATA_EXPORT GeoDataFeature : public GeoDataObject
      * The feature is only shown when the region if active.
      */
     void setRegion( const GeoDataRegion& region );
-
-    /**
-     * Return the symbol index of the placemark.
-     */
-    GeoDataVisualCategory visualCategory() const;
-    /**
-     * Sets the symbol @p index of the placemark.
-     * @param  category  the new category to be used.
-     */
-    void setVisualCategory( GeoDataVisualCategory category );
 
     /**
      * Return the role of the placemark.
@@ -612,43 +259,26 @@ class GEODATA_EXPORT GeoDataFeature : public GeoDataObject
      */
     void setStyleMap( const GeoDataStyleMap* map );
 
+    /// Duplicate into another equal instance
+    virtual GeoDataFeature * clone() const;
 
-    // ----------------------------------------------------------------
-    // The following functions are use for painting, and mostly for placemarks.
-
-    /**
-     * Return the label font of the placemark.
-     */
-    static void resetDefaultStyles();
 
     /// Serialize the contents of the feature to @p stream.
     virtual void pack( QDataStream& stream ) const;
     /// Unserialize the contents of the feature from @p stream.
     virtual void unpack( QDataStream& stream );
 
-    static QFont defaultFont();
-    static void setDefaultFont( const QFont& font );
-
-    static QColor defaultLabelColor();
-    static void setDefaultLabelColor( const QColor& color );
-
-    static QSharedPointer<Marble::GeoDataStyle> presetStyle( GeoDataVisualCategory category );
-
-    static QString visualCategoryName(GeoDataVisualCategory category);
-
-    virtual void detach();
-
  protected:
     // the d-pointer needs to be protected to be accessible from derived classes
-    GeoDataFeaturePrivate* d;
-    explicit GeoDataFeature( GeoDataFeaturePrivate* priv );
+    GeoDataFeaturePrivate* const d_ptr;
+    explicit GeoDataFeature(GeoDataFeaturePrivate* dd);
+    GeoDataFeature(const GeoDataFeature& other, GeoDataFeaturePrivate* dd);
 
     bool equals( const GeoDataFeature &other ) const;
     using GeoDataObject::equals;
 
  private:
-    // the private d pointer accessor - use it instead of the d pointer directly
-    GeoDataFeaturePrivate* p() const;
+    Q_DECLARE_PRIVATE(GeoDataFeature)
 };
 
 }

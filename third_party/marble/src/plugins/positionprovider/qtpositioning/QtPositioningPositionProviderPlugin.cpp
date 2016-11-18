@@ -11,10 +11,14 @@
 
 #include "QtPositioningPositionProviderPlugin.h"
 
+#include "GeoDataAccuracy.h"
+#include "GeoDataCoordinates.h"
+
 #include <QGeoPositionInfoSource>
 #include <QGeoPositionInfo>
 #include <QGeoCoordinate>
 #include <QTimer>
+#include <QIcon>
 
 namespace Marble {
 
@@ -48,7 +52,7 @@ QString QtPositioningPositionProviderPlugin::name() const
 
 QString QtPositioningPositionProviderPlugin::nameId() const
 {
-    return "QtPositioning";
+    return QStringLiteral("QtPositioning");
 }
 
 QString QtPositioningPositionProviderPlugin::guiString() const
@@ -58,7 +62,7 @@ QString QtPositioningPositionProviderPlugin::guiString() const
 
 QString QtPositioningPositionProviderPlugin::version() const
 {
-    return "1.0";
+    return QStringLiteral("1.0");
 }
 
 QString QtPositioningPositionProviderPlugin::description() const
@@ -68,13 +72,13 @@ QString QtPositioningPositionProviderPlugin::description() const
 
 QString QtPositioningPositionProviderPlugin::copyrightYears() const
 {
-    return "2011";
+    return QStringLiteral("2011");
 }
 
-QList<PluginAuthor> QtPositioningPositionProviderPlugin::pluginAuthors() const
+QVector<PluginAuthor> QtPositioningPositionProviderPlugin::pluginAuthors() const
 {
-    return QList<PluginAuthor>()
-            << PluginAuthor( "Daniel Marth", "danielmarth@gmx.at" );
+    return QVector<PluginAuthor>()
+            << PluginAuthor(QStringLiteral("Daniel Marth"), QStringLiteral("danielmarth@gmx.at"));
 }
 
 QIcon QtPositioningPositionProviderPlugin::icon() const
@@ -207,7 +211,5 @@ void QtPositioningPositionProviderPlugin::update()
 }
 
 } // namespace Marble
-
-Q_EXPORT_PLUGIN2( Marble::QtPositioningPositionProviderPlugin, Marble::QtPositioningPositionProviderPlugin )
 
 #include "moc_QtPositioningPositionProviderPlugin.cpp"

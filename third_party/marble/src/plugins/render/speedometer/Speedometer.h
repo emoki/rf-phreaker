@@ -15,9 +15,6 @@
 #ifndef MARBLESpeedometer_H
 #define MARBLESpeedometer_H
 
-#include <QObject>
-#include <QHash>
-
 #include "AbstractFloatItem.h"
 
 #include "ui_Speedometer.h"
@@ -37,7 +34,7 @@ class MarbleLocale;
 class Speedometer : public AbstractFloatItem
 {
     Q_OBJECT
-    Q_PLUGIN_METADATA( IID "org.kde.edu.marble.Speedometer" )
+    Q_PLUGIN_METADATA(IID "org.kde.marble.Speedometer")
     Q_INTERFACES( Marble::RenderPluginInterface )
     MARBLE_PLUGIN( Speedometer )
     
@@ -58,7 +55,7 @@ class Speedometer : public AbstractFloatItem
 
     QString description() const;
 
-    QList<PluginAuthor> pluginAuthors() const;
+    QVector<PluginAuthor> pluginAuthors() const override;
 
     QString copyrightYears() const;
 
@@ -68,8 +65,8 @@ class Speedometer : public AbstractFloatItem
 
     bool isInitialized () const;
 
- private slots:
-    void updateLocation( GeoDataCoordinates coordinates, qreal speed );
+ private Q_SLOTS:
+    void updateLocation( const GeoDataCoordinates& coordinates, qreal speed );
 
  private:
     MarbleLocale* m_locale;

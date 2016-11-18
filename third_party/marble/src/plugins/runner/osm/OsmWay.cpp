@@ -14,152 +14,71 @@
 #include <GeoDataLineStyle.h>
 #include <GeoDataPolyStyle.h>
 #include <GeoDataStyle.h>
-#include <osm/OsmPresetLibrary.h>
+#include <GeoDataDocument.h>
 #include <osm/OsmObjectManager.h>
 #include <MarbleDirs.h>
+#include <StyleBuilder.h>
 
 namespace Marble {
 
+QSet<StyleBuilder::OsmTag> OsmWay::s_areaTags;
 
-void OsmWay::create(GeoDataDocument *document, const OsmNodes &nodes) const
+void OsmWay::create(GeoDataDocument *document, const OsmNodes &nodes, QSet<qint64> &usedNodes) const
 {
-    bool const shouldRender =
-        !m_osmData.containsTag("boundary", "postal_code") &&
-        !m_osmData.containsTagKey("closed:highway") &&
-        !m_osmData.containsTagKey("abandoned:highway") &&
-        !m_osmData.containsTagKey("abandoned:natural") &&
-        !m_osmData.containsTagKey("abandoned:building") &&
-        !m_osmData.containsTagKey("abandoned:leisure") &&
-        !m_osmData.containsTagKey("disused:highway") &&
-        !m_osmData.containsTag("highway", "razed");
-
-    GeoDataPlacemark* placemark = new GeoDataPlacemark;
-    placemark->setOsmData(m_osmData);
-    placemark->setVisualCategory(OsmPresetLibrary::determineVisualCategory(m_osmData));
-    placemark->setName(m_osmData.tagValue("name"));
-    placemark->setVisible(shouldRender);
+    OsmPlacemarkData osmData = m_osmData;
+    GeoDataGeometry *geometry = 0;
 
     if (isArea()) {
-        GeoDataLinearRing* linearRing = new GeoDataLinearRing;
-        placemark->setGeometry(linearRing);
-
-        foreach(qint64 nodeId, m_references) {
+        GeoDataLinearRing linearRing;
+        bool const stripLastNode = m_references.first() == m_references.last();
+        for (int i=0, n=m_references.size() - (stripLastNode ? 1 : 0); i<n; ++i) {
+            qint64 nodeId = m_references[i];
             auto const nodeIter = nodes.constFind(nodeId);
             if (nodeIter == nodes.constEnd()) {
-                delete placemark;
                 return;
             }
 
             OsmNode const & node = nodeIter.value();
-            placemark->osmData().addNodeReference(node.coordinates(), node.osmData());
-            linearRing->append(node.coordinates());
+            osmData.addNodeReference(node.coordinates(), node.osmData());
+            linearRing.append(node.coordinates());
+            usedNodes << nodeId;
         }
 
-        *linearRing = linearRing->optimized();
-
-        if(placemark->visualCategory() == GeoDataFeature::AmenityGraveyard ||
-                 placemark->visualCategory() == GeoDataFeature::LanduseCemetery) {
-            bool adjustStyle = true;
-            GeoDataPolyStyle polyStyle = placemark->style()->polyStyle();
-            if( m_osmData.containsTag("religion","jewish") ){
-                polyStyle.setTexturePath(MarbleDirs::path("bitmaps/osmcarto/patterns/grave_yard_jewish.png"));
-            } else if( m_osmData.containsTag("religion","christian") ){
-                polyStyle.setTexturePath(MarbleDirs::path("bitmaps/osmcarto/patterns/grave_yard_christian.png"));
-            } else if( m_osmData.containsTag("religion","INT-generic") ){
-                polyStyle.setTexturePath(MarbleDirs::path("bitmaps/osmcarto/patterns/grave_yard_generic.png"));
-            } else {
-                adjustStyle = false;
-            }
-            if (adjustStyle) {
-                GeoDataStyle::Ptr style(new GeoDataStyle(*placemark->style()));
-                style->setPolyStyle(polyStyle);
-                placemark->setStyle(style);
-            }
-        }
-
-        QList<GeoDataFeature::GeoDataVisualCategory> categories = OsmPresetLibrary::visualCategories(m_osmData);
-        foreach(GeoDataFeature::GeoDataVisualCategory category, categories) {
-            const GeoDataStyle::Ptr categoryStyle = GeoDataFeature::presetStyle(category);
-            if (!categoryStyle->iconStyle().iconPath().isEmpty()) {
-                GeoDataStyle::Ptr style(new GeoDataStyle(*placemark->style()));
-                style->setIconStyle(categoryStyle->iconStyle());
-                placemark->setStyle(style);
-            }
-        }
+        geometry = new GeoDataLinearRing(linearRing.optimized());
     } else {
-        GeoDataLineString* lineString = new GeoDataLineString;
-        placemark->setGeometry(lineString);
+        GeoDataLineString lineString;
 
         foreach(qint64 nodeId, m_references) {
             auto const nodeIter = nodes.constFind(nodeId);
             if (nodeIter == nodes.constEnd()) {
-                delete placemark;
                 return;
             }
 
             OsmNode const & node = nodeIter.value();
-            placemark->osmData().addNodeReference(node.coordinates(), node.osmData());
-            lineString->append(node.coordinates());
+            osmData.addNodeReference(node.coordinates(), node.osmData());
+            lineString.append(node.coordinates());
+            usedNodes << nodeId;
         }
 
-        *lineString = lineString->optimized();
-
-        GeoDataPolyStyle polyStyle = placemark->style()->polyStyle();
-        GeoDataLineStyle lineStyle = placemark->style()->lineStyle();
-        lineStyle.setCosmeticOutline(true);
-
-        if (placemark->visualCategory() >= GeoDataFeature::HighwayService &&
-                placemark->visualCategory() <= GeoDataFeature::HighwayMotorway) {
-            bool const isOneWay = m_osmData.containsTag("oneway", "yes") || m_osmData.containsTag("oneway", "-1");
-            int const lanes = isOneWay ? 1 : 2; // also for motorway which implicitly is one way, but has two lanes and each direction has its own highway
-            double const laneWidth = 3.0;
-            double const margins = placemark->visualCategory() == GeoDataFeature::HighwayMotorway ? 2.0 : (isOneWay ? 1.0 : 0.0);
-            double const physicalWidth = margins + lanes * laneWidth;
-
-            lineStyle.setPhysicalWidth(physicalWidth);
-
-            QString const accessValue = m_osmData.tagValue("access");
-            if (accessValue == "private" || accessValue == "no" || accessValue == "agricultural" || accessValue == "delivery" || accessValue == "forestry") {
-                QColor polyColor = polyStyle.color();
-                qreal hue, sat, val;
-                polyColor.getHsvF(&hue, &sat, &val);
-                polyColor.setHsvF(0.98, qMin(1.0, 0.2 + sat), val);
-                polyStyle.setColor(polyColor);
-                lineStyle.setColor(lineStyle.color().darker(150));
-            }
-
-            if (m_osmData.containsTag("tunnel", "yes") ) {
-                QColor polyColor = polyStyle.color();
-                qreal hue, sat, val;
-                polyColor.getHsvF(&hue, &sat, &val);
-                polyColor.setHsvF(hue, 0.25 * sat, 0.95 * val);
-                polyStyle.setColor(polyColor);
-                lineStyle.setColor(lineStyle.color().lighter(115));
-            }
-
-        } else if (placemark->visualCategory() == GeoDataFeature::NaturalWater) {
-            QString const widthValue = m_osmData.tagValue("width").replace(" meters", QString()).replace(" m", QString());
-            bool ok;
-            float const width = widthValue.toFloat(&ok);
-            lineStyle.setPhysicalWidth(ok ? qBound(0.1f, width, 200.0f) : 0.0f);
-        }
-
-        GeoDataStyle::Ptr style(new GeoDataStyle(*placemark->style()));
-        style->setPolyStyle(polyStyle);
-        style->setLineStyle(lineStyle);
-        placemark->setStyle(style);
-
+        geometry = new GeoDataLineString(lineString.optimized());
     }
 
-    bool const hideLabel = placemark->visualCategory() == GeoDataFeature::HighwayTrack
-            || (placemark->visualCategory() >= GeoDataFeature::RailwayRail && placemark->visualCategory() <= GeoDataFeature::RailwayFunicular);
-    if (hideLabel) {
-        GeoDataStyle::Ptr style(new GeoDataStyle(*placemark->style()));
-        style->labelStyle().setColor(QColor(Qt::transparent));
-        placemark->setStyle(style);
-    }
+    Q_ASSERT(geometry != nullptr);
 
     OsmObjectManager::registerId(m_osmData.id());
+
+    GeoDataPlacemark *placemark = new GeoDataPlacemark;
+    placemark->setGeometry(geometry);
+    placemark->setVisualCategory(StyleBuilder::determineVisualCategory(m_osmData));
+    placemark->setName(m_osmData.tagValue(QStringLiteral("name")));
+    if (placemark->name().isEmpty()) {
+        placemark->setName(m_osmData.tagValue(QStringLiteral("ref")));
+    }
+    placemark->setOsmData(osmData);
+    placemark->setZoomLevel(OsmNode::zoomLevelFor(placemark->visualCategory()));
+    placemark->setPopularity(OsmNode::popularityFor(placemark->visualCategory()));
+    placemark->setVisible(placemark->visualCategory() != GeoDataPlacemark::None);
+
     document->append(placemark);
 }
 
@@ -185,14 +104,83 @@ void OsmWay::addReference(qint64 id)
 
 bool OsmWay::isArea() const
 {
+    // @TODO A single OSM way can be both closed and non-closed, e.g. landuse=grass with barrier=fence.
+    // We need to create two separate ways in cases like that to support this.
+    // See also https://wiki.openstreetmap.org/wiki/Key:area
+
+    bool const isLinearFeature =
+            m_osmData.containsTag(QStringLiteral("area"), QStringLiteral("no")) ||
+            m_osmData.containsTagKey(QStringLiteral("highway")) ||
+            m_osmData.containsTagKey(QStringLiteral("barrier"));
+    if (isLinearFeature) {
+        return false;
+    }
+
+    bool const isAreaFeature = m_osmData.containsTagKey(QStringLiteral("landuse"));
+    if (isAreaFeature) {
+        return true;
+    }
+
     for (auto iter = m_osmData.tagsBegin(), end=m_osmData.tagsEnd(); iter != end; ++iter) {
-        QString const keyValue = QString("%1=%2").arg(iter.key()).arg(iter.value());
-        if (OsmPresetLibrary::isAreaTag(keyValue)) {
+        const auto tag = StyleBuilder::OsmTag(iter.key(), iter.value());
+        if (isAreaTag(tag)) {
             return true;
         }
     }
 
-    return false;
+    bool const isImplicitlyClosed = m_references.size() > 1 && m_references.front() == m_references.last();
+    return isImplicitlyClosed;
+}
+
+bool OsmWay::isAreaTag(const StyleBuilder::OsmTag &keyValue)
+{
+    if (s_areaTags.isEmpty()) {
+        // All these tags can be found updated at
+        // http://wiki.openstreetmap.org/wiki/Map_Features#Landuse
+
+        s_areaTags.insert(StyleBuilder::OsmTag(QStringLiteral("natural"), QStringLiteral("water")));
+        s_areaTags.insert(StyleBuilder::OsmTag(QStringLiteral("natural"), QStringLiteral("wood")));
+        s_areaTags.insert(StyleBuilder::OsmTag(QStringLiteral("natural"), QStringLiteral("beach")));
+        s_areaTags.insert(StyleBuilder::OsmTag(QStringLiteral("natural"), QStringLiteral("wetland")));
+        s_areaTags.insert(StyleBuilder::OsmTag(QStringLiteral("natural"), QStringLiteral("glacier")));
+        s_areaTags.insert(StyleBuilder::OsmTag(QStringLiteral("natural"), QStringLiteral("scrub")));
+        s_areaTags.insert(StyleBuilder::OsmTag(QStringLiteral("natural"), QStringLiteral("cliff")));
+        s_areaTags.insert(StyleBuilder::OsmTag(QStringLiteral("area"), QStringLiteral("yes")));
+        s_areaTags.insert(StyleBuilder::OsmTag(QStringLiteral("waterway"), QStringLiteral("riverbank")));
+
+        foreach (const auto tag, StyleBuilder::buildingTags()) {
+            s_areaTags.insert(tag);
+        }
+        s_areaTags.insert(StyleBuilder::OsmTag(QStringLiteral("man_made"), QStringLiteral("bridge")));
+
+        s_areaTags.insert(StyleBuilder::OsmTag(QStringLiteral("amenity"), QStringLiteral("graveyard")));
+        s_areaTags.insert(StyleBuilder::OsmTag(QStringLiteral("amenity"), QStringLiteral("parking")));
+        s_areaTags.insert(StyleBuilder::OsmTag(QStringLiteral("amenity"), QStringLiteral("parking_space")));
+        s_areaTags.insert(StyleBuilder::OsmTag(QStringLiteral("amenity"), QStringLiteral("bicycle_parking")));
+        s_areaTags.insert(StyleBuilder::OsmTag(QStringLiteral("amenity"), QStringLiteral("college")));
+        s_areaTags.insert(StyleBuilder::OsmTag(QStringLiteral("amenity"), QStringLiteral("hospital")));
+        s_areaTags.insert(StyleBuilder::OsmTag(QStringLiteral("amenity"), QStringLiteral("kindergarten")));
+        s_areaTags.insert(StyleBuilder::OsmTag(QStringLiteral("amenity"), QStringLiteral("school")));
+        s_areaTags.insert(StyleBuilder::OsmTag(QStringLiteral("amenity"), QStringLiteral("university")));
+        s_areaTags.insert(StyleBuilder::OsmTag(QStringLiteral("leisure"), QStringLiteral("common")));
+        s_areaTags.insert(StyleBuilder::OsmTag(QStringLiteral("leisure"), QStringLiteral("garden")));
+        s_areaTags.insert(StyleBuilder::OsmTag(QStringLiteral("leisure"), QStringLiteral("golf_course")));
+        s_areaTags.insert(StyleBuilder::OsmTag(QStringLiteral("leisure"), QStringLiteral("marina")));
+        s_areaTags.insert(StyleBuilder::OsmTag(QStringLiteral("leisure"), QStringLiteral("playground")));
+        s_areaTags.insert(StyleBuilder::OsmTag(QStringLiteral("leisure"), QStringLiteral("pitch")));
+        s_areaTags.insert(StyleBuilder::OsmTag(QStringLiteral("leisure"), QStringLiteral("park")));
+        s_areaTags.insert(StyleBuilder::OsmTag(QStringLiteral("leisure"), QStringLiteral("sports_centre")));
+        s_areaTags.insert(StyleBuilder::OsmTag(QStringLiteral("leisure"), QStringLiteral("stadium")));
+        s_areaTags.insert(StyleBuilder::OsmTag(QStringLiteral("leisure"), QStringLiteral("swimming_pool")));
+        s_areaTags.insert(StyleBuilder::OsmTag(QStringLiteral("leisure"), QStringLiteral("track")));
+
+        s_areaTags.insert(StyleBuilder::OsmTag(QStringLiteral("military"), QStringLiteral("danger_area")));
+
+        s_areaTags.insert(StyleBuilder::OsmTag(QStringLiteral("marble_land"), QStringLiteral("landmass")));
+        s_areaTags.insert(StyleBuilder::OsmTag(QStringLiteral("settlement"), QStringLiteral("yes")));
+    }
+
+    return s_areaTags.contains(keyValue);
 }
 
 }

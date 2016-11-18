@@ -12,7 +12,6 @@
 
 #include "routing/RoutingManager.h"
 #include "routing/RouteRequest.h"
-#include "MarbleDeclarativeWidget.h"
 #include "MarbleMap.h"
 #include "MarbleModel.h"
 #include "Routing.h"
@@ -52,7 +51,7 @@ QHash<int, QByteArray> RouteRequestModel::roleNames() const
 QVariant RouteRequestModel::headerData ( int section, Qt::Orientation orientation, int role ) const
 {
     if ( orientation == Qt::Horizontal && role == Qt::DisplayRole && section == 0 ) {
-        return QString( "Waypoint" );
+        return QStringLiteral("Waypoint");
     }
 
     return QVariant();

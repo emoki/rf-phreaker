@@ -14,8 +14,6 @@
 #include "AbstractDataPluginModel.h"
 #include "GeoDataLatLonAltBox.h"
 
-#include <QDateTime>
-
 // Please note and respect that this key is for use ONLY within this plugin.
 #define AUTHKEY "mJg2Q5fD3qczP7M8"
 
@@ -41,7 +39,7 @@ public:
 
 
     /// Fetch a file for a cache
-    void fetchData(const QString& url, const QString &type, OpenCachingComItem *item);
+    void fetchData(const QUrl &url, const QString &type, OpenCachingComItem *item);
 
     /// home location
     const GeoDataCoordinates home() const;

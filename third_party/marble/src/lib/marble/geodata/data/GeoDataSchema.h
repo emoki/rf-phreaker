@@ -17,7 +17,6 @@
 
 // Marble
 #include "GeoDataObject.h"
-#include "GeoDataSimpleField.h"
 #include "geodata_export.h"
 
 class QDataStream;
@@ -26,7 +25,10 @@ namespace Marble
 {
 
 class GeoDataSchemaPrivate;
+class GeoDataSimpleField;
 
+/**
+ */
 class GEODATA_EXPORT GeoDataSchema : public GeoDataObject
 {
 public:

@@ -25,7 +25,21 @@ class GeoDataFeature;
 class GeoDataLatLonAltBox;
 class GeoGraphicsItemPrivate;
 class GeoPainter;
+class StyleBuilder;
 class ViewportParams;
+
+class RenderContext
+{
+public:
+    bool operator==(const RenderContext &other) const;
+    bool operator!=(const RenderContext &other) const;
+
+    explicit RenderContext(int tileLevel = -1);
+    int tileLevel() const;
+
+private:
+    int m_tileLevel;
+};
 
 class MARBLE_EXPORT GeoGraphicsItem
 {
@@ -82,14 +96,8 @@ class MARBLE_EXPORT GeoGraphicsItem
     /**
      * Returns the bounding box covered by the item.
      */
-    virtual const GeoDataLatLonAltBox& latLonAltBox() const;
+    virtual const GeoDataLatLonAltBox &latLonAltBox() const = 0;
 
-    /**
-     * Set the box used to determine if an item is active or inactive. If an empty box is passed
-     * the item will be shown in every case.
-     */
-    void setLatLonAltBox( const GeoDataLatLonAltBox& latLonAltBox );
-    
     /**
      * Returns the style of item.
      */
@@ -98,7 +106,7 @@ class MARBLE_EXPORT GeoGraphicsItem
     /**
      * Set the style for the item.
      */
-    void setStyle(const GeoDataStyle::ConstPtr &style );
+    void setStyleBuilder(const StyleBuilder *styleBuilder);
 
     /**
      * Set the style which will be used when
@@ -135,6 +143,8 @@ class MARBLE_EXPORT GeoGraphicsItem
     QStringList paintLayers() const;
 
     void setPaintLayers(const QStringList &paintLayers);
+
+    void setRenderContext(const RenderContext &renderContext);
 
  protected:
     GeoGraphicsItemPrivate *const d;

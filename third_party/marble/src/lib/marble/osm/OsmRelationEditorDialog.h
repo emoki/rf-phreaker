@@ -14,9 +14,9 @@
 #include "marble_export.h"
 
 #include <QDialog>
-#include <QLineEdit>
-#include <QDialogButtonBox>
 
+class QLineEdit;
+class QDialogButtonBox;
 
 namespace Marble {
 
@@ -37,7 +37,7 @@ public:
     explicit OsmRelationEditorDialog( OsmPlacemarkData *relationData, QWidget *parent = 0 );
     ~OsmRelationEditorDialog();
 
-private slots:
+private Q_SLOTS:
     void checkFields();
 
 private:

@@ -1,6 +1,6 @@
 PROJECT( MarbleDeclarativePlugin )
 
-macro_optional_find_package(Qt5Positioning)
+find_package(Qt5 ${REQUIRED_QT_VERSION} COMPONENTS Positioning)
 if(Qt5Positioning_FOUND)
     add_definitions(-DHAVE_QT5_POSITIONING)
 endif(Qt5Positioning_FOUND)
@@ -12,7 +12,6 @@ INCLUDE_DIRECTORIES(
 
 add_library( marbledeclarative SHARED
     Bookmarks.cpp
-    CloudSync.cpp
     Coordinate.cpp
     DeclarativeDataPluginModel.cpp
     DeclarativeDataPlugin.cpp
@@ -21,11 +20,9 @@ add_library( marbledeclarative SHARED
     MapThemeModel.cpp
     MarbleDeclarativeObject.cpp
     MarbleDeclarativePlugin.cpp
-    MarbleDeclarativeWidget.cpp
     MarbleQuickItem.cpp
     Placemark.cpp
     PositionSource.cpp
-    Search.cpp
     SearchBackend.cpp
     Tracking.cpp
     Routing.cpp
@@ -35,10 +32,8 @@ add_library( marbledeclarative SHARED
     Settings.cpp
 )
 
-# needed for marble_declarative_export.h
-set_target_properties(marbledeclarative PROPERTIES
-  DEFINE_SYMBOL MAKE_MARBLE_DECLARATIVE_LIB
-)
+generate_export_header(marbledeclarative BASE_NAME marble_declarative)
+target_include_directories(marbledeclarative PUBLIC $<BUILD_INTERFACE:${CMAKE_CURRENT_BINARY_DIR}>)
 
 marble_add_project_resources(qmldir)
 
@@ -47,10 +42,8 @@ marble_add_project_resources(qmldir)
 
 target_link_libraries( marbledeclarative
     LINK_PUBLIC
+        marblewidget
         Qt5::Quick
-        ${MARBLEWIDGET}
-    LINK_PRIVATE
-        Qt5::Script
 )
 if(Qt5Positioning_FOUND)
     target_link_libraries( marbledeclarative
@@ -59,14 +52,8 @@ if(Qt5Positioning_FOUND)
     )
 endif()
 
-set_target_properties( marbledeclarative PROPERTIES
-    INSTALL_RPATH_USE_LINK_PATH TRUE
-    SKIP_BUILD_RPATH TRUE
-    BUILD_WITH_INSTALL_RPATH TRUE
-)
-
 if(WIN32)
-  install(TARGETS marbledeclarative RUNTIME DESTINATION ${CMAKE_INSTALL_PREFIX})
+  install(TARGETS marbledeclarative RUNTIME DESTINATION ${CMAKE_INSTALL_PREFIX} ARCHIVE DESTINATION lib)
 else()
   install(TARGETS marbledeclarative LIBRARY DESTINATION ${CMAKE_INSTALL_LIBDIR})
 endif()

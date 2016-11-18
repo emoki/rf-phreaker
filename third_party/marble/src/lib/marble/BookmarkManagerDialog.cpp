@@ -17,14 +17,16 @@
 #include "FileManager.h"
 #include "GeoDataCoordinates.h"
 #include "GeoDataDocument.h"
+#include "GeoDataLookAt.h"
 #include "GeoDataExtendedData.h"
 #include "GeoDataFolder.h"
 #include "GeoDataPlacemark.h"
 #include "GeoDataPoint.h"
 #include "GeoDataStyle.h"
+#include "GeoDataIconStyle.h"
 #include "GeoDataTreeModel.h"
 #include "GeoDataTypes.h"
-#include "GeoWriter.h"
+#include "GeoDataDocumentWriter.h"
 #include "MarbleDirs.h"
 #include "MarbleDebug.h"
 #include "MarbleModel.h"
@@ -37,7 +39,6 @@
 #include <QSortFilterProxyModel>
 #include <QFileDialog>
 #include <QMessageBox>
-#include <QItemSelectionModel>
 
 namespace Marble {
 
@@ -174,7 +175,7 @@ void BookmarkManagerDialogPrivate::deleteFolder()
     if ( folder ) {
         if ( folder->size() > 0 ) {
             QString const text = QObject::tr( "The folder %1 is not empty. Removing it will delete all bookmarks it contains. Are you sure you want to delete the folder?" ).arg( folder->name() );
-            if ( QMessageBox::question( m_parent, QObject::tr("Remove Folder - Marble"), text, QMessageBox::Yes, QMessageBox::No ) != QMessageBox::Yes) {
+            if (QMessageBox::question(m_parent, BookmarkManagerDialog::tr("Remove Folder"), text, QMessageBox::Yes, QMessageBox::No) != QMessageBox::Yes) {
                 return;
             }
         }
@@ -323,9 +324,7 @@ GeoDataContainer *BookmarkManagerDialogPrivate::selectedFolder()
 void BookmarkManagerDialogPrivate::initializeFoldersView( GeoDataTreeModel* treeModel )
 {
     m_folderFilterModel.setFilterKeyColumn( 1 );
-    QString regexp = GeoDataTypes::GeoDataFolderType;
-    regexp += '|';
-    regexp += GeoDataTypes::GeoDataDocumentType;
+    const QString regexp = QLatin1String(GeoDataTypes::GeoDataFolderType) + QLatin1Char('|') + QLatin1String(GeoDataTypes::GeoDataDocumentType);
     m_folderFilterModel.setFilterRegExp( regexp );
     m_folderFilterModel.setSourceModel( treeModel );
 
@@ -407,21 +406,17 @@ void BookmarkManagerDialog::exportBookmarks()
                        QDir::homePath(), tr( "KML files (*.kml)" ) );
 
     if ( !fileName.isEmpty() ) {
-        QFile file( fileName );
-        GeoWriter writer;
-        writer.setDocumentType( kml::kmlTag_nameSpaceOgc22 );
-
-        if ( !file.open( QIODevice::ReadWrite ) || !writer.write( &file, bookmarkDocument() ) ) {
+        if (!GeoDataDocumentWriter::write(fileName, *bookmarkDocument())) {
             mDebug() << "Could not write the bookmarks file" << fileName;
             QString const text = tr( "Unable to save bookmarks. Please check that the file is writable." );
-            QMessageBox::warning( this, tr( "Bookmark Export - Marble" ), text );
+            QMessageBox::warning(this, tr("Bookmark Export"), text);
         }
     }
 }
 
 void BookmarkManagerDialog::importBookmarks()
 {
-    QString const file = QFileDialog::getOpenFileName( this, tr( "Import Bookmarks - Marble" ),
+    QString const file = QFileDialog::getOpenFileName(this, tr("Import Bookmarks"),
                             QDir::homePath(), tr( "KML Files (*.kml)" ) );
     if ( file.isEmpty() ) {
         return;
@@ -430,7 +425,7 @@ void BookmarkManagerDialog::importBookmarks()
     GeoDataDocument *import = BookmarkManager::openFile( file );
     if ( !import ) {
         QString const text = tr( "The file %1 cannot be opened as a KML file." ).arg( file );
-        QMessageBox::warning( this, tr( "Bookmark Import - Marble" ), text );
+        QMessageBox::warning(this, tr( "Bookmark Import"), text);
         return;
     }
 
@@ -462,8 +457,8 @@ void BookmarkManagerDialog::importBookmarks()
                         QString const newBookmark = tr( "Imported bookmark" );
                         QString const existingBookmark = tr( "Existing bookmark" );
                         QString const question = tr( "Do you want to replace the existing bookmark with the imported one?" );
-                        QString html = "<p>%1</p><table><tr><td>%2</td><td><b>%3 / %4</b></td></tr>";
-                        html += "<tr><td>%5</td><td><b>%6 / %7</b></td></tr></table><p>%8</p>";
+                        QString html = QLatin1String("<p>%1</p><table><tr><td>%2</td><td><b>%3 / %4</b></td></tr>"
+                                                     "<tr><td>%5</td><td><b>%6 / %7</b></td></tr></table><p>%8</p>");
                         html = html.arg( intro ).arg( existingBookmark ).arg( existingFolder->name() );
                         html = html.arg( existingPlacemark->name() ).arg( newBookmark ).arg( newFolder->name() );
                         html = html.arg( newPlacemark->name() ).arg( question );

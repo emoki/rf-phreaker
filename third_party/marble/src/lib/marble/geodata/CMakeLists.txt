@@ -1,4 +1,5 @@
 SET ( geodata_data_SRCS
+        geodata/data/LonLatParser.cpp
         geodata/data/GeoDataRegion.cpp
         geodata/data/GeoDataUpdate.cpp
         geodata/data/GeoDataViewVolume.cpp
@@ -76,6 +77,9 @@ SET ( geodata_data_SRCS
 )
 
 SET ( geodata_scene_SRCS
+        geodata/scene/GeoSceneAbstractTileProjection.cpp
+        geodata/scene/GeoSceneMercatorTileProjection.cpp
+        geodata/scene/GeoSceneEquirectTileProjection.cpp
         geodata/scene/GeoSceneIcon.cpp
         geodata/scene/GeoSceneTileDataset.cpp
         geodata/scene/GeoSceneVectorTileDataset.cpp
@@ -227,6 +231,8 @@ SET( geodata_graphicsitem_SRCS
     geodata/graphicsitem/GeoPhotoGraphicsItem.cpp
     geodata/graphicsitem/GeoPointGraphicsItem.cpp
     geodata/graphicsitem/GeoPolygonGraphicsItem.cpp
+    geodata/graphicsitem/AbstractGeoPolygonGraphicsItem.cpp
+    geodata/graphicsitem/BuildingGeoPolygonGraphicsItem.cpp
     geodata/graphicsitem/GeoTrackGraphicsItem.cpp
     geodata/graphicsitem/ScreenOverlayGraphicsItem.cpp
 )
@@ -471,6 +477,8 @@ SET ( geodata_parser_SRCS
 SET( geodata_writer_SRCS
         geodata/writer/GeoTagWriter.cpp
         geodata/writer/GeoWriter.cpp
+        geodata/writer/GeoWriterBackend.cpp
+        geodata/writer/GeoDataDocumentWriter.cpp
    )
 
 SET( geodata_SRCS

@@ -22,19 +22,15 @@
  */
 
 
-#include <QSize>
-#include <QString>
-#include <QObject>
-#include <QFont>
-#include <QPixmap>
-
 #include "marble_export.h"
 #include "GeoDataCoordinates.h"       // In geodata/data/
-#include "RenderState.h"
 
 // Qt
-class QAbstractItemModel;
-class QItemSelectionModel;
+#include <QObject>
+#include <QRegion>
+
+class QFont;
+class QString;
 
 namespace Marble
 {
@@ -49,14 +45,15 @@ class MarbleModel;
 class ViewportParams;
 class GeoPainter;
 class LayerInterface;
-class Quaternion;
 class RenderPlugin;
+class RenderState;
 class AbstractDataPlugin;
 class AbstractDataPluginItem;
 class AbstractFloatItem;
 class TextureLayer;
 class TileCoordsPyramid;
 class GeoSceneTextureTileDataset;
+class StyleBuilder;
 
 /**
  * @short A class that can paint a view of the earth.
@@ -85,7 +82,6 @@ class GeoSceneTextureTileDataset;
  * cities, mountain tops or the poles.
  *
  * @see MarbleWidget
- * @see MarbleControlBox
  * @see MarbleModel
  */
 
@@ -224,6 +220,11 @@ class MARBLE_EXPORT MarbleMap : public QObject
     qreal centerLatitude() const;
 
     QVector<const GeoDataFeature *> whichFeatureAt( const QPoint& ) const;
+
+    /**
+     * @since 0.26.0
+     */
+    QVector<const GeoDataFeature*> whichBuildingAt(const QPoint& curpos) const;
 
     /**
      * @brief  Return the property value by name.
@@ -421,6 +422,11 @@ class MARBLE_EXPORT MarbleMap : public QObject
 
     RenderState renderState() const;
 
+    /**
+     * @since 0.26.0
+     */
+    const StyleBuilder* styleBuilder() const;
+
  public Q_SLOTS:
 
     /**
@@ -447,7 +453,7 @@ class MARBLE_EXPORT MarbleMap : public QObject
      * of (lon, lat), otherwise the resulting angle will be the sum of
      * the previous position and the two offsets.
      */
-    void rotateBy( const qreal &deltaLon, const qreal &deltaLat );
+    void rotateBy(qreal deltaLon, qreal deltaLat);
 
     /**
      * @brief  Center the view on a geographical point
@@ -632,6 +638,36 @@ class MARBLE_EXPORT MarbleMap : public QObject
 
     void setShowRuntimeTrace( bool visible );
 
+    bool showRuntimeTrace() const;
+
+    /**
+     * @brief Set whether to enter the debug mode for
+     * polygon node drawing
+     * @param visible visibility of the node debug mode
+     */
+    void setShowDebugPolygons( bool visible);
+
+    bool showDebugPolygons() const;
+
+    /**
+     * @brief Set whether to enter the debug mode for
+     * visualizing batch rendering
+     * @param visible visibility of the batch rendering
+     */
+    void setShowDebugBatchRender( bool visible);
+
+    bool showDebugBatchRender() const;
+
+
+    /**
+     * @brief Set whether to enter the debug mode for
+     * placemark drawing
+     * @param visible visibility of the node debug mode
+     */
+    void setShowDebugPlacemarks(bool visible);
+
+    bool showDebugPlacemarks() const;
+
     void setShowBackground( bool visible );
 
      /**
@@ -729,6 +765,7 @@ class MARBLE_EXPORT MarbleMap : public QObject
     Q_PRIVATE_SLOT( d, void updateProperty( const QString &, bool ) )
     Q_PRIVATE_SLOT( d, void setDocument(QString) )
     Q_PRIVATE_SLOT( d, void updateTileLevel() )
+    Q_PRIVATE_SLOT(d, void addPlugins())
 
  private:
     Q_DISABLE_COPY( MarbleMap )

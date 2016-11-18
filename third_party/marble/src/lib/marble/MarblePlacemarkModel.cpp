@@ -16,11 +16,16 @@
 
 // Qt
 #include <QTime>
+#include <QImage>
 
 // Marble
 #include "MarbleDebug.h"
+#include "GeoDataPlacemark.h"
 #include "GeoDataExtendedData.h"
+#include "GeoDataData.h"
+#include "GeoDataGeometry.h"
 #include "GeoDataStyle.h"       // In geodata/data/
+#include "GeoDataIconStyle.h"
 
 using namespace Marble;
 
@@ -62,7 +67,6 @@ MarblePlacemarkModel::MarblePlacemarkModel( QObject *parent )
     roles[CountryCodeRole] = "countryCode";
     roles[StateRole] = "state";
     roles[PopularityRole] = "popularity";
-    roles[DescriptionRole] = "description";
     roles[GeoTypeRole] = "role";
     roles[CoordinateRole] = "coordinate";
     roles[StyleRole] = "style";
@@ -145,9 +149,9 @@ QVariant MarblePlacemarkModel::data( const QModelIndex &index, int role ) const
     } else if ( role == StyleRole ) {
         return qVariantFromValue( d->m_placemarkContainer->at( index.row() )->style().data() );
     } else if ( role == GmtRole ) {
-        return qVariantFromValue( d->m_placemarkContainer->at( index.row() )->extendedData().value("gmt").value() );
+        return qVariantFromValue( d->m_placemarkContainer->at( index.row() )->extendedData().value(QStringLiteral("gmt")).value() );
     } else if ( role == DstRole ) {
-        return qVariantFromValue( d->m_placemarkContainer->at( index.row() )->extendedData().value("dst").value() );
+        return qVariantFromValue( d->m_placemarkContainer->at( index.row() )->extendedData().value(QStringLiteral("dst")).value() );
     } else if ( role == GeometryRole ) {
         return qVariantFromValue( d->m_placemarkContainer->at( index.row() )->geometry() );
     } else if ( role == ObjectPointerRole ) {

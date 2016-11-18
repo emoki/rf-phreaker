@@ -14,7 +14,8 @@
 #define FLYTOEDITWIDGET_H
 
 #include <QWidget>
-#include <QModelIndex>
+#include <QPersistentModelIndex>
+
 #include "GeoDataCoordinates.h"
 
 class QDoubleSpinBox;

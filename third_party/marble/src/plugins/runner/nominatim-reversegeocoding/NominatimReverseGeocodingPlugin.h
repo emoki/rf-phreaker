@@ -21,7 +21,7 @@ namespace Marble
 class NominatimPlugin : public ReverseGeocodingRunnerPlugin
 {
     Q_OBJECT
-    Q_PLUGIN_METADATA( IID "org.kde.edu.marble.NominatimReverseGeocodingPlugin" )
+    Q_PLUGIN_METADATA(IID "org.kde.marble.NominatimReverseGeocodingPlugin")
     Q_INTERFACES( Marble::ReverseGeocodingRunnerPlugin )
 
 public:
@@ -39,7 +39,7 @@ public:
 
     QString copyrightYears() const;
 
-    QList<PluginAuthor> pluginAuthors() const;
+    QVector<PluginAuthor> pluginAuthors() const override;
 
     virtual ReverseGeocodingRunner* newRunner() const;
 };

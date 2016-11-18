@@ -22,6 +22,8 @@ namespace Marble
 class GeoDataMultiTrackPrivate;
 class GeoDataTrack;
 
+/**
+ */
 class GEODATA_EXPORT GeoDataMultiTrack : public GeoDataGeometry
 {
 public:
@@ -83,9 +85,9 @@ public:
     virtual void pack( QDataStream& stream ) const;
     // Unserialize the Placemark from @p stream
     virtual void unpack( QDataStream& stream );
+
  private:
-    GeoDataMultiTrackPrivate *p();
-    const GeoDataMultiTrackPrivate *p() const;
+    Q_DECLARE_PRIVATE(GeoDataMultiTrack)
 };
 
 }

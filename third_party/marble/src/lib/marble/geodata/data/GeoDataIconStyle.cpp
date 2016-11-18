@@ -18,6 +18,8 @@
 
 #include "GeoDataTypes.h"
 
+#include <QImageReader>
+
 namespace Marble
 {
 
@@ -26,6 +28,7 @@ class GeoDataIconStylePrivate
   public:
     GeoDataIconStylePrivate()
         : m_scale( 1.0 ),
+        m_size(0, 0),
         m_iconPath(),
         m_heading( 0 )
     {
@@ -33,6 +36,7 @@ class GeoDataIconStylePrivate
 
     GeoDataIconStylePrivate( const QString& iconPath, const QPointF &hotSpot )
         : m_scale( 1.0 ),
+          m_size(0, 0),
           m_iconPath( iconPath ),
           m_hotSpot( hotSpot ),
           m_heading( 0 )
@@ -50,9 +54,59 @@ class GeoDataIconStylePrivate
         return remoteIconLoader;
     }
 
+    QSize scaledSize(const QSize &size) const
+    {
+        QSize iconSize = size.isNull() ? m_icon.size() : size;
+        // Scaling the placemark's icon based on its size, scale, and maximum icon size.
+        if ( iconSize.width()*m_scale > s_maximumIconSize.width()
+             || iconSize.height()*m_scale > s_maximumIconSize.height() ) {
+            iconSize.scale( s_maximumIconSize, Qt::KeepAspectRatio );
+        }
+        else if ( iconSize.width()*m_scale < s_minimumIconSize.width()
+                  || iconSize.height()*m_scale < s_minimumIconSize.width() ) {
+            iconSize.scale( s_minimumIconSize, Qt::KeepAspectRatio );
+        }
+        else {
+            iconSize *= m_scale;
+        }
+
+        return iconSize;
+    }
+
+    QImage loadIcon(const QString &path, const QSize &size) const
+    {
+        if (!path.isEmpty()) {
+            // Icons from the local file system
+            if (!size.isNull()) {
+                QImageReader imageReader;
+                imageReader.setScaledSize(size);
+                imageReader.setFileName(path);
+                QImage icon = imageReader.read();
+                if (icon.isNull()) {
+                    mDebug() << "GeoDataIconStyle: Failed to read image " << path << ": " << imageReader.errorString();
+                }
+                return icon;
+            }
+            QImage icon = QImage(path);
+            if (!icon.isNull()) {
+                return icon;
+            }
+        }
+
+        if(QUrl(m_iconPath).isValid() ) {
+            // if image is not found on disk, check whether the icon is
+            // at remote location. If yes then go for remote icon loading
+            return remoteIconLoader()->load(QUrl(m_iconPath));
+        }
+
+        mDebug() << "Unable to open style icon at: " << path;
+        return QImage();
+    }
+
     float            m_scale;
 
     QImage           m_icon;
+    QSize            m_size;
     QImage           m_scaledIcon;
     QString          m_iconPath;
     GeoDataHotSpot   m_hotSpot;
@@ -94,6 +148,7 @@ bool GeoDataIconStyle::operator==( const GeoDataIconStyle &other ) const
 
     return d->m_scale == other.d->m_scale &&
            d->m_icon == other.d->m_icon &&
+           d->m_size == other.d->m_size &&
            d->m_iconPath == other.d->m_iconPath &&
            d->m_hotSpot == other.d->m_hotSpot &&
            d->m_heading == other.d->m_heading;
@@ -139,19 +194,7 @@ QImage GeoDataIconStyle::icon() const
         return d->m_icon;
     }
     else if ( !d->m_iconPath.isEmpty() ) {
-        d->m_icon = QImage( resolvePath( d->m_iconPath ) );
-        if( d->m_icon.isNull() ) {
-            // if image is not found on disk, check whether the icon is
-            // at remote location. If yes then go for remote icon loading
-            QUrl remoteLocation = QUrl( d->m_iconPath );
-            if( remoteLocation.isValid() ) {
-                d->m_icon = d->remoteIconLoader()->load( d->m_iconPath );
-            }
-            else {
-                mDebug() << "Unable to open style icon at: " << d->m_iconPath;
-            }
-        }
-
+        d->m_icon = d->loadIcon(resolvePath(d->m_iconPath), d->m_size);
         return d->m_icon;
     }
     else
@@ -170,7 +213,29 @@ QPointF GeoDataIconStyle::hotSpot( GeoDataHotSpot::Units &xunits, GeoDataHotSpot
     return d->m_hotSpot.hotSpot( xunits, yunits );
 }
 
-void GeoDataIconStyle::setScale( const float &scale )
+void GeoDataIconStyle::setSize(const QSize &size)
+{
+    if (size == d->m_size) {
+        return;
+    }
+
+    d->m_size = size;
+    if (!size.isNull() && !d->m_icon.isNull()) {
+        // Resize existing icon that cannot be restored from an image path
+        d->m_icon = d->m_icon.scaled(size);
+    } else if (!d->m_iconPath.isEmpty()) {
+        // Lazily reload the icons
+        d->m_icon = QImage();
+        d->m_scaledIcon = QImage();
+    }
+}
+
+QSize GeoDataIconStyle::size() const
+{
+    return d->m_size;
+}
+
+void GeoDataIconStyle::setScale(float scale)
 {
     d->m_scale = scale;
 }
@@ -186,28 +251,25 @@ QImage GeoDataIconStyle::scaledIcon() const
         return d->m_scaledIcon;
     }
 
-    // Scale shouldn't be 0, but if it is, returning regular icon.
-    if( scale() <= 0 || icon().isNull() ) {
+    if (d->m_scale == 1.0) {
         return icon();
     }
 
-    QSize iconSize = icon().size();
+    // Scale shouldn't be 0, but if it is, returning regular icon.
+    if(d->m_scale <= 0 || icon().isNull() ) {
+        return icon();
+    }
 
-    // Scaling the placemark's icon based on its size, scale, and maximum icon size.
+    // Try to load it
+    d->m_scaledIcon = d->loadIcon(resolvePath(d->m_iconPath), d->scaledSize(d->m_size));
 
-    if ( iconSize.width()*scale() > s_maximumIconSize.width()
-         || iconSize.height()*scale() > s_maximumIconSize.height() ) {
-       iconSize.scale( s_maximumIconSize, Qt::KeepAspectRatio );
-    }
-    else if ( iconSize.width()*scale() < s_minimumIconSize.width()
-              || iconSize.height()*scale() < s_minimumIconSize.width() ) {
-       iconSize.scale( s_maximumIconSize, Qt::KeepAspectRatio );
-    }
-    else {
-       iconSize *= scale();
-    }
-    if (!icon().isNull()) {
-        d->m_scaledIcon = icon().scaled( iconSize, Qt::KeepAspectRatio, Qt::SmoothTransformation ) ;
+    if (d->m_scaledIcon.isNull()) {
+        // Direct loading failed, try to scale the icon as a last resort
+        QImage const image = icon();
+        if (!image.isNull()) {
+            QSize iconSize = d->scaledSize(image.size());
+            d->m_scaledIcon = image.scaled( iconSize, Qt::KeepAspectRatio, Qt::SmoothTransformation ) ;
+        }
     }
     return d->m_scaledIcon;
 }

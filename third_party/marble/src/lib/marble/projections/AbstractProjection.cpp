@@ -17,10 +17,12 @@
 
 #include "MarbleDebug.h"
 #include <QRegion>
+#include <QPainterPath>
 
 // Marble
 #include "GeoDataLineString.h"
 #include "GeoDataLinearRing.h"
+#include "GeoDataLatLonAltBox.h"
 #include "ViewportParams.h"
 
 using namespace Marble;

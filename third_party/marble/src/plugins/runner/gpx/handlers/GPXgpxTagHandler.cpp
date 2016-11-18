@@ -28,6 +28,9 @@
 
 #include "GeoDataDocument.h"
 #include "GeoDataStyle.h"
+#include "GeoDataIconStyle.h"
+#include "GeoDataLabelStyle.h"
+#include "GeoDataLineStyle.h"
 #include "GeoDataStyleMap.h"
 #include "GeoDataHotSpot.h"
 #include "MarbleDirs.h"
@@ -50,11 +53,11 @@ GeoNode* GPXgpxTagHandler::parse(GeoParser& parser) const
     lineStyle.setColor( transparentRed );
     lineStyle.setWidth( 4 );
     style->setLineStyle(lineStyle);
-    style->setId("track");
+    style->setId(QStringLiteral("track"));
 
     GeoDataStyleMap styleMap;
-    styleMap.setId("map-track");
-    styleMap.insert("normal", QString("#").append(style->id()));
+    styleMap.setId(QStringLiteral("map-track"));
+    styleMap.insert(QStringLiteral("normal"), QLatin1Char('#') + style->id());
     doc->addStyleMap(styleMap);
     doc->addStyle(style);
 
@@ -66,19 +69,19 @@ GeoNode* GPXgpxTagHandler::parse(GeoParser& parser) const
     routeLineStyle.setColor( skyBlue );
     routeLineStyle.setWidth( 5 );
     routestyle->setLineStyle(routeLineStyle);
-    routestyle->setId("route");
+    routestyle->setId(QStringLiteral("route"));
 
     GeoDataStyleMap routeStyleMap;
-    routeStyleMap.setId("map-route");
-    routeStyleMap.insert("normal", QString("#").append(routestyle->id()));
+    routeStyleMap.setId(QStringLiteral("map-route"));
+    routeStyleMap.insert(QStringLiteral("normal"), QLatin1Char('#') + routestyle->id());
     doc->addStyleMap(routeStyleMap);
     doc->addStyle(routestyle);
 
     // create a default style for waypoint icons
     GeoDataStyle::Ptr waypointStyle(new GeoDataStyle);
-    waypointStyle->setId("waypoint");
+    waypointStyle->setId(QStringLiteral("waypoint"));
     GeoDataIconStyle iconStyle;
-    iconStyle.setIconPath(MarbleDirs::path("bitmaps/flag.png"));
+    iconStyle.setIconPath(MarbleDirs::path(QStringLiteral("bitmaps/flag.png")));
     iconStyle.setHotSpot(QPointF(0.12,0.03), GeoDataHotSpot::Fraction, GeoDataHotSpot::Fraction);
     waypointStyle->setIconStyle(iconStyle);
 
@@ -87,8 +90,8 @@ GeoNode* GPXgpxTagHandler::parse(GeoParser& parser) const
     waypointStyle->setLabelStyle(waypointLabelStyle);
 
     GeoDataStyleMap waypointStyleMap;
-    waypointStyleMap.setId("map-waypoint");
-    waypointStyleMap.insert("normal", QString("#").append(waypointStyle->id()));
+    waypointStyleMap.setId(QStringLiteral("map-waypoint"));
+    waypointStyleMap.insert(QStringLiteral("normal"), QLatin1Char('#') + waypointStyle->id());
     doc->addStyleMap(waypointStyleMap);
     doc->addStyle(waypointStyle);
 

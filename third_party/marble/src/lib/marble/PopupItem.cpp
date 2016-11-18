@@ -27,13 +27,8 @@
 #include <QPrintDialog>
 #include <QMouseEvent>
 #include <QApplication>
-#include <QVBoxLayout>
-#include <QLabel>
-#include <QPushButton>
+#include <QDesktopServices>
 #include <QPixmapCache>
-#include <QMenu>
-#include <QKeyEvent>
-#include <QClipboard>
 #include <qdrawutil.h>
 #include <QPainter>
 
@@ -50,7 +45,7 @@ PopupItem::PopupItem( QObject* parent ) :
 {
     setCacheMode( ItemCoordinateCache );
     setVisible( false );
-    setSize( QSizeF( 240.0, 320.0 ) );
+    setSize( QSizeF( 300.0, 320.0 ) );
 
     m_ui.setupUi( m_widget );
 
@@ -70,6 +65,7 @@ PopupItem::PopupItem( QObject* parent ) :
     m_ui.webView->setPalette(palette);
 #ifndef MARBLE_NO_WEBKITWIDGETS
     m_ui.webView->page()->setPalette(palette);
+    m_ui.webView->page()->setLinkDelegationPolicy(QWebPage::DelegateAllLinks);
 #endif
     m_ui.webView->setAttribute(Qt::WA_OpaquePaintEvent, false);
     m_ui.webView->setUrl( QUrl( "about:blank" ) );
@@ -81,6 +77,7 @@ PopupItem::PopupItem( QObject* parent ) :
 #ifndef MARBLE_NO_WEBKITWIDGETS
     // Update the popupitem on changes while loading the webpage
     connect( m_ui.webView->page(), SIGNAL(repaintRequested(QRect)), this, SLOT(requestUpdate()) );
+    connect(m_ui.webView->page(), SIGNAL(linkClicked(QUrl)), this, SLOT(openUrl(QUrl)));
 #endif
 }
 
@@ -170,8 +167,8 @@ void PopupItem::paint( QPainter *painter )
 
     if ( alignment() & Qt::AlignRight ) {
         popupRect.setRect( image.width() - 13, -10,
-                           size().width() - ( image.width() - 23 ),
-                           size().height() + 20 );
+                           size().width() - ( image.width() - 3 ),
+                           size().height()  );
         qDrawBorderPixmap(painter, popupRect, QMargins( 20, 20, 20, 20 ),
                           pixmap("marble/webpopup/webpopup2"));
         if ( alignment() & Qt::AlignTop ) {
@@ -187,8 +184,8 @@ void PopupItem::paint( QPainter *painter )
         m_widget->render( painter, QPoint( image.width() - 3, 0 ), QRegion() );
     } else if ( alignment() & Qt::AlignLeft ) {
         popupRect.setRect( -10, -10,
-                           size().width() - ( image.width() - 23 ),
-                           size().height() + 20 );
+                           size().width() - ( image.width() - 3 ),
+                           size().height() );
         qDrawBorderPixmap(painter, popupRect, QMargins( 20, 20, 20, 20 ),
                           pixmap("marble/webpopup/webpopup2"));
         if ( alignment() & Qt::AlignTop ) {
@@ -210,8 +207,8 @@ void PopupItem::paint( QPainter *painter )
         if ( alignment() & Qt::AlignTop )
         {
             image = pixmap("marble/webpopup/arrow2_vertical_bottomright");
-            popupRect.setRect( -10, -10, size().width() + 20,
-                               size().height() - image.height() + 23 );
+            popupRect.setRect( -10, -10, size().width(),
+                               size().height() - image.height() + 3 );
             qDrawBorderPixmap(painter, popupRect, QMargins( 20, 20, 20, 20 ),
                               pixmap("marble/webpopup/webpopup2"));
             painter->drawPixmap( size().width() / 2 - image.width(),
@@ -219,15 +216,15 @@ void PopupItem::paint( QPainter *painter )
             m_widget->render( painter, QPoint( 0, 0 ), QRegion() );
         } else if ( alignment() & Qt::AlignBottom ) {
             image = pixmap("marble/webpopup/arrow2_vertical_topleft");
-            popupRect.setRect( -10, image.height() - 13, size().width() + 20,
-                               size().height() - image.height() + 23 );
+            popupRect.setRect( -10, image.height() - 13, size().width(),
+                               size().height() - image.height() + 3 );
             qDrawBorderPixmap(painter, popupRect, QMargins( 20, 20, 20, 20 ),
                               pixmap("marble/webpopup/webpopup2"));
             painter->drawPixmap( size().width() / 2, 0, image );
             m_widget->render( painter, QPoint( 5, image.height() - 7 ), QRegion() );
         } else { // for no horizontal align value and Qt::AlignVCenter
-            popupRect.setRect( -10, -10, size().width() + 20,
-                               size().height() + 20 );
+            popupRect.setRect( -10, -10, size().width(),
+                               size().height());
             qDrawBorderPixmap(painter, popupRect, QMargins( 20, 20, 20, 20 ),
                               pixmap("marble/webpopup/webpopup2"));
             m_widget->render( painter, QPoint( 0, 0 ), QRegion() );
@@ -325,8 +322,8 @@ QWidget* PopupItem::transform( QPoint &point ) const
         }
     }
 
-    QList<QPointF> widgetPositions = positions();
-    QList<QPointF>::const_iterator it = widgetPositions.constBegin();
+    const QVector<QPointF> widgetPositions = positions();
+    QVector<QPointF>::const_iterator it = widgetPositions.constBegin();
     for( ; it != widgetPositions.constEnd(); ++it ) {
         if ( QRectF( *it, size() ).contains( point ) ) {
             point -= it->toPoint();
@@ -392,12 +389,17 @@ void PopupItem::goBack()
 #endif
 }
 
+void PopupItem::openUrl(const QUrl &url)
+{
+    QDesktopServices::openUrl(url);
+}
+
 QPixmap PopupItem::pixmap( const QString &imageId ) const
 {
   QPixmap result;
   if ( !QPixmapCache::find( imageId, result ) ) {
-    QImage bottom = QImage( QString( ":/%1_shadow.png" ).arg( imageId) );
-    QImage top = QImage( QString( ":/%1.png" ).arg( imageId) );
+    QImage bottom = QImage(QLatin1String(":/") + imageId + QLatin1String("_shadow.png"));
+    QImage top =    QImage(QLatin1String(":/") + imageId + QLatin1String(".png"));
     colorize( top, m_backColor );
     QPainter painter( &bottom );
     painter.drawImage( QPoint(0,0), top );

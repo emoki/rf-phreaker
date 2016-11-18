@@ -29,6 +29,8 @@
 #include "ViewParams.h"
 #include "ViewportParams.h"
 #include "MathHelper.h"
+#include "GeoDataLinearRing.h"
+#include "GeoDataPolygon.h"
 #include "GeoDataFeature.h"
 #include "GeoDataTypes.h"
 #include "GeoDataPlacemark.h"
@@ -38,33 +40,30 @@
 namespace Marble
 {
 
+// 4 uchar long queue
 class EmbossFifo
 {
 public:
     EmbossFifo()
-        : x1( 0 )
-        , x2( 0 )
-        , x3( 0 )
-        , x4( 0 )
+        : data( 0 )
     {}
 
-    inline uchar head() const { return x1; }
-
-    inline EmbossFifo &operator<<( uchar value )
+    inline uchar head() const
     {
-        x1 = x2;
-        x2 = x3;
-        x3 = x4;
-        x4 = value;
+        // return least significant byte as head of queue
+        return data & 0x000000FF;
+    }
 
-        return *this;
+    inline void enqueue(uchar value)
+    {
+        // drop current head by shifting by one byte
+        // and append new value as most significant byte to queue
+        data = ((data >> 8) & 0x00FFFFFF) | (value << 24);
     }
 
 private:
-    uchar  x1;
-    uchar  x2;
-    uchar  x3;
-    uchar  x4;
+    // 4 byte long queue
+    quint32 data;
 };
 
 
@@ -106,9 +105,9 @@ TextureColorizer::TextureColorizer( const QString &seafile,
 
         while ( !stream.atEnd() ) {
             stream >> evalstrg;
-            if ( !evalstrg.isEmpty() && evalstrg.contains( '=' ) ) {
-                QString  colorValue = evalstrg.left( evalstrg.indexOf( '=' ) );
-                QString  colorPosition = evalstrg.mid( evalstrg.indexOf( '=' ) + 1 );
+            if (!evalstrg.isEmpty() && evalstrg.contains(QLatin1Char('='))) {
+                QString  colorValue = evalstrg.left(evalstrg.indexOf(QLatin1Char('=')));
+                QString  colorPosition = evalstrg.mid(evalstrg.indexOf(QLatin1Char('=')) + 1);
                 gradient.setColorAt( colorPosition.toDouble(),
                                      QColor( colorValue ) );
             }
@@ -291,10 +290,13 @@ void TextureColorizer::colorize( QImage *origimg, const ViewportParams *viewport
                 uchar&  grey = *readData; // qBlue(*data);
 
                 if ( m_showRelief ) {
-                    emboss << grey;
+                    emboss.enqueue(grey);
                     bump = ( emboss.head() + 8 - grey );
-                    if ( bump  < 0 )  bump = 0;
-                    if ( bump  > 15 ) bump = 15;
+                    if (bump < 0) {
+                        bump = 0;
+                    } else if (bump > 15) {
+                        bump = 15;
+                    }
                 }
                 setPixel( coastData, writeData, bump, grey );
             }
@@ -333,10 +335,13 @@ void TextureColorizer::colorize( QImage *origimg, const ViewportParams *viewport
                 uchar& grey = *readData; // qBlue(*data);
 
                 if ( m_showRelief ) {
-                    emboss << grey;
+                    emboss.enqueue(grey);
                     bump = ( emboss.head() + 16 - grey ) >> 1;
-                    if ( bump > 15 ) bump = 15;
-                    if ( bump < 0 )  bump = 0;
+                    if (bump < 0) {
+                        bump = 0;
+                    } else if (bump > 15) {
+                        bump = 15;
+                    }
                 }
                 setPixel( coastData, writeData, bump, grey );
             }

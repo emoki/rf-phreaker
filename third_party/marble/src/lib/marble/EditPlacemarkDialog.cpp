@@ -15,28 +15,22 @@
 #include "ui_ElevationWidget.h"
 
 // Qt
-#include <QFileDialog>
 #include <QMessageBox>
 #include <QFileInfo>
 #include <QColorDialog>
 #include <QCheckBox>
-#include <QToolBar>
-#include <QTextEdit>
-#include <QFontComboBox>
-#include <QPushButton>
-#include <QLineEdit>
-#include <QVBoxLayout>
 
 // Marble
 #include "GeoDataStyle.h"
+#include "GeoDataIconStyle.h"
+#include "GeoDataLabelStyle.h"
 #include "GeoDataPlacemark.h"
 #include "MarbleWidget.h"
 #include "MarbleLocale.h"
-#include "AddLinkDialog.h"
 #include "FormattedTextWidget.h"
+#include "StyleBuilder.h"
 #include "osm/OsmTagEditorWidget.h"
 #include "osm/OsmPlacemarkData.h"
-#include "osm/OsmPresetLibrary.h"
 #include "osm/OsmRelationManagerWidget.h"
 
 namespace Marble {
@@ -58,7 +52,7 @@ public:
     QString m_initialName;
     GeoDataCoordinates m_initialCoords;
     GeoDataStyle m_initialStyle;
-    GeoDataFeature::GeoDataVisualCategory m_initialVisualCategory;
+    GeoDataPlacemark::GeoDataVisualCategory m_initialVisualCategory;
     OsmPlacemarkData m_initialOsmData;
     QString m_styleColorTabName;
     bool m_initialIsPlacemarkVisible;
@@ -348,11 +342,11 @@ void EditPlacemarkDialog::updateTextAnnotation()
         d->m_placemark->setStyle( newStyle );
     }
     else {
-        QString suitableTag = d->m_osmTagEditorWidget->suitableTag();
-        if ( !suitableTag.isEmpty() ) {
-            GeoDataFeature::GeoDataVisualCategory category = OsmPresetLibrary::osmVisualCategory( suitableTag );
-            d->m_placemark->setVisualCategory( category );
+        const OsmPlacemarkData osmData = d->m_osmTagEditorWidget->placemarkData();
+        const GeoDataPlacemark::GeoDataVisualCategory category = StyleBuilder::determineVisualCategory(osmData);
+        if (category != GeoDataPlacemark::None) {
             d->m_placemark->setStyle(GeoDataStyle::Ptr());
+            d->m_placemark->setVisualCategory( category );
         }
     }
 
@@ -373,7 +367,7 @@ void EditPlacemarkDialog::checkFields()
         QMessageBox::warning( this,
                               tr( "ID is invalid" ),
                               tr( "Please specify a valid ID for this placemark." ) );
-    } else if ( d->m_header->iconLink().isEmpty() && d->m_placemark->visualCategory() == GeoDataFeature::None ) {
+    } else if (d->m_header->iconLink().isEmpty() && d->m_placemark->visualCategory() == GeoDataPlacemark::None) {
         QMessageBox::warning( this,
                               tr( "No image specified" ),
                               tr( "Please specify an icon for this placemark or add a valid tag." ) );

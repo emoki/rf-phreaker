@@ -34,7 +34,7 @@ TourControlEditWidget::TourControlEditWidget( const QModelIndex &index, QWidget 
     layout->setSpacing( 5 );
 
     QLabel* iconLabel = new QLabel;
-    iconLabel->setPixmap( QPixmap( ":/marble/media-playback-pause.png" ) );
+    iconLabel->setPixmap(QPixmap(QStringLiteral(":/marble/media-playback-pause.png")));
     layout->addWidget( iconLabel );
 
     layout->addWidget( m_radio_play );
@@ -49,7 +49,7 @@ TourControlEditWidget::TourControlEditWidget( const QModelIndex &index, QWidget 
         m_radio_pause->setChecked( true );
     }
 
-    m_button->setIcon( QIcon( ":/marble/document-save.png" ) );
+    m_button->setIcon(QIcon(QStringLiteral(":/marble/document-save.png")));
     connect(m_button, SIGNAL(clicked()), this, SLOT(save()));
     layout->addWidget( m_button );
 

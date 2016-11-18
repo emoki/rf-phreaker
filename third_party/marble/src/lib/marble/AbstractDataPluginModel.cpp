@@ -15,6 +15,7 @@
 #include <QUrl>
 #include <QTimer>
 #include <QPointF>
+#include <QRectF>
 #include <QtAlgorithms>
 #include <QVariant>
 #include <QAbstractListModel>
@@ -48,7 +49,7 @@ const int timeBetweenDownloads = 1500;
 const qreal boxComparisonFactor = 16.0;
 
 // Separator to separate the id of the item from the file type
-const char fileIdSeparator = '_';
+const QChar fileIdSeparator = QLatin1Char('_');
 
 class FavoritesModel;
 
@@ -125,7 +126,7 @@ AbstractDataPluginModelPrivate::AbstractDataPluginModelPrivate( const QString& n
       m_descriptionFileNumber( 0 ),
       m_itemSettings(),
       m_favoriteItemsOnly( false ),
-      m_storagePolicy( MarbleDirs::localPath() + "/cache/" + m_name + '/' ),
+      m_storagePolicy(MarbleDirs::localPath() + QLatin1String("/cache/") + m_name + QLatin1Char('/')),
       m_downloadManager( &m_storagePolicy ),
       m_favoritesModel( 0 ),
       m_hasMetaObject( false ),
@@ -227,7 +228,7 @@ QVariant FavoritesModel::data( const QModelIndex &index, int role ) const
             if ( item->initialized() && item->isFavorite() ) {
                 if ( count == row ) {
                     QString const roleName = roleNames().value( role );
-                    return item->property( roleName.toLatin1() );
+                    return item->property(roleName.toLatin1().constData());
                 }
                 ++count;
             }
@@ -357,10 +358,12 @@ QList<AbstractDataPluginItem*> AbstractDataPluginModel::items( const ViewportPar
 QList<AbstractDataPluginItem *> AbstractDataPluginModel::whichItemAt( const QPoint& curpos )
 {
     QList<AbstractDataPluginItem *> itemsAt;
-    
+
+    const QPointF curposF(curpos);
     foreach( AbstractDataPluginItem* item, d->m_displayedItems ) {
-        if( item && item->contains( QPointF( curpos ) ) )
+        if (item && item->contains(curposF)) {
             itemsAt.append( item );
+        }
     }
     
     return itemsAt;
@@ -369,15 +372,6 @@ QList<AbstractDataPluginItem *> AbstractDataPluginModel::whichItemAt( const QPoi
 void AbstractDataPluginModel::parseFile( const QByteArray& file )
 {
     Q_UNUSED( file );
-}
-
-void AbstractDataPluginModel::downloadItemData( const QUrl& url,
-                                                const QString& type,
-                                                AbstractDataPluginItem *item )
-{
-    downloadItem( url, type, item );
-    connect( item, SIGNAL(destroyed(QObject*)), this, SLOT(removeItem(QObject*)) );
-    addItemToList( item );
 }
 
 void AbstractDataPluginModel::downloadItem( const QUrl& url,
@@ -541,7 +535,7 @@ QString AbstractDataPluginModelPrivate::generateFilename( const QString& id, con
 
 QString AbstractDataPluginModelPrivate::generateFilepath( const QString& id, const QString& type ) const
 {
-    return MarbleDirs::localPath() + "/cache/" + m_name + '/' + generateFilename( id, type );
+    return MarbleDirs::localPath() + QLatin1String("/cache/") + m_name + QLatin1Char('/') + generateFilename(id, type);
 }
 
 AbstractDataPluginItem *AbstractDataPluginModel::findItem( const QString& id ) const
@@ -560,7 +554,7 @@ bool AbstractDataPluginModel::itemExists( const QString& id ) const
     return findItem( id );
 }
 
-void AbstractDataPluginModel::setItemSettings( QHash<QString,QVariant> itemSettings )
+void AbstractDataPluginModel::setItemSettings(const QHash<QString, QVariant> &itemSettings)
 {
     d->m_itemSettings = itemSettings;
 }

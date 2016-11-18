@@ -11,16 +11,13 @@
 #ifndef MARBLE_OSMTAGTAGWRITER_H
 #define MARBLE_OSMTAGTAGWRITER_H
 
-// Qt
-#include <QMap>
-
 // Marble
-#include "GeoTagWriter.h"
 
 namespace Marble
 {
 
 class OsmPlacemarkData;
+class GeoWriter;
 
 class OsmTagTagWriter
 {

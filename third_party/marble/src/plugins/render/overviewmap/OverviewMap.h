@@ -11,10 +11,9 @@
 #ifndef MARBLEOVERVIEWMAP_H
 #define MARBLEOVERVIEWMAP_H
 
-#include <QObject>
 #include <QHash>
 #include <QColor>
-#include <QAbstractButton>
+#include <QPixmap>
 #include <QSvgWidget>
 #include <QSvgRenderer>
 
@@ -38,7 +37,7 @@ namespace Marble
 class OverviewMap : public AbstractFloatItem, public DialogConfigurationInterface
 {
     Q_OBJECT
-    Q_PLUGIN_METADATA( IID "org.kde.edu.marble.OverviewMap" )
+    Q_PLUGIN_METADATA(IID "org.kde.marble.OverviewMap")
     Q_INTERFACES( Marble::RenderPluginInterface )
     Q_INTERFACES( Marble::DialogConfigurationInterface )
     MARBLE_PLUGIN( OverviewMap )
@@ -62,7 +61,7 @@ class OverviewMap : public AbstractFloatItem, public DialogConfigurationInterfac
 
     QString copyrightYears() const;
 
-    QList<PluginAuthor> pluginAuthors() const;
+    QVector<PluginAuthor> pluginAuthors() const override;
 
     QIcon icon () const;
 
@@ -86,7 +85,7 @@ class OverviewMap : public AbstractFloatItem, public DialogConfigurationInterfac
      */
     virtual void setSettings( const QHash<QString,QVariant> &settings );
 
- public slots:
+ public Q_SLOTS:
     void readSettings();
     void writeSettings();
     void updateSettings();
@@ -119,7 +118,7 @@ class OverviewMap : public AbstractFloatItem, public DialogConfigurationInterfac
     qreal m_centerLon;
     bool m_mapChanged;
 
- private slots:
+ private Q_SLOTS:
     void chooseCustomMap();
     void synchronizeSpinboxes();
     void showCurrentPlanetPreview() const;

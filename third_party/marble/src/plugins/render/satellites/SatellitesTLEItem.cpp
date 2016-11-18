@@ -24,17 +24,11 @@
 #include <QFile>
 #include <QDateTime>
 #include <QAction>
-#include <QLabel>
-#include <QVBoxLayout>
 #include <QColor>
 
 #include <cmath>
-#include <QDialog>
-#include <QCheckBox>
 
 namespace Marble {
-
-#include "GeoDataPoint.h"
 
 SatellitesTLEItem::SatellitesTLEItem( const QString &name,
                                       elsetrec satrec,
@@ -51,7 +45,7 @@ SatellitesTLEItem::SatellitesTLEItem( const QString &name,
 
     setDescription();
 
-    placemark()->setVisualCategory( GeoDataFeature::Satellite );
+    placemark()->setVisualCategory(GeoDataPlacemark::Satellite);
     placemark()->setZoomLevel( 0 );
     placemark()->setGeometry( m_track );
 
@@ -60,7 +54,7 @@ SatellitesTLEItem::SatellitesTLEItem( const QString &name,
 
 void SatellitesTLEItem::setDescription()
 {
-    QFile templateFile(":/marble/satellites/satellite.html");
+    QFile templateFile(QStringLiteral(":/marble/satellites/satellite.html"));
     if (!templateFile.open(QIODevice::ReadOnly)) {
         placemark()->setDescription(QObject::tr("No info available."));
         return;

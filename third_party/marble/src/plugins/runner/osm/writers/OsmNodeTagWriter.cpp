@@ -20,37 +20,38 @@
 #include "OsmTagTagWriter.h"
 #include "GeoDataPoint.h"
 #include "GeoDataLineString.h"
+#include "GeoWriter.h"
 #include "osm/OsmPlacemarkData.h"
 #include "osm/OsmObjectManager.h"
-
 
 namespace Marble
 {
 
 
-void OsmNodeTagWriter::writeNode( const GeoDataCoordinates& coordinates, const OsmPlacemarkData& osmData, GeoWriter& writer )
+void OsmNodeTagWriter::writeNode( const OsmConverter::Node &node, GeoWriter& writer )
 {
-    QString lat = QString::number( coordinates.latitude( GeoDataCoordinates::Degree ), 'f', 10 );
-    QString lon = QString::number( coordinates.longitude( GeoDataCoordinates::Degree ), 'f', 10 );
+    QString lat = QString::number( node.first.latitude( GeoDataCoordinates::Degree ), 'f', 7 );
+    QString lon = QString::number( node.first.longitude( GeoDataCoordinates::Degree ), 'f', 7 );
 
     writer.writeStartElement( osm::osmTag_node );
 
     writer.writeAttribute( "lat", lat );
     writer.writeAttribute( "lon", lon );
-    OsmObjectAttributeWriter::writeAttributes( osmData, writer );
-    OsmTagTagWriter::writeTags( osmData, writer );
+    OsmObjectAttributeWriter::writeAttributes( node.second, writer );
+    OsmTagTagWriter::writeTags(node.second, writer);
 
     writer.writeEndElement();
 }
 
-void OsmNodeTagWriter::writeAllNodes( const OsmPlacemarkData& osmData, GeoWriter& writer )
+void OsmNodeTagWriter::writeAllNodes( const OsmConverter::Nodes& nodes, GeoWriter& writer )
 {
-    QHash< GeoDataCoordinates, OsmPlacemarkData >::const_iterator it = osmData.nodeReferencesBegin();
-    QHash< GeoDataCoordinates, OsmPlacemarkData >::const_iterator end = osmData.nodeReferencesEnd();
-
     // Writing all the component nodes
-    for ( ; it != end; ++it ) {
-        writeNode( it.key(), it.value(), writer );
+    qint64 lastId = 0;
+    foreach(const auto &node, nodes) {
+        if (node.second.id() != lastId) {
+            writeNode(node, writer);
+            lastId = node.second.id();
+        } // else duplicate/shared node
     }
 }
 

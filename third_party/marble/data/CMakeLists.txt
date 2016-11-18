@@ -13,6 +13,11 @@ FILE (GLOB BITMAP_FILES bitmaps/*.png)
 install (FILES ${BITMAP_FILES}
 DESTINATION ${MARBLE_DATA_INSTALL_PATH}/bitmaps)
 
+INSTALL (DIRECTORY svg/osmcarto/svg
+DESTINATION ${MARBLE_DATA_INSTALL_PATH}/svg/osmcarto
+FILES_MATCHING PATTERN "*.svg"
+PATTERN "svgorig" EXCLUDE)
+
 FILE (GLOB BITMAP_EDITARROW_FILES bitmaps/editarrows/*.png)
 install (FILES ${BITMAP_EDITARROW_FILES}
 DESTINATION ${MARBLE_DATA_INSTALL_PATH}/bitmaps/editarrows)
@@ -50,6 +55,7 @@ svg/sun.png
 svg/moon.png
 svg/glow.png
 svg/track_turtle.svg
+svg/bookmark.svg
 DESTINATION ${MARBLE_DATA_INSTALL_PATH}/svg)
 
 FILE (GLOB SVG_FILES flags/*.svg)
@@ -116,7 +122,12 @@ install (FILES
 maps/earth/hillshading/0/0/0.png
 DESTINATION ${MARBLE_DATA_INSTALL_PATH}/maps/earth/hillshading/0/0)
 
-OPTION(EXPERIMENTAL_VECTOR_TILING "Install a map theme using OSM vector tiles (experimental)")
+OPTION(EXPERIMENTAL_SENTINEL2_MAP "Install an experimental satellite map theme" ON)
+if(EXPERIMENTAL_SENTINEL2_MAP)
+    install (DIRECTORY maps/earth/sentinel2 DESTINATION ${MARBLE_DATA_INSTALL_PATH}/maps/earth)
+endif()
+
+OPTION(EXPERIMENTAL_VECTOR_TILING "Install a map theme using OSM vector tiles (experimental)" ON)
 if(EXPERIMENTAL_VECTOR_TILING OR CMAKE_SYSTEM_NAME STREQUAL Android)
     install (DIRECTORY maps/earth/vectorosm DESTINATION ${MARBLE_DATA_INSTALL_PATH}/maps/earth)
 endif()
@@ -212,6 +223,10 @@ weather/wind-arrows.svgz
 DESTINATION ${MARBLE_DATA_INSTALL_PATH}/weather)
 
 install (FILES
+licenses/lgpl2.txt
+DESTINATION ${MARBLE_DATA_INSTALL_PATH}/licenses)
+
+install (FILES
 mwdbii/DATELINE.PNT
 mwdbii/PCOAST.PNT
 mwdbii/PDIFFBORDER.PNT
@@ -262,16 +277,17 @@ DESTINATION ${MARBLE_DATA_INSTALL_PATH}/audio)
 
 add_subdirectory(lang)
 
-set(KDE_SKIP_UNINSTALL_TARGET ON CACHE BOOL "KDE uninstall target must be disabled")
-find_package(ECM QUIET) # for FindSharedMimeInfo
+find_package(ECM ${REQUIRED_ECM_VERSION} QUIET) # for FindSharedMimeInfo
+if(NOT ECM_FOUND)
+    return()
+endif()
+
 set(CMAKE_MODULE_PATH ${CMAKE_MODULE_PATH} ${ECM_MODULE_PATH})
-if(ECM_FOUND)
-    include(KDEInstallDirs) # for XDG_MIME_INSTALL_DIR
-    # shared-mime-info 0.40 is mandatory for generic-icon
-    set( SHARED_MIME_INFO_MINIMUM_VERSION "0.40" )
-    find_package( SharedMimeInfo QUIET )
-    IF( SHAREDMIMEINFO_FOUND )
-        install( FILES mimetypes/geo.xml  DESTINATION ${XDG_MIME_INSTALL_DIR} )
-        update_xdg_mimetypes( ${XDG_MIME_INSTALL_DIR} )
-    ENDIF()
+include(KDEInstallDirs) # for KDE_INSTALL_MIMEDIR
+# shared-mime-info 0.40 is mandatory for generic-icon
+set( SHARED_MIME_INFO_MINIMUM_VERSION "0.40" )
+find_package( SharedMimeInfo QUIET )
+if(SharedMimeInfo_FOUND)
+    install(FILES mimetypes/geo.xml  DESTINATION ${KDE_INSTALL_MIMEDIR})
+    update_xdg_mimetypes( ${KDE_INSTALL_MIMEDIR} )
 endif()

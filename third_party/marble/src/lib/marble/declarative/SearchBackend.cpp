@@ -9,9 +9,13 @@
 //
 
 #include "SearchBackend.h"
+
+#include "SearchRunnerManager.h"
 #include "MarblePlacemarkModel.h"
 #include "MarbleModel.h"
 #include "Coordinate.h"
+
+#include <QCompleter>
 
 using namespace Marble;
 
@@ -49,7 +53,7 @@ void SearchBackend::setCompletionPrefix(const QString &prefix)
             return;
         }
 
-        m_completionModel->removePlacemarks(QString("Completion model"), 0, m_completionModel->rowCount());
+        m_completionModel->removePlacemarks(QStringLiteral("Completion model"), 0, m_completionModel->rowCount());
         m_completionContainer->clear();
         QString const lastPrefix = m_completer->completionPrefix();
         m_completer->setCompletionPrefix(prefix);

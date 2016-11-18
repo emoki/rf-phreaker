@@ -12,7 +12,7 @@
 #ifndef GEODATALOCATION_H
 #define GEODATALOCATION_H
 
-#include "GeoDataGeometry.h"
+#include "GeoDataObject.h"
 #include "GeoDataCoordinates.h"
 #include "MarbleGlobal.h"
 
@@ -20,7 +20,9 @@ namespace Marble {
 
 class GeoDataLocationPrivate;
 
-class MARBLE_EXPORT GeoDataLocation: public GeoDataObject
+/**
+ */
+class GEODATA_EXPORT GeoDataLocation: public GeoDataObject
 {
 public:
     GeoDataLocation();

@@ -28,7 +28,6 @@ namespace Marble
 {
 
 class DownloadPolicy;
-class DownloadQueueSet;
 class StoragePolicy;
 
 /**
@@ -78,14 +77,14 @@ class MARBLE_EXPORT HttpDownloadManager : public QObject
 
 
  Q_SIGNALS:
-    void downloadComplete( QString, QString );
+    void downloadComplete( const QString&, const QString& );
 
     /**
      * This signal is emitted if a file is downloaded and the data argument
      * contains the files content. The HttpDownloadManager takes care to save
      * it using the given storage policy.
      */
-    void downloadComplete( QByteArray data, QString initiatorId );
+    void downloadComplete( const QByteArray &data, const QString& initiatorId );
 
     /**
      * Signal is emitted when a new job is added to the queue.

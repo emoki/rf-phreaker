@@ -22,8 +22,6 @@
 // Qt
 #include <QTreeWidget>
 #include <QMenu>
-#include <QLineEdit>
-#include <QList>
 
 namespace Marble
 {
@@ -62,8 +60,8 @@ void OsmRelationManagerWidgetPrivate::populateRelationsList()
             const OsmPlacemarkData &relationData = m_allRelations->value( it.key() );
 
             QTreeWidgetItem *newItem = new QTreeWidgetItem();
-            QString name = relationData.tagValue( "name" );
-            QString type = relationData.tagValue( "type" );
+            QString name = relationData.tagValue(QStringLiteral("name"));
+            QString type = relationData.tagValue(QStringLiteral("type"));
             QString role = it.value();
             newItem->setText( Column::Name, name );
             newItem->setText( Column::Type, type );
@@ -79,7 +77,7 @@ void OsmRelationManagerWidgetPrivate::populateDropMenu()
 {
     m_relationDropMenu->clear();
 
-    m_addRelation->setIcon( QIcon( ":marble/list-add.png" ) );
+    m_addRelation->setIcon(QIcon(QStringLiteral(":marble/list-add.png")));
 
     // The new relation adder
     m_relationDropMenu->addAction( QObject::tr( "New Relation" ) );
@@ -90,7 +88,7 @@ void OsmRelationManagerWidgetPrivate::populateDropMenu()
 
     // Suggesting existing relations
     foreach ( const OsmPlacemarkData &relationData, m_allRelations->values() ) {
-        QString relationText = QString( "%1 (%2)" ).arg( relationData.tagValue( "name" ) ).arg( relationData.tagValue( "type" ) );
+        const QString relationText = relationData.tagValue("name") + QLatin1String(" (") + relationData.tagValue("type") + QLatin1Char(')');
 
         // Don't suggest relations the placemark is already part of
         if ( m_placemark->hasOsmData() && m_placemark->osmData().containsRelation( relationData.id() ) ) {

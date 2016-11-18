@@ -19,19 +19,17 @@
 
 
 #include <QWidget>
-#include <QPixmap>
 #include <QPointer>
 
 #include "MarbleWidget.h"
 
-class QSplitter;
 class QPrintDialog;
 class QTextDocument;
 class QMainWindow;
 class QDockWidget;
-class QMenu;
 class QPrinter;
 class QActionGroup;
+class QPixmap;
 
 namespace Marble
 {
@@ -69,7 +67,7 @@ class ControlView : public QWidget
     void moveUp();
     void moveDown();
 
-    void addGeoDataFile( QString filename );
+    void addGeoDataFile( const QString &filename );
 
     QPixmap mapScreenShot() { return m_marbleWidget->mapScreenShot(); }
     
@@ -101,13 +99,14 @@ class ControlView : public QWidget
 
     /**
      * Opens the passed Geo URI
+     * @return true if uri could be parsed and opened
      * @see Marble::GeoUriParser for details
      */
-    void openGeoUri( const QString& geoUriString );
+    bool openGeoUri( const QString& geoUriString );
 
     static QActionGroup* createViewSizeActionGroup( QObject* parent );
 
- public slots:
+ public Q_SLOTS:
     void printMapScreenShot( QPointer<QPrintDialog> dialog );
     void printPreview();
     void paintPrintPreview( QPrinter * printer );
@@ -126,13 +125,22 @@ class ControlView : public QWidget
 
     void openTour( const QString &filename );
 
-signals:
+Q_SIGNALS:
     void showMapWizard();
     void showUploadDialog();
     void mapThemeDeleted();
 
 protected:
     void closeEvent( QCloseEvent *event );
+    /**
+     * @brief Reimplementation of the dragEnterEvent() function in QWidget.
+     */
+    void dragEnterEvent(QDragEnterEvent *event);
+
+    /**
+     * @brief Reimplementation of the dropEvent() function in QWidget.
+     */
+    void dropEvent(QDropEvent *event);
 
 private Q_SLOTS:
     void showSearch();

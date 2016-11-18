@@ -20,21 +20,22 @@
 class QAbstractItemModel;
 class QModelIndex;
 class QPoint;
-class QColor;
 
 namespace Marble
 {
 class GeoPainter;
 class GeoDataFeature;
-class ViewportParams;
-class GeometryLayerPrivate;
 class GeoDataPlacemark;
+class StyleBuilder;
+class ViewportParams;
+
+class GeometryLayerPrivate;
 
 class GeometryLayer : public QObject, public LayerInterface
 {
     Q_OBJECT
 public:
-    explicit GeometryLayer( const QAbstractItemModel *model );
+    explicit GeometryLayer(const QAbstractItemModel *model, const StyleBuilder *styleBuilder);
     ~GeometryLayer();
 
     virtual QStringList renderPosition() const;
@@ -49,9 +50,11 @@ public:
 
     QVector<const GeoDataFeature*> whichFeatureAt( const QPoint& curpos, const ViewportParams * viewport );
 
+    QVector<const GeoDataFeature*> whichBuildingAt(const QPoint& curpos, const ViewportParams * viewport);
+
 public Q_SLOTS:
-    void addPlacemarks( QModelIndex index, int first, int last );
-    void removePlacemarks( QModelIndex index, int first, int last );
+    void addPlacemarks( const QModelIndex& index, int first, int last );
+    void removePlacemarks( const QModelIndex& index, int first, int last );
     void resetCacheData();
 
     /**

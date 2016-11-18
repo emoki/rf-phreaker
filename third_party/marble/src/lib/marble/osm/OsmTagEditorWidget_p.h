@@ -12,17 +12,20 @@
 #define MARBLE_OSMTAGEDITORWIDGETPRIVATE_H
 
 #include "ui_OsmTagEditorWidget.h"
-#include "osm/OsmPresetLibrary.h"
+
+#include <QPair>
 
 namespace Marble
 {
-class OsmTagEditorWidget;
 
+class GeoDataPlacemark;
+class OsmPlacemarkData;
+class OsmTagEditorWidget;
 
 class OsmTagEditorWidgetPrivate : public Ui::OsmTagEditorWidgetPrivate
 {
 public:
-    typedef OsmPresetLibrary::OsmTag OsmTag;
+    typedef QPair<QString, QString> OsmTag;
     OsmTagEditorWidgetPrivate();
     ~OsmTagEditorWidgetPrivate();
     void populatePresetTagsList();
@@ -55,6 +58,11 @@ private:
      * and adds their keys to the filter, if the placemark doesn't already have them
      */
     void addPattern( QStringList &filter, const OsmPlacemarkData &osmData, const QStringList &pattern ) const;
+
+    /**
+     * @brief returns a list of useful, popular osm tags that currently don't have a visual category associated with them
+     */
+    static QVector<OsmTag> createAdditionalOsmTags();
 
     GeoDataPlacemark *m_placemark;
     static const QString m_customTagAdderText;

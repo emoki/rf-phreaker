@@ -28,6 +28,7 @@
 #include <GeoDataLink.h>
 #include <GeoDataAnimatedUpdate.h>
 #include <GeoDataSoundCue.h>
+#include "GeoDataPlaylist.h"
 #include <GeoDataTourControl.h>
 #include <GeoDataWait.h>
 #include <GeoDataTour.h>
@@ -70,6 +71,7 @@
 #include <GeoDataFolder.h>
 #include <GeoDataSchemaData.h>
 #include <GeoDataSimpleData.h>
+#include <GeoDataUpdate.h>
 #include "TestUtils.h"
 
 using namespace Marble;
@@ -77,7 +79,7 @@ using namespace Marble;
 class TestEquality : public QObject
 {
     Q_OBJECT
-private slots:
+private Q_SLOTS:
     void initTestCase();
     void aliasTest();
     void accuracyTest();

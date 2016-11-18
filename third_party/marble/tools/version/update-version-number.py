@@ -93,12 +93,18 @@ appVersionFile = os.path.join(rootDir, 'src', 'apps', 'marble-ui', 'ControlView.
 ensureCleanOrExit(rootDir, appVersionFile)
 
 replaceInFile(libFileName, 
-              'set\\(GENERIC_LIB_VERSION "[0-9]\\.[0-9]+\\.[0-9]+"\\)', 
-              'set(GENERIC_LIB_VERSION "{}.{}.{}")'.format(major, minor, patch))
+              'set\\(MARBLE_LIB_VERSION_MAJOR "[0-9]"\\)',
+              'set(MARBLE_LIB_VERSION_MAJOR "{}")'.format(major))
+replaceInFile(libFileName,
+              'set\\(MARBLE_LIB_VERSION_MINOR "[0-9]+"\\)',
+              'set(MARBLE_LIB_VERSION_MINOR "{}")'.format(minor))
+replaceInFile(libFileName,
+              'set\\(MARBLE_LIB_VERSION_PATCH "[0-9]+"\\)',
+              'set(MARBLE_LIB_VERSION_PATCH "{}")'.format(patch))
 soVersion = minor + 1 if patch > 19 else minor
 replaceInFile(libFileName, 
-              'set\\(GENERIC_LIB_SOVERSION "[0-9]+"\\)', 
-              'set(GENERIC_LIB_SOVERSION "{}")'.format(soVersion))
+              'set\\(MARBLE_ABI_VERSION "[0-9]+"\\)',
+              'set(MARBLE_ABI_VERSION "{}")'.format(soVersion))
 
 # We have version constants in MarbleGlobal.h
 libVersionOld = 'const QString MARBLE_VERSION_STRING = QString::fromLatin1\( ".*" \);'

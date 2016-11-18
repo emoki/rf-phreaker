@@ -11,23 +11,22 @@
 #ifndef MARBLE_ROUTINGLAYER_H
 #define MARBLE_ROUTINGLAYER_H
 
-#include "GeoDataCoordinates.h"
 #include "LayerInterface.h"
 
-#include <QModelIndex>
-#include <QRect>
-#include <QItemSelection>
+#include "MarbleGlobal.h"
 
-class QAbstractProxyModel;
+#include <QObject>
+#include <QRect>
+
+class QItemSelectionModel;
+class QModelIndex;
 
 namespace Marble
 {
 
 class MarbleWidget;
-class RoutingModel;
 class MarblePlacemarkModel;
 class RoutingLayerPrivate;
-class AlternativeRoutesModel;
 
 /**
   * @brief A paint layer that serves as a view on a route model

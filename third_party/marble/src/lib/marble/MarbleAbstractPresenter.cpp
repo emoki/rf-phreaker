@@ -20,7 +20,10 @@
 #include "MarbleMap.h"
 #include "MarbleModel.h"
 #include <Planet.h>
+#include "GeoDataGeometry.h"
+#include "GeoDataLatLonAltBox.h"
 #include <GeoDataPlacemark.h>
+#include <GeoDataLookAt.h>
 #include <MarbleClock.h>
 #include <MarbleDebug.h>
 
@@ -106,7 +109,7 @@ namespace Marble
                                   convertedDistance, unit);
         QString unitString = locale->unitAbbreviation(unit);
 
-        return QString("%L1 %2").arg(convertedDistance, 8, 'f', 1, QChar(' '))
+        return QString("%L1 %2").arg(convertedDistance, 8, 'f', 1, QLatin1Char(' '))
                                 .arg(unitString);
     }
 

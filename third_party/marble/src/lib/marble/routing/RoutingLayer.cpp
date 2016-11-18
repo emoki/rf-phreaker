@@ -23,13 +23,12 @@
 #include "AlternativeRoutesModel.h"
 #include "RoutingManager.h"
 #include "Maneuver.h"
+#include "RenderState.h"
 
-#include <QMap>
 #include <QAbstractItemModel>
 #include <QIcon>
 #include <QItemSelectionModel>
-#include <QKeyEvent>
-#include <QMenu>
+#include <QAction>
 #include <QMouseEvent>
 #include <QPixmap>
 #include <QFileDialog>
@@ -163,7 +162,8 @@ public:
 
 RoutingLayerPrivate::RoutingLayerPrivate( RoutingLayer *parent, MarbleWidget *widget ) :
         q( parent ), m_movingIndex( -1 ), m_marbleWidget( widget ),
-        m_targetPixmap( ":/data/bitmaps/routing_pick.png" ), m_dragStopOverRightIndex( -1 ),
+        m_targetPixmap(QStringLiteral(":/data/bitmaps/routing_pick.png")),
+        m_dragStopOverRightIndex(-1),
         m_routingModel( widget->model()->routingManager()->routingModel() ),
         m_placemarkModel( 0 ),
         m_selectionModel( 0 ),
@@ -221,7 +221,7 @@ void RoutingLayerPrivate::renderPlacemarks( GeoPainter *painter )
                 painter->drawPixmap( pos, pixmap );
             }
 
-            QRegion region = painter->regionFromRect( pos, m_targetPixmap.width(), m_targetPixmap.height() );
+            const QRegion region = painter->regionFromPixmapRect(pos, m_targetPixmap.width(), m_targetPixmap.height());
             m_placemarks.push_back( ModelRegion( index, region ) );
         }
     }
@@ -312,34 +312,35 @@ void RoutingLayerPrivate::renderRoute( GeoPainter *painter )
         return;
     }
 
-    Q_ASSERT( m_routingModel->rowCount() == m_routingModel->route().size() );
-    m_instructionRegions.clear();
-    for ( int i = 0; i < m_routingModel->rowCount(); ++i ) {
-        QModelIndex index = m_routingModel->index( i, 0 );
-        GeoDataCoordinates pos = index.data( MarblePlacemarkModel::CoordinateRole ).value<GeoDataCoordinates>();
+    if( m_routingModel->rowCount() == m_routingModel->route().size() ) {
+        m_instructionRegions.clear();
+        for ( int i = 0; i < m_routingModel->rowCount(); ++i ) {
+            QModelIndex index = m_routingModel->index( i, 0 );
+            GeoDataCoordinates pos = index.data( MarblePlacemarkModel::CoordinateRole ).value<GeoDataCoordinates>();
 
-        painter->setBrush( QBrush( m_marbleWidget->model()->routingManager()->routeColorAlternative() ) );
-        if ( m_selectionModel && m_selectionModel->selection().contains( index ) ) {
-            const RouteSegment &segment = m_routingModel->route().at( i );
-            const GeoDataLineString currentRoutePoints = segment.path();
+            painter->setBrush( QBrush( m_marbleWidget->model()->routingManager()->routeColorAlternative() ) );
+            if ( m_selectionModel && m_selectionModel->selection().contains( index ) ) {
+                const RouteSegment &segment = m_routingModel->route().at( i );
+                const GeoDataLineString currentRoutePoints = segment.path();
 
-            QPen activeRouteSegmentPen( m_marbleWidget->model()->routingManager()->routeColorHighlighted() );
+                QPen activeRouteSegmentPen( m_marbleWidget->model()->routingManager()->routeColorHighlighted() );
 
-            activeRouteSegmentPen.setWidth( 6 );
-            if ( m_marbleWidget->model()->routingManager()->state() == RoutingManager::Downloading ) {
-                activeRouteSegmentPen.setStyle( Qt::DotLine );
+                activeRouteSegmentPen.setWidth( 6 );
+                if ( m_marbleWidget->model()->routingManager()->state() == RoutingManager::Downloading ) {
+                    activeRouteSegmentPen.setStyle( Qt::DotLine );
+                }
+                painter->setPen( activeRouteSegmentPen );
+                painter->drawPolyline( currentRoutePoints );
+
+                painter->setPen( standardRoutePen );
+                painter->setBrush( QBrush( alphaAdjusted( Oxygen::hotOrange4, 200 ) ) );
             }
-            painter->setPen( activeRouteSegmentPen );
-            painter->drawPolyline( currentRoutePoints );
+            painter->drawEllipse( pos, 6, 6 );
 
-            painter->setPen( standardRoutePen );
-            painter->setBrush( QBrush( alphaAdjusted( Oxygen::hotOrange4, 200 ) ) );
-        }
-        painter->drawEllipse( pos, 6, 6 );
-
-        if ( m_isInteractive ) {
-            QRegion region = painter->regionFromEllipse( pos, 12, 12 );
-            m_instructionRegions.push_front( ModelRegion( index, region ) );
+            if ( m_isInteractive ) {
+                QRegion region = painter->regionFromEllipse( pos, 12, 12 );
+                m_instructionRegions.push_front( ModelRegion( index, region ) );
+            }
         }
     }
 
@@ -381,7 +382,7 @@ void RoutingLayerPrivate::renderRequest( GeoPainter *painter )
         if ( pos.isValid() ) {
             QPixmap pixmap = m_routeRequest->pixmap( i );
             painter->drawPixmap( pos, pixmap );
-            QRegion region = painter->regionFromRect( pos, pixmap.width(), pixmap.height() );
+            const QRegion region = painter->regionFromPixmapRect(pos, pixmap.width(), pixmap.height());
             m_regions.push_front( RequestRegion( i, region ) );
         }
     }
@@ -631,7 +632,7 @@ RoutingLayer::~RoutingLayer()
 
 QStringList RoutingLayer::renderPosition() const
 {
-    return QStringList() << "HOVERS_ABOVE_SURFACE";
+    return QStringList(QStringLiteral("HOVERS_ABOVE_SURFACE"));
 }
 
 qreal RoutingLayer::zValue() const
@@ -673,7 +674,7 @@ bool RoutingLayer::render( GeoPainter *painter, ViewportParams *viewport,
 
 RenderState RoutingLayer::renderState() const
 {
-    return RenderState( "Routing", d->m_marbleWidget->model()->routingManager()->state() == RoutingManager::Downloading ? WaitingForUpdate : Complete );
+    return RenderState(QStringLiteral("Routing"), d->m_marbleWidget->model()->routingManager()->state() == RoutingManager::Downloading ? WaitingForUpdate : Complete);
 }
 
 bool RoutingLayer::eventFilter( QObject *obj, QEvent *event )
@@ -780,7 +781,7 @@ bool RoutingLayer::isInteractive() const
 
 QString RoutingLayer::runtimeTrace() const
 {
-    return QString("Routing Layer");
+    return QStringLiteral("Routing Layer");
 }
 
 } // namespace Marble

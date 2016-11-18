@@ -17,6 +17,7 @@
 #include <QContextMenuEvent>
 #include <QDialog>
 #include <QHelpEvent>
+#include <QPen>
 
 // Marble
 #include "DialogConfigurationInterface.h"
@@ -72,19 +73,19 @@ AbstractFloatItem::~AbstractFloatItem()
 QHash<QString,QVariant> AbstractFloatItem::settings() const
 {
     QHash<QString,QVariant> updated = RenderPlugin::settings();
-    updated["position"] = position();
+    updated.insert(QStringLiteral("position"), position());
     return updated;
 }
 
 void AbstractFloatItem::setSettings(const QHash<QString, QVariant> &settings)
 {
-    if ( settings.value( "position" ).type() == QVariant::String ) {
+    if (settings.value(QStringLiteral("position")).type() == QVariant::String) {
         // work around KConfig turning QPointFs into QStrings
-        const QStringList coordinates = settings.value( "position" ).toString().split( QLatin1Char(',') );
+        const QStringList coordinates = settings.value(QStringLiteral("position")).toString().split(QLatin1Char(','));
         setPosition( QPointF( coordinates.at( 0 ).toFloat(), coordinates.at( 1 ).toFloat() ) );
     }
     else {
-        setPosition( settings.value( "position", position() ).toPointF() );
+        setPosition(settings.value(QStringLiteral("position"), position()).toPointF());
     }
 
     RenderPlugin::setSettings(settings);
@@ -119,12 +120,12 @@ void AbstractFloatItem::setFont( const QFont &font )
 
 QString AbstractFloatItem::renderPolicy() const
 {
-    return "ALWAYS";
+    return QStringLiteral("ALWAYS");
 }
 
 QStringList AbstractFloatItem::renderPosition() const
 {
-    return QStringList( "FLOAT_ITEM" );
+    return QStringList(QStringLiteral("FLOAT_ITEM"));
 }
 
 void AbstractFloatItem::setVisible( bool visible )
@@ -204,10 +205,10 @@ void AbstractFloatItem::toolTipEvent ( QHelpEvent *e )
 bool AbstractFloatItem::render( GeoPainter *painter, ViewportParams *viewport,
              const QString& renderPos, GeoSceneLayer * layer )
 {
-    Q_UNUSED( renderPos )
-    Q_UNUSED( layer )
-
-    paintEvent( painter, viewport );
+    Q_UNUSED(painter)
+    Q_UNUSED(viewport)
+    Q_UNUSED(renderPos)
+    Q_UNUSED(layer)
 
     return true;
 }
@@ -228,7 +229,7 @@ QMenu* AbstractFloatItem::contextMenu()
     {
         d->m_contextMenu = new QMenu;
 
-        QAction *lockAction = d->m_contextMenu->addAction( QIcon(":/icons/unlock.png"), tr( "&Lock" ) );
+        QAction *lockAction = d->m_contextMenu->addAction(QIcon(QStringLiteral(":/icons/unlock.png")), tr("&Lock"));
         lockAction->setCheckable( true );
         lockAction->setChecked( positionLocked() );
         connect( lockAction, SIGNAL(triggered(bool)), this, SLOT(setPositionLocked(bool)) );
@@ -243,7 +244,7 @@ QMenu* AbstractFloatItem::contextMenu()
         if( dialog )
         {
             d->m_contextMenu->addSeparator();
-            QAction *configAction = d->m_contextMenu->addAction( QIcon(":/icons/settings-configure.png"), tr( "&Configure..." ) );
+            QAction *configAction = d->m_contextMenu->addAction(QIcon(QStringLiteral(":/icons/settings-configure.png")), tr("&Configure..."));
             connect( configAction, SIGNAL(triggered()), dialog, SLOT(exec()) );
         }
     }

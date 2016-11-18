@@ -17,7 +17,10 @@
 #include "TourItemDelegate.h"
 
 #include "ui_TourWidget.h"
+#include "GeoDataPlacemark.h"
 #include "GeoDataDocument.h"
+#include "GeoDataLookAt.h"
+#include "GeoDataPlaylist.h"
 #include "GeoDataTour.h"
 #include "GeoDataTreeModel.h"
 #include "GeoDataTypes.h"
@@ -26,8 +29,12 @@
 #include "GeoDataCamera.h"
 #include "GeoDataTourControl.h"
 #include "GeoDataSoundCue.h"
+#include "GeoDataCreate.h"
+#include "GeoDataUpdate.h"
+#include "GeoDataDelete.h"
+#include "GeoDataChange.h"
 #include "GeoDataAnimatedUpdate.h"
-#include "GeoWriter.h"
+#include "GeoDataDocumentWriter.h"
 #include "KmlElementDictionary.h"
 #include "MarbleModel.h"
 #include "MarblePlacemarkModel.h"
@@ -41,27 +48,19 @@
 #include "EditPlacemarkDialog.h"
 #include "MarbleDirs.h"
 #include "GeoDataStyle.h"
+#include "GeoDataIconStyle.h"
 
 #include <QFileDialog>
 #include <QDir>
 #include <QModelIndex>
 #include <QMessageBox>
-#include <QStyledItemDelegate>
-#include <QAbstractTextDocumentLayout>
 #include <QPainter>
-#include <QListView>
-#include <QApplication>
-#include <QLabel>
-#include <QDoubleSpinBox>
-#include <QRadioButton>
-#include <QHBoxLayout>
 #include <QToolButton>
-#include <QLineEdit>
-#include <QProcess>
-#include <QProgressBar>
-#include <QToolBar>
 #include <QMenu>
 #include <QUrl>
+#include <QKeyEvent>
+#include <QCloseEvent>
+#include <QPointer>
 
 namespace Marble
 {
@@ -139,24 +138,24 @@ TourWidgetPrivate::TourWidgetPrivate( TourWidget *parent )
 
     QAction *separator = m_tourUi.m_toolBarControl->insertSeparator( m_tourUi.m_actionMoveUp );
 
-    m_addPrimitiveButton->setIcon( QIcon( ":/marble/flag.png" ) );
+    m_addPrimitiveButton->setIcon(QIcon(QStringLiteral(":/marble/flag.png")));
     m_addPrimitiveButton->setToolTip( QObject::tr( "Add FlyTo" ) );
     m_addPrimitiveButton->setPopupMode( QToolButton::MenuButtonPopup );
 
     QMenu *addPrimitiveMenu = new QMenu;
 
-    m_actionAddFlyTo = new QAction( QIcon( ":/marble/flag.png" ), QObject::tr( "Add FlyTo" ), addPrimitiveMenu );
+    m_actionAddFlyTo = new QAction(QIcon(QStringLiteral(":/marble/flag.png")), QObject::tr("Add FlyTo"), addPrimitiveMenu);
     addPrimitiveMenu->addAction( m_actionAddFlyTo );
-    m_actionAddWait = new QAction( QIcon( ":/marble/player-time.png" ), QObject::tr( "Add Wait" ), addPrimitiveMenu );
+    m_actionAddWait = new QAction(QIcon(QStringLiteral(":/marble/player-time.png")), QObject::tr("Add Wait"), addPrimitiveMenu);
     addPrimitiveMenu->addAction( m_actionAddWait );
-    m_actionAddSoundCue = new QAction( QIcon( ":/marble/audio-x-generic.png" ), QObject::tr( "Add SoundCue" ), addPrimitiveMenu );
+    m_actionAddSoundCue = new QAction(QIcon(QStringLiteral(":/marble/audio-x-generic.png")), QObject::tr("Add SoundCue"), addPrimitiveMenu);
     addPrimitiveMenu->addAction( m_actionAddSoundCue );
     addPrimitiveMenu->addSeparator();
-    m_actionAddPlacemark = new QAction( QIcon( ":/icons/add-placemark.png" ), QObject::tr( "Add Placemark" ), addPrimitiveMenu );
+    m_actionAddPlacemark = new QAction(QIcon(QStringLiteral(":/icons/add-placemark.png")), QObject::tr("Add Placemark"), addPrimitiveMenu);
     addPrimitiveMenu->addAction( m_actionAddPlacemark );
-    m_actionAddRemovePlacemark = new QAction( QIcon( ":/icons/remove.png" ), QObject::tr( "Remove placemark" ), addPrimitiveMenu );
+    m_actionAddRemovePlacemark = new QAction(QIcon(QStringLiteral(":/icons/remove.png")), QObject::tr("Remove placemark"), addPrimitiveMenu);
     addPrimitiveMenu->addAction( m_actionAddRemovePlacemark );
-    m_actionAddChangePlacemark = new QAction( QIcon( ":/marble/document-edit.png" ), QObject::tr( "Change placemark" ), addPrimitiveMenu );
+    m_actionAddChangePlacemark = new QAction(QIcon(QStringLiteral(":/marble/document-edit.png")), QObject::tr("Change placemark"), addPrimitiveMenu);
     addPrimitiveMenu->addAction( m_actionAddChangePlacemark );
     m_actionToggleLoopPlay = new QAction( QObject::tr( "Loop" ), m_tourUi.m_slider );
     m_actionToggleLoopPlay->setCheckable( true );
@@ -290,7 +289,7 @@ void TourWidget::startPlaying()
     setHighlightedItemIndex( 0 );
     d->m_isLoopingStopped = false;
     d->m_playback.play();
-    d->m_tourUi.actionPlay->setIcon( QIcon( ":/marble/playback-pause.png" ) );
+    d->m_tourUi.actionPlay->setIcon(QIcon(QStringLiteral(":/marble/playback-pause.png")));
     d->m_tourUi.actionPlay->setEnabled( true );
     d->m_tourUi.actionStop->setEnabled( true );
     d->m_tourUi.m_actionRecord->setEnabled( false );
@@ -302,7 +301,7 @@ void TourWidget::startPlaying()
 void TourWidget::pausePlaying()
 {
     d->m_playback.pause();
-    d->m_tourUi.actionPlay->setIcon( QIcon( ":/marble/playback-play.png" ) );
+    d->m_tourUi.actionPlay->setIcon(QIcon(QStringLiteral(":/marble/playback-play.png")));
     d->m_tourUi.actionPlay->setEnabled( true );
     d->m_tourUi.actionStop->setEnabled( true );
 }
@@ -311,7 +310,7 @@ void TourWidget::stopPlaying()
 {
     removeHighlight();
     d->m_playback.stop();
-    d->m_tourUi.actionPlay->setIcon( QIcon( ":/marble/playback-play.png" ) );
+    d->m_tourUi.actionPlay->setIcon(QIcon(QStringLiteral(":/marble/playback-play.png")));
     d->m_tourUi.actionPlay->setEnabled( true );
     d->m_tourUi.m_actionRecord->setEnabled( true );
     d->m_tourUi.actionStop->setEnabled( false );
@@ -361,7 +360,7 @@ void TourWidget::handleSliderMove( int value )
     d->m_playback.seek( value / 100.0 );
     QTime nullTime( 0, 0, 0 );
     QTime time = nullTime.addSecs(  value / 100.0 );
-    d->m_tourUi.m_elapsedTime->setText( QString("%L1:%L2").arg( time.minute(), 2, 10, QChar('0') ).arg( time.second(), 2, 10, QChar('0') ) );
+    d->m_tourUi.m_elapsedTime->setText(QString("%L1:%L2").arg(time.minute(), 2, 10, QLatin1Char('0')).arg(time.second(), 2, 10, QLatin1Char('0')));
 }
 
 void TourWidgetPrivate::openFile()
@@ -458,7 +457,7 @@ void TourWidgetPrivate::addPlacemark()
     GeoDataDocument *document = new GeoDataDocument;
     if( m_document->id().isEmpty() ) {
         if( m_document->name().isEmpty() ) {
-            m_document->setId( "untitled_tour" );
+            m_document->setId(QStringLiteral("untitled_tour"));
         } else {
             m_document->setId( m_document->name().trimmed().replace( QLatin1Char(' '), QLatin1Char('_') ).toLower() );
         }
@@ -470,7 +469,7 @@ void TourWidgetPrivate::addPlacemark()
     placemark->setVisible( true );
     placemark->setBalloonVisible( true );
     GeoDataStyle *newStyle = new GeoDataStyle( *placemark->style() );
-    newStyle->iconStyle().setIconPath( MarbleDirs::path("bitmaps/redflag_22.png") );
+    newStyle->iconStyle().setIconPath(MarbleDirs::path(QStringLiteral("bitmaps/redflag_22.png")));
     placemark->setStyle( GeoDataStyle::Ptr(newStyle) );
 
     document->append( placemark );
@@ -512,7 +511,7 @@ void TourWidgetPrivate::addChangePlacemark()
         GeoDataPlacemark *target = static_cast<GeoDataPlacemark*>( lastFeature );
         placemark = new GeoDataPlacemark( *target );
         placemark->setTargetId( m_delegate->defaultFeatureId() );
-        placemark->setId( "" );
+        placemark->setId(QString());
     } else {
         placemark = new GeoDataPlacemark;
     }
@@ -663,7 +662,7 @@ void TourWidgetPrivate::updateRootIndex()
         m_tourUi.m_slider->setMaximum( m_playback.duration() * 100 );
         QTime nullTime( 0, 0, 0 );
         QTime time = nullTime.addSecs( m_playback.duration() );
-        m_tourUi.m_totalTime->setText( QString("%L1:%L2").arg( time.minute(), 2, 10, QChar('0') ).arg( time.second(), 2, 10, QChar('0') ) );
+        m_tourUi.m_totalTime->setText(QString("%L1:%L2").arg(time.minute(), 2, 10, QLatin1Char('0')).arg(time.second(), 2, 10, QLatin1Char('0')));
         QObject::connect( &m_playback, SIGNAL(progressChanged(double)),
                          q, SLOT(handlePlaybackProgress(double)) );
         q->stopPlaying();
@@ -740,9 +739,9 @@ void TourWidget::updateDuration()
     d->m_tourUi.m_slider->setMaximum( d->m_playback.duration() * 100 );
     QTime nullTime( 0, 0, 0 );
     QTime totalTime = nullTime.addSecs( d->m_playback.duration() );
-    d->m_tourUi.m_totalTime->setText( QString("%L1:%L2").arg( totalTime.minute(), 2, 10, QChar('0') ).arg( totalTime.second(), 2, 10, QChar('0') ) );
+    d->m_tourUi.m_totalTime->setText(QString("%L1:%L2").arg(totalTime.minute(), 2, 10, QLatin1Char('0') ).arg(totalTime.second(), 2, 10, QLatin1Char('0')));
     d->m_tourUi.m_slider->setValue( 0 );
-    d->m_tourUi.m_elapsedTime->setText( QString("%L1:%L2").arg( 0, 2, 10, QChar('0') ).arg( 0, 2, 10, QChar('0') ) );
+    d->m_tourUi.m_elapsedTime->setText(QString("%L1:%L2").arg(0, 2, 10, QLatin1Char('0')).arg(0, 2, 10, QLatin1Char('0')));
 }
 
 void TourWidget::finishAddingItem()
@@ -785,10 +784,10 @@ void TourWidgetPrivate::createTour()
     if ( overrideModifications() ) {
         GeoDataDocument *document = new GeoDataDocument();
         document->setDocumentRole( UserDocument );
-        document->setName( "New Tour" );
-        document->setId( "new_tour" );
+        document->setName(QStringLiteral("New Tour"));
+        document->setId(QStringLiteral("new_tour"));
         GeoDataTour *tour = new GeoDataTour();
-        tour->setName( "New Tour" );
+        tour->setName(QStringLiteral("New Tour"));
         GeoDataPlaylist *playlist = new GeoDataPlaylist;
         tour->setPlaylist( playlist );
         document->append( static_cast<GeoDataFeature*>( tour ) );
@@ -844,24 +843,17 @@ void TourWidgetPrivate::saveTourAs()
 
 bool TourWidgetPrivate::saveTourAs(const QString &filename)
 {
-    if ( !filename.isEmpty() )
-    {
-        QFile file( filename );
-        if ( file.open( QIODevice::WriteOnly ) ) {
-            GeoWriter writer;
-            writer.setDocumentType( kml::kmlTag_nameSpaceOgc22 );
-            if ( writer.write( &file, m_document ) ) {
-                file.close();
-                m_tourUi.m_actionSaveTour->setEnabled( false );
-                m_isChanged = false;
-                GeoDataDocument* document = m_document;
-                if ( !document->fileName().isNull() ) {
-                    m_widget->model()->removeGeoData( document->fileName() );
-                }
-                m_widget->model()->addGeoDataFile( filename );
-                m_document->setFileName( filename );
-                return true;
+    if ( !filename.isEmpty() ) {
+        if (GeoDataDocumentWriter::write(filename, *m_document)) {
+            m_tourUi.m_actionSaveTour->setEnabled( false );
+            m_isChanged = false;
+            GeoDataDocument* document = m_document;
+            if ( !document->fileName().isNull() ) {
+                m_widget->model()->removeGeoData( document->fileName() );
             }
+            m_widget->model()->addGeoDataFile( filename );
+            m_document->setFileName( filename );
+            return true;
         }
     }
     return false;
@@ -926,7 +918,7 @@ void TourWidgetPrivate::handlePlaybackProgress(const double position)
         m_tourUi.m_slider->setValue( position * 100 );
         QTime nullTime( 0, 0, 0 );
         QTime time = nullTime.addSecs( position );
-        m_tourUi.m_elapsedTime->setText( QString("%L1:%L2").arg( time.minute(), 2, 10, QChar('0') ).arg( time.second(), 2, 10, QChar('0') ) );
+        m_tourUi.m_elapsedTime->setText(QString("%L1:%L2").arg(time.minute(), 2, 10, QLatin1Char('0')).arg(time.second(), 2, 10, QLatin1Char('0')));
     }
 }
 

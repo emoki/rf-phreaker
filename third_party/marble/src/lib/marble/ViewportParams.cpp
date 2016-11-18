@@ -16,10 +16,10 @@
 #include <QRect>
 
 #include <QPainterPath>
-#include <QPainterPathStroker>
 #include <QRegion>
 
 #include "MarbleDebug.h"
+#include "GeoDataLatLonAltBox.h"
 #include "SphericalProjection.h"
 #include "EquirectProjection.h"
 #include "MercatorProjection.h"
@@ -94,7 +94,7 @@ ViewportParamsPrivate::ViewportParamsPrivate( Projection projection,
       m_planetAxis(),
       m_planetAxisMatrix(),
       m_radius( radius ),
-      m_angularResolution( 4 / fabs( (qreal)( m_radius ) ) ),
+      m_angularResolution(4.0 / fabs((double)m_radius)),
       m_size( size ),
       m_dirtyBox( true ),
       m_viewLatLonAltBox()
@@ -228,7 +228,7 @@ void ViewportParams::setRadius(int newRadius)
         d->m_dirtyBox = true;
 
         d->m_radius = newRadius;
-        d->m_angularResolution = 4 / fabs( (qreal)(d->m_radius) );
+        d->m_angularResolution = 4.0 / d->m_radius;
     }
 }
 
@@ -298,7 +298,7 @@ void ViewportParams::setHeight(int newHeight)
     setSize( QSize( width(), newHeight ) );
 }
 
-void ViewportParams::setSize(QSize newSize)
+void ViewportParams::setSize(const QSize& newSize)
 {
     if ( newSize == d->m_size )
         return;
@@ -319,12 +319,6 @@ qreal ViewportParams::centerLongitude() const
 qreal ViewportParams::centerLatitude() const
 {
     return d->m_centerLatitude;
-}
-
-void ViewportParams::centerCoordinates( qreal &centerLon, qreal &centerLat ) const
-{
-    centerLon = d->m_centerLongitude;
-    centerLat = d->m_centerLatitude;
 }
 
 const GeoDataLatLonAltBox& ViewportParams::viewLatLonAltBox() const
@@ -354,13 +348,13 @@ qreal ViewportParams::angularResolution() const
 
 bool ViewportParams::resolves ( const GeoDataLatLonBox &latLonBox, qreal pixel ) const
 {
-    return latLonBox.width() + latLonBox.height() > pixel * angularResolution();
+    return latLonBox.width() + latLonBox.height() > pixel * d->m_angularResolution;
 }
 
 
 bool ViewportParams::resolves ( const GeoDataLatLonAltBox &latLonAltBox, qreal pixel, qreal altitude ) const
 {
-    return    latLonAltBox.width() + latLonAltBox.height() > pixel * angularResolution()
+    return    latLonAltBox.width() + latLonAltBox.height() > pixel * d->m_angularResolution
            || latLonAltBox.maxAltitude() - latLonAltBox.minAltitude() > altitude;
 }
 
@@ -374,7 +368,7 @@ bool ViewportParams::resolves ( const GeoDataCoordinates &coord1,
     coord2.geoCoordinates( lon2, lat2 );
 
     // We take the manhattan length as an approximation for the distance
-    return ( fabs( lon2 - lon1 ) + fabs( lat2 - lat1 ) > angularResolution() );
+    return ( fabs( lon2 - lon1 ) + fabs( lat2 - lat1 ) > d->m_angularResolution );
 }
 
 

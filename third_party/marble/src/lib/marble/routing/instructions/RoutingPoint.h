@@ -13,7 +13,9 @@
 
 #include "marble_export.h"
 
-#include <QTextStream>
+#include <QtGlobal>
+
+class QTextStream;
 
 namespace Marble
 {

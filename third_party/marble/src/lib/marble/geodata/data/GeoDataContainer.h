@@ -53,6 +53,11 @@ class GEODATA_EXPORT GeoDataContainer : public GeoDataFeature
     /// Destruct the GeoDataContainer
     virtual ~GeoDataContainer();
 
+    GeoDataContainer& operator=(const GeoDataContainer& other);
+
+    virtual const char* nodeType() const;
+
+    GeoDataFeature * clone() const override;
 
     /**
      * @brief A convenience function that returns the LatLonAltBox of all
@@ -107,7 +112,7 @@ class GEODATA_EXPORT GeoDataContainer : public GeoDataFeature
      */
     void insert( int index, GeoDataFeature *feature );
 
-    GEODATA_DEPRECATED( void insert( GeoDataFeature *other, int index ) );
+    GEODATA_DEPRECATED void insert(GeoDataFeature *other, int index);
 
     /**
     * @brief add an element
@@ -115,6 +120,18 @@ class GEODATA_EXPORT GeoDataContainer : public GeoDataFeature
     void append( GeoDataFeature *other );
 
     void remove( int index );
+
+    void remove(int index, int count);
+
+    int	removeAll(GeoDataFeature* feature);
+
+    void removeAt(int index);
+
+    void removeFirst();
+
+    void removeLast();
+
+    bool removeOne( GeoDataFeature *feature );
 
     /**
     * @brief size of the container
@@ -156,14 +173,14 @@ class GEODATA_EXPORT GeoDataContainer : public GeoDataFeature
     virtual void unpack( QDataStream& stream );
 
  protected:
-    explicit GeoDataContainer( GeoDataContainerPrivate *priv );
+    explicit GeoDataContainer(GeoDataContainerPrivate *priv);
+    GeoDataContainer(const GeoDataContainer& other, GeoDataContainerPrivate *priv);
 
     bool equals( const GeoDataContainer &other ) const;
     using GeoDataFeature::equals;
 
  private:
-    GeoDataContainerPrivate* p();
-    const GeoDataContainerPrivate* p() const;
+    Q_DECLARE_PRIVATE(GeoDataContainer)
 };
 
 }

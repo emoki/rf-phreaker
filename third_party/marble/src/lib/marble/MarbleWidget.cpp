@@ -14,14 +14,12 @@
 #include "MarbleWidget.h"
 
 #include <qmath.h>
-#include <QAbstractItemModel>
 #include <QHash>
 #include <QSettings>
 #include <QTime>
-#include <QItemSelectionModel>
 #include <QPaintEvent>
+#include <QPaintEngine>
 #include <QRegion>
-#include <QSizePolicy>
 #include <QNetworkProxy>
 #include <QMetaMethod>
 #include "DataMigration.h"
@@ -29,6 +27,7 @@
 #include "FileManager.h"
 #include "GeoDataLatLonAltBox.h"
 #include "GeoDataPlacemark.h"
+#include "GeoDataLookAt.h"
 #include "GeoPainter.h"
 #include "MarbleClock.h"
 #include "MarbleDebug.h"
@@ -40,12 +39,14 @@
 #include "MarbleWidgetPopupMenu.h"
 #include "Planet.h"
 #include "PopupLayer.h"
+#include "RenderState.h"
 #include "RenderPlugin.h"
 #include "SunLocator.h"
 #include "TileCreatorDialog.h"
 #include "ViewportParams.h"
 #include "routing/RoutingLayer.h"
 #include "MarbleAbstractPresenter.h"
+#include "StyleBuilder.h"
 
 namespace Marble
 {
@@ -75,9 +76,9 @@ class MarbleWidget::CustomPaintLayer : public LayerInterface
 
     virtual qreal zValue() const { return 1.0e7; }
 
-    RenderState renderState() const { return RenderState( "Custom Widget Paint" ); }
+    RenderState renderState() const { return RenderState(QStringLiteral("Custom Widget Paint")); }
 
-    QString runtimeTrace() const { return QString( "MarbleWidget::CustomPaintLayer" ); }
+    QString runtimeTrace() const { return QStringLiteral("MarbleWidget::CustomPaintLayer"); }
 
  private:
     MarbleWidget *const m_widget;
@@ -209,6 +210,8 @@ void MarbleWidgetPrivate::construct()
     // react to some signals of m_map
     m_widget->connect( &m_map,   SIGNAL(themeChanged(QString)),
                        m_widget, SLOT(updateMapTheme()) );
+    m_widget->connect( &m_map,   SIGNAL(viewContextChanged(ViewContext)),
+                       m_widget, SIGNAL(viewContextChanged(ViewContext)) );
     m_widget->connect( &m_map,   SIGNAL(repaintNeeded(QRegion)),
                        m_widget, SLOT(update()) );
     m_widget->connect( &m_map,   SIGNAL(visibleLatLonAltBoxChanged(GeoDataLatLonAltBox)),
@@ -624,7 +627,7 @@ void MarbleWidget::moveDown( FlyToMode mode )
 
 void MarbleWidget::leaveEvent( QEvent* )
 {
-    emit mouseMoveGeoPosition( tr( NOT_AVAILABLE ) );
+    emit mouseMoveGeoPosition( QCoreApplication::translate( "Marble", NOT_AVAILABLE ) );
 }
 
 void MarbleWidget::resizeEvent( QResizeEvent *event )
@@ -758,7 +761,7 @@ void MarbleWidgetPrivate::updateMapTheme()
 
     m_widget->setRadius( m_widget->radius() ); // Corrects zoom range, if needed
 
-    if ( m_model.planetId() == "earth" ) {
+    if (m_model.planetId() == QLatin1String("earth")) {
         m_map.addLayer( m_routingLayer );
     }
 
@@ -829,7 +832,7 @@ void MarbleWidget::setSubSolarPointIconVisible( bool visible )
     QList<RenderPlugin *>::const_iterator i = pluginList.constBegin();
     QList<RenderPlugin *>::const_iterator const end = pluginList.constEnd();
     for (; i != end; ++i ) {
-        if ( (*i)->nameId() == "sun" ) {
+        if ((*i)->nameId() == QLatin1String("sun")) {
             (*i)->setVisible( visible );
         }
     }
@@ -910,6 +913,41 @@ void MarbleWidget::setShowBackground( bool visible )
 void MarbleWidget::setShowRuntimeTrace( bool visible )
 {
     d->m_map.setShowRuntimeTrace( visible );
+}
+
+bool MarbleWidget::showRuntimeTrace() const
+{
+    return d->m_map.showRuntimeTrace();
+}
+
+void MarbleWidget::setShowDebugPolygons( bool visible)
+{
+    d->m_map.setShowDebugPolygons( visible );
+}
+
+bool MarbleWidget::showDebugPolygons() const
+{
+    return d->m_map.showDebugPolygons();
+}
+
+void MarbleWidget::setShowDebugBatchRender( bool visible)
+{
+    d->m_map.setShowDebugBatchRender( visible );
+}
+
+bool MarbleWidget::showDebugBatchRender() const
+{
+    return d->m_map.showDebugBatchRender();
+}
+
+void MarbleWidget::setShowDebugPlacemarks( bool visible)
+{
+    d->m_map.setShowDebugPlacemarks( visible );
+}
+
+bool MarbleWidget::showDebugPlacemarks() const
+{
+    return d->m_map.showDebugPlacemarks();
 }
 
 void MarbleWidget::setShowTileId( bool visible )
@@ -1058,7 +1096,7 @@ QList<RenderPlugin *> MarbleWidget::renderPlugins() const
 void MarbleWidget::readPluginSettings( QSettings& settings )
 {
     foreach( RenderPlugin *plugin, renderPlugins() ) {
-        settings.beginGroup( QString( "plugin_" ) + plugin->nameId() );
+        settings.beginGroup(QLatin1String("plugin_") + plugin->nameId());
 
         QHash<QString,QVariant> hash;
 
@@ -1075,7 +1113,7 @@ void MarbleWidget::readPluginSettings( QSettings& settings )
 void MarbleWidget::writePluginSettings( QSettings& settings ) const
 {
     foreach( RenderPlugin *plugin, renderPlugins() ) {
-        settings.beginGroup( QString( "plugin_" ) + plugin->nameId() );
+        settings.beginGroup(QLatin1String("plugin_") + plugin->nameId());
 
         QHash<QString,QVariant> hash = plugin->settings();
 
@@ -1172,6 +1210,11 @@ RoutingLayer* MarbleWidget::routingLayer()
 PopupLayer *MarbleWidget::popupLayer()
 {
     return d->m_mapInfoDialog;
+}
+
+const StyleBuilder* MarbleWidget::styleBuilder() const
+{
+    return d->m_map.styleBuilder();
 }
 
 }

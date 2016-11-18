@@ -14,9 +14,7 @@
 #include "AbstractDataPluginItem.h"
 // #include "OpenCachingComCache.h"
 
-#include <QDate>
-#include <QPixmap>
-#include <QVariant>
+#include <QVariantMap>
 
 class QAction;
 
@@ -34,7 +32,7 @@ class OpenCachingComItem : public AbstractDataPluginItem
     Q_OBJECT
 
 public:
-    OpenCachingComItem( QVariantMap cache, OpenCachingComModel *parent );
+    OpenCachingComItem( const QVariantMap& cache, OpenCachingComModel *parent );
 
     ~OpenCachingComItem();
 
@@ -48,10 +46,10 @@ public:
 
     void addDownloadedFile( const QString &url, const QString &type );
 
-public slots:
+public Q_SLOTS:
     void showInfoDialog();
 
-private slots:
+private Q_SLOTS:
     void dialogCloseClicked();
     void openWww();
 
@@ -62,7 +60,7 @@ private:
 
     static QString dateString(const QVariant& ms); ///< create a date string from millisecondssinceepoch in a qvariant
 
-    static const QString ratingNumberString(QVariant number); ///< "1" -> "1.0"
+    static const QString ratingNumberString(const QVariant& number); ///< "1" -> "1.0"
 
     QString formatDistance(qreal spheredistance) const; ///< nice string from a Marble::distanceSphere()
 

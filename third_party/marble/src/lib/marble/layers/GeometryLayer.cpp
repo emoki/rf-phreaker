@@ -14,15 +14,19 @@
 #include "GeometryLayer.h"
 
 // Marble
+#include "GeoDataLatLonAltBox.h"
 #include "GeoDataDocument.h"
 #include "GeoDataFolder.h"
 #include "GeoDataLineStyle.h"
 #include "GeoDataMultiTrack.h"
 #include "GeoDataObject.h"
 #include "GeoDataPlacemark.h"
+#include "GeoDataLinearRing.h"
+#include "GeoDataMultiGeometry.h"
 #include "GeoDataPolygon.h"
 #include "GeoDataPolyStyle.h"
 #include "GeoDataStyle.h"
+#include "GeoDataIconStyle.h"
 #include "GeoDataStyleMap.h"
 #include "GeoDataTrack.h"
 #include "GeoDataTypes.h"
@@ -30,6 +34,7 @@
 #include "MarbleDebug.h"
 #include "GeoPainter.h"
 #include "ViewportParams.h"
+#include "RenderState.h"
 #include "GeoGraphicsScene.h"
 #include "GeoGraphicsItem.h"
 #include "GeoLineStringGraphicsItem.h"
@@ -44,74 +49,55 @@
 #include "MarblePlacemarkModel.h"
 #include "GeoDataTreeModel.h"
 #include <OsmPlacemarkData.h>
+#include "StyleBuilder.h"
 
 // Qt
 #include <qmath.h>
 #include <QAbstractItemModel>
 #include <QModelIndex>
-#include <QColor>
 
 namespace Marble
 {
 class GeometryLayerPrivate
 {
 public:
-    typedef QList<GeoDataPlacemark const *> OsmQueue;
+    typedef QVector<GeoLineStringGraphicsItem*> OsmLineStringItems;
 
-    explicit GeometryLayerPrivate( const QAbstractItemModel *model );
+    struct PaintFragments {
+        // Three lists for different z values
+        // A z value of 0 is default and used by the majority of items, so sorting
+        // can be avoided for it
+        QVector<GeoGraphicsItem*> negative;
+        QVector<GeoGraphicsItem*> null;
+        QVector<GeoGraphicsItem*> positive;
+    };
+
+    explicit GeometryLayerPrivate(const QAbstractItemModel *model, const StyleBuilder *styleBuilder);
 
     void createGraphicsItems( const GeoDataObject *object );
-    void createGraphicsItemFromGeometry( const GeoDataGeometry *object, const GeoDataPlacemark *placemark, bool avoidOsmDuplicates );
+    void createGraphicsItemFromGeometry(const GeoDataGeometry *object, const GeoDataPlacemark *placemark);
     void createGraphicsItemFromOverlay( const GeoDataOverlay *overlay );
     void removeGraphicsItems( const GeoDataFeature *feature );
-
-    static int maximumZoomLevel();
+    void updateTiledLineStrings(const GeoDataPlacemark *placemark, GeoLineStringGraphicsItem* lineStringItem);
+    void updateTiledLineStrings(OsmLineStringItems &lineStringItems);
 
     const QAbstractItemModel *const m_model;
+    const StyleBuilder *const m_styleBuilder;
     GeoGraphicsScene m_scene;
     QString m_runtimeTrace;
     QList<ScreenOverlayGraphicsItem*> m_items;
 
-    QMap<qint64,OsmQueue> m_osmWayItems;
-    QMap<qint64,OsmQueue> m_osmRelationItems;
-
-private:
-    static void initializeDefaultValues();
-    static QString createPaintLayerOrder(const QString &itemType, GeoDataFeature::GeoDataVisualCategory visualCategory, const QString &subType = QString());
-
-    static int s_defaultMinZoomLevels[GeoDataFeature::LastIndex];
-    static bool s_defaultValuesInitialized;
-    static int s_maximumZoomLevel;
+    QHash<qint64,OsmLineStringItems> m_osmLineStringItems;
 };
 
-int GeometryLayerPrivate::s_defaultMinZoomLevels[GeoDataFeature::LastIndex];
-bool GeometryLayerPrivate::s_defaultValuesInitialized = false;
-int GeometryLayerPrivate::s_maximumZoomLevel = 0;
-QStringList s_paintLayerOrder;
-
-GeometryLayerPrivate::GeometryLayerPrivate( const QAbstractItemModel *model )
-    : m_model( model )
+GeometryLayerPrivate::GeometryLayerPrivate(const QAbstractItemModel *model, const StyleBuilder *styleBuilder) :
+    m_model(model),
+    m_styleBuilder(styleBuilder)
 {
-    initializeDefaultValues();
 }
 
-int GeometryLayerPrivate::maximumZoomLevel()
-{
-    return s_maximumZoomLevel;
-}
-
-QString GeometryLayerPrivate::createPaintLayerOrder(const QString &itemType, GeoDataFeature::GeoDataVisualCategory visualCategory, const QString &subType)
-{
-    QString const category = GeoDataFeature::visualCategoryName(visualCategory);
-    if (subType.isEmpty()) {
-        return QString("%1/%2").arg(itemType).arg(category);
-    } else {
-        return QString("%1/%2/%3").arg(itemType).arg(category).arg(subType);
-    }
-}
-
-GeometryLayer::GeometryLayer( const QAbstractItemModel *model )
-        : d( new GeometryLayerPrivate( model ) )
+GeometryLayer::GeometryLayer(const QAbstractItemModel *model, const StyleBuilder *styleBuilder) :
+    d(new GeometryLayerPrivate(model, styleBuilder))
 {
     const GeoDataObject *object = static_cast<GeoDataObject*>( d->m_model->index( 0, 0, QModelIndex() ).internalPointer() );
     if ( object && object->parent() )
@@ -138,188 +124,7 @@ GeometryLayer::~GeometryLayer()
 
 QStringList GeometryLayer::renderPosition() const
 {
-    return QStringList( "HOVERS_ABOVE_SURFACE" );
-}
-
-void GeometryLayerPrivate::initializeDefaultValues()
-{
-    if ( s_defaultValuesInitialized )
-        return;
-
-    for ( int i = 0; i < GeoDataFeature::LastIndex; i++ )
-        s_defaultMinZoomLevels[i] = 15;
-
-    for ( int i = GeoDataFeature::LanduseAllotments; i <= GeoDataFeature::LanduseVineyard; i++ ) {
-        if ((GeoDataFeature::GeoDataVisualCategory)i != GeoDataFeature::LanduseGrass) {
-            s_paintLayerOrder << createPaintLayerOrder("Polygon", (GeoDataFeature::GeoDataVisualCategory)i);
-        }
-    }
-    s_paintLayerOrder << createPaintLayerOrder("Polygon", GeoDataFeature::NaturalBeach);
-    s_paintLayerOrder << createPaintLayerOrder("Polygon", GeoDataFeature::NaturalWetland);
-    s_paintLayerOrder << createPaintLayerOrder("Polygon", GeoDataFeature::NaturalGlacier);
-    s_paintLayerOrder << createPaintLayerOrder("Polygon", GeoDataFeature::NaturalCliff);
-    s_paintLayerOrder << createPaintLayerOrder("Polygon", GeoDataFeature::NaturalPeak);
-    s_paintLayerOrder << createPaintLayerOrder("Polygon", GeoDataFeature::MilitaryDangerArea);
-    s_paintLayerOrder << createPaintLayerOrder("Polygon", GeoDataFeature::LeisurePark);
-    s_paintLayerOrder << createPaintLayerOrder("Polygon", GeoDataFeature::LeisurePitch);
-    s_paintLayerOrder << createPaintLayerOrder("Polygon", GeoDataFeature::LeisureSportsCentre);
-    s_paintLayerOrder << createPaintLayerOrder("Polygon", GeoDataFeature::LeisureStadium);
-    s_paintLayerOrder << createPaintLayerOrder("Polygon", GeoDataFeature::NaturalWood);
-    s_paintLayerOrder << createPaintLayerOrder("Polygon", GeoDataFeature::LanduseGrass);
-    s_paintLayerOrder << createPaintLayerOrder("Polygon", GeoDataFeature::LeisurePlayground);
-    s_paintLayerOrder << createPaintLayerOrder("Polygon", GeoDataFeature::NaturalScrub);
-    s_paintLayerOrder << createPaintLayerOrder("Polygon", GeoDataFeature::LeisureTrack);
-    s_paintLayerOrder << createPaintLayerOrder("Polygon", GeoDataFeature::TransportParking);
-    s_paintLayerOrder << createPaintLayerOrder("Polygon", GeoDataFeature::TransportParkingSpace);
-    s_paintLayerOrder << createPaintLayerOrder("Polygon", GeoDataFeature::ManmadeBridge);
-    s_paintLayerOrder << createPaintLayerOrder("Polygon", GeoDataFeature::BarrierCityWall);
-
-    s_paintLayerOrder << createPaintLayerOrder("Polygon", GeoDataFeature::AmenityGraveyard);
-
-    s_paintLayerOrder << createPaintLayerOrder("Polygon", GeoDataFeature::EducationCollege);
-    s_paintLayerOrder << createPaintLayerOrder("Polygon", GeoDataFeature::EducationSchool);
-    s_paintLayerOrder << createPaintLayerOrder("Polygon", GeoDataFeature::EducationUniversity);
-    s_paintLayerOrder << createPaintLayerOrder("Polygon", GeoDataFeature::HealthHospital);
-
-    s_paintLayerOrder << createPaintLayerOrder("Polygon", GeoDataFeature::NaturalWater);
-    s_paintLayerOrder << createPaintLayerOrder("LineString", GeoDataFeature::NaturalWater);
-    for ( int i = GeoDataFeature::HighwaySteps; i <= GeoDataFeature::HighwayMotorway; i++ ) {
-        s_paintLayerOrder << createPaintLayerOrder("LineString", (GeoDataFeature::GeoDataVisualCategory)i, "outline");
-    }
-    for ( int i = GeoDataFeature::HighwaySteps; i <= GeoDataFeature::HighwayMotorway; i++ ) {
-        s_paintLayerOrder << createPaintLayerOrder("LineString", (GeoDataFeature::GeoDataVisualCategory)i, "inline");
-    }
-    for ( int i = GeoDataFeature::HighwaySteps; i <= GeoDataFeature::HighwayMotorway; i++ ) {
-        s_paintLayerOrder << createPaintLayerOrder("LineString", (GeoDataFeature::GeoDataVisualCategory)i, "label");
-    }
-    for ( int i = GeoDataFeature::RailwayRail; i <= GeoDataFeature::RailwayFunicular; i++ ) {
-        s_paintLayerOrder << createPaintLayerOrder("LineString", (GeoDataFeature::GeoDataVisualCategory)i, "outline");
-    }
-    for ( int i = GeoDataFeature::RailwayRail; i <= GeoDataFeature::RailwayFunicular; i++ ) {
-        s_paintLayerOrder << createPaintLayerOrder("LineString", (GeoDataFeature::GeoDataVisualCategory)i, "inline");
-    }
-    for ( int i = GeoDataFeature::RailwayRail; i <= GeoDataFeature::RailwayFunicular; i++ ) {
-        s_paintLayerOrder << createPaintLayerOrder("LineString", (GeoDataFeature::GeoDataVisualCategory)i, "label");
-    }
-
-    s_paintLayerOrder << createPaintLayerOrder("Polygon", GeoDataFeature::TransportPlatform);
-
-    s_paintLayerOrder << createPaintLayerOrder("Point", GeoDataFeature::AmenityGraveyard);
-    s_paintLayerOrder << createPaintLayerOrder("Point", GeoDataFeature::NaturalWood);
-    s_paintLayerOrder << createPaintLayerOrder("Point", GeoDataFeature::NaturalBeach);
-    s_paintLayerOrder << createPaintLayerOrder("Point", GeoDataFeature::NaturalWetland);
-    s_paintLayerOrder << createPaintLayerOrder("Point", GeoDataFeature::NaturalGlacier);
-    s_paintLayerOrder << createPaintLayerOrder("Point", GeoDataFeature::NaturalScrub);
-    s_paintLayerOrder << createPaintLayerOrder("Point", GeoDataFeature::LeisurePark);
-    s_paintLayerOrder << createPaintLayerOrder("Point", GeoDataFeature::LeisurePlayground);
-    s_paintLayerOrder << createPaintLayerOrder("Point", GeoDataFeature::LeisurePitch);
-    s_paintLayerOrder << createPaintLayerOrder("Point", GeoDataFeature::LeisureSportsCentre);
-    s_paintLayerOrder << createPaintLayerOrder("Point", GeoDataFeature::LeisureStadium);
-    s_paintLayerOrder << createPaintLayerOrder("Point", GeoDataFeature::LeisureTrack);
-    s_paintLayerOrder << createPaintLayerOrder("Point", GeoDataFeature::TransportParking);
-    s_paintLayerOrder << createPaintLayerOrder("Point", GeoDataFeature::ManmadeBridge);
-    s_paintLayerOrder << createPaintLayerOrder("Point", GeoDataFeature::BarrierCityWall);
-    s_paintLayerOrder << createPaintLayerOrder("Point", GeoDataFeature::NaturalWater);
-    s_paintLayerOrder << createPaintLayerOrder("Point", GeoDataFeature::NaturalCliff);
-    s_paintLayerOrder << createPaintLayerOrder("Point", GeoDataFeature::NaturalPeak);
-    s_paintLayerOrder << createPaintLayerOrder("Point", GeoDataFeature::EducationCollege);
-    s_paintLayerOrder << createPaintLayerOrder("Point", GeoDataFeature::EducationSchool);
-    s_paintLayerOrder << createPaintLayerOrder("Point", GeoDataFeature::EducationUniversity);
-    s_paintLayerOrder << createPaintLayerOrder("Point", GeoDataFeature::HealthHospital);
-    s_paintLayerOrder << createPaintLayerOrder("Point", GeoDataFeature::MilitaryDangerArea);
-
-    s_paintLayerOrder << "Polygon/Building/frame";
-    s_paintLayerOrder << "Polygon/Building/roof";
-
-    Q_ASSERT(QSet<QString>::fromList(s_paintLayerOrder).size() == s_paintLayerOrder.size());
-
-    s_defaultMinZoomLevels[GeoDataFeature::Default]             = 1;
-    s_defaultMinZoomLevels[GeoDataFeature::NaturalWater]        = 8;
-    s_defaultMinZoomLevels[GeoDataFeature::NaturalWood]         = 8;
-    s_defaultMinZoomLevels[GeoDataFeature::NaturalBeach]        = 10;
-    s_defaultMinZoomLevels[GeoDataFeature::NaturalWetland]      = 10;
-    s_defaultMinZoomLevels[GeoDataFeature::NaturalGlacier]      = 8;
-    s_defaultMinZoomLevels[GeoDataFeature::NaturalScrub]        = 10;
-    s_defaultMinZoomLevels[GeoDataFeature::NaturalCliff]        = 15;
-    s_defaultMinZoomLevels[GeoDataFeature::NaturalPeak]         = 11;
-    s_defaultMinZoomLevels[GeoDataFeature::BarrierCityWall]     = 15;
-    s_defaultMinZoomLevels[GeoDataFeature::Building]            = 15;
-
-    s_defaultMinZoomLevels[GeoDataFeature::ManmadeBridge]       = 15;
-
-        // OpenStreetMap highways
-    s_defaultMinZoomLevels[GeoDataFeature::HighwaySteps]        = 15;
-    s_defaultMinZoomLevels[GeoDataFeature::HighwayUnknown]      = 13;
-    s_defaultMinZoomLevels[GeoDataFeature::HighwayPath]         = 13;
-    s_defaultMinZoomLevels[GeoDataFeature::HighwayTrack]        = 13;
-    s_defaultMinZoomLevels[GeoDataFeature::HighwayPedestrian]   = 13;
-    s_defaultMinZoomLevels[GeoDataFeature::HighwayFootway]      = 13;
-    s_defaultMinZoomLevels[GeoDataFeature::HighwayCycleway]     = 13;
-    s_defaultMinZoomLevels[GeoDataFeature::HighwayService]      = 13;
-    s_defaultMinZoomLevels[GeoDataFeature::HighwayRoad]         = 13;
-    s_defaultMinZoomLevels[GeoDataFeature::HighwayTertiaryLink] = 10;
-    s_defaultMinZoomLevels[GeoDataFeature::HighwayTertiary]     = 10;
-    s_defaultMinZoomLevels[GeoDataFeature::HighwaySecondaryLink]= 10;
-    s_defaultMinZoomLevels[GeoDataFeature::HighwaySecondary]    = 9;
-    s_defaultMinZoomLevels[GeoDataFeature::HighwayPrimaryLink]  = 10;
-    s_defaultMinZoomLevels[GeoDataFeature::HighwayPrimary]      = 8;
-    s_defaultMinZoomLevels[GeoDataFeature::HighwayTrunkLink]    = 10;
-    s_defaultMinZoomLevels[GeoDataFeature::HighwayTrunk]        = 7;
-    s_defaultMinZoomLevels[GeoDataFeature::HighwayMotorwayLink] = 10;
-    s_defaultMinZoomLevels[GeoDataFeature::HighwayMotorway]     = 6;
-
-    //FIXME: Bad, better to expand this
-    for(int i = GeoDataFeature::AccomodationCamping; i <= GeoDataFeature::ReligionSikh; i++)
-        s_defaultMinZoomLevels[i] = 15;
-
-    s_defaultMinZoomLevels[GeoDataFeature::AmenityGraveyard]    = 14;
-    s_defaultMinZoomLevels[GeoDataFeature::AmenityFountain]     = 17;
-
-    s_defaultMinZoomLevels[GeoDataFeature::MilitaryDangerArea]  = 11;
-
-    s_defaultMinZoomLevels[GeoDataFeature::LeisurePark]         = 11;
-    s_defaultMinZoomLevels[GeoDataFeature::LeisurePlayground]   = 11;
-    s_defaultMinZoomLevels[GeoDataFeature::LanduseAllotments]   = 11;
-    s_defaultMinZoomLevels[GeoDataFeature::LanduseBasin]        = 11;
-    s_defaultMinZoomLevels[GeoDataFeature::LanduseCemetery]     = 11;
-    s_defaultMinZoomLevels[GeoDataFeature::LanduseCommercial]   = 11;
-    s_defaultMinZoomLevels[GeoDataFeature::LanduseConstruction] = 11;
-    s_defaultMinZoomLevels[GeoDataFeature::LanduseFarmland]     = 11;
-    s_defaultMinZoomLevels[GeoDataFeature::LanduseFarmyard]     = 11;
-    s_defaultMinZoomLevels[GeoDataFeature::LanduseGarages]      = 11;
-    s_defaultMinZoomLevels[GeoDataFeature::LanduseGrass]        = 11;
-    s_defaultMinZoomLevels[GeoDataFeature::LanduseIndustrial]   = 11;
-    s_defaultMinZoomLevels[GeoDataFeature::LanduseLandfill]     = 11;
-    s_defaultMinZoomLevels[GeoDataFeature::LanduseMeadow]       = 11;
-    s_defaultMinZoomLevels[GeoDataFeature::LanduseMilitary]     = 11;
-    s_defaultMinZoomLevels[GeoDataFeature::LanduseQuarry]       = 11;
-    s_defaultMinZoomLevels[GeoDataFeature::LanduseRailway]      = 11;
-    s_defaultMinZoomLevels[GeoDataFeature::LanduseReservoir]    = 11;
-    s_defaultMinZoomLevels[GeoDataFeature::LanduseResidential]  = 11;
-    s_defaultMinZoomLevels[GeoDataFeature::LanduseRetail]       = 11;
-    s_defaultMinZoomLevels[GeoDataFeature::LanduseOrchard]      = 14;
-    s_defaultMinZoomLevels[GeoDataFeature::LanduseVineyard]     = 14;
-
-    s_defaultMinZoomLevels[GeoDataFeature::RailwayRail]         = 6;
-    s_defaultMinZoomLevels[GeoDataFeature::RailwayNarrowGauge]  = 6;
-    s_defaultMinZoomLevels[GeoDataFeature::RailwayTram]         = 14;
-    s_defaultMinZoomLevels[GeoDataFeature::RailwayLightRail]    = 12;
-    s_defaultMinZoomLevels[GeoDataFeature::RailwayAbandoned]    = 10;
-    s_defaultMinZoomLevels[GeoDataFeature::RailwaySubway]       = 13;
-    s_defaultMinZoomLevels[GeoDataFeature::RailwayPreserved]    = 13;
-    s_defaultMinZoomLevels[GeoDataFeature::RailwayMiniature]    = 13;
-    s_defaultMinZoomLevels[GeoDataFeature::RailwayConstruction] = 10;
-    s_defaultMinZoomLevels[GeoDataFeature::RailwayMonorail]     = 12;
-    s_defaultMinZoomLevels[GeoDataFeature::RailwayFunicular]    = 13;
-    s_defaultMinZoomLevels[GeoDataFeature::TransportPlatform]   = 16;
-
-    s_defaultMinZoomLevels[GeoDataFeature::Satellite]           = 0;
-
-    for ( int i = 0; i < GeoDataFeature::LastIndex; ++i ) {
-        s_maximumZoomLevel = qMax( s_maximumZoomLevel, s_defaultMinZoomLevels[i] );
-    }
-
-    s_defaultValuesInitialized = true;
+    return QStringList(QStringLiteral("HOVERS_ABOVE_SURFACE"));
 }
 
 
@@ -331,44 +136,49 @@ bool GeometryLayer::render( GeoPainter *painter, ViewportParams *viewport,
 
     painter->save();
 
-    int maxZoomLevel = qMin<int>( qMax<int>( qLn( viewport->radius() *4 / 256 ) / qLn( 2.0 ), 1), GeometryLayerPrivate::maximumZoomLevel() );
+    const int maxZoomLevel = qMin<int>(qMax<int>(qLn(viewport->radius()*4/256)/qLn(2.0), 1), d->m_styleBuilder->maximumZoomLevel());
     QList<GeoGraphicsItem*> items = d->m_scene.items( viewport->viewLatLonAltBox(), maxZoomLevel );
 
     typedef QPair<QString, GeoGraphicsItem*> LayerItem;
     QList<LayerItem> defaultLayer;
-    int paintedItems = 0;
-    QHash<QString, QList<GeoGraphicsItem*> > paintedFragments;
-    foreach( GeoGraphicsItem* item, items )
-    {
-        if ( item->latLonAltBox().intersects( viewport->viewLatLonAltBox() ) ) {
-            QStringList paintLayers = item->paintLayers();
-            if (paintLayers.isEmpty()) {
-                mDebug() << item << " provides no paint layers, so I force one onto it.";
-                paintLayers << QString();
-            }
-            foreach(const auto &layer, paintLayers) {
-                if (s_paintLayerOrder.contains(layer)) {
-                    paintedFragments[layer] << item;
+    QHash<QString, GeometryLayerPrivate::PaintFragments> paintedFragments;
+    QSet<QString> const knownLayers = QSet<QString>::fromList(d->m_styleBuilder->renderOrder());
+    foreach( GeoGraphicsItem* item, items ) {
+        QStringList paintLayers = item->paintLayers();
+        if (paintLayers.isEmpty()) {
+            mDebug() << item << " provides no paint layers, so I force one onto it.";
+            paintLayers << QString();
+        }
+        foreach(const auto &layer, paintLayers) {
+            if (knownLayers.contains(layer)) {
+                GeometryLayerPrivate::PaintFragments & fragments = paintedFragments[layer];
+                double const zValue = item->zValue();
+                if (zValue == 0.0) {
+                  fragments.null << item;
+                } else if (zValue < 0.0) {
+                  fragments.negative << item;
                 } else {
-                    defaultLayer << LayerItem(layer, item);
-                    static QSet<QString> missingLayers;
-                    if (!missingLayers.contains(layer)) {
-                        mDebug() << "Missing layer " << layer << ", in render order, will render it on top";
-                        missingLayers << layer;
-                    }
+                  fragments.positive << item;
+                }
+            } else {
+                defaultLayer << LayerItem(layer, item);
+                static QSet<QString> missingLayers;
+                if (!missingLayers.contains(layer)) {
+                    mDebug() << "Missing layer " << layer << ", in render order, will render it on top";
+                    missingLayers << layer;
                 }
             }
-            ++paintedItems;
         }
     }
 
-    QStringList paintedLayers = s_paintLayerOrder;
-    foreach(const QString &layer, paintedLayers) {
-        QList<GeoGraphicsItem*> & layerItems = paintedFragments[layer];
-        qStableSort(layerItems.begin(), layerItems.end(), GeoGraphicsItem::zValueLessThan);
-        foreach(auto item, layerItems) {
-            item->paint(painter, viewport, layer);
-        }
+    foreach (const QString &layer, d->m_styleBuilder->renderOrder()) {
+        GeometryLayerPrivate::PaintFragments & layerItems = paintedFragments[layer];
+        qStableSort(layerItems.negative.begin(), layerItems.negative.end(), GeoGraphicsItem::zValueLessThan);
+        // The idea here is that layerItems.null has most items and needs not to be sorted => faster
+        qStableSort(layerItems.positive.begin(), layerItems.positive.end(), GeoGraphicsItem::zValueLessThan);
+        foreach(auto item, layerItems.negative) { item->paint(painter, viewport, layer); }
+        foreach(auto item, layerItems.null) { item->paint(painter, viewport, layer); }
+        foreach(auto item, layerItems.positive) { item->paint(painter, viewport, layer); }
     }
     foreach(const auto & item, defaultLayer) {
         item.second->paint(painter, viewport, item.first);
@@ -379,16 +189,15 @@ bool GeometryLayer::render( GeoPainter *painter, ViewportParams *viewport,
     }
 
     painter->restore();
-    d->m_runtimeTrace = QString( "Geometries: %1 Drawn: %2 Zoom: %3")
+    d->m_runtimeTrace = QStringLiteral("Geometries: %1 Zoom: %2")
                 .arg( items.size() )
-                .arg( paintedItems )
                 .arg( maxZoomLevel );
     return true;
 }
 
 RenderState GeometryLayer::renderState() const
 {
-    return RenderState( "GeoGraphicsScene" );
+    return RenderState(QStringLiteral("GeoGraphicsScene"));
 }
 
 QString GeometryLayer::runtimeTrace() const
@@ -400,7 +209,7 @@ void GeometryLayerPrivate::createGraphicsItems( const GeoDataObject *object )
 {
     if ( const GeoDataPlacemark *placemark = dynamic_cast<const GeoDataPlacemark*>( object ) )
     {
-        createGraphicsItemFromGeometry( placemark->geometry(), placemark, true );
+        createGraphicsItemFromGeometry(placemark->geometry(), placemark);
     } else if ( const GeoDataOverlay* overlay = dynamic_cast<const GeoDataOverlay*>( object ) ) {
         createGraphicsItemFromOverlay( overlay );
     }
@@ -416,44 +225,69 @@ void GeometryLayerPrivate::createGraphicsItems( const GeoDataObject *object )
     }
 }
 
-void GeometryLayerPrivate::createGraphicsItemFromGeometry(const GeoDataGeometry* object, const GeoDataPlacemark *placemark , bool avoidOsmDuplicates)
+void GeometryLayerPrivate::updateTiledLineStrings(const GeoDataPlacemark* placemark, GeoLineStringGraphicsItem* lineStringItem)
 {
+    if (!placemark->hasOsmData()) {
+        return;
+    }
+    qint64 const osmId = placemark->osmData().oid();
+    if (osmId <= 0) {
+        return;
+    }
+    auto & lineStringItems = m_osmLineStringItems[osmId];
+    lineStringItems << lineStringItem;
+    updateTiledLineStrings(lineStringItems);
+}
+
+void GeometryLayerPrivate::updateTiledLineStrings(OsmLineStringItems &lineStringItems)
+{
+    GeoDataLineString merged;
+    if (lineStringItems.size() > 1) {
+        QVector<const GeoDataLineString*> lineStrings;
+        for (auto item: lineStringItems) {
+            lineStrings << item->lineString();
+        }
+        merged = GeoLineStringGraphicsItem::merge(lineStrings);
+    }
+
+    // If merging failed, reset all. Otherwise only the first one
+    // gets the merge result and becomes visible.
+    bool visible = true;
+    for (auto item: lineStringItems) {
+        item->setVisible(visible);
+        if (visible) {
+            item->setMergedLineString(merged);
+            visible = merged.isEmpty();
+        }
+    }
+}
+
+void GeometryLayerPrivate::createGraphicsItemFromGeometry(const GeoDataGeometry* object, const GeoDataPlacemark *placemark)
+{
+    if (!placemark->isGloballyVisible()) {
+        return; // Reconsider this when visibility can be changed dynamically
+    }
+
     GeoGraphicsItem *item = 0;
     if ( object->nodeType() == GeoDataTypes::GeoDataLineStringType )
     {
         const GeoDataLineString* line = static_cast<const GeoDataLineString*>( object );
-        item = new GeoLineStringGraphicsItem( placemark, line );
+        auto lineStringItem = new GeoLineStringGraphicsItem( placemark, line );
+        item = lineStringItem;
+        updateTiledLineStrings(placemark, lineStringItem);
     }
     else if ( object->nodeType() == GeoDataTypes::GeoDataLinearRingType )
     {
-        if (avoidOsmDuplicates && placemark->hasOsmData()){
-            qint64 const osmId = placemark->osmData().id();
-            if (osmId > 0) {
-                m_osmWayItems[osmId] << placemark;
-                if (m_osmWayItems[osmId].size()>1) {
-                    return;
-                }
-            }
-        }
-
         const GeoDataLinearRing *ring = static_cast<const GeoDataLinearRing*>( object );
-        item = new GeoPolygonGraphicsItem( placemark, ring );
+        item = GeoPolygonGraphicsItem::createGraphicsItem(placemark, ring);
     }
     else if ( object->nodeType() == GeoDataTypes::GeoDataPolygonType )
     {
-        if (avoidOsmDuplicates && placemark->hasOsmData()){
-            qint64 const osmId = placemark->osmData().id();
-            if (osmId > 0) {
-                m_osmRelationItems[osmId] << placemark;
-                if (m_osmRelationItems[osmId].size()>1) {
-                    return;
-                }
-            }
-        }
-
         const GeoDataPolygon *poly = static_cast<const GeoDataPolygon*>( object );
-        item = new GeoPolygonGraphicsItem( placemark, poly );
-        item->setZValue(poly->renderOrder());
+        item = GeoPolygonGraphicsItem::createGraphicsItem(placemark, poly);
+        if (item->zValue() == 0) {
+             item->setZValue(poly->renderOrder());
+        }
     }
     else if ( object->nodeType() == GeoDataTypes::GeoDataMultiGeometryType  )
     {
@@ -461,7 +295,7 @@ void GeometryLayerPrivate::createGraphicsItemFromGeometry(const GeoDataGeometry*
         int rowCount = multigeo->size();
         for ( int row = 0; row < rowCount; ++row )
         {
-            createGraphicsItemFromGeometry( multigeo->child( row ), placemark, true );
+            createGraphicsItemFromGeometry(multigeo->child( row ), placemark);
         }
     }
     else if ( object->nodeType() == GeoDataTypes::GeoDataMultiTrackType  )
@@ -470,7 +304,7 @@ void GeometryLayerPrivate::createGraphicsItemFromGeometry(const GeoDataGeometry*
         int rowCount = multitrack->size();
         for ( int row = 0; row < rowCount; ++row )
         {
-            createGraphicsItemFromGeometry( multitrack->child( row ), placemark, true );
+            createGraphicsItemFromGeometry(multitrack->child( row ), placemark);
         }
     }
     else if ( object->nodeType() == GeoDataTypes::GeoDataTrackType )
@@ -480,14 +314,18 @@ void GeometryLayerPrivate::createGraphicsItemFromGeometry(const GeoDataGeometry*
     }
     if ( !item )
         return;
-    item->setStyle( placemark->style() );
-    item->setVisible( placemark->isGloballyVisible() );
-    item->setMinZoomLevel( s_defaultMinZoomLevels[placemark->visualCategory()] );
+    item->setStyleBuilder(m_styleBuilder);
+    item->setVisible( item->visible() && placemark->isGloballyVisible() );
+    item->setMinZoomLevel(m_styleBuilder->minimumZoomLevel(*placemark));
     m_scene.addItem( item );
 }
 
 void GeometryLayerPrivate::createGraphicsItemFromOverlay( const GeoDataOverlay *overlay )
 {
+    if (!overlay->isGloballyVisible()) {
+        return; // Reconsider this when visibility can be changed dynamically
+    }
+
     GeoGraphicsItem* item = 0;
     if ( overlay->nodeType() == GeoDataTypes::GeoDataPhotoOverlayType ) {
         GeoDataPhotoOverlay const * photoOverlay = static_cast<GeoDataPhotoOverlay const *>( overlay );
@@ -501,7 +339,7 @@ void GeometryLayerPrivate::createGraphicsItemFromOverlay( const GeoDataOverlay *
     }
 
     if ( item ) {
-        item->setStyle( overlay->style() );
+        item->setStyleBuilder(m_styleBuilder);
         item->setVisible( overlay->isGloballyVisible() );
         m_scene.addItem( item );
     }
@@ -512,29 +350,21 @@ void GeometryLayerPrivate::removeGraphicsItems( const GeoDataFeature *feature )
 
     if( feature->nodeType() == GeoDataTypes::GeoDataPlacemarkType ) {
         GeoDataPlacemark const * placemark = static_cast<GeoDataPlacemark const *>(feature);
-        if (placemark->hasOsmData() && placemark->osmData().id() > 0) {
-            QMap<qint64,OsmQueue>* osmItems = 0;
-            if (placemark->geometry()->nodeType() == GeoDataTypes::GeoDataLinearRingType) {
-                osmItems = &m_osmWayItems;
-            } else if (placemark->geometry()->nodeType() == GeoDataTypes::GeoDataPolygonType) {
-                osmItems = &m_osmRelationItems;
-            }
-            if (osmItems) {
-                OsmQueue & items = (*osmItems)[placemark->osmData().id()];
-                Q_ASSERT(items.contains(placemark));
-                if (items.first() == placemark) {
-                    items.removeAt(0);
-                    m_scene.removeItem( feature ); // the item was in use
-                    if (!items.empty()) {
-                        // we need to fill in a replacement now
-                        createGraphicsItemFromGeometry(items.first()->geometry(), items.first(), false);
-                    }
-                } else {
-                    // the item was not used
-                    items.removeOne(placemark);
+        if (placemark->isGloballyVisible() &&
+                placemark->geometry()->nodeType() == GeoDataTypes::GeoDataLineStringType &&
+                placemark->hasOsmData() &&
+                placemark->osmData().oid() > 0) {
+            auto & items = m_osmLineStringItems[placemark->osmData().oid()];
+            bool removed = false;
+            for (auto item: items) {
+                if (item->feature() == feature) {
+                    items.removeOne(item);
+                    removed = true;
+                    break;
                 }
-                return;
             }
+            Q_ASSERT(removed);
+            updateTiledLineStrings(items);
         }
         m_scene.removeItem( feature );
     }
@@ -554,7 +384,7 @@ void GeometryLayerPrivate::removeGraphicsItems( const GeoDataFeature *feature )
     }
 }
 
-void GeometryLayer::addPlacemarks( QModelIndex parent, int first, int last )
+void GeometryLayer::addPlacemarks( const QModelIndex& parent, int first, int last )
 {
     Q_ASSERT( first < d->m_model->rowCount( parent ) );
     Q_ASSERT( last < d->m_model->rowCount( parent ) );
@@ -569,7 +399,7 @@ void GeometryLayer::addPlacemarks( QModelIndex parent, int first, int last )
 
 }
 
-void GeometryLayer::removePlacemarks( QModelIndex parent, int first, int last )
+void GeometryLayer::removePlacemarks( const QModelIndex& parent, int first, int last )
 {
     Q_ASSERT( last < d->m_model->rowCount( parent ) );
     bool isRepaintNeeded = false;
@@ -594,8 +424,7 @@ void GeometryLayer::resetCacheData()
     d->m_scene.clear();
     qDeleteAll( d->m_items );
     d->m_items.clear();
-    d->m_osmWayItems.clear();
-    d->m_osmRelationItems.clear();
+    d->m_osmLineStringItems.clear();
 
     const GeoDataObject *object = static_cast<GeoDataObject*>( d->m_model->index( 0, 0, QModelIndex() ).internalPointer() );
     if ( object && object->parent() )
@@ -603,10 +432,10 @@ void GeometryLayer::resetCacheData()
     emit repaintNeeded();
 }
 
-QVector<const GeoDataFeature*> GeometryLayer::whichFeatureAt(const QPoint& curpos , const ViewportParams *viewport)
+QVector<const GeoDataFeature*> GeometryLayer::whichFeatureAt(const QPoint &curpos, const ViewportParams *viewport)
 {
+    const int maxZoom = qMin<int>(qMax<int>(qLn(viewport->radius()*4/256)/qLn(2.0), 1), d->m_styleBuilder->maximumZoomLevel());
     QVector<const GeoDataFeature*> result;
-    int maxZoom = qMin<int>( qMax<int>( qLn( viewport->radius() *4 / 256 ) / qLn( 2.0 ), 1), GeometryLayerPrivate::maximumZoomLevel() );
     foreach ( GeoGraphicsItem * item, d->m_scene.items( viewport->viewLatLonAltBox(), maxZoom ) ) {
         if ( item->feature()->nodeType() == GeoDataTypes::GeoDataPhotoOverlayType ) {
             GeoPhotoGraphicsItem* photoItem = dynamic_cast<GeoPhotoGraphicsItem*>( item );
@@ -634,6 +463,40 @@ QVector<const GeoDataFeature*> GeometryLayer::whichFeatureAt(const QPoint& curpo
     return result;
 }
 
+QVector<const GeoDataFeature *> GeometryLayer::whichBuildingAt(const QPoint &curpos, const ViewportParams *viewport)
+{
+    QVector<const GeoDataFeature*> result;
+    qreal lon, lat;
+    if (!viewport->geoCoordinates(curpos.x(), curpos.y(), lon, lat, GeoDataCoordinates::Radian)) {
+        return result;
+    }
+    GeoDataCoordinates const coordinates = GeoDataCoordinates(lon, lat);
+
+    const int maxZoom = qMin<int>(qMax<int>(qLn(viewport->radius()*4/256)/qLn(2.0), 1), d->m_styleBuilder->maximumZoomLevel());
+    foreach ( GeoGraphicsItem * item, d->m_scene.items( viewport->viewLatLonAltBox(), maxZoom ) ) {
+        if (item->feature()->nodeType() == GeoDataTypes::GeoDataPlacemarkType) {
+            const GeoDataPlacemark* placemark = static_cast<const GeoDataPlacemark*>(item->feature());
+
+            if (placemark->visualCategory() != GeoDataPlacemark::Building) {
+                continue;
+            }
+
+            if (placemark->geometry()->nodeType() == GeoDataTypes::GeoDataPolygonType) {
+                const GeoDataPolygon *polygon = static_cast<const GeoDataPolygon*>(placemark->geometry());
+                if (polygon->contains(coordinates)) {
+                    result << item->feature();
+                }
+            } else if (placemark->geometry()->nodeType() == GeoDataTypes::GeoDataLinearRingType) {
+                const GeoDataLinearRing *ring = static_cast<const GeoDataLinearRing*>(placemark->geometry());
+                if (ring->contains(coordinates)) {
+                    result << item->feature();
+                }
+            }
+        }
+    }
+    return result;
+}
+
 void GeometryLayer::handleHighlight( qreal lon, qreal lat, GeoDataCoordinates::Unit unit )
 {
     GeoDataCoordinates clickedPoint( lon, lat, 0, unit );
@@ -649,7 +512,7 @@ void GeometryLayer::handleHighlight( qreal lon, qreal lat, GeoDataCoordinates::U
                 bool isHighlight = false;
 
                 foreach ( const GeoDataStyleMap &styleMap, doc->styleMaps() ) {
-                    if ( styleMap.contains( QString("highlight") ) ) {
+                    if (styleMap.contains(QStringLiteral("highlight"))) {
                         isHighlight = true;
                         break;
                     }

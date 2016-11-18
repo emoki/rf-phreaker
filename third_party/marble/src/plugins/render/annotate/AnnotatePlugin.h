@@ -19,22 +19,16 @@
 #include "GeoDataGroundOverlay.h"
 #include "GroundOverlayFrame.h"
 
-#include <QObject>
 #include <QMenu>
 #include <QSortFilterProxyModel>
 
-
-class QNetworkAccessManager;
-class QNetworkReply;
 
 namespace Marble
 {
 
 class MarbleWidget;
-class TextureLayer;
 class GeoDataDocument;
 class GeoDataLinearRing;
-class GeoDataLineString;
 class AreaAnnotation;
 class PolylineAnnotation;
 class PlacemarkTextAnnotation;
@@ -48,7 +42,7 @@ class OsmPlacemarkData;
 class AnnotatePlugin :  public RenderPlugin
 {
     Q_OBJECT
-    Q_PLUGIN_METADATA( IID "org.kde.edu.marble.AnnotatePlugin" )
+    Q_PLUGIN_METADATA(IID "org.kde.marble.AnnotatePlugin")
     Q_INTERFACES( Marble::RenderPluginInterface )
     MARBLE_PLUGIN( AnnotatePlugin )
 
@@ -76,7 +70,7 @@ public:
 
     QString copyrightYears() const;
 
-    QList<PluginAuthor> pluginAuthors() const;
+    QVector<PluginAuthor> pluginAuthors() const override;
 
     void initialize ();
 
@@ -89,13 +83,13 @@ public:
     bool render( GeoPainter *painter, ViewportParams *viewport,
                  const QString &renderPos, GeoSceneLayer *layer = 0 );
 
-signals:
+Q_SIGNALS:
     void placemarkMoved();
     void nodeAdded( const GeoDataCoordinates &coordinates );
     void itemMoved( GeoDataPlacemark *placemark );
     void mouseMoveGeoPosition( const QString& );
 
-private slots:
+private Q_SLOTS:
     void enableModel( bool enabled );
     void askToRemoveFocusItem();
     void removeFocusItem();

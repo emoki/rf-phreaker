@@ -21,7 +21,7 @@ class WlocatePositionProviderPluginPrivate;
 class WlocatePositionProviderPlugin: public PositionProviderPlugin
 {
     Q_OBJECT
-    Q_PLUGIN_METADATA( IID "org.kde.edu.marble.WlocatePositionProviderPlugin" )
+    Q_PLUGIN_METADATA(IID "org.kde.marble.WlocatePositionProviderPlugin")
     Q_INTERFACES( Marble::PositionProviderPluginInterface )
 
 public:
@@ -35,7 +35,7 @@ public:
     virtual QString version() const;
     virtual QString description() const;
     virtual QString copyrightYears() const;
-    virtual QList<PluginAuthor> pluginAuthors() const;
+    QVector<PluginAuthor> pluginAuthors() const override;
     virtual QIcon icon() const;
     virtual void initialize();
     virtual bool isInitialized() const;

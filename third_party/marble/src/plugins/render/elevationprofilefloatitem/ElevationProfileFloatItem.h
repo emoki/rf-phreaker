@@ -21,8 +21,6 @@
 
 #include "GeoDataDocument.h"
 #include "GeoDataLineString.h"
-#include "GeoGraphicsItem.h"
-#include "LabelGraphicsItem.h"
 
 namespace Ui
 {
@@ -38,7 +36,6 @@ class ElevationProfileTrackDataSource;
 class ElevationProfileRouteDataSource;
 class GeoDataPlacemark;
 class MarbleWidget;
-class RoutingModel;
 
 /**
  * @short The class that creates an interactive elvation profile.
@@ -48,7 +45,7 @@ class RoutingModel;
 class ElevationProfileFloatItem : public AbstractFloatItem, public DialogConfigurationInterface
 {
     Q_OBJECT
-    Q_PLUGIN_METADATA( IID "org.kde.edu.marble.ElevationProfileFloatItem" )
+    Q_PLUGIN_METADATA(IID "org.kde.marble.ElevationProfileFloatItem")
 
     Q_INTERFACES( Marble::RenderPluginInterface )
     Q_INTERFACES( Marble::DialogConfigurationInterface )
@@ -75,7 +72,7 @@ class ElevationProfileFloatItem : public AbstractFloatItem, public DialogConfigu
 
     virtual QString copyrightYears() const;
 
-    virtual QList<PluginAuthor> pluginAuthors() const;
+    QVector<PluginAuthor> pluginAuthors() const override;
 
     virtual QIcon icon() const;
 
@@ -94,7 +91,7 @@ protected:
     virtual void contextMenuEvent( QWidget *w, QContextMenuEvent *e );
 
  private Q_SLOTS:
-    void handleDataUpdate(const GeoDataLineString &points, QList<QPointF> eleData);
+    void handleDataUpdate(const GeoDataLineString &points, const QVector<QPointF> &eleData);
     void updateVisiblePoints();
     void forceRepaint();
     void readSettings();
@@ -143,15 +140,15 @@ Q_SIGNALS:
     int               m_firstVisiblePoint;
     int               m_lastVisiblePoint;
     bool              m_zoomToViewport;
-    QList<QPointF>    m_eleData;
+    QVector<QPointF>    m_eleData;
     GeoDataLineString m_points;
     qreal             m_minElevation;
     qreal             m_maxElevation;
     qreal             m_gain;
     qreal             m_loss;
 
-    QList<QPointF> calculateElevationData( const GeoDataLineString &lineString ) const;
-    void calculateStatistics( const QList<QPointF> &eleData );
+    QVector<QPointF> calculateElevationData(const GeoDataLineString &lineString) const;
+    void calculateStatistics(const QVector<QPointF> &eleData);
 };
 
 

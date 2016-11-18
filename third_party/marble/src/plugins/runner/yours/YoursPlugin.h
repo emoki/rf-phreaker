@@ -6,6 +6,7 @@
 // the source code.
 //
 // Copyright 2010      Dennis Nienhüser <nienhueser@kde.org>
+// Copyright 2016      Piotr Wójcik <chocimier@tlen.pl>
 //
 
 
@@ -20,7 +21,7 @@ namespace Marble
 class YoursPlugin : public RoutingRunnerPlugin
 {
     Q_OBJECT
-    Q_PLUGIN_METADATA( IID "org.kde.edu.marble.YoursPlugin" )
+    Q_PLUGIN_METADATA(IID "org.kde.marble.YoursPlugin")
     Q_INTERFACES( Marble::RoutingRunnerPlugin )
 
 public:
@@ -38,11 +39,15 @@ public:
 
     QString copyrightYears() const;
 
-    QList<PluginAuthor> pluginAuthors() const;
+    QVector<PluginAuthor> pluginAuthors() const override;
 
     virtual RoutingRunner *newRunner() const;
 
+    ConfigWidget* configWidget();
+
     virtual bool supportsTemplate(RoutingProfilesModel::ProfileTemplate profileTemplate) const;
+
+    QHash< QString, QVariant > templateSettings(RoutingProfilesModel::ProfileTemplate profileTemplate) const;
 };
 
 }

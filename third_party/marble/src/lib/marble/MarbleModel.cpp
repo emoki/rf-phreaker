@@ -19,10 +19,7 @@
 
 #include <QAtomicInt>
 #include <QPointer>
-#include <QTime>
-#include <QTimer>
 #include <QAbstractItemModel>
-#include <QSet>
 #include <QItemSelectionModel>
 #include <QSortFilterProxyModel>
 #include <QTextDocument>
@@ -47,6 +44,7 @@
 #include "GeoDataPlacemark.h"
 #include "GeoDataStyle.h"
 #include "GeoDataStyleMap.h"
+#include "GeoDataLineStyle.h"
 #include "GeoDataPolyStyle.h"
 #include "GeoDataTypes.h"
 
@@ -81,7 +79,7 @@ class MarbleModelPrivate
  public:
     MarbleModelPrivate()
         : m_clock(),
-          m_planet( PlanetFactory::construct( "earth" ) ),
+          m_planet(PlanetFactory::construct(QStringLiteral("earth"))),
           m_sunLocator( &m_clock, &m_planet ),
           m_pluginManager(),
           m_homePoint( -9.4, 54.8, 0.0, GeoDataCoordinates::Degree ),  // Some point that tackat defined. :-)
@@ -228,7 +226,7 @@ BookmarkManager *MarbleModel::bookmarkManager()
 
 QString MarbleModel::mapThemeId() const
 {
-    QString mapThemeId = "";
+    QString mapThemeId;
 
     if (d->m_mapTheme)
         mapThemeId = d->m_mapTheme->head()->mapThemeId();
@@ -399,7 +397,7 @@ void MarbleModel::setMapTheme( GeoSceneDocument *document )
                 style = GeoDataStyle::Ptr(new GeoDataStyle);
                 style->setLineStyle( lineStyle );
                 style->setPolyStyle( polyStyle );
-                style->setId( "default" );
+                style->setId(QStringLiteral("default"));
             }
             if ( sourceFileMatch && !currentDatasets[datasetIndex].colors().isEmpty() ) {
                 /**
@@ -448,7 +446,7 @@ void MarbleModelPrivate::addHighlightStyle(GeoDataDocument* doc)
         QColor highlightPenColor = m_mapTheme->map()->highlightPenColor();
 
         GeoDataStyle::Ptr highlightStyle(new GeoDataStyle);
-        highlightStyle->setId("highlight");
+        highlightStyle->setId(QStringLiteral("highlight"));
 
         if ( highlightBrushColor.isValid() ) {
             GeoDataPolyStyle highlightPolyStyle;
@@ -463,8 +461,8 @@ void MarbleModelPrivate::addHighlightStyle(GeoDataDocument* doc)
         if ( highlightBrushColor.isValid()
             || highlightPenColor.isValid() )
         {
-            GeoDataStyleMap styleMap = doc->styleMap("default-map");
-            styleMap.insert( "highlight", QString("#").append(highlightStyle->id()) );
+            GeoDataStyleMap styleMap = doc->styleMap(QStringLiteral("default-map"));
+            styleMap.insert(QStringLiteral("highlight"), QLatin1Char('#') + highlightStyle->id());
             doc->addStyle( highlightStyle );
             doc->addStyleMap( styleMap );
         }
@@ -476,13 +474,14 @@ void MarbleModelPrivate::assignNewStyle( const QString &filePath, const GeoDataS
     GeoDataDocument *doc = m_fileManager.at( filePath );
     Q_ASSERT( doc );
     GeoDataStyleMap styleMap;
-    styleMap.setId("default-map");
-    styleMap.insert( "normal", QString("#").append(style->id()) );
+    styleMap.setId(QStringLiteral("default-map"));
+    styleMap.insert(QStringLiteral("normal"), QLatin1Char('#') + style->id());
     doc->addStyleMap( styleMap );
     doc->addStyle( style );
 
     addHighlightStyle( doc );
 
+    const QString styleUrl = QLatin1Char('#') + styleMap.id();
     QVector<GeoDataFeature*>::iterator iter = doc->begin();
     QVector<GeoDataFeature*>::iterator const end = doc->end();
 
@@ -493,7 +492,7 @@ void MarbleModelPrivate::assignNewStyle( const QString &filePath, const GeoDataS
                 if ( placemark->geometry()->nodeType() != GeoDataTypes::GeoDataTrackType &&
                     placemark->geometry()->nodeType() != GeoDataTypes::GeoDataPointType )
                 {
-                    placemark->setStyleUrl( QString("#").append( styleMap.id() ) );
+                    placemark->setStyleUrl(styleUrl);
                 }
             }
         }
@@ -648,7 +647,7 @@ void MarbleModel::clearPersistentTileCache()
             TileCreator *tileCreator = new TileCreator(
                                      sourceDir,
                                      installMap,
-                                     (role == "dem") ? "true" : "false" );
+                                     (role == QLatin1String("dem")) ? "true" : "false" );
             tileCreator->setTileFormat( texture->fileFormat().toLower() );
 
             QPointer<TileCreatorDialog> tileCreatorDlg = new TileCreatorDialog( tileCreator, 0 );
@@ -824,7 +823,7 @@ void MarbleModelPrivate::assignFillColors( const QString &filePath ) {
 
                         QPen pen = data->pen();
                         QBrush brush = data->brush();
-                        QList<QColor> colors = data->colors();
+                        const QVector<QColor> colors = data->colors();
                         GeoDataLineStyle lineStyle( pen.color() );
                         lineStyle.setPenStyle( pen.style() );
                         lineStyle.setWidth( pen.width() );
@@ -837,7 +836,7 @@ void MarbleModelPrivate::assignFillColors( const QString &filePath ) {
                                 GeoDataPlacemark *placemark = dynamic_cast<GeoDataPlacemark*>( *it );
                                 if ( placemark ) {
                                     GeoDataStyle::Ptr style(new GeoDataStyle);
-                                    style->setId( QString("normal") );
+                                    style->setId(QStringLiteral("normal"));
                                     style->setLineStyle( lineStyle );
                                     quint8 colorIndex = placemark->style()->polyStyle().colorIndex();
                                     GeoDataPolyStyle polyStyle;
@@ -867,13 +866,14 @@ void MarbleModelPrivate::assignFillColors( const QString &filePath ) {
                             polyStyle.setFill( true );
                             style->setLineStyle( lineStyle );
                             style->setPolyStyle( polyStyle );
-                            style->setId( "default" );
+                            style->setId(QStringLiteral("default"));
                             GeoDataStyleMap styleMap;
-                            styleMap.setId("default-map");
-                            styleMap.insert( "normal", QString("#").append(style->id()) );
+                            styleMap.setId(QStringLiteral("default-map"));
+                            styleMap.insert(QStringLiteral("normal"), QLatin1Char('#') + style->id());
                             doc->addStyle( style );
                             doc->addStyleMap( styleMap );
 
+                            const QString styleUrl = QLatin1Char('#') + styleMap.id();
                             QVector<GeoDataFeature*>::iterator iter = doc->begin();
                             QVector<GeoDataFeature*>::iterator const end = doc->end();
 
@@ -884,7 +884,7 @@ void MarbleModelPrivate::assignFillColors( const QString &filePath ) {
                                     if ( placemark->geometry()->nodeType() != GeoDataTypes::GeoDataTrackType &&
                                         placemark->geometry()->nodeType() != GeoDataTypes::GeoDataPointType )
                                     {
-                                            placemark->setStyleUrl( QString("#").append( styleMap.id() ) );
+                                        placemark->setStyleUrl(styleUrl);
                                     }
                                 }
                             }

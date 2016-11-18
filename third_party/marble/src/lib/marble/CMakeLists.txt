@@ -7,6 +7,8 @@ marble_set_package_properties( Phonon PROPERTIES TYPE OPTIONAL PURPOSE "Support 
 if(PHONON_FOUND)
     set(HAVE_PHONON TRUE)
 endif()
+CONFIGURE_FILE(${CMAKE_CURRENT_SOURCE_DIR}/config-phonon.h.cmake
+               ${CMAKE_CURRENT_BINARY_DIR}/config-phonon.h)
 
 INCLUDE_DIRECTORIES(
  ${CMAKE_CURRENT_SOURCE_DIR}
@@ -35,10 +37,11 @@ INCLUDE(graphicsview/CMakeLists.txt)
 INCLUDE(layers/CMakeLists.txt)
 INCLUDE(osm/CMakeLists.txt)
 
-if(NOT CMAKE_SYSTEM_NAME STREQUAL Android)
-set(GENERIC_LIB_VERSION "0.24.21")
-set(GENERIC_LIB_SOVERSION "25")
-endif()
+set(MARBLE_LIB_VERSION_MAJOR "0")
+set(MARBLE_LIB_VERSION_MINOR "25")
+set(MARBLE_LIB_VERSION_PATCH "20")
+set(MARBLE_LIB_VERSION "${MARBLE_LIB_VERSION_MAJOR}.${MARBLE_LIB_VERSION_MINOR}.${MARBLE_LIB_VERSION_PATCH}")
+set(MARBLE_ABI_VERSION "26")
 
 ########### next target ###############
 
@@ -267,6 +270,8 @@ set(marblewidget_SRCS
     kineticmodel.cpp
     NewstuffModel.cpp
     MarbleZip.cpp
+
+    StyleBuilder.cpp
     
     cloudsync/CloudSyncManager.cpp
     cloudsync/RouteSyncManager.cpp
@@ -293,7 +298,7 @@ else()
         )
 endif()
 
-if (NOT QT_NO_DBUS AND NOT CMAKE_SYSTEM_NAME STREQUAL Android)
+if (NOT MARBLE_NO_DBUS)
     LIST(APPEND marblewidget_SRCS
         MarbleDBusInterface.cpp
         )
@@ -357,44 +362,46 @@ qt_add_resources(marblewidget_SRCS libmarble.qrc ../../apps/marble-ui/marble.qrc
 
 qt_wrap_ui(marblewidget_SRCS ${marblewidget_UI})
 
-ADD_LIBRARY(${MARBLEWIDGET} SHARED ${marblewidget_SRCS} ${SOURCES_UI_HDRS})
+add_library(marblewidget SHARED ${marblewidget_SRCS} ${SOURCES_UI_HDRS})
+
+generate_export_header(marblewidget BASE_NAME marble)
+
 
 # TODO: use PUBLIC/PRIVATE everywhere instead of LINK_PUBLIC/LINK_PRIVATE
 # once SailfishOS has cmake >= 2.8.12
 
 # link with libastro
-TARGET_LINK_LIBRARIES (${MARBLEWIDGET} LINK_PRIVATE astro)
+target_link_libraries(marblewidget LINK_PRIVATE astro)
 
 # link against zlib
-TARGET_LINK_LIBRARIES (${MARBLEWIDGET} LINK_PRIVATE ${ZLIB_LIBRARIES})
+target_link_libraries(marblewidget LINK_PRIVATE ${ZLIB_LIBRARIES})
 
 # link with release version of Qt libs
-TARGET_LINK_LIBRARIES (${MARBLEWIDGET}
+target_link_libraries(marblewidget
     LINK_PUBLIC
         Qt5::Xml
         Qt5::Gui
         Qt5::Widgets
-        Qt5::Quick
+        Qt5::Network
     LINK_PRIVATE
         Qt5::Svg
-        Qt5::Script
         Qt5::PrintSupport
         Qt5::Concurrent
 )
 if (NOT MARBLE_NO_WEBKITWIDGETS)
-    TARGET_LINK_LIBRARIES (${MARBLEWIDGET}
+    target_link_libraries(marblewidget
         LINK_PUBLIC
             Qt5::WebKitWidgets
     )
 endif ()
-if (NOT QT_NO_DBUS AND NOT CMAKE_SYSTEM_NAME STREQUAL Android)
-    TARGET_LINK_LIBRARIES (${MARBLEWIDGET}
+if (NOT MARBLE_NO_DBUS)
+    target_link_libraries(marblewidget
         LINK_PRIVATE
             Qt5::DBus
     )
 endif ()
 if (PHONON_FOUND)
-    TARGET_LINK_LIBRARIES (${MARBLEWIDGET}
+    target_link_libraries(marblewidget
         LINK_PRIVATE
             ${PHONON_LIBS}
     )
@@ -403,44 +410,49 @@ endif()
 if (APPLE)
   # TODO: PUBLIC or can be PRIVATE?
   #defined in top level makefile
-  TARGET_LINK_LIBRARIES(${MARBLEWIDGET} LINK_PUBLIC ${MAC_EXTRA_LIBS} )
+  target_link_libraries(marblewidget LINK_PUBLIC ${MAC_EXTRA_LIBS} )
 endif (APPLE)
 
 # TODO: still supported?
 if (CMAKE_SYSTEM_NAME MATCHES "SunOS")
-  TARGET_LINK_LIBRARIES(${MARBLEWIDGET} LINK_PUBLIC m)
+  target_link_libraries(marblewidget LINK_PUBLIC m)
 endif (CMAKE_SYSTEM_NAME MATCHES "SunOS")
 
 if(WIN32)
   # TODO: PUBLIC or can be PRIVATE?
-  TARGET_LINK_LIBRARIES(${MARBLEWIDGET} LINK_PUBLIC ws2_32 imm32 winmm)
+  target_link_libraries(marblewidget LINK_PUBLIC ws2_32 imm32 winmm)
 endif(WIN32)
 
-if(NOT CMAKE_SYSTEM_NAME STREQUAL Android)
-  set_target_properties(${MARBLEWIDGET}  PROPERTIES
-                                    VERSION ${GENERIC_LIB_VERSION}
-                                    SOVERSION ${GENERIC_LIB_SOVERSION})
-endif()
+set_target_properties(marblewidget  PROPERTIES
+    EXPORT_NAME "Marble"
+    OUTPUT_NAME marblewidget-qt5
+    VERSION ${MARBLE_LIB_VERSION}
+    SOVERSION ${MARBLE_ABI_VERSION}
+    COMPILE_FLAGS "-DKML_LAZY_IMP"
+)
 
-set_target_properties(${MARBLEWIDGET}  PROPERTIES
-                                    COMPILE_FLAGS "-DKML_LAZY_IMP")
-
-# needed for marble_export.h
-set_target_properties(${MARBLEWIDGET} PROPERTIES
-  DEFINE_SYMBOL MAKE_MARBLE_LIB
+target_include_directories(marblewidget
+    INTERFACE "$<INSTALL_INTERFACE:${INCLUDE_INSTALL_DIR}>"
 )
 
 # choose the correct target install library path
 if(WIN32)
-  install(TARGETS ${MARBLEWIDGET} RUNTIME DESTINATION ${CMAKE_INSTALL_PREFIX})
+  install(TARGETS marblewidget RUNTIME DESTINATION ${CMAKE_INSTALL_PREFIX} ARCHIVE DESTINATION lib)
 elseif(APPLE)
-  install(TARGETS ${MARBLEWIDGET} LIBRARY DESTINATION ${CMAKE_INSTALL_PREFIX}/Marble.app/Contents/MacOS/lib)
+  install(TARGETS marblewidget LIBRARY DESTINATION ${CMAKE_INSTALL_PREFIX}/Marble.app/Contents/MacOS/lib)
 else()
-  install(TARGETS ${MARBLEWIDGET} LIBRARY DESTINATION ${CMAKE_INSTALL_LIBDIR})
+  install(TARGETS marblewidget
+    EXPORT MarbleTargets
+    LIBRARY DESTINATION ${CMAKE_INSTALL_LIBDIR})
 endif()
 
 
-########### install files ###############
+########### install headers & cmake config files ###############
+
+if (WIN32 OR APPLE)
+    # TODO: find how to install & deploy library, headers and config files as bundle for development
+    return()
+endif()
 
 if (MARBLE_NO_WEBKITWIDGETS)
     set(marble_WebKit
@@ -455,6 +467,7 @@ else()
 endif()
 
 install( FILES
+    ${CMAKE_CURRENT_BINARY_DIR}/marble_export.h
     ${graphicsview_HDRS}
     ${marble_WebKit}
     AutoNavigation.h
@@ -490,7 +503,7 @@ install( FILES
     TileCoordsPyramid.h
     TileLevelRangeWidget.h
     QtMarbleConfigDialog.h
-    global.h
+    MarbleMath.h
     MarbleColors.h
     MarbleGlobal.h
     MarbleLocale.h
@@ -550,6 +563,7 @@ install( FILES
     geodata/data/Serializable.h
     geodata/geodata_export.h
     geodata/parser/GeoDocument.h
+    geodata/parser/GeoDataTypes.h
     geodata/writer/GeoWriter.h
     routing/RoutingWidget.h
     routing/RoutingManager.h
@@ -576,7 +590,6 @@ install( FILES
     LayerInterface.h
     RenderState.h
     PluginAboutDialog.h
-    marble_export.h
     Planet.h
     PlanetFactory.h
     EditPlacemarkDialog.h
@@ -603,8 +616,123 @@ install( FILES
     routing/RoutingModel.h
     routing/RoutingProfile.h
 
-    DESTINATION ${CMAKE_INSTALL_PREFIX}/include/marble
+    DESTINATION ${INCLUDE_INSTALL_DIR}/marble
 )
 
-CONFIGURE_FILE(${CMAKE_CURRENT_SOURCE_DIR}/config-phonon.h.cmake
-               ${CMAKE_CURRENT_BINARY_DIR}/config-phonon.h)
+
+########### CMake Config files ###############
+
+include(CMakePackageConfigHelpers)
+
+set(MARBLE_CMAKECONFIGNAME Marble)
+set(MARBLE_INSTALL_CMAKECONFIGDIR ${CMAKE_INSTALL_LIBDIR}/cmake/${MARBLE_CMAKECONFIGNAME})
+
+configure_package_config_file(MarbleConfig.cmake.in
+    ${CMAKE_CURRENT_BINARY_DIR}/${MARBLE_CMAKECONFIGNAME}Config.cmake
+    INSTALL_DESTINATION ${MARBLE_INSTALL_CMAKECONFIGDIR}
+)
+
+write_basic_package_version_file(${CMAKE_CURRENT_BINARY_DIR}/${MARBLE_CMAKECONFIGNAME}ConfigVersion.cmake
+    VERSION ${MARBLE_LIB_VERSION}
+    COMPATIBILITY SameMajorVersion
+)
+
+install(FILES
+    ${CMAKE_CURRENT_BINARY_DIR}/${MARBLE_CMAKECONFIGNAME}Config.cmake
+    ${CMAKE_CURRENT_BINARY_DIR}/${MARBLE_CMAKECONFIGNAME}ConfigVersion.cmake
+
+    DESTINATION ${MARBLE_INSTALL_CMAKECONFIGDIR}
+)
+
+install(
+    EXPORT MarbleTargets
+    FILE ${MARBLE_CMAKECONFIGNAME}Targets.cmake
+    DESTINATION ${MARBLE_INSTALL_CMAKECONFIGDIR}
+)
+
+
+########### Qt Pri file ###############
+
+# Where the pri file is installed is defined by the following rules, with decreasing priority:
+# * MARBLE_PRI_INSTALL_USE_QT_SYS_PATHS=TRUE:
+#   pri file will be installed with the dirs of the Qt installation used
+# * MARBLE_PRI_INSTALL_DIR=some-relative-or-absolute-path
+#   if set will be used as given
+# * installation prefix = Qt installation prefix:
+#   pri file will be installed with the dirs of the Qt installation used
+# * otherwise:
+#   pri file will be installed in mkspecs/modules in the installation prefix
+
+get_target_property(PRI_LIB_NAME marblewidget OUTPUT_NAME)
+
+set(PRI_ABS_INCLUDE_INSTALL_DIR "${INCLUDE_INSTALL_DIR}")
+if(NOT IS_ABSOLUTE "${PRI_ABS_INCLUDE_INSTALL_DIR}")
+    set(PRI_ABS_INCLUDE_INSTALL_DIR "${CMAKE_INSTALL_PREFIX}/${PRI_ABS_INCLUDE_INSTALL_DIR}")
+endif()
+
+set(PRI_ABS_LIB_INSTALL_DIR "${CMAKE_INSTALL_LIBDIR}")
+if(NOT IS_ABSOLUTE "${PRI_ABS_LIB_INSTALL_DIR}")
+    set(PRI_ABS_LIB_INSTALL_DIR "${CMAKE_INSTALL_PREFIX}/${PRI_ABS_LIB_INSTALL_DIR}")
+endif()
+
+set(PRI_DEPS "xml gui widgets network")
+if (NOT MARBLE_NO_WEBKITWIDGETS)
+    set(PRI_DEPS "${PRI_DEPS} webkitwidgets")
+endif()
+
+file(GENERATE
+    OUTPUT ${CMAKE_CURRENT_BINARY_DIR}/qt_Marble.pri
+    CONTENT
+"QT.Marble.VERSION = ${MARBLE_LIB_VERSION}
+QT.Marble.MAJOR_VERSION = ${MARBLE_LIB_VERSION_MAJOR}
+QT.Marble.MINOR_VERSION = ${MARBLE_LIB_VERSION_MINOR}
+QT.Marble.PATCH_VERSION = ${MARBLE_LIB_VERSION_PATCH}
+QT.Marble.name = ${PRI_LIB_NAME}
+QT.Marble.defines =
+QT.Marble.includes = ${PRI_ABS_INCLUDE_INSTALL_DIR}
+QT.Marble.private_includes =
+QT.Marble.libs = ${PRI_ABS_LIB_INSTALL_DIR}
+QT.Marble.depends = ${PRI_DEPS}
+"
+)
+
+# detect which folder the pri file should be installed into
+get_target_property(QMAKE_EXECUTABLE Qt5::qmake LOCATION)
+
+function(query_qmake result_variable qt_variable)
+    execute_process(
+        COMMAND ${QMAKE_EXECUTABLE} -query "${qt_variable}"
+        RESULT_VARIABLE return_code
+        OUTPUT_VARIABLE output
+    )
+    if(return_code EQUAL 0)
+        string(STRIP "${output}" output)
+        file(TO_CMAKE_PATH "${output}" output_path)
+        set(${result_variable} "${output_path}" PARENT_SCOPE)
+    else()
+        message(WARNING "Failed call: ${QMAKE_EXECUTABLE} -query \"${qt_variable}\"")
+        message(FATAL_ERROR "QMake call failed: ${return_code}")
+    endif()
+endfunction()
+
+# if going to be installed into same prefix as Qt, then also use same folder
+set(IS_SHARED_INSTALL_PREFIX FALSE)
+if(NOT DEFINED MARBLE_PRI_INSTALL_USE_QT_SYS_PATHS)
+    query_qmake(qt_install_prefix_dir QT_INSTALL_PREFIX)
+    if(qt_install_prefix_dir STREQUAL "${CMAKE_INSTALL_PREFIX}")
+        set(IS_SHARED_INSTALL_PREFIX TRUE)
+    endif()
+endif()
+
+if(MARBLE_PRI_INSTALL_USE_QT_SYS_PATHS OR IS_SHARED_INSTALL_PREFIX)
+    query_qmake(qt_host_data_dir QT_HOST_DATA)
+    set(PRI_INSTALL_DIR ${qt_host_data_dir}/mkspecs/modules)
+else()
+    set(PRI_INSTALL_DIR mkspecs/modules)
+endif()
+set(MARBLE_PRI_INSTALL_DIR "${PRI_INSTALL_DIR}" CACHE PATH "The directory where the Marble pri file will be installed to.")
+
+install(FILES
+    ${CMAKE_CURRENT_BINARY_DIR}/qt_Marble.pri
+    DESTINATION  ${MARBLE_PRI_INSTALL_DIR}
+)

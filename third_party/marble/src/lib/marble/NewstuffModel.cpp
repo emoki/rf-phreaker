@@ -320,7 +320,7 @@ void NewstuffModelPrivate::handleProviderData(QNetworkReply *reply)
 
 bool NewstuffModelPrivate::canExecute( const QString &executable )
 {
-    QString path = QProcessEnvironment::systemEnvironment().value( "PATH", "/usr/local/bin:/usr/bin:/bin" );
+    QString path = QProcessEnvironment::systemEnvironment().value(QStringLiteral("PATH"), QStringLiteral("/usr/local/bin:/usr/bin:/bin"));
     foreach( const QString &dir, path.split( QLatin1Char( ':' ) ) ) {
         QFileInfo application( QDir( dir ), executable );
         if ( application.exists() ) {
@@ -379,7 +379,7 @@ void NewstuffModelPrivate::updateModel()
             bool found = false;
             for ( int j=0; j<m_items.size() && !found; ++j ) {
                 NewstuffItem &item = m_items[j];
-                if ( m_idTag == NewstuffModel::PayloadTag && item.m_payloadUrl == value ) {
+                if ( m_idTag == NewstuffModel::PayloadTag && item.m_payloadUrl.toString() == value ) {
                     item.m_registryNode = items.item( i );
                     found = true;
                 }
@@ -426,7 +426,7 @@ void NewstuffModelPrivate::uninstall( int index )
     QStringList directories;
     QStringList const files = m_items[index].installedFiles();
     foreach( const QString &file, files ) {
-        if ( file.endsWith( '/' ) ) {
+        if (file.endsWith(QLatin1Char('/'))) {
             directories << file;
         } else {
             QFile::remove( file );
@@ -462,12 +462,12 @@ void NewstuffModelPrivate::readValue( const QDomNode &node, const QString &key, 
 {
     QDomNodeList matches = node.toElement().elementsByTagName( key );
     if ( matches.size() == 1 ) {
-        *target = matches.at( 0 ).toElement().text();
+        *target = T(matches.at( 0 ).toElement().text());
     } else {
         for ( int i=0; i<matches.size(); ++i ) {
-            if ( matches.at( i ).attributes().contains( "lang" ) &&
-                 matches.at( i ).attributes().namedItem( "lang").toAttr().value() == "en" ) {
-                *target = matches.at( i ).toElement().text();
+            if ( matches.at( i ).attributes().contains(QStringLiteral("lang")) &&
+                 matches.at( i ).attributes().namedItem(QStringLiteral("lang")).toAttr().value() == QLatin1String("en")) {
+                *target = T(matches.at( i ).toElement().text());
                 return;
             }
         }
@@ -477,7 +477,7 @@ void NewstuffModelPrivate::readValue( const QDomNode &node, const QString &key, 
 NewstuffModel::NewstuffModel( QObject *parent ) :
     QAbstractListModel( parent ), d( new NewstuffModelPrivate( this ) )
 {
-    setTargetDirectory( MarbleDirs::localPath() + "/maps" );
+    setTargetDirectory(MarbleDirs::localPath() + QLatin1String("/maps"));
     // no default registry file
 
     connect( &d->m_networkAccessManager, SIGNAL(finished(QNetworkReply*)),
@@ -607,7 +607,7 @@ QString NewstuffModel::targetDirectory() const
 void NewstuffModel::setRegistryFile( const QString &filename, IdTag idTag )
 {
     QString registryFile = filename;
-    if ( registryFile.startsWith( '~' ) && registryFile.length() > 1 ) {
+    if (registryFile.startsWith(QLatin1Char('~')) && registryFile.length() > 1) {
         registryFile = QDir::homePath() + registryFile.mid( 1 );
     }
 
@@ -821,7 +821,7 @@ void NewstuffModel::mapUninstalled()
 void NewstuffModel::contentsListed( int exitStatus )
 {
     if ( exitStatus == 0 ) {
-        QStringList const files = QString( d->m_unpackProcess->readAllStandardOutput() ).split( '\n', QString::SkipEmptyParts );
+        QStringList const files = QString(d->m_unpackProcess->readAllStandardOutput()).split(QLatin1Char('\n'), QString::SkipEmptyParts);
         d->updateRegistry(files);
 
         QObject::disconnect( d->m_unpackProcess, SIGNAL(finished(int)),
@@ -883,7 +883,7 @@ void NewstuffModelPrivate::updateRegistry(const QStringList &files)
 
         foreach( const QString &file, files ) {
             QDomNode fileNode = node.appendChild( m_registryDocument.createElement( "installedfile" ) );
-            fileNode.appendChild( m_registryDocument.createTextNode( m_targetDirectory + '/' + file ) );
+            fileNode.appendChild(m_registryDocument.createTextNode(m_targetDirectory + QLatin1Char('/') + file));
         }
 
         saveRegistry();
@@ -903,7 +903,7 @@ void NewstuffModelPrivate::processQueue()
     if ( m_currentAction.second == Install ) {
         if ( !m_currentFile ) {
             QFileInfo const file = m_items.at( m_currentAction.first ).m_payloadUrl.path();
-            m_currentFile = new QTemporaryFile( QDir::tempPath() + "/marble-XXXXXX-" + file.fileName() );
+            m_currentFile = new QTemporaryFile(QDir::tempPath() + QLatin1String("/marble-XXXXXX-") + file.fileName());
         }
 
         if ( m_currentFile->open() ) {
@@ -931,7 +931,7 @@ void NewstuffModelPrivate::processQueue()
 NewstuffItem NewstuffModelPrivate::importNode(const QDomNode &node)
 {
     NewstuffItem item;
-    item.m_category = node.attributes().namedItem( "category" ).toAttr().value();
+    item.m_category = node.attributes().namedItem(QStringLiteral("category")).toAttr().value();
     readValue<QString>( node, "name", &item.m_name );
     readValue<QString>( node, "author", &item.m_author );
     readValue<QString>( node, "licence", &item.m_license );

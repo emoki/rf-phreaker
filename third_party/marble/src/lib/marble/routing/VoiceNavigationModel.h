@@ -12,15 +12,13 @@
 #define MARBLE_VOICENAVIGATIONMODEL_H
 
 #include "marble_export.h"
-#include "Route.h"
-#include "Maneuver.h"
-#include "PositionTracking.h"
 
-#include <QAbstractListModel>
-#include <QFileInfo>
+#include <QObject>
 
 namespace Marble
 {
+
+class Route;
 
 class VoiceNavigationModelPrivate;
 
@@ -52,9 +50,6 @@ public:
     void reset();
 
 public Q_SLOTS:
-// Continuous updates
-    void handleTrackingStatusChange( PositionProviderStatus status );
-
     void update( const Route &route, qreal distanceManuever, qreal distanceTarget, bool deviated );
 
 // Turn instructions

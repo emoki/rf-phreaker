@@ -15,16 +15,20 @@
 // Qt
 #include <QColorDialog>
 #include <QMessageBox>
-#include <QVBoxLayout>
 
 // Marble
+#include "GeoDataPlacemark.h"
 #include "GeoDataStyle.h"
+#include "GeoDataLineStyle.h"
+#include "GeoDataPolyStyle.h"
 #include "GeoDataTypes.h"
+#include "GeoDataLinearRing.h"
+#include "GeoDataPolygon.h"
 #include "NodeModel.h"
 #include "NodeItemDelegate.h"
 #include "FormattedTextWidget.h"
+#include "StyleBuilder.h"
 #include "osm/OsmTagEditorWidget.h"
-#include "osm/OsmPresetLibrary.h"
 #include "osm/OsmPlacemarkData.h"
 #include "osm/OsmRelationManagerWidget.h"
 
@@ -229,13 +233,13 @@ void EditPolygonDialog::handleChangingStyle()
 {
 
     // The default style of the polygon has been changed, thus the old style URL is no longer valid
-    d->m_placemark->setStyleUrl( "" );
+    d->m_placemark->setStyleUrl(QString());
 
     GeoDataStyle::Ptr style(new GeoDataStyle( *d->m_placemark->style() ));
     style->lineStyle().setWidth( d->m_linesWidth->value() );
     // 0 corresponds to "Filled" and 1 corresponds to "Not Filled".
     style->polyStyle().setFill( !d->m_filledColor->currentIndex() );
-    style->setId( d->m_placemark->id() + "Style" );
+    style->setId(d->m_placemark->id() + QLatin1String("Style"));
 
 
     // Adjust the lines/polygon colors.
@@ -256,9 +260,9 @@ void EditPolygonDialog::updatePolygon()
 
     // If there is not custom style initialized( default #polyline url is used ) and there is a osmTag-based style
     // available, set it
-    QString suitableTag = d->m_osmTagEditorWidget->suitableTag();
-    if ( d->m_placemark->styleUrl() == "#polygon" && !suitableTag.isEmpty() ) {
-        GeoDataFeature::GeoDataVisualCategory category = OsmPresetLibrary::osmVisualCategory( suitableTag );
+    const OsmPlacemarkData osmData = d->m_osmTagEditorWidget->placemarkData();
+    const GeoDataPlacemark::GeoDataVisualCategory category = StyleBuilder::determineVisualCategory(osmData);
+    if (d->m_placemark->styleUrl() == QLatin1String("#polygon") && category != GeoDataPlacemark::None) {
         d->m_placemark->setStyle( GeoDataStyle::Ptr() ); // first clear style so style gets set by setVisualCategory()
         d->m_placemark->setVisualCategory( category );
     }

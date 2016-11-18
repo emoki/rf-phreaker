@@ -16,15 +16,14 @@
 #ifndef MARBLE_MERGEDLAYERDECORATOR_H
 #define MARBLE_MERGEDLAYERDECORATOR_H
 
-#include <QSize>
 #include <QVector>
 #include <QList>
 
 #include "GeoSceneTextureTileDataset.h"
-#include "RenderState.h"
 
 class QImage;
 class QString;
+class QSize;
 
 namespace Marble
 {
@@ -35,6 +34,7 @@ class StackedTile;
 class Tile;
 class TileId;
 class TileLoader;
+class RenderState;
 
 class MergedLayerDecorator
 {
@@ -57,7 +57,7 @@ class MergedLayerDecorator
 
     int tileRowCount( int level ) const;
 
-    GeoSceneTextureTileDataset::Projection tileProjection() const;
+    GeoSceneAbstractTileProjection::Type tileProjectionType() const;
 
     QSize tileSize() const;
 

@@ -15,13 +15,14 @@
 #include "OsmWay.h"
 #include <osm/OsmPlacemarkData.h>
 #include <GeoDataLinearRing.h>
-#include <GeoDataDocument.h>
 
 #include <QString>
 #include <QXmlStreamAttributes>
 #include <QSet>
 
 namespace Marble {
+
+class GeoDataDocument;
 
 class OsmRelation
 {
@@ -32,9 +33,12 @@ public:
 
     const OsmPlacemarkData & osmData() const;
 
-    void create(GeoDataDocument* document, const OsmWays &ways, const OsmNodes &nodes, QSet<qint64> &usedWays) const;
+    void create(GeoDataDocument* document, OsmWays &ways, const OsmNodes &nodes, QSet<qint64> &usedNodes, QSet<qint64> &usedWays) const;
 
 private:
+    typedef QPair<GeoDataLinearRing, OsmPlacemarkData> OsmRing;
+    typedef QVector<OsmRing> OsmRings;
+
     struct OsmMember
     {
         QString type;
@@ -44,7 +48,7 @@ private:
         OsmMember();
     };
 
-    QList<GeoDataLinearRing> rings(const QStringList &roles, const OsmWays &ways, const OsmNodes &nodes, QSet<qint64> &usedWays) const;
+    OsmRings rings(const QStringList &roles, const OsmWays &ways, const OsmNodes &nodes, QSet<qint64> &usedNodes, QSet<qint64> &usedWays) const;
 
     OsmPlacemarkData m_osmData;
     QVector<OsmMember> m_members;

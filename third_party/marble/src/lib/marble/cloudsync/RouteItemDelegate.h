@@ -1,13 +1,12 @@
 #ifndef ROUTEITEMDELEGATE_H
 #define ROUTEITEMDELEGATE_H
 
-#include "CloudRouteModel.h"
-
-#include <QListView>
-#include <MarbleWidget.h>
 #include <QStyledItemDelegate>
 
+class QListView;
+
 namespace Marble {
+class CloudRouteModel;
 
 class RouteItemDelegate : public QStyledItemDelegate {
     Q_OBJECT
@@ -20,12 +19,12 @@ public:
     bool editorEvent(QEvent* event, QAbstractItemModel* model, const QStyleOptionViewItem& option, const QModelIndex& index);
 
 
-signals:
-    void downloadButtonClicked( QString timestamp );
-    void openButtonClicked( QString timestamp );
-    void deleteButtonClicked( QString timestamp );
-    void removeFromCacheButtonClicked( QString timestamp );
-    void uploadToCloudButtonClicked( QString timestamp );
+Q_SIGNALS:
+    void downloadButtonClicked( const QString& timestamp );
+    void openButtonClicked( const QString& timestamp );
+    void deleteButtonClicked( const QString& timestamp );
+    void removeFromCacheButtonClicked( const QString& timestamp );
+    void uploadToCloudButtonClicked( const QString& timestamp );
 
 private:
     enum Element {

@@ -19,12 +19,9 @@
 
 #include "GeoDataDocument.h"
 
-class QAbstractItemModel;
-
 namespace Marble
 {
 
-class MarbleModel;
 class PluginManager;
 
 class MARBLE_EXPORT ParsingRunnerManager : public QObject

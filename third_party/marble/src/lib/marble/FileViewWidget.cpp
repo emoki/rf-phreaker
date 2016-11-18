@@ -12,12 +12,13 @@
 #include "FileViewWidget.h"
 
 // Qt
-#include <QSortFilterProxyModel>
 #include <QFileDialog>
 #include <QMenu>
 #include <QAction>
+#include <QPointer>
 
 // Marble
+#include "GeoDataLatLonAltBox.h"
 #include "GeoDataContainer.h"
 #include "GeoDataDocument.h"
 #include "GeoDataPlacemark.h"

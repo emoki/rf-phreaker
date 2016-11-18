@@ -11,9 +11,7 @@
 
 #include "DeferredFlag.h"
 
-#include <QColor>
 #include <QPainter>
-#include <QPainterPath>
 #include <QPixmapCache>
 #include <QSvgRenderer>
 

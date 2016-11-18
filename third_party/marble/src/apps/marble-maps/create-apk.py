@@ -35,7 +35,7 @@ class Filter(object):
             return ['include']
         if dir == '/assets/data':
             # Currently not used
-            return ['mwdbii', 'weather', 'naturalearth', 'stars', 'flags']
+            return ['mwdbii', 'weather', 'naturalearth', 'flags']
         elif dir == '/assets/data/maps':
             # Other planets are not used
             return ['moon']
@@ -46,19 +46,20 @@ class Filter(object):
             # Large images from example KML tour
             return [item for item in files if item.endswith('.png') or item.endswith('.jpg')]
         elif dir == '/assets/data/placemarks':
-            # Moon placemarks
-            return ['moonlandingsites.cache', 'moonterrain.cache']
+            # Only include very basic placemarks
+            return ['moonlandingsites.cache', 'moonterrain.cache', 'elevplacemarks.cache', 'otherplacemarks.cache', 'cityplacemarks.cache']
         elif dir == '/assets/data/placemarks':
             # Large images. worldmap.svg is used by the overviewmap, bring back if that plugin should be enabled
             return ['application-x-marble.svg', 'marsmap.svg', 'marble-logo.svg', 'lunarmap.svg', 'worldmap.svg']
         elif dir == '/assets/plugins':
             # Whitelisted plugins, all others are ignored
             search = ['LatLonPlugin', 'NominatimSearchPlugin', 'LocalDatabasePlugin', 'LocalOsmSearchPlugin']
-            routing = ['CycleStreetsPlugin', 'OSRMPlugin', 'OpenRouteServicePlugin', 'NominatimReverseGeocodingPlugin', 'RoutingPlugin']
+            routing = ['CycleStreetsPlugin', 'OSRMPlugin', 'YoursPlugin', 'NominatimReverseGeocodingPlugin']
             fileFormats = ['CachePlugin', 'GpxPlugin', 'KmlPlugin', 'OsmPlugin']
-            floatItems = ['ElevationProfileFloatItem', 'ElevationProfileMarker', 'PositionMarker', 'ProgressFloatItem', 'License']
+            floatItems = ['License']
             positioning = ['QtPositioningPositionProviderPlugin']
-            plugins = search + routing + fileFormats + floatItems + positioning
+            render = ['StarsPlugin', 'GraticulePlugin']
+            plugins = search + routing + fileFormats + floatItems + positioning + render
             whitelist = set(['lib{}.so'.format(plugin) for plugin in plugins])
             masked = [item for item in files if item not in whitelist]
             if len(files) - len(masked) != len(whitelist):

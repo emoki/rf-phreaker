@@ -14,6 +14,8 @@
 
 #include "GeoSceneTileDataset.h"
 #include "GeoSceneTypes.h"
+#include "GeoSceneEquirectTileProjection.h"
+#include "GeoSceneMercatorTileProjection.h"
 
 #include "DownloadPolicy.h"
 #include "MarbleDebug.h"
@@ -22,6 +24,7 @@
 #include "TileId.h"
 
 #include <QImage>
+#include <QUrl>
 
 namespace Marble
 {
@@ -36,17 +39,20 @@ GeoSceneTileDataset::GeoSceneTileDataset( const QString& name )
       m_levelZeroRows( defaultLevelZeroRows ),
       m_minimumTileLevel(0),
       m_maximumTileLevel( -1 ),
-      m_projection( Equirectangular ),
+      m_tileProjection(new GeoSceneEquirectTileProjection()),
       m_blending(),
       m_downloadUrls(),
       m_nextUrl( m_downloadUrls.constEnd() )
 {
+    m_tileProjection->setLevelZeroColumns(m_levelZeroColumns);
+    m_tileProjection->setLevelZeroRows(m_levelZeroRows);
 }
 
 GeoSceneTileDataset::~GeoSceneTileDataset()
 {
     qDeleteAll( m_downloadPolicies );
     delete m_serverLayout;
+    delete m_tileProjection;
 }
 
 const char* GeoSceneTileDataset::nodeType() const
@@ -103,6 +109,7 @@ int GeoSceneTileDataset::levelZeroColumns() const
 void GeoSceneTileDataset::setLevelZeroColumns( const int columns )
 {
     m_levelZeroColumns = columns;
+    m_tileProjection->setLevelZeroColumns(m_levelZeroColumns);
 }
 
 int GeoSceneTileDataset::levelZeroRows() const
@@ -113,6 +120,7 @@ int GeoSceneTileDataset::levelZeroRows() const
 void GeoSceneTileDataset::setLevelZeroRows( const int rows )
 {
     m_levelZeroRows = rows;
+    m_tileProjection->setLevelZeroRows(m_levelZeroRows);
 }
 
 int GeoSceneTileDataset::maximumTileLevel() const
@@ -142,7 +150,7 @@ void GeoSceneTileDataset::setTileLevels(const QString &tileLevels)
         return;
     }
 
-    QStringList values = tileLevels.split(',');
+    const QStringList values = tileLevels.split(QLatin1Char(','));
     foreach(const QString &value, values) {
         bool canParse(false);
         int const tileLevel = value.trimmed().toInt(&canParse);
@@ -207,14 +215,31 @@ void GeoSceneTileDataset::setTileSize( const QSize &tileSize )
     }
 }
 
-GeoSceneTileDataset::Projection GeoSceneTileDataset::projection() const
+void GeoSceneTileDataset::setTileProjection(GeoSceneAbstractTileProjection::Type projectionType)
 {
-    return m_projection;
+    if (m_tileProjection->type() == projectionType) {
+        return;
+    }
+
+    delete m_tileProjection;
+    if (projectionType == GeoSceneAbstractTileProjection::Mercator) {
+        m_tileProjection = new GeoSceneMercatorTileProjection();
+    } else {
+        m_tileProjection = new GeoSceneEquirectTileProjection();
+    }
+
+    m_tileProjection->setLevelZeroColumns(m_levelZeroColumns);
+    m_tileProjection->setLevelZeroRows(m_levelZeroRows);
 }
 
-void GeoSceneTileDataset::setProjection( const Projection projection )
+const GeoSceneAbstractTileProjection * GeoSceneTileDataset::tileProjection() const
 {
-    m_projection = projection;
+    return m_tileProjection;
+}
+
+GeoSceneAbstractTileProjection::Type GeoSceneTileDataset::tileProjectionType() const
+{
+    return m_tileProjection->type();
 }
 
 // Even though this method changes the internal state, it may be const
@@ -223,9 +248,7 @@ QUrl GeoSceneTileDataset::downloadUrl( const TileId &id ) const
 {
     // default download url
     if ( m_downloadUrls.empty() ) {
-        QUrl const defaultUrl = QUrl(QString("%1/%2")
-                                     .arg("https://maps.kde.org")
-                                     .arg(m_serverLayout->sourceDir()));
+        QUrl const defaultUrl = QUrl(QLatin1String("https://maps.kde.org/") + m_serverLayout->sourceDir());
         mDebug() << "No download URL specified for tiles stored in "
                  << m_sourceDir << ", falling back to " << defaultUrl.toString();
         return m_serverLayout->downloadUrl(defaultUrl, id);
@@ -261,8 +284,8 @@ QString GeoSceneTileDataset::relativeTileFileName( const TileId &id ) const
         relFileName = QString( "%1/%2/%3/%3_%4.%5" )
             .arg( themeStr() )
             .arg( id.zoomLevel() )
-            .arg( id.y(), tileDigits, 10, QChar('0') )
-            .arg( id.x(), tileDigits, 10, QChar('0') )
+            .arg(id.y(), tileDigits, 10, QLatin1Char('0'))
+            .arg(id.x(), tileDigits, 10, QLatin1Char('0'))
             .arg( suffix );
         break;
     case GeoSceneTileDataset::OpenStreetMap:
@@ -289,7 +312,7 @@ QString GeoSceneTileDataset::relativeTileFileName( const TileId &id ) const
 QString GeoSceneTileDataset::themeStr() const
 {
     QFileInfo const dirInfo( sourceDir() );
-    return dirInfo.isAbsolute() ? sourceDir() : "maps/" + sourceDir();
+    return dirInfo.isAbsolute() ? sourceDir() : QLatin1String("maps/") + sourceDir();
 }
 
 QList<const DownloadPolicy *> GeoSceneTileDataset::downloadPolicies() const
@@ -308,6 +331,8 @@ void GeoSceneTileDataset::addDownloadPolicy( const DownloadUsage usage, const in
 QStringList GeoSceneTileDataset::hostNames() const
 {
     QStringList result;
+    result.reserve(m_downloadUrls.size());
+
     QVector<QUrl>::const_iterator pos = m_downloadUrls.constBegin();
     QVector<QUrl>::const_iterator const end = m_downloadUrls.constEnd();
     for (; pos != end; ++pos )

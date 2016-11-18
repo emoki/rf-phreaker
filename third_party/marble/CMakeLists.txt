@@ -1,3 +1,5 @@
+cmake_minimum_required(VERSION 2.8.12)
+
 project(marble)
 
 ####################################################
@@ -39,6 +41,31 @@ if ("${CMAKE_CXX_COMPILER_ID}" STREQUAL "GNU" OR "${CMAKE_CXX_COMPILER_ID}" STRE
 elseif ("${CMAKE_CXX_COMPILER_ID}" STREQUAL "Intel" AND NOT WIN32)
     set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -std=c++0x")
 endif()
+# Default to hidden visibility for symbols
+set(CMAKE_C_VISIBILITY_PRESET hidden)
+set(CMAKE_CXX_VISIBILITY_PRESET hidden)
+set(CMAKE_VISIBILITY_INLINES_HIDDEN 1)
+if (POLICY CMP0063)
+    cmake_policy(SET CMP0063 NEW)
+endif()
+
+# RPATH/RUNPATH settings
+if (UNIX)
+    # Add CMAKE_INSTALL_FULL_LIBDIR to the RPATH to be used when installing,
+    # but only if it isn't a standard system directory.
+    list(FIND CMAKE_PLATFORM_IMPLICIT_LINK_DIRECTORIES "${CMAKE_INSTALL_FULL_LIBDIR}" isSystemLibDir)
+    list(FIND CMAKE_CXX_IMPLICIT_LINK_DIRECTORIES      "${CMAKE_INSTALL_FULL_LIBDIR}" isSystemCxxLibDir)
+    list(FIND CMAKE_C_IMPLICIT_LINK_DIRECTORIES        "${CMAKE_INSTALL_FULL_LIBDIR}" isSystemCLibDir)
+    if("${isSystemLibDir}" STREQUAL "-1"  AND  "${isSystemCxxLibDir}" STREQUAL "-1"  AND  "${isSystemCLibDir}" STREQUAL "-1")
+        set(CMAKE_INSTALL_RPATH "${CMAKE_INSTALL_FULL_LIBDIR}")
+    endif()
+
+    # Add directories which are in the linker search path (but outside the project)
+    # to the RPATH to be used when installing
+    set(CMAKE_INSTALL_RPATH_USE_LINK_PATH TRUE)
+    # no libs or plugins are designed to be used from the build dir, so directly link with install rpath
+    set(CMAKE_BUILD_WITH_INSTALL_RPATH TRUE)
+endif (UNIX)
 
 ####################################################
 # Where to look first for cmake modules,
@@ -62,54 +89,76 @@ include( MarbleMacros )
 option(MOBILE "Create a Marble version optimized for handheld devices")
 
 ####################################################
-# Specific options for building with Qt 4 vs 5
+# Build a D-Bus interface for the Marble widget
+# This is disabled by default for all win32, apple and Android
+if(WIN32 OR APPLE OR CMAKE_SYSTEM_NAME STREQUAL Android)
+    option(BUILD_WITH_DBUS "Build the D-Bus interface for the Marble widget" OFF)
+else()
+    option(BUILD_WITH_DBUS "Build the D-Bus interface for the Marble widget" ON)
+endif()
+
+
+#######################################################
+# Specific options for building for different platforms
 
 if(CMAKE_SYSTEM_NAME STREQUAL Android)
    add_definitions(-DANDROID)
+endif()
 
-   # Minimum Qt version
-   set(QT_REQUIRED_VERSION 5.3.0)
 
+#######################################################
+# Find Qt dependencies
+
+if(CMAKE_SYSTEM_NAME STREQUAL Android)
+    set(REQUIRED_QT_VERSION 5.7.0)
+   # TODO: still needed with ECM toolchain?
    SET(QT_QMAKE_EXECUTABLE "$ENV{Qt5_android}/bin/qmake")
+else()
+    set(REQUIRED_QT_VERSION 5.3.0)
+endif()
 
-   find_package(Qt5Location REQUIRED)
-   find_package(Qt5Positioning REQUIRED)
-   find_package(Qt5Multimedia REQUIRED)
+find_package(Qt5 ${REQUIRED_QT_VERSION} REQUIRED
+    COMPONENTS
+        Core
+        Xml
+        Network
+        Test
+        Widgets
+        Svg
+        Sql
+        Concurrent
+        Quick
+        PrintSupport
+)
+
+if(CMAKE_SYSTEM_NAME STREQUAL Android)
+    find_package(Qt5 ${REQUIRED_QT_VERSION} REQUIRED
+        COMPONENTS
+            Location
+            Positioning
+            Multimedia
+    )
    set ( MARBLE_NO_WEBKITWIDGETS TRUE )
 else()
-   find_package(Qt5WebKit)
-   find_package(Qt5WebKitWidgets)
-   find_package(Qt5DBus REQUIRED)
+   find_package(Qt5 ${REQUIRED_QT_VERSION}
+        COMPONENTS
+            WebKit
+            WebKitWidgets
+    )
 
    if ( NOT Qt5WebKitWidgets_FOUND )
      set ( MARBLE_NO_WEBKITWIDGETS TRUE )
    endif()
 endif()
 
-find_package(Qt5Core REQUIRED)
-find_package(Qt5Xml REQUIRED)
-find_package(Qt5Network REQUIRED)
-find_package(Qt5Test REQUIRED)
-find_package(Qt5Script REQUIRED)
-find_package(Qt5Widgets REQUIRED)
-find_package(Qt5Svg REQUIRED)
-find_package(Qt5Sql REQUIRED)
-find_package(Qt5Concurrent REQUIRED)
-find_package(Qt5Quick REQUIRED)
-find_package(Qt5PrintSupport REQUIRED)
-
-if(QTONLY)
-  # Forward the old QTONLY=TRUE option to the new WITH_KDE=FALSE
-  # needs to be written to cache and forcefully, otherwise macro_optional_find_package's
-  # option(WITH_${_name} ON) seems to operate on a shadowed variant of the variable
-  set(WITH_KF5 FALSE CACHE BOOL "Search for KF5 package" FORCE)
-  # And unset it quickly. Nobody shall use it anymore anywhere.
-  # to detect if KDE _should_ be used (set by user): WITH_KDE but do not use it within src/lib/
-  unset(QTONLY)
+if (BUILD_WITH_DBUS)
+  find_package(Qt5 ${REQUIRED_QT_VERSION} COMPONENTS DBus)
+  if (NOT Qt5DBus_FOUND)
+    set(MARBLE_NO_DBUS TRUE)
+  endif()
+else()
+  set(MARBLE_NO_DBUS TRUE)
 endif()
-
-cmake_minimum_required(VERSION 2.8.12)
-set(MARBLEWIDGET marblewidget-qt5)
 
 SET(CMAKE_AUTOMOC TRUE)
 
@@ -117,15 +166,6 @@ SET(CMAKE_AUTOMOC TRUE)
 if( WIN32 )
     add_definitions( -D_USE_MATH_DEFINES )
 endif( WIN32 )
-
-####################################################
-# Build a D-Bus interface for marble
-# This is disabled by default for all win32, apple and Qt-Only builds
-if(WIN32 OR APPLE OR CMAKE_SYSTEM_NAME STREQUAL Android)
-    option(BUILD_WITH_DBUS "Build the D-Bus interface for the Marble widget" OFF)
-else()
-    option(BUILD_WITH_DBUS "Build the D-Bus interface for the Marble widget" ON)
-endif()
 
 ####################################################
 # build unit tests
@@ -159,7 +199,6 @@ endif()
 if(WIN32)
     set(data_dir data)
     set(plugin_dir plugins)
-    set(CMAKE_MODULES_INSTALL_PATH ${CMAKE_ROOT}/Modules)
 elseif(APPLE)
     # needed for finding bundle path in e.g. katlasdir.h
     FIND_LIBRARY(APP_SERVICES_LIBRARY ApplicationServices )
@@ -180,7 +219,6 @@ elseif(CMAKE_SYSTEM_NAME STREQUAL Android)
 else() # Linux / bsd etc...
       set(data_dir ${CMAKE_INSTALL_FULL_DATAROOTDIR}/marble/data)
       set(plugin_dir ${CMAKE_INSTALL_FULL_LIBDIR}/marble/plugins)
-      set(CMAKE_MODULES_INSTALL_PATH ${CMAKE_INSTALL_FULL_DATAROOTDIR}/marble/cmake)
 endif()
 
 if(NOT ICON_INSTALL_DIR)
@@ -190,6 +228,10 @@ endif(NOT ICON_INSTALL_DIR)
 if(NOT APPS_INSTALL_DIR)
 	set(APPS_INSTALL_DIR ${CMAKE_INSTALL_FULL_DATAROOTDIR}/applications)
 endif(NOT APPS_INSTALL_DIR)
+
+if(NOT INCLUDE_INSTALL_DIR)
+    set(INCLUDE_INSTALL_DIR "${CMAKE_INSTALL_PREFIX}/include")
+endif()
 
 if (NOT MARBLE_DATA_PATH)
   set (MARBLE_DATA_PATH ${data_dir})
@@ -213,24 +255,20 @@ if(WIN32)
   set (STATIC_BUILD FALSE CACHE BOOL "Link to static Qt libs (win32 only)?")
 endif(WIN32)
 
-add_definitions(-DQT_USE_FAST_CONCATENATION -DQT_USE_FAST_OPERATOR_PLUS)
+add_definitions(
+    -DQT_USE_QSTRINGBUILDER
+    -DQT_NO_SIGNALS_SLOTS_KEYWORDS
+    -DQT_NO_URL_CAST_FROM_STRING
+    -DQT_NO_CAST_TO_ASCII
+    -DQT_NO_CAST_FROM_BYTEARRAY
+    -DQT_STRICT_ITERATORS
+)
 
 ####################################################
 # Options for static build
 if(STATIC_BUILD)
   add_definitions(-DSTATIC_BUILD=1)
 endif(STATIC_BUILD)
-
-####################################################
-# Workaround FindQt.cmake bug not finding
-# QtDesigner includes
-if(APPLE)
-  if (NOT DEFINED ${QT_QTDESIGNER_INCLUDE_DIR})
-    set ( QT_QTDESIGNER_INCLUDE_DIR
-    ${QT_LIBRARY_DIR}/QtDesigner.framework/Headers
-    )
-  endif(NOT DEFINED ${QT_QTDESIGNER_INCLUDE_DIR})
-endif(APPLE)
 
 #############################################################
 if (CMAKE_COMPILER_IS_GNUCXX OR CMAKE_C_COMPILER MATCHES "icc")
@@ -262,6 +300,15 @@ if(WIN32)
   SET(CMAKE_DEBUG_POSTFIX "d")
 endif(WIN32)
 ####################################################
+
+
+####################################################
+# Add global ECM & KF5 settings
+set(REQUIRED_ECM_VERSION 1.7.0)
+set(KDE_INSTALL_DIRS_NO_DEPRECATED TRUE)
+set(KDE_SKIP_UNINSTALL_TARGET ON CACHE BOOL "KDE uninstall target must be disabled")
+set(REQUIRED_KF5_VERSION 5.7.0)
+
 
 ####################################################
 # Add the include directories
@@ -306,20 +353,6 @@ endif()
 ####################################################
 # Install extra files
 install(FILES LICENSE.txt DESTINATION ${MARBLE_DATA_INSTALL_PATH})
-install(FILES marble.appdata.xml DESTINATION ${CMAKE_INSTALL_FULL_DATAROOTDIR}/appdata/)
-
-####################################################
-# Install CMake module
-
-CONFIGURE_FILE(
-    ${CMAKE_CURRENT_SOURCE_DIR}/FindMarble.cmake.in
-    ${CMAKE_CURRENT_BINARY_DIR}/FindMarble.cmake
-)
-
-if( CMAKE_MODULES_INSTALL_PATH AND NOT WIN32 )
-  install( FILES ${CMAKE_CURRENT_BINARY_DIR}/FindMarble.cmake
-           DESTINATION ${CMAKE_MODULES_INSTALL_PATH}  )
-endif()
 
 ############################################################
 # Uninstall stuff

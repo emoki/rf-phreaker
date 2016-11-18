@@ -9,6 +9,7 @@
 //
 
 #include <QApplication>
+
 #include <marble/MarbleWidget.h>
 #include <marble/GeoPainter.h>
 
@@ -26,14 +27,15 @@ void MyMarbleWidget::customPaint(GeoPainter* painter)
     painter->setPen(Qt::green);
     painter->drawEllipse(home, 7, 7);
     painter->setPen(Qt::black);
-    painter->drawText(home, "Hello Marble!");
+    painter->drawText(home, QStringLiteral("Hello Marble!"));
 }
 
 int main(int argc, char** argv)
 {
     QApplication app(argc,argv);
     MyMarbleWidget *mapWidget = new MyMarbleWidget;
-    mapWidget->setMapThemeId("earth/openstreetmap/openstreetmap.dgml");
+    mapWidget->setMapThemeId(QStringLiteral("earth/openstreetmap/openstreetmap.dgml"));
+    mapWidget->centerOn(8.4, 49.0);
     mapWidget->show();
     return app.exec();
 }

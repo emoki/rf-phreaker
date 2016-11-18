@@ -6,21 +6,20 @@ include_directories(${CMAKE_CURRENT_BINARY_DIR})
 if (CMAKE_SYSTEM_NAME STREQUAL Android)
     set(TARGET MarbleBehaim)
 
-    find_package(Qt5AndroidExtras)
+    find_package(Qt5 ${REQUIRED_QT_VERSION} REQUIRED COMPONENTS AndroidExtras)
 
     add_library (${TARGET} SHARED ${marble_SRCS} ${marble_QRCS})
 
     # while not directly linked, need to be listed here to have deployqt pick up those libs
     target_link_libraries (
         ${TARGET}
-        ${MARBLEWIDGET}
+        marblewidget
         astro
         Qt5::Concurrent
         Qt5::Xml
         Qt5::Widgets
         Qt5::PrintSupport
         Qt5::Network
-        Qt5::Script
         Qt5::Sql
         Qt5::Svg
         Qt5::Location

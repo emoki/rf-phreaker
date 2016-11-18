@@ -12,13 +12,13 @@
 #define NULLTINYWEBBROWSER_H
 
 // Qt
-#include <QByteArray>
-#include <QString>
-#include <QUrl>
 #include <QWidget>
 
 // Marble
 #include "marble_export.h"
+
+class QString;
+class QByteArray;
 
 namespace Marble
 {
@@ -37,7 +37,7 @@ class MARBLE_EXPORT TinyWebBrowser : public QWidget
     void print();
 
  Q_SIGNALS:
-    void statusMessage( QString );
+    void statusMessage( const QString& );
 };
 
 }

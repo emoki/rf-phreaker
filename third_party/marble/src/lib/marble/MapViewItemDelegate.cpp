@@ -17,7 +17,7 @@
 #include "MapViewItemDelegate.h"
 
 //Qt
-#include <QStyledItemDelegate>
+#include <QListView>
 #include <QModelIndex>
 #include <QTextDocument>
 #include <QPainter>
@@ -28,7 +28,8 @@
 
 namespace Marble {
 MapViewItemDelegate::MapViewItemDelegate( QListView *view ) :
-    m_view( view ), m_bookmarkIcon( ":/icons/bookmarks.png" )
+    m_view(view),
+    m_bookmarkIcon(QStringLiteral(":/icons/bookmarks.png"))
 {
     // nothing to do
 }
@@ -36,7 +37,7 @@ MapViewItemDelegate::MapViewItemDelegate( QListView *view ) :
 
 void MapViewItemDelegate::paint( QPainter *painter, const QStyleOptionViewItem &option, const QModelIndex &index ) const
 {
-    QStyleOptionViewItemV4 styleOption = option;
+    QStyleOptionViewItem styleOption = option;
     initStyleOption( &styleOption, index );
     styleOption.text = QString();
     styleOption.icon = QIcon();
@@ -61,7 +62,7 @@ void MapViewItemDelegate::paint( QPainter *painter, const QStyleOptionViewItem &
 
     int const padding = 5;
     QString const name = index.data().toString();
-    const bool isFavorite = QSettings().contains( "Favorites/" + name );
+    const bool isFavorite = QSettings().contains(QLatin1String("Favorites/") + name);
     QSize const bookmarkSize( 16, 16 );
     QRect bookmarkRect( iconRect.bottomRight(), bookmarkSize );
     bookmarkRect.translate( QPoint( -bookmarkSize.width() - padding, -bookmarkSize.height() - padding ) );

@@ -12,7 +12,6 @@
 #define MARBLE_GOTODIALOG_H
 
 #include "marble_export.h"
-#include "GeoDataCoordinates.h"
 
 #include <QDialog>
 
@@ -22,6 +21,7 @@ namespace Marble
 {
 
 class GeoDataPlacemark;
+class GeoDataCoordinates;
 class GoToDialogPrivate;
 class MarbleModel;
 
@@ -55,7 +55,7 @@ public:
 
     Q_PRIVATE_SLOT( d, void startSearch() )
 
-    Q_PRIVATE_SLOT( d, void updateSearchResult( QVector<GeoDataPlacemark*> placemarks ) )
+    Q_PRIVATE_SLOT( d, void updateSearchResult( const QVector<GeoDataPlacemark*>& placemarks ) )
 
     Q_PRIVATE_SLOT( d, void updateSearchMode() )
 

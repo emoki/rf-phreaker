@@ -12,6 +12,7 @@
 #define MARBLE_SATELLITESCONFIGNODEITEM_H
 
 #include "SatellitesConfigAbstractItem.h"
+#include <QVector>
 
 namespace Marble
 {
@@ -22,7 +23,7 @@ public:
     explicit SatellitesConfigNodeItem( const QString &name );
     ~SatellitesConfigNodeItem();
 
-    void loadSettings( QHash<QString, QVariant> settings );
+    void loadSettings(const QHash<QString, QVariant> &settings) override;
 
     QVariant data( int column, int role ) const;
     bool setData(int column, int role, const QVariant& data);

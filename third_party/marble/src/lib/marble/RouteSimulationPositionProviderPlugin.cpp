@@ -12,13 +12,14 @@
 
 #include "RouteSimulationPositionProviderPlugin.h"
 
-#include <QTimer>
-
 #include "MarbleMath.h"
 #include "MarbleModel.h"
 #include "routing/Route.h"
 #include "routing/RoutingManager.h"
 #include "routing/RoutingModel.h"
+#include "GeoDataAccuracy.h"
+
+#include <QIcon>
 
 namespace Marble
 {
@@ -34,7 +35,7 @@ QString RouteSimulationPositionProviderPlugin::name() const
 
 QString RouteSimulationPositionProviderPlugin::nameId() const
 {
-    return "RouteSimulationPositionProviderPlugin";
+    return QStringLiteral("RouteSimulationPositionProviderPlugin");
 }
 
 QString RouteSimulationPositionProviderPlugin::guiString() const
@@ -44,7 +45,7 @@ QString RouteSimulationPositionProviderPlugin::guiString() const
 
 QString RouteSimulationPositionProviderPlugin::version() const
 {
-    return "1.1";
+    return QStringLiteral("1.1");
 }
 
 QString RouteSimulationPositionProviderPlugin::description() const
@@ -54,15 +55,15 @@ QString RouteSimulationPositionProviderPlugin::description() const
 
 QString RouteSimulationPositionProviderPlugin::copyrightYears() const
 {
-    return "2011, 2012";
+    return QStringLiteral("2011, 2012");
 }
 
-QList<PluginAuthor> RouteSimulationPositionProviderPlugin::pluginAuthors() const
+QVector<PluginAuthor> RouteSimulationPositionProviderPlugin::pluginAuthors() const
 {
-    return QList<PluginAuthor>()
-            << PluginAuthor( "Konrad Enzensberger", "e.konrad@mpegcode.com" )
-            << PluginAuthor( QString::fromUtf8( "Dennis Nienhüser" ), "nienhueser@kde.org" )
-            << PluginAuthor( "Bernhard Beschow", "bbeschow@cs.tu-berlin.de" );
+    return QVector<PluginAuthor>()
+            << PluginAuthor(QStringLiteral("Konrad Enzensberger"), QStringLiteral("e.konrad@mpegcode.com"))
+            << PluginAuthor(QStringLiteral("Dennis Nienhüser"), QStringLiteral("nienhueser@kde.org"))
+            << PluginAuthor(QStringLiteral("Bernhard Beschow"), QStringLiteral("bbeschow@cs.tu-berlin.de"));
 }
 
 QIcon RouteSimulationPositionProviderPlugin::icon() const
@@ -107,7 +108,7 @@ RouteSimulationPositionProviderPlugin::RouteSimulationPositionProviderPlugin( Ma
     m_direction( 0.0 ),
     m_directionWithNoise(0.0)
 {
-    // nothing to do
+    connect(&m_updateTimer, SIGNAL(timeout()), this, SLOT(update()));
 }
 
 RouteSimulationPositionProviderPlugin::~RouteSimulationPositionProviderPlugin()
@@ -116,13 +117,8 @@ RouteSimulationPositionProviderPlugin::~RouteSimulationPositionProviderPlugin()
 
 void RouteSimulationPositionProviderPlugin::initialize()
 {
-    m_currentIndex = -1;
-    m_lineString = m_lineStringInterpolated = m_marbleModel->routingManager()->routingModel()->route().path();
-    m_speed = 0;   //initialize speed to be around 25 m/s;
-    m_status = m_lineString.isEmpty() ? PositionProviderStatusUnavailable : PositionProviderStatusAcquiring;
-    if ( !m_lineString.isEmpty() ) {
-        QTimer::singleShot( 1000.0 / c_frequency, this, SLOT(update()) );
-    }
+    updateRoute();
+    connect(m_marbleModel->routingManager()->routingModel(), SIGNAL(currentRouteChanged()), this, SLOT(updateRoute()));
 }
 
 bool RouteSimulationPositionProviderPlugin::isInitialized() const
@@ -145,14 +141,31 @@ QDateTime RouteSimulationPositionProviderPlugin::timestamp() const
     return m_currentDateTime;
 }
 
+void RouteSimulationPositionProviderPlugin::updateRoute(){
+    m_currentIndex = -1;
+    m_lineString = m_lineStringInterpolated = m_marbleModel->routingManager()->routingModel()->route().path();
+    m_speed = 0;   //initialize speed to be around 25 m/s;
+    bool const canWork = !m_lineString.isEmpty() || m_currentPosition.isValid();
+    if (canWork) {
+        changeStatus(PositionProviderStatusAcquiring);
+        m_updateTimer.start(1000.0 / c_frequency);
+    } else {
+        changeStatus(PositionProviderStatusUnavailable);
+        m_updateTimer.stop();
+    }
+}
+
 void RouteSimulationPositionProviderPlugin::update()
 {
-    if ( m_currentIndex >= 0 && m_currentIndex < m_lineStringInterpolated.size() ) {
-        if ( m_status != PositionProviderStatusAvailable ) {
-            m_status = PositionProviderStatusAvailable;
-            emit statusChanged( PositionProviderStatusAvailable );
-        }
+    if (m_lineString.isEmpty() && m_currentPosition.isValid()) {
+        m_currentPositionWithNoise = addNoise(m_currentPosition, accuracy());
+        changeStatus(PositionProviderStatusAvailable);
+        emit positionChanged(position(), accuracy());
+        return;
+    }
 
+    if ( m_currentIndex >= 0 && m_currentIndex < m_lineStringInterpolated.size() ) {
+        changeStatus(PositionProviderStatusAvailable);
         GeoDataCoordinates newPosition = m_lineStringInterpolated.at( m_currentIndex );
         const QDateTime newDateTime = QDateTime::currentDateTime();
         qreal time= m_currentDateTime.msecsTo(newDateTime)/1000.0;
@@ -246,13 +259,8 @@ void RouteSimulationPositionProviderPlugin::update()
         m_currentPosition = GeoDataCoordinates();	//Reset the current position so that the simulation starts from the correct starting point.
         m_currentPositionWithNoise = GeoDataCoordinates();
         m_speed = 0;
-        if ( m_status != PositionProviderStatusUnavailable ) {
-            m_status = PositionProviderStatusUnavailable;
-            emit statusChanged( PositionProviderStatusUnavailable );
-        }
+        changeStatus(PositionProviderStatusUnavailable);
     }
-
-    QTimer::singleShot( 1000.0 / c_frequency, this, SLOT(update()) );
 }
 
 GeoDataCoordinates RouteSimulationPositionProviderPlugin::addNoise(const Marble::GeoDataCoordinates &position, const Marble::GeoDataAccuracy &accuracy ) const
@@ -266,6 +274,14 @@ qreal RouteSimulationPositionProviderPlugin::addNoise(qreal bearing) const
 {
     qreal const maxBearingError = 30.0;
     return bearing + static_cast<qreal>(qrand()) / (static_cast<qreal>(RAND_MAX/maxBearingError/2.0)) - maxBearingError / 2.0;
+}
+
+void RouteSimulationPositionProviderPlugin::changeStatus(PositionProviderStatus status)
+{
+    if (m_status != status) {
+        m_status = status;
+        emit statusChanged(m_status);
+    }
 }
 
 } // namespace Marble

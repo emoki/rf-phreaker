@@ -13,8 +13,8 @@
 #include "MarbleDirs.h"
 #include "MarbleDebug.h"
 #include "routing/VoiceNavigationModel.h"
+#include "routing/Route.h"
 
-#include <QDirIterator>
 #include <QUrl>
 #include <phonon/MediaObject>
 #include <phonon/MediaSource>

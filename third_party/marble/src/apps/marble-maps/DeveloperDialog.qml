@@ -13,6 +13,8 @@ import QtQuick.Controls 1.3
 import QtQuick.Window 2.2
 import QtQuick.Layouts 1.1
 
+import org.kde.marble 0.20
+
 Item {
     id: root
     height: column.height + Screen.pixelDensity * 4
@@ -20,6 +22,19 @@ Item {
     SystemPalette {
         id: palette
         colorGroup: SystemPalette.Active
+    }
+
+    Settings {
+        id: settings
+
+        Component.onDestruction: {
+            settings.setValue("Developer", "inertialGlobeRotation", marbleMaps.inertialGlobeRotation)
+            settings.setValue("Developer", "positionProvider", marbleMaps.currentPositionProvider)
+            settings.setValue("Developer", "runtimeTrace", runtimeTrace.checked ? "true" : "false")
+            settings.setValue("Developer", "debugPlacemarks", debugPlacemarks.checked ? "true" : "false")
+            settings.setValue("Developer", "debugPolygons", debugPolygons.checked ? "true" : "false")
+            settings.setValue("Developer", "debugBatches", debugBatches.checked ? "true" : "false")
+        }
     }
 
     Rectangle {
@@ -36,27 +51,60 @@ Item {
             margins: Screen.pixelDensity * 2
         }
 
-        spacing: Screen.pixelDensity * 2
+        spacing: Screen.pixelDensity * 1
 
-        Text {
-            id: text
-            text: "Developer Settings"
-        }
+        Grid {
+            columns: 2
+            flow: Grid.TopToBottom
 
-        CheckBox {
-            text: "Show Render Performance"
-            onCheckedChanged: marbleMaps.setShowRuntimeTrace(checked)
-        }
+            Text {
+                text: "Developer Tools"
+            }
 
-        CheckBox {
-            text: "Show OSM Bitmap Tiles"
-            checked: true
-            onCheckedChanged: marbleMaps.setPropertyEnabled("mapnik", checked)
-        }
+            CheckBox {
+                text: "Inertial Rotation"
+                checked: settings.value("Developer", "inertialGlobeRotation") === "true"
+                onCheckedChanged: marbleMaps.inertialGlobeRotation = checked
+            }
 
-        Button {
-            text: "Close"
-            onClicked: root.visible = false
+            CheckBox {
+                text: "GPS Simulation"
+                checked: settings.value("Developer", "positionProvider") === "RouteSimulationPositionProviderPlugin"
+                onCheckedChanged: marbleMaps.currentPositionProvider = checked ? "RouteSimulationPositionProviderPlugin" : "QtPositioning"
+            }
+
+            CheckBox {
+                id: runtimeTrace
+                text: "Render Performance"
+                checked: settings.value("Developer", "runtimeTrace") === "true"
+                onCheckedChanged: marbleMaps.setShowRuntimeTrace(checked)
+            }
+
+            Text {
+                text: "Debug Rendering"
+            }
+
+            CheckBox {
+                id: debugPlacemarks
+                text: "Placemarks"
+                checked: settings.value("Developer", "debugPlacemarks") === "true"
+                onCheckedChanged: marbleMaps.setShowDebugPlacemarks(checked)
+
+            }
+
+            CheckBox {
+                id: debugPolygons
+                text: "Polygons"
+                checked: settings.value("Developer", "debugPolygons") === "true"
+                onCheckedChanged: marbleMaps.setShowDebugPolygons(checked)
+            }
+
+            CheckBox {
+                id: debugBatches
+                text: "Batches"
+                checked: settings.value("Developer", "debugBatches") === "true"
+                onCheckedChanged: marbleMaps.setShowDebugBatches(checked)
+            }
         }
     }
 }

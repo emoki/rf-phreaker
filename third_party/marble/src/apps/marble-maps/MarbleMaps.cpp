@@ -17,13 +17,15 @@
 #ifdef Q_OS_ANDROID
 #include <QtAndroid>
 #include <QAndroidJniObject>
+#include <qandroidfunctions.h>
 #endif
 
 namespace Marble {
 
 MarbleMaps::MarbleMaps(QQuickItem *parent) :
     MarbleQuickItem(parent),
-    m_suspended(false)
+    m_suspended(false),
+    m_keepScreenOn(false)
 {
     QGuiApplication* application = qobject_cast<QGuiApplication*>(QGuiApplication::instance());
     if (application) {
@@ -32,9 +34,13 @@ MarbleMaps::MarbleMaps(QQuickItem *parent) :
     }
 
 #ifdef Q_OS_ANDROID
-    // If a file is passed, open it. Possible file types are registered in package/AndroidManifest.xml
     QAndroidJniObject const activity = QtAndroid::androidActivity();
     if (activity.isValid()) {
+        // Control music volume
+        int const STREAM_MUSIC = 3;
+        activity.callMethod<void>("setVolumeControlStream", "(I)V", STREAM_MUSIC);
+
+        // If a file is passed, open it. Possible file types are registered in package/AndroidManifest.xml
         QAndroidJniObject const intent = activity.callObjectMethod("getIntent", "()Landroid/content/Intent;");
         if (intent.isValid()) {
             QAndroidJniObject const data = intent.callObjectMethod("getData", "()Landroid/net/Uri;");
@@ -53,6 +59,38 @@ MarbleMaps::MarbleMaps(QQuickItem *parent) :
 bool MarbleMaps::isSuspended() const
 {
     return m_suspended;
+}
+
+bool MarbleMaps::keepScreenOn() const
+{
+    return m_keepScreenOn;
+}
+
+void MarbleMaps::setKeepScreenOn(bool screenOn)
+{
+    if (m_keepScreenOn == screenOn) {
+        return;
+    }
+    m_keepScreenOn = screenOn;
+    char const * const action = m_keepScreenOn ? "addFlags" : "clearFlags";
+#ifdef Q_OS_ANDROID
+  #if QT_VERSION >= 0x050700
+    QtAndroid::runOnAndroidThread([action](){
+    QAndroidJniObject activity = QtAndroid::androidActivity();
+    if (activity.isValid()) {
+        QAndroidJniObject window = activity.callObjectMethod("getWindow", "()Landroid/view/Window;");
+        if (window.isValid()) {
+            const int FLAG_KEEP_SCREEN_ON = 128;
+            window.callObjectMethod(action, "(I)V", FLAG_KEEP_SCREEN_ON);
+        }
+    }});
+  #else
+  #warning "Please upgrade to Qt for Android 5.7 or later to enable the keep-screen-on feature"
+  #endif
+#else
+    Q_UNUSED(action);
+#endif
+    emit keepScreenOnChanged(screenOn);
 }
 
 void MarbleMaps::handleApplicationStateChange(Qt::ApplicationState state)

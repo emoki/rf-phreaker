@@ -11,28 +11,26 @@
 #ifndef MARBLE_GEOPOINTGRAPHICSITEM_H
 #define MARBLE_GEOPOINTGRAPHICSITEM_H
 
-#include "GeoDataPoint.h"
 #include "GeoGraphicsItem.h"
-#include "GeoDataLatLonAltBox.h"
 #include "marble_export.h"
 
 namespace Marble
 {
 
+class GeoDataPlacemark;
+class GeoDataPoint;
+
 class MARBLE_EXPORT GeoPointGraphicsItem : public GeoGraphicsItem
 {
 public:
-    explicit GeoPointGraphicsItem( const GeoDataFeature *feature );
+    explicit GeoPointGraphicsItem(const GeoDataPlacemark *placemark, const GeoDataPoint *point);
 
-    void setPoint( const GeoDataPoint& point );
-    GeoDataPoint point() const;
-    
     virtual void paint(GeoPainter* painter, const ViewportParams *viewport, const QString &layer);
 
     virtual const GeoDataLatLonAltBox& latLonAltBox() const;
 
 protected:
-    GeoDataPoint    m_point;
+    const GeoDataPoint *m_point;
 };
 
 }

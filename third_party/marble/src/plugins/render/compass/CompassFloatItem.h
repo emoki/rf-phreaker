@@ -11,7 +11,7 @@
 #ifndef COMPASS_FLOAT_ITEM_H
 #define COMPASS_FLOAT_ITEM_H
 
-#include <QObject>
+#include <QPixmap>
 
 #include "AbstractFloatItem.h"
 #include "DialogConfigurationInterface.h"
@@ -33,7 +33,7 @@ namespace Marble
 class CompassFloatItem  : public AbstractFloatItem, public DialogConfigurationInterface
 {
     Q_OBJECT
-    Q_PLUGIN_METADATA( IID "org.kde.edu.marble.CompassFloatItem" )
+    Q_PLUGIN_METADATA(IID "org.kde.marble.CompassFloatItem")
     Q_INTERFACES( Marble::RenderPluginInterface )
     Q_INTERFACES( Marble::DialogConfigurationInterface )
     MARBLE_PLUGIN( CompassFloatItem )
@@ -56,7 +56,7 @@ class CompassFloatItem  : public AbstractFloatItem, public DialogConfigurationIn
 
     QString copyrightYears() const;
 
-    QList<PluginAuthor> pluginAuthors() const;
+    QVector<PluginAuthor> pluginAuthors() const override;
 
     QIcon icon () const;
     

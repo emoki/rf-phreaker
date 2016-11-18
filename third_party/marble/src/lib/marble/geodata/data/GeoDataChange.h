@@ -11,36 +11,37 @@
 #ifndef GEODATACHANGE_H
 #define GEODATACHANGE_H
 
-#include <QString>
-#include <QDateTime>
-
 #include "GeoDataContainer.h"
-#include "marble_export.h"
+#include "geodata_export.h"
 
 namespace Marble
 {
 
 class GeoDataChangePrivate;
 
-class MARBLE_EXPORT GeoDataChange : public GeoDataContainer
+/**
+ */
+class GEODATA_EXPORT GeoDataChange : public GeoDataContainer
 {
 public:
     GeoDataChange();
 
     GeoDataChange( const GeoDataChange &other );
 
+    ~GeoDataChange();
+
     GeoDataChange& operator=( const GeoDataChange &other );
 
     bool operator==( const GeoDataChange &other ) const;
     bool operator!=( const GeoDataChange &other ) const;
 
-    ~GeoDataChange();
+    GeoDataFeature * clone() const override;
 
     /** Provides type information for downcasting a GeoNode */
     virtual const char* nodeType() const;
 
 private:
-    GeoDataChangePrivate* const d;
+    Q_DECLARE_PRIVATE(GeoDataChange)
 };
 
 }

@@ -16,8 +16,7 @@
 
 // Qt
 #include <QHash>
-
-class QIcon;
+#include <QIcon>
 
 namespace Ui
 {
@@ -30,7 +29,7 @@ namespace Marble
 class WeatherPlugin : public AbstractDataPlugin, public DialogConfigurationInterface
 {
     Q_OBJECT
-    Q_PLUGIN_METADATA( IID "org.kde.edu.marble.WeatherPlugin" )
+    Q_PLUGIN_METADATA(IID "org.kde.marble.WeatherPlugin")
     Q_INTERFACES( Marble::RenderPluginInterface )
     Q_INTERFACES( Marble::DialogConfigurationInterface )
     MARBLE_PLUGIN( WeatherPlugin )
@@ -56,7 +55,7 @@ class WeatherPlugin : public AbstractDataPlugin, public DialogConfigurationInter
 
     QString copyrightYears() const;
 
-    QList<PluginAuthor> pluginAuthors() const;
+    QVector<PluginAuthor> pluginAuthors() const override;
 
     QString aboutDataText() const;
 

@@ -26,7 +26,7 @@ class OpenDesktopPlugin : public AbstractDataPlugin, public DialogConfigurationI
 {
 
     Q_OBJECT
-    Q_PLUGIN_METADATA( IID "org.kde.edu.marble.OpenDesktopPlugin" )
+    Q_PLUGIN_METADATA(IID "org.kde.marble.OpenDesktopPlugin")
 
     Q_INTERFACES(Marble::RenderPluginInterface)
     Q_INTERFACES(Marble::DialogConfigurationInterface)
@@ -52,7 +52,7 @@ class OpenDesktopPlugin : public AbstractDataPlugin, public DialogConfigurationI
 
     QString copyrightYears() const;
 
-    QList<PluginAuthor> pluginAuthors() const;
+    QVector<PluginAuthor> pluginAuthors() const override;
 
     QIcon icon() const;
 

@@ -13,12 +13,8 @@
 
 #include "AbstractDataPlugin.h"
 #include "DialogConfigurationInterface.h"
-#include "RenderPlugin.h"
-#include "RenderPluginInterface.h"
 
 #include <QHash>
-
-class QIcon;
 
 namespace Ui
 {
@@ -31,7 +27,7 @@ namespace Marble
 class PhotoPlugin : public AbstractDataPlugin, public DialogConfigurationInterface
 {
     Q_OBJECT
-    Q_PLUGIN_METADATA( IID "org.kde.edu.marble.PhotoPlugin" )
+    Q_PLUGIN_METADATA(IID "org.kde.marble.PhotoPlugin")
     Q_INTERFACES( Marble::RenderPluginInterface )
     Q_INTERFACES( Marble::DialogConfigurationInterface )
     MARBLE_PLUGIN( PhotoPlugin )
@@ -57,7 +53,7 @@ class PhotoPlugin : public AbstractDataPlugin, public DialogConfigurationInterfa
 
     QString copyrightYears() const;
 
-    QList<PluginAuthor> pluginAuthors() const;
+    QVector<PluginAuthor> pluginAuthors() const override;
 
     QIcon icon() const;
 

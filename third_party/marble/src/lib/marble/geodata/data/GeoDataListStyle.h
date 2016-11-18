@@ -11,20 +11,20 @@
 #ifndef GEODATALISTSTYLE_H
 #define GEODATALISTSTYLE_H
 
-#include <QImage>
-#include <QFlags>
 #include <QVector>
 
 #include "MarbleGlobal.h"
 #include "GeoDataObject.h"
-#include "GeoDataItemIcon.h"
 #include "geodata_export.h"
 
 namespace Marble
 {
 
 class GeoDataListStylePrivate;
+class GeoDataItemIcon;
 
+/**
+ */
 class GEODATA_EXPORT GeoDataListStyle : public GeoDataObject
 {
 public:
@@ -50,7 +50,7 @@ public:
     };
 
     ListItemType listItemType() const;
-    void setListItemType( const ListItemType &type );
+    void setListItemType(ListItemType type);
 
     QColor backgroundColor() const;
     void setBackgroundColor( const QColor &color );

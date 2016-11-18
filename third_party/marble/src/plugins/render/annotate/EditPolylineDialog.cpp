@@ -15,17 +15,18 @@
 // Qt
 #include <QColorDialog>
 #include <QMessageBox>
-#include <QVBoxLayout>
 
 // Marble
 #include "GeoDataPlacemark.h"
+#include "GeoDataLineString.h"
 #include "GeoDataStyle.h"
+#include "GeoDataLineStyle.h"
 #include "GeoDataTypes.h"
 #include "NodeModel.h"
 #include "FormattedTextWidget.h"
 #include "NodeItemDelegate.h"
+#include "StyleBuilder.h"
 #include "osm/OsmTagEditorWidget.h"
-#include "osm/OsmPresetLibrary.h"
 #include "osm/OsmPlacemarkData.h"
 #include "osm/OsmRelationManagerWidget.h"
 
@@ -202,12 +203,12 @@ void EditPolylineDialog::handleChangingStyle()
 {
     // The default style has been changed, thus the old style URL is no longer valid
     // The polyline is now considered to have a customStyle
-    d->m_placemark->setStyleUrl( "" );
+    d->m_placemark->setStyleUrl(QString());
 
     GeoDataStyle::Ptr newStyle(new GeoDataStyle( *d->m_placemark->style() ));
     newStyle->lineStyle().setColor( d->m_linesDialog->currentColor() );
     newStyle->lineStyle().setWidth( d->m_linesWidth->value() );
-    newStyle->setId( d->m_placemark->id() + "Style" );
+    newStyle->setId(d->m_placemark->id() + QLatin1String("Style"));
     d->m_placemark->setStyle( newStyle );
 
     updatePolyline();
@@ -220,9 +221,9 @@ void EditPolylineDialog::updatePolyline()
 
     // If there is no custom style initialized( default #polyline url is used ) and there is a osmTag-based style
     // available, set it
-    QString suitableTag = d->m_osmTagEditorWidget->suitableTag();
-    if ( d->m_placemark->styleUrl() == "#polyline" && !suitableTag.isEmpty() ) {
-        GeoDataFeature::GeoDataVisualCategory category = OsmPresetLibrary::osmVisualCategory( suitableTag );
+    const OsmPlacemarkData osmData = d->m_osmTagEditorWidget->placemarkData();
+    const GeoDataPlacemark::GeoDataVisualCategory category = StyleBuilder::determineVisualCategory(osmData);
+    if (d->m_placemark->styleUrl() == QLatin1String("#polyline") && category != GeoDataPlacemark::None) {
         d->m_placemark->setStyle( GeoDataStyle::Ptr() ); // first clear style so style gets set by setVisualCategory()
         d->m_placemark->setVisualCategory( category );
     }

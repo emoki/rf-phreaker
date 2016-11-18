@@ -10,7 +10,10 @@
 
 #include "SearchWidget.h"
 
+#include "GeoDataPlacemark.h"
+#include "GeoDataLatLonAltBox.h"
 #include "GeoDataDocument.h"
+#include "GeoDataTreeModel.h"
 #include "SearchInputWidget.h"
 #include "MarbleWidget.h"
 #include "MarbleModel.h"
@@ -35,12 +38,14 @@ public:
     BranchFilterProxyModel  m_branchfilter;
     QSortFilterProxyModel   m_sortproxy;
     GeoDataDocument        *m_document;
+    QString m_planetId;
 
     SearchWidgetPrivate();
-    void setSearchResult( QVector<GeoDataPlacemark*> );
+    void setSearchResult( const QVector<GeoDataPlacemark*>& );
     void search( const QString &searchTerm, SearchMode searchMode );
     void clearSearch();
     void centerMapOn( const QModelIndex &index );
+    void handlePlanetChange();
 };
 
 SearchWidgetPrivate::SearchWidgetPrivate() :
@@ -55,7 +60,7 @@ SearchWidgetPrivate::SearchWidgetPrivate() :
     m_document->setName( QObject::tr( "Search Results" ) );
 }
 
-void SearchWidgetPrivate::setSearchResult( QVector<GeoDataPlacemark *> locations )
+void SearchWidgetPrivate::setSearchResult( const QVector<GeoDataPlacemark *>& locations )
 {
     if( locations.isEmpty() ) {
         return;
@@ -122,6 +127,10 @@ void SearchWidget::setMarbleWidget( MarbleWidget* widget )
 
     d->m_widget = widget;
 
+    d->m_planetId = widget->model()->planetId();
+    connect( widget->model(), SIGNAL(themeChanged(QString)),
+             this, SLOT(handlePlanetChange()) );
+
     d->m_searchField->setCompletionModel( widget->model()->placemarkModel() );
     connect( d->m_searchField, SIGNAL(centerOn(GeoDataCoordinates)),
              widget, SLOT(centerOn(GeoDataCoordinates)) );
@@ -186,6 +195,18 @@ void SearchWidgetPrivate::centerMapOn( const QModelIndex &index )
         m_widget->centerOn( *placemark, true );
         m_widget->model()->placemarkSelectionModel()->select( index, QItemSelectionModel::ClearAndSelect );
     }
+}
+
+void SearchWidgetPrivate::handlePlanetChange()
+{
+    const QString newPlanetId = m_widget->model()->planetId();
+
+    if (newPlanetId == m_planetId) {
+        return;
+    }
+
+    m_planetId = newPlanetId;
+    clearSearch();
 }
 
 }

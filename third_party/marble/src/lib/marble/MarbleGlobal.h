@@ -92,15 +92,6 @@ enum MapQuality {
 }; 
 
 /**
- * @brief This enum is used to choose which graphics system Qt is using.
- */
-enum GraphicsSystem {
-    NativeGraphics,     ///< Uses the native graphics system of the OS
-    RasterGraphics,     ///< Renders everything onto a pixmap
-    OpenGLGraphics      ///< Uses OpenGL
-};
-
-/**
  * @brief This enum is used to specify the proxy that is used.
  */
 enum ProxyType {
@@ -256,16 +247,16 @@ const qreal SEC2HOUR = 1.0 / HOUR2SEC;
 
 // String for about dialog and http user agent
 // FIXME: check if blanks are allowed in user agent version numbers
-const QString MARBLE_VERSION_STRING = QString::fromLatin1( "0.24.21 (0.25 development version)" );
+const QString MARBLE_VERSION_STRING = QString::fromLatin1( "0.25.20 (0.26 development version)" );
 
 // API Version id:
 // form : 0xMMmmpp
 //        MM = major revision.
 //        mm = minor revision.
 //        pp = patch revision.
-#define MARBLE_VERSION 0x001815
+#define MARBLE_VERSION 0x001914
 
-static const char NOT_AVAILABLE[] = QT_TR_NOOP("not available");
+static const char NOT_AVAILABLE[] = QT_TRANSLATE_NOOP("Marble", "not available");
 
 const int tileDigits = 6;
 

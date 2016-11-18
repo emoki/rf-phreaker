@@ -11,10 +11,10 @@
 #ifndef MARBLE_SATELLITESCONFIGABSTRACTITEM_H
 #define MARBLE_SATELLITESCONFIGABSTRACTITEM_H
 
-#include <QVector>
-#include <QStringList>
 #include <QHash>
-#include <QVariant>
+#include <QString>
+
+class QVariant;
 
 namespace Marble
 {
@@ -37,7 +37,7 @@ public:
     SatellitesConfigAbstractItem *parent() const;
     void setParent( SatellitesConfigAbstractItem *parent );
 
-    virtual void loadSettings( QHash<QString, QVariant> settings );
+    virtual void loadSettings(const QHash<QString, QVariant> &settings);
 
     virtual QVariant data( int column, int role ) const;
     virtual bool setData( int column, int role, const QVariant &data );

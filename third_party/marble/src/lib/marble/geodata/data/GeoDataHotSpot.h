@@ -13,7 +13,7 @@
 #ifndef MARBLE_GEODATAHOTSPOT_H
 #define MARBLE_GEODATAHOTSPOT_H
 
-#include <QPoint>
+#include <QPointF>
 
 #include "GeoDataObject.h"
 
@@ -24,6 +24,8 @@ namespace Marble
 
 class GeoDataHotSpotPrivate;
 
+/**
+ */
 class GEODATA_EXPORT GeoDataHotSpot : public GeoDataObject
 {
   public:

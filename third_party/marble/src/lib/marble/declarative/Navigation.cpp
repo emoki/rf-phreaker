@@ -11,9 +11,9 @@
 #include "Navigation.h"
 
 #include "Planet.h"
-#include "MarbleDeclarativeWidget.h"
 #include "MarbleModel.h"
 #include "MarbleQuickItem.h"
+#include "routing/Route.h"
 #include "routing/RoutingManager.h"
 #include "routing/RoutingModel.h"
 #include "PositionTracking.h"
@@ -21,47 +21,58 @@
 #include "AutoNavigation.h"
 #include "routing/VoiceNavigationModel.h"
 #include "ViewportParams.h"
+#include "GeoDataAccuracy.h"
+
+namespace Marble {
 
 class NavigationPrivate
 {
 public:
     NavigationPrivate();
 
-    MarbleWidget* m_marbleWidget;
-
-    Marble::MarbleQuickItem * m_marbleQuickItem;
+    MarbleQuickItem * m_marbleQuickItem;
 
     bool m_muted;
 
-    Marble::RouteSegment m_currentSegment;
+    RouteSegment m_currentSegment;
 
-    Marble::AutoNavigation* m_autoNavigation;
+    AutoNavigation* m_autoNavigation;
 
-    Marble::VoiceNavigationModel m_voiceNavigation;
+    VoiceNavigationModel m_voiceNavigation;
 
     qreal m_nextInstructionDistance;
 
     qreal m_destinationDistance;
 
-    Marble::RouteSegment nextRouteSegment();
+    double m_screenAccuracy;
+    QPointF m_screenPosition;
 
-    void updateNextInstructionDistance( const Marble::Route &route );
+    RouteSegment nextRouteSegment();
 
-    Marble::MarbleModel * model() const;
+    void updateNextInstructionDistance( const Route &route );
+
+    MarbleModel * model() const;
+
+    QPointF positionOnRoute() const;
+    QPointF currentPosition() const;
+
+    RouteSegment m_secondLastSegment;
+    RouteSegment m_lastSegment;
+
 };
 
 NavigationPrivate::NavigationPrivate() :
-    m_marbleWidget( nullptr ), m_marbleQuickItem( nullptr ), m_muted( false ), m_autoNavigation( 0 ), m_nextInstructionDistance( 0.0 ),
-    m_destinationDistance( 0.0 )
+    m_marbleQuickItem( nullptr ), m_muted( false ), m_autoNavigation( 0 ), m_nextInstructionDistance( 0.0 ),
+    m_destinationDistance( 0.0 ), m_screenAccuracy(0)
 {
     // nothing to do
 }
 
-void NavigationPrivate::updateNextInstructionDistance( const Marble::Route &route )
+void NavigationPrivate::updateNextInstructionDistance( const Route &route )
 {
-    const Marble::GeoDataCoordinates position = route.position();
-    const Marble::GeoDataCoordinates interpolated = route.positionOnRoute();
-    const Marble::GeoDataCoordinates onRoute = route.currentWaypoint();
+    const GeoDataCoordinates position = route.position();
+    const GeoDataCoordinates interpolated = route.positionOnRoute();
+    const GeoDataCoordinates onRoute = route.currentWaypoint();
 
     qreal planetRadius = 0;
     if (model()){
@@ -69,7 +80,7 @@ void NavigationPrivate::updateNextInstructionDistance( const Marble::Route &rout
     }
     qreal distance = planetRadius * ( distanceSphere( position, interpolated ) + distanceSphere( interpolated, onRoute ) );
     qreal remaining = 0.0;
-    const Marble::RouteSegment &segment = route.currentSegment();
+    const RouteSegment &segment = route.currentSegment();
     for ( int i=0; i<segment.path().size(); ++i ) {
         if ( segment.path()[i] == onRoute ) {
             distance += segment.path().length( planetRadius, i );
@@ -79,7 +90,7 @@ void NavigationPrivate::updateNextInstructionDistance( const Marble::Route &rout
 
     bool upcoming = false;
     for ( int i=0; i<route.size(); ++i ) {
-        const Marble::RouteSegment &segment = route.at( i );
+        const RouteSegment &segment = route.at( i );
 
         if ( upcoming ) {
             remaining += segment.path().length( planetRadius );
@@ -94,26 +105,15 @@ void NavigationPrivate::updateNextInstructionDistance( const Marble::Route &rout
     m_destinationDistance = distance + remaining;
 }
 
-Marble::MarbleModel * NavigationPrivate::model() const
+MarbleModel * NavigationPrivate::model() const
 {
-    if (m_marbleQuickItem !=  nullptr) {
-        return m_marbleQuickItem->model();
-    }
-    else if (m_marbleWidget != nullptr)
-    {
-        return m_marbleWidget->model();
-    }
-    return nullptr;
+    return m_marbleQuickItem ? m_marbleQuickItem->model() : nullptr;
 }
 
-Marble::RouteSegment NavigationPrivate::nextRouteSegment()
+RouteSegment NavigationPrivate::nextRouteSegment()
 {
-    if ( m_marbleWidget || m_marbleQuickItem) {
-        // Not using m_currentSegment on purpose
-        return model()->routingManager()->routingModel()->route().currentSegment().nextRouteSegment();
-    }
-
-    return Marble::RouteSegment();
+    // Not using m_currentSegment on purpose
+    return m_marbleQuickItem ? model()->routingManager()->routingModel()->route().currentSegment().nextRouteSegment() : RouteSegment();
 }
 
 Navigation::Navigation( QObject* parent) :
@@ -127,51 +127,18 @@ Navigation::~Navigation()
     delete d;
 }
 
-MarbleWidget *Navigation::map()
-{
-    return d->m_marbleWidget;
-}
-
-void Navigation::setMap( MarbleWidget* widget )
-{
-    d->m_marbleWidget = widget;
-    if ( d->m_marbleWidget ) {
-        // Avoid the QWidget based warning
-        d->m_marbleWidget->model()->routingManager()->setShowGuidanceModeStartupWarning( false );
-        connect( d->m_marbleWidget->model()->routingManager()->routingModel(),
-                SIGNAL(positionChanged()), this, SLOT(update()) );
-
-        delete d->m_autoNavigation;
-        d->m_autoNavigation = new Marble::AutoNavigation( d->m_marbleWidget->model(), d->m_marbleWidget->viewport(), this );
-        connect( d->m_autoNavigation, SIGNAL(zoomIn(FlyToMode)),
-                 d->m_marbleWidget, SLOT(zoomIn()) );
-        connect( d->m_autoNavigation, SIGNAL(zoomOut(FlyToMode)),
-                 d->m_marbleWidget, SLOT(zoomOut()) );
-        connect( d->m_autoNavigation, SIGNAL(centerOn(GeoDataCoordinates,bool)),
-                 d->m_marbleWidget, SLOT(centerOn(GeoDataCoordinates)) );
-
-        connect( d->m_marbleWidget, SIGNAL(visibleLatLonAltBoxChanged()),
-                 d->m_autoNavigation, SLOT(inhibitAutoAdjustments()) );
-        connect( d->m_marbleWidget->model()->positionTracking(), SIGNAL(statusChanged(PositionProviderStatus)),
-                 &d->m_voiceNavigation, SLOT(handleTrackingStatusChange(PositionProviderStatus)) );
-    }
-    emit mapChanged();
-}
 
 bool Navigation::guidanceModeEnabled() const
 {
-    if (d->m_marbleWidget || d->m_marbleQuickItem) {
-        return d->model()->routingManager()->guidanceModeEnabled();
-    }
-    return false;
+    return d->m_marbleQuickItem ? d->model()->routingManager()->guidanceModeEnabled() : false;
 }
 
 void Navigation::setGuidanceModeEnabled( bool enabled )
 {
-    if ( d->m_marbleWidget || d->m_marbleQuickItem ) {
+    if ( d->m_marbleQuickItem ) {
         d->model()->routingManager()->setGuidanceModeEnabled( enabled );
         d->m_autoNavigation->setAutoZoom( enabled );
-        d->m_autoNavigation->setRecenter( enabled ? Marble::AutoNavigation::RecenterOnBorder : Marble::AutoNavigation::DontRecenter );
+        d->m_autoNavigation->setRecenter( enabled ? AutoNavigation::RecenterOnBorder : AutoNavigation::DontRecenter );
 
         if ( enabled && !d->m_muted ) {
             //d->m_audio.announceStart();
@@ -202,26 +169,26 @@ QString Navigation::nextRoad() const
 QString Navigation::nextInstructionImage() const
 {
     switch ( d->nextRouteSegment().maneuver().direction() ) {
-    case Marble::Maneuver::Unknown: return "";
-    case Marble::Maneuver::Continue: return "qrc:/marble/turn-continue.svg";
-    case Marble::Maneuver::Merge: return "qrc:/marble/turn-merge.svg";
-    case Marble::Maneuver::Straight: return "qrc:/marble/turn-continue.svg";
-    case Marble::Maneuver::SlightRight: return "qrc:/marble/turn-slight-right.svg";
-    case Marble::Maneuver::Right: return "qrc:/marble/turn-right.svg";
-    case Marble::Maneuver::SharpRight: return "qrc:/marble/turn-sharp-right.svg";
-    case Marble::Maneuver::TurnAround: return "qrc:/marble/turn-around.svg";
-    case Marble::Maneuver::SharpLeft: return "qrc:/marble/turn-sharp-left.svg";
-    case Marble::Maneuver::Left: return "qrc:/marble/turn-left.svg";
-    case Marble::Maneuver::SlightLeft: return "qrc:/marble/turn-slight-left.svg";
-    case Marble::Maneuver::RoundaboutFirstExit: return "qrc:/marble/turn-roundabout-first.svg";
-    case Marble::Maneuver::RoundaboutSecondExit: return "qrc:/marble/turn-roundabout-second.svg";
-    case Marble::Maneuver::RoundaboutThirdExit: return "qrc:/marble/turn-roundabout-third.svg";
-    case Marble::Maneuver::RoundaboutExit: return "qrc:/marble/turn-roundabout-far.svg";
-    case Marble::Maneuver::ExitLeft: return "qrc:/marble/turn-exit-left.svg";
-    case Marble::Maneuver::ExitRight: return "qrc:/marble/turn-exit-right.svg";
+    case Maneuver::Continue:             return QStringLiteral("qrc:/marble/turn-continue.svg");
+    case Maneuver::Merge:                return QStringLiteral("qrc:/marble/turn-merge.svg");
+    case Maneuver::Straight:             return QStringLiteral("qrc:/marble/turn-continue.svg");
+    case Maneuver::SlightRight:          return QStringLiteral("qrc:/marble/turn-slight-right.svg");
+    case Maneuver::Right:                return QStringLiteral("qrc:/marble/turn-right.svg");
+    case Maneuver::SharpRight:           return QStringLiteral("qrc:/marble/turn-sharp-right.svg");
+    case Maneuver::TurnAround:           return QStringLiteral("qrc:/marble/turn-around.svg");
+    case Maneuver::SharpLeft:            return QStringLiteral("qrc:/marble/turn-sharp-left.svg");
+    case Maneuver::Left:                 return QStringLiteral("qrc:/marble/turn-left.svg");
+    case Maneuver::SlightLeft:           return QStringLiteral("qrc:/marble/turn-slight-left.svg");
+    case Maneuver::RoundaboutFirstExit:  return QStringLiteral("qrc:/marble/turn-roundabout-first.svg");
+    case Maneuver::RoundaboutSecondExit: return QStringLiteral("qrc:/marble/turn-roundabout-second.svg");
+    case Maneuver::RoundaboutThirdExit:  return QStringLiteral("qrc:/marble/turn-roundabout-third.svg");
+    case Maneuver::RoundaboutExit:       return QStringLiteral("qrc:/marble/turn-roundabout-far.svg");
+    case Maneuver::ExitLeft:             return QStringLiteral("qrc:/marble/turn-exit-left.svg");
+    case Maneuver::ExitRight:            return QStringLiteral("qrc:/marble/turn-exit-right.svg");
+    case Maneuver::Unknown:
+    default:
+        return QString();
     }
-
-    return "";
 }
 
 qreal Navigation::nextInstructionDistance() const
@@ -249,42 +216,51 @@ void Navigation::setSpeaker( const QString &speaker )
     d->m_voiceNavigation.setSpeaker( speaker );
 }
 
-bool Navigation::soundEnabled() const
-{
-    return !d->m_voiceNavigation.isSpeakerEnabled();
-}
-
-void Navigation::setSoundEnabled( bool soundEnabled )
-{
-    d->m_voiceNavigation.setSpeakerEnabled( !soundEnabled );
-}
-
 bool Navigation::deviated() const
 {
-    if ( d->m_marbleWidget || d->m_marbleQuickItem ) {
-        Marble::RoutingModel const * routingModel = d->model()->routingManager()->routingModel();
+    if ( d->m_marbleQuickItem ) {
+        RoutingModel const * routingModel = d->model()->routingManager()->routingModel();
         return routingModel->deviatedFromRoute();
     }
 
     return true;
 }
 
-Marble::MarbleQuickItem *Navigation::marbleQuickItem() const
+MarbleQuickItem *Navigation::marbleQuickItem() const
 {
     return d->m_marbleQuickItem;
 }
 
-QPointF Navigation::positionOnRoute() const
+QPointF NavigationPrivate::positionOnRoute() const
 {
-    Marble::RoutingModel const * routingModel = d->model()->routingManager()->routingModel();
+    RoutingModel const * routingModel = model()->routingManager()->routingModel();
     GeoDataCoordinates  coordinates = routingModel->route().positionOnRoute();
     qreal x = 0;
     qreal y = 0;
-    d->m_marbleQuickItem->map()->viewport()->screenCoordinates(coordinates, x, y);
+    m_marbleQuickItem->map()->viewport()->screenCoordinates(coordinates, x, y);
     return QPointF(x,y);
 }
 
-void Navigation::setMarbleQuickItem(Marble::MarbleQuickItem *marbleQuickItem)
+QPointF NavigationPrivate::currentPosition() const
+{
+    GeoDataCoordinates coordinates = model()->positionTracking()->currentLocation();
+    qreal x = 0;
+    qreal y = 0;
+    m_marbleQuickItem->map()->viewport()->screenCoordinates(coordinates, x, y);
+    return QPointF(x,y);
+}
+
+QPointF Navigation::screenPosition() const
+{
+    return d->m_screenPosition;
+}
+
+double Navigation::screenAccuracy() const
+{
+    return d->m_screenAccuracy;
+}
+
+void Navigation::setMarbleQuickItem(MarbleQuickItem *marbleQuickItem)
 {
     if ( d->m_marbleQuickItem == marbleQuickItem) {
         return;
@@ -302,8 +278,6 @@ void Navigation::setMarbleQuickItem(Marble::MarbleQuickItem *marbleQuickItem)
 
         disconnect( d->m_marbleQuickItem, SIGNAL(visibleLatLonAltBoxChanged()),
                  d->m_autoNavigation, SLOT(inhibitAutoAdjustments()) );
-        disconnect( d->model()->positionTracking(), SIGNAL(statusChanged(PositionProviderStatus)),
-                 &d->m_voiceNavigation, SLOT(handleTrackingStatusChange(PositionProviderStatus)) );
     }
 
     d->m_marbleQuickItem = marbleQuickItem;
@@ -311,9 +285,11 @@ void Navigation::setMarbleQuickItem(Marble::MarbleQuickItem *marbleQuickItem)
         d->model()->routingManager()->setShowGuidanceModeStartupWarning( false );
         connect( d->model()->routingManager()->routingModel(),
                 SIGNAL(positionChanged()), this, SLOT(update()) );
+        connect( d->model()->routingManager()->routingModel(),
+                SIGNAL(deviatedFromRoute(bool)), this, SIGNAL(deviationChanged()) );
 
         delete d->m_autoNavigation;
-        d->m_autoNavigation = new Marble::AutoNavigation( d->model(), d->m_marbleQuickItem->map()->viewport(), this );
+        d->m_autoNavigation = new AutoNavigation( d->model(), d->m_marbleQuickItem->map()->viewport(), this );
         connect( d->m_autoNavigation, SIGNAL(zoomIn(FlyToMode)),
                  d->m_marbleQuickItem, SLOT(zoomIn()) );
         connect( d->m_autoNavigation, SIGNAL(zoomOut(FlyToMode)),
@@ -323,8 +299,14 @@ void Navigation::setMarbleQuickItem(Marble::MarbleQuickItem *marbleQuickItem)
 
         connect( d->m_marbleQuickItem, SIGNAL(visibleLatLonAltBoxChanged()),
                  d->m_autoNavigation, SLOT(inhibitAutoAdjustments()) );
+
+        connect( d->m_marbleQuickItem, SIGNAL(visibleLatLonAltBoxChanged()),
+                 this, SLOT(updateScreenPosition()) );
+        connect( d->model()->positionTracking(), SIGNAL(gpsLocation(GeoDataCoordinates,qreal)),
+                 this, SLOT(updateScreenPosition()) );
         connect( d->model()->positionTracking(), SIGNAL(statusChanged(PositionProviderStatus)),
-                 &d->m_voiceNavigation, SLOT(handleTrackingStatusChange(PositionProviderStatus)) );
+                 this, SLOT(updateScreenPosition()) );
+
     }
     emit marbleQuickItemChanged(marbleQuickItem);
 }
@@ -335,11 +317,12 @@ void Navigation::update()
         return;
     }
 
-    Marble::RoutingModel const * routingModel = d->model()->routingManager()->routingModel();
+    RoutingModel const * routingModel = d->model()->routingManager()->routingModel();
     d->updateNextInstructionDistance( routingModel->route() );
     emit nextInstructionDistanceChanged();
     emit destinationDistanceChanged();
-    Marble::RouteSegment segment = routingModel->route().currentSegment();
+    RouteSegment segment = routingModel->route().currentSegment();
+
     if ( !d->m_muted ) {
         d->m_voiceNavigation.update( routingModel->route(), d->m_nextInstructionDistance, d->m_destinationDistance, routingModel->deviatedFromRoute() );
     }
@@ -349,7 +332,22 @@ void Navigation::update()
         emit nextInstructionImageChanged();
         emit nextRoadChanged();
     }
+
+    updateScreenPosition();
 }
 
+void Navigation::updateScreenPosition()
+{
+    if(d->m_marbleQuickItem) {
+        double distanceMeter = d->model()->positionTracking()->accuracy().horizontal;
+        d->m_screenAccuracy = distanceMeter * d->m_marbleQuickItem->map()->radius() / d->model()->planetRadius();
+        emit screenAccuracyChanged();
+
+        d->m_screenPosition = deviated() ? d->currentPosition() : d->positionOnRoute();
+        emit screenPositionChanged();
+    }
+}
+
+}
 
 #include "moc_Navigation.cpp"

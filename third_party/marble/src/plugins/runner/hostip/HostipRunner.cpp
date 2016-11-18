@@ -10,8 +10,6 @@
 #include "HostipRunner.h"
 
 #include "MarbleDebug.h"
-#include "GeoDataDocument.h"
-#include "GeoDataFeature.h"
 #include "GeoDataPlacemark.h"
 
 #include <QString>
@@ -42,7 +40,7 @@ void HostipRunner::slotNoResults()
 
 void HostipRunner::search( const QString &searchTerm, const GeoDataLatLonBox & )
 {
-    if( !searchTerm.contains('.') ) {
+    if (!searchTerm.contains(QLatin1Char('.'))) {
         // Simple IP/hostname heuristic to avoid requests not needed:
         // String must contain at least one dot.
         slotNoResults();
@@ -117,7 +115,7 @@ void HostipRunner::slotRequestFinished( QNetworkReply* reply )
                                  arg( m_hostInfo.addresses().first().toString() ) );
 
         placemark->setCoordinate( lon * DEG2RAD, lat * DEG2RAD );
-        placemark->setVisualCategory( GeoDataFeature::Coordinate );
+        placemark->setVisualCategory(GeoDataPlacemark::Coordinate);
         placemarks << placemark;
     }
     

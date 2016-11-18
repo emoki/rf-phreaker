@@ -12,7 +12,7 @@ import QtQuick 2.3
 import QtGraphicalEffects 1.0
 import QtQuick.Window 2.2
 
-import org.kde.edu.marble 0.20
+import org.kde.marble 0.20
 
 Item {
     id: root
@@ -34,14 +34,14 @@ Item {
             if (type == "searchResult") {
                 if (placemarkDialog.placemark === placemark) {
                     placemarkDialog.placemark = null
-                    itemStack.state = ""
+                    dialogContainer.currentIndex = dialogContainer.none
                 } else {
                     placemarkDialog.placemark = placemark
-                    itemStack.state = "place"
+                    dialogContainer.currentIndex = dialogContainer.place
                 }
             } else {
                 routeEditor.currentIndex = index
-                itemStack.state = "routing"
+                dialogContainer.currentIndex = dialogContainer.routing
             }
         }
         anchors {

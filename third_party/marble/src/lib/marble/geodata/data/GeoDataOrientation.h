@@ -11,14 +11,16 @@
 #ifndef GEODATAORIENTATION_H
 #define GEODATAORIENTATION_H
 
-#include "GeoDataGeometry.h"
+#include "GeoDataObject.h"
 #include "MarbleGlobal.h"
 
 namespace Marble {
 
 class GeoDataOrientationPrivate;
 
-class MARBLE_EXPORT GeoDataOrientation: public GeoDataObject
+/**
+ */
+class GEODATA_EXPORT GeoDataOrientation: public GeoDataObject
 {
 public:
     GeoDataOrientation();

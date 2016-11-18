@@ -18,7 +18,6 @@
 
 
 #include <QObject>
-#include <QString>
 #include <QColor>
 
 //FIXME: This class shouldn't be exposed but is needed by the worldclock plasmoid
@@ -55,6 +54,7 @@ class MARBLE_EXPORT SunLocator : public QObject
 
  private:
     void updatePosition();
+    void updateTwilightZone();
 
     SunLocatorPrivate * const d;
 

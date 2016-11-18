@@ -13,9 +13,8 @@
 #ifndef MARBLEABSTRACTPRESENTER_H
 #define MARBLEABSTRACTPRESENTER_H
 
-#include <QSharedPointer>
 #include <QList>
-#include "GeoDataLookAt.h"
+
 #include "GeoDataLatLonBox.h"
 #include "MarblePhysics.h"
 #include <marble_export.h>
@@ -24,6 +23,7 @@ namespace Marble
 {
 
 class GeoDataPlacemark;
+class GeoDataLookAt;
 class MarbleMap;
 class MarbleModel;
 class ViewportParams;
@@ -32,7 +32,7 @@ class ViewportParams;
     {
     Q_OBJECT
 
-    signals:
+    Q_SIGNALS:
         void zoomChanged(int zoom);
         void distanceChanged(const QString& distanceString);
 
@@ -113,7 +113,7 @@ class ViewportParams;
         ViewportParams *viewport();
         const ViewportParams* viewport() const;
 
-    public slots:
+    public Q_SLOTS:
         void rotateBy(const qreal deltaLon, const qreal deltaLat, FlyToMode mode = Instant);
         void flyTo(const GeoDataLookAt &newLookAt, FlyToMode mode = Automatic);
         void goHome(FlyToMode mode = Automatic);

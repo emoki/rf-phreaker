@@ -15,10 +15,14 @@
 #include <QColor>
 
 #include "MarbleGlobal.h"
-#include "GeoDataPlacemark.h"
 
 
 namespace Marble {
+
+class GeoDataPlacemark;
+class GeoDataCoordinates;
+class GeoDataFeature;
+class OsmPlacemarkData;
 
 /**
  * @brief As it name says by itself, this class is used to show a couple of
@@ -35,13 +39,13 @@ public:
                        QWidget *parent = 0 );
     ~EditPolygonDialog();
 
-public slots:
+public Q_SLOTS:
     void handleAddingNode( const GeoDataCoordinates &node );
     void handleItemMoving( GeoDataPlacemark *item );
     void handleChangingStyle();
     void updatePolygon();
 
-signals:
+Q_SIGNALS:
     void polygonUpdated( GeoDataFeature *feature );
 
     /**
@@ -51,7 +55,7 @@ signals:
      */
     void relationCreated( const OsmPlacemarkData &relation );
 
-private slots:
+private Q_SLOTS:
     void updateLinesDialog( const QColor &color );
     void updatePolyDialog( const QColor &color );
     void checkFields();

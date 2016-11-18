@@ -15,7 +15,6 @@
 #include "MarbleDebug.h"
 
 #include <QFile>
-#include <QFileInfo>
 
 namespace Marble
 {
@@ -33,7 +32,7 @@ GeoDataDocument *LogRunner::parseFile(const QString &fileName, DocumentRole role
 {
     QFile file( fileName );
     if ( !file.exists() ) {
-        errorString = QString("File %1 does not exist").arg(fileName);
+        errorString = QStringLiteral("File %1 does not exist").arg(fileName);
         mDebug() << errorString;
         return nullptr;
     }
@@ -54,7 +53,7 @@ GeoDataDocument *LogRunner::parseFile(const QString &fileName, DocumentRole role
     bool error = false;
     while( !stream.atEnd() || error ){
         const QString line = stream.readLine();
-        const QStringList list = line.split( ',' );
+        const QStringList list = line.split(QLatin1Char(','));
 
         if ( list.size() != 7 ) {
             mDebug() << Q_FUNC_INFO << "Aborting due to error in line" << count << ". Line was:" << line;

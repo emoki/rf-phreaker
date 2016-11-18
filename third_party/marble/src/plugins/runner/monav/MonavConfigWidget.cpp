@@ -18,8 +18,6 @@
 #include <QFile>
 #include <QProcess>
 #include <QSignalMapper>
-#include <QStringListModel>
-#include <QComboBox>
 #include <QPushButton>
 #include <QShowEvent>
 #include <QSortFilterProxyModel>
@@ -213,27 +211,27 @@ void MonavConfigWidgetPrivate::parseNewStuff( const QByteArray &data )
     }
 
     QDomElement root = xml.documentElement();
-    QDomNodeList items = root.elementsByTagName( "stuff" );
+    QDomNodeList items = root.elementsByTagName(QStringLiteral("stuff"));
     for (int i=0 ; i < items.length(); ++i ) {
         MonavStuffEntry item;
         QDomNode node = items.item( i );
 
-        QDomNodeList names = node.toElement().elementsByTagName( "name" );
+        QDomNodeList names = node.toElement().elementsByTagName(QStringLiteral("name"));
         if ( names.size() == 1 ) {
             item.setName( names.at( 0 ).toElement().text() );
         }
 
         QString releaseDate;
-        QDomNodeList dates = node.toElement().elementsByTagName( "releasedate" );
+        QDomNodeList dates = node.toElement().elementsByTagName(QStringLiteral("releasedate"));
         if ( dates.size() == 1 ) {
             releaseDate = dates.at( 0 ).toElement().text();
         }
 
         QString filename;
-        QDomNodeList payloads = node.toElement().elementsByTagName( "payload" );
+        QDomNodeList payloads = node.toElement().elementsByTagName(QStringLiteral("payload"));
         if ( payloads.size() == 1 ) {
             QString payload = payloads.at( 0 ).toElement().text();
-            filename = payload.mid( 1 + payload.lastIndexOf( "/" ) );
+            filename = payload.mid(1 + payload.lastIndexOf(QLatin1Char('/')));
             item.setPayload( payload );
         }
 
@@ -355,7 +353,7 @@ MonavConfigWidget::~MonavConfigWidget()
 
 void MonavConfigWidget::loadSettings( const QHash<QString, QVariant> &settings )
 {
-    d->m_transport = settings["transport"].toString();
+    d->m_transport = settings[QStringLiteral("transport")].toString();
     d->updateTransportPreference();
 }
 
@@ -386,7 +384,7 @@ void MonavConfigWidgetPrivate::updateTransportPreference()
 QHash<QString, QVariant> MonavConfigWidget::settings() const
 {
     QHash<QString, QVariant> settings;
-    settings["transport"] = d->m_transport;
+    settings.insert(QStringLiteral("transport"), d->m_transport);
     return settings;
 }
 
@@ -488,14 +486,14 @@ void MonavConfigWidget::cancelOperation()
 void MonavConfigWidgetPrivate::install()
 {
     if ( !m_currentDownload.isEmpty() ) {
-        int const index = m_currentDownload.lastIndexOf( "/");
-        QString localFile = MarbleDirs::localPath() + "/maps" + m_currentDownload.mid( index );
+        int const index = m_currentDownload.lastIndexOf(QLatin1Char('/'));
+        const QString localFile = MarbleDirs::localPath() + QLatin1String("/maps") + m_currentDownload.mid(index);
         m_currentFile.setFileName( localFile );
         if ( m_currentFile.open( QFile::WriteOnly ) ) {
             QFileInfo file( m_currentFile );
             QString message = QObject::tr( "Downloading %1" ).arg( file.fileName() );
             setBusy( true, message );
-            m_currentReply = m_networkAccessManager.get( QNetworkRequest( m_currentDownload ) );
+            m_currentReply = m_networkAccessManager.get( QNetworkRequest( QUrl ( m_currentDownload ) ) );
             QObject::connect( m_currentReply, SIGNAL(readyRead()),
                          m_parent, SLOT(retrieveData()) );
             QObject::connect( m_currentReply, SIGNAL(readChannelFinished()),
@@ -549,7 +547,7 @@ void MonavConfigWidget::updateProgressBar( qint64 bytesReceived, qint64 bytesTot
 
 bool MonavConfigWidgetPrivate::canExecute( const QString &executable )
 {
-    QString path = QProcessEnvironment::systemEnvironment().value( "PATH", "/usr/local/bin:/usr/bin:/bin" );
+    QString path = QProcessEnvironment::systemEnvironment().value(QStringLiteral("PATH"), QStringLiteral("/usr/local/bin:/usr/bin:/bin"));
     foreach( const QString &dir, path.split( QLatin1Char( ':' ) ) ) {
         QFileInfo application( QDir( dir ), executable );
         if ( application.exists() ) {
@@ -615,7 +613,7 @@ void MonavConfigWidgetPrivate::updateInstalledMapsViewButtons()
     m_upgradeMapSignalMapper.removeMappings( m_parent );
     for( int i=0; i<m_mapsModel->rowCount(); ++i ) {
         {
-            QPushButton* button = new QPushButton( QIcon( ":/system-software-update.png" ), "" );
+            QPushButton* button = new QPushButton(QIcon(QStringLiteral(":/system-software-update.png")), QString());
             button->setAutoFillBackground( true );
             QModelIndex index = m_mapsModel->index( i, 3 );
             m_parent->m_installedMapsListView->setIndexWidget( index, button );
@@ -628,7 +626,7 @@ void MonavConfigWidgetPrivate::updateInstalledMapsViewButtons()
             button->setEnabled( upgradable );
         }
         {
-            QPushButton* button = new QPushButton( QIcon( ":/edit-delete.png" ), "" );
+            QPushButton* button = new QPushButton(QIcon(QStringLiteral(":/edit-delete.png")), QString());
             button->setAutoFillBackground( true );
             QModelIndex index = m_mapsModel->index( i, 4 );
             m_parent->m_installedMapsListView->setIndexWidget( index, button );
@@ -664,7 +662,7 @@ void MonavConfigWidget::upgradeMap( int index )
     QString payload = d->m_mapsModel->payload( index );
     if ( !payload.isEmpty() ) {
         foreach( const MonavStuffEntry &entry, d->m_remoteMaps ) {
-            if ( entry.payload().endsWith( '/' + payload ) ) {
+            if (entry.payload().endsWith(QLatin1Char('/') + payload)) {
                 d->m_currentDownload = entry.payload();
                 d->install();
                 return;

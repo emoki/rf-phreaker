@@ -22,6 +22,7 @@
 #include "MarbleGlobal.h"
 #include "AzimuthalProjection_p.h"
 
+#include <QIcon>
 #include <qmath.h>
 
 #define SAFE_DISTANCE
@@ -73,7 +74,7 @@ QString GnomonicProjection::description() const
 
 QIcon GnomonicProjection::icon() const
 {
-    return QIcon(":/icons/map-gnomonic.png");
+    return QIcon(QStringLiteral(":/icons/map-gnomonic.png"));
 }
 
 qreal GnomonicProjection::clippingRadius() const

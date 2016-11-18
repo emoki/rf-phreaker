@@ -14,8 +14,8 @@
 #include "AbstractFloatItem.h"
 
 #include <QMutex>
-#include <QObject>
 #include <QTimer>
+#include <QIcon>
 
 namespace Marble
 {
@@ -27,7 +27,7 @@ namespace Marble
 class ProgressFloatItem  : public AbstractFloatItem
 {
     Q_OBJECT
-    Q_PLUGIN_METADATA( IID "org.kde.edu.marble.ProgressFloatItem" )
+    Q_PLUGIN_METADATA(IID "org.kde.marble.ProgressFloatItem")
 
     Q_INTERFACES( Marble::RenderPluginInterface )
 
@@ -51,7 +51,7 @@ class ProgressFloatItem  : public AbstractFloatItem
 
     QString copyrightYears() const;
 
-    QList<PluginAuthor> pluginAuthors() const;
+    QVector<PluginAuthor> pluginAuthors() const override;
 
     QIcon icon () const;
 
