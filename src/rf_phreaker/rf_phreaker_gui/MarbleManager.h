@@ -218,7 +218,7 @@ public:
 					proto.Clear();
 				}
 			}
-			// Not sure if we can alter track after it's added to multitrack so we wait to add a track until until it's finished.
+			// Not sure if we can alter track after it's added to multitrack so we wait to add a track until it's finished.
 			// This means the last track is added here (if there are points within).
 			if(track->size()) {
 				multiTrack->append(track.get());
