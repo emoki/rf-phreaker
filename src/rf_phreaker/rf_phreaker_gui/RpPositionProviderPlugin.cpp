@@ -45,7 +45,7 @@ QString RpPositionProviderPlugin::description() const {
 }
 
 QString RpPositionProviderPlugin::copyrightYears() const {
-	return "2016";
+	return "2017";
 }
 
 QVector<PluginAuthor> RpPositionProviderPlugin::pluginAuthors() const {
