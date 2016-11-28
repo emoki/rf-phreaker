@@ -6,6 +6,7 @@
 
 #include "marble/declarative/MarbleDeclarativePlugin.h"
 #include "rf_phreaker/rf_phreaker_gui/ApiPlugin.h"
+#include "rf_phreaker/rf_phreaker_gui/MarbleLayerManager.h"
 
 int main(int argc, char *argv[])
 {
@@ -18,6 +19,10 @@ int main(int argc, char *argv[])
 	MarbleDeclarativePlugin declarativePlugin;
 	const char * marbleUri = "org.kde.edu.marble";
 	declarativePlugin.registerTypes(marbleUri);
+
+	// Instantiate MarbleLayerManager so that we can use the MarbleModel
+	// within multiple MarbleMaps.
+	MarbleLayers::instance();
 
 	registerQmlTypes();
 

@@ -23,30 +23,24 @@
 #include "marble/PluginManager.h"
 #include "marble/PositionTracking.h"
 #include "marble/MarblePlacemarkModel.h"
-#include "marble/MarbleDirs.h"
-#include "marble/GeoDataTreeModel.h"
 #include "marble/TreeViewDecoratorModel.h"
 #include "marble/routing/RouteRequest.h"
 #include "marble/routing/RoutingManager.h"
 #include "marble/kdescendantsproxymodel.h"
 #include "marble/geodata/data/GeoDataPlacemark.h"
 #include "marble/geodata/data/GeoDataDocument.h"
-#include "marble/geodata/data/GeoDataStyle.h"
-#include "marble/geodata/data/GeoDataStyleMap.h"
-#include "marble/geodata/data/GeoDataMultiTrack.h"
-#include "marble/geodata/data/GeoDataTrack.h"
 #include "rf_phreaker/protobuf_specific/rf_phreaker_serialization.h"
 #include <google/protobuf/io/zero_copy_stream_impl.h>
 #include "rf_phreaker/protobuf_specific/io.h"
-#include "rf_phreaker/rf_phreaker_gui/RpPositionProviderPlugin.h"
 #include "rf_phreaker/rf_phreaker_gui/MarbleProxyModel.h"
+#include "rf_phreaker/rf_phreaker_gui/MarbleLayerManager.h"
 #include "rf_phreaker/rf_phreaker_gui/MarbleHelper.h"
 #include "rf_phreaker/rf_phreaker_gui/Settings.h"
+#include "rf_phreaker/rf_phreaker_gui/RpPositionProviderPlugin.h"
 
 class MarbleManager : public Marble::MarbleQuickItem {
 	Q_OBJECT
 	Q_PROPERTY(QAbstractItemModel* treeViewModel READ treeViewModel NOTIFY treeViewModelChanged)
-	Q_PROPERTY(QAbstractItemModel* proxyTreeViewModel READ proxyTreeViewModel NOTIFY proxyTreeViewModelChanged)
 	Q_PROPERTY(MarbleProxyModel* placemarkModel READ placemarkModel NOTIFY placemarkModelChanged)
 	Q_PROPERTY(double downloadProgess READ downloadProgess NOTIFY downloadProgressChanged)
 	Q_PROPERTY(bool iscurrentPositionGloballyVisible READ iscurrentPositionGloballyVisible NOTIFY isCurrentPositionGloballyVisibleChanged)
@@ -64,16 +58,12 @@ public:
 	MarbleManager(QQuickItem *parent = 0)
 		: Marble::MarbleQuickItem(parent)
 		, numDownloadJobs_(0)
-		, currentDownloadJobValue_(0)
-		, rpDoc_(nullptr)
-		, positionDoc_(nullptr) {
+		, currentDownloadJobValue_(0) {
 		loadSettings();
-		init();
 	}
 
 	~MarbleManager() {
 		writeSettings();
-		storePreviousLayers();
 	}
 
 	Q_INVOKABLE QPointF currentPositionScreenCoordinates() {
@@ -130,7 +120,7 @@ public:
 		auto placemark = MarbleHelper::toPlacemark(placemarkModel_.data(placemarkModel_.index(placemarkIndex, 0), MarbleProxyModel::PlacemarkObjectPointerRole));
 		if(placemark != nullptr ) {
 			// Cannot delete current track or current position!
-			if(!isPositionTrackingRelated(placemark)) {
+			if(!MarbleHelper::isPositionTrackingRelated(placemark)) {
 				map()->model()->treeModel()->removeFeature(placemark);
 			}
 		}
@@ -171,71 +161,9 @@ public:
 		//map()->model()->positionTracking()->setPositionProviderPlugin(plugin);
 	}
 
-	Q_INVOKABLE void addRpf(QString filename) {
-		// Can reduce number of measurements by using a distance calculation.
-		// Do if neccessary.
-
-		// When filename comes from QML it as a URL, however when we store the filename
-		// it is native therefore only use tmp if it is valid, otherwise use native.
-		QUrl url(filename);
-		auto tmp = url.toLocalFile();
-		if(!tmp.isEmpty())
-			filename = tmp;
-		qDebug() << "Converting RPF file. " << filename << ".";
-		QFile f(filename);
-		if(!f.open(QIODevice::ReadOnly | QIODevice::Unbuffered)) {
-			qDebug() << "Failed to open RPF file. " << f.errorString();
-		}
-		else {
-			if(rpDoc_ == nullptr)
-				createTrackingDocument();
-
-			auto name = filename;
-			auto multiTrack = std::make_unique<Marble::GeoDataMultiTrack>();
-			multiTrack->setId("multitrack_" + name);
-			auto track = std::make_unique<Marble::GeoDataTrack>();
-			auto input_file = std::make_unique<google::protobuf::io::FileInputStream>(f.handle());
-			rf_phreaker::protobuf::update_pb message;
-			auto &proto = message.protobuf();
-			rf_phreaker::gps gps;
-			bool previously_had_lock = true; // Inital condition = true.
-			while(rf_phreaker::protobuf::read_delimited_from(input_file.get(), &proto)) {
-				if(proto.update_case() == rf_phreaker::protobuf::rp_update::UpdateCase::kGps) {
-					gps = message.get_gps();
-					if(gps.lock_) {
-						if(!previously_had_lock) {
-							if(track->size())
-								multiTrack->append(track.get());
-							track.release();
-							track = std::make_unique<Marble::GeoDataTrack>();
-							previously_had_lock = true;
-						}
-						track->addPoint(QDateTime::fromTime_t(gps.coordinated_universal_time_),
-							Marble::GeoDataCoordinates(gps.longitude_, gps.latitude_, gps.altitude_, Marble::GeoDataCoordinates::Degree));
-					}
-					else {
-						previously_had_lock = false;
-					}
-					proto.Clear();
-				}
-			}
-			// Not sure if we can alter track after it's added to multitrack so we wait to add a track until it's finished.
-			// This means the last track is added here (if there are points within).
-			if(track->size()) {
-				multiTrack->append(track.get());
-				track.release();
-			}
-			auto placemark = std::make_unique<Marble::GeoDataPlacemark>();
-			placemark->setName(name);
-			placemark->setGeometry(multiTrack.get());
-			placemark->setVisible(true);
-			multiTrack.release();
-			map()->model()->treeModel()->removeDocument(rpDoc_);
-			rpDoc_->append(placemark.get());
-			placemark->setStyleUrl("#ptrack");
-			map()->model()->treeModel()->addDocument(rpDoc_);
-			placemark.release();
-		}
+	Q_INVOKABLE void addLayer(QString filename) {
+		QMetaObject::invokeMethod(&MarbleLayers::instance(), "addLayer", 
+			Qt::QueuedConnection, Q_ARG(QString, filename));
 	}
 
 	double downloadProgess() {
@@ -245,13 +173,7 @@ public:
 			return std::min(1.0, currentDownloadJobValue_ / numDownloadJobs_);
 	}
 
-	bool isPositionTrackingRelated(Marble::GeoDataPlacemark* p) {
-		return p->name() == "Current Position" || p->name() == "Current Track";
-	}
-
 	QAbstractItemModel* treeViewModel() { return map()->model()->treeModel(); }
-
-	QAbstractItemModel* proxyTreeViewModel() { return &proxyTreeViewModel_; }
 
 	MarbleProxyModel* placemarkModel() { return &placemarkModel_; }
 
@@ -274,6 +196,42 @@ public:
 		return placemark;
 	}
 
+	void componentComplete() {
+		using namespace Marble;
+		MarbleQuickItem::componentComplete();
+
+		//MarbleDebug::setEnabled(true);
+		//map()->setShowFrameRate(true);
+		//map()->setShowRuntimeTrace(true);
+		//map()->setShowDebugBatchRender(true);
+
+		MarbleLayers::instance().init();
+
+		// Force update so that on consecutive uses of the model the map correctly
+		// displays everything.
+		forceMapThemeUpdate();  
+
+		// Force update of position plugin.
+		setPositionProvider("");
+		setPositionProvider("RfPhreakerPositioning");
+
+		// Unlimited persistent cache!
+		map()->model()->setPersistentTileCacheLimit(0);
+
+		// Connect to give user input on downloading tiles.
+		QObject::connect(map()->model()->downloadManager(), &HttpDownloadManager::progressChanged,
+			this, &MarbleManager::handleDownloadProgess);
+		QObject::connect(map()->model()->downloadManager(), &HttpDownloadManager::jobRemoved,
+			this, &MarbleManager::handleDownloadJobRemoved);
+
+		placemarkModel_.setSourceModel(map()->model()->placemarkModel());
+		placemarkModelChanged();
+
+		// Connect for isTrackingEnabled - Stops us from tracking current location when user interacts with map.
+		QObject::connect(inputHandler(), &MarbleInputHandler::mouseEventDoubleClickOrWheelSeen,
+			this, &MarbleManager::mouseEventDoubleClickOrWheelSeen);
+	}
+
 public slots:
 	void handleDownloadProgess(int active, int queued) {
 		auto tmp = std::max(numDownloadJobs_, (double)(active + queued));
@@ -288,110 +246,14 @@ public slots:
 		emit downloadProgressChanged();
 	}
 
-private:
-	void init() {
-		using namespace Marble;
-		//MarbleDebug::setEnabled(true);
-
-		// Unlimited persistent cache!
-		map()->model()->setPersistentTileCacheLimit(0);
-
-		// Connect to give user input on downloading tiles.
-		QObject::connect(map()->model()->downloadManager(), &HttpDownloadManager::progressChanged,
-			this, &MarbleManager::handleDownloadProgess);
-		QObject::connect(map()->model()->downloadManager(), &HttpDownloadManager::jobRemoved,
-			this, &MarbleManager::handleDownloadJobRemoved);
-
-		// Add our position plugin which gives Marble our location.
-		auto pluginManager = map()->model()->pluginManager();
-		pluginManager->addPositionProviderPlugin(&rpPositionProviderPlugin_);
-
-
-		placemarkModel_.setSourceModel(map()->model()->placemarkModel());
-		placemarkModelChanged();
-		auto tree = map()->model()->treeModel();
-		auto tmp = tree->data(tree->index(0, 0), MarbleProxyModel::PlacemarkObjectPointerRole).value<GeoDataObject*>();
-		positionDoc_ = static_cast<GeoDataDocument*>(tmp);
-		Q_ASSERT(positionDoc_->name() == "Position Tracking");
-
-		// Connect for isTrackingEnabled - Stops us from tracking current location when user interacts with map.
-		QObject::connect(inputHandler(), &MarbleInputHandler::mouseEventDoubleClickOrWheelSeen,
-			this, &MarbleManager::mouseEventDoubleClickOrWheelSeen);
-
-		// Open rf_phreaker.kml which contains our styles.
-		// We wait for document to finish opening (GeoObjectAdded).
-		// Once open we config previous layers and positiontracking.
-		QObject::connect(map()->model()->treeModel(), &GeoDataTreeModel::added,
-			this, &MarbleManager::GeoObjectAdded);
-		QFileInfo rpFile(MarbleDirs::path("rf_phreaker/rf_phreaker.kml"));
-		//if(!rpFile.exists())
-		//	 Signal error
-		map()->model()->addGeoDataFile(rpFile.absoluteFilePath());
+	void forceMapThemeUpdate() {
+		map()->forceMapThemeUpdate();
 	}
 
+private:
 	void mouseEventDoubleClickOrWheelSeen() {
 		// This means the user has clicked on the map stopping the tracking from occurring.
 		setIsTrackingEnabled(false);
-	}
-
-	void GeoObjectAdded(Marble::GeoDataObject *object) {
-		if(rpDoc_ == nullptr && object->nodeType() == Marble::GeoDataTypes::GeoDataDocumentType) {
-			auto doc = static_cast<Marble::GeoDataDocument*>(object);
-			if(doc->name() == "RfPhreaker") {
-				rpDoc_ = doc;
-				configPositionTracking();
-				openPreviousLayers();
-			}
-		}
-	}
-
-	void configPositionTracking() {
-		// Disable PositionTracking current position and use our own built in QML
-		using namespace Marble;
-
-		map()->model()->treeModel()->removeDocument(positionDoc_);
-		auto styles = rpDoc_->styles();
-		for(auto i : styles) {
-			positionDoc_->addStyle(i);
-		}
-		auto stylemaps = rpDoc_->styleMaps();
-		for(auto &i : stylemaps) {
-			positionDoc_->addStyleMap(i);
-		}
-
-		auto feature = positionDoc_->child(0);
-		if(feature != nullptr) {
-			Q_ASSERT(feature->name() == QObject::tr("Current Position"));
-			feature->setStyleUrl("#dpos");
-			feature->setVisible(true);
-			emit isCurrentPositionGloballyVisibleChanged();
-		}
-		feature = positionDoc_->child(1);
-		if(feature != nullptr) {
-			Q_ASSERT(feature->name() == QObject::tr("Current Track"));
-			feature->setStyleUrl("#ctrack");
-		}
-		map()->model()->treeModel()->addDocument(positionDoc_);
-	}
-
-	void openPreviousLayers() {
-		// Open any layers from previous instance.
-		SettingsIO s;
-		QStringList placemarkList = s.readMarbleLayers();
-		for(auto &i : placemarkList)
-			addRpf(i);
-	}
-
-	void storePreviousLayers() {
-		QStringList placemarkList;
-		for(auto i = 0; i < placemarkModel_.rowCount(); ++i) {
-			auto placemark = MarbleHelper::toPlacemark(placemarkModel_.data(placemarkModel_.index(i, 0), MarbleProxyModel::PlacemarkObjectPointerRole));
-			if(isPositionTrackingRelated(placemark))
-				continue;
-			placemarkList << placemark->name();
-		}
-		SettingsIO s;
-		s.writeMarbleLayers(placemarkList);
 	}
 
 	void storeLastKnownCoordinate() {
@@ -404,26 +266,10 @@ private:
 		}
 	}
 
-	void createTrackingDocument() {
-		if(rpDoc_ == nullptr) {
-			auto doc = std::make_unique<Marble::GeoDataDocument>();
-			doc->setName("rp_tracking_doc");
-			doc->setDocumentRole(Marble::TrackingDocument);
-			// Marble is managing the memory now.
-			map()->model()->treeModel()->addDocument(doc.get());
-			rpDoc_ = doc.get();
-			doc.release();
-		}
-	}
-
 	double currentDownloadJobValue_;
 	double numDownloadJobs_;
 	bool isTrackingEnabled_;
-	RpPositionProviderPlugin rpPositionProviderPlugin_;
-	Marble::KDescendantsProxyModel proxyTreeViewModel_;
 	MarbleProxyModel placemarkModel_;
-	Marble::GeoDataDocument *rpDoc_;
-	Marble::GeoDataDocument *positionDoc_;
 };
 
 

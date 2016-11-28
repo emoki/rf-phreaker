@@ -30,8 +30,11 @@ set (rf_phreaker_gui_SRCS
 	Gsm.h
 	IO.h
 	Lte.h
+	MarbleHelper.h
 	MarbleManager.h
 	MarbleProxyModel.h
+	MarbleLayerManager.cpp
+	MarbleLayerManager.h
 	MeasurementIndex.h
 	MeasurementModel.h
 	ModelGroup.h

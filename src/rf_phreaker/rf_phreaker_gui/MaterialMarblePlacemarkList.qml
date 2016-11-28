@@ -130,11 +130,8 @@ Rectangle {
         onAccepted: {
             console.log("Layers to import: " + fileUrls);
             for(var i = 0; i < fileUrls.length; ++i)
-                manager.addRpf(fileUrls[i]);
-            placemarkView.updateHeight()
-            if(materialPlacemarkView.snackbar !== undefined)
-                materialPlacemarkView.snackbar.open("Finished importing layers.")
+                manager.addLayer(fileUrls[i]);
         }
-        onRejected: { console.log("Cancelled openLayers dialog.") }
+        onRejected: { console.log("Canceled openLayers dialog.") }
     }
 }

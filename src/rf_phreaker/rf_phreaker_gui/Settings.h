@@ -10,10 +10,12 @@
 
 static const QString api_output_key("api_output");
 static const QString last_known_coordinates_key("last_known_coordinates");
+static const QString rpf_track_min_distance_key("rpf_track_min_distance");
 
 class Settings {
 public:
 	bool api_output_;
+	double rpf_track_min_distance_;
 };
 
 class SettingsIO {
@@ -23,6 +25,7 @@ public:
 
 	void readSettings(Settings &settings) {
 		settings.api_output_ = qs_.value(api_output_key, false).toBool();
+		settings.rpf_track_min_distance_ = qs_.value(rpf_track_min_distance_key, 3).toDouble();
 	}
 
 	Marble::GeoDataCoordinates readLastKnownCoordinate() {
@@ -59,8 +62,8 @@ public:
 	}
 
 	void writeSettings(const Settings &settings) {
-		qs_.setValue("api_output", settings.api_output_);
-
+		qs_.setValue(api_output_key, settings.api_output_);
+		qs_.setValue(rpf_track_min_distance_key, settings.rpf_track_min_distance_);
 	}
 
 	void writeLastKnownCoordinate(const Marble::GeoDataCoordinates &coordinate) {
