@@ -31,7 +31,6 @@ public:
 		roles_[PlacemarkPopularityIndexRole] = "popularityIndex";
 		roles_[PlacemarkCoodinateRole] = "coordinate";
 		roles_[BackgroundRole] = "background";
-
 	}
 
 	QVariant data(const QModelIndex &index, int role = Qt::DisplayRole) const {
