@@ -143,6 +143,12 @@ class MARBLE_EXPORT MarbleMap : public QObject
      */
     QString mapThemeId() const;
 
+	/**
+	* @brief Forces update of map theme.
+	* Ensures the map is refreshed if reusing the model.
+	*/
+	void forceMapThemeUpdate();
+
     void setMapQualityForViewContext( MapQuality qualityForViewContext, ViewContext viewContext );
     MapQuality mapQuality( ViewContext viewContext ) const;
 

@@ -873,6 +873,10 @@ void MarbleMap::setMapThemeId( const QString& mapThemeId )
     d->m_model->setMapThemeId( mapThemeId );
 }
 
+void MarbleMap::forceMapThemeUpdate() {
+	d->updateMapTheme();
+}
+
 void MarbleMapPrivate::updateMapTheme()
 {
     m_layerManager.removeLayer( &m_textureLayer );
