@@ -14,6 +14,8 @@ Card {
     property int height2: dp(215*2+16)
     property int width3: dp(350*3+16*2)
     property int height3: dp(215*3+16*2)
+    property int width4: dp(350*4+16*3)
+    property int height4: dp(215*4+16*3)
 
     state: "w1h1"
 
@@ -65,6 +67,10 @@ Card {
         State {
             name: "w2h3"
             PropertyChanges { target: card; width: width2; height: height3; }
+        },
+        State {
+            name: "w4h4"
+            PropertyChanges { target: card; width: width4; height: height4; }
         }
     ]
 
