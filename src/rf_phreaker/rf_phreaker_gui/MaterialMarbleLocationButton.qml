@@ -15,7 +15,6 @@ ActionButton {
         shortcut: "Ctrl+L"
         onTriggered: {
             marbleManager.isTrackingEnabled = true;
-            marbleManager.setCurrentTrackVisible(true);
             marbleManager.centerOnCurrentPosition();
         }
     }

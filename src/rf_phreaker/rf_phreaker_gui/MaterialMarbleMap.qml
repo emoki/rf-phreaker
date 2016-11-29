@@ -11,8 +11,10 @@ Item {
     width: 600
 
     Component.onCompleted: {
-        if(Api.connectionStatus === ApiTypes.CONNECTED && marbleManager.positionAvailable)
-            manager.centerOnCurrentLocation();
+        if(Api.connectionStatus === ApiTypes.CONNECTED && marbleManager.positionAvailable) {
+            manager.isTrackingEnabled = true;
+            manager.centerOnCurrentPosition();
+        }
     }
 
     MarbleManager {
