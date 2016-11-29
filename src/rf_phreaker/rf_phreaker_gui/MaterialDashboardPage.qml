@@ -26,7 +26,7 @@ Page {
             id: startRecording
             visible: Api.deviceStatus !== ApiTypes.RECORDING
             enabled: Api.connectionStatus === ApiTypes.CONNECTED && Api.deviceStatus === ApiTypes.IDLE
-            text: "Start Recording Data Measuremnts"
+            text: "Record Data"
             shortcut: "Ctrl+R"
             iconName: "av/play_arrow"
             onTriggered: {
@@ -38,7 +38,7 @@ Page {
         Action {
             id: stopRecording
             visible: Api.connectionStatus === ApiTypes.CONNECTED && Api.deviceStatus === ApiTypes.RECORDING
-            text: "Stop Recording Data Measurements"
+            text: "Stop Recording"
             shortcut: "Ctrl+S"
             iconName: "av/stop"
             onTriggered: Api.stopCollection()
