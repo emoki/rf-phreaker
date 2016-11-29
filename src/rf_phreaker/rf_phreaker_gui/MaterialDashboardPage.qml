@@ -23,6 +23,27 @@ Page {
             onTriggered: rpWindow.showError("Error test!", "", false)
         },
         Action {
+            id: startRecording
+            visible: Api.deviceStatus !== ApiTypes.RECORDING
+            enabled: Api.connectionStatus === ApiTypes.CONNECTED && Api.deviceStatus === ApiTypes.IDLE
+            text: "Start Recording Data Measuremnts"
+            shortcut: "Ctrl+R"
+            iconName: "av/play_arrow"
+            onTriggered: {
+                rpWindow.startCollectionDialog.filename = "collection_data_" +
+                        Qt.formatDateTime(new Date(), "yyyy-MMM-dd_hh-mm-ss");
+                rpWindow.startCollectionDialog.open()
+            }
+        },
+        Action {
+            id: stopRecording
+            visible: Api.connectionStatus === ApiTypes.CONNECTED && Api.deviceStatus === ApiTypes.RECORDING
+            text: "Stop Recording Data Measurements"
+            shortcut: "Ctrl+S"
+            iconName: "av/stop"
+            onTriggered: Api.stopCollection()
+        },
+        Action {
             iconName: "navigation/more_vert"
             name: "More Options"
             hoverAnimation: true
@@ -576,8 +597,7 @@ Page {
     }
 
     ActionButton {
-        id: startRecording
-        visible: Api.connectionStatus === ApiTypes.CONNECTED && Api.deviceStatus === ApiTypes.IDLE
+        id: addCard
 
         anchors {
             right: parent.right
@@ -586,50 +606,11 @@ Page {
         }
 
         action: Action {
-            text: "&Start Recording Data Measuremnts"
-            shortcut: "Ctrl+R"
-            onTriggered: {
-                startCollectionDialog.filename = "collection_data_" +
-                        Qt.formatDateTime(new Date(), "yyyy-MMM-dd_hh-mm-ss");
-                startCollectionDialog.open()
-            }
+            text: ""
+            shortcut: "Ctrl+A"
+            onTriggered: {}
         }
-        iconName: "av/play_arrow"
-    }
-
-    ActionButton {
-        id: stopRecording
-        visible: Api.connectionStatus === ApiTypes.CONNECTED && Api.deviceStatus === ApiTypes.RECORDING
-
-        anchors {
-            right: parent.right
-            bottom: snackbar.top
-            margins: dp(32)
-        }
-
-        action: Action {
-            text: "Stop &Recording Data Measurements"
-            shortcut: "Ctrl+S"
-            onTriggered: Api.stopCollection()
-        }
-        iconName: "av/stop"
-    }
-
-    FileSaveDialog{
-        id: startCollectionDialog
-        visible: false
-        title: "Please choose the collection filename"
-        nameFilters: [ "rf phreaker files (*.rfp)", "All files (*)" ]
-//        modality: Qt.WindowModal
-//        folder: shortcuts.documents
-//        selectedNameFilter: "rf phreaker files (*.rfp)"
-//        sidebarVisible: true
-        onAccepted: {
-            Api.collectionFilename = fileUrl;
-            console.log("collection filename is" + fileUrl);
-            rpWindow.stateMachine.startRecording();
-        }
-        onRejected: { console.log("Cancelled save collection filename.") }
+        iconName: "content/add"
     }
 
     Snackbar {

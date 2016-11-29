@@ -373,10 +373,10 @@ ApplicationWindow {
         id: startCollectionDialog
         visible: false
         title: "Please choose the collection filename"
-        nameFilters: [ "rf phreaker files (*.rfp)", "All files (*)" ]
+        nameFilters: [ "rf phreaker files (*.rpf)", "All files (*)" ]
 //        modality: Qt.WindowModal
 //        folder: shortcuts.documents
-//        selectedNameFilter: "rf phreaker files (*.rfp)"
+//        selectedNameFilter: "rf phreaker files (*.rpf)"
 //        sidebarVisible: true
         onAccepted: {
             Api.collectionFilename = fileUrl;

@@ -15,18 +15,34 @@ Page {
     actions: [
         Action {
             iconName: "maps/layers"
-            name: "open mr snacky, bitch!"
-            onTriggered: snackbar.open("Test! test!!!")
-        },
-        Action {
-            iconName: "maps/layers"
             name: "Manager layers"
             onTriggered: layerPopup.open()
         },
         Action {
             iconName: "file/file_download"
             name: "Download current map region"
-            onTriggered: materialMarbleMap.marbleManager.downloadMapRegion(marbleManager.marbleMap)
+            onTriggered: materialMarbleMap.marbleManager.downloadMapRegion()
+        },
+        Action {
+            id: startRecording
+            visible: Api.deviceStatus !== ApiTypes.RECORDING
+            enabled: Api.connectionStatus === ApiTypes.CONNECTED && Api.deviceStatus === ApiTypes.IDLE
+            text: "Start Recording Data Measuremnts"
+            shortcut: "Ctrl+R"
+            iconName: "av/play_arrow"
+            onTriggered: {
+                rpWindow.startCollectionDialog.filename = "collection_data_" +
+                        Qt.formatDateTime(new Date(), "yyyy-MMM-dd_hh-mm-ss");
+                rpWindow.startCollectionDialog.open()
+            }
+        },
+        Action {
+            id: stopRecording
+            visible: Api.connectionStatus === ApiTypes.CONNECTED && Api.deviceStatus === ApiTypes.RECORDING
+            text: "Stop Recording Data Measurements"
+            shortcut: "Ctrl+S"
+            iconName: "av/stop"
+            onTriggered: Api.stopCollection()
         },
         Action {
             iconName: "navigation/more_vert"

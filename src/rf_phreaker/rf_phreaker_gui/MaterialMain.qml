@@ -11,7 +11,7 @@ ApplicationWindow {
     property alias stateMachine: dsmOperation
     property alias openScannerDialog: __openScannerDialog
     property alias snackbar: __snackbar
-
+    property alias startCollectionDialog: __startCollectionDialog
     title: ""
 
     visible: true
@@ -90,6 +90,22 @@ ApplicationWindow {
         id: __openScannerDialog
     }
 
+    FileSaveDialog{
+        id: __startCollectionDialog
+        visible: false
+        title: "Please choose the collection filename"
+        nameFilters: [ "rf phreaker files (*.rpf)", "kml files (*.kml)", "All files (*)" ]
+//        modality: Qt.WindowModal
+//        folder: shortcuts.documents
+//        selectedNameFilter: "rf phreaker files (*.rfp)"
+//        sidebarVisible: true
+        onAccepted: {
+            Api.collectionFilename = fileUrl;
+            console.log("collection filename is" + fileUrl);
+            rpWindow.stateMachine.startRecording();
+        }
+        onRejected: { console.log("Cancelled save collection filename.") }
+    }
 //    Label {
 //        id: graphingLabel
 //        font.pixelSize: dp(12)
