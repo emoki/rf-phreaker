@@ -9,8 +9,8 @@ Item {
     property int posX: 0
     property int posY: 0
 
-    width: 100
-    height: 100
+    width: 75
+    height: 75
     x: posX - width * 0.5
     y: posY - height * 0.5
 
