@@ -17,9 +17,9 @@ ApplicationWindow {
     visible: true
 
     theme {
-        primaryColor: "indigo"
-        accentColor: "green"
-        tabHighlightColor: "white"
+        primaryColor: Api.themePrimaryColor
+        accentColor: Api.themeAccentColor
+        tabHighlightColor: Api.themeTabHighlightColor
     }
 
     property var pages: [

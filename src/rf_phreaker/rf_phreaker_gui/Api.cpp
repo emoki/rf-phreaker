@@ -109,6 +109,9 @@ Api::Api(QObject *parent)
 	connect(&scanList_, SIGNAL(rowsInserted(QModelIndex, int, int)), this, SLOT(findFreqMinMax()));
 	connect(&scanList_, SIGNAL(rowsRemoved(QModelIndex, int, int)), this, SLOT(findFreqMinMax()));
 
+	SettingsIO settingsIO;
+	settingsIO.readSettings(settings_);
+
 	thread_->start();
 }
 
@@ -124,10 +127,10 @@ Api::~Api() {
 
 void Api::initializeApi() {
 	QCoreApplication::postEvent(thread_->worker(), new InitializeApiEvent(&callbacks_));
-	SettingsIO settingsIO;
-	settingsIO.readSettings(settings_);
-	scanList_.setList(settingsIO.readScanList(this));
 
+	// We have to initialize the channel list here so that QML is properly updated.
+	SettingsIO settingsIO;
+	scanList_.setList(settingsIO.readScanList(this));
 }
 
 void Api::cleanUpApi() {

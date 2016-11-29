@@ -34,7 +34,7 @@ Item {
         ColorOverlay {
                 anchors.fill: image
                 source: image
-                color: Theme.primaryColor
+                color: Theme.accentColor
         }
     }
 
@@ -42,7 +42,7 @@ Item {
         id: innerCircle
         width: root.width * .30
         height: root.height * .30
-        color: Theme.primaryColor
+        color: Theme.accentColor
         radius: width * .5
         anchors.centerIn: parent
     }

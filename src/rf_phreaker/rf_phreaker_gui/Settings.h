@@ -11,11 +11,17 @@
 static const QString api_output_key("api_output");
 static const QString last_known_coordinates_key("last_known_coordinates");
 static const QString rpf_track_min_distance_key("rpf_track_min_distance");
+static const QString theme_primary_color_key("theme_primary_color");
+static const QString theme_accent_color_key("theme_accent_color");
+static const QString theme_tab_highlight_color_key("theme_tab_highlight_color");
 
 class Settings {
 public:
 	bool api_output_;
 	double rpf_track_min_distance_;
+	QString theme_primary_color_;
+	QString theme_accent_color_;
+	QString theme_tab_highlight_color_;
 };
 
 class SettingsIO {
@@ -26,6 +32,9 @@ public:
 	void readSettings(Settings &settings) {
 		settings.api_output_ = qs_.value(api_output_key, false).toBool();
 		settings.rpf_track_min_distance_ = qs_.value(rpf_track_min_distance_key, 3).toDouble();
+		settings.theme_primary_color_ = qs_.value(theme_primary_color_key, "indigo").toString();
+		settings.theme_accent_color_ = qs_.value(theme_accent_color_key, "green").toString();
+		settings.theme_tab_highlight_color_ = qs_.value(theme_tab_highlight_color_key, "white").toString();
 	}
 
 	Marble::GeoDataCoordinates readLastKnownCoordinate() {
@@ -64,6 +73,9 @@ public:
 	void writeSettings(const Settings &settings) {
 		qs_.setValue(api_output_key, settings.api_output_);
 		qs_.setValue(rpf_track_min_distance_key, settings.rpf_track_min_distance_);
+		qs_.setValue(theme_primary_color_key, settings.theme_primary_color_);
+		qs_.setValue(theme_accent_color_key, settings.theme_accent_color_);
+		qs_.setValue(theme_tab_highlight_color_key, settings.theme_tab_highlight_color_);
 	}
 
 	void writeLastKnownCoordinate(const Marble::GeoDataCoordinates &coordinate) {
