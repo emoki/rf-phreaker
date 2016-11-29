@@ -123,16 +123,6 @@ public:
 	QString themeAccentColor() { return settings_.theme_accent_color_; }
 	QString themeTabHighlightColor() { return settings_.theme_tab_highlight_color_; }
 
-//	void setScanList(const CollectionInfoList *list) {
-//		scanList_->setList(list->list());
-//		emit scanListChanged();
-//	}
-
-//	void setBackgroundScanList(const CollectionInfoList *list) {
-//		backgroundScanList_->setList(list->list());
-//		emit backgroundScanListChanged();
-//	}
-
 	void setDeviceStatus(ApiTypes::DeviceStatus s) {
 		if(deviceStatus_ != s) {
 			deviceStatus_ = s;

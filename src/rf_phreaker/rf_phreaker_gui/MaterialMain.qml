@@ -106,11 +106,4 @@ ApplicationWindow {
         }
         onRejected: { console.log("Cancelled save collection filename.") }
     }
-//    Label {
-//        id: graphingLabel
-//        font.pixelSize: dp(12)
-//        font.family: "Roboto"
-//        font.weight: Font.Normal
-//    }
-
 }
