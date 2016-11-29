@@ -115,7 +115,10 @@ Rectangle {
                         color: Theme.light.textColor
                         anchors.verticalCenter: parent.verticalCenter
                         onClicked: manager.removePlacemark(styleData.row);
-                        enabled: styleData.row === 0 || styleData.row === 1 ? false : true
+                        enabled: {
+                            var s = String(placemarkView.model.data(placemarkView.model.index(styleData.row, 0), MarbleProxyModel.DisplayRole))
+                            return s !== "Current Position" && s !== "Current Track" && s.indexOf("recording") === -1
+                        }
                     }
                 }
             }
