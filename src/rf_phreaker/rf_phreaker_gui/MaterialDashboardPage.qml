@@ -55,7 +55,7 @@ Page {
         id: flickable
         anchors.fill: parent
         contentWidth: parent.width;
-        contentHeight: layout.childrenRect.height
+        contentHeight: layout.childrenRect.height + dp(16)
 
         Flow {
             id: layout
@@ -521,8 +521,7 @@ Page {
             }
 
             MaterialCard {
-                state: "w3h3"
-//                state: mapExpBut.expanded ? "w3h3" : "w2h2"
+                state: mapExpBut.expanded ? "w4h4" : "w2h2"
                 MouseArea {
                     anchors.fill: parent
                     propagateComposedEvents: true
@@ -534,47 +533,59 @@ Page {
                 ColumnLayout {
                     anchors {
                         fill: parent
-                        //bottomMargin: dp(8)
+                        bottomMargin: dp(8)
                     }
+                    spacing: dp(8)
 
                     MaterialMarbleMap {
                         id: dashboardMarbleMap
-                        //anchors.fill: parent
                         Layout.fillWidth: true
                         Layout.fillHeight: true
                         visible: true
                         focus: true
-                    }
-                    MaterialMarbleLocationButton {
-                        marbleManager: dashboardMarbleMap.marbleManager
-                        anchors {
-                            right: dashboardMarbleMap.right
-                            bottom: dashboardMarbleMap.bottom
-                            margins: dp(32)
+
+                        MaterialMarbleLocationButton {
+                            marbleManager: dashboardMarbleMap.marbleManager
+                            anchors {
+                                right: dashboardMarbleMap.right
+                                bottom: dashboardMarbleMap.bottom
+                                margins: dp(32)
+                            }
+                            isMiniSize: true
                         }
-                        isMiniSize: true
                     }
 
-//                    RowLayout {
-//                        Layout.fillWidth: true
-//                        Layout.preferredHeight: mapExpBut.implicitHeight
-//                        spacing: dp(8)
+                    RowLayout {
+                        spacing: dp(8)
 
-//                        anchors {
-//                            right: parent.right
-//                            left: parent.left
-//                            rightMargin: dp(8)
-//                            leftMargin: dp(8)
-//                        }
+                        anchors {
+                            right: parent.right
+                            left: parent.left
+                            rightMargin: dp(8)
+                            leftMargin: dp(8)
+                        }
 
-//                        Item {
-//                            Layout.fillWidth: true
-//                        }
+                        Button {
+                            text: "Manager Layers"
+                            textColor: Theme.primaryColor
+                            visible: true
+                            //onClicked:
+                        }
+                        Button {
+                            text: "Download Current Area"
+                            textColor: Theme.primaryColor
+                            visible: true
+                            //onClicked:
+                        }
 
-//                        MaterialExpansionButton {
-//                            id: mapExpBut
-//                        }
-//                    }
+                        Item {
+                            Layout.fillWidth: true
+                        }
+
+                        MaterialExpansionButton {
+                            id: mapExpBut
+                        }
+                    }
                 }
             }
 
