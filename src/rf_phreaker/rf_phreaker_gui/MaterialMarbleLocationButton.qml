@@ -19,6 +19,6 @@ ActionButton {
         }
     }
     iconName: Api.connectionStatus === ApiTypes.CONNECTED
-              ? (marbleManager.positionAvailable ? "device/gps_fixed" : "device/gps_fixed")
+              ? (marbleManager.positionAvailable ? "device/gps_fixed" : "device/gps_not_fixed")
               : "device/gps_off"
 }
