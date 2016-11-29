@@ -13,8 +13,8 @@ Rectangle {
     property var manager
     property var snackbar
 
-    implicitHeight: Math.min(placemarkView.implicitHeight + toolbar.implicitHeight + dp(44), dp(512))
-    implicitWidth: dp(512)
+    implicitHeight: Math.min(placemarkView.implicitHeight + toolbar.implicitHeight + dp(44), dp(676))
+    implicitWidth: dp(676)
 
     signal close
 
@@ -61,15 +61,20 @@ Rectangle {
 
             function updateHeight() {
                 if(placemarkView.model !== undefined)
-                    placemarkView.implicitHeight = placemarkView.model.rowCount() * dp(48) + dp(56) + dp(10)
+                    placemarkView.implicitHeight = placemarkView.model.rowCount() * dp(48) + dp(56) + dp(15)
                 else
-                    placemarkView.implicitHeight = 4 * dp(48) + dp(56) + dp(10)
+                    placemarkView.implicitHeight = 4 * dp(48) + dp(56) + dp(15)
             }
 
-            onVisibleChanged: updateHeight()
-            Component.onCompleted: updateHeight()
-            onModelChanged: updateHeight()
+            onVisibleChanged: placemarkView.updateHeight()
+            Component.onCompleted: placemarkView.updateHeight()
+            Connections {
+                target: placemarkView.model
+                onRowsInserted: placemarkView.updateHeight()
+                onRowsRemoved: placemarkView.updateHeight()
+            }
 
+            // Integrate into item delegate!
             onDoubleClicked: { manager.centerOnPlacemark(currentRow); }
 
             headerDelegate: MaterialHeaderDelegate { control: placemarkView }
