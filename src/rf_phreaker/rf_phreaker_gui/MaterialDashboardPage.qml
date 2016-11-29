@@ -569,13 +569,13 @@ Page {
                             text: "Manager Layers"
                             textColor: Theme.primaryColor
                             visible: true
-                            //onClicked:
+                            onClicked: dashboardMarbleMap.layerPopup.open()
                         }
                         Button {
                             text: "Download Current Area"
                             textColor: Theme.primaryColor
                             visible: true
-                            //onClicked:
+                            onClicked: dashboardMarbleMap.marbleManager.downloadMapRegion()
                         }
 
                         Item {

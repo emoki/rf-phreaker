@@ -16,7 +16,7 @@ Page {
         Action {
             iconName: "maps/layers"
             name: "Manager layers"
-            onTriggered: layerPopup.open()
+            onTriggered: materialMarbleMap.layerPopup.open()
         },
         Action {
             iconName: "file/file_download"
@@ -50,47 +50,7 @@ Page {
             hoverAnimation: true
         }
     ]
-    PopupBase {
-        id: layerPopup
 
-        x: columnLayout.x + columnLayout.width / 2 - marblePlacemarkList.width / 2
-        y: columnLayout.y + dp(64)
-
-        width: marblePlacemarkList.implicitWidth
-        height: marblePlacemarkList.implicitHeight
-
-        globalMouseAreaEnabled: false
-        dismissOnTap: false
-
-        opacity: showing ? 1 : 0
-        visible: opacity > 0
-
-        Behavior on opacity {
-            NumberAnimation { duration: 200 }
-        }
-
-        View {
-            id: dialogContainer
-
-            anchors.fill: parent
-            elevation: 5
-            radius: dp(2)
-
-            Flickable {
-                id: viewFlick
-                MaterialMarblePlacemarkList {
-                    id: marblePlacemarkList
-                    manager: materialMarbleMap.marbleManager
-                    model: materialMarbleMap.marbleManager.placemarkModel
-                    snackbar: page.snackbar
-                    onClose: layerPopup.close()
-                }
-            }
-            Scrollbar {
-                flickableItem: viewFlick
-            }
-        }
-    }
     ColumnLayout {
         id: columnLayout
         anchors.fill: parent

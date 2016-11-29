@@ -6,7 +6,9 @@ import RfPhreaker 1.0
 import org.kde.edu.marble 0.20
 
 Item {
+    id: root_
     property alias marbleManager: manager
+    property alias layerPopup: layerPopup__
     height: 600
     width: 600
 
@@ -74,6 +76,48 @@ Item {
                     }
                     manager.update();
                 }
+            }
+        }
+    }
+
+    PopupBase {
+        id: layerPopup__
+
+        x: root_.x + root_.width / 2 - marblePlacemarkList.width / 2
+        y: root_.y + dp(64)
+
+        width: marblePlacemarkList.implicitWidth
+        height: marblePlacemarkList.implicitHeight
+
+        globalMouseAreaEnabled: false
+        dismissOnTap: false
+
+        opacity: showing ? 1 : 0
+        visible: opacity > 0
+
+        Behavior on opacity {
+            NumberAnimation { duration: 200 }
+        }
+
+        View {
+            id: dialogContainer
+
+            anchors.fill: parent
+            elevation: 5
+            radius: dp(2)
+
+            Flickable {
+                id: viewFlick
+                MaterialMarblePlacemarkList {
+                    id: marblePlacemarkList
+                    manager: manager
+                    model: manager.placemarkModel
+                    snackbar: page.snackbar
+                    onClose: layerPopup.close()
+                }
+            }
+            Scrollbar {
+                flickableItem: viewFlick
             }
         }
     }
