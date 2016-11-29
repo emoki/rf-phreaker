@@ -123,10 +123,11 @@ Item {
     }
 
     ProgressBar {
+        id: progressBar
         anchors.bottom: parent.bottom
         anchors.left: parent.left
         anchors.right: parent.right
-        color: "transparent"
+        visible: manager.downloadProgess != 0 && manager.downloadProgess != 1
         value: manager.downloadProgess
     }
 }
