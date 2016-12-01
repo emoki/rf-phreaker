@@ -123,14 +123,14 @@ public:
 			lte_.frame_number_ = a.frame_number_;
 			emit frameNumberChanged();
 		}
-		if(lte_.layer_3_.raw_layer_3_.size() ||
-				lte_.layer_3_.sib1_.is_decoded() ||
-				lte_.layer_3_.sib3_.is_decoded() ||
-				lte_.layer_3_.sib4_.is_decoded() ||
-				lte_.layer_3_.sib5_.is_decoded() ||
-				lte_.layer_3_.sib6_.is_decoded() ||
-				lte_.layer_3_.sib7_.is_decoded() ||
-				lte_.layer_3_.sib8_.is_decoded()) {
+		if(a.layer_3_.raw_layer_3_.size() ||
+				a.layer_3_.sib1_.is_decoded() ||
+				a.layer_3_.sib3_.is_decoded() ||
+				a.layer_3_.sib4_.is_decoded() ||
+				a.layer_3_.sib5_.is_decoded() ||
+				a.layer_3_.sib6_.is_decoded() ||
+				a.layer_3_.sib7_.is_decoded() ||
+				a.layer_3_.sib8_.is_decoded()) {
 			lte_.layer_3_.update_info(a.layer_3_);
 			emit cellLayer3Changed();
 		}
