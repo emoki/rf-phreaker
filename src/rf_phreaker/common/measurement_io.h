@@ -90,9 +90,9 @@ inline std::ostream& header(std::ostream &os, const gps &t) {
 		<< "horizontal_accuracy_meters" << delimiter
 		<< "vertical_accuracy_meters" << delimiter
 		<< "raw_status" << delimiter
-		<< "num_satellite_info" << delimiter;
+		<< "num_satellite_info";
 		for(auto i = 0; i < 32; ++i)
-			os << "sat_prn_" << i << delimiter
+			os << delimiter << "sat_prn_" << i << delimiter
 			<< "sat_snr_" << i << delimiter
 			<< "sat_elevation_" << i << delimiter
 			<< "sat_azimuth_" << i;
@@ -121,6 +121,8 @@ inline std::ostream& operator<<(std::ostream &os, const gps &t) {
 			<< i.snr_ << delimiter
 			<< i.elevation_ << delimiter
 			<< i.azimuth_;
+	for(size_t i = 0; i < 32 - t.satellites_.size(); ++i)
+		os << delimiter << delimiter << delimiter << delimiter;
 	return os;
 }
 
