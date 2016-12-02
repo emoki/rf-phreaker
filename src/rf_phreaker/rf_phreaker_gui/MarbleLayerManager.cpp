@@ -79,7 +79,8 @@ void MarbleLayerManager::init() {
 }
 
 MarbleLayerManager::~MarbleLayerManager() {
-	storePreviousLayers();
+	if(init_)
+		storePreviousLayers();
 }
 
 void MarbleLayerManager::GeoObjectAdded(Marble::GeoDataObject *object) {
