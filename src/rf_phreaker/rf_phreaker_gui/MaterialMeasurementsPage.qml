@@ -13,7 +13,7 @@ TabbedPage {
     actions: [
         Action {
             id: startRecording
-            visible: Api.connectionStatus !== ApiTypes.RECORDING
+            visible: Api.deviceStatus !== ApiTypes.RECORDING
             enabled: Api.connectionStatus === ApiTypes.CONNECTED && Api.deviceStatus === ApiTypes.IDLE
             text: "Record Data"
             shortcut: "Ctrl+R"
