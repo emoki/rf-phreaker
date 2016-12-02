@@ -83,6 +83,10 @@ RP_LIBEXPORT(const char*) rp_status_message(rp_status status) {
 	return rf_phreaker_impl::status_message(status);
 }
 
+RP_LIBEXPORT(const char*) rp_last_error_message() {
+	return rf_phreaker_impl::instance().last_error_message();
+}
+
 RP_LIBEXPORT(const char*) rp_build_version() {
 	return rf_phreaker_impl::build_version();
 }

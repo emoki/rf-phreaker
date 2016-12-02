@@ -10,8 +10,9 @@ ApplicationWindow {
 
     property alias stateMachine: dsmOperation
     property alias openScannerDialog: __openScannerDialog
-    property alias snackbar: __snackbar
+    property alias snackbar: navPage.snackbar
     property alias startCollectionDialog: __startCollectionDialog
+    property alias messageDialog: __messageDialog
     title: ""
 
     visible: true
@@ -62,10 +63,6 @@ ApplicationWindow {
                 }
             }
         }
-
-        Snackbar {
-            id: __snackbar
-        }
     }
 
     onClosing: {
@@ -86,8 +83,17 @@ ApplicationWindow {
         id: dsmOperation
     }
 
-    MaterialOpenScannerDialog {
+    //MaterialOpenScannerDialog {
+    SelectScannerWindow {
         id: __openScannerDialog
+    }
+
+    Dialog {
+        id: __messageDialog
+        width: dp(400)
+        title: Api.newestError.mainDescription
+        text: Api.newestError.details
+        negativeButton.visible: false
     }
 
     FileSaveDialog{

@@ -23,6 +23,8 @@ public:
 	}
 	void set_device_has_updated(bool b) { device_has_updated_ = b; }
 	void set_error_has_occurred(bool b) { error_has_occurred_ = b; }
+	bool device_has_updated() { return device_has_updated_; }
+	bool error_has_occurred() { return error_has_occurred_; }
 private:
 	api_helper() {};
 	std::atomic_bool device_has_updated_;

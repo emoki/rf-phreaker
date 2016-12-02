@@ -11,9 +11,12 @@
 import QtQuick 2.4
 import Material 0.3
 import QtQuick.Controls 1.4 as Controls
+import RfPhreaker 1.0
 
 TabbedPage {
     id: navPage
+
+    property var snackbar: __snackbar
 
     backAction: navDrawer.action
     title: page.title
@@ -29,13 +32,6 @@ TabbedPage {
 
     property var page
 
-
-//    Connections {
-//        target: navPage.page.snackbar ? navPage.page.snackbar : navPage.snacky
-//        onClicked: snacky.clicked
-//        onOpen: snacky.open(text)
-//    }
-
     function navigate(page) {
         stackView.push({ item: page, replace: true })
         navPage.page = stackView.currentItem;
@@ -44,15 +40,36 @@ TabbedPage {
 
     onNavDrawerChanged: navDrawer.parent = navPage
 
-    //onPageChanged: stackView.push({ item: page, replace: true })
-
     Controls.StackView {
         id: stackView
-        anchors.fill: parent
+        anchors.top: parent.top
+        anchors.left: parent.left
+        anchors.right: parent.right
+        anchors.bottom: __snackbar.top
     }
 
-//    Snackbar {
-//        id: snacky
-//    }
+    Snackbar {
+        id: __snackbar
+        anchors.bottom: parent.bottom
+        property var messages: new Array(0)
+        Component.onCompleted: {
+            Api.messagesChanged.connect(__snackbar.store)
+        }
+        signal store()
+        onStore: {
+            messages.push(Api.newestMessage);
+            showMessageAndShift();
+        }
+        onOpenedChanged: {
+            if(messages.length) {
+                showMessageAndShift();
+            }
+        }
+        function showMessageAndShift() {
+            if(!opened) {
+                __snackbar.open(messages.shift().details);
+            }
+        }
+    }
 
 }

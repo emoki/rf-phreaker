@@ -69,6 +69,10 @@ typedef enum rp_status {
 	RP_STATUS_PROCESSING_ERROR,
 	RP_STATUS_GPS_COMMUNICATION_ERROR,
 	RP_STATUS_RF_PHREAKER_API_ERROR,
+	RP_STATUS_LICENSE_ERROR,
+	RP_STATUS_CONFIGURATION_FILE_NOT_FOUND,
+	RP_STATUS_CONVERSION_ERROR,
+	RP_STATUS_COLLECTION_FINISHED,
 	RP_STATUS_GENERIC_ERROR,
 	RP_STATUS_UNKNOWN_ERROR
 } rp_status;
@@ -784,6 +788,8 @@ RP_LIBEXPORT(rp_status) rp_get_iq_data(rp_device *device, rp_frequency_type freq
 RP_LIBEXPORT(rp_status) rp_update_license(rp_device *device, const char *filename);
 
 RP_LIBEXPORT(const char*) rp_status_message(rp_status status);
+
+RP_LIBEXPORT(const char*) rp_last_error_message();
 
 RP_LIBEXPORT(const char*) rp_build_version();
 

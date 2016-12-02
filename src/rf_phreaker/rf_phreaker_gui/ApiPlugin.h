@@ -2,6 +2,7 @@
 #include <QtQml/qqml.h>
 #include "rf_phreaker/rf_phreaker_gui/Api.h"
 #include "rf_phreaker/rf_phreaker_gui/ApiTypes.h"
+#include "rf_phreaker/rf_phreaker_gui/ApiMessage.h"
 #include "rf_phreaker/rf_phreaker_gui/ChannelFreq.h"
 #include "rf_phreaker/rf_phreaker_gui/CollectionInfoList.h"
 #include "rf_phreaker/rf_phreaker_gui/CollectionInfoSearch.h"
@@ -43,6 +44,7 @@ void registerQmlTypes()
 
 	qmlRegisterSingletonType<Api>(uri.latin1(), 1, 0, "Api", ApiInterfaceSingletonTypeProvider);
 	qmlRegisterType<ApiTypes>(uri.latin1(), 1, 0, "ApiTypes");
+	qmlRegisterType<ApiMessage>(uri.latin1(), 1, 0, "ApiMessage");
 	qmlRegisterType<ChannelFreq>(uri.latin1(), 1, 0, "ChannelFreq");
 	qmlRegisterType<CollectionInfo>(uri.latin1(), 1, 0, "CollectionInfo");
 	qmlRegisterType<CollectionInfoList>(uri.latin1(), 1, 0, "CollectionInfoList");

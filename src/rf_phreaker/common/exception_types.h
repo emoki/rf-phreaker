@@ -9,6 +9,7 @@ namespace rf_phreaker
 enum error_type
 {
 	no_error_type,
+	unknown_error_type,
 	generic_error_type,
 	comm_error_type,
 	scanner_init_error_type,
@@ -112,5 +113,48 @@ typedef specific_error<cappeen_api_error_type> cappeen_api_error;
 typedef specific_error<gps_comm_error_type> gps_comm_error;
 typedef specific_error<rf_phreaker_api_error_type> rf_phreaker_api_error;
 typedef specific_error<rf_phreaker_gui_error_type> rf_phreaker_gui_error;
+
+inline rf_phreaker_error create_error(error_type err, const std::string &str, int code) {
+	switch(err) {
+	case generic_error_type:
+		return rf_phreaker_error(str, code);
+	case comm_error_type:
+		return comm_error(str, code);
+	case scanner_init_error_type:
+		return scanner_init_error(str, code);
+	case hardware_info_error_type:
+		return hardware_info_error(str, code);
+	case misc_error_type:
+		return misc_error(str, code);
+	case file_io_error_type:
+		return file_io_error(str, code);
+	case blade_rf_error_type:
+		return blade_rf_error(str, code);
+	case ipp_error_type:
+		return ipp_error(str, code);
+	case filter_error_type:
+		return filter_error(str, code);
+	case gsm_analysis_error_type:
+		return gsm_analysis_error(str, code);
+	case umts_analysis_error_type:
+		return umts_analysis_error(str, code);
+	case lte_analysis_error_type:
+		return lte_analysis_error(str, code);
+	case processing_error_type:
+		return processing_error(str, code);
+	case matlab_interface_error_type:
+		return matlab_interface_error(str, code);
+	case cappeen_api_error_type:
+		return cappeen_api_error(str, code);
+	case gps_comm_error_type:
+		return gps_comm_error(str, code);
+	case rf_phreaker_api_error_type:
+		return rf_phreaker_api_error(str, code);
+	case rf_phreaker_gui_error_type:
+		return rf_phreaker_gui_error(str, code);
+	default:
+		return rf_phreaker_error(str, code);
+	}
+}
 
 }

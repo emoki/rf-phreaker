@@ -41,7 +41,7 @@ Page {
             text: "Stop Recording"
             shortcut: "Ctrl+S"
             iconName: "av/stop"
-            onTriggered: Api.stopCollection()
+            onTriggered: rpWindow.stateMachine.stopScanning()
         },
         Action {
             iconName: "navigation/more_vert"
@@ -203,14 +203,14 @@ Page {
                                 text: "Disconnect"
                                 textColor: Theme.primaryColor
                                 visible: Api.connectionStatus === ApiTypes.CONNECTED
-                                onClicked: Api.disconnectDevice();
+                                onClicked: rpWindow.stateMachine.disconnectScanner();
 
                             }
                             Button {
                                 text: "Connect"
                                 textColor: Theme.primaryColor
                                 visible: Api.connectionStatus !== ApiTypes.CONNECTED && Api.connectionStatus !== ApiTypes.CONNECTING
-                                onClicked: dsmOperation.connectScanner();
+                                onClicked: rpWindow.stateMachine.connectScanner();
                             }
                         }
                         Item {
@@ -589,6 +589,118 @@ Page {
                 }
             }
 
+            MaterialCard {
+                state: wcdmaExpBut.expanded ? "w2h3" : "w1h2"
+                ColumnLayout {
+                    anchors {
+                        fill: parent
+                        topMargin: dp(24)
+                        bottomMargin: dp(8)
+                    }
+
+                    ColumnLayout {
+                        anchors {
+                            top: parent.top
+                            right: parent.right
+                            left: parent.left
+                            rightMargin: dp(16*2)
+                            leftMargin: dp(16)
+                        }
+                        Label {
+                            style: "headline"
+                            text: "WCDMA Measurements"
+                        }
+                        BarChart {
+                            id: wcdmaBarChart
+                            Layout.fillWidth: true
+                            Layout.fillHeight: true
+                            sourceModel: Api.wcdmaModels.fullScanModel
+
+                            slMin: -120
+                            slMax: -10
+                        }
+                        Item {
+                            Layout.fillWidth: true
+                            Layout.preferredHeight: dp(8)
+                        }
+                    }
+                    RowLayout {
+                        Layout.alignment: Qt.AlignRight
+                        spacing: dp(8)
+
+                        anchors {
+                            right: parent.right
+                            left: parent.left
+                            rightMargin: dp(8)
+                            leftMargin: dp(8)
+                        }
+                        Item {
+                            Layout.fillWidth: true
+                        }
+                        MaterialExpansionButton {
+                            id: wcdmaExpBut
+                        }
+                    }
+                }
+            }
+
+            MaterialCard {
+                state: lteExpBut.expanded ? "w2h3" : "w1h2"
+                ColumnLayout {
+                    anchors {
+                        fill: parent
+                        topMargin: dp(24)
+                        bottomMargin: dp(8)
+                    }
+
+                    ColumnLayout {
+                        anchors {
+                            top: parent.top
+                            right: parent.right
+                            left: parent.left
+                            rightMargin: dp(16*2)
+                            leftMargin: dp(16)
+                        }
+                        Label {
+                            style: "headline"
+                            text: "LTE Measurements"
+                        }
+                        BarChart {
+                            id: lteBarChart
+                            Layout.fillWidth: true
+                            Layout.fillHeight: true
+
+                            sourceModel: Api.lteModels.fullScanModel
+
+                            slMin: -120
+                            slMax: -10
+                        }
+                        Item {
+                            Layout.fillWidth: true
+                            Layout.preferredHeight: dp(8)
+                        }
+                    }
+                    RowLayout {
+                        Layout.alignment: Qt.AlignRight
+                        spacing: dp(8)
+
+                        anchors {
+                            right: parent.right
+                            left: parent.left
+                            rightMargin: dp(8)
+                            leftMargin: dp(8)
+                        }
+                        Item {
+                            Layout.fillWidth: true
+                        }
+                        MaterialExpansionButton {
+                            id: lteExpBut
+                        }
+                    }
+                }
+            }
+
+
             move: Transition {
                 NumberAnimation {
                     properties: "x,y"
@@ -624,7 +736,4 @@ Page {
         iconName: "content/add"
     }
 
-    Snackbar {
-        id: snackbar
-    }
 }

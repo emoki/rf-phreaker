@@ -48,6 +48,14 @@ TEST(RfPhreakerApi, GeneralTest) {
 
 		api_helper::instance().wait(std::chrono::minutes(60));
 
+		if(api_helper::instance().error_has_occurred()) {
+			auto status = rp_initialize(&output.cbs_);
+			status = rp_connect_device(serial[0], &d1);
+			rp_start_collection(d1, &info);
+			api_helper::instance().wait(std::chrono::minutes(60));
+		}
+
+
 		rp_stop_collection(d1);
 
 		status = rp_disconnect_device(d1);

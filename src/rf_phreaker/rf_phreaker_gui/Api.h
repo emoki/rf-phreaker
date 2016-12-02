@@ -19,6 +19,7 @@
 #include "rf_phreaker/rf_phreaker_gui/ModelGroup.h"
 #include "rf_phreaker/rf_phreaker_gui/MeasurementModel.h"
 #include "rf_phreaker/rf_phreaker_gui/ProxyMeasurementModel.h"
+#include "rf_phreaker/rf_phreaker_gui/ApiMessage.h"
 #include "rf_phreaker/protobuf_specific/rf_phreaker_serialization.h"
 #include <google/protobuf/io/zero_copy_stream_impl.h>
 //namespace rf_phreaker { namespace gui {
@@ -34,7 +35,10 @@ class Api : public QObject {
 	Q_PROPERTY(CollectionInfoList* scanList READ scanList NOTIFY scanListChanged)
 	Q_PROPERTY(CollectionInfoList* backgroundScanList READ backgroundScanList NOTIFY backgroundScanListChanged)
 	Q_PROPERTY(QStringList log READ log NOTIFY logChanged)
-	Q_PROPERTY(QStringList messages READ messages NOTIFY messagesChanged)
+	Q_PROPERTY(QList<QObject*> errors READ errors NOTIFY errorsChanged)
+	Q_PROPERTY(ApiMessage* newestError READ newestError NOTIFY errorsChanged)
+	Q_PROPERTY(QList<QObject*> messages READ messages NOTIFY messagesChanged)
+	Q_PROPERTY(ApiMessage* newestMessage READ newestMessage NOTIFY messagesChanged)
 	Q_PROPERTY(RpDevice* connectedDevice READ connectedDevice NOTIFY connectedDeviceChanged)
 	Q_PROPERTY(Gps* gps READ gps NOTIFY gpsChanged)
 	Q_PROPERTY(QStringList availableDevices READ availableDevices NOTIFY availableDevicesChanged)
@@ -62,12 +66,17 @@ public:
 	Q_INVOKABLE void convertRfp(QString filename);
 	Q_INVOKABLE QString getColorTheme(Base *b);
 	Q_INVOKABLE MeasurementModel* getSweepModel(Base *b);
+	Q_INVOKABLE void addMessage(QString details, int status = 0) {
+		messages_.prepend(new ApiMessage(static_cast<rp_status>(status), "", details));
+		emit messagesChanged();
+	}
 
 signals:
 	void scanListChanged();
 	void backgroundScanListChanged();
 	void logChanged();
 	void messagesChanged();
+	void errorsChanged();
 	void deviceStatusChanged();
 	void deviceStatusStrChanged();
 	void connectionStatusChanged();
@@ -92,8 +101,8 @@ signals:
 	void apiInitialized();
 	void licenseUpdateSucceeded();
 	void licenseUpdateFailed();
-	void errorMessage(int status, QString msg);
-	void message(int status, QString msg);
+	void errorReinitialize();
+	void errorGoIdle();
 
 public slots:
 	void findFreqMinMax();
@@ -109,7 +118,10 @@ public:
 	CollectionInfoList* scanList() { return &scanList_; }
 	CollectionInfoList* backgroundScanList() { return &backgroundScanList_; }
 	QStringList log() { return log_; }
-	QStringList messages() { return messages_; }
+	QList<QObject*> messages() { return messages_; }
+	ApiMessage* newestMessage() { return messages_.isEmpty() ? new ApiMessage(RP_STATUS_OK, "", "No error.") : static_cast<ApiMessage*>(messages_.front()); }
+	QList<QObject*> errors() { return errors_; }
+	ApiMessage* newestError() { return errors_.isEmpty() ? new ApiMessage(RP_STATUS_OK, "", "No error.") : static_cast<ApiMessage*>(errors_.front()); }
 	QString deviceSerial() const { return deviceSerial_; }
 	QString collectionFilename() const { return collectionFilename_; }
 	RpDevice* connectedDevice() { return &connectedDevice_; }
@@ -156,12 +168,9 @@ public:
 protected:
 	bool event(QEvent *);
 
-private slots:
-	void emitSignals();
-
 private:
 	explicit Api(QObject *parent = 0);
-	void handle_message(rp_status status, const QString &s);
+	void handle_message(const ApiMessage &msg);
 	void close_collection_file(); // Handled internally using the event loop so we don't have to worry about threading issues.
 	void clearModels();
 	void updateModels();
@@ -174,8 +183,8 @@ private:
 	CollectionInfoList backgroundScanList_;
 	QStringList availableDevices_;
 	QStringList log_;
-	QStringList messages_;
-	QStringList error_messages_;
+	QList<QObject*> errors_;
+	QList<QObject*> messages_;
 	QString deviceSerial_;
 	QString collectionFilename_;
 	RpDevice connectedDevice_;
@@ -187,11 +196,6 @@ private:
 
 	ApiThread *thread_;
 
-	QTimer *updateTimer_;
-	bool canUpdateLog_;
-	bool canUpdateMessages_;
-	bool canUpdateDevice_;
-	bool canUpdateGps_;
 	std::atomic_bool canRecordData_;
 
 	rf_phreaker::protobuf::update_pb update_pb_;

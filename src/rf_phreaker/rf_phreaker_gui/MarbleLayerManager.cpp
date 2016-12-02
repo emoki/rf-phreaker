@@ -241,6 +241,7 @@ void MarbleLayerManager::addRpf(const QString &filename) {
 		// Style needs to be set after placemark has been added to the document.
 		placemark->setStyleUrl("#ptrack");
 		model_.treeModel()->addDocument(rpDoc_);
+		Api::instance()->addMessage(placemark->name() + " layer added.");
 		placemark.release();
 	}
 }

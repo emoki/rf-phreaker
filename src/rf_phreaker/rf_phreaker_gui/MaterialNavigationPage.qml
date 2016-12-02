@@ -42,7 +42,7 @@ Page {
             text: "Stop Recording"
             shortcut: "Ctrl+S"
             iconName: "av/stop"
-            onTriggered: Api.stopCollection()
+            onTriggered: rpWindow.stateMachine.stopScanning()
         },
         Action {
             iconName: "navigation/more_vert"
@@ -76,9 +76,5 @@ Page {
             bottom: snackbar.top
             margins: dp(32)
         }
-    }
-
-    Snackbar {
-        id: snackbar
     }
 }

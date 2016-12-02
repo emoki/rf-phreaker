@@ -2,6 +2,7 @@
 #include <QDebug>
 #include <QEvent>
 #include "rf_phreaker/rf_phreaker_api/rf_phreaker_api.h"
+#include "rf_phreaker/rf_phreaker_gui/ApiMessage.h"
 #include "rf_phreaker/rf_phreaker_gui/RpDevice.h"
 #include "rf_phreaker/rf_phreaker_gui/Gps.h"
 #include "rf_phreaker/rf_phreaker_gui/Gsm.h"
@@ -136,12 +137,17 @@ private:
 
 class MessageUpdateEvent : public QEvent, public TypeInterface<MessageUpdateEvent> {
 public:
-	MessageUpdateEvent(rp_status status, const QString &msg) : QEvent(getType()), status_(status), msg_(msg) {}
-	QString& msg() { return msg_; }
-	rp_status status() { return status_; }
+	MessageUpdateEvent(rp_status status, const QString &mainDescription, const QString &details) 
+		: QEvent(getType())
+		, msg_(status, mainDescription, details)
+	{}
+	const ApiMessage& msg() const { return msg_; }
+	rp_status status() const { return msg_.status_; }
+	const QString& statusStr() const { return msg_.statusStr_; }
+	const QString& mainDescription() const { return msg_.mainDescription_; }
+	const QString& details() const { return msg_.details_; }
 private:
-	rp_status status_;
-	QString msg_;
+	ApiMessage msg_;
 };
 
 class DeviceUpdateEvent : public QEvent, public TypeInterface<DeviceUpdateEvent> {

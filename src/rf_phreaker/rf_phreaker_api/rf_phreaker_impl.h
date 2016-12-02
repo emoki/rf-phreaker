@@ -36,6 +36,8 @@ public:
 	rf_phreaker_impl();
 
 	~rf_phreaker_impl();
+
+	const char* last_error_message();
 	
 	rp_status initialize(rp_callbacks *callbacks);
 
@@ -104,6 +106,10 @@ private:
 
 	void error_handling(const std::string &str, int type, int code);
 
+	void save_error(const rf_phreaker_error &err);
+
+	void save_error(const std::string &str, int type, int code = -1);
+
 	void clear_queues();
 
 	bool is_initialized_;
@@ -140,6 +146,8 @@ private:
 	protobuf::update_pb update_;
 	
 	std::mutex update_mutex_;
+
+	std::vector<rf_phreaker_error> error_history_;
 };
 
 }}

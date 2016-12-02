@@ -12,6 +12,7 @@ set (rf_phreaker_gui_VERSION_TWEAK 0)
 # Set the source files.
 set (rf_phreaker_gui_SRCS
 	main.cpp
+	ApiMessage.h
 	ApiThreadWorker.h
 	ApiTypes.h
 	Api.cpp

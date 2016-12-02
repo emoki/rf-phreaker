@@ -20,6 +20,8 @@ DSM.StateMachine {
     signal updateLicense()
     signal startBackgroundScanning()
     signal startRecording()
+    signal stopScanning()
+    signal goIdle()
 
     DSM.State {
         id: parentState
@@ -28,8 +30,8 @@ DSM.StateMachine {
         onEntered: console.debug("Entered main state.")
 
         DSM.SignalTransition {
-            signal: Api.errorMessage
-            targetState: smError
+            signal: Api.errorReinitialize
+            targetState: smError1
         }
         DSM.SignalTransition {
             targetState: smChooseDevice
@@ -37,10 +39,11 @@ DSM.StateMachine {
         }
 
         DSM.State {
-            id: smError
+            id: smError1
             onEntered: {
-                console.debug("Entered smError.");
-                Api.status = ApiTypes.ERROR
+                console.debug("Entered smError1.");
+                Api.deviceStatus = ApiTypes.ERROR
+                messageDialog.show();
                 Api.initializeApi();
                 recoverFromError = true;
             }
@@ -54,7 +57,7 @@ DSM.StateMachine {
             id: smInitialize
             onEntered: {
                 console.debug("Entered smInitialize.");
-                Api.status = ApiTypes.DISCONNECTED;
+                Api.deviceStatus = ApiTypes.DISCONNECTED;
                 Api.initializeApi();
             }
             DSM.SignalTransition {
@@ -71,7 +74,6 @@ DSM.StateMachine {
                 Api.connectionStatus = ApiTypes.DISCONNECTED;
                 Api.deviceStatus = ApiTypes.OFF;
             }
-
             DSM.State {
                 id: smWait
                 onEntered: console.debug("Entered smWait.")
@@ -81,7 +83,6 @@ DSM.StateMachine {
                     targetState: smListingDevices
                 }
             }
-
             DSM.State {
                 id: smListingDevices
                 onEntered: {
@@ -94,6 +95,7 @@ DSM.StateMachine {
                     guard: numDevices > 0
                 }
                 DSM.TimeoutTransition {
+                    targetState: smListingDevices
                     timeout: 2000
                 }
             }
@@ -147,7 +149,6 @@ DSM.StateMachine {
             }
             onExited: {
                 console.debug("Leaving smConnecting.");
-                //devicePage.setVisible(true);
             }
 
             DSM.SignalTransition {
@@ -162,99 +163,150 @@ DSM.StateMachine {
 
         DSM.State {
             id: smConnected
-            initialState: smIdle
+            initialState: smInsideConnected
             onEntered: {
-                console.debug("Entered smIdle.")
+                console.debug("Entered smConnected.")
                 Api.connectionStatus = ApiTypes.CONNECTED;
+            }
+            onExited: {
+                console.debug("Exiting smConnected")
+                // Api disconnect will not return with an error so it's safe to use here.
+                Api.disconnectDevice()
             }
             DSM.SignalTransition {
                 targetState: smWait
-                signal: Api.deviceDisconnected
+                signal: dsmOperation.disconnectScanner
             }
+            DSM.State {
+                id: smInsideConnected
+                initialState: smIdle
+                DSM.SignalTransition {
+                    targetState: smError2
+                    signal: Api.errorGoIdle
+                }
+                DSM.State {
+                    id: smError2
+                    onEntered: {
+                        console.debug("Entered smError2.");
+                        messageDialog.show()
+                        if(Api.deviceStatus == ApiTypes.RECORDING
+                                || Api.deviceStatus === ApiTypes.BACKGROUND_SCANNING
+                                || Api.deviceStatus === ApiTypes.SCANNING)
+                            dsmOperation.stopScanning()
+                        else
+                            dsmOperation.goIdle()
+                    }
+                    onExited: {
+                    }
+                    DSM.SignalTransition {
+                        targetState: smIdle
+                        signal: dsmOperation.goIdle
+                    }
+                    DSM.SignalTransition {
+                        targetState: smStopScanning
+                        signal: dsmOperation.stopScanning
+                    }
+                }
+                DSM.State {
+                    id: smIdle
+                    onEntered: {
+                        console.debug("Entered smIdle.");
+                        Api.deviceStatus = ApiTypes.IDLE;
+                    }
+                    onExited: {
+                    }
 
-            DSM.State {
-                id: smIdle
-                onEntered: {
-                    console.debug("Entered smIdle.");
-                    Api.deviceStatus = ApiTypes.IDLE;
+                    DSM.SignalTransition {
+                        targetState: smBackgroundScanning
+                        signal: dsmOperation.startBackgroundScanning
+                    }
+                    DSM.SignalTransition {
+                        targetState: smScanning
+                        signal: dsmOperation.startScanning
+                    }
+                    DSM.SignalTransition {
+                        targetState: smRecording
+                        signal: dsmOperation.startRecording
+                        guard: Api.collectionFilename !== ""
+                    }
                 }
-                onExited: {
+                DSM.State {
+                    id: smUpdatingLicense
+                    onEntered: {
+                        console.debug("Entered smUpdatingLicense.");
+                        Api.deviceStatus = ApiTypes.UPDATING_LICENSE;
+                        Api.updateLicense();
+                    }
+                    onExited: {
+                    }
+                    DSM.SignalTransition {
+                        targetState: smIdle
+                        signal: Api.licenseUpdateSucceeded
+                    }
+                    DSM.SignalTransition {
+                        targetState: smIdle
+                        signal: Api.licenseUpdateFailed
+                    }
+                }
+                DSM.State {
+                    id: smScanning
+                    onEntered: {
+                        console.debug("Entered smScanning.");
+                        Api.deviceStatus = ApiTypes.SCANNING;
+                        Api.startCollection();
+                    }
+                    onExited: {
+                    }
+                    DSM.SignalTransition {
+                        targetState: smStopScanning
+                        signal: dsmOperation.stopScanning()
+                    }
+                }
+                DSM.State {
+                    id: smBackgroundScanning
+                    onEntered: {
+                        console.debug("Entered smBackgroundScanning.");
+                        Api.deviceStatus = ApiTypes.BACKGROUND_SCANNING;
+                        Api.startCollection();
+                    }
+                    onExited: {
+                    }
+                    DSM.SignalTransition {
+                        targetState: smStopScanning
+                        signal: dsmOperation.stopScanning()
+                    }
+                }
+                DSM.State {
+                    id: smRecording
+                    onEntered: {
+                        console.debug("Entered smRecording.");
+                        Api.deviceStatus = ApiTypes.RECORDING;
+                        Api.openCollectionFile();
+                        Api.startCollection();
+                    }
+                    onExited: {
+                        console.debug("Exiting smRecording")
+                        Api.closeCollectionFile()
+                    }
+                    DSM.SignalTransition {
+                        targetState: smStopScanning
+                        signal: dsmOperation.stopScanning()
+                    }
+                }
+                DSM.State {
+                    id: smStopScanning
+                    onEntered: {
+                        console.debug("Entered smStopScanning.");
+                        Api.stopCollection();
+                    }
+                    onExited: {
+                    }
+                    DSM.SignalTransition {
+                        targetState: smIdle
+                        signal: Api.scanningStopped
+                    }
                 }
 
-                DSM.SignalTransition {
-                    targetState: smBackgroundScanning
-                    signal: dsmOperation.startBackgroundScanning
-                }
-                DSM.SignalTransition {
-                    targetState: smScanning
-                    signal: dsmOperation.startScanning
-                }
-                DSM.SignalTransition {
-                    targetState: smRecording
-                    signal: dsmOperation.startRecording
-                    guard: Api.collectionFilename !== ""
-                }
-            }
-            DSM.State {
-                id: smUpdatingLicense
-                onEntered: {
-                    console.debug("Entered smUpdatingLicense.");
-                    Api.deviceStatus = ApiTypes.UPDATING_LICENSE;
-                    Api.updateLicense();
-                }
-                onExited: {
-                }
-                DSM.SignalTransition {
-                    targetState: smIdle
-                    signal: Api.licenseUpdateSucceeded
-                }
-                DSM.SignalTransition {
-                    targetState: smIdle
-                    signal: Api.licenseUpdateFailed
-                }
-            }
-            DSM.State {
-                id: smScanning
-                onEntered: {
-                    console.debug("Entered smScanning.");
-                    Api.deviceStatus = ApiTypes.SCANNING;
-                    Api.startCollection();
-                }
-                onExited: {
-                }
-                DSM.SignalTransition {
-                    targetState: smIdle
-                    signal: Api.scanningStopped
-                }
-            }
-            DSM.State {
-                id: smBackgroundScanning
-                onEntered: {
-                    console.debug("Entered smBackgroundScanning.");
-                    Api.deviceStatus = ApiTypes.BACKGROUND_SCANNING;
-                    Api.startCollection();
-                }
-                onExited: {
-                }
-                DSM.SignalTransition {
-                    targetState: smIdle
-                    signal: Api.scanningStopped
-                }
-            }
-            DSM.State {
-                id: smRecording
-                onEntered: {
-                    console.debug("Entered smRecording.");
-                    Api.deviceStatus = ApiTypes.RECORDING;
-                    Api.openCollectionFile();
-                    Api.startCollection();
-                }
-                onExited: {
-                }
-                DSM.SignalTransition {
-                    targetState: smIdle
-                    signal: Api.scanningStopped
-                }
             }
         }
     }

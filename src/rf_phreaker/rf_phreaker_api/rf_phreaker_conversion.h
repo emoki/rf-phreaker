@@ -6,8 +6,41 @@
 
 namespace rf_phreaker { namespace api { 
 
-inline rp_status to_rp_status(const rf_phreaker_error &err) {
-	switch(err.error_type_) {
+	inline rp_status to_rp_status(rf_phreaker::message_codes code) {
+		switch(code) {
+		case FREQUENCY_CORRECTION_SUCCESSFUL:
+			return RP_STATUS_FREQUENCY_CORRECTION_SUCCESSFUL;
+		case GENERAL_ERROR:
+		case STD_EXCEPTION_ERROR:
+		case UNKNOWN_ERROR:
+			return RP_STATUS_GENERIC_ERROR;
+		case FREQUENCY_CORRECTION_FAILED:
+			return RP_STATUS_FREQUENCY_CORRECTION_FAILED;
+		case FREQUENCY_CORRECTION_VALUE_INVALID:
+			return RP_STATUS_FREQUENCY_CORRECTION_VALUE_INVALID;
+		case EEPROM_ERROR:
+			return RP_STATUS_EEPROM_ERROR;
+		case CALIBRATION_ERROR:
+			return RP_STATUS_CALIBRATION_ERROR;
+		case LICENSE_ERROR:
+			return RP_STATUS_LICENSE_ERROR;
+		case CONVERSION_ERROR:
+			return RP_STATUS_CONVERSION_ERROR;
+		case CONFIGURATION_FILE_NOT_FOUND:
+			return RP_STATUS_CONFIGURATION_FILE_NOT_FOUND;
+		case COLLECTION_FINISHED:
+			return RP_STATUS_COLLECTION_FINISHED;
+		case INVALID_PARAMETER:
+			return RP_STATUS_INVALID_PARAMETER;
+		case NOT_INITIALIZED:
+			return RP_STATUS_NOT_INITIALIZED;
+		default:
+			return RP_STATUS_GENERIC_ERROR;
+		}
+	}
+
+inline rp_status to_rp_status(rf_phreaker::error_type err) {
+	switch(err) {
 	case no_error_type:
 		return RP_STATUS_OK;
 	case generic_error_type:
@@ -42,6 +75,22 @@ inline rp_status to_rp_status(const rf_phreaker_error &err) {
 		return RP_STATUS_RF_PHREAKER_API_ERROR;
 	default:
 		return RP_STATUS_UNKNOWN_ERROR;
+	}
+}
+
+inline rp_status to_rp_status(const rf_phreaker_error &err) {
+	// There are several ways the API reports errors or messages.  If the error code
+	// is populated with something besides the generic codes or -1 (init default)
+	// then use it.  Otherwise we just use the error type to give some general info 
+	// about where the error is occurring.
+	switch(err.error_code_) {
+		case GENERAL_ERROR:
+		case STD_EXCEPTION_ERROR:
+		case UNKNOWN_ERROR:
+		case -1:
+			return to_rp_status(err.error_type_);
+		default:
+			return to_rp_status(static_cast<message_codes>(err.error_code_));
 	}
 }
 
