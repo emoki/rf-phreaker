@@ -1,9 +1,10 @@
-import QtQuick 2.5
+import QtQuick 2.6
 import Material 0.3
 import Material.Extras 0.1
 import Material.ListItems 0.1 as ListItem
 import QtQuick.Layouts 1.1
 import QtQuick.Controls 1.4 as Controls
+import QtQuick.Dialogs 1.2
 import RfPhreaker 1.0
 
 Page {
@@ -13,14 +14,9 @@ Page {
 
     actions: [
         Action {
-            iconName: "alert/warning"
-            name: "Testing Snackbar"
-            onTriggered: snackbar.open("Open Sesame!", "Close", false)
-        },
-        Action {
-            iconName: "alert/warning"
-            name: "Testing Error"
-            onTriggered: rpWindow.showError("Error test!", "", false)
+            iconName: "hardware/developer_board"
+            name: "RPF Conversion"
+            onTriggered: rpfConversionDialog.open();
         },
         Action {
             id: startRecording
@@ -719,21 +715,39 @@ Page {
         flickableItem: flickable
     }
 
-    ActionButton {
-        id: addCard
-
-        anchors {
-            right: parent.right
-            bottom: snackbar.top
-            margins: dp(32)
+    FileDialog {
+        id: rpfConversionDialog
+        visible: false
+        title: "Choose RPF Files For Conversion"
+        nameFilters: [ "rf phreaker files (*.rpf)" ]
+        modality: Qt.WindowModal
+        folder: shortcuts.documents
+        selectedNameFilter: "rf phreaker files (*.rpf)"
+        sidebarVisible: true
+        selectExisting: true
+        selectMultiple: true
+        onAccepted: {
+            console.log("RPF files to convert: " + fileUrls);
+            for(var i = 0; i < fileUrls.length; ++i)
+                Api.convertRfp(fileUrls[i]);
         }
-
-        action: Action {
-            text: ""
-            shortcut: "Ctrl+A"
-            onTriggered: {}
-        }
-        iconName: "content/add"
+        onRejected: { console.log("Canceled RPF conversion dialog.") }
     }
 
+//    ActionButton {
+//        id: addCard
+
+//        anchors {
+//            right: parent.right
+//            bottom: snackbar.top
+//            margins: dp(32)
+//        }
+
+//        action: Action {
+//            text: ""
+//            shortcut: "Ctrl+A"
+//            onTriggered: {}
+//        }
+//        iconName: "content/add"
+//    }
 }
