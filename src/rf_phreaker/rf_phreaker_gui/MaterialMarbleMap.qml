@@ -8,7 +8,7 @@ import org.kde.edu.marble 0.20
 Item {
     id: root_
     property alias marbleManager: manager
-    property alias layerPopup: layerPopup__
+    property alias layerPopup: __layerPopup
     height: 600
     width: 600
 
@@ -81,7 +81,7 @@ Item {
     }
 
     PopupBase {
-        id: layerPopup__
+        id: __layerPopup
 
         x: root_.x + root_.width / 2 - marblePlacemarkList.width / 2
         y: root_.y + dp(64)
