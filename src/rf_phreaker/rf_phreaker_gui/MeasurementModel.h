@@ -178,7 +178,7 @@ public:
 		auto pos = index_position(index_, it);
 		// Assume that if something is using one of the measurement classes then it
 		// using connections to update the object.
-		emit dataChanged(createIndex(pos, TimeElapsedColumn), createIndex(pos, ColumnSize - 1));
+		emit dataChanged(createIndex(pos, BasicMeasColumn), createIndex(pos, ColumnSize - 1));
 	}
 
 	template<typename Comparator, typename Data>
