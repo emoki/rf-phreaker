@@ -48,16 +48,29 @@ Rectangle {
 
         model: FilterProxyMeasurementModel {
             id: filter
-            filterRole: FilterProxyMeasurementModel.NoFilterRole
-            dynamicSortFilter: false
-            Component.onCompleted: filter.sort(dataTable.convertColumn(dataTable.sortIndicatordicatorColumn), dataTable.sortIndicatorOrder)
+            filterRole: FilterProxyMeasurementModel.TimeFilter
+            dynamicSortFilter: false // Must be set to false if we want to manually sort.
+            expirationTimeFilter: 8
+            Component.onCompleted: sortAndUpdate()
             onRowsInserted: {
-                //dataTable.implicitHeight = filter.rowCount() * dp(48) + dp(16) + dp(56)
-                //            console.debug("data worksheet filter model rows inserted");
-                //            filter.sort(dataTable.convertColumn(dataTable.sortIndicatorColumn), dataTable.sortIndicatorOrder);
-                //            console.debug("data worksheet filter model after rows inserted");
-                //filteredModelUpdated();
+                dataTable.implicitHeight = filter.rowCount() * dp(48) + dp(16) + dp(56)
+                sortAndUpdate();
             }
+        }
+        Timer {
+            interval: 1000
+            running: true
+            repeat: true
+            onTriggered: {
+                //console.debug("timer expired")
+                filter.refilter();
+                filteredModelUpdated();
+            }
+        }
+
+        function sortAndUpdate() {
+            filter.sort(dataTable.convertColumn(dataTable.sortIndicatordicatorColumn), dataTable.sortIndicatorOrder)
+            filteredModelUpdated();
         }
 
         function convertColumn(column) {
@@ -83,15 +96,9 @@ Rectangle {
             }
         }
 
-        onSortIndicatorColumnChanged: {
-            filter.sort(dataTable.convertColumn(dataTable.sortIndicatorColumn), dataTable.sortIndicatorOrder);
-            filteredModelUpdated();
-        }
+        onSortIndicatorColumnChanged: sortAndUpdate()
 
-        onSortIndicatorOrderChanged: {
-            filter.sort(dataTable.convertColumn(dataTable.sortIndicatorColumn), dataTable.sortIndicatorOrder);
-            filteredModelUpdated();
-        }
+        onSortIndicatorOrderChanged: sortAndUpdate()
 
         Controls.TableViewColumn {
             id: column0

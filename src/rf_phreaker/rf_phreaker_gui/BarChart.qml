@@ -48,10 +48,6 @@ ChartView {
     }
 
     function update() {
-        console.debug("updating channel bar lines.");
-        //channelBarLines.sourceModel = {};
-        //barChart.removeAllSeries();
-        //channelBarLines.sourceModel = barChart.sourceModel;
         channelBarLines.refresh();
     }
 }

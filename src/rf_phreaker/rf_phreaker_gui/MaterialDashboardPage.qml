@@ -610,7 +610,19 @@ Page {
                             id: wcdmaBarChart
                             Layout.fillWidth: true
                             Layout.fillHeight: true
-                            sourceModel: Api.wcdmaModels.fullScanModel
+                            sourceModel: FilterProxyMeasurementModel {
+                                id: filterWcdma
+                                sourceModel: Api.wcdmaModels.fullScanModel
+                                filterRole: FilterProxyMeasurementModel.TimeFilter
+                                expirationTimeFilter: 8
+
+                            }
+                            Timer {
+                                interval: 1000
+                                running: true
+                                repeat: true
+                                onTriggered: filterWcdma.refilter()
+                            }
 
                             slMin: -120
                             slMax: -10
@@ -666,7 +678,19 @@ Page {
                             Layout.fillWidth: true
                             Layout.fillHeight: true
 
-                            sourceModel: Api.lteModels.fullScanModel
+                            sourceModel:  FilterProxyMeasurementModel {
+                                id: filterLte
+                                sourceModel: Api.lteModels.fullScanModel
+                                filterRole: FilterProxyMeasurementModel.TimeFilter
+                                expirationTimeFilter: 8
+
+                            }
+                            Timer {
+                                interval: 1000
+                                running: true
+                                repeat: true
+                                onTriggered: filterLte.refilter()
+                            }
 
                             slMin: -120
                             slMax: -10

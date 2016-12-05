@@ -54,6 +54,14 @@ Item {
             if(index == repeater.count - 1)
                 refresh();
         }
+        onItemRemoved: {
+            //console.debug("item removed - ", "  index: ", index, "   repeater count: " , repeater.count);
+            var upperId = item.meas.cellChannel + "_" + item.meas.cellId + "Upper";
+            var lowerId = item.meas.cellChannel + "_" + item.meas.cellId + "Lower"
+            chart.removeSeries(chart.series(upperId));
+            chart.removeSeries(chart.series(lowerId));
+            refresh();
+        }
     }
     function refresh() {
         //console.debug("repeater count: ", repeater.count);

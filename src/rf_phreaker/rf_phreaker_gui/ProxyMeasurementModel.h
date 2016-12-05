@@ -12,9 +12,9 @@
 class FilterProxyMeasurementModel : public QSortFilterProxyModel {
 	Q_OBJECT
 	Q_ENUMS(MeasFilterRole)
-	Q_PROPERTY(QString stringFilter READ stringFilter WRITE setStringFilter)
-	Q_PROPERTY(int expirationTimeFilter READ expirationTimeFilter WRITE setExpirationTimeFilter)
-	Q_PROPERTY(ApiTypes::OperatingBand operatingBandFilter READ operatingBandFilter WRITE setOperatingBandFilter)
+	Q_PROPERTY(QString stringFilter READ stringFilter WRITE setStringFilter NOTIFY stringFilterChanged)
+	Q_PROPERTY(int expirationTimeFilter READ expirationTimeFilter WRITE setExpirationTimeFilter NOTIFY expirationTimeFilterChanged)
+	Q_PROPERTY(ApiTypes::OperatingBand operatingBandFilter READ operatingBandFilter WRITE setOperatingBandFilter NOTIFY operatingBandFilterChanged)
 	Q_PROPERTY(double lowFreqFilter READ lowFreqFilter WRITE setLowFreqFilter NOTIFY lowFreqFilterChanged)
 	Q_PROPERTY(double highFreqFilter READ highFreqFilter WRITE setHighFreqFilter NOTIFY  highFreqFilterChanged)
 	Q_PROPERTY(ApiTypes::OperatingBand lowBandFilter READ lowBandFilter WRITE setLowBandFilter NOTIFY lowBandFilterChanged)
@@ -63,6 +63,10 @@ public:
 		QSortFilterProxyModel::endResetModel();
 	}
 
+	Q_INVOKABLE void refilter() {
+		QSortFilterProxyModel::invalidateFilter();
+	}
+
 	bool filterAcceptsRow(int sourceRow, const QModelIndex & sourceParent) const Q_DECL_OVERRIDE {
 		if(filterRole() < NoFilterRole)
 			return QSortFilterProxyModel::filterAcceptsRow(sourceRow, sourceParent);
@@ -96,10 +100,11 @@ public:
 	int expirationTimeFilter() const { return expirationTimeFilter_; }
 	void setExpirationTimeFilter(int seconds) {
 		expirationTimeFilter_ = seconds;
+		emit expirationTimeFilterChanged();
 	}
 
 	QString stringFilter() const { return stringFilter_; }
-	void setStringFilter(QString s) { stringFilter_ = s; }
+	void setStringFilter(QString s) { stringFilter_ = s; emit stringFilterChanged(); }
 
 	ApiTypes::OperatingBand operatingBandFilter() const { return operatingBandFilter_; }
 	void setOperatingBandFilter(ApiTypes::OperatingBand t) {
@@ -108,6 +113,7 @@ public:
 		operatingBandFilter_ = t;
 		lowFreqFilter_ = range.low_freq_hz_ / 1e6;
 		highFreqFilter_ = range.high_freq_hz_ / 1e6;
+		emit operatingBandFilterChanged();
 	}
 
 	int64_t lowFreqFilter() const { return lowFreqFilter_; }
@@ -123,6 +129,9 @@ public:
 	void setHighBandFilter(ApiTypes::OperatingBand f) { highBandFilter_ = f; emit highBandFilterChanged(); }
 
 signals:
+	void stringFilterChanged();
+	void expirationTimeFilterChanged();
+	void operatingBandFilterChanged();
 	void lowFreqFilterChanged();
 	void highFreqFilterChanged();
 	void lowBandFilterChanged();
