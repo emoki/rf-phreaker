@@ -290,7 +290,7 @@ DSM.StateMachine {
                     }
                     DSM.SignalTransition {
                         targetState: smStopScanning
-                        signal: dsmOperation.stopScanning()
+                        signal: dsmOperation.stopScanning
                     }
                 }
                 DSM.State {
