@@ -72,8 +72,7 @@ Page {
         marbleManager: materialMarbleMap.marbleManager
         anchors {
             right: parent.right
-            //bottom: parent.bottom
-            bottom: snackbar.top
+            bottom: parent.bottom
             margins: dp(32)
         }
     }
