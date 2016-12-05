@@ -48,7 +48,7 @@ Item {
             item.areaSeriesInter = chart.series(lowerId);
             if(item.areaSeriesInter === null) {
                 item.areaSeriesInter = chart.createSeries(ChartView.SeriesTypeArea, lowerId, mainAxisX, mainAxisY, true);
-                item.areaSeriesInter.color = "lightcoral";
+                item.areaSeriesInter.color = "grey";
             }
 //            //item.areaSeries.color = Api.getColorTheme(item.meas);
             if(index == repeater.count - 1)
