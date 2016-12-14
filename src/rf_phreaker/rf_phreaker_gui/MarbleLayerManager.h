@@ -1,5 +1,6 @@
 #pragma once
 #include <mutex>
+#include <future>
 #include <vector>
 #include <atomic>
 #include <QString>
@@ -49,6 +50,8 @@ public slots:
 
 	void addLayer(const QString &filename);
 
+	void addPreviousTrack(Marble::GeoDataPlacemark *placemark);
+
 private:
 	void GeoObjectAdded(Marble::GeoDataObject *object);
 
@@ -79,7 +82,7 @@ private:
 	Marble::GeoDataPlacemark *recordingPlacemark_;
 
 	Marble::GeoDataMultiTrack *multiTrack_;
-	
+
 	Marble::GeoDataTrack  *currentTrack_;
 
 	Marble::GeoDataCoordinates previousPosition_;
@@ -93,4 +96,6 @@ private:
 	std::atomic_bool collecting_;
 
 	double minDistance_;
+
+	std::vector<std::future<void>> addLayerFutures_;
 };

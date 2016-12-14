@@ -163,8 +163,7 @@ public:
 	}
 
 	Q_INVOKABLE void addLayer(QString filename) {
-		QMetaObject::invokeMethod(&MarbleLayers::instance(), "addLayer", 
-			Qt::QueuedConnection, Q_ARG(QString, filename));
+		MarbleLayers::instance().addLayer(filename);
 	}
 
 	double downloadProgess() {
