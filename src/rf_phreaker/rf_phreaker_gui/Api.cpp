@@ -66,9 +66,7 @@ Api* Api::instance() {
 	if(instance_ == nullptr) {
 		QMutexLocker lock(&instance_mutex_);
 		if(instance_ == nullptr) {
-			qDebug() << "Instantiating instance pointer." << instance_;
 			instance_ = new Api;
-			qDebug() << "New instance pointer." << instance_;
 		}
 	}
 	return instance_;
