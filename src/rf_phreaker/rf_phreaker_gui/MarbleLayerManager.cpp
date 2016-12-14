@@ -15,6 +15,7 @@
 #include "rf_phreaker/rf_phreaker_gui/MarbleLayerManager.h"
 #include "rf_phreaker/rf_phreaker_gui/MarbleHelper.h"
 #include "rf_phreaker/rf_phreaker_gui/Settings.h"
+#include "rf_phreaker/rf_phreaker_gui/SettingsIO.h"
 #include "rf_phreaker/protobuf_specific/rf_phreaker_serialization.h"
 #include <google/protobuf/io/zero_copy_stream_impl.h>
 #include "rf_phreaker/protobuf_specific/io.h"
@@ -37,10 +38,12 @@ MarbleLayerManager::MarbleLayerManager(QObject *parent)
 	QObject::connect(&rpPositionProviderPlugin_, &RpPositionProviderPlugin::positionChanged, this, &MarbleLayerManager::updateRecordingTrack);
 	QObject::connect(&rpPositionProviderPlugin_, &RpPositionProviderPlugin::statusChanged, this, &MarbleLayerManager::updatePositionStatus);
 	QObject::connect(Api::instance(), &Api::deviceStatusChanged, this, &MarbleLayerManager::deviceStatusChanged);
-	SettingsIO sio;
-	Settings s;
-	sio.readSettings(s);
-	minDistance_ = s.rpf_track_min_distance_;
+	minDistance_ = Settings::instance()->rpfTrackMinDistance();
+	QObject::connect(Settings::instance(), &Settings::rpfTrackMinDistanceChanged, this, &MarbleLayerManager::changeMinDistance);
+}
+
+void MarbleLayerManager::changeMinDistance(int minDistance) {
+	minDistance_ = minDistance;
 }
 
 void MarbleLayerManager::init() {

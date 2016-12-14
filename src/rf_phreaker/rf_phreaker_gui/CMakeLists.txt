@@ -44,7 +44,10 @@ set (rf_phreaker_gui_SRCS
 	RpPositionProviderPlugin.cpp
 	RpPositionProviderPlugin.h
 	Serialization.h
+	Settings.cpp
 	Settings.h
+	SettingsIO.cpp
+	SettingsIO.h
 	Stats.h
 	Sweep.h
 	Utility.h

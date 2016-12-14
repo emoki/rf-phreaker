@@ -48,9 +48,6 @@ class Api : public QObject {
 	Q_PROPERTY(ModelGroup* gsmModels READ gsmModels NOTIFY gsmModelsChanged)
 	Q_PROPERTY(ModelGroup* wcdmaModels READ wcdmaModels NOTIFY wcdmaModelsChanged)
 	Q_PROPERTY(ModelGroup* lteModels READ lteModels NOTIFY lteModelsChanged)
-	Q_PROPERTY(QString themePrimaryColor READ themePrimaryColor CONSTANT)
-	Q_PROPERTY(QString themeAccentColor READ themeAccentColor CONSTANT)
-	Q_PROPERTY(QString themeTabHighlightColor READ themeTabHighlightColor CONSTANT)
 
 public:
 	Q_INVOKABLE void initializeApi();
@@ -131,9 +128,6 @@ public:
 	ModelGroup* gsmModels() { return &gsmModels_; }
 	ModelGroup* wcdmaModels() { return &wcdmaModels_; }
 	ModelGroup* lteModels() { return &lteModels_; }
-	QString themePrimaryColor() { return settings_.theme_primary_color_; }
-	QString themeAccentColor() { return settings_.theme_accent_color_; }
-	QString themeTabHighlightColor() { return settings_.theme_tab_highlight_color_; }
 
 	void setDeviceStatus(ApiTypes::DeviceStatus s) {
 		if(deviceStatus_ != s) {
@@ -204,9 +198,8 @@ private:
 	QFile output_qfile_;
 	std::unique_ptr<google::protobuf::io::FileOutputStream> output_file_;
 
-	Settings settings_;
-
 	IO api_debug_output_;
+	bool apiOutput_;
 
 	Stats stats_;
 

@@ -5,6 +5,7 @@
 #include "rf_phreaker/rf_phreaker_gui/Utility.h"
 #include "rf_phreaker/rf_phreaker_gui/Events.h"
 #include "rf_phreaker/rf_phreaker_gui/ApiThreadWorker.h"
+#include "rf_phreaker/rf_phreaker_gui/SettingsIO.h"
 #include "rf_phreaker/protobuf_specific/io.h"
 
 //namespace rf_phreaker { namespace gui {
@@ -95,20 +96,21 @@ Api::Api(QObject *parent)
 	callbacks_.rp_wcdma_sweep_update = nullptr;
 	callbacks_.rp_lte_sweep_update = nullptr;
 
+	apiOutput_ = Settings::instance()->apiOutput();
+	QObject::connect(Settings::instance(), &Settings::apiOutputChanged, [&](bool apiOutput) {
+		this->apiOutput_ = apiOutput;
+	});
+
 	connect(&scanList_, SIGNAL(dataChanged(QModelIndex, QModelIndex, QVector<int>)), this, SLOT(findFreqMinMax()));
 	connect(&scanList_, SIGNAL(modelReset()), this, SLOT(findFreqMinMax()));
 	connect(&scanList_, SIGNAL(rowsInserted(QModelIndex, int, int)), this, SLOT(findFreqMinMax()));
 	connect(&scanList_, SIGNAL(rowsRemoved(QModelIndex, int, int)), this, SLOT(findFreqMinMax()));
-
-	SettingsIO settingsIO;
-	settingsIO.readSettings(settings_);
 
 	thread_->start();
 }
 
 Api::~Api() {
 	SettingsIO settingsIO;
-	settingsIO.writeSettings(settings_);
 	settingsIO.writeScanList(scanList_.list());
 	thread_->quit();
 	thread_->wait();
@@ -220,7 +222,7 @@ bool Api::event(QEvent *e) {
 		if(canRecordData_) {
 			if(proto.update_case() != rf_phreaker::protobuf::rp_update::UpdateCase::kLog)
 				rf_phreaker::protobuf::write_delimited_to(proto, output_file_.get());
-			if(settings_.api_output_) {
+			if(apiOutput_) {
 				api_debug_output_.output_api_data(update_pb_, collectionFilename_, current_gps_);
 			}
 		}

@@ -66,6 +66,8 @@ private:
 
 	std::unique_ptr<Marble::GeoDataPlacemark> createPlacemarkMultiTrack(const QString &filename);
 
+	void changeMinDistance(int minDistance);
+
 	Marble::MarbleModel model_;
 
 	RpPositionProviderPlugin rpPositionProviderPlugin_;

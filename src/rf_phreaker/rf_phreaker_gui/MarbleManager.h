@@ -36,6 +36,7 @@
 #include "rf_phreaker/rf_phreaker_gui/MarbleLayerManager.h"
 #include "rf_phreaker/rf_phreaker_gui/MarbleHelper.h"
 #include "rf_phreaker/rf_phreaker_gui/Settings.h"
+#include "rf_phreaker/rf_phreaker_gui/SettingsIO.h"
 #include "rf_phreaker/rf_phreaker_gui/RpPositionProviderPlugin.h"
 
 class MarbleManager : public Marble::MarbleQuickItem {
