@@ -100,7 +100,6 @@ int32_t gsm_layer_3_decoder::decode_bcch_message(const uint8_t *raw_bits, uint32
 					message.si_2quater_.extended_eutran_neighbors_.push_back(ext.data[i]);
 				}
 			}
-
 		} break;
 
 		case ID_RRPLENDownlink_SYSTEM_INFORMATION_TYPE_3_DN: {
@@ -150,6 +149,11 @@ int32_t gsm_layer_3_decoder::decode_bcch_message(const uint8_t *raw_bits, uint32
 			message.si_3_.is_2ter_present_ = octet.System_Information_2ter_Present == 1;
 			
 			message.si_3_.is_2quater_present_ = octet.SI2quater_Indicator_Present == 1;
+
+			message.mcc_ = message.si_3_.plmn_.mcc_;
+			message.mnc_ = message.si_3_.plmn_.mnc_;
+			message.lac_ = message.si_3_.location_area_code_;
+			message.cid_ = message.si_3_.cell_id_;
 		} break;
 
 		case ID_RRPLENDownlink_SYSTEM_INFORMATION_TYPE_4_DN: {
@@ -209,6 +213,11 @@ int32_t gsm_layer_3_decoder::decode_bcch_message(const uint8_t *raw_bits, uint32
 				message.si_4_.plmn_.mnc_ = octet.MNC;
 
 			message.si_4_.have_additional_param_in_si7_si8_ = octet.Break_Indicator_Present != 0;
+	
+			message.mcc_ = message.si_4_.plmn_.mcc_;
+			message.mnc_ = message.si_4_.plmn_.mnc_;
+			message.lac_ = message.si_4_.location_area_code_;
+			message.cid_ = message.si_4_.cell_id_;
 		} break;
 
 		case ID_RRPLENDownlink_SYSTEM_INFORMATION_TYPE_7_DN: {
@@ -239,14 +248,18 @@ int32_t gsm_layer_3_decoder::decode_bcch_message(const uint8_t *raw_bits, uint32
 					message.si_7_.selection_parameters_.apply_infinity_offset_ = true;
 				}
 			}
-			if(octet.Cell_Identity_Present)
+			if(octet.Cell_Identity_Present) {
 				message.si_7_.cell_id_ = octet.Cell_Identity;
-
-			if(octet.MCC_Present)
+				message.cid_ = message.si_7_.cell_id_;
+			}
+			if(octet.MCC_Present) {
 				message.si_7_.plmn_.mcc_ = octet.MCC;
-
-			if(octet.MNC_Present)
+				message.mcc_ = message.si_7_.plmn_.mcc_;
+			}
+			if(octet.MNC_Present) {
 				message.si_7_.plmn_.mnc_ = octet.MNC;
+				message.mnc_ = message.si_7_.plmn_.mnc_;
+			}
 		} break;
 
 		case ID_RRPLENDownlink_SYSTEM_INFORMATION_TYPE_8_DN: {
@@ -277,14 +290,18 @@ int32_t gsm_layer_3_decoder::decode_bcch_message(const uint8_t *raw_bits, uint32
 					message.si_8_.selection_parameters_.apply_infinity_offset_ = true;
 				}
 			}
-			if(octet.Cell_Identity_Present)
+			if(octet.Cell_Identity_Present) {
 				message.si_8_.cell_id_ = octet.Cell_Identity;
-
-			if(octet.MCC_Present)
+				message.cid_ = message.si_8_.cell_id_;
+			}
+			if(octet.MCC_Present) {
 				message.si_8_.plmn_.mcc_ = octet.MCC;
-
-			if(octet.MNC_Present)
+				message.mcc_ = message.si_8_.plmn_.mcc_;
+			}
+			if(octet.MNC_Present) {
 				message.si_8_.plmn_.mnc_ = octet.MNC;
+				message.mnc_ = message.si_8_.plmn_.mnc_;
+			}
 		} break;
 
 		case ID_RRPLENDownlink_SYSTEM_INFORMATION_TYPE_23_DN:
