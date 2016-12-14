@@ -2,8 +2,8 @@
 <Package>
 	<DisplayName>RF Phreaker</DisplayName>
     <Description>Cappeen collection software</Description>
-    <Version>0.5.1</Version>
-    <ReleaseDate>2016-03-18</ReleaseDate>
+    <Version>0.9.3</Version>
+    <ReleaseDate>2016-12-14</ReleaseDate>
 	<Dependencies>cypress, vcredist_msvc2010_x86, vcredist_msvc2013_x86</Dependencies>
     <Licenses>
         <License name="RF Phreaker License Agreement" file="license.txt" />
