@@ -1,5 +1,6 @@
 #include <QDebug>
 #include <QtCore/QCoreApplication>
+#include <QRegularExpression>
 #include "rf_phreaker/rf_phreaker_gui/Api.h"
 #include "rf_phreaker/rf_phreaker_gui/Utility.h"
 #include "rf_phreaker/rf_phreaker_gui/Events.h"
@@ -18,7 +19,7 @@ void (RP_CALLCONV rp_log_update)(const char *message) {
 }
 
 void (RP_CALLCONV rp_message_update)(rp_status status, const char *message) {
-	QCoreApplication::postEvent(Api::instance(), new MessageUpdateEvent(status, message));
+	QCoreApplication::postEvent(Api::instance(), new MessageUpdateEvent(status, "", message));
 }
 
 void (RP_CALLCONV rp_device_info_update)(const rp_device_info *info) {
@@ -77,16 +78,11 @@ Api::Api(QObject *parent)
 	: QObject(parent)
 	, deviceStatus_(ApiTypes::OFF)
 	, connectionStatus_(ApiTypes::DISCONNECTED)
-	, scanList_(new CollectionInfoList(this))
-	, backgroundScanList_(new CollectionInfoList(this))
 	, thread_(new ApiThread)
-	, updateTimer_(new QTimer(this))
-	, lowestFreq_(lowestFreqDefault_)
-	, highestFreq_(highestFreqDefault_)
-	, canUpdateLog_(false)
-	, canUpdateMessages_(false)
-	, canUpdateDevice_(false)
-	, canUpdateGps_(false) {
+	, allTechModels_(highestCellPerChannelModel_, ApiTypes::FIRST_GSM_OPERATING_BAND, ApiTypes::LAST_LTE_OPERATING_BAND)
+	, gsmModels_(highestCellPerChannelModel_, ApiTypes::FIRST_GSM_OPERATING_BAND, ApiTypes::LAST_GSM_OPERATING_BAND)
+	, wcdmaModels_(highestCellPerChannelModel_, ApiTypes::FIRST_UMTS_OPERATING_BAND, ApiTypes::LAST_UMTS_OPERATING_BAND)
+	, lteModels_(highestCellPerChannelModel_, ApiTypes::FIRST_LTE_OPERATING_BAND, ApiTypes::LAST_LTE_OPERATING_BAND) {
 	canRecordData_ = false;
 	callbacks_.rp_update = rp_update;
 	callbacks_.rp_log_update = nullptr;
@@ -101,17 +97,21 @@ Api::Api(QObject *parent)
 	callbacks_.rp_wcdma_sweep_update = nullptr;
 	callbacks_.rp_lte_sweep_update = nullptr;
 
-	connect(updateTimer_, SIGNAL(timeout()), this, SLOT(emitSignals()));
-	updateTimer_->start(800);
+	connect(&scanList_, SIGNAL(dataChanged(QModelIndex, QModelIndex, QVector<int>)), this, SLOT(findFreqMinMax()));
+	connect(&scanList_, SIGNAL(modelReset()), this, SLOT(findFreqMinMax()));
+	connect(&scanList_, SIGNAL(rowsInserted(QModelIndex, int, int)), this, SLOT(findFreqMinMax()));
+	connect(&scanList_, SIGNAL(rowsRemoved(QModelIndex, int, int)), this, SLOT(findFreqMinMax()));
 
-	connect(scanList_, SIGNAL(listChanged()), this, SLOT(findFreqMinMax()));
+	SettingsIO settingsIO;
+	settingsIO.readSettings(settings_);
 
 	thread_->start();
 }
 
 Api::~Api() {
-	settingsIO_.writeSettings(settings_);
-	settingsIO_.writeScanList(scanList_->qlist());
+	SettingsIO settingsIO;
+	settingsIO.writeSettings(settings_);
+	settingsIO.writeScanList(scanList_.list());
 	thread_->quit();
 	thread_->wait();
 	rp_clean_up();
@@ -120,8 +120,10 @@ Api::~Api() {
 
 void Api::initializeApi() {
 	QCoreApplication::postEvent(thread_->worker(), new InitializeApiEvent(&callbacks_));
-	settingsIO_.readSettings(settings_);
-	scanList_->setList(settingsIO_.readScanList());
+
+	// We have to initialize the channel list here so that QML is properly updated.
+	SettingsIO settingsIO;
+	scanList_.setList(settingsIO.readScanList(this));
 }
 
 void Api::cleanUpApi() {
@@ -148,19 +150,14 @@ void Api::disconnectDevice() {
 void Api::startCollection() {
 	qDebug() << "Starting collection.";
 
-	gsmFullScanModel_.clear();
-	wcdmaFullScanModel_.clear();
-	lteFullScanModel_.clear();
-	highestCellPerChannelModel_.clear();
-	sweepModelList_.clear();
-	sweepModels_.clear();
+	clearModels();
 
 	// Create storage for all possible techs.  Note, QMap automatically inserts a default item if it is empty.
 	api_storage<rp_operating_band, rp_operating_band_group> sweep;
 	api_storage<rp_frequency_type, rp_frequency_group> raw_data;
 	QMap<ApiTypes::Tech, api_storage<rp_frequency_band, rp_frequency_band_group>> techs;
 
-	foreach(const auto &ci, scanList_->qlist()) {
+	foreach(const auto &ci, scanList_.list()) {
 		auto cf = ci->channelFreqLow();
 		if(ci->isSweep()) {
 			sweep.push_back(cf->toRpBand());
@@ -168,7 +165,7 @@ void Api::startCollection() {
 			// Add operating band to sweep models
 			auto sweepModel = sweepModels_.insert(cf->band(), std::make_shared<MeasurementModel>());
 			QQmlEngine::setObjectOwnership(sweepModel->get(), QQmlEngine::CppOwnership);
-			sweepModelList_.push_back(sweepModel->get());
+//			sweepModelList_.push_back(sweepModel->get());
 		}
 		else if(cf->tech() == ApiTypes::RAW_DATA) {
 			raw_data.push_back(cf->toRpFreq());
@@ -178,75 +175,41 @@ void Api::startCollection() {
 		}
 	}
 
-	// Alert the GUI that the sweep models have changed.
-	emit sweepModelListChanged();
+	updateModels();
 
 	QCoreApplication::postEvent(thread_->worker(), new StartCollectionEvent(sweep, raw_data, techs));
 }
 
-void Api::findFreqMinMax() {
-	int low;
-	int high;
-	auto list = scanList_->qlist();
-	if(list.empty()) {
-		low = lowestFreqDefault_;
-		high = highestFreqDefault_;
-	}
-	else {
-		low = list[0]->channelFreqLow()->freqMhz();
-		high = list[0]->isSweep() ? list[0]->channelFreqHigh()->freqMhz() : list[0]->channelFreqLow()->freqMhz();
-		foreach(const auto &ci, list) {
-			if(ci->channelFreqLow()->freqMhz() < low)
-				low = ci->channelFreqLow()->freqMhz();
-			if(ci->isSweep() && ci->channelFreqHigh()->freqMhz() > high)
-				high = ci->channelFreqHigh()->freqMhz();
-			else if(ci->channelFreqLow()->freqMhz() > high)
-				high = ci->channelFreqLow()->freqMhz();
-		}
-		// Add some additional clearance due to bandwidth of LTE channels.
-		low -= 15;
-		high += 15;
-		// Make it look more consistent.
-		low = low - (low % 20);
-		high = high + (20 - high % 20);
-	}
-	if(low != lowestFreq_) {
-		lowestFreq_ = low;
-		emit lowestFreqChanged();
-	}
-	if(high != highestFreq_) {
-		highestFreq_ = high;
-		emit highestFreqChanged();
-	}
+void Api::clearModels() {
+	allTechModels_.clear();
+	gsmModels_.clear();
+	wcdmaModels_.clear();
+	lteModels_.clear();
+	highestCellPerChannelModel_.clear();
+	sweepModels_.clear();
+}
 
-	}
+void Api::updateModels() {
+	allTechModels_.setSweepModels(sweepModels_);
+	gsmModels_.setSweepModels(sweepModels_);
+	wcdmaModels_.setSweepModels(sweepModels_);
+	lteModels_.setSweepModels(sweepModels_);
+}
+
+void Api::findFreqMinMax() {
+	auto list = scanList_.list();
+	allTechModels_.findFreqMinMax(list);
+	gsmModels_.findFreqMinMax(list);
+	wcdmaModels_.findFreqMinMax(list);
+	lteModels_.findFreqMinMax(list);
+}
 
 void Api::stopCollection() {
 	QCoreApplication::postEvent(thread_->worker(), new StopCollectionEvent());
-	stats_.stop_benchmark();
 }
 
 void Api::updateLicense() {
 
-}
-
-void Api::emitSignals() {
-	if(canUpdateLog_) {
-		emit logChanged();
-		canUpdateLog_ = false;
-	}
-	if(canUpdateMessages_) {
-		emit messagesChanged();
-		canUpdateMessages_ = false;
-	}
-	if(canUpdateDevice_) {
-		emit connectedDeviceChanged();
-		canUpdateDevice_ = false;
-	}
-	if(canUpdateGps_) {
-		emit gpsChanged();
-		canUpdateGps_ = false;
-	}
 }
 
 bool Api::event(QEvent *e) {
@@ -269,36 +232,35 @@ bool Api::event(QEvent *e) {
 			QString msg(update_pb_.protobuf().log().msg().c_str());
 			qDebug() << msg;
 			log_.prepend(msg);
-			canUpdateLog_ = true;
+			emit logChanged();
 			break;
 		}
 		case rf_phreaker::protobuf::rp_update::UpdateCase::kMsg: {
 			auto &msg = update_pb_.protobuf().msg();
-			handle_message((rp_status)msg.status(), msg.msg().c_str());
-			canUpdateMessages_ = true;
+			handle_message(ApiMessage((rp_status)msg.status(), "", msg.msg().c_str()));
 			break;
 		}
 		case rf_phreaker::protobuf::rp_update::UpdateCase::kDevice: {
 			auto &device = update_pb_.get_hardware();
 			connectedDevice_.copy(device);
-			canUpdateDevice_ = true;
+			emit connectedDeviceChanged();
 			deviceConnected();
 			break;
 		}
 		case rf_phreaker::protobuf::rp_update::UpdateCase::kGps: {
 			current_gps_ = update_pb_.get_gps();
 			gps_.copy(current_gps_);
-			canUpdateGps_ = true;
+			emit gpsChanged();
 			break;
 		}
 		case rf_phreaker::protobuf::rp_update::UpdateCase::kGsmFullScan: {
 			auto &t = update_pb_.get_gsm_full_scan();
 			if(t.empty()) {
-				auto &k = update_pb_.get_gsm_full_scan_basic();
-				gsmFullScanModel_.update_with_basic_data(k, ApiTypes::GSM_FULL_SCAN);
+				//auto &k = update_pb_.get_gsm_full_scan_basic();
+				//gsmFullScanModel_.update_with_basic_data(k, ApiTypes::GSM_FULL_SCAN);
 			}
 			else {
-				gsmFullScanModel_.update(t);
+				gsmModels_.fullScanModel()->update(t);
 				highestCellPerChannelModel_.update_freq_using_highest<less_than_cell_sl>(t);
 			}
 			break;
@@ -306,11 +268,11 @@ bool Api::event(QEvent *e) {
 		case rf_phreaker::protobuf::rp_update::UpdateCase::kWcdmaFullScan: {
 			auto &t = update_pb_.get_wcdma_full_scan();
 			if(t.empty()) {
-				auto &k = update_pb_.get_wcdma_full_scan_basic();
-				wcdmaFullScanModel_.update_with_basic_data(k, ApiTypes::WCDMA_FULL_SCAN);
+				//auto &k = update_pb_.get_wcdma_full_scan_basic();
+				//wcdmaFullScanModel_.update_with_basic_data(k, ApiTypes::WCDMA_FULL_SCAN);
 			}
 			else {
-				wcdmaFullScanModel_.update(t);
+				wcdmaModels_.fullScanModel()->update(t);
 				highestCellPerChannelModel_.update_freq_using_highest<less_than_cell_sl>(t);
 			}
 			break;
@@ -318,11 +280,11 @@ bool Api::event(QEvent *e) {
 		case rf_phreaker::protobuf::rp_update::UpdateCase::kLteFullScan: {
 			auto &t = update_pb_.get_lte_full_scan();
 			if(t.empty()) {
-				auto &k = update_pb_.get_lte_full_scan_basic();
-				lteFullScanModel_.update_with_basic_data(k, ApiTypes::LTE_FULL_SCAN);
+				//auto &k = update_pb_.get_lte_full_scan_basic();
+				//lteFullScanModel_.update_with_basic_data(k, ApiTypes::LTE_FULL_SCAN);
 			}
 			else {
-				lteFullScanModel_.update(t);
+				lteModels_.fullScanModel()->update(t);
 				highestCellPerChannelModel_.update_freq_using_highest<less_than_cell_sl>(t);
 			}
 			break;
@@ -378,6 +340,8 @@ bool Api::event(QEvent *e) {
 	}
 	else if(e->type() == DeviceDisconnectedEvent::getType()) {
 		deviceDisconnected();
+		gps_.clear();
+		clearModels();
 		e->accept();
 		return true;
 	}
@@ -391,52 +355,83 @@ bool Api::event(QEvent *e) {
 		e->accept();
 		return true;
 	}
+	else if(e->type() == MessageUpdateEvent::getType()) {
+		auto ev = static_cast<MessageUpdateEvent*>(e);
+		handle_message(ev->msg());
+		e->accept();
+		return true;
+	}
 
 	return QObject::event(e);
 }
 
-void Api::handle_message(rp_status status, const QString &s) {
-	auto status_str = rp_status_message(status);
+void Api::handle_message(const ApiMessage &t) {
+	qDebug() << t.mainDescription_ << " | " << t.statusStr_ << " | " << t.details_;
 
-	switch(status) {
+	auto main = t.mainDescription_;
+
+	// Remove any line number and filenames that may be in the message.
+	// These can be observed using the log file.
+	auto details = t.details_;
+	details.remove(QRegularExpression("\\[.*\\] ", QRegularExpression::NoPatternOption));
+
+	auto msg = new ApiMessage(t.status_, main, details, this);
+	switch(msg->status_) {
 	case RP_STATUS_OK:
-		break;
 	case RP_STATUS_FREQUENCY_CORRECTION_SUCCESSFUL:
-		message(status, s);
+	case RP_STATUS_COLLECTION_FINISHED:
+		if(msg->mainDescription_.isEmpty())
+			msg->mainDescription_ = "Internal RF Phreaker Message";
+		messages_.prepend(msg);
+		emit messagesChanged();
+		break;
+	default:
+		if(msg->mainDescription_.isEmpty())
+			msg->mainDescription_ = "Internal RF Phreaker Error";
+		errors_.prepend(msg);
+		emit errorsChanged();
+	}
+
+	switch(msg->status_) {
+	// If it's a "good" message no signals needed.
+	case RP_STATUS_OK:
+	case RP_STATUS_FREQUENCY_CORRECTION_SUCCESSFUL:
+	case RP_STATUS_COLLECTION_FINISHED:
 		break;
 	case RP_STATUS_FREQUENCY_CORRECTION_FAILED:
-		message(status, s);
-		break;
 	case RP_STATUS_FREQUENCY_CORRECTION_VALUE_INVALID:
-		message(status, s);
+	case RP_STATUS_INVALID_PARAMETER: // This means the API has been initialized successfully and we only need to stop scanning.
+	case RP_STATUS_CALIBRATION_ERROR:
+	case RP_STATUS_EEPROM_ERROR:
+	case RP_STATUS_HARDWARE_INFO_ERROR:
+	case RP_STATUS_MISC_ERROR:
+	case RP_STATUS_FILE_IO_ERROR:
+	case RP_STATUS_IPP_ERROR:
+	case RP_STATUS_FILTER_ERROR:
+	case RP_STATUS_GSM_ANALYSIS_ERROR:
+	case RP_STATUS_UMTS_ANALYSIS_ERROR:
+	case RP_STATUS_LTE_ANALYSIS_ERROR:
+	case RP_STATUS_PROCESSING_ERROR:
+	case RP_STATUS_LICENSE_ERROR:
+	case RP_STATUS_CONVERSION_ERROR:
+	case RP_STATUS_RF_PHREAKER_API_ERROR:
+		errorGoIdle();
 		break;
 	case RP_STATUS_NOT_INITIALIZED:
-		message(status, s);
-		break;
-	case RP_STATUS_INVALID_PARAMETER:
-		message(status, s);
-		break;
-	case RP_STATUS_CALIBRATION_ERROR:
-		message(status, s);
-		break;
-	case RP_STATUS_EEPROM_ERROR:
-		message(status, s);
-		break;
-
-	//case RP_OTHER_GOOD_THINGS:
-	// Handle other messages that may not be errors?
+	case RP_STATUS_COMMUNICATION_ERROR:
+	case RP_STATUS_SCANNER_INIT_ERROR:
+	case RP_STATUS_BLADE_RF_ERROR:
+	case RP_STATUS_GPS_COMMUNICATION_ERROR:
+	case RP_STATUS_CONFIGURATION_FILE_NOT_FOUND:
 	default:
-		errorMessage(status, s);
+		errorReinitialize();
 	}
-	qDebug() << status_str + s;
-
-	messages_.prepend(status_str + s);
-	emit messagesChanged();
 }
 
 bool Api::openCollectionFile(){
+	QUrl url(collectionFilename_);
+	collectionFilename_ = url.toLocalFile();
 	qDebug() << "Opening collection file. " << collectionFilename_ << ".";
-	collectionFilename_.remove("file:///");
 	output_qfile_.setFileName(collectionFilename_);
 	if(!output_qfile_.open(QIODevice::WriteOnly | QIODevice::Unbuffered)) {
 		qDebug() << "Failed to open collection file. " << output_qfile_.errorString();
@@ -463,6 +458,7 @@ void Api::close_collection_file() {
 		output_qfile_.close();
 	}
 	api_debug_output_.close();
+	stats_.stop_benchmark();
 }
 
 void Api::convertRfp(QString filename) {

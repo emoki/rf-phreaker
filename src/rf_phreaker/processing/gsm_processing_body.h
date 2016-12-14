@@ -17,16 +17,18 @@ namespace rf_phreaker { namespace processing {
 class gsm_cell_search_settings
 {
 public:
-	gsm_cell_search_settings(const collection_settings &s, const gsm_general_settings &g, const layer_3_settings &l)
+	gsm_cell_search_settings(const collection_settings &s, const gsm_general_settings &g, const layer_3_settings &l, bool have_common_sweep_output)
 		: general_(g)
 		, gsm_config_(g.perform_sync_correlations_, (int)s.sampling_rate_, (int)s.sampling_rate_, 
 		rf_phreaker::convert_to_samples_and_mod_1024(s.collection_time_, s.sampling_rate_),
 			(int)g.side_power_threshold_, (int)g.band_power_threshold_, (int)s.bandwidth_) 
-		, layer_3_(l) {}
+		, layer_3_(l)
+		, have_common_sweep_output_(have_common_sweep_output) {}
 
 	gsm_config gsm_config_;
 	gsm_general_settings general_;
 	layer_3_settings layer_3_;
+	bool have_common_sweep_output_;
 };
 
 class gsm_processing_body
@@ -106,6 +108,22 @@ public:
 			p_info_group.push_back(power_info(center_freq + freq, gsm_channel_bandwidth_, freq_bin_calculator_.get_power_in_bin(freq)));
 		}
 
+		// Determine if this works when GSM is implemented for rf_phreaker_gui.
+		//power_info_group p_info_group;
+		//if(config_.have_common_sweep_output_) {
+		//	auto length = meas.get_iq().length() > (1 << 17) ? (1 << 17) : meas.get_iq().length();
+		//	p_info_group = freq_bin_calculator_.calculate_power_info_group(meas, mhz(1), khz(100), -GSM_LOW_BANDWIDTH_HZ, GSM_HIGH_BANDWIDTH_HZ,
+		//		rf_phreaker::largest_pow_of_2(length));
+		//}
+		//else {
+		//	auto center_freq = meas.frequency() + GSM_PROCESSING_IF;
+		//	if(center_freq % khz(200) != 0)
+		//		throw processing_error("GSM center freq is incorrectly centered on a GSM channel.");
+		//	auto length = meas.get_iq().length() > (1 << 17) ? (1 << 17) : meas.get_iq().length();
+		//	p_info_group = freq_bin_calculator_.calculate_power_info_group(meas, gsm_channel_bandwidth_, gsm_channel_bandwidth_, -GSM_LOW_BANDWIDTH_HZ, GSM_HIGH_BANDWIDTH_HZ,
+		//		rf_phreaker::largest_pow_of_2(length), center_freq);
+		//}
+
 		LOG_IF(LCOLLECTION, (gsm_group.size() != 0)) << "GSM processing - Found " << gsm_group.size() << " GSM measurements using a center frequency of "
 			<< meas.frequency() / 1e6 << "mhz and a bandwidth of " << meas.bandwidth() / 1e6 << "mhz";
 
@@ -125,7 +143,8 @@ public:
 		}
 
 		for(auto &data : info.processed_data_) {
-			if(!tracker_.is_fully_decoded(data.center_frequency_, data) && (data.c_i_ratio_ > config_.layer_3_.decode_threshold_ || tracker_.in_history(data.center_frequency_, data))) {
+			if(!tracker_.is_fully_decoded(data.center_frequency_, data) && (data.c_i_ratio_ > config_.layer_3_.decode_threshold_ 
+				|| (config_.layer_3_.should_prioritize_layer_3_ && tracker_.in_history(data.center_frequency_, data)))) {
 				if(data.bsic_ == -1) {
 					int status = analysis_.decode_bsic(meas, data);
 					if(status != 0)

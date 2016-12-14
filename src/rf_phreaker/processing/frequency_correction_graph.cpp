@@ -44,18 +44,18 @@ void frequency_correction_graph::start(scanner_controller_interface *sc, data_ou
 
 			graph_ = (std::make_shared<tbb::flow::graph>());
 
+			// Only allow one item in flight - this allows us to change the trim value and have it affect all subsequent packets collected.
+			auto max_limit = 1;
+
 			start_node_ = std::make_shared<start_node>(*graph_, [=](add_remove_collection_info &info) { return true; }, false);
 			collection_manager_node_ = std::make_shared<collection_manager_node>(*graph_, tbb::flow::serial,
 				freq_correction_collection_manager_body(graph_.get(), sc, collection_info, config.packet_output_,
-				config));
-
-			// Only allow one item in flight - this allows us to change the trim value and have it affect all subsequent packets collected.
-			auto max_limit = 1;
+				config, max_limit));
 
 			auto limiter = std::make_shared<limiter_node>(*graph_, max_limit);
 
 			auto umts_sweep_cell_search = std::make_shared<umts_cell_search_node>(*graph_, tbb::flow::serial, umts_processing_body(
-				umts_cell_search_settings(config.umts_sweep_collection_, config.umts_layer_3_decode_, config.frequency_correction_settings_.general_settings_, 5), sc));
+				umts_cell_search_settings(config.umts_sweep_collection_, config.umts_layer_3_decode_, config.frequency_correction_settings_.general_settings_, 5, false, false), sc));
 			auto umts_sweep_output_feedback = std::make_shared<umts_output_and_feedback_node>(*graph_, tbb::flow::serial, umts_sweep_output_and_feedback_body(&tmp_data_output));
 			auto umts_freq_correction = std::make_shared<frequency_correction_node>(*graph_, tbb::flow::serial, frequency_correction_body(graph_.get(), sc, out,
 				config.umts_sweep_collection_, config.frequency_correction_settings_, config.umts_layer_3_general_));

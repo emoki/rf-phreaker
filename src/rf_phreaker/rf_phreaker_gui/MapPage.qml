@@ -1,4 +1,4 @@
-import QtQuick 2.5
+import QtQuick 2.6
 import QtQuick.Layouts 1.1
 import QtQuick.Controls 1.4
 import QtQuick.Controls.Styles.Flat 1.0 as Flat
@@ -7,94 +7,129 @@ import QtQuick.Extras.Private 1.0
 import QtQml.Models 2.2
 import QtPositioning 5.3
 import QtLocation 5.3
+import QtQuick.Dialogs 1.2
 import RfPhreaker 1.0
+import org.kde.edu.marble 0.20
 
-ScrollView {
-    id: scannerScrollView
+
+Rectangle {
+    id: root
     anchors.fill: parent
-    horizontalScrollBarPolicy: Qt.ScrollBarAlwaysOff
-
-    Flickable {
+    color: "transparent"
+    ColumnLayout {
         anchors.fill: parent
-   //     contentWidth: viewport.width
 
-        property variant location: QtPositioning.coordinate(Api.gps.gpsLock ? Api.gps.latitude : 0, Api.gps.gpsLock ? Api.gps.longitude : 0)
-        //! [Initialize Plugin]
-        Plugin {
-            id: myPlugin
-            name: "osm"
-            //specify plugin parameters if necessary
-            //PluginParameter {...}
-            //PluginParameter {...}
-            //...
+        RowLayout {
+            id: row
+            Layout.preferredHeight: 30
+
+            Button {
+                id: downloadButton
+                text: "Download"
+                onClicked: {
+                    marbleManager.downloadMapRegion(marbleManager.marbleMap);
+                }
+            }
+
+            ProgressBar {
+                value: marbleManager.downloadProgess;
+            }
         }
-        //! [Initialize Plugin]
 
-        //! [Current Location]
-//        PositionSource {
-//            id: positionSource
-//            property variant lastSearchPosition: location
-//            active: true
-//            updateInterval: 500//120000 // 2 mins
-//            onPositionChanged:  {
-//                var currentPosition = positionSource.position.coordinate
-//                map.center = currentPosition
-//                var distance = currentPosition.distanceTo(lastSearchPosition)
-//                if (distance > 500) {
-//                    // 500m from last performed pizza search
-//                    lastSearchPosition = currentPosition
-//                    searchModel.searchArea = QtPositioning.circle(currentPosition)
-//                    searchModel.update()
-//                }
-//            }
-//        }
-        //! [Current Location]
-
-        //! [PlaceSearchModel]
-//        PlaceSearchModel {
-//            id: searchModel
-
-//            plugin: myPlugin
-
-//            searchTerm: "Pizza"
-//            //initially show Brisbane
-//            searchArea: QtPositioning.circle(location)
-
-//            Component.onCompleted: update()
-//        }
-        //! [PlaceSearchModel]
-
-        //! [Places MapItemView]
-        Map {
-            id: map
-            anchors.fill: parent
-            plugin: myPlugin;
-            center: QtPositioning.coordinate(Api.gps.gpsLock ? Api.gps.latitude : 0, Api.gps.gpsLock ? Api.gps.longitude : 0)
-            zoomLevel: 13
-
-//            MapItemView {
-//                model: searchModel
-//                delegate: MapQuickItem {
-//                    coordinate: place.location.coordinate
-
-//                    anchorPoint.x: image.width * 0.5
-//                    anchorPoint.y: image.height
-
-//                    sourceItem: Image {
-//                        id: image
-//                        source: "marker.png"
-//                    }
-//                }
-//            }
+        MarblePlacemarkList {
+            Layout.preferredHeight: 125
+            Layout.fillWidth: true
+            model: marbleManager.placemarkModel
+            manager: marbleManager
         }
-        //! [Places MapItemView]
 
-//        Connections {
-//            target: searchModel
-//            onStatusChanged: {
-//                if (searchModel.status == PlaceSearchModel.Error)
-//                    console.log(searchModel.errorString());
-//            }
-//        }
+
+        MarbleManager {
+            id: marbleManager
+            Layout.fillHeight: true
+            Layout.fillWidth: true
+            visible: true
+            focus: true
+
+            projection: MarbleItem.Mercator
+            //mapThemeId: "earth/vectorosm/vectorosm.dgml"
+            mapThemeId: "earth/openstreetmap/openstreetmap.dgml"
+            showFrameRate: false
+            showAtmosphere: false
+            showCompass: false
+            showClouds: false
+            showCrosshairs: false
+            showGrid: false
+            showOverviewMap: false
+            showOtherPlaces: false
+            showScaleBar: false
+            showBackground: false
+            positionProvider: "RfPhreakerPositioning"
+            showPositionMarker: true
+
+            onCurrentPositionChanged: {
+                positionMarker.update();
+            }
+            onVisibleLatLonAltBoxChanged: {
+                positionMarker.update();
+            }
+
+            PinchArea
+            {
+                objectName: "pinchArea"
+                anchors.fill: parent
+                onPinchStarted: { marbleManager.handlePinchStart(pinch.center) }
+                onPinchUpdated: { marbleManager.handlePinchUpdate(pinch.center, pinch.scale) }
+                onPinchFinished:{ marbleManager.handlePinchEnd(pinch.center, false) }
+            }
+            PositionMarker {
+                id: positionMarker
+                angle: marbleManager.angle
+                visible: marbleManager.positionVisible && marbleManager.iscurrentPositionGloballyVisible
+                function update() {
+                    var newX = Math.floor(marbleManager.screenCoordinatesFromCoordinate(marbleManager.currentPosition.coordinate).x);
+                    var newY = Math.floor(marbleManager.screenCoordinatesFromCoordinate(marbleManager.currentPosition.coordinate).y);
+                    if(newX !== posX || newY !== posY) {
+                        if((Math.abs(newX - posX) > 0 || Math.abs(newY - posY) > 0) && marbleManager.isTrackingEnabled && visible) {
+                            posX = newX;
+                            posY = newY;
+                            marbleManager.centerOnCurrentPosition();
+                        }
+                        else {
+                            posX = newX;
+                            posY = newY;
+                        }
+                    }
+                }
+            }
+
+            PositionButton {
+                id: zoomToPositionButton
+                anchors {
+                    right: parent.right
+                    rightMargin: 0.005 * root.width
+                    bottom: marbleManager.bottom
+                    bottomMargin: 10
+                }
+
+                iconSource: marbleManager.positionAvailable ? "qrc:/icons/device_gps_fixed.svg" : "qrc:/icons/device_gps_fixed.svg"
+
+                onClicked: {
+                    marbleManager.isTrackingEnabled = true;
+                    marbleManager.setCurrentTrackVisible(true);
+                    marbleManager.centerOnCurrentLocation();
+                }
+
+                property real distance: 0
+
+                function updateIndicator() {
+                    var point = marbleManager.mapFromItem(zoomToPositionButton, diameter * 0.5, diameter * 0.5);
+                    distance = 0.001 * marbleManager.distanceFromPointToCurrentLocation(point);
+                    angle = marbleManager.angleFromPointToCurrentLocation(point);
+                }
+
+                showDirection: marbleManager.positionAvailable && !marbleManager.positionVisible
+            }
+        }
     }
 }

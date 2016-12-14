@@ -1,9 +1,10 @@
 #pragma once
 
-#include "rf_phreaker/umts_analysis/umts_measurement.h"
-#include "rf_phreaker/common/common_types.h"
 #include <map>
 #include <vector>
+#include <chrono>
+#include "rf_phreaker/umts_analysis/umts_measurement.h"
+#include "rf_phreaker/common/common_types.h"
 
 namespace rf_phreaker {
 
@@ -50,6 +51,16 @@ public:
 		auto tracking = meas_map_.find(freq);
 		if(tracking != meas_map_.end())
 			meas_map_.erase(tracking);
+	}
+
+	void remove_old_meas(rf_phreaker::frequency_type freq, std::chrono::milliseconds current_time, std::chrono::milliseconds expiration_time) {
+		auto tracking = meas_map_.find(freq);
+		if(tracking != meas_map_.end()) {
+			auto &v = tracking->second;
+			v.erase(std::remove_if(std::begin(v), std::end(v), [&](const umts_measurement &a) {
+				return current_time - static_cast<std::chrono::milliseconds>(a.time_) > expiration_time;
+			}), v.end());
+		}
 	}
 
 private:

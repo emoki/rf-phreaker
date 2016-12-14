@@ -74,7 +74,6 @@ template <typename T> class concurrent {
 		}
 	}
 
-
 	int approximate_size() {
 		return queue_.size();
 	}

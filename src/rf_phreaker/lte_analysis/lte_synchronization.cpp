@@ -24,10 +24,6 @@ Ipp32fc SSS_Buffer[2 * 3 * 168 * 128 + WINDIPP_MEM_ALIGN_SIZE * 2];
 Ipp32fc *PSS_seqT[3], *PSS_seqF[3];
 Ipp32fc *SSS_seqT[168][3], *SSS_seqF[168][3];
 
-void generate_PSS(Ipp32fc *PSS_seq_T, Ipp32fc *PSS_seq_F, int len, int id);
-
-void generate_SSS(Ipp32fc *SSS_seq, int cellID1, int cellID2);
-
 void getChannelEstFromSSS(Ipp32fc *H_est, const Ipp32fc *signal192, unsigned int PSSStartSample,
 	int halfFrameFlag, unsigned int cellID1, unsigned int cellID2, int PSS_No,
 	const CYCLICPREFIX cyclicPrefixMode);

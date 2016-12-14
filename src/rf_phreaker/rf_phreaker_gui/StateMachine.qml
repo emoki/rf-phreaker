@@ -1,4 +1,4 @@
-import QtQuick 2.5
+import QtQuick 2.6
 import QtQuick.Layouts 1.1
 import QtQuick.Controls 1.4
 import QtQuick.Controls.Styles.Flat 1.0 as Flat
@@ -250,6 +250,7 @@ DSM.StateMachine {
                     Api.startCollection();
                 }
                 onExited: {
+                    Api.closeCollectionFile();
                 }
                 DSM.SignalTransition {
                     targetState: smIdle

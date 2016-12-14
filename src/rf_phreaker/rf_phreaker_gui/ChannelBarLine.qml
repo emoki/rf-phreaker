@@ -4,14 +4,29 @@ import RfPhreaker 1.0
 
 Item {
     id: channelBarLine
+    property ChartView chart
     property ValueAxis mainAxisX
     property AreaSeries areaSeriesSL
     property AreaSeries areaSeriesInter
     property GenericMeasurement meas
     property real bottomY
     property real topY
+    property bool shouldUpdate: true
+
+    Timer {
+        interval: 1000
+        running: true
+        repeat: true
+        onTriggered: {
+            if(shouldUpdate) {
+                update();
+                shouldUpdate = false;
+            }
+        }
+    }
 
     function update() {
+        //console.debug("updating channelBarLine: ", meas.cellChannel, "-", meas.cellId);
         areaSeriesSL.upperSeries.clear();
         areaSeriesSL.upperSeries.append(mainAxisX.min, topY);
         areaSeriesSL.upperSeries.append(meas.carrierSignalLevel, topY);
@@ -34,7 +49,7 @@ Item {
 
     Connections {
         target: meas
-        onCellSignalLevelChanged: update()
-        onCellInterferenceChanged: update()
+        onCellSignalLevelChanged: shouldUpdate = true;
+        onCellInterferenceChanged: shouldUpdate = true;
     }
 }

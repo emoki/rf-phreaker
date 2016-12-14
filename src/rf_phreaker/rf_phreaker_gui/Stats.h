@@ -11,6 +11,7 @@
 class Stats {
 public:
 	void start_benchmark(const std::string &filename) {
+		benchmark_.close_benchmark();
 		benchmark_.open_benchmark(filename + "_benchmark.txt", true);
 		count_.clear();
 		benchmark_.clear();

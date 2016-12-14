@@ -1,8 +1,10 @@
+#pragma once 
 #include <vector>
 #include "rf_phreaker/common/ipp_array.h"
 #include "rf_phreaker/common/common_types.h"
 #include "rf_phreaker/common/fft_helper.h"
 #include "rf_phreaker/common/moving_window_calculator.h"
+#include "rf_phreaker/common/raw_signal.h"
 
 namespace rf_phreaker {
 
@@ -15,6 +17,19 @@ public:
 		, length_(0)
 		, freq_resolution_(0) {}
 
+	power_info_group calculate_power_info_group(const raw_signal &sig, frequency_type bin_size_hz, frequency_type step_size_hz,
+		frequency_type low_if, frequency_type high_if, int length = 0, frequency_type center_freq = 0) {
+		calculate_power_in_bins(sig.get_iq(), sig.sampling_rate(), bin_size_hz, length);
+		
+		if(center_freq == 0)
+			center_freq = sig.frequency();
+
+		power_info_group group;
+		for(auto inter_freq = low_if; inter_freq <= high_if; inter_freq += step_size_hz) {
+			group.push_back(power_info(center_freq + inter_freq, bin_size_hz, get_power_in_bin(inter_freq)));
+		}
+		return group;
+	}
 
 	void calculate_power_in_bins(const ipp_32fc_array &src, frequency_type sampling_rate, frequency_type bin_size_hz, int length = 0) {
 		sampling_rate_ = sampling_rate;

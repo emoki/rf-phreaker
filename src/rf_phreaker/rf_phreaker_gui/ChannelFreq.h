@@ -2,6 +2,7 @@
 #include <QtCore/QObject>
 #include <QtCore/QString>
 #include <QtCore/QLocale>
+#include <QDebug>
 #include "rf_phreaker/rf_phreaker_api/rf_phreaker_api.h"
 #include "rf_phreaker/common/common_types.h"
 #include "rf_phreaker/rf_phreaker_gui/ApiTypes.h"
@@ -14,13 +15,15 @@ class ChannelFreq : public QObject {
 	Q_PROPERTY(QString freq READ toFreqStr WRITE setFreq NOTIFY freqChanged)
 	Q_PROPERTY(QString band READ toBandStr WRITE setBand NOTIFY bandChanged)
 	Q_PROPERTY(QString tech READ toTechStr WRITE setTech NOTIFY techChanged)
+	Q_PROPERTY(QString radioType READ toRadioTypeStr NOTIFY techChanged)
 
 public:
 	ChannelFreq(QObject *parent = 0)
 		: QObject(parent)
 		, tech_(ApiTypes::UNKNOWN_TECH)
 	{}
-	ChannelFreq(rf_phreaker::channel_freq cf, ApiTypes::Tech t, QObject *parent = 0)
+
+	ChannelFreq(const rf_phreaker::channel_freq &cf, ApiTypes::Tech t, QObject *parent = 0)
 		: QObject(parent)
 		, cf_(cf)
 		, tech_(t)
@@ -36,12 +39,14 @@ public:
 
 	ChannelFreq& operator=(const ChannelFreq &cf) {
 		cf_ = cf.cf_;
+		tech_ = cf.tech_;
 		return *this;
 	}
 
 	bool operator==(const ChannelFreq &cf) {
 		return cf_ == cf.cf_;
 	}
+
 	bool operator!=(const ChannelFreq &cf) {
 		return !(cf_ == cf.cf_);
 	}
@@ -55,6 +60,7 @@ public:
 			emit channelChanged();
 		}
 	}
+
 	void setFreq(const QString &a) {
 		bool ok = false;
 		auto t = a.toDouble(&ok) * 1000000;
@@ -64,6 +70,7 @@ public:
 			emit freqChanged();
 		}
 	}
+
 	void setBand(const QString &a) {
 		auto t = (rf_phreaker::operating_band)ApiTypes::toOperatingBand(a);
 		if(t != cf_.band_) {
@@ -71,6 +78,7 @@ public:
 			emit bandChanged();
 		}
 	}
+
 	void setTech(const QString &a) {
 		auto t = ApiTypes::toTech(a);
 		if(t != tech_) {
@@ -83,6 +91,23 @@ public:
 	QString toFreqStr() const { return QString::number(cf_.freq_/1e6, 'f', 1); }
 	QString toBandStr() const { return ApiTypes::toQString(cf_.band_); }
 	QString toTechStr() const { return ApiTypes::toQString(tech_); }
+	QString toRadioTypeStr() const {
+		switch(tech_) {
+		case ApiTypes::GSM_FULL_SCAN:
+		case ApiTypes::GSM_SWEEP:
+			return "GSM";
+		case ApiTypes::WCDMA_FULL_SCAN:
+		case ApiTypes::WCDMA_SWEEP:
+			return "WCDMA";
+		case ApiTypes::LTE_FULL_SCAN:
+		case ApiTypes::LTE_SWEEP:
+			return "LTE";
+		case ApiTypes::RAW_DATA:
+			return "RAW_DATA";
+		default:
+			return "UNKNOWN";
+		}
+	}
 
 	double freqMhz() const { return cf_.freq_ / 1e6; }
 

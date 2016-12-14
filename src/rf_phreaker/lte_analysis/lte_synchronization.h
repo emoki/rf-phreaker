@@ -15,6 +15,9 @@ namespace rf_phreaker {
 //} LTEProc_CorrRecordType;
 typedef CORR_RECORD_TYPE LTEProc_CorrRecordType;
 
+void generate_PSS(Ipp32fc *PSS_seq_T, Ipp32fc *PSS_seq_F, int len, int id);
+
+void generate_SSS(Ipp32fc *SSS_seq, int cellID1, int cellID2);
 
 void sampleRateConv2(Ipp32fc *signal192, Ipp32fc *signal384, unsigned int signalLength,
 	double* pDelayTime, int sampling_factor);

@@ -3,6 +3,7 @@
 #include <stdint.h>
 
 #include "rf_phreaker/common/ipp_array.h"
+#include "rf_phreaker/common/common_types.h"
 
 namespace rf_phreaker
 {
@@ -10,16 +11,15 @@ namespace rf_phreaker
 class frequency_shifter
 {
 public:
-	frequency_shifter(double sample_rate = 4.875e6)
-		: sample_rate_(sample_rate)
-		, magnitude_(1)
+	frequency_shifter()
+		: magnitude_(1)
 		, phase_(0)
 	{}
 	
 	~frequency_shifter()
 	{}
 
-	void shift_frequency(ipp_32fc_array &signal, int32_t length, double frequency_hz_to_shift)
+	void shift_frequency(ipp_32fc_array &signal, int32_t length, double frequency_hz_to_shift, frequency_type sample_rate)
 	{
 		if(frequency_hz_to_shift == 0)
 			return;
@@ -29,18 +29,18 @@ public:
 		if(tone_.length() < signal.length())
 			tone_.reset(signal.length());
 
-		generate_tone(tone_, length, frequency_hz_to_shift);
+		generate_tone(tone_, length, frequency_hz_to_shift, sample_rate);
 
 		ipp_helper::check_status(ippsMul_32fc(signal.get(), tone_.get(), signal.get(), length));
 	}
 
-	void generate_tone(ipp_32fc_array &tone, int32_t length, double frequency_hz_to_shift)
+	void generate_tone(ipp_32fc_array &tone, int32_t length, double frequency_hz_to_shift, frequency_type sample_rate)
 	{
 		assert(length <= tone.length());
 
 		phase_ = 0;
 
-		float normalized_freq = static_cast<float>(frequency_hz_to_shift / sample_rate_);
+		float normalized_freq = static_cast<float>(frequency_hz_to_shift / (double)sample_rate);
 
 		if(abs(normalized_freq) > .5)
 			throw misc_error("Error generating tone for frequency shift.");
@@ -59,10 +59,6 @@ private:
 	float magnitude_;
 
 	float phase_;
-
-	double sample_rate_;
-
-	ipp_32fc_array *signal_;
 };
 
 }

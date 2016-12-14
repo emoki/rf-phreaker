@@ -30,15 +30,28 @@ protected:
 	}
 	gps create_gps(int tmp = 0) {
 		gps g;
-		g.coordinated_universal_time_ = tmp++;
-		g.latitude_ = tmp++;
-		g.lock_ = false;
-		g.longitude_ = tmp++;
-		g.raw_status_ = tmp++;
 		g.serial_ = "adlfkjapo";
-		g.speed_ = tmp++;
-		g.tracking_satellites_ = tmp++;
+		g.lock_ = false;
+		g.coordinated_universal_time_ = tmp++;
 		g.visible_satellites_ = tmp++;
+		g.tracking_satellites_ = tmp++;
+		g.latitude_ = tmp++;
+		g.longitude_ = tmp++;
+		g.altitude_= tmp++;
+		g.angle_ = tmp++;
+		g.speed_ = tmp++;
+		g.dilution_of_precision_ = tmp++;
+		g.horizontal_accuracy_meters_ = tmp++;
+		g.vertical_accuracy_meters_= tmp++;
+		g.raw_status_ = tmp++;
+		for(int i = 0; i < 12; ++i) {
+			gps::satellite sat;
+			sat.prn_ = tmp++;
+			sat.snr_ = tmp++;
+			sat.elevation_ = tmp++;
+			sat.azimuth_ = tmp++;
+			g.satellites_.push_back(sat);
+		}
 		return g;
 	}
 	gsm_data create_gsm(int tmp = 0) {

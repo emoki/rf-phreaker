@@ -4,9 +4,12 @@
 #include "rf_phreaker/processing/scanner_error_tracker.h"
 #include "rf_phreaker/processing/frequency_correction_calculator.h"
 #include "rf_phreaker/processing/processing_and_feedback_helper.h"
+#include "rf_phreaker/scanner/scanner_controller_interface.h"
 #include "rf_phreaker/umts_analysis/umts_analysis.h"
 #include "rf_phreaker/common/settings.h"
 #include "rf_phreaker/common/common_utility.h"
+#include "rf_phreaker/common/concurrent.h"
+#include "rf_phreaker/common/frequency_bin_calculator.h"
 #include "tbb/flow_graph.h"
 
 namespace rf_phreaker { namespace processing {
@@ -14,16 +17,52 @@ namespace rf_phreaker { namespace processing {
 class umts_cell_search_settings
 {
 public:
-	umts_cell_search_settings(const collection_settings &s, const layer_3_settings &l, const umts_general_settings &g, int max_candidates)
+	umts_cell_search_settings(const collection_settings &s, const layer_3_settings &l, const umts_general_settings &g, int max_candidates, 
+		bool have_common_sweep_output, bool offload_full_scan)
 		: layer_3_(l)
 		, umts_general_(g)
 		, umts_config_((int)s.sampling_rate_, (int)38400000, 
 		rf_phreaker::convert_to_samples_and_mod_1024(s.collection_time_, s.sampling_rate_), g.num_coherent_slots_, max_candidates)
-	{}
+		, offload_full_scan_(offload_full_scan)
+		, have_common_sweep_output_(have_common_sweep_output)	{}
 	
 	umts_config umts_config_;
 	layer_3_settings layer_3_;
 	umts_general_settings umts_general_;
+	bool offload_full_scan_;
+	bool have_common_sweep_output_;
+};
+
+class offloaded_analysis {
+public:
+	offloaded_analysis(const offloaded_analysis &a)
+		: mutex_(a.mutex_) {
+		analysis_ = std::make_unique<umts_analysis>(*a.analysis_.get());
+	}
+
+	offloaded_analysis(offloaded_analysis &&a)
+		: mutex_(std::move(a.mutex_)) {
+		analysis_.swap(a.analysis_);
+	}
+
+	offloaded_analysis(std::mutex &mutex, const umts_analysis &analysis)
+		: mutex_(mutex) {
+		analysis_ = std::make_unique<umts_analysis>(analysis);
+	}
+
+	void perform_full_scan(umts_analysis *updating_analysis, const rf_phreaker::scanner::measurement_info &meas, double sensitivity, double error) {
+		umts_measurements group;
+		int status = analysis_->cell_search(meas, group, sensitivity, umts_scan_type::full_scan_type, error);
+		if(status != 0)
+			throw umts_analysis_error("Error processing umts.");
+
+		std::lock_guard<std::mutex> lock(mutex_);
+		updating_analysis->update_tracked_measurements(meas.frequency(), group);
+	}
+
+private:
+	std::unique_ptr<umts_analysis> analysis_;
+	std::mutex &mutex_;
 };
 
 class umts_processing_body
@@ -33,7 +72,6 @@ public:
 		: analysis_(config.umts_config_, is_cancelled)
 		, tracker_(config.layer_3_.max_update_threshold_, config.layer_3_.minimum_collection_round_, config.layer_3_.minimum_decode_count_)
 		, config_(config)
-		, calculator_(config.umts_config_.sampling_rate())
 		, sc_(sc) {
 		if(config.layer_3_.wanted_layer_3_.empty()) {
 			LOG(LVERBOSE) << "Defaulting to decoding all UMTS SIBs.";
@@ -45,15 +83,17 @@ public:
 		}
 		else
 			tracker_.set_wanted_layer_3((std::vector<layer_3_information::umts_sib_type>&)config.layer_3_.wanted_layer_3_);
+
+		offloaded_analysis_ = std::make_unique<concurrent<offloaded_analysis>>(offloaded_analysis(analysis_mutex_, analysis_));
 	}
 	
 	umts_processing_body(const umts_processing_body &body)
-		: analysis_(body.config_.umts_config_)
+		: analysis_(body.analysis_)
 		, tracker_(body.tracker_.max_update_, body.tracker_.min_collection_round_, body.tracker_.min_decode_count_, body.tracker_.wanted_layer_3())
 		, config_(body.config_)
-		, calculator_(body.config_.umts_config_.sampling_rate()) 
-		, sc_(body.sc_) 
-	{}
+		, sc_(body.sc_) {
+		offloaded_analysis_ = std::make_unique<concurrent<offloaded_analysis>>(offloaded_analysis(analysis_mutex_, analysis_));
+	}
 
 	//umts_processing_body(umts_processing_body &&body)
 	//	: umts_analysis_(std::move(body.umts_analysis_))
@@ -64,12 +104,27 @@ public:
 		auto meas = *package.measurement_info_.get();
 		umts_measurements group;
 		double rms = 0;
+
+		helper_.remove_futures();
 		
 		// Change scan_type to candidate_one_timeslot_scan_type once we have tracking.
 		auto scan_type = candidate_all_timeslots_scan_type;
 		if(meas.collection_round() % config_.umts_general_.full_scan_interval_ == 0) {
 			scan_type = full_scan_type;
 		}
+
+		// If we are to offload processing then process this signal twice.  The processing on this thread will only be tracked cells
+		// and the full scan will occur on a separate thread.  We have a reference to the mutex and umts_container to update the 
+		// the tracked cells when the processing is done.
+		// Do NOT offload processing if we are not tracking any measurements.  This could cause us to artifically surpass 
+		// the min_collection_round with no measurements found which would cause the API to remove
+		if(scan_type == umts_scan_type::full_scan_type && config_.offload_full_scan_) {
+			scan_type = umts_scan_type::candidate_all_timeslots_scan_type;
+			helper_.track_future((*offloaded_analysis_)([meas, this](offloaded_analysis &a) {
+				a.perform_full_scan(&analysis_, meas, config_.umts_general_.sensitivity_, g_scanner_error_tracker::instance().current_error());
+			}));
+		}
+
 
 		int status = analysis_.cell_search(meas, group, config_.umts_general_.sensitivity_, scan_type,
 			g_scanner_error_tracker::instance().current_error(), &rms);
@@ -127,7 +182,8 @@ public:
 		}
 
 		for(auto &data : info.processed_data_) {
-			if(!tracker_.is_fully_decoded(freq, data) && (data.ecio_ > config_.layer_3_.decode_threshold_ || tracker_.in_history(freq, data))) {
+			if(!tracker_.is_fully_decoded(freq, data) && (data.ecio_ > config_.layer_3_.decode_threshold_ 
+				|| (config_.layer_3_.should_prioritize_layer_3_ && tracker_.in_history(freq, data)))) {
 				int status = analysis_.decode_layer_3(meas, data);
 				if(status != 0)
 					throw umts_analysis_error("Error decoding umts layer 3.");
@@ -158,6 +214,8 @@ protected:
 	frequency_correction_calculator calculator_;
 	scanner::scanner_controller_interface *sc_;
 	processing_and_feedback_helper helper_;
+	std::mutex analysis_mutex_;
+	std::unique_ptr<concurrent<offloaded_analysis>> offloaded_analysis_;
 };
 
 class umts_sweep_processing_body : public umts_processing_body {
@@ -179,12 +237,19 @@ public:
 		power_info_group rms_group;
 
 		int status = analysis_.cell_search_sweep(meas, group, config_.umts_general_.sensitivity_,
-			g_scanner_error_tracker::instance().current_error(), low_intermediate_freq_, high_intermediate_freq_, &rms_group);
+			g_scanner_error_tracker::instance().current_error(), low_intermediate_freq_, high_intermediate_freq_,  &rms_group);
 		if(status != 0)
 			throw umts_analysis_error("Error processing umts.");
 
+		//if(config_.have_common_sweep_output_) {
+		//	auto length = meas.get_iq().length() > (1 << 16) ? (1 << 16) : meas.get_iq().length();
+		//	rms_group = freq_bin_calculator_.calculate_power_info_group(meas, mhz(2), khz(100), low_intermediate_freq_, high_intermediate_freq_,
+		//		rf_phreaker::largest_pow_of_2(length));
+		//}
+
 		if(group.size()) {
-			std::string log("UMTS sweep processing - Found ");
+			std::string log("UMTS sweep processing on center freq (");
+			log += std::to_string(meas.frequency()/1e6) + "mhz) - Found ";
 			log += std::to_string(group.size()) + " UMTS measurements on frequencies: ";
 			std::set<frequency_type> freqs;
 			for(const auto &i : group)
@@ -200,6 +265,9 @@ public:
 private:
 	frequency_type low_intermediate_freq_;
 	frequency_type high_intermediate_freq_;
+	frequency_bin_calculator freq_bin_calculator_;
 };
+
+
 
 }}

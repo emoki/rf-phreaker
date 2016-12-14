@@ -40,20 +40,25 @@ class DLL_PUBLIC umts_analysis
 public:
 	umts_analysis(const umts_config &config, std::atomic_bool *is_cancelled = nullptr);
 	
-	umts_analysis(umts_analysis &analysis);
+	umts_analysis(const umts_analysis &analysis);
 
 	~umts_analysis();
 
 	int cell_search_sweep(const rf_phreaker::raw_signal &raw_signal, umts_measurements &umts_meas, double sensitivity, double error,
 		frequency_type low_intermediate_freq, frequency_type high_intermediate_freq, power_info_group *rms_group = nullptr);
 
-	int cell_search(const rf_phreaker::raw_signal &raw_signal, umts_measurements &umts_meas, double sensitivity, umts_scan_type scan_type, double error = 0, double *rms = nullptr);
+	int cell_search(const rf_phreaker::raw_signal &raw_signal, umts_measurements &umts_meas, double sensitivity, umts_scan_type scan_type, 
+		double error = 0, double *rms = nullptr);
 
 	int decode_layer_3(const rf_phreaker::raw_signal &raw_signal, umts_measurement &umts_meas);
 
 	int set_num_coherent_slots_for_psch(int num_coherent_slots);
 	
 	//void set_config(const umts_config &config);
+
+	const umts_measurements& get_tracked_measurements(frequency_type freq);
+
+	void update_tracked_measurements(frequency_type freq, const umts_measurements &meas);
 
 private:
 	umts_analysis_impl *impl_;

@@ -247,6 +247,11 @@ int fir_filter_impl::num_output_samples_required(int num_input_samples_desired) 
 	return num_iterations * m_UpFactor;
 }
 
+int fir_filter_impl::ensure_output_samples_large_enough(int num_output_samples_desired) const {
+	return num_output_samples_required(num_input_samples_required(num_output_samples_desired));
+}
+
+
 int fir_filter_impl::num_iterations_required(int num_input_samples_desired) const
 {
 	return num_output_samples_required(num_input_samples_desired)/m_UpFactor;

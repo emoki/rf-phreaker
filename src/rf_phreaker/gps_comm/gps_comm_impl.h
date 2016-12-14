@@ -109,6 +109,11 @@ public:
 			updates.messageID = NMEASentence::GSV;
 			updates.rate = 5;			// seconds per msg
 			origin_gps_device_->sendCommand(updates);
+
+			//std::cout << "Setting GPGSA to output almanac." << std::endl;
+			updates.messageID = NMEASentence::GSA;
+			updates.rate = 1;			// seconds per msg
+			origin_gps_device_->sendCommand(updates);
 			// [END]
 
 

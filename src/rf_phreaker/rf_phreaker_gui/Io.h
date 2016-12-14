@@ -121,6 +121,11 @@ public:
 			gps.coordinated_universal_time_ = 0;
 			gps.raw_status_ = 0;
 			gps.speed_ = 0;
+			gps.altitude_ = 0;
+			gps.angle_ = 0;
+			gps.dilution_of_precision_ = -1;
+			gps.horizontal_accuracy_meters_ = -1;
+			gps.vertical_accuracy_meters_ = -1;
 			while(rf_phreaker::protobuf::read_delimited_from(input_file.get(), &proto)) {
 
 				switch(proto.update_case()) {

@@ -4,22 +4,37 @@
 #include <QtGui/QFontDatabase>
 #include <QtCore/QDir>
 
+#include "marble/declarative/MarbleDeclarativePlugin.h"
 #include "rf_phreaker/rf_phreaker_gui/ApiPlugin.h"
+#include "rf_phreaker/rf_phreaker_gui/MarbleLayerManager.h"
 
 int main(int argc, char *argv[])
 {
+	//qputenv("QML_IMPORT_TRACE", "1");
 	QApplication app(argc, argv);
 	//app.setOrganizationName("Cappeen");
 	app.setOrganizationDomain("cappeen.com");
 	app.setApplicationName("rf_phreaker");
 
+	MarbleDeclarativePlugin declarativePlugin;
+	const char * marbleUri = "org.kde.edu.marble";
+	declarativePlugin.registerTypes(marbleUri);
+
+	// Instantiate MarbleLayerManager so that we can use the MarbleModel
+	// within multiple MarbleMaps.
+	MarbleLayers::instance();
+
 	registerQmlTypes();
+
 	QGuiApplication::setAttribute(Qt::AA_EnableHighDpiScaling);
 	QQmlApplicationEngine engine;
-	if (qgetenv("QT_QUICK_CONTROLS_STYLE").isEmpty()) {
-		qputenv("QT_QUICK_CONTROLS_STYLE", "Flat");
-	}
-	engine.load(QUrl(QStringLiteral("qrc:/main.qml")));
+//	if (qgetenv("QT_QUICK_CONTROLS_STYLE").isEmpty()) {
+//		qputenv("QT_QUICK_CONTROLS_STYLE", "Material");
+//	}
+//	engine.addImportPath("/Material/");
+	declarativePlugin.initializeEngine(&engine, marbleUri);
+	//engine.load(QUrl(QStringLiteral("qrc:/main.qml")));
+	engine.load(QUrl(QStringLiteral("qrc:/MaterialMain.qml")));
 
 	return app.exec();
 }

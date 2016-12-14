@@ -55,11 +55,7 @@ struct freq_correction_param
 class frequency_correction_calculator
 {
 public:
-	frequency_correction_calculator(double sampling_rate)
-		: shifter_(sampling_rate) {}
-
-	frequency_correction_calculator(const frequency_correction_calculator &a) 
-		: shifter_(a.shifter_) {}
+	frequency_correction_calculator() {}
 
 	double calculate_error(frequency_type shift, frequency_type carrier_freq) {
 		return shift * (38.4e6 / carrier_freq);
@@ -74,8 +70,9 @@ public:
 
 		LOG(LDEBUG) << "Starting frequency correction for " << sig.frequency() / 1e6 << " MHz. Start offset = " << param.start_freq_ << " Hz. End offset = " << param.end_freq_ << " Hz. Increment = " << param.increment_ << " Hz.";
 		for(int i = param.start_freq_; i <= param.end_freq_; i += param.increment_) {
+
 			raw_signal shifted_signal(sig);
-			shifter_.shift_frequency(shifted_signal.get_iq(), shifted_signal.get_iq().length(), i);
+			shifter_.shift_frequency(shifted_signal.get_iq(), shifted_signal.get_iq().length(), i, shifted_signal.sampling_rate());
 			auto status = analysis.cell_search(shifted_signal, group, param.sensitivity_, param.scan_type_);
 			if(status != 0)
 				throw umts_analysis_error("Error processing umts.");

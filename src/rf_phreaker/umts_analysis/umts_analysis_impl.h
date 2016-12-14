@@ -4,8 +4,11 @@
 #include <mutex>
 #include "rf_phreaker/common/frequency_shifter.h"
 #include "rf_phreaker/common/frequency_bin_calculator.h"
+#include "rf_phreaker/common/filters.h"
+#include "rf_phreaker/fir_filter/fir_filter.h"
 #include "rf_phreaker/umts_analysis/umts_measurement.h"
 #include "rf_phreaker/umts_analysis/umts_config.h"
+#include "rf_phreaker/umts_analysis/umts_utilities.h"
 #include "rf_phreaker/scanner/measurement_info.h"
 #include "rf_phreaker/umts_analysis/cpich_table_container.h"
 #include "rf_phreaker/umts_analysis/umts_psch_with_brute_force.h"
@@ -24,7 +27,8 @@ public:
 	int cell_search_sweep(const rf_phreaker::raw_signal &raw_signal, umts_measurements &umts_meas, double sensitivity, double error,
 		frequency_type low_intermediate_freq, frequency_type high_intermediate_freq, power_info_group *rms_group);
 
-	int cell_search(const rf_phreaker::raw_signal &raw_signal, umts_measurements &umts_meas, double sensitivity, umts_scan_type scan_type, double error, double *rms);
+	int cell_search(const rf_phreaker::raw_signal &raw_signal, umts_measurements &umts_meas, double sensitivity, umts_scan_type scan_type, 
+		double error, double *rms);
 
 	int decode_layer_3(const rf_phreaker::raw_signal &raw_signal, umts_measurement &umts_meas);
 
@@ -32,13 +36,15 @@ public:
 
 	int set_num_coherent_slots_for_psch(int num_coherent_slots);
 
-	umts_config get_umts_config() { return config_; }
+	umts_config get_umts_config() const { return config_; }
 
-	std::atomic_bool* get_cancellation_bool() { return is_cancelled_; }
+	std::atomic_bool* get_cancellation_bool() const { return is_cancelled_; }
+
+	const umts_measurements& get_tracked_measurements(frequency_type freq) { return umts_meas_container_.get_meas(freq); }
+
+	void update_tracked_measurements(frequency_type freq, const umts_measurements &meas) { umts_meas_container_.update_meas(freq, meas); }
 
 private:
-	void consolidate_measurements(umts_measurements &group);
-
 	const cpich_table_container* brute_force_cpich_table_ptr();
 
 	const cpich_table_container* bch_decoder_cpich_table_ptr();
@@ -62,6 +68,12 @@ private:
 	frequency_shifter shifter_;
 
 	frequency_bin_calculator freq_bin_calculator_;
+
+	filters filters_;
+
+	ipp_32fc_array resampled_signal_;
+
+	const int umts_cell_search_sampling_rate = 4875000;
 };
 
 }

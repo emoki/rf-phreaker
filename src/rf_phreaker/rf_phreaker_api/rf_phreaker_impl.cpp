@@ -6,6 +6,7 @@
 #include "rf_phreaker/common/log.h"
 #include "rf_phreaker/processing/collection_info_container.h"
 #include "rf_phreaker/processing/frequency_range_creation.h"
+#include "rf_phreaker/processing/processing_utility.h"
 #include "rf_phreaker/qt_specific/settings_io.h"
 #include "rf_phreaker/qt_specific/file_path_validation.h"
 #include "rf_phreaker/qt_specific/qt_utility.h"
@@ -146,20 +147,33 @@ rp_status rf_phreaker_impl::initialize(rp_callbacks *callbacks) {
 	}
 	catch(const rf_phreaker_error &err) {
 		s = to_rp_status(err);
+		save_error(err.what(), err.error_type_, err.error_code_);
 	}
-	catch(const std::exception &) {
+	catch(const std::exception &err) {
 		s = RP_STATUS_GENERIC_ERROR;
+		save_error(err.what(), generic_error_type);
 	}
 	catch(...) {
 		s = RP_STATUS_UNKNOWN_ERROR;
+		save_error("an unknown error has occurred", unknown_error_type);
 	}
 	return s;
 }
 
 void rf_phreaker_impl::read_settings() {
 	settings_io io("rf_phreaker_api", qt_utility::app_name());
+	
+	if(!io.does_exist()) {
+		error_handling("The INI file (\"" + io.filename() +
+			"\") was not found.  This may adversely affect API functionality.",
+			rf_phreaker_api_error_type, CONFIGURATION_FILE_NOT_FOUND);
+	}
 
 	io.read(config_);
+	config_.lte_sweep_general_.psch_margin_ = 13;
+	config_.lte_layer_3_general_.psch_margin_ = 13; // not used
+	config_.offload_umts_full_scan_ = true;
+	config_.have_common_sweep_output_ = false;
 }
 
 rp_status rf_phreaker_impl::clean_up() {
@@ -196,12 +210,15 @@ rp_status rf_phreaker_impl::clean_up() {
 	}
 	catch(const rf_phreaker_error &err) {
 		s = to_rp_status(err);
+		save_error(err.what(), err.error_type_, err.error_code_);
 	}
-	catch(const std::exception &) {
+	catch(const std::exception &err) {
 		s = RP_STATUS_GENERIC_ERROR;
+		save_error(err.what(), generic_error_type);
 	}
 	catch(...) {
 		s = RP_STATUS_UNKNOWN_ERROR;
+		save_error("an unknown error has occurred", unknown_error_type);
 	}
 
 	try {
@@ -220,13 +237,13 @@ rp_status rf_phreaker_impl::list_devices(rp_serial *serials, int *num_serials) {
 		LOG(LINFO) << "Listing devices...";
 
 		if(!is_initialized_)
-			throw rf_phreaker_api_error("Not initialized.", RP_STATUS_NOT_INITIALIZED);
+			throw rf_phreaker_api_error("Not initialized.", NOT_INITIALIZED);
 		else if(serials == nullptr)
-			throw rf_phreaker_api_error("Null serials.", RP_STATUS_INVALID_PARAMETER);
+			throw rf_phreaker_api_error("Null serials.", INVALID_PARAMETER);
 		else if(num_serials == nullptr)
-			throw rf_phreaker_api_error("Null num_serials.", RP_STATUS_INVALID_PARAMETER);
+			throw rf_phreaker_api_error("Null num_serials.", INVALID_PARAMETER);
 		else if(*num_serials <= 0)
-			throw rf_phreaker_api_error("num_serials <= 0.", RP_STATUS_INVALID_PARAMETER);
+			throw rf_phreaker_api_error("num_serials <= 0.", INVALID_PARAMETER);
 
 		for(int i = 0; i < *num_serials; ++i)
 			memset(serials[i].serial_, 0, RP_SERIAL_LENGTH);
@@ -241,7 +258,7 @@ rp_status rf_phreaker_impl::list_devices(rp_serial *serials, int *num_serials) {
 			scanner_list = tmp_blade.list_available_scanners();
 
 		if((size_t)*num_serials < scanner_list.size())
-			throw rf_phreaker_api_error("Error while listing devices.  More devices than input buffer.", RP_STATUS_INVALID_PARAMETER);
+			throw rf_phreaker_api_error("Error while listing devices.  More devices than input buffer.", INVALID_PARAMETER);
 
 		*num_serials = scanner_list.size();
 
@@ -253,12 +270,15 @@ rp_status rf_phreaker_impl::list_devices(rp_serial *serials, int *num_serials) {
 	}
 	catch(const rf_phreaker_error &err) {
 		s = to_rp_status(err);
+		save_error(err.what(), err.error_type_, err.error_code_);
 	}
-	catch(const std::exception &) {
+	catch(const std::exception &err) {
 		s = RP_STATUS_GENERIC_ERROR;
+		save_error(err.what(), generic_error_type);
 	}
 	catch(...) {
 		s = RP_STATUS_UNKNOWN_ERROR;
+		save_error("an unknown error has occurred", unknown_error_type);
 	}
 	return s;
 }
@@ -271,11 +291,11 @@ rp_status rf_phreaker_impl::connect_device(rp_serial serial, rp_device **device_
 		LOG(LINFO) << "Opening device " << serial.serial_ << "...";
 
 		if(!is_initialized_)
-			throw rf_phreaker_api_error("Not initialized.", RP_STATUS_NOT_INITIALIZED);
+			throw rf_phreaker_api_error("Not initialized.", NOT_INITIALIZED);
 		else if(serial.serial_ == nullptr)
-			throw rf_phreaker_api_error("NULL serial.", RP_STATUS_INVALID_PARAMETER);
+			throw rf_phreaker_api_error("NULL serial.", INVALID_PARAMETER);
 		else if(device_ptr == nullptr)
-			throw rf_phreaker_api_error("NULL rp_device.", RP_STATUS_INVALID_PARAMETER);
+			throw rf_phreaker_api_error("NULL rp_device.", INVALID_PARAMETER);
 
 		*device_ptr = 0;
 
@@ -313,12 +333,15 @@ rp_status rf_phreaker_impl::connect_device(rp_serial serial, rp_device **device_
 	}
 	catch(const rf_phreaker_error &err) {
 		s = to_rp_status(err);
+		save_error(err.what(), err.error_type_, err.error_code_);
 	}
-	catch(const std::exception &) {
+	catch(const std::exception &err) {
 		s = RP_STATUS_GENERIC_ERROR;
+		save_error(err.what(), generic_error_type);
 	}
 	catch(...) {
 		s = RP_STATUS_UNKNOWN_ERROR;
+		save_error("an unknown error has occurred", unknown_error_type);
 	}
 	return s;
 }
@@ -372,21 +395,24 @@ rp_status rf_phreaker_impl::disconnect_device(rp_device *device) {
 	}
 	catch(const rf_phreaker_error &err) {
 		s = to_rp_status(err);
+		save_error(err.what(), err.error_type_, err.error_code_);
 	}
-	catch(const std::exception &) {
+	catch(const std::exception &err) {
 		s = RP_STATUS_GENERIC_ERROR;
+		save_error(err.what(), generic_error_type);
 	}
 	catch(...) {
 		s = RP_STATUS_UNKNOWN_ERROR;
+		save_error("an unknown error has occurred", unknown_error_type);
 	}
 	return s;
 }
 
 void rf_phreaker_impl::general_checks(rp_device *device) {
 	if(!is_initialized_)
-		throw rf_phreaker_api_error("Not initialized.", RP_STATUS_NOT_INITIALIZED);
+		throw rf_phreaker_api_error("Not initialized.", NOT_INITIALIZED);
 	else if(!check_rp_device(device))
-		throw rf_phreaker_api_error("Invalid rp_device.", RP_STATUS_INVALID_PARAMETER);
+		throw rf_phreaker_api_error("Invalid rp_device.", INVALID_PARAMETER);
 }
 
 bool rf_phreaker_impl::is_device_open(rp_device *device) {
@@ -404,12 +430,15 @@ bool rf_phreaker_impl::is_device_open(rp_device *device) {
 	}
 	catch(const rf_phreaker_error &err) {
 		s = to_rp_status(err);
+		save_error(err.what(), err.error_type_, err.error_code_);
 	}
-	catch(const std::exception &) {
+	catch(const std::exception &err) {
 		s = RP_STATUS_GENERIC_ERROR;
+		save_error(err.what(), generic_error_type);
 	}
 	catch(...) {
 		s = RP_STATUS_UNKNOWN_ERROR;
+		save_error("an unknown error has occurred", unknown_error_type);
 	}
 	return s == RP_STATUS_OK;
 }
@@ -420,20 +449,101 @@ rp_status rf_phreaker_impl::get_device_info(rp_device *device, rp_device_info *d
 		std::lock_guard<std::recursive_mutex> lock(mutex_);
 
 		if(!is_initialized_)
-			throw rf_phreaker_api_error("Not initialized.", RP_STATUS_NOT_INITIALIZED);
+			throw rf_phreaker_api_error("Not initialized.", NOT_INITIALIZED);
 		else if(!check_rp_device(device))
-			throw rf_phreaker_api_error("Invalid rp_device.", RP_STATUS_INVALID_PARAMETER);
+			throw rf_phreaker_api_error("Invalid rp_device.", INVALID_PARAMETER);
 
 		*device_info = hardware_wrap(device->async_.get_scanner().get()->get_hardware()).buf_;
 	}
 	catch(const rf_phreaker_error &err) {
 		s = to_rp_status(err);
+		save_error(err.what(), err.error_type_, err.error_code_);
 	}
-	catch(const std::exception &) {
+	catch(const std::exception &err) {
 		s = RP_STATUS_GENERIC_ERROR;
+		save_error(err.what(), generic_error_type);
 	}
 	catch(...) {
 		s = RP_STATUS_UNKNOWN_ERROR;
+		save_error("an unknown error has occurred", unknown_error_type);
+	}
+	return s;
+}
+
+rp_status rf_phreaker_impl::add_gsm_collection_frequencies(rp_device *device, const rp_frequency_band_group &rp_gsm) {
+	using namespace ::rf_phreaker::processing;
+	rp_status s = RP_STATUS_OK;
+	try {
+		std::lock_guard<std::recursive_mutex> lock(mutex_);
+
+		if(rp_gsm.size_ == 0)
+			return s;
+
+		general_checks(device);
+
+		auto hw = device->async_.get_scanner().get()->get_hardware();
+
+		// Verify license and calibration and add for sorting.
+		std::vector<std::pair<operating_band, frequency_type>> gsm_freqs;
+		for(int i = 0; i < rp_gsm.size_; ++i) {
+			LOG(LINFO) << "Adding frequency (" << rp_gsm.e_[i].freq_ << ").";
+			check_calibration(hw, rp_gsm.e_[i].freq_);
+			// Check for license.
+			gsm_freqs.push_back(std::make_pair(to_operating_band(rp_gsm.e_[i].band_), rp_gsm.e_[i].freq_));
+		}
+
+		// Sort the gsm freqs that are to be added.
+		std::sort(std::begin(gsm_freqs), std::end(gsm_freqs), [&](const std::pair<operating_band, frequency_type> &a, const std::pair<operating_band, frequency_type> &b) {
+			if(a.first == b.first) return a.second < b.second;
+			else return a.first < b.first;
+		});
+
+		gsm_frequency_tracker tracker;
+		std::vector<std::pair<operating_band, frequency_type>> new_gsm;
+		auto i = gsm_freqs.begin();
+		while(i != gsm_freqs.end()) {
+			if(tracker.do_we_add_freq(i->second)) {
+				auto freq = tracker.calculate_closest_freq(i->second, i->first);
+				// Because we're adjusting the freq there is a chance the adjusted freq is not in the cali table
+				// If so, add the original file (which has already been checked) and continue.
+				if(!rf_phreaker::is_within_freq_paths(hw.frequency_paths_, freq))
+					freq = i->second;
+				new_gsm.push_back(std::make_pair(i->first, freq));
+				tracker.insert(freq);
+			}
+			++i;
+		}
+
+		auto specifier = GSM_LAYER_3_DECODE;
+		auto it = std::find_if(containers_.begin(), containers_.end(), [&](const collection_info_container &c) {
+			return c.has_specifier(specifier);
+		});
+
+		if(it == containers_.end()) {
+			// If simultaneous collection is enabled we do not want to stop collection after one iteration of freqs.
+			containers_.push_back(collection_info_container(specifier, find_collection_settings(specifier, config_).is_streaming_));
+			it = std::find_if(containers_.begin(), containers_.end(), [&](const collection_info_container &c) {
+				return c.has_specifier(specifier);
+			});
+		}
+
+		add_collection_info ci;
+		for(auto &i : new_gsm)
+			ci.add_.push_back(create_tech_collection_info(specifier, i.second, i.first));
+
+		it->adjust(ci);
+	}
+	catch(const rf_phreaker_error &err) {
+		s = to_rp_status(err);
+		save_error(err.what(), err.error_type_, err.error_code_);
+	}
+	catch(const std::exception &err) {
+		s = RP_STATUS_GENERIC_ERROR;
+		save_error(err.what(), generic_error_type);
+	}
+	catch(...) {
+		s = RP_STATUS_UNKNOWN_ERROR;
+		save_error("an unknown error has occurred", unknown_error_type);
 	}
 	return s;
 }
@@ -474,12 +584,15 @@ rp_status rf_phreaker_impl::add_collection_frequency(rp_device *device, rp_frequ
 	}
 	catch(const rf_phreaker_error &err) {
 		s = to_rp_status(err);
+		save_error(err.what(), err.error_type_, err.error_code_);
 	}
-	catch(const std::exception &) {
+	catch(const std::exception &err) {
 		s = RP_STATUS_GENERIC_ERROR;
+		save_error(err.what(), generic_error_type);
 	}
 	catch(...) {
 		s = RP_STATUS_UNKNOWN_ERROR;
+		save_error("an unknown error has occurred", unknown_error_type);
 	}
 	return s;
 }
@@ -487,7 +600,7 @@ rp_status rf_phreaker_impl::add_collection_frequency(rp_device *device, rp_frequ
 void rf_phreaker_impl::check_calibration(hardware hw, frequency_type freq) {
 	// Check for calibration.
 	if(!rf_phreaker::is_within_freq_paths(hw.frequency_paths_, freq))
-		throw rf_phreaker_api_error("Frequency (" + std::to_string(freq / 1e6) + " mhz) is not within calibration limits.");
+		throw rf_phreaker_api_error("Frequency (" + std::to_string(freq / 1e6) + " mhz) is not within calibration limits.", CALIBRATION_ERROR);
 }
 
 rp_status rf_phreaker_impl::remove_collection_frequency(rp_device *device, rp_frequency_type freq, rp_operating_band rp_band) {
@@ -512,12 +625,15 @@ rp_status rf_phreaker_impl::remove_collection_frequency(rp_device *device, rp_fr
 	}
 	catch(const rf_phreaker_error &err) {
 		s = to_rp_status(err);
+		save_error(err.what(), err.error_type_, err.error_code_);
 	}
-	catch(const std::exception &) {
+	catch(const std::exception &err) {
 		s = RP_STATUS_GENERIC_ERROR;
+		save_error(err.what(), generic_error_type);
 	}
 	catch(...) {
 		s = RP_STATUS_UNKNOWN_ERROR;
+		save_error("an unknown error has occurred", unknown_error_type);
 	}
 	return s;
 }
@@ -529,9 +645,9 @@ rp_status rf_phreaker_impl::remove_collection_frequency(rp_device *device, rp_fr
 //		std::lock_guard<std::recursive_mutex> lock(mutex_);
 //
 //		if(!is_initialized_)
-//			throw rf_phreaker_api_error("Not initialized.", RP_STATUS_NOT_INITIALIZED);
+//			throw rf_phreaker_api_error("Not initialized.", NOT_INITIALIZED);
 //		else if(data == RAW_DATA)
-//			throw rf_phreaker_api_error("Invalid rp_technology - RAW_DATA does not have associated channels.", RP_STATUS_INVALID_PARAMETER);
+//			throw rf_phreaker_api_error("Invalid rp_technology - RAW_DATA does not have associated channels.", INVALID_PARAMETER);
 //
 //		auto specifier = to_layer_3_specifier(data);
 //
@@ -539,12 +655,15 @@ rp_status rf_phreaker_impl::remove_collection_frequency(rp_device *device, rp_fr
 //	}
 //	catch(const rf_phreaker_error &err) {
 //		s = to_rp_status(err);
+//		save_error(err.what(), err.error_type_, err.error_code_);
 //	}
-//	catch(const std::exception &) {
+//	catch(const std::exception &err) {
 //		s = RP_STATUS_GENERIC_ERROR;
+//		save_error(err.what(), generic_error_type);
 //	}
 //	catch(...) {
 //		s = RP_STATUS_UNKNOWN_ERROR;
+//		save_error("an unknown error has occurred", unknown_error_type);
 //	}
 //	return s;
 //}
@@ -567,7 +686,7 @@ rp_status rf_phreaker_impl::add_sweep_operating_band(rp_device *device, rp_opera
 		auto range = operating_bands_.get_band_freq_range(band);
 		if(!rf_phreaker::is_within_freq_paths(hw.frequency_paths_, range.low_freq_hz_, range.high_freq_hz_))
 			throw rf_phreaker_api_error("rp_operating_band is not within calibration limits.  Start freq: " +
-			std::to_string(range.low_freq_hz_ / 1e6) + ".  Stop freq: " + std::to_string(range.high_freq_hz_ / 1e6) + ".");
+			std::to_string(range.low_freq_hz_ / 1e6) + ".  Stop freq: " + std::to_string(range.high_freq_hz_ / 1e6) + ".", CALIBRATION_ERROR);
 
 		// Check license.
 
@@ -575,16 +694,24 @@ rp_status rf_phreaker_impl::add_sweep_operating_band(rp_device *device, rp_opera
 
 		if(band >= FIRST_UMTS_OPERATING_BAND && band <= LAST_UMTS_OPERATING_BAND) {
 			it = add_sweep(UMTS_SWEEP, UMTS_LAYER_3_DECODE);
-			frequency_range_creation::adjust_umts_sweep_collection_info(range, *it);
+			auto sweep = UMTS_SWEEP;
+			frequency_range_creation::adjust_umts_sweep_collection_info_with_adjustment(range, *it,
+				find_collection_settings(sweep, config_).low_intermediate_frequency_,
+				find_collection_settings(sweep, config_).high_intermediate_frequency_,
+				find_collection_settings(sweep, config_).step_size_);
 		}
 		else if(band >= FIRST_LTE_OPERATING_BAND && band <= LAST_LTE_OPERATING_BAND) {
 			it = add_sweep(LTE_SWEEP, LTE_LAYER_3_DECODE);
-			frequency_range_creation::adjust_lte_sweep_collection_info(range, *it);
+			auto sweep = LTE_SWEEP;
+			frequency_range_creation::adjust_lte_sweep_collection_info_with_adjustment(range, *it,
+				find_collection_settings(sweep, config_).low_intermediate_frequency_,
+				find_collection_settings(sweep, config_).high_intermediate_frequency_,
+				find_collection_settings(sweep, config_).step_size_);
 		}
 		else if(band >= FIRST_GSM_OPERATING_BAND && band <= LAST_GSM_OPERATING_BAND) {
-			throw rf_phreaker_api_error("GSM not supported.");
+			auto sweep = GSM_SWEEP;
 			it = add_sweep(GSM_SWEEP, GSM_LAYER_3_DECODE);
-			//frequency_range_creation::adjust_gsm_sweep_collection_info(range, *it);
+			frequency_range_creation::adjust_gsm_sweep_collection_info_with_adjustment(range, *it);
 		}
 
 		// We sort the sweep items to make sure they are in ascending order.  This makes the graphs look pretty in the output.
@@ -594,12 +721,15 @@ rp_status rf_phreaker_impl::add_sweep_operating_band(rp_device *device, rp_opera
 	}
 	catch(const rf_phreaker_error &err) {
 		s = to_rp_status(err);
+		save_error(err.what(), err.error_type_, err.error_code_);
 	}
-	catch(const std::exception &) {
+	catch(const std::exception &err) {
 		s = RP_STATUS_GENERIC_ERROR;
+		save_error(err.what(), generic_error_type);
 	}
 	catch(...) {
 		s = RP_STATUS_UNKNOWN_ERROR;
+		save_error("an unknown error has occurred", unknown_error_type);
 	}
 	return s;
 }
@@ -657,12 +787,15 @@ rp_status rf_phreaker_impl::remove_sweep_operating_band(rp_device *device, rp_op
 	}
 	catch(const rf_phreaker_error &err) {
 		s = to_rp_status(err);
+		save_error(err.what(), err.error_type_, err.error_code_);
 	}
-	catch(const std::exception &) {
+	catch(const std::exception &err) {
 		s = RP_STATUS_GENERIC_ERROR;
+		save_error(err.what(), generic_error_type);
 	}
 	catch(...) {
 		s = RP_STATUS_UNKNOWN_ERROR;
+		save_error("an unknown error has occurred", unknown_error_type);
 	}
 	return s;
 }
@@ -677,13 +810,19 @@ void rf_phreaker_impl::remove_sweep(operating_band band, specifier sweep) {
 		collection_info_container tmp;
 		switch(sweep) {
 		case UMTS_SWEEP:
-			frequency_range_creation::adjust_umts_sweep_collection_info(range, tmp);
+			frequency_range_creation::adjust_umts_sweep_collection_info_with_adjustment(range, tmp,
+				find_collection_settings(sweep, config_).low_intermediate_frequency_,
+				find_collection_settings(sweep, config_).high_intermediate_frequency_,
+				find_collection_settings(sweep, config_).step_size_);
 			break;
 		case LTE_SWEEP:
-			frequency_range_creation::adjust_lte_sweep_collection_info(range, tmp);
+			frequency_range_creation::adjust_lte_sweep_collection_info_with_adjustment(range, tmp, 
+				find_collection_settings(sweep, config_).low_intermediate_frequency_, 
+				find_collection_settings(sweep, config_).high_intermediate_frequency_, 
+				find_collection_settings(sweep, config_).step_size_);
 			break;
 		case GSM_SWEEP:
-			frequency_range_creation::adjust_gsm_sweep_collection_info(range, tmp);
+			frequency_range_creation::adjust_gsm_sweep_collection_info_with_adjustment(range, tmp);
 			break;
 		default:
 			;
@@ -706,12 +845,15 @@ rp_status rf_phreaker_impl::remove_collection_frequencies_and_bands(rp_device *d
 	}
 	catch(const rf_phreaker_error &err) {
 		s = to_rp_status(err);
+		save_error(err.what(), err.error_type_, err.error_code_);
 	}
-	catch(const std::exception &) {
+	catch(const std::exception &err) {
 		s = RP_STATUS_GENERIC_ERROR;
+		save_error(err.what(), generic_error_type);
 	}
 	catch(...) {
 		s = RP_STATUS_UNKNOWN_ERROR;
+		save_error("an unknown error has occurred", unknown_error_type);
 	}
 	return s;
 }
@@ -725,7 +867,7 @@ rp_status rf_phreaker_impl::start_collection(rp_device *device, const rp_collect
 
 		general_checks(device);
 		if(info == nullptr)
-			throw rf_phreaker_api_error("rp_collection_info is null", RP_STATUS_INVALID_PARAMETER);
+			throw rf_phreaker_api_error("rp_collection_info is null", INVALID_PARAMETER);
 
 		if(frequency_correction_graph_)
 			frequency_correction_graph_->cancel_and_wait();
@@ -738,12 +880,10 @@ rp_status rf_phreaker_impl::start_collection(rp_device *device, const rp_collect
 		read_settings();
 		processing::initialize_collection_info_defaults(config_);
 
+		// GSM is a special case because it's usually a range of 200khz channels that are added which means we have to determine
+		// the freqs to dwell on.
+		add_gsm_collection_frequencies(device, info->gsm_);
 
-		for(int i = 0; i < info->gsm_.size_; ++i) {
-			rp_status status = add_collection_frequency(device, info->gsm_.e_[i].freq_, info->gsm_.e_[i].band_);
-			if(status != RP_STATUS_OK)
-				return status;
-		}
 		for(int i = 0; i < info->wcdma_.size_; ++i) {
 			rp_status status = add_collection_frequency(device, info->wcdma_.e_[i].freq_, info->wcdma_.e_[i].band_);
 			if(status != RP_STATUS_OK)
@@ -755,7 +895,7 @@ rp_status rf_phreaker_impl::start_collection(rp_device *device, const rp_collect
 				return status;
 		}
 		for(int i = 0; i < info->raw_data_.size_; ++i) {
-			throw rf_phreaker_api_error("RAW_DATA not yet supported.");
+			throw rf_phreaker_api_error("RAW_DATA not yet supported.", INVALID_PARAMETER);
 			rp_status status = add_collection_frequency(device, info->raw_data_.e_[i], rp_operating_band::OPERATING_BAND_UNKNOWN);
 			if(status != RP_STATUS_OK)
 				return status;
@@ -766,16 +906,22 @@ rp_status rf_phreaker_impl::start_collection(rp_device *device, const rp_collect
 				return status;
 		}
 
+		if(containers_.empty())
+			throw rf_phreaker_api_error("rp_collection_info is empty", INVALID_PARAMETER);
+
 		processing_graph_->start(&device->async_, data_output_.get(), containers_, config_);
 	}
 	catch(const rf_phreaker_error &err) {
 		s = to_rp_status(err);
+		save_error(err.what(), err.error_type_, err.error_code_);
 	}
-	catch(const std::exception &) {
+	catch(const std::exception &err) {
 		s = RP_STATUS_GENERIC_ERROR;
+		save_error(err.what(), generic_error_type);
 	}
 	catch(...) {
 		s = RP_STATUS_UNKNOWN_ERROR;
+		save_error("an unknown error has occurred", unknown_error_type);
 	}
 	return s;
 }
@@ -802,16 +948,18 @@ rp_status rf_phreaker_impl::stop_collection(rp_device *device) {
 					c.adjust(processing::remove_collection_info(i));
 			}
 		}
-
 	}
 	catch(const rf_phreaker_error &err) {
 		s = to_rp_status(err);
+		save_error(err.what(), err.error_type_, err.error_code_);
 	}
-	catch(const std::exception &) {
+	catch(const std::exception &err) {
 		s = RP_STATUS_GENERIC_ERROR;
+		save_error(err.what(), generic_error_type);
 	}
 	catch(...) {
 		s = RP_STATUS_UNKNOWN_ERROR;
+		save_error("an unknown error has occurred", unknown_error_type);
 	}
 	return s;
 }
@@ -831,12 +979,15 @@ rp_status rf_phreaker_impl::get_gps_data(rp_device *device, rp_gps gps) {
 	}
 	catch(const rf_phreaker_error &err) {
 		s = to_rp_status(err);
+		save_error(err.what(), err.error_type_, err.error_code_);
 	}
-	catch(const std::exception &) {
+	catch(const std::exception &err) {
 		s = RP_STATUS_GENERIC_ERROR;
+		save_error(err.what(), generic_error_type);
 	}
 	catch(...) {
 		s = RP_STATUS_UNKNOWN_ERROR;
+		save_error("an unknown error has occurred", unknown_error_type);
 	}
 	return s;
 }
@@ -850,16 +1001,16 @@ rp_status rf_phreaker_impl::get_iq_data_using_auto_gain(rp_device *device, rp_fr
 		general_checks(device);
 
 		if(raw_data == nullptr)
-			throw rf_phreaker_api_error("Null rp_raw_data.", RP_STATUS_INVALID_PARAMETER);
+			throw rf_phreaker_api_error("Null rp_raw_data.", INVALID_PARAMETER);
 		else if(time_ns < 0)
-			throw rf_phreaker_api_error("Invalid time.", RP_STATUS_INVALID_PARAMETER);
+			throw rf_phreaker_api_error("Invalid time.", INVALID_PARAMETER);
 
 		auto hw = device->async_.get_scanner();
 
 		auto samples_required = rf_phreaker::convert_to_samples(time_ns, sampling_rate);
 		if(samples_required > raw_data->num_samples_)
 			throw rf_phreaker_api_error("Insufficient number of samples supplied.  At least " + std::to_string(samples_required)
-			+ " samples are required.", RP_STATUS_INVALID_PARAMETER);
+			+ " samples are required.", INVALID_PARAMETER);
 
 		auto meas = device->async_.get_rf_data(frequency, time_ns, bandwidth, sampling_rate).get();
 
@@ -885,12 +1036,15 @@ rp_status rf_phreaker_impl::get_iq_data_using_auto_gain(rp_device *device, rp_fr
 	}
 	catch(const rf_phreaker_error &err) {
 		s = to_rp_status(err);
+		save_error(err.what(), err.error_type_, err.error_code_);
 	}
-	catch(const std::exception &) {
+	catch(const std::exception &err) {
 		s = RP_STATUS_GENERIC_ERROR;
+		save_error(err.what(), generic_error_type);
 	}
 	catch(...) {
 		s = RP_STATUS_UNKNOWN_ERROR;
+		save_error("an unknown error has occurred", unknown_error_type);
 	}
 	return s;
 }
@@ -899,7 +1053,7 @@ rp_status rf_phreaker_impl::get_iq_data(rp_device *device, rp_frequency_type fre
 	rp_bandwidth_type bandwidth, rp_frequency_type sampling_rate, int32_t gain_db, rp_raw_data *raw_data) {
 	rp_status s = RP_STATUS_OK;
 	try {
-		throw rf_phreaker_api_error("get_iq_data with gain is not supported.");
+		throw rf_phreaker_api_error("get_iq_data with gain is not supported.", INVALID_PARAMETER);
 
 		std::lock_guard<std::recursive_mutex> lock(mutex_);
 
@@ -910,7 +1064,7 @@ rp_status rf_phreaker_impl::get_iq_data(rp_device *device, rp_frequency_type fre
 		auto samples_required = rf_phreaker::convert_to_samples(time_ns, sampling_rate);
 		if(samples_required > raw_data->num_samples_)
 			throw rf_phreaker_api_error("Insufficient number of samples supplied.  At least " + std::to_string(samples_required)
-			+ " samples are required.", RP_STATUS_INVALID_PARAMETER);
+			+ " samples are required.", INVALID_PARAMETER);
 
 		//auto meas = device->async_.get_rf_data(frequency, time_ns, bandwidth, gain, sampling_rate).get();
 
@@ -922,12 +1076,15 @@ rp_status rf_phreaker_impl::get_iq_data(rp_device *device, rp_frequency_type fre
 	}
 	catch(const rf_phreaker_error &err) {
 		s = to_rp_status(err);
+		save_error(err.what(), err.error_type_, err.error_code_);
 	}
-	catch(const std::exception &) {
+	catch(const std::exception &err) {
 		s = RP_STATUS_GENERIC_ERROR;
+		save_error(err.what(), generic_error_type);
 	}
 	catch(...) {
 		s = RP_STATUS_UNKNOWN_ERROR;
+		save_error("an unknown error has occurred", unknown_error_type);
 	}
 	return s;
 }
@@ -940,19 +1097,22 @@ rp_status rf_phreaker_impl::update_license(rp_device *device, const char *filena
 		general_checks(device);
 
 		if(filename == nullptr)
-			throw rf_phreaker_api_error("filename is null", RP_STATUS_INVALID_PARAMETER);
+			throw rf_phreaker_api_error("filename is null", INVALID_PARAMETER);
 
-		throw rf_phreaker_api_error("update_license is not supported.");
+		throw rf_phreaker_api_error("update_license is not supported.", LICENSE_ERROR);
 
 	}
 	catch(const rf_phreaker_error &err) {
 		s = to_rp_status(err);
+		save_error(err.what(), err.error_type_, err.error_code_);
 	}
-	catch(const std::exception &) {
+	catch(const std::exception &err) {
 		s = RP_STATUS_GENERIC_ERROR;
+		save_error(err.what(), generic_error_type);
 	}
 	catch(...) {
 		s = RP_STATUS_UNKNOWN_ERROR;
+		save_error("an unknown error has occurred", unknown_error_type);
 	}
 	return s;
 }
@@ -1011,6 +1171,15 @@ const char* rf_phreaker_impl::status_message(rp_status status) {
 	case RP_STATUS_RF_PHREAKER_API_ERROR:
 		s = "rf_phreaker api error";
 		break;
+	case RP_STATUS_LICENSE_ERROR:
+		s = "license error";
+		break;
+	case RP_STATUS_CONFIGURATION_FILE_NOT_FOUND:
+		s = "configuration file not found";
+		break;
+	case RP_STATUS_CONVERSION_ERROR:
+		s = "conversion error";
+		break;
 	case RP_STATUS_UNKNOWN_ERROR:
 		s = "unknown error";
 		break;
@@ -1040,7 +1209,6 @@ void rf_phreaker_impl::error_handling(const std::string &str, int type, int code
 	// Until we have a better handle on how specific errors should be handled.  We stop all communication to scanner.
 	bool disconnect = false;
 	switch((message_codes)code) {
-			break;
 		case GENERAL_ERROR:
 		case STD_EXCEPTION_ERROR:
 		case UNKNOWN_ERROR:
@@ -1052,23 +1220,49 @@ void rf_phreaker_impl::error_handling(const std::string &str, int type, int code
 		case FREQUENCY_CORRECTION_FAILED:
 		case FREQUENCY_CORRECTION_VALUE_INVALID:
 		case FREQUENCY_CORRECTION_SUCCESSFUL:
+		case LICENSE_ERROR:
+		case CONFIGURATION_FILE_NOT_FOUND:
+		case COLLECTION_FINISHED:
+			disconnect = false;
+			break;
 		default:
+			disconnect = true;
 			;
 	}
 	if(disconnect && scanners_.rbegin() != scanners_.rend()) {
 		rp_disconnect_device(scanners_.rbegin()->get());
 	}
 
+	auto rp_status = code == GENERAL_ERROR ? to_rp_status(static_cast<error_type>(type)) 
+		: to_rp_status(static_cast<message_codes>(code));
+
 	if(callbacks_ && callbacks_->rp_message_update) {
-		callbacks_->rp_message_update(RP_STATUS_GENERIC_ERROR, str.c_str());	
+		callbacks_->rp_message_update(rp_status, str.c_str());
 	}
 	if(callbacks_ && callbacks_->rp_update) {
 		std::lock_guard<std::mutex> lock(update_mutex_);
-		update_.populate_message(RP_STATUS_OK, str.c_str());
+		update_.populate_message(rp_status, str.c_str());
 		update_.serialize();
 		callbacks_->rp_update(update_.to_bytes(), update_.size());
 	}
 
+	save_error(str, type, code);
+}
+
+const char* rf_phreaker_impl::last_error_message() {
+	if(error_history_.size())
+		return error_history_.back().what();
+	else
+		return "";
+}
+
+void rf_phreaker_impl::save_error(const rf_phreaker_error &err) {
+	std::lock_guard<std::recursive_mutex> lock(mutex_);
+	error_history_.push_back(err);
+}
+
+void rf_phreaker_impl::save_error(const std::string &str, int type, int code) {
+	save_error(rf_phreaker::create_error(static_cast<rf_phreaker::error_type>(type), str, code));
 }
 
 

@@ -37,7 +37,7 @@ public:
 	};
 
 	enum Tech {
-		UNKNOWN_TECH,
+		UNKNOWN_TECH = ::rf_phreaker::UNKOWN_SPECIFIER,
 		GSM_FULL_SCAN = ::rf_phreaker::GSM_LAYER_3_DECODE,
 		CDMA_FULL_SCAN = ::rf_phreaker::CDMA_LAYER_3_DECODE,
 		WCDMA_FULL_SCAN = ::rf_phreaker::UMTS_LAYER_3_DECODE,

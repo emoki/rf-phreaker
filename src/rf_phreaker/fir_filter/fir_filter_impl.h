@@ -55,6 +55,8 @@ public:
 
 	virtual int num_output_samples_required(int num_input_samples_desired) const;
 
+	virtual int ensure_output_samples_large_enough(int num_output_samples_desired) const;
+
 	virtual int num_iterations_required(int num_input_samples_desired) const;
 
 	int up_factor() const { return m_UpFactor; }

@@ -328,21 +328,21 @@ public:
 	}
 	
 	static void decode_eutran_neighbors(const _c_SI2quaterRestOctets_Priority_and_E_UTRAN_Parameters_Description_E_UTRAN_Parameters_Description &des, std::vector<eutran_neighbor> &eutran) {
-		std::vector<eutran_neighbor> nieghbors;
+		auto &neighbors = eutran;
 		for(int i = 0; i < des.Repeated_E_UTRAN_Neighbour_Cells.items; ++i) {
 			auto repeated = des.Repeated_E_UTRAN_Neighbour_Cells.data[i];
 			for(int j = 0; j < repeated->cell.items; ++j) {
 				eutran_neighbor n;
-				n.earfcn_ = repeated->cell.data[i]->EARFCN;
-				if(repeated->cell.data[i]->Measurement_Bandwidth_Present)
-					n.bandwidth_ = determine_eutran_bandwidth(repeated->cell.data[i]->Measurement_Bandwidth);
+				n.earfcn_ = repeated->cell.data[j]->EARFCN;
+				if(repeated->cell.data[j]->Measurement_Bandwidth_Present)
+					n.bandwidth_ = determine_eutran_bandwidth(repeated->cell.data[j]->Measurement_Bandwidth);
 				else
 					n.bandwidth_ = num_resource_blocks_6;
-				n.qrxlevmin_db_ = repeated->E_UTRAN_QRXLEVMIN_Present ? repeated->E_UTRAN_QRXLEVMIN * 2 : -1;
+				n.qrxlevmin_db_ = repeated->E_UTRAN_QRXLEVMIN_Present ? -140 + repeated->E_UTRAN_QRXLEVMIN * 2 : -140;
 				n.priority_ = repeated->E_UTRAN_PRIORITY_Present ? repeated->E_UTRAN_PRIORITY : -1;
-				n.threshold_high_db_ = 140 - repeated->THRESH_E_UTRAN_high * 2;
-				n.threshold_low_db_ = repeated->THRESH_E_UTRAN_low_Present ? 140 - repeated->THRESH_E_UTRAN_low * 2: n.threshold_high_db_;
-				nieghbors.push_back(n);
+				n.threshold_high_db_ = repeated->THRESH_E_UTRAN_high * 2;
+				n.threshold_low_db_ = repeated->THRESH_E_UTRAN_low_Present ? repeated->THRESH_E_UTRAN_low * 2 : n.threshold_high_db_;
+				neighbors.push_back(n);
 			}
 		}
 		// If no index is preset in the not_allowed then it is applicable to all eutran freqs.
@@ -357,17 +357,20 @@ public:
 			}
 
 			// Handle pcid bitmaps.
+			// When this field is received as part of the Not Allowed Cells IE, if bit number n is set to '1', then all cells whose PCID
+			// belongs to the group identified by that bit are not allowed; correspondingly, if bit number n is set to '0', then all cells
+			// whose PCID belongs to that group are allowed.
 			if(not_allowed_ie->Not_Allowed_Cells.PCID_BITMAP_GROUP_Present) {
 				for(int n = 0; n < 6; ++n) {
 					auto mask = 1 << n;
 					if((not_allowed_ie->Not_Allowed_Cells.PCID_BITMAP_GROUP & mask) == 0) {
 						for(int k = 0; k < 83; ++k) {
-							not_allowed.push_back(k * n);
+							allowed.push_back(k * n);
 						}
 					}
 					else {
 						for(int k = 0; k < 83; ++k) {
-							allowed.push_back(k * n);
+							not_allowed.push_back(k * n);
 						}
 					}
 				}
@@ -377,28 +380,28 @@ public:
 			auto pat = not_allowed_ie->Not_Allowed_Cells.PCID_Pattern;
 			auto p_sense = not_allowed_ie->Not_Allowed_Cells.PCID_pattern_sense;
 			auto p_length = not_allowed_ie->Not_Allowed_Cells.PCID_Pattern_length;
-			if(p_length.items || pat.items) {
+			if(p_length.items && pat.items && p_sense.items) {
 				if(pat.items != p_sense.items || pat.items != p_length.items) {
-					std::wcerr << "GSM PCID GROUP IE items do have the same length! Skipping group.\n";
+					std::wcerr << "GSM PCID GROUP IE items (not_allowed_cells) do not have the same length! Skipping group.\n";
 					break;
 				}
+				// If the PCID_pattern_sense bit is equal to '0' then the group of identified cells are those where the most significant bits of
+				//	the physical layer cell identity are equal to "PCID_pattern".If the PCID_pattern_sense bit is equal to '1' then the group
+				//	of identified cells is all those where the most significant bits of the physical layer cell identity are not equal to the
+				//	PCID_pattern.
 				for(int j = 0; j < pat.items; ++j) {
-					// All pcids do NOT match are selected.
 					if(p_sense.data[j]) {
+						auto mask = *pat.data[j]->value << (7 - p_length.data[j]);
+						for(int k = 0; k < 504; ++k) {
+							if((mask & k) != mask)
+								not_allowed.push_back(k);
+						}
+					}
+					else {
 						auto mask = *pat.data[j]->value << (7 - p_length.data[j]);
 						for(int k = 0; k < 504; ++k) {
 							if((mask & k) == mask)
 								not_allowed.push_back(k);
-						}
-					}
-					// All pcids that match are selected.
-					else {
-						for(int k = 0; k < 504; ++k) {
-							auto mask = *pat.data[j]->value << (7 - p_length.data[j]);
-							for(int k = 0; k < 504; ++k) {
-								if((mask & k) != mask)
-									not_allowed.push_back(k);
-							}
 						}
 					}
 				}
@@ -406,7 +409,7 @@ public:
 
 			if(not_allowed_ie->E_UTRAN_FREQUENCY_INDEX.items == 0) {
 				// This applies to all eutran freqs.
-				for(auto &j : nieghbors) {
+				for(auto &j : neighbors) {
 					for(auto &k : not_allowed)
 						j.pcids_not_allowed_.push_back(k);
 					for(auto &k : allowed)
@@ -416,11 +419,11 @@ public:
 			else{
 				for(int j = 0; j < not_allowed_ie->E_UTRAN_FREQUENCY_INDEX.items; ++j) {
 					auto index = not_allowed_ie->E_UTRAN_FREQUENCY_INDEX.data[j];
-					if(index < nieghbors.size()) {
+					if(index < neighbors.size()) {
 						for(auto &k : not_allowed)
-							nieghbors[index].pcids_not_allowed_.push_back(k);
+							neighbors[index].pcids_not_allowed_.push_back(k);
 						for(auto &k : allowed)
-							nieghbors[index].pcids_allowed_.push_back(k);
+							neighbors[index].pcids_allowed_.push_back(k);
 					}
 				}
 			}
@@ -437,11 +440,14 @@ public:
 				std::vector<int32_t> different_ta_group;
 
 				// Handle regular pcids.
-				for(int j = 0; j < ta_mapping_item->PCID.items; ++j) {
-					same_ta_group.push_back(ta_mapping_item->PCID.data[j]);
+				for(int k = 0; k < ta_mapping_item->PCID.items; ++k) {
+					same_ta_group.push_back(ta_mapping_item->PCID.data[k]);
 				}
 
 				// Handle pcid bitmaps.
+				// When this field is received as part of the PCID to TA mapping IE, if bit number n is set to '1', then all cells whose PCID
+				// belongs to the group identified by that bit are part of the same TA, correspondingly, if bit number n is set to '0', then all
+				// cells whose PCID belongs to that group are not part of the same TA.
 				if(ta_mapping_item->PCID_BITMAP_GROUP_Present) {
 					for(int n = 0; n < 6; ++n) {
 						auto mask = 1 << n;
@@ -462,28 +468,28 @@ public:
 				auto pat = ta_mapping_item->PCID_Pattern;
 				auto p_sense = ta_mapping_item->PCID_pattern_sense;
 				auto p_length = ta_mapping_item->PCID_Pattern_length;
-				if(p_length.items || pat.items) {
+				if(p_length.items && pat.items && p_sense.items) {
 					if(pat.items != p_sense.items || pat.items != p_length.items) {
-						std::wcerr << "GSM PCID GROUP IE items do have the same length! Skipping group.\n";
+						std::wcerr << "GSM PCID GROUP IE items (pcid_to_tracking_area_mapping) do not have the same length! Skipping group.\n";
 						break;
 					}
+					// If the PCID_pattern_sense bit is equal to '0' then the group of identified cells are those where the most significant bits of
+					//	the physical layer cell identity are equal to "PCID_pattern".If the PCID_pattern_sense bit is equal to '1' then the group
+					//	of identified cells is all those where the most significant bits of the physical layer cell identity are not equal to the
+					//	PCID_pattern.
 					for(int j = 0; j < pat.items; ++j) {
-						// All pcids do NOT match are selected.
 						if(p_sense.data[j]) {
+							auto mask = *pat.data[j]->value << (7 - p_length.data[j]);
+							for(int k = 0; k < 504; ++k) {
+								if((mask & k) != mask)
+									same_ta_group.push_back(k);
+							}
+						}
+						else {
 							auto mask = *pat.data[j]->value << (7 - p_length.data[j]);
 							for(int k = 0; k < 504; ++k) {
 								if((mask & k) == mask)
 									same_ta_group.push_back(k);
-							}
-						}
-						// All pcids that match are selected.
-						else {
-							for(int k = 0; k < 504; ++k) {
-								auto mask = *pat.data[j]->value << (7 - p_length.data[j]);
-								for(int k = 0; k < 504; ++k) {
-									if((mask & k )!= mask)
-										same_ta_group.push_back(k);
-								}
 							}
 						}
 					}
@@ -495,7 +501,7 @@ public:
 
 			if(ta_mapping->E_UTRAN_FREQUENCY_INDEX.items == 0) {
 				// This applies to all eutran freqs.
-				for(auto &j : nieghbors) {
+				for(auto &j : neighbors) {
 					for(auto &k : same_tas)
 						j.pcids_same_tracking_area_.push_back(k);
 					for(auto &k : different_tas)
@@ -505,11 +511,11 @@ public:
 			else {
 				for(int j = 0; j < ta_mapping->E_UTRAN_FREQUENCY_INDEX.items; ++j) {
 					auto index = ta_mapping->E_UTRAN_FREQUENCY_INDEX.data[j];
-					if(index < nieghbors.size()) {
+					if(index < neighbors.size()) {
 						for(auto &k : same_tas)
-							nieghbors[index].pcids_same_tracking_area_.push_back(k);
+							neighbors[index].pcids_same_tracking_area_.push_back(k);
 						for(auto &k : different_tas)
-							nieghbors[index].pcids_different_tracking_area_.push_back(k);
+							neighbors[index].pcids_different_tracking_area_.push_back(k);
 					}
 				}
 			}

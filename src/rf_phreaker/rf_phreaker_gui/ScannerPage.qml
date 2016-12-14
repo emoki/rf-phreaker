@@ -1,4 +1,4 @@
-import QtQuick 2.5
+import QtQuick 2.6
 import QtQuick.Layouts 1.1
 import QtQuick.Controls 1.4
 import QtQuick.Controls.Styles.Flat 1.0 as Flat
@@ -129,7 +129,7 @@ ScrollView {
                         font.family: Flat.FlatStyle.fontFamily
                         font.pixelSize: scannerDetailsPixelSize
                         renderType: Text.QtRendering
-                        text: Api.gps.utcDateTime
+                        text: Api.gps.utcDateTimeStr
                     }
                     Label {
                         font.family: Flat.FlatStyle.fontFamily

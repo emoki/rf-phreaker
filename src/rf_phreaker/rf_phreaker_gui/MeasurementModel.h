@@ -33,6 +33,10 @@ public:
 		CellIdRole,
 		CellSignalLevelRole,
 		CellInterferenceRole,
+		CellMccRole,
+		CellMncRole,
+		CellLacTacRole,
+		CellCidRole,
 		LteDownlinkBandwidthRole,
 		MeasurementRoleSize
 	};
@@ -52,13 +56,36 @@ public:
 		CellIdColumn,
 		CellSignalLevelColumn,
 		CellInterferenceColumn,
+		CellMccColumn,
+		CellMncColumn,
+		CellLacTacColumn,
+		CellCidColumn,
 		LteDownlinkBandwidthColumn,
 		ColumnSize
 	};
 
 
 	MeasurementModel(QObject *parent = 0)
-		: QAbstractTableModel(parent) {}
+		: QAbstractTableModel(parent) {
+		roles_[BasicMeasRole] = "basic";
+		roles_[GsmRole] = "gsm";
+		roles_[WcdmaRole] = "wcdma";
+		roles_[LteRole] = "lte";
+		roles_[TimeElapsedRole] = "timeElapsed";
+		roles_[CarrierFreqRole] = "carrierFreq";
+		roles_[CarrierSignalLevelRole] = "carrierSignalLevel";
+		roles_[CellTechRole] = "cellTech";
+		roles_[CellBandRole] = "cellBand";
+		roles_[CellChannelRole] = "cellChannel";
+		roles_[CellIdRole] = "cellId";
+		roles_[CellSignalLevelRole] = "cellSignalLevel";
+		roles_[CellInterferenceRole] = "cellInterference";
+		roles_[CellMccRole] = "mcc";
+		roles_[CellMncRole] = "mnc";
+		roles_[CellLacTacRole] = "lactac";
+		roles_[CellCidRole] = "cid";
+		roles_[LteDownlinkBandwidthRole] = "lteDownlinkBandwidth";
+	}
 
 	~MeasurementModel() {
 		clear();
@@ -84,9 +111,6 @@ public:
 		// The only available data is a generic meas.  Update it.
 		else if(distance == 1 && id(*range.first) == -1) {
 			modify(range.first, t);
-//			auto success = index_.modify(range.first, index_update<rf_phreaker::basic_data>(t));
-//			if(!success)
-//				throw rf_phreaker::rf_phreaker_gui_error("Failed to modify measurement model.");
 		}
 	}
 
@@ -107,9 +131,6 @@ public:
 			if(id(t) != -1) {
 				if(it != index_.get<unique_lookup>().end()) {
 					modify(it, t);
-//					auto success = index_.modify(it, index_update<Data>(t));
-//					if(!success)
-//						throw rf_phreaker::rf_phreaker_gui_error("Failed to modify measurement model.");
 				}
 				// If valid measurement and it's new, insert it! At this point remove a generic measurement if present.
 				else {
@@ -129,7 +150,6 @@ public:
 				// The only available data is a generic meas.  Update it.
 				else if(distance == 1 && id(*range.first) == -1) {
 					modify(range.first, t);
-					//index_.modify(range.first, index_update<Data>(t));
 				}
 			}
 		}
@@ -158,7 +178,7 @@ public:
 		auto pos = index_position(index_, it);
 		// Assume that if something is using one of the measurement classes then it
 		// using connections to update the object.
-		emit dataChanged(createIndex(pos, TimeElapsedColumn), createIndex(pos, ColumnSize - 1));
+		emit dataChanged(createIndex(pos, BasicMeasColumn), createIndex(pos, ColumnSize - 1));
 	}
 
 	template<typename Comparator, typename Data>
@@ -235,6 +255,14 @@ public:
 				return QVariant(index_.get<random_access>()[index.row()]->cellSignalLevel());
 			case CellInterferenceRole:
 				return QVariant(index_.get<random_access>()[index.row()]->cellInterference());
+			case CellMccRole:
+				return QVariant(index_.get<random_access>()[index.row()]->cellMccStr());
+			case CellMncRole:
+				return QVariant(index_.get<random_access>()[index.row()]->cellMncStr());
+			case CellLacTacRole:
+				return QVariant(index_.get<random_access>()[index.row()]->cellLacTacStr());
+			case CellCidRole:
+				return QVariant(index_.get<random_access>()[index.row()]->cellCidStr());
 			case LteDownlinkBandwidthRole:
 				return QVariant(reinterpret_cast<Lte*>(index_.get<random_access>()[index.row()])->downlinkBandwidth());
 			default:
@@ -267,6 +295,14 @@ public:
 				return QVariant(index_.get<random_access>()[index.row()]->cellSignalLevel());
 			case CellInterferenceColumn:
 				return QVariant(index_.get<random_access>()[index.row()]->cellInterference());
+			case CellMccColumn:
+				return QVariant(index_.get<random_access>()[index.row()]->cellMccStr());
+			case CellMncColumn:
+				return QVariant(index_.get<random_access>()[index.row()]->cellMncStr());
+			case CellLacTacColumn:
+				return QVariant(index_.get<random_access>()[index.row()]->cellLacTacStr());
+			case CellCidColumn:
+				return QVariant(index_.get<random_access>()[index.row()]->cellCidStr());
 			case LteDownlinkBandwidthColumn:
 				return QVariant(reinterpret_cast<Lte*>(index_.get<random_access>()[index.row()])->downlinkBandwidth());
 			default:;
@@ -277,21 +313,7 @@ public:
 
 protected:
 	QHash<int, QByteArray> roleNames() const {
-		QHash<int, QByteArray> roles;
-		roles[BasicMeasRole] = "basic";
-		roles[GsmRole] = "gsm";
-		roles[WcdmaRole] = "wcdma";
-		roles[LteRole] = "lte";
-		roles[TimeElapsedRole] = "timeElapsed";
-		roles[CarrierFreqRole] = "carrierFreq";
-		roles[CarrierSignalLevelRole] = "carrierSignalLevel";
-		roles[CellTechRole] = "cellTech";
-		roles[CellBandRole] = "cellBand";
-		roles[CellChannelRole] = "cellChannel";
-		roles[CellIdRole] = "cellId";
-		roles[CellSignalLevelRole] = "cellSignalLevel";
-		roles[CellInterferenceRole] = "cellInterference";
-		return roles;
+		return roles_;
 	}
 private:
 	void insert(Base* t) {
@@ -329,6 +351,8 @@ private:
 	data_index index_;
 
 	QVector<int> rolesToUpdate_;
+
+	QHash<int, QByteArray> roles_;
 };
 
 

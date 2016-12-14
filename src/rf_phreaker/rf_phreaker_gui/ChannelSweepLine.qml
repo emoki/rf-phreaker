@@ -7,17 +7,27 @@ Item {
     property LineSeries lineSeries
     property GenericMeasurement meas
     property alias sourceModel: filter.sourceModel
+    property int bandwidth: 0;
 
     function refresh() {
-        filter.invalidate();
-        filter.lowFreqFilter = meas.carrierFreq - meas.carrierBandwidth / 2;
-        filter.highFreqFilter = meas.carrierFreq + meas.carrierBandwidth / 2;
-        filter.filterRole = FilterProxyMeasurementModel.FreqRangeFilter;
+        if(bandwidth < meas.carrierBandwidth) {
+            bandwidth = meas.carrierBandwidth;
+            filter.lowFreqFilter = meas.carrierFreq - meas.carrierBandwidth / 2;
+            filter.highFreqFilter = meas.carrierFreq + meas.carrierBandwidth / 2;
+            filter.reset();
+
+            // This ensures we refresh the entire sweep line!
+
+
+            //if(filter.sourceModel)
+            //    filter.sourceModel.resetInternalData();
+
+            console.debug("sweep channel bandwidth: ", filter.lowFreqFilter, " - ", filter.highFreqFilter);
+        }
     }
 
     FilterProxyMeasurementModel {
         id: filter
-        dynamicSortFilter: true
         filterRole: FilterProxyMeasurementModel.FreqRangeFilter
         lowFreqFilter: meas.carrierFreq - meas.carrierBandwidth / 2
         highFreqFilter: meas.carrierFreq + meas.carrierBandwidth / 2
@@ -26,14 +36,9 @@ Item {
     VXYModelMapper {
         id: mapper
         model: filter
-        //series: areaSeries.upperSeries
         series: lineSeries
         xColumn: MeasurementModel.CarrierFreqColumn
         yColumn: MeasurementModel.CarrierSignalLevelColumn
-        Component.onCompleted: {
-//            if(areaSeries && areaSeries.upperSeries)
-//                series = areaSeries.upperSeries;
-        }
     }
 
     Connections {
@@ -44,6 +49,8 @@ Item {
                 lineSeries.append(meas.carrierFreq - (meas.carrierBandwidth / 2), meas.carrierSignalLevel);
                 lineSeries.append(meas.carrierFreq + (meas.carrierBandwidth / 2), meas.carrierSignalLevel);
             }
+//            else
+//                refresh();
         }
         onCarrierBandwidthChanged: {
             refresh();

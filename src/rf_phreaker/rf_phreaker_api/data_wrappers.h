@@ -79,7 +79,12 @@ public:
 		buf_.tracking_satellites_ = t.tracking_satellites_;
 		buf_.latitude_ = t.latitude_;
 		buf_.longitude_ = t.longitude_;
+		buf_.altitude_ = t.altitude_;
+		buf_.angle_ = t.angle_;
 		buf_.speed_ = t.speed_;
+		buf_.dilution_of_precision_ = t.dilution_of_precision_;
+		buf_.horizontal_accuracy_meters_ = t.horizontal_accuracy_meters_;
+		buf_.vertical_accuracy_meters_ = t.vertical_accuracy_meters_;
 		buf_.raw_status_ = t.raw_status_;
 	}
 	rp_gps buf_;

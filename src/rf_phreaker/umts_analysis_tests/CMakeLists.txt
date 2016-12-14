@@ -13,6 +13,7 @@ set (umts_analysis_tests_VERSION_TWEAK 0)
 set (umts_analysis_tests_SRCS 
 	umts_analysis_tests.cpp
 	umts_analysis_gtests.cpp
+	umts_measurement_container_gtests.cpp
 	${SRC_PLATFORM_SPECIFIC}/stdafx.cpp)
 
 

@@ -17,7 +17,7 @@ public:
 			if(status == RP_STATUS_OK)
 				QCoreApplication::postEvent(Api::instance(), new ApiInitializedEvent());
 			else
-				QCoreApplication::postEvent(Api::instance(), new MessageUpdateEvent(status, QString("Unable to initialize API.  Error message \"") + rp_status_message(status) + "\"."));
+				QCoreApplication::postEvent(Api::instance(), new MessageUpdateEvent(status, QString("API Initialization Failure"), rp_last_error_message()));
 			e->accept();
 			return true;
 		}
@@ -27,7 +27,7 @@ public:
 				QCoreApplication::postEvent(Api::instance(), new ApiCleanedUpEvent());
 			else {
 				QCoreApplication::postEvent(Api::instance(), new ApiCleanedUpEvent());
-				QCoreApplication::postEvent(Api::instance(), new MessageUpdateEvent(status, QString("Unable to CleanUpAPI.  Error message \"") + rp_status_message(status) + "\"."));
+				QCoreApplication::postEvent(Api::instance(), new MessageUpdateEvent(status, QString("API Deinitialization Failure"), rp_last_error_message()));
 			}
 			e->accept();
 			return true;
@@ -41,7 +41,8 @@ public:
 		else if(e->type() == ConnectDeviceEvent::getType()) {
 			auto ev = static_cast<ConnectDeviceEvent*>(e);
 			auto status = connectDevice(ev->serial());
-			Q_UNUSED(status);
+			if(!ApiTypes::statusOk(status))
+				QCoreApplication::postEvent(Api::instance(), new MessageUpdateEvent(status, QString("Scanner Communication Failure"), rp_last_error_message()));
 			e->accept();
 			return true;
 		}
@@ -59,7 +60,7 @@ public:
 			if(ApiTypes::statusOk(status))
 				QCoreApplication::postEvent(Api::instance(), new CollectionStartedEvent());
 			else
-				QCoreApplication::postEvent(Api::instance(), new MessageUpdateEvent(status, "Unable to start collection."));
+				QCoreApplication::postEvent(Api::instance(), new MessageUpdateEvent(status, QString("Data Recording Failure"), rp_last_error_message()));
 			e->accept();
 			return true;
 		}
@@ -68,7 +69,7 @@ public:
 			if(ApiTypes::statusOk(status))
 				QCoreApplication::postEvent(Api::instance(), new CollectionStoppedEvent());
 			else
-				QCoreApplication::postEvent(Api::instance(), new MessageUpdateEvent(status, "Unable to stop collection."));
+				QCoreApplication::postEvent(Api::instance(), new MessageUpdateEvent(status, QString("Stop Data Recording Failed"), rp_last_error_message()));
 			e->accept();
 			return true;
 		}
@@ -80,7 +81,7 @@ private:
 		qDebug() << "Initializing API.";
 		auto status = rp_initialize(callbacks);
 		if(!ApiTypes::statusOk(status)) {
-			qWarning() << "Failed to initialize API.  Error message \"" << rp_status_message(status) << "\".";
+			qWarning() << "Failed to initialize API.  Error message \"" << rp_last_error_message() << "\".";
 		}
 		return status;
 	}
@@ -89,7 +90,7 @@ private:
 		qDebug() << "Cleaning up API.";
 		auto status = rp_clean_up();
 		if(!ApiTypes::statusOk(status)) {
-			qWarning() << "Failed to clean up API.  Error message \"" << rp_status_message(status) << "\".";
+			qWarning() << "Failed to clean up API.  Error message \"" << rp_last_error_message() << "\".";
 		}
 		return status;
 	}
@@ -101,7 +102,7 @@ private:
 		auto status = rp_list_devices(&serials[0], &size);
 
 		if(!ApiTypes::statusOk(status)) {
-			qWarning() << "Failed to list devices.  Error:" << rp_status_message(status);
+			qWarning() << "Failed to list devices.  Error message \"" << rp_last_error_message() << "\".";
 			size = 0;
 		}
 		QStringList list;
@@ -135,7 +136,7 @@ private:
 		auto status = rp_connect_device(serial, &device_);
 
 		if(!ApiTypes::statusOk(status))
-			qWarning() << "Unable to connnect to" << qserial << ".  Error:" << rp_status_message(status);
+			qWarning() << "Unable to connnect to" << qserial << ".  Error message \"" << rp_last_error_message();
 		else {
 			qDebug() << "Connected device handle:" << device_;
 		}
@@ -145,16 +146,18 @@ private:
 	rp_status disconnectDevice() {
 		qDebug() << "Disconnecting device handle" << device_;
 
+		auto status = RP_STATUS_OK;
+
 		if(device_ == 0)
 			qDebug() << "Device handle zero, skipping rp_disconnect_device.";
 
-		auto status = rp_disconnect_device(device_);
+		else {
+			status = rp_disconnect_device(device_);
+			device_ = 0;
 
-		device_ = 0;
-
-		if(!ApiTypes::statusOk(status))
-			qWarning() << "Error disconnecting device" << device_ << ". Error: " << rp_status_message(status);
-
+			if(!ApiTypes::statusOk(status))
+				qWarning() << "Error disconnecting device" << device_ << ". Error message \"" << rp_last_error_message() << "\".";
+		}
 		return status;
 	}
 
@@ -172,7 +175,7 @@ private:
 
 		auto status = rp_start_collection(device_, &info);
 		if(!ApiTypes::statusOk(status))
-			qWarning() << "Unable to start collection.  Error: " << rp_status_message(status);
+			qWarning() << "Unable to start collection.  Error message \"" << rp_last_error_message() << "\".";
 
 		return status;
 	}
@@ -182,7 +185,7 @@ private:
 
 		auto status = rp_stop_collection(device_);
 		if(!ApiTypes::statusOk(status))
-			qWarning() << "Unable to stop collection.  Error:" << rp_status_message(status);
+			qWarning() << "Unable to stop collection.  Error message \"" << rp_last_error_message() << "\".";
 
 		return status;
 	}

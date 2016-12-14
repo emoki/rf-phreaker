@@ -7,7 +7,7 @@
 #include <QTimer>
 #include <QFile>
 #include "rf_phreaker/rf_phreaker_gui/CollectionInfoList.h"
-#include "rf_phreaker/rf_phreaker_gui/Device.h"
+#include "rf_phreaker/rf_phreaker_gui/RpDevice.h"
 #include "rf_phreaker/rf_phreaker_gui/Gps.h"
 #include "rf_phreaker/rf_phreaker_gui/Gsm.h"
 #include "rf_phreaker/rf_phreaker_gui/Wcdma.h"
@@ -16,8 +16,10 @@
 #include "rf_phreaker/rf_phreaker_gui/Settings.h"
 #include "rf_phreaker/rf_phreaker_gui/IO.h"
 #include "rf_phreaker/rf_phreaker_gui/Stats.h"
+#include "rf_phreaker/rf_phreaker_gui/ModelGroup.h"
 #include "rf_phreaker/rf_phreaker_gui/MeasurementModel.h"
 #include "rf_phreaker/rf_phreaker_gui/ProxyMeasurementModel.h"
+#include "rf_phreaker/rf_phreaker_gui/ApiMessage.h"
 #include "rf_phreaker/protobuf_specific/rf_phreaker_serialization.h"
 #include <google/protobuf/io/zero_copy_stream_impl.h>
 //namespace rf_phreaker { namespace gui {
@@ -30,22 +32,25 @@ class Api : public QObject {
 	Q_PROPERTY(QString deviceStatusStr READ deviceStatusStr NOTIFY deviceStatusStrChanged)
 	Q_PROPERTY(ApiTypes::ConnectionStatus connectionStatus READ connectionStatus WRITE setConnectionStatus NOTIFY connectionStatusChanged)
 	Q_PROPERTY(QString connectionStatusStr READ connectionStatusStr NOTIFY connectionStatusStrChanged)
-	Q_PROPERTY(CollectionInfoList* scanList READ scanList WRITE setScanList NOTIFY scanListChanged)
-	Q_PROPERTY(CollectionInfoList* backgroundScanList READ backgroundScanList WRITE setBackgroundScanList NOTIFY backgroundScanListChanged)
+	Q_PROPERTY(CollectionInfoList* scanList READ scanList NOTIFY scanListChanged)
+	Q_PROPERTY(CollectionInfoList* backgroundScanList READ backgroundScanList NOTIFY backgroundScanListChanged)
 	Q_PROPERTY(QStringList log READ log NOTIFY logChanged)
-	Q_PROPERTY(QStringList messages READ messages NOTIFY messagesChanged)
-	Q_PROPERTY(Device* connectedDevice READ connectedDevice NOTIFY connectedDeviceChanged)
+	Q_PROPERTY(QList<QObject*> errors READ errors NOTIFY errorsChanged)
+	Q_PROPERTY(ApiMessage* newestError READ newestError NOTIFY errorsChanged)
+	Q_PROPERTY(QList<QObject*> messages READ messages NOTIFY messagesChanged)
+	Q_PROPERTY(ApiMessage* newestMessage READ newestMessage NOTIFY messagesChanged)
+	Q_PROPERTY(RpDevice* connectedDevice READ connectedDevice NOTIFY connectedDeviceChanged)
 	Q_PROPERTY(Gps* gps READ gps NOTIFY gpsChanged)
-	Q_PROPERTY(MeasurementModel* highestCellPerChannelModel READ highestCellPerChannelModel NOTIFY highestCellPerChannelModelChanged)
-	Q_PROPERTY(MeasurementModel* gsmFullScanModel READ gsmFullScanModel NOTIFY gsmFullScanModelChanged)
-	Q_PROPERTY(MeasurementModel* wcdmaFullScanModel READ wcdmaFullScanModel NOTIFY wcdmaFullScanModelChanged)
-	Q_PROPERTY(MeasurementModel* lteFullScanModel READ lteFullScanModel NOTIFY lteFullScanModelChanged)
 	Q_PROPERTY(QStringList availableDevices READ availableDevices NOTIFY availableDevicesChanged)
 	Q_PROPERTY(QString deviceSerial READ deviceSerial WRITE setDeviceSerial NOTIFY deviceSerialChanged)
 	Q_PROPERTY(QString collectionFilename READ collectionFilename WRITE setCollectionFilename NOTIFY collectionFilenameChanged)
-	Q_PROPERTY(QList<QObject*> sweepModelList READ sweepModelList NOTIFY sweepModelListChanged)
-	Q_PROPERTY(int lowestFreq READ lowestFreq NOTIFY lowestFreqChanged)
-	Q_PROPERTY(int highestFreq READ highestFreq NOTIFY highestFreqChanged)
+	Q_PROPERTY(ModelGroup* allTechModels READ allTechModels NOTIFY allTechModelsChanged)
+	Q_PROPERTY(ModelGroup* gsmModels READ gsmModels NOTIFY gsmModelsChanged)
+	Q_PROPERTY(ModelGroup* wcdmaModels READ wcdmaModels NOTIFY wcdmaModelsChanged)
+	Q_PROPERTY(ModelGroup* lteModels READ lteModels NOTIFY lteModelsChanged)
+	Q_PROPERTY(QString themePrimaryColor READ themePrimaryColor CONSTANT)
+	Q_PROPERTY(QString themeAccentColor READ themeAccentColor CONSTANT)
+	Q_PROPERTY(QString themeTabHighlightColor READ themeTabHighlightColor CONSTANT)
 
 public:
 	Q_INVOKABLE void initializeApi();
@@ -61,12 +66,17 @@ public:
 	Q_INVOKABLE void convertRfp(QString filename);
 	Q_INVOKABLE QString getColorTheme(Base *b);
 	Q_INVOKABLE MeasurementModel* getSweepModel(Base *b);
+	Q_INVOKABLE void addMessage(QString details, int status = 0) {
+		messages_.prepend(new ApiMessage(static_cast<rp_status>(status), "", details));
+		emit messagesChanged();
+	}
 
 signals:
 	void scanListChanged();
 	void backgroundScanListChanged();
 	void logChanged();
 	void messagesChanged();
+	void errorsChanged();
 	void deviceStatusChanged();
 	void deviceStatusStrChanged();
 	void connectionStatusChanged();
@@ -74,15 +84,13 @@ signals:
 	void availableDevicesChanged();
 	void connectedDeviceChanged();
 	void gpsChanged();
-	void highestCellPerChannelModelChanged();
-	void gsmFullScanModelChanged();
-	void wcdmaFullScanModelChanged();
-	void lteFullScanModelChanged();
-	void sweepModelListChanged();
 	void deviceSerialChanged();
 	void collectionFilenameChanged();
-	void lowestFreqChanged();
-	void highestFreqChanged();
+	void allTechModelsChanged();
+	void gsmModelsChanged();
+	void wcdmaModelsChanged();
+	void lteModelsChanged();
+
 
 	// Signals for state machine
 	void numDevicesConnected(int numDevices);
@@ -93,8 +101,8 @@ signals:
 	void apiInitialized();
 	void licenseUpdateSucceeded();
 	void licenseUpdateFailed();
-	void errorMessage(int status, QString msg);
-	void message(int status, QString msg);
+	void errorReinitialize();
+	void errorGoIdle();
 
 public slots:
 	void findFreqMinMax();
@@ -107,32 +115,25 @@ public:
 	QString deviceStatusStr() { return ApiTypes::toQString(deviceStatus_); }
 	ApiTypes::ConnectionStatus connectionStatus() { return connectionStatus_; }
 	QString connectionStatusStr() { return ApiTypes::toQString(connectionStatus_); }
-	CollectionInfoList* scanList() { return scanList_; }
-	CollectionInfoList* backgroundScanList() { return backgroundScanList_; }
+	CollectionInfoList* scanList() { return &scanList_; }
+	CollectionInfoList* backgroundScanList() { return &backgroundScanList_; }
 	QStringList log() { return log_; }
-	QStringList messages() { return messages_; }
+	QList<QObject*> messages() { return messages_; }
+	ApiMessage* newestMessage() { return messages_.isEmpty() ? new ApiMessage(RP_STATUS_OK, "", "No error.") : static_cast<ApiMessage*>(messages_.front()); }
+	QList<QObject*> errors() { return errors_; }
+	ApiMessage* newestError() { return errors_.isEmpty() ? new ApiMessage(RP_STATUS_OK, "", "No error.") : static_cast<ApiMessage*>(errors_.front()); }
 	QString deviceSerial() const { return deviceSerial_; }
 	QString collectionFilename() const { return collectionFilename_; }
-	Device* connectedDevice() { return &connectedDevice_; }
+	RpDevice* connectedDevice() { return &connectedDevice_; }
 	Gps* gps() { return &gps_; }
 	QStringList availableDevices() { return availableDevices_; }
-	MeasurementModel* highestCellPerChannelModel() { return &highestCellPerChannelModel_; }
-	MeasurementModel* gsmFullScanModel() { return &gsmFullScanModel_; }
-	MeasurementModel* wcdmaFullScanModel() { return &wcdmaFullScanModel_; }
-	MeasurementModel* lteFullScanModel() { return &lteFullScanModel_; }
-	QList<QObject*> sweepModelList() { return sweepModelList_; }
-	int lowestFreq() { return lowestFreq_; }
-	int highestFreq() { return highestFreq_; }
-
-	void setScanList(const CollectionInfoList *list) {
-		scanList_->setList(list->qlist());
-		emit scanListChanged();
-	}
-
-	void setBackgroundScanList(const CollectionInfoList *list) {
-		backgroundScanList_->setList(list->qlist());
-		emit backgroundScanListChanged();
-	}
+	ModelGroup* allTechModels() { return &allTechModels_; }
+	ModelGroup* gsmModels() { return &gsmModels_; }
+	ModelGroup* wcdmaModels() { return &wcdmaModels_; }
+	ModelGroup* lteModels() { return &lteModels_; }
+	QString themePrimaryColor() { return settings_.theme_primary_color_; }
+	QString themeAccentColor() { return settings_.theme_accent_color_; }
+	QString themeTabHighlightColor() { return settings_.theme_tab_highlight_color_; }
 
 	void setDeviceStatus(ApiTypes::DeviceStatus s) {
 		if(deviceStatus_ != s) {
@@ -167,27 +168,26 @@ public:
 protected:
 	bool event(QEvent *);
 
-private slots:
-	void emitSignals();
-
 private:
 	explicit Api(QObject *parent = 0);
-	void handle_message(rp_status status, const QString &s);
+	void handle_message(const ApiMessage &msg);
 	void close_collection_file(); // Handled internally using the event loop so we don't have to worry about threading issues.
+	void clearModels();
+	void updateModels();
 
 	static Api *instance_;
 	static QMutex instance_mutex_;
 	ApiTypes::DeviceStatus deviceStatus_;
 	ApiTypes::ConnectionStatus connectionStatus_;
-	CollectionInfoList *scanList_;
-	CollectionInfoList *backgroundScanList_;
+	CollectionInfoList scanList_;
+	CollectionInfoList backgroundScanList_;
 	QStringList availableDevices_;
 	QStringList log_;
-	QStringList messages_;
-	QStringList error_messages_;
+	QList<QObject*> errors_;
+	QList<QObject*> messages_;
 	QString deviceSerial_;
 	QString collectionFilename_;
-	Device connectedDevice_;
+	RpDevice connectedDevice_;
 	Gps gps_;
 
 	// Perhaps in the future we allow for multiple devices.
@@ -196,11 +196,6 @@ private:
 
 	ApiThread *thread_;
 
-	QTimer *updateTimer_;
-	bool canUpdateLog_;
-	bool canUpdateMessages_;
-	bool canUpdateDevice_;
-	bool canUpdateGps_;
 	std::atomic_bool canRecordData_;
 
 	rf_phreaker::protobuf::update_pb update_pb_;
@@ -210,24 +205,18 @@ private:
 	std::unique_ptr<google::protobuf::io::FileOutputStream> output_file_;
 
 	Settings settings_;
-	SettingsIO settingsIO_;
 
 	IO api_debug_output_;
 
 	Stats stats_;
 
-	MeasurementModel highestCellPerChannelModel_;
-	MeasurementModel gsmFullScanModel_;
-	MeasurementModel wcdmaFullScanModel_;
-	MeasurementModel lteFullScanModel_;
-	QMap<ApiTypes::OperatingBand, std::shared_ptr<MeasurementModel>> sweepModels_;
-	QList<QObject*> sweepModelList_;
 	rf_phreaker::operating_band_range_specifier band_specifier_;
-
-	static const int lowestFreqDefault_ = 700;
-	static const int highestFreqDefault_ = 2600;
-	int highestFreq_;
-	int lowestFreq_;
+	MeasurementModel highestCellPerChannelModel_;
+	QMap<ApiTypes::OperatingBand, std::shared_ptr<MeasurementModel>> sweepModels_;
+	ModelGroup allTechModels_;
+	ModelGroup gsmModels_;
+	ModelGroup wcdmaModels_;
+	ModelGroup lteModels_;
 };
 
 //}}

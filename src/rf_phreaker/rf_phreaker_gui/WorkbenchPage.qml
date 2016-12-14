@@ -1,4 +1,4 @@
-import QtQuick 2.5
+import QtQuick 2.6
 import QtQuick.Layouts 1.1
 import QtQuick.Controls 1.4
 import QtQuick.Controls.Styles.Flat 1.0 as Flat
@@ -23,8 +23,6 @@ ScrollView {
             anchors.margins: textMargins / 2
             columnSpacing: textMargins / 2
             rowSpacing: textMargins / 2
-            columns: Math.max(1, Math.floor(scrollView.width / Math.max(scannerGroup.implicitWidth, gpsGroup.implicitWidth, licenses.implicitWidth)))
-
 
             Button {
                 text: "Convert RFP file"

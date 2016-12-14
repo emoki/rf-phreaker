@@ -12,9 +12,9 @@ TEST(FftHelper, TestMain) {
 
 	ipp_32fc_array signal((int)pow(2, 18));
 
-	frequency_shifter shifter((double)sampling_rate);
+	frequency_shifter shifter;
 
-	shifter.generate_tone(signal, signal.length(), khz(100));
+	shifter.generate_tone(signal, signal.length(), khz(100), sampling_rate);
 
 	calc.calculate_power_in_bins(signal, sampling_rate, khz(200));
 

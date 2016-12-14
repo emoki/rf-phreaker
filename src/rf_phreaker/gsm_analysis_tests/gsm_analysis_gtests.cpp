@@ -26,11 +26,13 @@ TEST(GsmAnalysisTests, TestGeneral) {
 	// ./lte_phreaker/test_files		(directory containing test data)
 
 	std::string folder_path =
-		"../../../../rf_phreaker/test_files/gsm/";
-
+		//"../../../../rf_phreaker/test_files/gsm/"
+		"b:/tmp_cappeen/cobham/MMI GSM Error/";
+	;
 	std::string prefix =
 		//"gsm_layer_3_1432609567_";
-		"umts_sweep_1435430575_";
+		"gsm_layer_3_1463754944_"
+		;
 
 	std::string suffix = ".bin";
 	//std::string suffix = ".txt";
@@ -39,7 +41,7 @@ TEST(GsmAnalysisTests, TestGeneral) {
 
 	gsm_config config;
 	config.preform_sync_correlations(true);
-	config.max_signal_length(292500);
+	config.max_signal_length(300000);
 	gsm_analysis analysis(config);
 
 	for(int i = 0; i < num_iterations; ++i) {
@@ -54,6 +56,8 @@ TEST(GsmAnalysisTests, TestGeneral) {
 			}
 			else
 				file >> signal;
+
+			EXPECT_GE(config.max_signal_length(), signal.get_iq().length());
 
 			gsm_measurements meas_group;
 

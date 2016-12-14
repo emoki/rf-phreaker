@@ -24,13 +24,17 @@ TEST(UmtsAnalysisTests, TestGeneral)
 
 		std::string folder_path = 
 			//"../../../../rf_phreaker/test_files/"
-			"../../../../rf_phreaker/test_files/umts_shift/"
+			//"../../../../rf_phreaker/test_files/umts_shift/"
+			//"../../../../rf_phreaker/test_files/umts_corr_analysis/has_freq_error/"
+			"../../../../rf_phreaker/test_files/umts_975_sample_rate/"
 			;
 		
-		std::string prefix = 
+		std::string prefix =
 			//"umts_sweep_1397750536_"
-			"umts_sweep_1458751660_"
-			;
+			//"umts_sweep_1458751660_"
+			//"umts_layer_3_1426537582_"
+			"umts_layer_3_1460661150_";
+		;
 		std::string suffix = ".bin";
 		//std::string suffix = ".txt";
 
@@ -54,7 +58,7 @@ TEST(UmtsAnalysisTests, TestGeneral)
 				config.clock_rate((int)info.sampling_rate());
 				config.max_signal_length(info.get_iq().length());
 				config.max_num_candidates(1000);
-				config.num_coherent_psch_slots(2);
+				config.num_coherent_psch_slots(14);
 
 				umts_analysis analysis(config);
 
@@ -68,7 +72,7 @@ TEST(UmtsAnalysisTests, TestGeneral)
 						output_umts_meas_debug_header(freq_shift_file2) << "\n";
 						write_header = false;
 					}
-					if(info.frequency() % mhz(1) == 0) {
+					if(info.frequency() % khz(100) == 0) {
 						bool fs2 = false;
 						power_info_group rms_group;
 						analysis.cell_search_sweep(info, group, -20, 0, -khz(500), khz(500), &rms_group);
@@ -76,21 +80,19 @@ TEST(UmtsAnalysisTests, TestGeneral)
 							fs2 = true;
 							freq_shift_file2 <<
 								i << "\t" << info.frequency() / 1e6 << "\t" <<
-								(info.frequency() + j.intermediate_frequency_) / 1e6 << "\t" << rms_group[0].avg_rms_
-								/*std::find_if(rms_group.begin(), rms_group.end(), [&](const power_info &p) {
+								(info.frequency() + j.intermediate_frequency_) / 1e6 << "\t" << 
+								std::find_if(rms_group.begin(), rms_group.end(), [&](const power_info &p) {
 								return info.frequency() + j.intermediate_frequency_ == p.freq_;
-								})->avg_rms_*/ 
-								<< "\t" << j << std::endl;
+								})->avg_rms_ << "\t" << j << std::endl;
 						}
 						if(!fs2) {
 							int k = 0;
 							freq_shift_file2 <<
 								i << "\t" << info.frequency() / 1e6 << "\t" <<
-								(info.frequency() + k) / 1e6 << "\t" << rms_group[0].avg_rms_
-								/* std::find_if(rms_group.begin(), rms_group.end(), [&](const power_info &p) {
+								(info.frequency() + k) / 1e6 << "\t" << 
+								std::find_if(rms_group.begin(), rms_group.end(), [&](const power_info &p) {
 								return info.frequency() + k == p.freq_;
-								})->avg_rms_*/ 
-								<< "\t" << std::endl;
+								})->avg_rms_ << "\t" << std::endl;
 						}
 					}
 				}

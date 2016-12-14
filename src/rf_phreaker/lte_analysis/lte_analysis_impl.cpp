@@ -9,6 +9,7 @@ std::mutex lte_analysis_impl::processing_mutex;
 lte_analysis_impl::lte_analysis_impl(const lte_config &config, std::atomic_bool *is_cancelled)
 	: config_(config)
 	, is_cancelled_(is_cancelled)
+	, correlator_(cell_search_sampling_rate_)
 {
 	si_tracker_.set_wanted_si(config.wanted_si());
 }
@@ -17,41 +18,92 @@ lte_analysis_impl::~lte_analysis_impl()
 {}
 
 int lte_analysis_impl::cell_search_sweep(const rf_phreaker::raw_signal &raw_signal, lte_measurements &lte_meas, int num_half_frames,
-	frequency_type low_intermediate_freq, frequency_type high_intermediate_freq, power_info_group *rms_group) {
+	frequency_type low_intermediate_freq, frequency_type high_intermediate_freq, frequency_type step_size, power_info_group *rms_group) {
 	int status = 0;
 
 	try {
 		lte_meas.clear();
-		for(auto i = low_intermediate_freq; i <= high_intermediate_freq; i += khz(100)) {
+		
+		auto num_samples_to_process = calculate_required_num_samples_for_cell_search(num_half_frames);
+
+		for(auto i = low_intermediate_freq; i <= high_intermediate_freq; i += step_size) {
 			auto tmp_sig = raw_signal;
-			shifter_.shift_frequency(tmp_sig.get_iq(), tmp_sig.get_iq().length(), -(double)i);
+			shifter_.shift_frequency(tmp_sig.get_iq(), tmp_sig.get_iq().length(), -(double)i, tmp_sig.sampling_rate());
 			tmp_sig.frequency(raw_signal.frequency() + i);
-			// Don't bother with filtering right now.
-			lte_measurements tmp_lte_meas;
-			double rms = 0;
-			auto status = cell_search(tmp_sig, tmp_lte_meas, num_half_frames, &rms);
-			if(i == 0 && rms_group)
-				rms_group->push_back(power_info(raw_signal.frequency(), raw_signal.bandwidth(), rms));
-			for(auto &j : tmp_lte_meas)
-				j.intermediate_frequency_ = i;
-			lte_meas.insert(lte_meas.end(), tmp_lte_meas.begin(), tmp_lte_meas.end());
+
+			auto num_samples_to_process = calculate_required_num_samples_for_cell_search(num_half_frames, correlator_.sampling_rate());
+
+			int tmp_num_meas = 0;
+
+			if(raw_signal.sampling_rate() != correlator_.sampling_rate()) {
+
+				auto &filter = get_filter_and_set_resampled_length(raw_signal.sampling_rate(), correlator_.sampling_rate(), num_samples_to_process);
+
+				auto required_signal_length = filter.num_input_samples_required(resampled_length_);
+
+				if(tmp_sig.get_iq().length() < required_signal_length)
+					throw lte_analysis_error("Number of LTE half frames to process requires a larger input signal.");
+
+				filter.filter(tmp_sig.get_iq().get(), resampled_signal_.get(), filter.num_iterations_required(required_signal_length));
+
+				correlator_.set_signal(resampled_signal_, num_half_frames);
+				auto pss_group = correlator_.find_pss(0);
+				for(auto &j : pss_group) {
+					rf_phreaker::lte_measurement meas;
+					meas.PschRecord = j;
+					meas.SschRecord = j;
+					meas.RsRecord = j;
+					meas.estimated_rsrq = j.NormCorr;
+					meas.sync_quality = j.NormCorr;
+					meas.intermediate_frequency_ = i;
+					lte_meas.push_back(meas);
+				}
+
+				// Convert frame start sample num.  At this point they are based on the 1.92mhz. 
+				// we need to change it to the sampling rate of the input signal.
+				for(int i = 0; i < tmp_num_meas; ++i) {
+					lte_measurements_[i].PschRecord.StartSampleNum = (int)boost::math::round((double)lte_measurements_[i].PschRecord.StartSampleNum /
+						correlator_.sampling_rate() * raw_signal.sampling_rate());
+					lte_measurements_[i].SschRecord.StartSampleNum = (int)boost::math::round((double)lte_measurements_[i].SschRecord.StartSampleNum /
+						correlator_.sampling_rate() * raw_signal.sampling_rate());
+					lte_measurements_[i].RsRecord.StartSampleNum = (int)boost::math::round((double)lte_measurements_[i].RsRecord.StartSampleNum /
+						correlator_.sampling_rate() * raw_signal.sampling_rate());
+				}
+
+				if(rms_group) {
+					rms_group->push_back(power_info(tmp_sig.frequency(), correlator_.sampling_rate() / 2, ipp_helper::calculate_average_rms(resampled_signal_.get(), resampled_length_)));
+				}
+			}
+			else {
+				if(tmp_sig.get_iq().length() < num_samples_to_process)
+					throw lte_analysis_error("Number of LTE half frames to process requires a larger input signal.");
+
+				correlator_.set_signal(tmp_sig.get_iq(), num_half_frames);
+				auto pss_group = correlator_.find_pss(0);
+				for(auto &j : pss_group) {
+					rf_phreaker::lte_measurement meas;
+					meas.PschRecord = j;
+					meas.SschRecord = j;
+					meas.RsRecord = j;
+					meas.estimated_rsrq = j.NormCorr;
+					meas.sync_quality = j.NormCorr;
+					meas.intermediate_frequency_ = i;
+					lte_meas.push_back(meas);
+				}
+		
+				if(rms_group) {
+					rms_group->push_back(power_info(tmp_sig.frequency(), correlator_.sampling_rate() / 2, ipp_helper::calculate_average_rms(resampled_signal_.get(), resampled_length_)));
+				}
+			}
 		}
-		//if(rms_group) {
-		//	int length;
-		//	if(raw_signal.get_iq().length() >= (1 << 15))
-		//		length = 1 << 15;
-		//	else
-		//		length = largest_pow_of_2(raw_signal.get_iq().length());
 
-		//	freq_bin_calculator_.calculate_power_in_bins(raw_signal.get_iq(), raw_signal.sampling_rate(), mhz(1), length);
-
-		//	for(auto i = low_intermediate_freq; i <= high_intermediate_freq; i += step_size) {
-		//		double power = 0;
-		//		//for(int j = -khz(1750); j <= khz(1750); j += khz(500))
-		//			power += freq_bin_calculator_.get_power_in_bin(i);
-		//		rms_group->push_back(power_info(raw_signal.frequency() + i, mhz(1), power));
-		//	}
-		//}
+		// Convert values to dB.
+		for(auto &i : lte_meas) {
+			i.PschRecord.NormCorr = 20 * log10(i.PschRecord.NormCorr);
+			i.SschRecord.NormCorr = 20 * log10(i.SschRecord.NormCorr);
+			i.sync_quality = 20 * log10(i.sync_quality);
+			i.estimated_rsrq = 20 * log10(i.estimated_rsrq);
+		}
 	}
 	catch(const rf_phreaker_error &err) {
 		rf_phreaker::delegate_sink::instance().log_error(err);
@@ -82,16 +134,15 @@ int lte_analysis_impl::cell_search(const rf_phreaker::raw_signal &raw_signal, lt
 
 			auto &filter = get_filter_and_set_resampled_length(raw_signal.sampling_rate(), cell_search_sampling_rate_, num_samples_to_process);
 			
-			auto required_signal_length = filter.num_input_samples_required(resampled_length_);
+			auto required_signal_length = filter.num_input_samples_required(num_samples_to_process);
 
 			if(raw_signal.get_iq().length() < required_signal_length)
 				throw lte_analysis_error("Number of LTE half frames to process requires a larger input signal.");
 
 			filter.filter(raw_signal.get_iq().get(), resampled_signal_.get(), filter.num_iterations_required(required_signal_length));
 
-			// NOT WORKING - Maybe a bug
-			//if(avg_rms)
-			//	*avg_rms = ipp_helper::calculate_average_rms(resampled_signal_.get(), resampled_length_ - 25);
+			if(avg_rms)
+				*avg_rms = ipp_helper::calculate_average_rms(resampled_signal_.get(), resampled_length_);
 
 			std::lock_guard<std::mutex> lock(processing_mutex);
 			status = lte_cell_search(resampled_signal_.get(), resampled_length_, num_half_frames, lte_measurements_, tmp_num_meas,
@@ -112,9 +163,8 @@ int lte_analysis_impl::cell_search(const rf_phreaker::raw_signal &raw_signal, lt
 			if(raw_signal.get_iq().length() < num_samples_to_process)
 				throw lte_analysis_error("Number of LTE half frames to process requires a larger input signal.");
 
-			// NOT WORKING - Maybe a bug
-			//if(avg_rms)
-			//	*avg_rms = ipp_helper::calculate_average_rms(raw_signal.get_iq().get(), raw_signal.get_iq().length());
+			if(avg_rms)
+				*avg_rms = ipp_helper::calculate_average_rms(raw_signal.get_iq().get(), raw_signal.get_iq().length());
 
 			std::lock_guard<std::mutex> lock(processing_mutex);
 			status = lte_cell_search(raw_signal.get_iq().get(), num_samples_to_process, num_half_frames, lte_measurements_, tmp_num_meas,
@@ -149,21 +199,12 @@ int lte_analysis_impl::cell_search(const rf_phreaker::raw_signal &raw_signal, lt
 	return status;
 }
 
-rf_phreaker::fir_filter& lte_analysis_impl::get_filter_and_set_resampled_length(rf_phreaker::frequency_type input_sampling_rate, rf_phreaker::frequency_type output_sampling_rate, int num_resampled_samples)
+rf_phreaker::fir_filter& lte_analysis_impl::get_filter_and_set_resampled_length(rf_phreaker::frequency_type input_sampling_rate, rf_phreaker::frequency_type output_sampling_rate, int num_samples_to_process)
 {
-	sampling_rates wanted(sampling_rates(input_sampling_rate, output_sampling_rate));
-	auto it = filters_.find(wanted);
-	if(it == filters_.end()) {
-		auto filter = std::make_shared<rf_phreaker::fir_filter>();
-		filter->set_zero_delay(true);
-		filter->set_up_down_factor_based_on_sampling_rates(input_sampling_rate, output_sampling_rate);
-		filter->set_taps();
-		it = filters_.insert(std::make_pair(wanted, filter)).first;
-	}
+	auto &filter = filters_.get_filter(input_sampling_rate, output_sampling_rate);
 
-	auto &filter = *it->second;
-
-	resampled_length_ = num_resampled_samples;
+	// This ensures the resampled length is large enough to hold the filtered signal.  
+	resampled_length_ = filter.ensure_output_samples_large_enough(num_samples_to_process);
 	// We reset length because the filter uses the array length when filtering.
 	if(resampled_length_ != resampled_signal_.length())
 		resampled_signal_.reset(resampled_length_);
@@ -171,9 +212,9 @@ rf_phreaker::fir_filter& lte_analysis_impl::get_filter_and_set_resampled_length(
 	return filter;
 }
 
-int lte_analysis_impl::calculate_required_num_samples_for_cell_search(int num_half_frames)
+int lte_analysis_impl::calculate_required_num_samples_for_cell_search(int num_half_frames, frequency_type target_sampling_rate)
 {
-	return rf_phreaker::convert_to_samples(milli_to_nano(5 * num_half_frames), cell_search_sampling_rate_) + 128; // pss template length
+	return (int)std::ceil(rf_phreaker::convert_to_samples(milli_to_nano(5 * num_half_frames), target_sampling_rate) + (128.0 * target_sampling_rate / 1.92e6)); // pss template length
 }
 
 void lte_analysis_impl::clear_lte_measurements()

@@ -5,7 +5,7 @@
 
 #include "lte_analysis.h"
 #include "lte_synchronization.h"
-
+#include "rf_phreaker/lte_analysis/lte_correlator.h"
 #include "lte_channel_estimation.h"
 #include "lte_pbch.h" 
 #include "lte_pcfich.h"

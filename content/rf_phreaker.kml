@@ -1,0 +1,151 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<kml xmlns="http://www.opengis.net/kml/2.2" xmlns:gx="http://www.google.com/kml/ext/2.2" xmlns:kml="http://www.opengis.net/kml/2.2" xmlns:atom="http://www.w3.org/2005/Atom">
+
+
+<!-- See https://developers.google.com/kml/documentation/kmlreference?csw=1#color for explanation of color values. -->
+<!-- 	Material Palette		Kml	
+		#rrggbb					#aabbggrr
+		#303F9F = indigo 		#FF9F3F30
+		#4CAF50 = green			#FF50AF4C
+		#FFFFFF = white			#FFFFFFFF
+		#757575 = grey			#FF757575
+		#C5CAE9 = light_blue	#FFE9CAC5
+-->
+
+    <Document>
+        <name>RfPhreaker</name>
+
+ 		<StyleMap id="ptrack">
+            <Pair>
+                <key>normal</key>
+                <styleUrl>#ptrack_n</styleUrl>
+            </Pair>
+            <Pair>
+                <key>highlight</key>
+                <styleUrl>#ptrack_n</styleUrl>
+            </Pair>
+        </StyleMap>
+		
+        <Style id="ptrack_n">
+            <LineStyle>
+                <color>FF757575</color>
+                <width>16</width>
+            </LineStyle>
+            <PolyStyle>
+                <color>0F757575</color>
+				<fill>1</fill>
+            </PolyStyle>
+			<IconStyle><scale>0</scale></IconStyle>
+			<LabelStyle><scale>0</scale></LabelStyle>
+		</Style>
+        <Style id="ptrack_hl">
+             <LineStyle>
+                <color>FF757575</color>
+                <width>17</width>
+            </LineStyle>
+             <PolyStyle>
+                <color>0F757575</color>
+				<fill>1</fill>
+            </PolyStyle>
+ 			<IconStyle><scale>0</scale></IconStyle>
+			<LabelStyle><scale>0</scale></LabelStyle>
+        </Style>
+ 
+		<StyleMap id="ctrack">
+            <Pair>
+                <key>normal</key>
+                <styleUrl>#ctrack_n</styleUrl>
+            </Pair>
+            <Pair>
+                <key>highlight</key>
+                <styleUrl>#ctrack_n</styleUrl>
+            </Pair>
+        </StyleMap>
+		
+        <Style id="ctrack_n">
+            <LineStyle>
+                <color>FFE9CAC5</color>
+                <width>10</width>
+            </LineStyle>
+            <PolyStyle>
+                <color>0FE9CAC5</color>
+				<fill>1</fill>
+            </PolyStyle>
+ 			<IconStyle><scale>0</scale></IconStyle>
+			<LabelStyle><scale>0</scale></LabelStyle>
+       </Style>
+        <Style id="ctrack_hl">
+            <LineStyle>
+                <color>FFE9CAC5</color>
+                <width>12</width>
+            </LineStyle>
+            <PolyStyle>
+                <color>0FE9CAC5</color>
+				<fill>1</fill>
+            </PolyStyle>
+			<IconStyle><scale>0</scale></IconStyle>
+			<LabelStyle><scale>0</scale></LabelStyle>
+        </Style>
+
+		<StyleMap id="rtrack">
+            <Pair>
+                <key>normal</key>
+                <styleUrl>#rtrack_n</styleUrl>
+            </Pair>
+            <Pair>
+                <key>highlight</key>
+                <styleUrl>#rtrack_n</styleUrl>
+            </Pair>
+        </StyleMap>
+		
+        <Style id="rtrack_n">
+            <LineStyle>
+                <color>FF9F3F30</color>
+                <width>17</width>
+            </LineStyle>
+            <PolyStyle>
+                <color>0F9F3F30</color>
+				<fill>1</fill>
+            </PolyStyle>
+ 			<IconStyle><scale>0</scale></IconStyle>
+			<LabelStyle><scale>0</scale></LabelStyle>
+       </Style>
+        <Style id="rtrack_hl">
+            <LineStyle>
+                <color>FF9F3F30</color>
+                <width>19</width>
+            </LineStyle>
+            <PolyStyle>
+                <color>0F9F3F30</color>
+				<fill>1</fill>
+            </PolyStyle>
+			<IconStyle><scale>0</scale></IconStyle>
+			<LabelStyle><scale>0</scale></LabelStyle>
+        </Style>
+
+		<!-- Dummy placemark is used because we show current location in QML -->
+ 		<StyleMap id="dpos">
+            <Pair>
+                <key>normal</key>
+                <styleUrl>#dpos_n</styleUrl>
+            </Pair>
+             <Pair>
+                <key>highlight</key>
+                <styleUrl>#dpos_n</styleUrl>
+            </Pair>
+ 		</StyleMap>
+	
+        <Style id="dpos_n"> 
+            <LineStyle>
+                <color>0</color>
+                <width>0</width>
+            </LineStyle>
+            <PolyStyle>
+                <color>0</color>
+                <width>0</width>
+            </PolyStyle>
+			<IconStyle><scale>0.00001</scale></IconStyle>
+			<LabelStyle><color>0</color><scale>0.00001</scale></LabelStyle>
+		</Style>  
+    </Document>
+</kml>

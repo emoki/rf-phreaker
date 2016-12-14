@@ -36,6 +36,8 @@ public:
 	rf_phreaker_impl();
 
 	~rf_phreaker_impl();
+
+	const char* last_error_message();
 	
 	rp_status initialize(rp_callbacks *callbacks);
 
@@ -78,6 +80,8 @@ public:
 	rp_status update_license(rp_device *device, const char *filename);
 
 private:
+	rp_status add_gsm_collection_frequencies(rp_device *device, const rp_frequency_band_group &gsm_freqs);
+
 	void general_checks(rp_device *device);
 
 	void check_calibration(hardware hw, frequency_type freq);
@@ -101,6 +105,10 @@ private:
 	void message_handling(const std::string &str, int type, int code);
 
 	void error_handling(const std::string &str, int type, int code);
+
+	void save_error(const rf_phreaker_error &err);
+
+	void save_error(const std::string &str, int type, int code = -1);
 
 	void clear_queues();
 
@@ -138,6 +146,8 @@ private:
 	protobuf::update_pb update_;
 	
 	std::mutex update_mutex_;
+
+	std::vector<rf_phreaker_error> error_history_;
 };
 
 }}

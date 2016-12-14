@@ -206,8 +206,8 @@ class freq_correction_collection_manager_body : public collection_manager_body
 {
 public:
 	freq_correction_collection_manager_body(tbb::flow::graph *graph, rf_phreaker::scanner::scanner_controller_interface *sc, const collection_info_containers &info, 
-		const output_settings &p_output, const settings &s_settings)
-	: collection_manager_body(graph, sc, info, p_output, s_settings, false)
+		const output_settings &p_output, const settings &s_settings, int num_items_in_flight)
+		: collection_manager_body(graph, sc, info, p_output, s_settings, num_items_in_flight, false)
 	{}
 
 protected:

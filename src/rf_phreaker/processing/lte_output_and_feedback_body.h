@@ -40,7 +40,8 @@ public:
 		//output_debug_info(info);
 
 		// Output basic tech.
-		helper_.track_future(io_->output(convert_to_basic_data(meas, info.power_info_group_[0].avg_rms_), std::vector<lte_data>()));
+		for(auto &i : info.power_info_group_)
+			helper_.track_future(io_->output(convert_to_basic_data(meas, i), std::vector<lte_data>()));
 
 		if(info.processed_data_.size()) {
 			tracker_.update_measurements(info.processed_data_, meas.frequency());
@@ -125,16 +126,26 @@ public:
 
 	void operator()(lte_info info, lte_output_and_feedback_node::output_ports_type &out) {
 		auto meas = *info.measurement_package_.measurement_info_.get();
+		if(helper_.has_sweep_restarted(meas)) {
+			added_freqs_.clear();
+		}
 
 		helper_.remove_futures();
 
 		// Output basic tech.
-		helper_.track_future(io_->output(convert_to_basic_data(meas, info.power_info_group_[0].avg_rms_), std::vector<lte_data>()));
+		for(auto &i : info.power_info_group_)
+			helper_.track_future(io_->output(convert_to_basic_data(meas, i), std::vector<lte_data>()));
 
 		if(info.processed_data_.size()) {
 			std::set<frequency_type> freqs;
 			for(const auto i : info.processed_data_) {
-				freqs.insert(meas.frequency() + i.intermediate_frequency_);
+				for(frequency_type j = i.intermediate_frequency_ - khz(00); j <= i.intermediate_frequency_ + khz(00); j += khz(100)) {
+					auto freq = meas.frequency() + rf_phreaker::round_to_nearest<khz(100)>(j);
+					auto p = added_freqs_.insert(freq);
+					if(p.second) {
+						freqs.insert(freq);
+					}
+				}
 			}
 			for(const auto &i : freqs) {
 				auto packet = lte_layer_3_collection_info(i, lte_layer_3_collection_info::sampling_rate__,
@@ -144,6 +155,8 @@ public:
 		}
 		std::get<1>(out).try_put(tbb::flow::continue_msg());
 	}
+public:
+	std::set<frequency_type> added_freqs_;
 };
 
 class lte_layer_3_output_and_feedback_body
@@ -208,7 +221,7 @@ public:
 						add_remove_collection_info params;
 
 						params.remove_.push_back(lte_layer_3_collection_info(meas.frequency(), meas.sampling_rate(),
-							meas.bandwidth(), meas.get_lte_band()));
+							meas.bandwidth(), meas.get_lte_band(), info.measurement_package_.can_remove_));
 
 						params.add_.push_back(lte_layer_3_collection_info(meas.frequency(), sampling_rate, determine_bandwidth_for_collection(decoded_bw),
 							meas.get_lte_band(), info.measurement_package_.can_remove_));

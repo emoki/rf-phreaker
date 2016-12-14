@@ -7,7 +7,30 @@
 
 namespace rf_phreaker {
 
-	umts_psch_with_brute_force::umts_psch_with_brute_force(const umts_config &config, const /*cpich_table_container&*/Ipp32fc* resampled_cpich_table, std::atomic_bool *is_cancelled)
+umts_psch_with_brute_force::umts_psch_with_brute_force(const umts_psch_with_brute_force &a)
+	: pause_(a.pause_)
+	, max_num_psch_peaks_(a.max_num_psch_peaks_)
+	, psch_confidence_threshold_(a.psch_confidence_threshold_)
+	, cpich_confidence_threshold_(a.cpich_confidence_threshold_)
+	, is_cancelled_(a.is_cancelled_)
+	, psch_template_(a.psch_template_)
+	, do_we_benchmark_(a.do_we_benchmark_)
+	, num_coherent_psch_slots_(a.num_coherent_psch_slots_)
+	, max_num_candidates_(a.max_num_candidates_)
+	, sample_rate_(a.sample_rate_)
+	, clock_rate_(a.clock_rate_)
+	, over_sampling_rate_(a.over_sampling_rate_)
+	, num_samples_per_cpich_(a.num_samples_per_cpich_)
+	, num_samples_per_time_slot_(a.num_samples_per_time_slot_)
+	, max_processing_length_(a.max_processing_length_)
+	, resampled_cpich_table_(a.resampled_cpich_table_) {
+#ifdef USE_PSCH_BRUTE_FORCE_BENCHMARK 	
+	if(do_we_benchmark_)
+		benchmark_.open_benchmark(a.benchmark_.filename_.append("2.txt"), false);
+#endif
+}
+
+umts_psch_with_brute_force::umts_psch_with_brute_force(const umts_config &config, const /*cpich_table_container&*/Ipp32fc* resampled_cpich_table, std::atomic_bool *is_cancelled)
 : pause_(-1)
 , max_num_psch_peaks_(25)
 , psch_confidence_threshold_(11)

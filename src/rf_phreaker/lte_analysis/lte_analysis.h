@@ -44,7 +44,7 @@ public:
 	~lte_analysis();
 
 	int cell_search_sweep(const rf_phreaker::raw_signal &raw_signal, lte_measurements &lte_meas, int num_half_frames, 
-		frequency_type low_intermediate_freq, frequency_type high_intermediate_freq, power_info_group *rms_group = nullptr);
+		frequency_type low_intermediate_freq, frequency_type high_intermediate_freq, frequency_type step_size, power_info_group *rms_group = nullptr);
 
 	int cell_search(const rf_phreaker::raw_signal &raw_signal, lte_measurements &lte_meas, int num_half_frames, double *avg_rms = nullptr);
 

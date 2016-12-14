@@ -25,6 +25,7 @@ set (lte_analysis_SRCS
 	lte_common.cpp
 	lte_common.h
 	lte_config.h
+	lte_correlator.h
 	lte_crc_16.cpp
 	lte_crc_16.h
 	lte_decode_data.cpp

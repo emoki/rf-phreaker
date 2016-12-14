@@ -21,6 +21,7 @@ set (common_SRCS
 	concurrent.h
 	config_file.cpp
 	config_file.h
+	correlation_utility.h
 	cross_correlation_incoherent_and_coherent_addition.cpp
 	cross_correlation_incoherent_and_coherent_addition.h
 	delegate_sink.h

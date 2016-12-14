@@ -1,0 +1,61 @@
+<!DOCTYPE RCC>
+<RCC version="1.0">
+
+<qresource prefix="/icons/alert">
+	<file alias="warning.svg">alert_warning.svg</file>
+	<file alias="error.svg">alert_error.svg</file>
+</qresource>
+
+<qresource prefix="/icons/hardware">
+	<file alias="developer_board.svg">hardware_developer_board.svg</file>
+</qresource>
+
+<qresource prefix="/icons/file">
+	<file alias="file_download.svg">file_file_download.svg</file>
+</qresource>
+
+<qresource prefix="/icons/navigation">
+	<file alias="arrow_drop_up.svg">navigation_arrow_drop_up.svg</file>
+	<file alias="arrow_drop_down.svg">navigation_arrow_drop_down.svg</file>
+	<file alias="arrow_downward.svg">navigation_arrow_downward.svg</file>
+	<file alias="arrow_upward.svg">navigation_arrow_upward.svg</file>
+	<file alias="cancel.svg">navigation_cancel.svg</file>
+	<file alias="close.svg">navigation_close.svg</file>
+	<file alias="expand_more.svg">navigation_expand_more.svg</file>
+	<file alias="expand_less.svg">navigation_expand_less.svg</file>
+	<file alias="more_vert.svg">navigation_more_vert.svg</file>
+</qresource>
+
+<qresource prefix="/icons/device">
+	<file alias="gps_fixed.svg">device_gps_fixed.svg</file>
+	<file alias="gps_not_fixed.svg">device_gps_not_fixed.svg</file>
+	<file alias="gps_off.svg">device_gps_off.svg</file>
+	<file alias="usb.svg">device_usb.svg</file>
+</qresource>
+
+<qresource prefix="/icons/maps">
+	<file alias="layers.svg">maps_layers.svg</file>
+	<file alias="layers_clear.svg">maps_layers_clear.svg</file>
+	<file alias="map.svg">maps_map.svg</file>
+</qresource>
+
+<qresource prefix="/icons/action">
+	<file alias="help.svg">action_help.svg</file>
+	<file alias="settings.svg">action_settings.svg</file>
+</qresource>
+
+<qresource prefix="/icons/editor">
+	<file alias="insert_chart.svg">editor_insert_chart.svg</file>
+</qresource>
+
+<qresource prefix="/icons/av">
+	<file alias="play_arrow.svg">av_play_arrow.svg</file>
+	<file alias="stop.svg">av_stop.svg</file>
+</qresource>
+
+<qresource prefix="/icons/content">
+	<file alias="add.svg">content_add.svg</file>
+	<file alias="remove.svg">content_remove.svg</file>
+</qresource>
+
+</RCC>
