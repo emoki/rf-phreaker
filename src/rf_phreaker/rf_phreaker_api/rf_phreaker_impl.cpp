@@ -67,9 +67,14 @@ rp_status rf_phreaker_impl::initialize(rp_callbacks *callbacks) {
 
 		// If logging fails continue anyway.
 		try {
-			if(!file_path_validation::is_path_valid(config_.output_directory_))
-				file_path_validation::make_path(config_.output_directory_);
-			logger_.reset(new logger("rf_phreaker_api", config_.output_directory_));
+			// Only initialize logger the first time thru.
+			if(!logger_) {
+				if(!file_path_validation::is_path_valid(config_.output_directory_))
+					file_path_validation::make_path(config_.output_directory_);
+				logger_.reset(new logger("rf_phreaker_api", config_.output_directory_));
+				auto tmp = std2::make_unique<log_handler>(callbacks);
+				logger_->handler_->worker->addSink(std::move(tmp), &log_handler::receive_log_message);
+			}
 		}
 		catch(...) {}
 
@@ -82,10 +87,6 @@ rp_status rf_phreaker_impl::initialize(rp_callbacks *callbacks) {
 			logger_->enable_collection_log(config_.log_collection_);
 			logger_->enable_gps_general_log(config_.log_gps_general_);
 			logger_->enable_gps_parsing_log(config_.log_gps_parsing_);
-			if(callbacks->rp_log_update) {
-				auto tmp = std2::make_unique<log_handler>(callbacks);
-				logger_->handler_->worker->addSink(std::move(tmp), &log_handler::receive_log_message);
-			}
 		}
 
 		// Release all components before changing delegate.

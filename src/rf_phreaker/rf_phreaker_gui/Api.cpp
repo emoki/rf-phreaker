@@ -83,6 +83,7 @@ Api::Api(QObject *parent)
 	, wcdmaModels_(highestCellPerChannelModel_, ApiTypes::FIRST_UMTS_OPERATING_BAND, ApiTypes::LAST_UMTS_OPERATING_BAND)
 	, lteModels_(highestCellPerChannelModel_, ApiTypes::FIRST_LTE_OPERATING_BAND, ApiTypes::LAST_LTE_OPERATING_BAND) {
 	canRecordData_ = false;
+	shouldUpdateLog_ = false;
 	callbacks_.rp_update = rp_update;
 	callbacks_.rp_log_update = nullptr;
 	callbacks_.rp_message_update = nullptr;
@@ -100,6 +101,15 @@ Api::Api(QObject *parent)
 	QObject::connect(Settings::instance(), &Settings::apiOutputChanged, [&](bool apiOutput) {
 		this->apiOutput_ = apiOutput;
 	});
+
+	auto timer = new QTimer(this);
+	QObject::connect(timer, &QTimer::timeout, [&] () {
+		if(this->shouldUpdateLog_) {
+			emit this->logChanged();
+			this->shouldUpdateLog_ = false;
+		}
+	});
+	timer->start(1000);
 
 	connect(&scanList_, SIGNAL(dataChanged(QModelIndex, QModelIndex, QVector<int>)), this, SLOT(findFreqMinMax()));
 	connect(&scanList_, SIGNAL(modelReset()), this, SLOT(findFreqMinMax()));
@@ -229,10 +239,7 @@ bool Api::event(QEvent *e) {
 
 		switch(proto.update_case()) {
 		case rf_phreaker::protobuf::rp_update::UpdateCase::kLog: {
-			QString msg(update_pb_.protobuf().log().msg().c_str());
-			qDebug() << msg;
-			log_.prepend(msg);
-			emit logChanged();
+			appendLog(QString(update_pb_.protobuf().log().msg().c_str()));
 			break;
 		}
 		case rf_phreaker::protobuf::rp_update::UpdateCase::kMsg: {
@@ -319,6 +326,10 @@ bool Api::event(QEvent *e) {
 		default:
 			qDebug() << "Unknown protobuf message.";
 		}
+	}
+	else if(e->type() == LogUpdateEvent::getType()) {
+		appendLog(static_cast<LogUpdateEvent*>(e)->msg());
+		return true;
 	}
 	else if(e->type() == AvailableDevicesEvent::getType()) {
 		auto ev = static_cast<AvailableDevicesEvent*>(e);
@@ -426,6 +437,12 @@ void Api::handle_message(const ApiMessage &t) {
 	default:
 		errorReinitialize();
 	}
+}
+
+void Api::appendLog(const QString &s) {
+	auto msg = new ApiMessage(RP_STATUS_OK, "", s, this);
+	log_.prepend(msg);
+	shouldUpdateLog_ = true;
 }
 
 bool Api::openCollectionFile(){

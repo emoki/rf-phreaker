@@ -7,9 +7,13 @@
 #include "marble/declarative/MarbleDeclarativePlugin.h"
 #include "rf_phreaker/rf_phreaker_gui/ApiPlugin.h"
 #include "rf_phreaker/rf_phreaker_gui/MarbleLayerManager.h"
+#include "rf_phreaker/rf_phreaker_gui/MessageHandler.h"
 
 int main(int argc, char *argv[])
 {
+	// Construct message handler.
+	MessageHandler::instance();
+
 	//qputenv("QML_IMPORT_TRACE", "1");
 	QApplication app(argc, argv);
 	//app.setOrganizationName("Cappeen");

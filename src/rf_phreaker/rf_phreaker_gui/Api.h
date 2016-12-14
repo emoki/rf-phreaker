@@ -34,7 +34,7 @@ class Api : public QObject {
 	Q_PROPERTY(QString connectionStatusStr READ connectionStatusStr NOTIFY connectionStatusStrChanged)
 	Q_PROPERTY(CollectionInfoList* scanList READ scanList NOTIFY scanListChanged)
 	Q_PROPERTY(CollectionInfoList* backgroundScanList READ backgroundScanList NOTIFY backgroundScanListChanged)
-	Q_PROPERTY(QStringList log READ log NOTIFY logChanged)
+	Q_PROPERTY(QList<QObject*> log READ log NOTIFY logChanged)
 	Q_PROPERTY(QList<QObject*> errors READ errors NOTIFY errorsChanged)
 	Q_PROPERTY(ApiMessage* newestError READ newestError NOTIFY errorsChanged)
 	Q_PROPERTY(QList<QObject*> messages READ messages NOTIFY messagesChanged)
@@ -63,6 +63,10 @@ public:
 	Q_INVOKABLE void convertRfp(QString filename);
 	Q_INVOKABLE QString getColorTheme(Base *b);
 	Q_INVOKABLE MeasurementModel* getSweepModel(Base *b);
+	Q_INVOKABLE void addMessageAsync(QString details, int status = 0) {
+		QMetaObject::invokeMethod(Api::instance(), "addMessage",
+			Qt::QueuedConnection, Q_ARG(QString, details), Q_ARG(int, status));
+	}
 	Q_INVOKABLE void addMessage(QString details, int status = 0) {
 		messages_.prepend(new ApiMessage(static_cast<rp_status>(status), "", details));
 		emit messagesChanged();
@@ -114,7 +118,7 @@ public:
 	QString connectionStatusStr() { return ApiTypes::toQString(connectionStatus_); }
 	CollectionInfoList* scanList() { return &scanList_; }
 	CollectionInfoList* backgroundScanList() { return &backgroundScanList_; }
-	QStringList log() { return log_; }
+	QList<QObject*> log() { return log_; }
 	QList<QObject*> messages() { return messages_; }
 	ApiMessage* newestMessage() { return messages_.isEmpty() ? new ApiMessage(RP_STATUS_OK, "", "No error.") : static_cast<ApiMessage*>(messages_.front()); }
 	QList<QObject*> errors() { return errors_; }
@@ -168,6 +172,7 @@ private:
 	void close_collection_file(); // Handled internally using the event loop so we don't have to worry about threading issues.
 	void clearModels();
 	void updateModels();
+	void appendLog(const QString &s);
 
 	static Api *instance_;
 	static QMutex instance_mutex_;
@@ -176,7 +181,7 @@ private:
 	CollectionInfoList scanList_;
 	CollectionInfoList backgroundScanList_;
 	QStringList availableDevices_;
-	QStringList log_;
+	QList<QObject*> log_;
 	QList<QObject*> errors_;
 	QList<QObject*> messages_;
 	QString deviceSerial_;
@@ -191,6 +196,7 @@ private:
 	ApiThread *thread_;
 
 	std::atomic_bool canRecordData_;
+	std::atomic_bool shouldUpdateLog_;
 
 	rf_phreaker::protobuf::update_pb update_pb_;
 	rf_phreaker::gps current_gps_;
