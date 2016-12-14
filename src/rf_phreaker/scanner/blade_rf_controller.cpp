@@ -290,14 +290,14 @@ void blade_rf_controller::do_initial_scanner_config(const scanner_settings &sett
 			break;
 		}
 		catch(rf_phreaker_error &err) {
-			if(++retry > 4)
+			if(++retry > 1)
 				throw err;
 
 			LOG(LDEBUG) << err.what() << "  Attempting to recover...";
 
 			close_scanner();
-			for(int i = 0; i < 3; ++i) {
-				std::this_thread::sleep_for(std::chrono::seconds(3));
+			for(int i = 0; i < 1; ++i) {
+				std::this_thread::sleep_for(std::chrono::seconds(2));
 				open_scanner_and_refresh_scanner_info(id);
 				std::this_thread::sleep_for(std::chrono::seconds(1));
 				break;
