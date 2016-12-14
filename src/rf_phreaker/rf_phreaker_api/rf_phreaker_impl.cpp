@@ -312,8 +312,6 @@ rp_status rf_phreaker_impl::connect_device(rp_serial serial, rp_device **device_
 		scanners_.push_back(std::make_shared<rp_device>(rf_phreaker::scanner::USB_BLADE_RF));
 		rp_device *device = scanners_.rbegin()->get();
 
-		device->async_.set_log_level(config_.blade_settings_.log_level_);
-
 		device->async_.open_scanner_and_refresh_scanner_info(serial.serial_).get();
 
 		device->async_.do_initial_scanner_config(config_.blade_settings_).get();

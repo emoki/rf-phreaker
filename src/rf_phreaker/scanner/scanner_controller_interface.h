@@ -25,6 +25,8 @@ public:
 
 	virtual std::future<void> do_initial_scanner_config(const scanner_settings &settings) = 0;
 
+	virtual std::future<void> update_settings(const scanner_settings &settings) = 0;
+
 	virtual std::future<void> refresh_scanner_info() = 0;
 
 	virtual std::future<const scanner*> get_scanner() = 0;

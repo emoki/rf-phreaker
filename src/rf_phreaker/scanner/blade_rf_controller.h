@@ -44,6 +44,8 @@ public:
 
 	void do_initial_scanner_config(const scanner_settings &settings = blade_settings());
 
+	void update_settings(const scanner_settings &settings = blade_settings());
+
 	void refresh_scanner_info();
 
 	void write_vctcxo_trim(uint16_t trim);

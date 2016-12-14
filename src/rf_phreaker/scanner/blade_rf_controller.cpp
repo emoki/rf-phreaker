@@ -243,9 +243,7 @@ void blade_rf_controller::do_initial_scanner_config(const scanner_settings &sett
 
 	std::string id = comm_blade_rf_->id();
 
-	auto &blade = reinterpret_cast<const blade_settings&>(settings);
-	blade_settings_ = blade.intermittent_streaming_rx_;
-	blade_settings_stream_ = blade.full_streaming_rx_;
+	update_settings(settings);
 
 	// When errors opening and configuring occur they seem to be fixed
 	// by restarting the entire process hence if an error occurs anywhere 
@@ -323,6 +321,14 @@ void blade_rf_controller::do_initial_scanner_config(const scanner_settings &sett
 	update_vctcxo_based_on_eeprom();
 
 	power_on_gps();
+}
+
+void blade_rf_controller::update_settings(const scanner_settings &settings) {
+	stop_streaming_and_disable_blade_rx();
+	auto &blade = reinterpret_cast<const blade_settings&>(settings);
+	set_blade_sync_rx_settings(blade.intermittent_streaming_rx_);
+	set_blade_sync_rx_stream_settings(blade.full_streaming_rx_);
+	set_log_level(blade.log_level_);
 }
 
 void blade_rf_controller::enable_blade_rx(const blade_rx_settings &settings)
