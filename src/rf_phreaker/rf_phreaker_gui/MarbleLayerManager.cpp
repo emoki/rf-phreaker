@@ -15,6 +15,7 @@
 #include "rf_phreaker/rf_phreaker_gui/MarbleLayerManager.h"
 #include "rf_phreaker/rf_phreaker_gui/MarbleHelper.h"
 #include "rf_phreaker/rf_phreaker_gui/Settings.h"
+#include "rf_phreaker/rf_phreaker_gui/SettingsIO.h"
 #include "rf_phreaker/protobuf_specific/rf_phreaker_serialization.h"
 #include <google/protobuf/io/zero_copy_stream_impl.h>
 #include "rf_phreaker/protobuf_specific/io.h"
@@ -37,10 +38,12 @@ MarbleLayerManager::MarbleLayerManager(QObject *parent)
 	QObject::connect(&rpPositionProviderPlugin_, &RpPositionProviderPlugin::positionChanged, this, &MarbleLayerManager::updateRecordingTrack);
 	QObject::connect(&rpPositionProviderPlugin_, &RpPositionProviderPlugin::statusChanged, this, &MarbleLayerManager::updatePositionStatus);
 	QObject::connect(Api::instance(), &Api::deviceStatusChanged, this, &MarbleLayerManager::deviceStatusChanged);
-	SettingsIO sio;
-	Settings s;
-	sio.readSettings(s);
-	minDistance_ = s.rpf_track_min_distance_;
+	minDistance_ = Settings::instance()->rpfTrackMinDistance();
+	QObject::connect(Settings::instance(), &Settings::rpfTrackMinDistanceChanged, this, &MarbleLayerManager::changeMinDistance);
+}
+
+void MarbleLayerManager::changeMinDistance(int minDistance) {
+	minDistance_ = minDistance;
 }
 
 void MarbleLayerManager::init() {
@@ -148,23 +151,25 @@ void MarbleLayerManager::storePreviousLayers() {
 }
 
 void MarbleLayerManager::addLayer(const QString &filename) {
-	// When filename comes from QML it as a URL, however when we store the filename
-	// it is native therefore only use tmp if it is valid, otherwise use native.
-	auto tmp_filename = filename;
-	QUrl url(tmp_filename);
-	auto tmp = url.toLocalFile();
-	if(!tmp.isEmpty())
-		tmp_filename = tmp;
+	try {
+		// When filename comes from QML it as a URL, however when we store the filename
+		// it is native therefore only use tmp if it is valid, otherwise use native.
+		auto tmp_filename = filename;
+		QUrl url(tmp_filename);
+		auto tmp = url.toLocalFile();
+		if(!tmp.isEmpty())
+			tmp_filename = tmp;
 
-	QFileInfo info(tmp_filename);
+		QFileInfo info(tmp_filename);
 
-	if(info.suffix() == "rpf")
-		addRpf(tmp_filename);
-	else // See if Marble handles the file...
-		addMapFile(tmp_filename);
-
-	// Update saved layers.
-	storePreviousLayers();
+		if(info.suffix() == "rpf")
+			addRpf(tmp_filename);
+		else // See if Marble handles the file...
+			addMapFile(tmp_filename);
+	}
+	catch(const std::exception &err) {
+		Api::instance()->addMessageAsync(QString("Error adding layer. ").append(err.what()));
+	}
 }
 
 void MarbleLayerManager::addMapFile(const QString &filename) {
@@ -175,76 +180,88 @@ void MarbleLayerManager::addMapFile(const QString &filename) {
 }
 
 void MarbleLayerManager::addRpf(const QString &filename) {
-	std::lock_guard<std::recursive_mutex> lock(mutex_);
 
-	qDebug() << "Converting RPF file. " << filename << ".";
-	QFile f(filename);
-	if(!f.open(QIODevice::ReadOnly | QIODevice::Unbuffered)) {
-		qDebug() << "Failed to open RPF file. " << f.errorString();
-	}
-	else {
-		auto multiTrack = std::make_unique<Marble::GeoDataMultiTrack>();
-		multiTrack->setId("multitrack_" + filename);
-		auto track = std::make_unique<Marble::GeoDataTrack>();
-		auto input_file = std::make_unique<google::protobuf::io::FileInputStream>(f.handle());
-		rf_phreaker::protobuf::update_pb message;
-		auto &proto = message.protobuf();
-		rf_phreaker::gps previousGps, gps;
-		previousGps.coordinated_universal_time_ = -1;
-		bool previously_had_lock = true; // Inital condition = true.
-		while(rf_phreaker::protobuf::read_delimited_from(input_file.get(), &proto)) {
-			if(proto.update_case() == rf_phreaker::protobuf::rp_update::UpdateCase::kGps) {
-				gps = message.get_gps();
-				if(gps.lock_) {
-					if(!previously_had_lock) {
-						if(track->size())
-							multiTrack->append(track.get());
-						track.release();
-						track = std::make_unique<Marble::GeoDataTrack>();
-						previously_had_lock = true;
-						previousGps.coordinated_universal_time_ = -1;
-					}
-					bool addPoint = false;
-					if(previousGps.coordinated_universal_time_ == -1) {
-						addPoint = true;
-					}
-					else {
-						auto distance = MarbleHelper::calculateDistanceMeters(previousGps.longitude_, previousGps.latitude_, gps.longitude_, gps.latitude_, model_);
-						if(distance > minDistance_)
-							addPoint = true;
-					}
-					if(addPoint) {
-						track->addPoint(QDateTime::fromTime_t(gps.coordinated_universal_time_),
-							Marble::GeoDataCoordinates(gps.longitude_, gps.latitude_, gps.altitude_, Marble::GeoDataCoordinates::Degree));
-						previousGps = gps;
+	addLayerFutures_.push_back(std::async(std::launch::async, [&](const QString filename) {
+		try {
+
+			qDebug() << "Converting RPF file. " << filename << ".";
+			QFile f(filename);
+			if(!f.open(QIODevice::ReadOnly | QIODevice::Unbuffered)) {
+				throw std::runtime_error(std::string("Failed to open RPF file. ").append(f.errorString().toStdString()));
+			}
+			else {
+				auto multiTrack = std::make_unique<Marble::GeoDataMultiTrack>();
+				multiTrack->setId("multitrack_" + filename);
+				auto track = std::make_unique<Marble::GeoDataTrack>();
+				auto input_file = std::make_unique<google::protobuf::io::FileInputStream>(f.handle());
+				rf_phreaker::protobuf::update_pb message;
+				auto &proto = message.protobuf();
+				rf_phreaker::gps previousGps, gps;
+				previousGps.coordinated_universal_time_ = -1;
+				bool previously_had_lock = true; // Inital condition = true.
+				while(rf_phreaker::protobuf::read_delimited_from(input_file.get(), &proto)) {
+					if(proto.update_case() == rf_phreaker::protobuf::rp_update::UpdateCase::kGps) {
+						gps = message.get_gps();
+						if(gps.lock_) {
+							if(!previously_had_lock) {
+								if(track->size())
+									multiTrack->append(track.get());
+								track.release();
+								track = std::make_unique<Marble::GeoDataTrack>();
+								previously_had_lock = true;
+								previousGps.coordinated_universal_time_ = -1;
+							}
+							bool addPoint = false;
+							if(previousGps.coordinated_universal_time_ == -1) {
+								addPoint = true;
+							}
+							else {
+								auto distance = MarbleHelper::calculateDistanceMeters(previousGps.longitude_, previousGps.latitude_, gps.longitude_, gps.latitude_, model_);
+								if(distance > minDistance_)
+									addPoint = true;
+							}
+							if(addPoint) {
+								track->addPoint(QDateTime::fromTime_t(gps.coordinated_universal_time_),
+									Marble::GeoDataCoordinates(gps.longitude_, gps.latitude_, gps.altitude_, Marble::GeoDataCoordinates::Degree));
+								previousGps = gps;
+							}
+						}
+						else {
+							previously_had_lock = false;
+						}
+						proto.Clear();
 					}
 				}
-				else {
-					previously_had_lock = false;
+				// Not sure if we can alter track after it's added to multitrack so we wait to add a track until it's finished.
+				// This means the last track is added here (if there are points within).
+				if(track->size()) {
+					multiTrack->append(track.get());
+					track.release();
 				}
-				proto.Clear();
+				auto placemark = std::make_unique<Marble::GeoDataPlacemark>();
+				placemark->setName(filename);
+				placemark->setGeometry(multiTrack.get());
+				placemark->setVisible(true);
+				multiTrack.release();
+
+				QMetaObject::invokeMethod(&MarbleLayers::instance(), "addPreviousTrack", 
+					Qt::QueuedConnection, Q_ARG(Marble::GeoDataPlacemark*, placemark.get()));
+				placemark.release();
 			}
 		}
-		// Not sure if we can alter track after it's added to multitrack so we wait to add a track until it's finished.
-		// This means the last track is added here (if there are points within).
-		if(track->size()) {
-			multiTrack->append(track.get());
-			track.release();
+		catch(const std::exception &err) {
+			Api::instance()->addMessageAsync(QString("Error adding layer. ").append(err.what()));
 		}
-		auto placemark = std::make_unique<Marble::GeoDataPlacemark>();
-		placemark->setName(filename);
-		placemark->setGeometry(multiTrack.get());
-		placemark->setVisible(true);
-		multiTrack.release();
-	
-		model_.treeModel()->removeDocument(rpDoc_);
-		rpDoc_->append(placemark.get());
-		// Style needs to be set after placemark has been added to the document.
-		placemark->setStyleUrl("#ptrack");
-		model_.treeModel()->addDocument(rpDoc_);
-		Api::instance()->addMessage(placemark->name() + " layer added.");
-		placemark.release();
-	}
+	}, filename));
+}
+
+void MarbleLayerManager::addPreviousTrack(Marble::GeoDataPlacemark *placemark) {
+	model_.treeModel()->removeDocument(rpDoc_);
+	rpDoc_->append(placemark);
+	// Style needs to be set after placemark has been added to the document.
+	placemark->setStyleUrl("#ptrack");
+	model_.treeModel()->addDocument(rpDoc_);
+	Api::instance()->addMessageAsync(placemark->name() + " layer added.");
 }
 
 Marble::MarbleModel* MarbleLayerManager::model() {
@@ -344,5 +361,4 @@ void MarbleLayerManager::transferRecordingTrack() {
 	recordingPlacemark_ = nullptr;
 	multiTrack_ = nullptr;
 	currentTrack_ = nullptr;
-	addRpf(filename);
 }

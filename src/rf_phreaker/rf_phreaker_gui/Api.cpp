@@ -5,6 +5,7 @@
 #include "rf_phreaker/rf_phreaker_gui/Utility.h"
 #include "rf_phreaker/rf_phreaker_gui/Events.h"
 #include "rf_phreaker/rf_phreaker_gui/ApiThreadWorker.h"
+#include "rf_phreaker/rf_phreaker_gui/SettingsIO.h"
 #include "rf_phreaker/protobuf_specific/io.h"
 
 //namespace rf_phreaker { namespace gui {
@@ -66,9 +67,7 @@ Api* Api::instance() {
 	if(instance_ == nullptr) {
 		QMutexLocker lock(&instance_mutex_);
 		if(instance_ == nullptr) {
-			qDebug() << "Instantiating instance pointer." << instance_;
 			instance_ = new Api;
-			qDebug() << "New instance pointer." << instance_;
 		}
 	}
 	return instance_;
@@ -84,6 +83,7 @@ Api::Api(QObject *parent)
 	, wcdmaModels_(highestCellPerChannelModel_, ApiTypes::FIRST_UMTS_OPERATING_BAND, ApiTypes::LAST_UMTS_OPERATING_BAND)
 	, lteModels_(highestCellPerChannelModel_, ApiTypes::FIRST_LTE_OPERATING_BAND, ApiTypes::LAST_LTE_OPERATING_BAND) {
 	canRecordData_ = false;
+	shouldUpdateLog_ = false;
 	callbacks_.rp_update = rp_update;
 	callbacks_.rp_log_update = nullptr;
 	callbacks_.rp_message_update = nullptr;
@@ -97,20 +97,30 @@ Api::Api(QObject *parent)
 	callbacks_.rp_wcdma_sweep_update = nullptr;
 	callbacks_.rp_lte_sweep_update = nullptr;
 
+	apiOutput_ = Settings::instance()->apiOutput();
+	QObject::connect(Settings::instance(), &Settings::apiOutputChanged, [&](bool apiOutput) {
+		this->apiOutput_ = apiOutput;
+	});
+
+	auto timer = new QTimer(this);
+	QObject::connect(timer, &QTimer::timeout, [&] () {
+		if(this->shouldUpdateLog_) {
+			emit this->logChanged();
+			this->shouldUpdateLog_ = false;
+		}
+	});
+	timer->start(1000);
+
 	connect(&scanList_, SIGNAL(dataChanged(QModelIndex, QModelIndex, QVector<int>)), this, SLOT(findFreqMinMax()));
 	connect(&scanList_, SIGNAL(modelReset()), this, SLOT(findFreqMinMax()));
 	connect(&scanList_, SIGNAL(rowsInserted(QModelIndex, int, int)), this, SLOT(findFreqMinMax()));
 	connect(&scanList_, SIGNAL(rowsRemoved(QModelIndex, int, int)), this, SLOT(findFreqMinMax()));
-
-	SettingsIO settingsIO;
-	settingsIO.readSettings(settings_);
 
 	thread_->start();
 }
 
 Api::~Api() {
 	SettingsIO settingsIO;
-	settingsIO.writeSettings(settings_);
 	settingsIO.writeScanList(scanList_.list());
 	thread_->quit();
 	thread_->wait();
@@ -222,17 +232,14 @@ bool Api::event(QEvent *e) {
 		if(canRecordData_) {
 			if(proto.update_case() != rf_phreaker::protobuf::rp_update::UpdateCase::kLog)
 				rf_phreaker::protobuf::write_delimited_to(proto, output_file_.get());
-			if(settings_.api_output_) {
+			if(apiOutput_) {
 				api_debug_output_.output_api_data(update_pb_, collectionFilename_, current_gps_);
 			}
 		}
 
 		switch(proto.update_case()) {
 		case rf_phreaker::protobuf::rp_update::UpdateCase::kLog: {
-			QString msg(update_pb_.protobuf().log().msg().c_str());
-			qDebug() << msg;
-			log_.prepend(msg);
-			emit logChanged();
+			appendLog(QString(update_pb_.protobuf().log().msg().c_str()));
 			break;
 		}
 		case rf_phreaker::protobuf::rp_update::UpdateCase::kMsg: {
@@ -261,7 +268,17 @@ bool Api::event(QEvent *e) {
 			}
 			else {
 				gsmModels_.fullScanModel()->update(t);
-				highestCellPerChannelModel_.update_freq_using_highest<less_than_cell_sl>(t);
+				// Manually sort vector and only pass in the first meas (hopefully with a decoded bsic) for each freq 
+				less_than_freq_id cmp;
+				std::sort(t.begin(), t.end(), cmp);
+				// We at least have one measurement.
+				less_than_freq less_than_f;
+				auto p = std::equal_range(t.begin(), t.end(), *t.begin(), less_than_f);
+				while(1) {
+					highestCellPerChannelModel_.update_freq<less_than_cell_sl>(*p.first);
+					if(p.second == t.end()) break;
+					p = std::equal_range(p.second, t.end(), *p.second, less_than_f);
+				}
 			}
 			break;
 		}
@@ -319,6 +336,10 @@ bool Api::event(QEvent *e) {
 		default:
 			qDebug() << "Unknown protobuf message.";
 		}
+	}
+	else if(e->type() == LogUpdateEvent::getType()) {
+		appendLog(static_cast<LogUpdateEvent*>(e)->msg());
+		return true;
 	}
 	else if(e->type() == AvailableDevicesEvent::getType()) {
 		auto ev = static_cast<AvailableDevicesEvent*>(e);
@@ -428,6 +449,12 @@ void Api::handle_message(const ApiMessage &t) {
 	}
 }
 
+void Api::appendLog(const QString &s) {
+	auto msg = new ApiMessage(RP_STATUS_OK, "", s, this);
+	log_.prepend(msg);
+	shouldUpdateLog_ = true;
+}
+
 bool Api::openCollectionFile(){
 	QUrl url(collectionFilename_);
 	collectionFilename_ = url.toLocalFile();
@@ -462,8 +489,16 @@ void Api::close_collection_file() {
 }
 
 void Api::convertRfp(QString filename) {
-	filename.remove("file:///");
-	IO::convert_rpf(filename);
+	rpf_conversions_.push_back(std::async(std::launch::async, [=](QString fn) {
+		try {
+			fn.remove("file:///"); 
+			IO::convert_rpf(fn);
+			Api::instance()->addMessageAsync(fn + " conversion successfully.");
+		}
+		catch(const std::exception &err) {
+			Api::instance()->addMessageAsync(fn + " conversion failed!  " + err.what());
+		}
+	}, filename));
 }
 
 QString Api::getColorTheme(Base *b) {

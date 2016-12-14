@@ -10,6 +10,7 @@ Item {
     property int bandwidth: 0;
 
     function refresh() {
+        //console.debug("sweep channel bandwidth: ", filter.lowFreqFilter, " - ", filter.highFreqFilter);
         if(bandwidth < meas.carrierBandwidth) {
             bandwidth = meas.carrierBandwidth;
             filter.lowFreqFilter = meas.carrierFreq - meas.carrierBandwidth / 2;
@@ -18,11 +19,10 @@ Item {
 
             // This ensures we refresh the entire sweep line!
 
-
             //if(filter.sourceModel)
             //    filter.sourceModel.resetInternalData();
 
-            console.debug("sweep channel bandwidth: ", filter.lowFreqFilter, " - ", filter.highFreqFilter);
+            //console.debug("sweep channel bandwidth: ", filter.lowFreqFilter, " - ", filter.highFreqFilter);
         }
     }
 

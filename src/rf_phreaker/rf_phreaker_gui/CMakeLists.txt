@@ -38,13 +38,17 @@ set (rf_phreaker_gui_SRCS
 	MarbleLayerManager.h
 	MeasurementIndex.h
 	MeasurementModel.h
+	MessageHandler.h
 	ModelGroup.h
 	ProxyMeasurementModel.h
 	RpDevice.h
 	RpPositionProviderPlugin.cpp
 	RpPositionProviderPlugin.h
 	Serialization.h
+	Settings.cpp
 	Settings.h
+	SettingsIO.cpp
+	SettingsIO.h
 	Stats.h
 	Sweep.h
 	Utility.h
@@ -85,6 +89,7 @@ set (rf_phreaker_gui_QMLS
 	MaterialScanConfigurationPage.qml
 	MaterialScanList.qml
 	MaterialScannerInfoPage.qml
+	MaterialSettingsPage.qml
 	MaterialStateMachine.qml
 	MaterialTabbedNavigationDrawerPage.qml
 	OverviewChart.qml

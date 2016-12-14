@@ -24,12 +24,17 @@ Page {
             onTriggered: materialMarbleMap.marbleManager.downloadMapRegion()
         },
         Action {
+            name: "Convert RPF file to ASCII"
+            iconName: "av/note"
+            onTriggered: rpfConversionDialog.open();
+        },
+        Action {
             id: startRecording
             visible: Api.deviceStatus !== ApiTypes.RECORDING
             enabled: Api.connectionStatus === ApiTypes.CONNECTED && Api.deviceStatus === ApiTypes.IDLE
-            text: "Record Data"
+            name: "Record Data"
             shortcut: "Ctrl+R"
-            iconName: "av/play_arrow"
+            iconName: "av/play_circle_filled"
             onTriggered: {
                 rpWindow.startCollectionDialog.filename = "collection_data_" +
                         Qt.formatDateTime(new Date(), "yyyy-MMM-dd_hh-mm-ss");
@@ -39,17 +44,17 @@ Page {
         Action {
             id: stopRecording
             visible: Api.connectionStatus === ApiTypes.CONNECTED && Api.deviceStatus === ApiTypes.RECORDING
-            text: "Stop Recording"
+            name: "Stop Recording"
             shortcut: "Ctrl+S"
             iconName: "av/stop"
             onTriggered: rpWindow.stateMachine.stopScanning()
         },
         Action {
-            iconName: "navigation/more_vert"
-            name: "More Options"
-            hoverAnimation: true
-        }
-    ]
+            name: "Show Log"
+            shortcut: "Ctrl+L"
+            iconName: "action/subject"
+            onTriggered: rpWindow.showLog()
+        }    ]
 
     ColumnLayout {
         id: columnLayout

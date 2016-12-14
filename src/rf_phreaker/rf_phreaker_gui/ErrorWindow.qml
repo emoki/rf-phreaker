@@ -6,18 +6,7 @@ import QtQuick.Extras 1.4
 import QtQuick.Extras.Private 1.0
 import QtQml.Models 2.2
 import QtQuick.Window 2.2
-import RfPhreaker 1.0
 
-Dialog {
-    id: openScannerWindow
-    width: 16*20
-    height: 10*20
-    title: "Error"
-    signal canceled()
-    signal accepted()
-
-    flags: Qt.Dialog
-    modality: Qt.WindowModal
+Item {
 
 }
-

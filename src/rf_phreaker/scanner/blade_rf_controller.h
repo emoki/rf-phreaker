@@ -44,6 +44,8 @@ public:
 
 	void do_initial_scanner_config(const scanner_settings &settings = blade_settings());
 
+	void update_settings(const scanner_settings &settings = blade_settings());
+
 	void refresh_scanner_info();
 
 	void write_vctcxo_trim(uint16_t trim);
@@ -139,6 +141,8 @@ public:
 	void enable_continuity_check();
 
 	void output_continuity_packet(int num_transfer_samples);
+
+	void flash_fx3_firmware(const std::string &filename);
 
 private:
 	void enable_blade_rx(const blade_rx_settings &settings);

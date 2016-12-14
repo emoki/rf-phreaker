@@ -243,9 +243,7 @@ void blade_rf_controller::do_initial_scanner_config(const scanner_settings &sett
 
 	std::string id = comm_blade_rf_->id();
 
-	auto &blade = reinterpret_cast<const blade_settings&>(settings);
-	blade_settings_ = blade.intermittent_streaming_rx_;
-	blade_settings_stream_ = blade.full_streaming_rx_;
+	update_settings(settings);
 
 	// When errors opening and configuring occur they seem to be fixed
 	// by restarting the entire process hence if an error occurs anywhere 
@@ -292,14 +290,14 @@ void blade_rf_controller::do_initial_scanner_config(const scanner_settings &sett
 			break;
 		}
 		catch(rf_phreaker_error &err) {
-			if(++retry > 4)
+			if(++retry > 1)
 				throw err;
 
 			LOG(LDEBUG) << err.what() << "  Attempting to recover...";
 
 			close_scanner();
-			for(int i = 0; i < 3; ++i) {
-				std::this_thread::sleep_for(std::chrono::seconds(3));
+			for(int i = 0; i < 1; ++i) {
+				std::this_thread::sleep_for(std::chrono::seconds(2));
 				open_scanner_and_refresh_scanner_info(id);
 				std::this_thread::sleep_for(std::chrono::seconds(1));
 				break;
@@ -323,6 +321,14 @@ void blade_rf_controller::do_initial_scanner_config(const scanner_settings &sett
 	update_vctcxo_based_on_eeprom();
 
 	power_on_gps();
+}
+
+void blade_rf_controller::update_settings(const scanner_settings &settings) {
+	stop_streaming_and_disable_blade_rx();
+	auto &blade = reinterpret_cast<const blade_settings&>(settings);
+	set_blade_sync_rx_settings(blade.intermittent_streaming_rx_);
+	set_blade_sync_rx_stream_settings(blade.full_streaming_rx_);
+	set_log_level(blade.log_level_);
 }
 
 void blade_rf_controller::enable_blade_rx(const blade_rx_settings &settings)
@@ -1133,7 +1139,7 @@ void blade_rf_controller::set_blade_sync_rx_settings(const blade_rx_settings &se
 }
 
 void blade_rf_controller::set_blade_sync_rx_stream_settings(const blade_rx_settings &settings) {
-	blade_settings_ = settings;
+	blade_settings_stream_ = settings;
 }
 
 void blade_rf_controller::start_gps_1pps_integration(int seconds) {
@@ -1184,4 +1190,13 @@ void blade_rf_controller::output_continuity_packet(int num_transfer_samples) {
 	debug_rx << *(uint32_t*)aligned_buffer << "\t" << *((uint32_t*)aligned_buffer + num_transfer_samples - 1) << std::endl;
 }
 
+void blade_rf_controller::flash_fx3_firmware(const std::string &filename) {
+	// Manually disable RF
+	check_blade_comm();
+	check_blade_status(nr_flash_fx3_firmware(comm_blade_rf_->blade_rf(), filename,
+		__FILE__, __LINE__), __FILE__, __LINE__);
+
+}
+
 }}
+

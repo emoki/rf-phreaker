@@ -20,6 +20,8 @@
 #include "rf_phreaker/rf_phreaker_gui/ProxyMeasurementModel.h"
 #include "rf_phreaker/rf_phreaker_gui/MarbleManager.h"
 #include "rf_phreaker/rf_phreaker_gui/MarbleProxyModel.h"
+#include "rf_phreaker/rf_phreaker_gui/Settings.h"
+#include "marble/geodata/data/GeoDataPlacemark.h"
 
 //namespace rf_phreaker { namespace gui {
 
@@ -30,6 +32,7 @@ Q_DECLARE_METATYPE(Gsm*)
 Q_DECLARE_METATYPE(Wcdma*)
 Q_DECLARE_METATYPE(Lte*)
 Q_DECLARE_METATYPE(Sweep*)
+Q_DECLARE_METATYPE(Marble::GeoDataPlacemark*)
 
 QObject* ApiInterfaceSingletonTypeProvider(QQmlEngine *engine, QJSEngine *scriptEngine) {
 	Q_UNUSED(engine);
@@ -37,6 +40,11 @@ QObject* ApiInterfaceSingletonTypeProvider(QQmlEngine *engine, QJSEngine *script
 	return Api::instance();
 }
 
+QObject* SettingsSingletonTypeProvider(QQmlEngine *engine, QJSEngine *scriptEngine) {
+	Q_UNUSED(engine);
+	Q_UNUSED(scriptEngine);
+	return Settings::instance();
+}
 
 void registerQmlTypes()
 {
@@ -64,9 +72,12 @@ void registerQmlTypes()
 	qmlRegisterType<BarGraphProxyMeasurementModel>(uri.latin1(), 1, 0, "BarGraphProxyMeasurementModel");
 	qmlRegisterType<MarbleManager>(uri.latin1(), 1, 0, "MarbleManager");
 	qmlRegisterType<MarbleProxyModel>(uri.latin1(), 1, 0, "MarbleProxyModel");
+	qmlRegisterSingletonType<Api>(uri.latin1(), 1, 0, "GuiSettings", SettingsSingletonTypeProvider);
 
 	qRegisterMetaTypeStreamOperators<rf_phreaker::channel_freq>("channel_freq");
 	qRegisterMetaTypeStreamOperators<ApiTypes::Tech>("ApiTech");
+
+	qRegisterMetaType<Marble::GeoDataPlacemark*>();
 }
 
 //}}

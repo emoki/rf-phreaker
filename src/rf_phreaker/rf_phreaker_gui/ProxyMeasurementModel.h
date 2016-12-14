@@ -80,6 +80,8 @@ public:
 			return true;
 		case FreqRangeFilter: {
 			auto freq = idx.data(MeasurementModel::CarrierFreqRole).toDouble();
+			//qDebug() << "sourceRow: " << sourceRow << "   filtered: " << ((lowFreqFilter_ != -1 && highFreqFilter_ != -1) && freq >= lowFreqFilter_
+			//			&& freq <= highFreqFilter_) << "  freq:" << freq;
 			return (lowFreqFilter_ != -1 && highFreqFilter_ != -1) && freq >= lowFreqFilter_
 					&& freq <= highFreqFilter_;
 		}
@@ -90,7 +92,9 @@ public:
 		}
 		case TimeFilter: {
 			auto meas = idx.data(MeasurementModel::BasicMeasRole).value<Base*>();
-			return expirationTimeFilter_ != -1 && meas->timeElapsed().elapsed() < expirationTimeFilter_ * 1000;
+//			qDebug() << "sourceRow: " << sourceRow << "   filtered: " << (expirationTimeFilter_ == -1 || meas->timeElapsed().elapsed() < expirationTimeFilter_ * 1000)
+//				<< "  channel:" << meas->cellChannel() << "  cid: " << meas->cellId();
+			return expirationTimeFilter_ == -1 || meas->timeElapsed().elapsed() < expirationTimeFilter_ * 1000;
 		}
 		default:
 			return idx.data(filterRole()).toString() == stringFilter_;

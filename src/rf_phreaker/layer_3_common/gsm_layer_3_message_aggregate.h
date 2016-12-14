@@ -414,25 +414,25 @@ public:
 
 	virtual void update_info(const gsm_layer_3_message_aggregate &a) {
 		bcch_bch_message_aggregate::update_info(a);
-		if(si_1_.is_decoded())
+		if(a.si_1_.is_decoded())
 			si_1_ = a.si_1_;
-		if(si_2_.is_decoded())
+		if(a.si_2_.is_decoded())
 			si_2_ = a.si_2_;
-		if(si_2bis_.is_decoded())
+		if(a.si_2bis_.is_decoded())
 			si_2bis_ = a.si_2bis_;
-		if(si_2ter_.is_decoded())
+		if(a.si_2ter_.is_decoded())
 			si_2ter_ = a.si_2ter_;
-		if(si_2quater_.is_decoded())
+		if(a.si_2quater_.is_decoded())
 			si_2quater_ = a.si_2quater_;
-		if(si_3_.is_decoded())
+		if(a.si_3_.is_decoded())
 			si_3_ = a.si_3_;
-		if(si_4_.is_decoded())
+		if(a.si_4_.is_decoded())
 			si_4_ = a.si_4_;
-		if(si_7_.is_decoded())
+		if(a.si_7_.is_decoded())
 			si_7_ = a.si_7_;
-		if(si_8_.is_decoded())
+		if(a.si_8_.is_decoded())
 			si_8_ = a.si_8_;
-		if(si_23_.is_decoded())
+		if(a.si_23_.is_decoded())
 			si_23_ = a.si_23_;
 	}
 

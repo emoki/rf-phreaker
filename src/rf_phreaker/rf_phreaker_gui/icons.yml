@@ -1,12 +1,17 @@
 out: icons
 icons:
+  - action/done
   - action/help
   - action/settings
+  - action/subject
   - alert/warning
   - alert/error
   - av/play_arrow
+  - av/play_circle_filled
   - av/stop
+  - av/note
   - content/add
+  - content/clear
   - content/remove
   - device/gps_fixed
   - device/gps_not_fixed

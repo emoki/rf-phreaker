@@ -36,6 +36,7 @@
 #include "rf_phreaker/rf_phreaker_gui/MarbleLayerManager.h"
 #include "rf_phreaker/rf_phreaker_gui/MarbleHelper.h"
 #include "rf_phreaker/rf_phreaker_gui/Settings.h"
+#include "rf_phreaker/rf_phreaker_gui/SettingsIO.h"
 #include "rf_phreaker/rf_phreaker_gui/RpPositionProviderPlugin.h"
 
 class MarbleManager : public Marble::MarbleQuickItem {
@@ -79,12 +80,20 @@ public:
 		currentDownloadJobValue_ = 0;
 
 		auto &geoLatLonBox = map()->viewport()->viewLatLonAltBox();
-		Marble::DownloadRegion region;
-		region.setTileLevelRange(1, 19);
-		region.setMarbleModel(map()->model());
-		region.setVisibleTileLevel(map()->textureLayer()->tileZoomLevel());
-		auto tilesCoordPyramid = region.region(map()->textureLayer(), geoLatLonBox);
-		map()->downloadRegion(tilesCoordPyramid);
+		for(int i = 1; i < 16; i += 5) {
+			Marble::DownloadRegion region;
+			region.setTileLevelRange(i, std::min(i + 5, 14));
+			region.setMarbleModel(map()->model());
+			region.setVisibleTileLevel(map()->textureLayer()->tileZoomLevel());
+			auto tilesCoordPyramid = region.region(map()->textureLayer(), geoLatLonBox);
+			map()->downloadRegion(tilesCoordPyramid);
+		}
+		//Marble::DownloadRegion region;
+		//region.setTileLevelRange(1, 19);
+		//region.setMarbleModel(map()->model());
+		//region.setVisibleTileLevel(map()->textureLayer()->tileZoomLevel());
+		//auto tilesCoordPyramid = region.region(map()->textureLayer(), geoLatLonBox);
+		//map()->downloadRegion(tilesCoordPyramid);
 	}
 
 	Q_INVOKABLE void setCurrentTrackVisible(bool beVisible) {
@@ -162,8 +171,7 @@ public:
 	}
 
 	Q_INVOKABLE void addLayer(QString filename) {
-		QMetaObject::invokeMethod(&MarbleLayers::instance(), "addLayer", 
-			Qt::QueuedConnection, Q_ARG(QString, filename));
+		MarbleLayers::instance().addLayer(filename);
 	}
 
 	double downloadProgess() {

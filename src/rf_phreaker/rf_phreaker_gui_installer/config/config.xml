@@ -1,7 +1,7 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <Installer>
     <Name>RF Phreaker</Name>
-    <Version>0.5.1</Version>
+    <Version>0.9.3</Version>
     <Title>RF Phreaker Installer</Title>
     <Publisher>Cappeen Technologies Limited</Publisher>
     <StartMenuDir>Cappeen</StartMenuDir>

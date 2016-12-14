@@ -1,6 +1,7 @@
 #pragma once
 #include "boost/multi_index_container.hpp"
 #include <QAbstractListModel>
+#include <QDebug>
 #include "rf_phreaker/rf_phreaker_gui/MeasurementIndex.h"
 #include "rf_phreaker/rf_phreaker_gui/Base.h"
 #include "rf_phreaker/rf_phreaker_gui/Gsm.h"
@@ -63,7 +64,6 @@ public:
 		LteDownlinkBandwidthColumn,
 		ColumnSize
 	};
-
 
 	MeasurementModel(QObject *parent = 0)
 		: QAbstractTableModel(parent) {
@@ -146,15 +146,37 @@ public:
 				auto distance = std::distance(range.first, range.second);
 				// Nothing there insert generic meas.
 				if(distance == 0)
-					insert(std::vector<Base*>{new GenericMeasurement(t, tech(t), this)});
-				// The only available data is a generic meas.  Update it.
+					new_items.push_back(create_data(t));
+				// The only available data is a generic meas.  Erase the original measurement and
+				// insert a new one.  We do this rather than update it so that views that depend on
+				// the cellId will be able to keep track.
 				else if(distance == 1 && id(*range.first) == -1) {
-					modify(range.first, t);
+					erase(range.first);
+					new_items.push_back(create_data(t));
 				}
 			}
 		}
-		insert(new_items);
-		//erase(removal_items);
+
+		// Take any duplicates and aggregate them into one measurement.  This
+		// ensures we are able to keep all available layer 3.
+		if(!new_items.empty()) {
+			less_than_freq_id freq_id;
+			std::vector<Base*> after_dup_removal;
+			std::sort(new_items.begin(), new_items.end(), freq_id);
+			auto p = std::equal_range(new_items.begin(), new_items.end(), *new_items.begin(), freq_id);
+			while(auto distance = std::distance(p.first, p.second)) {
+				after_dup_removal.push_back(*p.first);
+				auto it = p.first;
+				++it;
+				while(it != p.second) {
+					after_dup_removal.back()->update((*it)->base());
+					++it;
+				}
+				if(p.second == new_items.end()) break;
+				p = std::equal_range(p.second, new_items.end(), *p.second, freq_id);
+			}
+			insert(after_dup_removal);
+		}
 	}
 
 	Base* create_data(const rf_phreaker::gsm_data &t) {
@@ -194,6 +216,12 @@ public:
 				highest = *i;
 		}
 
+		update_freq<Comparator>(highest);
+	}
+
+	template<typename Comparator, typename Data>
+	void update_freq(const Data &highest) {
+		Comparator cmp;
 		index_frequency freq;
 		index_tech tech;
 		index_id id;
@@ -320,8 +348,11 @@ private:
 		// Always append to the end.
 		auto size = index_.get<random_access>().size();
 		beginInsertRows(QModelIndex(), size, size);
-			index_.get<random_access>().push_back(t);
+		index_.get<random_access>().push_back(t);
 		endInsertRows();
+
+//		qDebug() << "Insert pos:" << size << "  channel:" << (t->cellChannel() == -1 ? t->carrierFreq() : t->cellChannel())
+//																				   << "  cid: " << t->cellId();
 	}
 
 	void insert(const std::vector<Base*> &v) {
@@ -338,6 +369,7 @@ private:
 
 	void erase(const by_unique_lookup::type::iterator &i) {
 		auto pos = index_position(index_, i);
+		//qDebug() << "Remove pos:" << pos << "  channel:" << (*i)->cellChannel() << "  cid: " << (*i)->cellId();
 		beginRemoveRows(QModelIndex(), pos, pos);
 		index_.get<unique_lookup>().erase(i);
 		endRemoveRows();

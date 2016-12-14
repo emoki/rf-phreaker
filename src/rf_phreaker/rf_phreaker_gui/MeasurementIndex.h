@@ -82,23 +82,49 @@ struct index_update {
 struct less_than_cell_sl {
 	template<typename Data>
 	bool operator()(const Base *b, const Data &a) const {
-		static index_cell_sl sl;
+		index_cell_sl sl;
 		return b->cellSignalLevel() < sl(a);
 	}
 	template<typename Data>
 	bool operator()(const Data &a, const Base *b) const {
-		static index_cell_sl sl;
+		index_cell_sl sl;
 		return sl(a) < b->cellSignalLevel();
 	}
 	template<typename Data>
 	bool operator()(const Data &a, const Data &b) const {
-		static index_cell_sl sl;
+		index_cell_sl sl;
 		return sl(a) < sl(b);
 	}
 	template<typename Data>
 	bool operator()(double cell_sl, const Data &b) const {
 		index_cell_sl sl;
 		return cell_sl < sl(b);
+	}
+};
+
+struct less_than_freq_id {
+	bool operator()(const Base *a, const Base *b) const {
+		if(a->carrierFreq() == b->carrierFreq())
+			return a->cellId() < b->cellId();
+		else
+			return a->carrierFreq() < b->carrierFreq();
+	}
+	template<typename Data>
+	bool operator()(const Data &a, const Data &b) const {
+		index_frequency f;
+		index_id i;
+		if(f(a) == f(b))
+			return i(a) < i(a);
+		else
+			return f(a) < f(b);
+	}
+};
+
+struct less_than_freq {
+	template<typename Data>
+	bool operator()(const Data &a, const Data &b) const {
+		index_frequency f;
+		return f(a) < f(b);
 	}
 };
 

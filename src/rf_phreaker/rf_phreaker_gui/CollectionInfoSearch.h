@@ -39,6 +39,7 @@ private:
 	void populateWithWcdma();
 	void populateWithLte();
 	void populateWithRaw();
+	void populateWithGsmFreqRange(const rf_phreaker::channel_freq &cf);
 	void populateWithWcdmaFreqRange(const rf_phreaker::channel_freq &cf);
 	void populateWithLteFreqRange(const rf_phreaker::channel_freq &cf);
 

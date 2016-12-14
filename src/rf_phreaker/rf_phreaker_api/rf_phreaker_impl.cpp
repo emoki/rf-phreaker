@@ -67,9 +67,14 @@ rp_status rf_phreaker_impl::initialize(rp_callbacks *callbacks) {
 
 		// If logging fails continue anyway.
 		try {
-			if(!file_path_validation::is_path_valid(config_.output_directory_))
-				file_path_validation::make_path(config_.output_directory_);
-			logger_.reset(new logger("rf_phreaker_api", config_.output_directory_));
+			// Only initialize logger the first time thru.
+			if(!logger_) {
+				if(!file_path_validation::is_path_valid(config_.output_directory_))
+					file_path_validation::make_path(config_.output_directory_);
+				logger_.reset(new logger("rf_phreaker_api", config_.output_directory_));
+				auto tmp = std2::make_unique<log_handler>(callbacks);
+				logger_->handler_->worker->addSink(std::move(tmp), &log_handler::receive_log_message);
+			}
 		}
 		catch(...) {}
 
@@ -82,10 +87,6 @@ rp_status rf_phreaker_impl::initialize(rp_callbacks *callbacks) {
 			logger_->enable_collection_log(config_.log_collection_);
 			logger_->enable_gps_general_log(config_.log_gps_general_);
 			logger_->enable_gps_parsing_log(config_.log_gps_parsing_);
-			if(callbacks->rp_log_update) {
-				auto tmp = std2::make_unique<log_handler>(callbacks);
-				logger_->handler_->worker->addSink(std::move(tmp), &log_handler::receive_log_message);
-			}
 		}
 
 		// Release all components before changing delegate.
@@ -309,10 +310,11 @@ rp_status rf_phreaker_impl::connect_device(rp_serial serial, rp_device **device_
 			}
 		}
 
+		// Read settings in case anything parameters have changed.
+		read_settings();
+
 		scanners_.push_back(std::make_shared<rp_device>(rf_phreaker::scanner::USB_BLADE_RF));
 		rp_device *device = scanners_.rbegin()->get();
-
-		device->async_.set_log_level(config_.blade_settings_.log_level_);
 
 		device->async_.open_scanner_and_refresh_scanner_info(serial.serial_).get();
 
@@ -364,7 +366,6 @@ rp_status rf_phreaker_impl::disconnect_device(rp_device *device) {
 		if(processing_graph_)
 			processing_graph_->cancel_and_wait();
 
-
 		// Write gps 1pps calibration to EEPROM if neccessary.
 		auto hw = device->async_.get_scanner().get()->get_hardware();
 		auto gps_1pps = device->async_.get_last_valid_gps_1pps_integration().get();
@@ -381,7 +382,6 @@ rp_status rf_phreaker_impl::disconnect_device(rp_device *device) {
 			LOG(LDEBUG) << "Storing latest GPS 1PPS calibration using " << gps_1pps.clock_ticks() << " clock ticks for an error of " << gps_1pps.error_in_hz() << " Hz.";
 			device->async_.calculate_vctcxo_trim_and_update_eeprom(gps_1pps.error_in_hz());
 		}
-
 
 		device->async_.close_scanner().get();
 		//device->async_.clear_queue();

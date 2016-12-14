@@ -4,36 +4,73 @@
 #include "rf_phreaker/general_utility/sync_rx_benchmark_utility.h"
 #include "rf_phreaker/general_utility/scanner_stress_test.h"
 #include "rf_phreaker/common/exception_types.h"
+#include "rf_phreaker/common/log.h"
+#include "rf_phreaker/qt_specific/file_path_validation.h"
 
 int handle_calibration(int argc, char* argv[]) {
 	namespace po = boost::program_options;
 
 	try {
 		// Option variables.
-		std::vector<std::string> serials;
+		std::string filename;
+		std::string dir;
 
-		po::options_description desc("Allowed options");
+		po::options_description general("Allowed options");
 
-		desc.add_options()
-			("help,h", "Produce help message.")
-			("upload_calibration,c", po::value<std::vector<std::string>>(&serials)->multitoken(),
-			"Uploads a calibration file to a scanner.\n"
-			"Calibration filename format:\n"
-			"13cadd7137a3ef4d18dcfcc179667998_cali.bin."
+		general.add_options()
+			("help,h", "Displays help message.")
+			("version,v", "Displays version number.")
+			("upload_calibration,u", po::value<std::string>(&filename)->implicit_value(std::string(), ""),
+			"Uploads a calibration file using the filename specified."
 			"\nExample usage:\n"
-			"'-c 13cadd7137a3ef4d18dcfcc179667998'"
-			);
+			"-u 13cadd7137a3ef4d18dcfcc179667998_cali.bin\n")
+			("upload_calibration_via_dir,d", po::value<std::string>(&dir)->implicit_value(std::string(), ""),
+				"Uploads a calibration file using the default calibration naming structure (<32_char_serial>_cali.bin>). "
+				"The calibration file should be within the directory specified. "
+				"If no directory is specified the working directory is used."
+				"\nExample usage:\n"
+				"-d c:\\capppeen\\calibration_files\\\n");
+
+		std::string rf_cali_filename, switch_filename, nuand_cali_filename;
+		uint32_t hw_id = 0;
+		po::options_description hidden("Config options");
+		hidden.add_options()
+			("check_fix_fx3_firmware,f", "Checks for FX3 firmware v1.8.0 on scanner. If not found, we flash v1.8.0 to the scanner.")
+			("rf_cali_filename,r", po::value<std::string>(&rf_cali_filename))
+			("nuand_cali_filename,n", po::value<std::string>(&nuand_cali_filename))
+			("switch_filename,s", po::value<std::string>(&switch_filename))
+			("hw_id,i", po::value<uint32_t>(&hw_id));
+
+		po::options_description all("all");
+		all.add(general).add(hidden);
 
 		// Read command line.
 		po::variables_map vm;
-		po::store(po::parse_command_line(argc, argv, desc), vm);
-		if(vm.count("help")) {
-			std::cout << desc << std::endl;
-			return 1;
-		}
+		po::store(po::parse_command_line(argc, argv, all), vm);
 		vm.notify();
 
-		calibration_utility::load_calibrations(serials);
+		if(vm.count("version")) {
+			std::cout << "v1.3.0" << std::endl;
+		}
+		else if(vm.count("check_fix_fx3_firmware")) {
+			calibration_utility::upload_fx3_firmware_if_necessary();
+		}
+		else if(vm.count("upload_calibration")) {
+			calibration_utility::load_calibration(filename);
+		}
+		else if(vm.count("upload_calibration_via_dir")) {
+			calibration_utility::load_calibration_from_directory(dir);
+		}
+		else if(rf_cali_filename.size() || nuand_cali_filename.size() || switch_filename.size() || hw_id != 0) {
+			if(rf_cali_filename.empty() || nuand_cali_filename.empty() || switch_filename.empty() || hw_id == 0)
+				std::cout << "To create a calibration file the RF calibration file, Nuand calibration file, Switch setting file, and hardware ID need to be specified." << std::endl;
+			else
+				calibration_utility::read_calibration_and_output(nuand_cali_filename, rf_cali_filename, switch_filename, hw_id);
+		}
+		else {
+			std::cout << general << std::endl;
+		}
+		return 0;
 	}
 	catch(std::exception &err) {
 		std::cout << "Error: " << err.what() << std::endl;
@@ -267,12 +304,20 @@ int dump_entire_eeprom(const std::string &str) {
 }
 
 int main(int argc, char* argv[]) {
+	
+	// Create logging to prevent hangup when exiting due to static delegate_sink not destructing properly.
+	auto path = rf_phreaker::file_path_validation::get_writable_file_path();
+	if(!rf_phreaker::file_path_validation::is_path_valid(path))
+		rf_phreaker::file_path_validation::make_path(path);
+	rf_phreaker::logger log("repair_eeprom", path);
+	log.change_logging_level(0);
+
 	//-c 77ecda454d25738ee419f6fd676170d5 13cadd7137a3ef4d18dcfcc179667998 47d54d57db30c9169c98c53e30c08d9a d01d12c0dc5c71c8a081e0c25f27b6fd d7db1c90fd06a5a6d950615ea7fa6164
-	//int status = handle_calibration(argc, argv);
+	int status = handle_calibration(argc, argv);
 	//int status = handle_sync_rx_benchmark(argc, argv);
 	//int status = handle_scanner_stress_test(argc, argv);
-	int status = dump_entire_eeprom("eeprom_dump.bin");
-	system("pause");
+	//int status = dump_entire_eeprom("eeprom_dump.bin");
+
 	return status;
 }
 

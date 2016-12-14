@@ -42,6 +42,12 @@ public:
 		});
 	}
 
+	virtual std::future<void> update_settings(const scanner_settings &settings = blade_settings()) {
+		return controller_([&](blade_rf_controller &c) {
+			c.update_settings(settings);
+		});
+	}
+
 	virtual std::future<void> refresh_scanner_info() {
 		return controller_([=](blade_rf_controller &c) {
 			c.refresh_scanner_info();

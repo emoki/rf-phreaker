@@ -10,8 +10,8 @@ public:
 	static void init() {
 		if(QCoreApplication::instance() == nullptr) {
 			int argc = 1;
-			char* argv = "dummy_qt_core";
-			static QCoreApplication dummy_qt_core(argc, &argv);
+			char **argv = 0;
+			static QCoreApplication dummy_qt_core(argc, argv);
 		}
 	}
 };
