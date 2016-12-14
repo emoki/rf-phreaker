@@ -216,6 +216,8 @@ private:
 	ModelGroup gsmModels_;
 	ModelGroup wcdmaModels_;
 	ModelGroup lteModels_;
+
+	std::vector<std::future<void>> rpf_conversions_;
 };
 
 //}}

@@ -479,8 +479,16 @@ void Api::close_collection_file() {
 }
 
 void Api::convertRfp(QString filename) {
-	filename.remove("file:///");
-	IO::convert_rpf(filename);
+	rpf_conversions_.push_back(std::async(std::launch::async, [=](QString fn) {
+		try {
+			fn.remove("file:///"); 
+			IO::convert_rpf(fn);
+			Api::instance()->addMessageAsync(fn + " conversion successfully.");
+		}
+		catch(const std::exception &err) {
+			Api::instance()->addMessageAsync(fn + " conversion failed!  " + err.what());
+		}
+	}, filename));
 }
 
 QString Api::getColorTheme(Base *b) {
