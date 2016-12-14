@@ -12,12 +12,17 @@ TabbedPage {
 
     actions: [
         Action {
+            name: "Convert RPF file to ASCII"
+            iconName: "av/note"
+            onTriggered: rpfConversionDialog.open();
+        },
+        Action {
             id: startRecording
             visible: Api.deviceStatus !== ApiTypes.RECORDING
             enabled: Api.connectionStatus === ApiTypes.CONNECTED && Api.deviceStatus === ApiTypes.IDLE
-            text: "Record Data"
+            name: "Record Data"
             shortcut: "Ctrl+R"
-            iconName: "av/play_arrow"
+            iconName: "av/play_circle_filled"
             onTriggered: {
                 rpWindow.startCollectionDialog.filename = "collection_data_" +
                         Qt.formatDateTime(new Date(), "yyyy-MMM-dd_hh-mm-ss");
@@ -27,149 +32,192 @@ TabbedPage {
         Action {
             id: stopRecording
             visible: Api.connectionStatus === ApiTypes.CONNECTED && Api.deviceStatus === ApiTypes.RECORDING
-            text: "Stop Recording"
+            name: "Stop Recording"
             shortcut: "Ctrl+S"
             iconName: "av/stop"
             onTriggered: rpWindow.stateMachine.stopScanning()
         },
         Action {
-            iconName: "navigation/more_vert"
-            name: "More Options"
-            hoverAnimation: true
+            name: "Show Log"
+            shortcut: "Ctrl+L"
+            iconName: "action/subject"
+            onTriggered: rpWindow.showLog()
         }
     ]
 
     Tab {
-        id: wcdmaTab
-        title: "WCDMA"
-
-        GridLayout {
-            id: wcdmaGrid
-            anchors {
-                fill: parent
-                topMargin: dp(16)
-                bottomMargin: dp(16)
-                leftMargin: dp(16)
-                rightMargin: dp(16*2)
-            }
-
-            columnSpacing: dp(32)
-            rowSpacing: dp(32)
-
-            columns: 10
-            rows: 2
-
-            OverviewChart {
-                id: wcdmaOverviewChart
-                Layout.column: 0
-                Layout.columnSpan: 7
-                Layout.row: 0
-                Layout.preferredWidth: wcdmaGrid.width * .7
-                Layout.preferredHeight: wcdmaGrid.height * .3
-
-                sweepModelList: Api.wcdmaModels.sweepModelList
-                channelModel: Api.wcdmaModels.highestCellPerChannelModel
-
-                xMin: Api.wcdmaModels.lowestFreq
-                xMax: Api.wcdmaModels.highestFreq
-                yMin: -120
-                yMax: -10
-
-            }
-
-            BarChart {
-                id: wcdmaBarChart
-                Layout.column: 7
-                Layout.columnSpan: 3
-                Layout.row: 0
-                Layout.rowSpan: 2
-                Layout.preferredWidth: wcdmaGrid.width - wcdmaOverviewChart.width
-                Layout.preferredHeight: wcdmaGrid.height
-
-                sourceModel: wcdmaDataWorksheet.filteredModel
-
-                slMin: -120
-                slMax: -10
-            }
-            MaterialMeasurementTable {
-                id: wcdmaDataWorksheet
-
-                Layout.column: 0
-                Layout.columnSpan: 7
-                Layout.row: 1
-                Layout.preferredWidth: wcdmaGrid.width * .7
-                Layout.preferredHeight: wcdmaGrid.height * .7
-
-                sourceModel: Api.wcdmaModels.fullScanModel
-
-                onFilteredModelUpdated: wcdmaBarChart.update();
-            }
-        }
-    }
-
-    Tab {
+        id: lteTab
         title: "LTE"
 
-        GridLayout {
+        RowLayout {
             id: lteGrid
             anchors {
                 fill: parent
                 topMargin: dp(16)
                 bottomMargin: dp(16)
                 leftMargin: dp(16)
-                rightMargin: dp(16*2)
+                rightMargin: dp(16)
             }
 
-            columnSpacing: dp(32)
-            rowSpacing: dp(32)
+            spacing: dp(16)
 
-            columns: 10
-            rows: 2
+            ColumnLayout {
+                Layout.maximumWidth: lteGrid.width * .7
+                Layout.fillHeight: true
+                spacing: dp(16)
 
-            OverviewChart {
-                id: lteOverviewChart
-                Layout.column: 0
-                Layout.columnSpan: 7
-                Layout.row: 0
-                Layout.preferredWidth: lteGrid.width * .7
-                Layout.preferredHeight: lteGrid.height * .3
+                OverviewChart {
+                    id: lteOverviewChart
+                    Layout.fillWidth: true
+                    Layout.preferredHeight: lteGrid.height * .3
 
-                sweepModelList: Api.lteModels.sweepModelList
-                channelModel: Api.lteModels.highestCellPerChannelModel
+                    sweepModelList: Api.lteModels.sweepModelList
+                    channelModel: Api.lteModels.highestCellPerChannelModel
 
-                xMin: Api.lteModels.lowestFreq
-                xMax: Api.lteModels.highestFreq
-                yMin: -120
-                yMax: -10
+                    xMin: Api.lteModels.lowestFreq
+                    xMax: Api.lteModels.highestFreq
+                    yMin: -120
+                    yMax: -10
 
+                }
+                MaterialMeasurementTable {
+                    id: lteDataWorksheet
+
+                    Layout.fillHeight: true
+                    Layout.fillWidth: true
+
+                    sourceModel: Api.lteModels.fullScanModel
+
+                    onFilteredModelUpdated: lteBarChart.update();
+                }
             }
-
             BarChart {
                 id: lteBarChart
-                Layout.column: 7
-                Layout.columnSpan: 3
-                Layout.row: 0
-                Layout.rowSpan: 2
-                Layout.preferredWidth: lteGrid.width - lteOverviewChart.width
-                Layout.preferredHeight: lteGrid.height
+                Layout.fillHeight: true
+                Layout.fillWidth: true
 
                 sourceModel: lteDataWorksheet.filteredModel
 
                 slMin: -120
                 slMax: -10
             }
-            MaterialMeasurementTable {
-                id: lteDataWorksheet
+        }
+    }
 
-                Layout.column: 0
-                Layout.columnSpan: 7
-                Layout.row: 1
-                Layout.preferredWidth: lteGrid.width * .7
-                Layout.preferredHeight: lteGrid.height * .7
+    Tab {
+        id: wcdmaTab
+        title: "WCDMA"
 
-                sourceModel: Api.lteModels.fullScanModel
+        RowLayout {
+            id: wcdmaGrid
+            anchors {
+                fill: parent
+                topMargin: dp(16)
+                bottomMargin: dp(16)
+                leftMargin: dp(16)
+                rightMargin: dp(16)
+            }
 
-                onFilteredModelUpdated: lteBarChart.update();
+            spacing: dp(16)
+
+            ColumnLayout {
+                Layout.maximumWidth: wcdmaGrid.width * .7
+                Layout.fillHeight: true
+                spacing: dp(16)
+
+                OverviewChart {
+                    id: wcdmaOverviewChart
+                    Layout.fillWidth: true
+                    Layout.preferredHeight: wcdmaGrid.height * .3
+
+                    sweepModelList: Api.wcdmaModels.sweepModelList
+                    channelModel: Api.wcdmaModels.highestCellPerChannelModel
+
+                    xMin: Api.wcdmaModels.lowestFreq
+                    xMax: Api.wcdmaModels.highestFreq
+                    yMin: -120
+                    yMax: -10
+
+                }
+                MaterialMeasurementTable {
+                    id: wcdmaDataWorksheet
+
+                    Layout.fillHeight: true
+                    Layout.fillWidth: true
+
+                    sourceModel: Api.wcdmaModels.fullScanModel
+
+                    onFilteredModelUpdated: wcdmaBarChart.update();
+                }
+            }
+            BarChart {
+                id: wcdmaBarChart
+                Layout.fillHeight: true
+                Layout.fillWidth: true
+
+                sourceModel: wcdmaDataWorksheet.filteredModel
+
+                slMin: -120
+                slMax: -10
+            }
+        }
+    }
+
+    Tab {
+        id: gsmTab
+        title: "GSM"
+
+        RowLayout {
+            id: gsmGrid
+            anchors {
+                fill: parent
+                topMargin: dp(16)
+                bottomMargin: dp(16)
+                leftMargin: dp(16)
+                rightMargin: dp(16)
+            }
+
+            spacing: dp(16)
+
+            ColumnLayout {
+                Layout.maximumWidth: gsmGrid.width * .7
+                Layout.fillHeight: true
+                spacing: dp(16)
+
+                OverviewChart {
+                    id: gsmOverviewChart
+                    Layout.fillWidth: true
+                    Layout.preferredHeight: gsmGrid.height * .3
+
+                    sweepModelList: Api.gsmModels.sweepModelList
+                    channelModel: Api.gsmModels.highestCellPerChannelModel
+
+                    xMin: Api.gsmModels.lowestFreq
+                    xMax: Api.gsmModels.highestFreq
+                    yMin: -120
+                    yMax: -10
+
+                }
+                MaterialMeasurementTable {
+                    id: gsmDataWorksheet
+
+                    Layout.fillHeight: true
+                    Layout.fillWidth: true
+
+                    sourceModel: Api.gsmModels.fullScanModel
+
+                    onFilteredModelUpdated: gsmBarChart.update();
+                }
+            }
+            BarChart {
+                id: gsmBarChart
+                Layout.fillHeight: true
+                Layout.fillWidth: true
+
+                sourceModel: gsmDataWorksheet.filteredModel
+
+                slMin: -120
+                slMax: -10
             }
         }
     }

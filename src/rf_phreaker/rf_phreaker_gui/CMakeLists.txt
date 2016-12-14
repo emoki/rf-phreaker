@@ -89,6 +89,7 @@ set (rf_phreaker_gui_QMLS
 	MaterialScanConfigurationPage.qml
 	MaterialScanList.qml
 	MaterialScannerInfoPage.qml
+	MaterialSettingsPage.qml
 	MaterialStateMachine.qml
 	MaterialTabbedNavigationDrawerPage.qml
 	OverviewChart.qml

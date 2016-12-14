@@ -12,7 +12,8 @@ DSM.StateMachine {
     id: dsmOperation
     initialState: parentState
     running: true
-    property bool recoverFromError
+    property bool isRecoveringFromError
+    property bool isReinitializing
 
     signal connecting()
     signal connectScanner()
@@ -22,6 +23,8 @@ DSM.StateMachine {
     signal startRecording()
     signal stopScanning()
     signal goIdle()
+    signal reinitialize()
+    signal transition()
 
     DSM.State {
         id: parentState
@@ -33,9 +36,28 @@ DSM.StateMachine {
             signal: Api.errorReinitialize
             targetState: smError1
         }
+
         DSM.SignalTransition {
             targetState: smChooseDevice
             signal: dsmOperation.connectScanner
+        }
+
+        DSM.SignalTransition {
+            targetState: smReinitialize
+            signal: dsmOperation.reinitialize
+        }
+
+        DSM.State {
+            id: smReinitialize
+            onEntered: {
+                console.debug("Entered smReinitialize.");
+                isReinitializing = true;
+                dsmOperation.transition();
+            }
+            DSM.SignalTransition {
+                targetState: smInitialize
+                signal: dsmOperation.transition
+            }
         }
 
         DSM.State {
@@ -45,7 +67,7 @@ DSM.StateMachine {
                 Api.deviceStatus = ApiTypes.ERROR
                 messageDialog.show();
                 Api.initializeApi();
-                recoverFromError = true;
+                isRecoveringFromError = true;
             }
             DSM.SignalTransition {
                 signal: Api.apiInitialized
@@ -103,7 +125,7 @@ DSM.StateMachine {
                 id: smChooseDevice
                 onEntered: {
                     console.debug("Entered smChooseDevice.");
-                    if(recoverFromError) {
+                    if(isRecoveringFromError) {
                         console.debug("Recovering from error.  Looking for serial.")
                         var found = false;
                         for(var i = 0; i < Api.availableDevices.length; i++) {
@@ -123,6 +145,7 @@ DSM.StateMachine {
                         openScannerDialog.show();
                     }
                 }
+
                 DSM.SignalTransition {
                     targetState: smConnecting
                     signal: openScannerDialog.accepted
@@ -145,7 +168,8 @@ DSM.StateMachine {
                 Api.connectionStatus = ApiTypes.CONNECTING;
                 Api.deviceStatus = ApiTypes.OFF;
                 Api.connectDevice(Api.deviceSerial);
-                recoverFromError = false;
+                isRecoveringFromError = false;
+                isReinitializing = false;
             }
             onExited: {
                 console.debug("Leaving smConnecting.");
@@ -285,8 +309,10 @@ DSM.StateMachine {
                         Api.startCollection();
                     }
                     onExited: {
-                        console.debug("Exiting smRecording")
-                        Api.closeCollectionFile()
+                        console.debug("Exiting smRecording");
+                        Api.closeCollectionFile();
+                        if(GuiSettings.convertRfpToAscii)
+                            Api.convertRfp(Api.collectionFilename);
                     }
                     DSM.SignalTransition {
                         targetState: smStopScanning

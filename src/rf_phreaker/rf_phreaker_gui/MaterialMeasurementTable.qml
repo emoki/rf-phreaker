@@ -50,11 +50,12 @@ Rectangle {
             id: filter
             filterRole: FilterProxyMeasurementModel.TimeFilter
             dynamicSortFilter: false // Must be set to false if we want to manually sort.
-            expirationTimeFilter: 8
-            Component.onCompleted: sortAndUpdate()
+            expirationTimeFilter: GuiSettings.measurementRemovalTime
+            Component.onCompleted: dataTable.sortAndUpdate()
             onRowsInserted: {
+                //console.debug("onRowsInserted")
                 dataTable.implicitHeight = filter.rowCount() * dp(48) + dp(16) + dp(56)
-                sortAndUpdate();
+                //dataTable.sortAndUpdate();
             }
         }
         Timer {
@@ -64,13 +65,13 @@ Rectangle {
             onTriggered: {
                 //console.debug("timer expired")
                 filter.refilter();
-                filteredModelUpdated();
+                root.filteredModelUpdated();
             }
         }
 
         function sortAndUpdate() {
-            filter.sort(dataTable.convertColumn(dataTable.sortIndicatordicatorColumn), dataTable.sortIndicatorOrder)
-            filteredModelUpdated();
+            filter.sort(dataTable.convertColumn(dataTable.sortIndicatorColumn), dataTable.sortIndicatorOrder);
+            root.filteredModelUpdated();
         }
 
         function convertColumn(column) {
@@ -96,9 +97,9 @@ Rectangle {
             }
         }
 
-        onSortIndicatorColumnChanged: sortAndUpdate()
+        onSortIndicatorColumnChanged: dataTable.sortAndUpdate()
 
-        onSortIndicatorOrderChanged: sortAndUpdate()
+        onSortIndicatorOrderChanged: dataTable.sortAndUpdate()
 
         Controls.TableViewColumn {
             id: column0
@@ -209,5 +210,4 @@ Rectangle {
             }
         }
     }
-
 }

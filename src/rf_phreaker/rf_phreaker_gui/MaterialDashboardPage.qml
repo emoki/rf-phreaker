@@ -12,19 +12,21 @@ Page {
 
     title: "RF Phreaker Dashboard"
 
+    actionBar.maxActionCount: 5
+
     actions: [
         Action {
-            iconName: "hardware/developer_board"
-            name: "RPF Conversion"
+            name: "Convert RPF file to ASCII"
+            iconName: "av/note"
             onTriggered: rpfConversionDialog.open();
         },
         Action {
             id: startRecording
             visible: Api.deviceStatus !== ApiTypes.RECORDING
             enabled: Api.connectionStatus === ApiTypes.CONNECTED && Api.deviceStatus === ApiTypes.IDLE
-            text: "Record Data"
+            name: "Record Data"
             shortcut: "Ctrl+R"
-            iconName: "av/play_arrow"
+            iconName: "av/play_circle_filled"
             onTriggered: {
                 rpWindow.startCollectionDialog.filename = "collection_data_" +
                         Qt.formatDateTime(new Date(), "yyyy-MMM-dd_hh-mm-ss");
@@ -34,16 +36,16 @@ Page {
         Action {
             id: stopRecording
             visible: Api.connectionStatus === ApiTypes.CONNECTED && Api.deviceStatus === ApiTypes.RECORDING
-            text: "Stop Recording"
+            name: "Stop Recording"
             shortcut: "Ctrl+S"
             iconName: "av/stop"
             onTriggered: rpWindow.stateMachine.stopScanning()
         },
         Action {
-            iconName: "navigation/more_vert"
-            name: "More Options"
-            hoverAnimation: true
-            onTriggered: Dialg
+            name: "Show Log"
+            shortcut: "Ctrl+L"
+            iconName: "action/subject"
+            onTriggered: rpWindow.showLog()
         }
     ]
 
@@ -66,232 +68,238 @@ Page {
 
             spacing: dp(16)
 
-            MaterialCard {
-                id: rpCard
-                state: rpExpBut.expanded ? "w1h2" : "w1h1"
+            Column {
+                spacing: dp(16)
+                width: childrenRect.width
+                height: childrenRect.height
 
-                Item {
-                    anchors.fill: parent
+                MaterialCard {
+                    id: rpCard
+                    state: rpExpBut.expanded ? "w1h2" : "w1h1"
 
-                    ProgressCircle {
-                        id: determinateProgress
-                        anchors.centerIn: parent
-                        anchors.verticalCenterOffset: rpStatus.height + dp(16)
-                        width: dp(64)
-                        height: dp(64)
-                        indeterminate: false
-                        minimumValue: 0
-                        maximumValue: 100
-                        visible: Api.connectionStatus === ApiTypes.CONNECTING
+                    Item {
+                        anchors.fill: parent
 
-                        SequentialAnimation on value {
-                            running: Api.connectionStatus === ApiTypes.CONNECTING
-                            NumberAnimation {
-                                duration: 18000
-                                from: determinateProgress.minimumValue
-                                to: determinateProgress.maximumValue - 1
-                            }
-                        }
-
-                        Label {
+                        ProgressCircle {
+                            id: determinateProgress
                             anchors.centerIn: parent
-                            text: Math.round(determinateProgress.value) + "%"
-                        }
-                    }
-                }
+                            anchors.verticalCenterOffset: rpStatus.height + dp(16)
+                            width: dp(64)
+                            height: dp(64)
+                            indeterminate: false
+                            minimumValue: 0
+                            maximumValue: 100
+                            visible: Api.connectionStatus === ApiTypes.CONNECTING
 
-                ColumnLayout {
-                    anchors {
-                        fill: parent
-                        topMargin: dp(24)
-                        bottomMargin: dp(8)
-                    }
-
-                    ColumnLayout {
-                        anchors {
-                            top: parent.top
-                            right: parent.right
-                            left: parent.left
-                            rightMargin: dp(16)
-                            leftMargin: dp(16)
-                        }
-                        Label {
-                            id: rpStatus
-                            style: "headline"
-                            states: [
-                                State {
-                                    when: Api.connectionStatus === ApiTypes.DISCONNECTED
-                                    PropertyChanges {
-                                        target: rpStatus
-                                        text: Api.deviceStatus === ApiTypes.ERROR ? "RF Phreaker Disconnected (Error)" : "RF Phreaker Disconnected"
-                                    }
-                                },
-                                State {
-                                    when: Api.connectionStatus === ApiTypes.CONNECTING
-                                    PropertyChanges {
-                                        target: rpStatus
-                                        text: "RF Phreaker Connecting"
-                                    }
-                                },
-                                State {
-                                    when: Api.connectionStatus === ApiTypes.CONNECTED && Api.deviceStatus == ApiTypes.ERROR
-                                    PropertyChanges {
-                                        target: rpStatus
-                                        text: "RF Phreaker Idle (Error)"
-                                    }
-                                },
-                                State {
-                                    when: Api.connectionStatus === ApiTypes.CONNECTED && Api.deviceStatus == ApiTypes.IDLE
-                                    PropertyChanges {
-                                        target: rpStatus
-                                        text: "RF Phreaker Idle"
-                                    }
-                                },
-                                State {
-                                    when: Api.connectionStatus === ApiTypes.CONNECTED && Api.deviceStatus == ApiTypes.RECORDING
-                                    PropertyChanges {
-                                        target: rpStatus
-                                        text: "RF Phreaker Recording"
-                                    }
+                            SequentialAnimation on value {
+                                running: Api.connectionStatus === ApiTypes.CONNECTING
+                                NumberAnimation {
+                                    duration: 18000
+                                    from: determinateProgress.minimumValue
+                                    to: determinateProgress.maximumValue - 1
                                 }
-                            ]
-                        }
-
-                        Label {
-                            style: "body1"
-                            color: Theme.light.subTextColor
-                            text: Api.connectedDevice.serial
-                        }
-                        Label {
-                            id: freqCorrectionDate
-                            style: "body1"
-                            color: Theme.light.subTextColor
-                            text: Api.connectionStatus === ApiTypes.CONNECTED
-                                  ? "Frequency Correction performed on " + Api.connectedDevice.freqCorrectionDateStr + "."
-                                  : ""
-                        }
-                        Label {
-                            style: "body1"
-                            color: Theme.light.subTextColor
-                            text: Api.connectionStatus === ApiTypes.CONNECTED
-                                  ? "RF Calibration Date performed on " + Api.connectedDevice.rfCalibrationDateStr + "."
-                                  : ""
-                        }
-                        Item {
-                            Layout.fillWidth: true
-                            Layout.preferredHeight: dp(8)
-                        }
-                    }
-                    RowLayout {
-                        Layout.alignment: Qt.AlignRight
-                        spacing: dp(8)
-
-                        anchors {
-                            right: parent.right
-                            left: parent.left
-                            rightMargin: dp(8)
-                            leftMargin: dp(8)
-                        }
-                        Item {
-                            width: childrenRect.width
-                            height: childrenRect.height
-                            Button {
-                                text: "Disconnect"
-                                textColor: Theme.primaryColor
-                                visible: Api.connectionStatus === ApiTypes.CONNECTED
-                                onClicked: rpWindow.stateMachine.disconnectScanner();
-
                             }
-                            Button {
-                                text: "Connect"
-                                textColor: Theme.primaryColor
-                                visible: Api.connectionStatus !== ApiTypes.CONNECTED && Api.connectionStatus !== ApiTypes.CONNECTING
-                                onClicked: rpWindow.stateMachine.connectScanner();
+
+                            Label {
+                                anchors.centerIn: parent
+                                text: Math.round(determinateProgress.value) + "%"
                             }
                         }
-                        Item {
-                            Layout.fillWidth: true
-                        }
-                        MaterialExpansionButton {
-                            id: rpExpBut
-                        }
-                    }
-                }
-            }
-
-            MaterialCard {
-                state: gpsExpBut.expanded ? "w1h2" : "w1h1"
-                ColumnLayout {
-                    anchors {
-                        fill: parent
-                        topMargin: dp(24)
-                        bottomMargin: dp(8)
                     }
 
                     ColumnLayout {
                         anchors {
-                            top: parent.top
-                            right: parent.right
-                            left: parent.left
-                            rightMargin: dp(16)
-                            leftMargin: dp(16)
+                            fill: parent
+                            topMargin: dp(24)
+                            bottomMargin: dp(8)
                         }
-                        Label {
-                            style: "headline"
-                            text: Api.connectionStatus === ApiTypes.CONNECTED
-                                  ? (Api.gps.gpsLock ? "Position Locked" : "Position Not Locked")
-                                  : "Position Not Available"
+
+                        ColumnLayout {
+                            anchors {
+                                top: parent.top
+                                right: parent.right
+                                left: parent.left
+                                rightMargin: dp(16)
+                                leftMargin: dp(16)
+                            }
+                            Label {
+                                id: rpStatus
+                                style: "headline"
+                                states: [
+                                    State {
+                                        when: Api.connectionStatus === ApiTypes.DISCONNECTED
+                                        PropertyChanges {
+                                            target: rpStatus
+                                            text: Api.deviceStatus === ApiTypes.ERROR ? "RF Phreaker Disconnected (Error)" : "RF Phreaker Disconnected"
+                                        }
+                                    },
+                                    State {
+                                        when: Api.connectionStatus === ApiTypes.CONNECTING
+                                        PropertyChanges {
+                                            target: rpStatus
+                                            text: "RF Phreaker Connecting"
+                                        }
+                                    },
+                                    State {
+                                        when: Api.connectionStatus === ApiTypes.CONNECTED && Api.deviceStatus == ApiTypes.ERROR
+                                        PropertyChanges {
+                                            target: rpStatus
+                                            text: "RF Phreaker Idle (Error)"
+                                        }
+                                    },
+                                    State {
+                                        when: Api.connectionStatus === ApiTypes.CONNECTED && Api.deviceStatus == ApiTypes.IDLE
+                                        PropertyChanges {
+                                            target: rpStatus
+                                            text: "RF Phreaker Idle"
+                                        }
+                                    },
+                                    State {
+                                        when: Api.connectionStatus === ApiTypes.CONNECTED && Api.deviceStatus == ApiTypes.RECORDING
+                                        PropertyChanges {
+                                            target: rpStatus
+                                            text: "RF Phreaker Recording"
+                                        }
+                                    }
+                                ]
+                            }
+
+                            Label {
+                                style: "body1"
+                                color: Theme.light.subTextColor
+                                text: Api.connectedDevice.serial
+                            }
+                            Label {
+                                id: freqCorrectionDate
+                                style: "body1"
+                                color: Theme.light.subTextColor
+                                text: Api.connectionStatus === ApiTypes.CONNECTED
+                                      ? "Frequency Correction performed on " + Api.connectedDevice.freqCorrectionDateStr + "."
+                                      : ""
+                            }
+                            Label {
+                                style: "body1"
+                                color: Theme.light.subTextColor
+                                text: Api.connectionStatus === ApiTypes.CONNECTED
+                                      ? "RF Calibration Date performed on " + Api.connectedDevice.rfCalibrationDateStr + "."
+                                      : ""
+                            }
+                            Item {
+                                Layout.fillWidth: true
+                                Layout.preferredHeight: dp(8)
+                            }
                         }
-                        Label {
-                            style: "body1"
-                            color: Theme.light.subTextColor
-                            text: Api.connectionStatus === ApiTypes.CONNECTED && Api.gps.init
-                                  ? Api.gps.utcDateTimeStr : ""
-                        }
-                        //                    Label {
-                        //                        style: "body1"
-                        //                        color: Theme.light.subTextColor
-                        //                        text: Number(Api.gps.latitude).toPrecision(6)
-                        //                    }
-                        //                    Label {
-                        //                        style: "body1"
-                        //                        color: Theme.light.subTextColor
-                        //                        text: Number(Api.gps.longitude).toPrecision(6)
-                        //                    }
-                        Label {
-                            style: "body1"
-                            color: Theme.light.subTextColor
-                            text: Api.connectionStatus === ApiTypes.CONNECTED && Api.gps.init
-                                  ? Api.gps.trackingSatellites + " Tracking Satellites"
-                                  : ""
-                        }
-                        Label {
-                            style: "body1"
-                            color: Theme.light.subTextColor
-                            text: Api.connectionStatus === ApiTypes.CONNECTED && Api.gps.init
-                                  ? Api.gps.visibleSatellites + " Visible Satellites"
-                                  : ""
-                        }
-                        Item {
-                            Layout.fillWidth: true
-                            Layout.preferredHeight: dp(8)
+                        RowLayout {
+                            Layout.alignment: Qt.AlignRight
+                            spacing: dp(8)
+
+                            anchors {
+                                right: parent.right
+                                left: parent.left
+                                rightMargin: dp(8)
+                                leftMargin: dp(8)
+                            }
+                            Item {
+                                width: childrenRect.width
+                                height: childrenRect.height
+                                Button {
+                                    text: "Disconnect"
+                                    textColor: Theme.primaryColor
+                                    visible: Api.connectionStatus === ApiTypes.CONNECTED
+                                    onClicked: rpWindow.stateMachine.disconnectScanner();
+
+                                }
+                                Button {
+                                    text: "Connect"
+                                    textColor: Theme.primaryColor
+                                    visible: Api.connectionStatus !== ApiTypes.CONNECTED && Api.connectionStatus !== ApiTypes.CONNECTING
+                                    onClicked: rpWindow.stateMachine.connectScanner();
+                                }
+                            }
+                            Item {
+                                Layout.fillWidth: true
+                            }
+                            MaterialExpansionButton {
+                                id: rpExpBut
+                            }
                         }
                     }
-                    RowLayout {
-                        Layout.alignment: Qt.AlignRight
-                        spacing: dp(8)
+                }
 
+                MaterialCard {
+                    state: gpsExpBut.expanded ? "w1h2" : "w1h1"
+                    ColumnLayout {
                         anchors {
-                            right: parent.right
-                            left: parent.left
-                            rightMargin: dp(8)
-                            leftMargin: dp(8)
+                            fill: parent
+                            topMargin: dp(24)
+                            bottomMargin: dp(8)
                         }
-                        Item {
-                            Layout.fillWidth: true
+
+                        ColumnLayout {
+                            anchors {
+                                top: parent.top
+                                right: parent.right
+                                left: parent.left
+                                rightMargin: dp(16)
+                                leftMargin: dp(16)
+                            }
+                            Label {
+                                style: "headline"
+                                text: Api.connectionStatus === ApiTypes.CONNECTED
+                                      ? (Api.gps.gpsLock ? "Position Locked" : "Position Not Locked")
+                                      : "Position Not Available"
+                            }
+                            Label {
+                                style: "body1"
+                                color: Theme.light.subTextColor
+                                text: Api.connectionStatus === ApiTypes.CONNECTED && Api.gps.init
+                                      ? Api.gps.utcDateTimeStr : ""
+                            }
+                            //                    Label {
+                            //                        style: "body1"
+                            //                        color: Theme.light.subTextColor
+                            //                        text: Number(Api.gps.latitude).toPrecision(6)
+                            //                    }
+                            //                    Label {
+                            //                        style: "body1"
+                            //                        color: Theme.light.subTextColor
+                            //                        text: Number(Api.gps.longitude).toPrecision(6)
+                            //                    }
+                            Label {
+                                style: "body1"
+                                color: Theme.light.subTextColor
+                                text: Api.connectionStatus === ApiTypes.CONNECTED && Api.gps.init
+                                      ? Api.gps.trackingSatellites + " Tracking Satellites"
+                                      : ""
+                            }
+                            Label {
+                                style: "body1"
+                                color: Theme.light.subTextColor
+                                text: Api.connectionStatus === ApiTypes.CONNECTED && Api.gps.init
+                                      ? Api.gps.visibleSatellites + " Visible Satellites"
+                                      : ""
+                            }
+                            Item {
+                                Layout.fillWidth: true
+                                Layout.preferredHeight: dp(8)
+                            }
                         }
-                        MaterialExpansionButton {
-                            id: gpsExpBut
+                        RowLayout {
+                            Layout.alignment: Qt.AlignRight
+                            spacing: dp(8)
+
+                            anchors {
+                                right: parent.right
+                                left: parent.left
+                                rightMargin: dp(8)
+                                leftMargin: dp(8)
+                            }
+                            Item {
+                                Layout.fillWidth: true
+                            }
+                            MaterialExpansionButton {
+                                id: gpsExpBut
+                            }
                         }
                     }
                 }
@@ -300,7 +308,8 @@ Page {
             MaterialCard {
 //                property int minHeight: scanListTitle.height + Api.scanList.rowCount * dp(32) + collectionInfoSuggestionText.height + dp(18)
 //                property int h2
-                state: scanListExpBut.expanded ? "w2h3" : "w2h1"
+                state: scanListExpBut.expanded ? "w2h3" : "w1h2"
+//                state: scanListExpBut.expanded ? "w2h3" : "w2h1"
 
 //                height2: minHeight
 
@@ -334,7 +343,7 @@ Page {
                             anchors.fill: parent
                             model: Api.scanList
 
-                            cellWidth: width / 2
+                            cellWidth: width/* / 2*/
                             cellHeight: dp(32)
 
                             delegate: ListItem.Standard {
@@ -586,51 +595,104 @@ Page {
             }
 
             MaterialCard {
+                state: lteExpBut.expanded ? "w2h3" : "w1h2"
+                ColumnLayout {
+                    anchors {
+                        fill: parent
+                        topMargin: dp(24)
+                        bottomMargin: dp(8)
+                        rightMargin: dp(16)
+                        leftMargin: dp(16)
+                    }
+                    Label {
+                        style: "headline"
+                        text: "LTE Measurements"
+                    }
+                    BarChart {
+                        id: lteBarChart
+                        Layout.fillWidth: true
+                        Layout.fillHeight: true
+
+                        sourceModel:  FilterProxyMeasurementModel {
+                            id: filterLte
+                            sourceModel: Api.lteModels.fullScanModel
+                            filterRole: FilterProxyMeasurementModel.TimeFilter
+                            expirationTimeFilter: GuiSettings.measurementRemovalTime
+
+                        }
+                        Timer {
+                            interval: 1000
+                            running: true
+                            repeat: true
+                            onTriggered: filterLte.refilter()
+                        }
+
+                        slMin: -120
+                        slMax: -10
+                    }
+                    Item {
+                        Layout.fillWidth: true
+                        Layout.preferredHeight: dp(8)
+                    }
+                    RowLayout {
+                        Layout.alignment: Qt.AlignRight
+                        spacing: dp(8)
+
+                        anchors {
+                            right: parent.right
+                            left: parent.left
+                            rightMargin: dp(8)
+                            leftMargin: dp(8)
+                        }
+                        Item {
+                            Layout.fillWidth: true
+                        }
+                        MaterialExpansionButton {
+                            id: lteExpBut
+                        }
+                    }
+                }
+            }
+
+            MaterialCard {
                 state: wcdmaExpBut.expanded ? "w2h3" : "w1h2"
                 ColumnLayout {
                     anchors {
                         fill: parent
                         topMargin: dp(24)
                         bottomMargin: dp(8)
+                        rightMargin: dp(16)
+                        leftMargin: dp(16)
                     }
 
-                    ColumnLayout {
-                        anchors {
-                            top: parent.top
-                            right: parent.right
-                            left: parent.left
-                            rightMargin: dp(16*2)
-                            leftMargin: dp(16)
-                        }
-                        Label {
-                            style: "headline"
-                            text: "WCDMA Measurements"
-                        }
-                        BarChart {
-                            id: wcdmaBarChart
-                            Layout.fillWidth: true
-                            Layout.fillHeight: true
-                            sourceModel: FilterProxyMeasurementModel {
-                                id: filterWcdma
-                                sourceModel: Api.wcdmaModels.fullScanModel
-                                filterRole: FilterProxyMeasurementModel.TimeFilter
-                                expirationTimeFilter: 8
+                    Label {
+                        style: "headline"
+                        text: "WCDMA Measurements"
+                    }
+                    BarChart {
+                        id: wcdmaBarChart
+                        Layout.fillWidth: true
+                        Layout.fillHeight: true
+                        sourceModel: FilterProxyMeasurementModel {
+                            id: filterWcdma
+                            sourceModel: Api.wcdmaModels.fullScanModel
+                            filterRole: FilterProxyMeasurementModel.TimeFilter
+                            expirationTimeFilter: GuiSettings.measurementRemovalTime
 
-                            }
-                            Timer {
-                                interval: 1000
-                                running: true
-                                repeat: true
-                                onTriggered: filterWcdma.refilter()
-                            }
+                        }
+                        Timer {
+                            interval: 1000
+                            running: true
+                            repeat: true
+                            onTriggered: filterWcdma.refilter()
+                        }
 
-                            slMin: -120
-                            slMax: -10
-                        }
-                        Item {
-                            Layout.fillWidth: true
-                            Layout.preferredHeight: dp(8)
-                        }
+                        slMin: -120
+                        slMax: -10
+                    }
+                    Item {
+                        Layout.fillWidth: true
+                        Layout.preferredHeight: dp(8)
                     }
                     RowLayout {
                         Layout.alignment: Qt.AlignRight
@@ -653,52 +715,44 @@ Page {
             }
 
             MaterialCard {
-                state: lteExpBut.expanded ? "w2h3" : "w1h2"
+                state: gsmExpBut.expanded ? "w2h3" : "w1h2"
                 ColumnLayout {
                     anchors {
                         fill: parent
                         topMargin: dp(24)
                         bottomMargin: dp(8)
+                        rightMargin: dp(16)
+                        leftMargin: dp(16)
                     }
 
-                    ColumnLayout {
-                        anchors {
-                            top: parent.top
-                            right: parent.right
-                            left: parent.left
-                            rightMargin: dp(16*2)
-                            leftMargin: dp(16)
-                        }
-                        Label {
-                            style: "headline"
-                            text: "LTE Measurements"
-                        }
-                        BarChart {
-                            id: lteBarChart
-                            Layout.fillWidth: true
-                            Layout.fillHeight: true
+                    Label {
+                        style: "headline"
+                        text: "GSM Measurements"
+                    }
+                    BarChart {
+                        id: gsmBarChart
+                        Layout.fillWidth: true
+                        Layout.fillHeight: true
+                        sourceModel: FilterProxyMeasurementModel {
+                            id: filterGsm
+                            sourceModel: Api.gsmModels.fullScanModel
+                            filterRole: FilterProxyMeasurementModel.TimeFilter
+                            expirationTimeFilter: GuiSettings.measurementRemovalTime
 
-                            sourceModel:  FilterProxyMeasurementModel {
-                                id: filterLte
-                                sourceModel: Api.lteModels.fullScanModel
-                                filterRole: FilterProxyMeasurementModel.TimeFilter
-                                expirationTimeFilter: 8
-
-                            }
-                            Timer {
-                                interval: 1000
-                                running: true
-                                repeat: true
-                                onTriggered: filterLte.refilter()
-                            }
-
-                            slMin: -120
-                            slMax: -10
                         }
-                        Item {
-                            Layout.fillWidth: true
-                            Layout.preferredHeight: dp(8)
+                        Timer {
+                            interval: 1000
+                            running: true
+                            repeat: true
+                            onTriggered: filterGsm.refilter()
                         }
+
+                        slMin: -120
+                        slMax: -10
+                    }
+                    Item {
+                        Layout.fillWidth: true
+                        Layout.preferredHeight: dp(8)
                     }
                     RowLayout {
                         Layout.alignment: Qt.AlignRight
@@ -714,12 +768,11 @@ Page {
                             Layout.fillWidth: true
                         }
                         MaterialExpansionButton {
-                            id: lteExpBut
+                            id: gsmExpBut
                         }
                     }
                 }
             }
-
 
             move: Transition {
                 NumberAnimation {
@@ -757,21 +810,4 @@ Page {
         }
         onRejected: { console.log("Canceled RPF conversion dialog.") }
     }
-
-//    ActionButton {
-//        id: addCard
-
-//        anchors {
-//            right: parent.right
-//            bottom: snackbar.top
-//            margins: dp(32)
-//        }
-
-//        action: Action {
-//            text: ""
-//            shortcut: "Ctrl+A"
-//            onTriggered: {}
-//        }
-//        iconName: "content/add"
-//    }
 }

@@ -13,18 +13,31 @@ ApplicationWindow {
     property alias snackbar: navPage.snackbar
     property alias startCollectionDialog: __startCollectionDialog
     property alias messageDialog: __messageDialog
+    property alias logVisible: navPage.logVisible
+
     title: ""
 
     visible: true
 
+    function showLog() {
+        if(navPage.logHeight === 0)
+            navPage.logHeight = dp(400);
+        logVisible = true;
+    }
+
+    function hideLog() {
+        logVisible = false;
+        console.debug(logVisible, navPage.logHeight)
+    }
+
     theme {
-        primaryColor: Api.themePrimaryColor
-        accentColor: Api.themeAccentColor
-        tabHighlightColor: Api.themeTabHighlightColor
+        primaryColor: GuiSettings.themePrimaryColor
+        accentColor: GuiSettings.themeAccentColor
+        tabHighlightColor: GuiSettings.themeTabHighlightColor
     }
 
     property var pages: [
-            "Dashboard", "Measurements", "Navigation"
+            "Dashboard", "Measurements", "Navigation", "Settings"
     ]
 
     property string selectedComponent: pages[0]
@@ -77,6 +90,9 @@ ApplicationWindow {
         property alias y: rpWindow.y
         property alias width: rpWindow.width
         property alias height: rpWindow.height
+        property alias visibility: rpWindow.visibility
+        property alias logHeight: navPage.logHeight
+        property alias logVisible: rpWindow.logVisible
     }
 
     MaterialStateMachine {
@@ -107,7 +123,7 @@ ApplicationWindow {
 //        sidebarVisible: true
         onAccepted: {
             Api.collectionFilename = fileUrl;
-            console.log("collection filename is" + fileUrl);
+            console.log("Collection filename is " + fileUrl);
             rpWindow.stateMachine.startRecording();
         }
         onRejected: { console.log("Cancelled save collection filename.") }
