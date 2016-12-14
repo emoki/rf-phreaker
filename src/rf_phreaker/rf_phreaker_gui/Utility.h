@@ -6,14 +6,14 @@
 
 //namespace rf_phreaker { namespace gui {
 
-int64_t to_hash(const rp_wcdma &a) {
+inline int64_t to_hash(const rp_wcdma &a) {
 	int64_t t = a.base_.carrier_frequency_;
 	t = t << 32;
 	t |= a.cpich_;
 	return t;
 }
 
-int64_t to_hash(const rp_lte &a) {
+inline int64_t to_hash(const rp_lte &a) {
 	int64_t t = a.base_.carrier_frequency_;
 	t = t << 32;
 	t |= a.physical_cell_id_;
