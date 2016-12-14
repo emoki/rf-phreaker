@@ -1190,4 +1190,13 @@ void blade_rf_controller::output_continuity_packet(int num_transfer_samples) {
 	debug_rx << *(uint32_t*)aligned_buffer << "\t" << *((uint32_t*)aligned_buffer + num_transfer_samples - 1) << std::endl;
 }
 
+void blade_rf_controller::flash_fx3_firmware(const std::string &filename) {
+	// Manually disable RF
+	check_blade_comm();
+	check_blade_status(nr_flash_fx3_firmware(comm_blade_rf_->blade_rf(), filename,
+		__FILE__, __LINE__), __FILE__, __LINE__);
+
+}
+
 }}
+

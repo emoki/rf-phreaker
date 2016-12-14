@@ -872,6 +872,16 @@ int nr_write_flash(struct bladerf *dev, const uint8_t *buf, uint32_t page, uint3
 	return status;
 }
 
+int nr_flash_fx3_firmware(struct bladerf *dev, const std::string &fx3_filename, const std::string &file = __FILE__, int line = __LINE__) {
+	int status = 0;
+	// Manually disable module, not checking status, as it can report an error in firmwares > 1.8.0.
+	::bladerf_enable_module(dev, BLADERF_MODULE_RX, false);
+	status = ::bladerf_flash_firmware(dev, fx3_filename.c_str());
+	log_if(status, file, line);
+	return status;
+
+}
+
 
 }}
 

@@ -142,6 +142,8 @@ public:
 
 	void output_continuity_packet(int num_transfer_samples);
 
+	void flash_fx3_firmware(const std::string &filename);
+
 private:
 	void enable_blade_rx(const blade_rx_settings &settings);
 	void enable_full_streaming_rx();
