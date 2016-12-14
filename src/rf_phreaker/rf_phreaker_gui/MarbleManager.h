@@ -80,12 +80,20 @@ public:
 		currentDownloadJobValue_ = 0;
 
 		auto &geoLatLonBox = map()->viewport()->viewLatLonAltBox();
-		Marble::DownloadRegion region;
-		region.setTileLevelRange(1, 19);
-		region.setMarbleModel(map()->model());
-		region.setVisibleTileLevel(map()->textureLayer()->tileZoomLevel());
-		auto tilesCoordPyramid = region.region(map()->textureLayer(), geoLatLonBox);
-		map()->downloadRegion(tilesCoordPyramid);
+		for(int i = 1; i < 16; i += 5) {
+			Marble::DownloadRegion region;
+			region.setTileLevelRange(i, std::min(i + 5, 14));
+			region.setMarbleModel(map()->model());
+			region.setVisibleTileLevel(map()->textureLayer()->tileZoomLevel());
+			auto tilesCoordPyramid = region.region(map()->textureLayer(), geoLatLonBox);
+			map()->downloadRegion(tilesCoordPyramid);
+		}
+		//Marble::DownloadRegion region;
+		//region.setTileLevelRange(1, 19);
+		//region.setMarbleModel(map()->model());
+		//region.setVisibleTileLevel(map()->textureLayer()->tileZoomLevel());
+		//auto tilesCoordPyramid = region.region(map()->textureLayer(), geoLatLonBox);
+		//map()->downloadRegion(tilesCoordPyramid);
 	}
 
 	Q_INVOKABLE void setCurrentTrackVisible(bool beVisible) {
