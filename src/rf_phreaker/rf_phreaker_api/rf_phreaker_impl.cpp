@@ -362,7 +362,6 @@ rp_status rf_phreaker_impl::disconnect_device(rp_device *device) {
 		if(processing_graph_)
 			processing_graph_->cancel_and_wait();
 
-
 		// Write gps 1pps calibration to EEPROM if neccessary.
 		auto hw = device->async_.get_scanner().get()->get_hardware();
 		auto gps_1pps = device->async_.get_last_valid_gps_1pps_integration().get();
@@ -379,7 +378,6 @@ rp_status rf_phreaker_impl::disconnect_device(rp_device *device) {
 			LOG(LDEBUG) << "Storing latest GPS 1PPS calibration using " << gps_1pps.clock_ticks() << " clock ticks for an error of " << gps_1pps.error_in_hz() << " Hz.";
 			device->async_.calculate_vctcxo_trim_and_update_eeprom(gps_1pps.error_in_hz());
 		}
-
 
 		device->async_.close_scanner().get();
 		//device->async_.clear_queue();
