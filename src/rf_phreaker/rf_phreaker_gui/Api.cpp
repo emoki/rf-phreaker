@@ -268,7 +268,17 @@ bool Api::event(QEvent *e) {
 			}
 			else {
 				gsmModels_.fullScanModel()->update(t);
-				highestCellPerChannelModel_.update_freq_using_highest<less_than_cell_sl>(t);
+				// Manually sort vector and only pass in the first meas (hopefully with a decoded bsic) for each freq 
+				less_than_freq_id cmp;
+				std::sort(t.begin(), t.end(), cmp);
+				// We at least have one measurement.
+				less_than_freq less_than_f;
+				auto p = std::equal_range(t.begin(), t.end(), *t.begin(), less_than_f);
+				while(1) {
+					highestCellPerChannelModel_.update_freq<less_than_cell_sl>(*p.first);
+					if(p.second == t.end()) break;
+					p = std::equal_range(p.second, t.end(), *p.second, less_than_f);
+				}
 			}
 			break;
 		}
