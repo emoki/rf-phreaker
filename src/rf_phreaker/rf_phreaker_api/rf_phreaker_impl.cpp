@@ -309,6 +309,9 @@ rp_status rf_phreaker_impl::connect_device(rp_serial serial, rp_device **device_
 			}
 		}
 
+		// Read settings in case anything parameters have changed.
+		read_settings();
+
 		scanners_.push_back(std::make_shared<rp_device>(rf_phreaker::scanner::USB_BLADE_RF));
 		rp_device *device = scanners_.rbegin()->get();
 
