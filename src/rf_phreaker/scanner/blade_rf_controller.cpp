@@ -1133,7 +1133,7 @@ void blade_rf_controller::set_blade_sync_rx_settings(const blade_rx_settings &se
 }
 
 void blade_rf_controller::set_blade_sync_rx_stream_settings(const blade_rx_settings &settings) {
-	blade_settings_ = settings;
+	blade_settings_stream_ = settings;
 }
 
 void blade_rf_controller::start_gps_1pps_integration(int seconds) {
