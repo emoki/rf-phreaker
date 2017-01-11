@@ -37,6 +37,8 @@ public:
 
 	std::vector<operating_band_range> find_avaliable_lte_operating_bands(frequency_type freq) const;
 
+	std::vector<operating_band_range> get_all_operating_bands(operating_band begin, operating_band inclusive_end) const;
+
 private:
 	std::vector<operating_band_range> find_avaliable_operating_bands(frequency_type freq, operating_band begin, operating_band inclusive_end) const;
 

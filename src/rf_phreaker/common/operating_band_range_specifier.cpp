@@ -121,5 +121,15 @@ std::vector<operating_band_range> operating_band_range_specifier::find_avaliable
 	return valid_bands;
 }
 
+std::vector<operating_band_range> operating_band_range_specifier::get_all_operating_bands(operating_band begin, operating_band inclusive_end) const {
+	std::vector<operating_band_range> valid_bands;
+
+	for(int i = begin; i <= inclusive_end; ++i) {
+		valid_bands.push_back(operating_bands_[i]);
+	}
+
+	return valid_bands;
+}
+
 
 }

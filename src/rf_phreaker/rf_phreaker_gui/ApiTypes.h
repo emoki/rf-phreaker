@@ -189,6 +189,21 @@ public:
 			return UNKNOWN_TECH;
 	}
 
+	Q_INVOKABLE static Tech toTech(rf_phreaker::operating_band b, bool is_sweep) {
+		if(b >= rf_phreaker::FIRST_GSM_OPERATING_BAND && b <= rf_phreaker::LAST_GSM_OPERATING_BAND)
+			return is_sweep ? GSM_SWEEP : GSM_FULL_SCAN;
+		//else if(b == "CDMA FULL SCAN")
+		//	return CDMA_FULL_SCAN;
+		else if(b >= rf_phreaker::FIRST_UMTS_OPERATING_BAND && b <= rf_phreaker::LAST_UMTS_OPERATING_BAND)
+			return is_sweep ? WCDMA_SWEEP : WCDMA_FULL_SCAN;
+		else if(b >= rf_phreaker::FIRST_LTE_OPERATING_BAND && b <= rf_phreaker::LAST_LTE_OPERATING_BAND)
+			return is_sweep ? LTE_SWEEP : LTE_FULL_SCAN;
+		//else if(b == "RAW DATA")
+		//	return RAW_DATA;
+		else
+			return UNKNOWN_TECH;
+	}
+
 	Q_INVOKABLE static QString toQString(Tech s) {
 		switch(s) {
 		case GSM_FULL_SCAN:
