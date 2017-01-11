@@ -67,6 +67,8 @@ private:
 
 	void addRecordingTrackPoint(const Marble::GeoDataCoordinates &position);
 
+	void changeMinDistance(int minDistance);
+
 	std::unique_ptr<Marble::GeoDataPlacemark> createPlacemarkMultiTrack(const QString &filename);
 
 	Marble::MarbleModel model_;
