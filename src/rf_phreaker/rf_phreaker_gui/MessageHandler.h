@@ -5,6 +5,8 @@
 #include "rf_phreaker/rf_phreaker_gui/Api.h"
 #include "rf_phreaker/rf_phreaker_gui/ApiMessage.h"
 #include "rf_phreaker/rf_phreaker_gui/Events.h"
+#include "rf_phreaker/qt_specific/qt_utility.h"
+#include "rf_phreaker/qt_specific/settings_io.h"
 
 class MessageHandler {
 public:
@@ -44,7 +46,19 @@ public:
 
 		QCoreApplication::postEvent(Api::instance(), new LogUpdateEvent(s));
 
-		static std::ofstream f("gui_log.txt");
+		static std::ofstream f;
+		static bool fileOpenAttempt = false;
+		if (!fileOpenAttempt) {
+			fileOpenAttempt = true;
+			rf_phreaker::settings_io io("rf_phreaker_api", rf_phreaker::qt_utility::app_name());
+			QString filePath;
+			if (io.does_exist()) {
+				rf_phreaker::settings config;
+				io.read(config);
+				filePath = config.output_directory_.c_str();
+			}
+			f.open(QString(filePath + QDir::separator() + "rf_phreaker_gui.log").toStdString());
+		}
 		f << s.toStdString().c_str() << std::endl;
 	}
 
