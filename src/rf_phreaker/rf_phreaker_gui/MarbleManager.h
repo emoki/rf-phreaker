@@ -80,12 +80,21 @@ public:
 		currentDownloadJobValue_ = 0;
 
 		auto &geoLatLonBox = map()->viewport()->viewLatLonAltBox();
-		for(int i = 1; i < 16; i += 5) {
+		qint64 previousTilesCount = 0;
+		for(int i = 1; i < 17; i += 1) {
 			Marble::DownloadRegion region;
-			region.setTileLevelRange(i, std::min(i + 5, 14));
+			region.setTileLevelRange(i, i);
 			region.setMarbleModel(map()->model());
 			region.setVisibleTileLevel(map()->textureLayer()->tileZoomLevel());
 			auto tilesCoordPyramid = region.region(map()->textureLayer(), geoLatLonBox);
+			if(previousTilesCount > 200000)
+				break;
+			qint64 tilesCount = 0;
+			for(auto tiles = tilesCoordPyramid.begin(); tiles != tilesCoordPyramid.end(); tiles++)
+				tilesCount = tiles->tilesCount();
+			previousTilesCount = tilesCount;
+			if (tilesCount > 500000)
+				break;
 			map()->downloadRegion(tilesCoordPyramid);
 		}
 		//Marble::DownloadRegion region;
@@ -114,7 +123,6 @@ public:
 	}
 
 	Q_INVOKABLE void centerOnPlacemark(int placemarkIndex) {
-		using namespace Marble;
 		using namespace Marble;
 		auto placemark = MarbleHelper::toPlacemark(placemarkModel_.data(placemarkModel_.index(placemarkIndex, 0), MarbleProxyModel::PlacemarkObjectPointerRole));
 		if(placemark != nullptr) {
