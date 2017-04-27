@@ -237,7 +237,7 @@ if(WIN32)
             "${CMAKE_LIBRARY_OUTPUT_DIRECTORY}/${CMAKE_CFG_INTDIR}/cyusb3.inf"
             "${CMAKE_LIBRARY_OUTPUT_DIRECTORY}/${CMAKE_CFG_INTDIR}/cyusb3.sys"
             "${CMAKE_LIBRARY_OUTPUT_DIRECTORY}/${CMAKE_CFG_INTDIR}/cyusb3.cat"
-            "${CMAKE_LIBRARY_OUTPUT_DIRECTORY}/${CMAKE_CFG_INTDIR}/WdfCoInstaller01009.dll"
+            "${CMAKE_LIBRARY_OUTPUT_DIRECTORY}/${CMAKE_CFG_INTDIR}/WdfCoInstaller01011.dll"
         )
 
         add_custom_command(
@@ -265,9 +265,9 @@ if(WIN32)
         )
 
         add_custom_command(
-            OUTPUT "${CMAKE_LIBRARY_OUTPUT_DIRECTORY}/${CMAKE_CFG_INTDIR}/WdfCoInstaller01009.dll"
+            OUTPUT "${CMAKE_LIBRARY_OUTPUT_DIRECTORY}/${CMAKE_CFG_INTDIR}/WdfCoInstaller01011.dll"
             COMMAND ${CMAKE_COMMAND} -E copy_if_different
-                "${CYUSB3_DRIVER_DIR}/WdfCoInstaller01009.dll"
+                "${CYUSB3_DRIVER_DIR}/WdfCoInstaller01011.dll"
                 "${CMAKE_LIBRARY_OUTPUT_DIRECTORY}/${CMAKE_CFG_INTDIR}/"
             COMMENT "Copying WdfCoInstaller01009.dll to output directory..."
         )

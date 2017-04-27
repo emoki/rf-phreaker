@@ -102,7 +102,7 @@ HKR,,DriverGUID,,%CYUSB3.GUID%
 
 ;-------------- WDF Coinstaller installation
 [SourceDisksFiles]
-WdfCoInstaller01009.dll=1 ; make sure the number matches with SourceDisksNames
+WdfCoInstaller01011.dll=1 ; make sure the number matches with SourceDisksNames
 
 [DestinationDirs]
 CoInstaller_CopyFiles = 11
@@ -116,10 +116,10 @@ AddReg=CoInstaller_AddReg
 CopyFiles=CoInstaller_CopyFiles
 
 [CoInstaller_CopyFiles]
-WdfCoInstaller01009.dll
+WdfCoInstaller01011.dll
 
 [CoInstaller_AddReg]
-HKR,,CoInstallers32,0x00010000, "WdfCoInstaller01009.dll,WdfCoInstaller"
+HKR,,CoInstallers32,0x00010000, "WdfCoInstaller01011.dll,WdfCoInstaller"
 
 [CYUSB3.NTamd64.Wdf]
 KmdfService = CYUSB3, CYUSB3_wdfsect
