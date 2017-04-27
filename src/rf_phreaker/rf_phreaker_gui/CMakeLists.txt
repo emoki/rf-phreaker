@@ -147,12 +147,13 @@ set (AUTOGEN_TARGET_DEPENDS ${rf_phreaker_gui_SRCS})
 set (rf_phreaker_gui_MAIN_QRC
 	rf_phreaker.qrc
 	${PROJECT_SOURCE_DIR}/icons/icons.qrc
-	)
+)
 
 #${rf_phreaker_gui_QMLS}
-add_executable (rf_phreaker_gui  ${rf_phreaker_gui_SRCS} ${rf_phreaker_gui_MAIN_QRC})
+add_executable (rf_phreaker_gui  WIN32 ${rf_phreaker_gui_SRCS} ${rf_phreaker_gui_MAIN_QRC})
 
 target_link_libraries (rf_phreaker_gui Qt5::Core)
+target_link_libraries (rf_phreaker_gui Qt5::Gui)
 target_link_libraries (rf_phreaker_gui Qt5::Widgets)
 target_link_libraries (rf_phreaker_gui Qt5::Quick)
 target_link_libraries (rf_phreaker_gui rf_phreaker_api)
