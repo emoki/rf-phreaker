@@ -1,0 +1,9 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<Installer>
+    <Name>RF Phreaker</Name>
+    <Version>@rfp_VERSION_MAJOR@.@rfp_VERSION_MINOR@.@rfp_VERSION_PATCH@</Version>
+    <Title>RF Phreaker Installer</Title>
+    <Publisher>Cappeen Technologies Limited</Publisher>
+    <StartMenuDir>Cappeen</StartMenuDir>
+    <TargetDir>@ATSYMBOL@ApplicationsDir@ATSYMBOL@/Cappeen/RF Phreaker</TargetDir>
+</Installer>

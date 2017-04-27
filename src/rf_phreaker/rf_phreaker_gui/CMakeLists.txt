@@ -4,10 +4,15 @@ cmake_policy(SET CMP0020 NEW)
 
 # rf_phreaker_gui version number.
 # TODO - finish this when you have time!
-set (rf_phreaker_gui_VERSION_MAJOR 1)
-set (rf_phreaker_gui_VERSION_MINOR 0)
-set (rf_phreaker_gui_VERSION_PATCH 0)
-set (rf_phreaker_gui_VERSION_TWEAK 0)
+set (rfp_VERSION_MAJOR 1 CACHE INTERNAL "rf_phreaker_gui versioning" FORCE)
+set (rfp_VERSION_MINOR 1 CACHE INTERNAL "rf_phreaker_gui versioning" FORCE)
+set (rfp_VERSION_PATCH 0 CACHE INTERNAL "rf_phreaker_gui versioning" FORCE)
+set (rfp_VERSION_TWEAK 0 CACHE INTERNAL "rf_phreaker_gui versioning" FORCE)
+
+set (rf_phreaker_gui_VERSION_MAJOR rfp_VERSION_MAJOR)
+set (rf_phreaker_gui_VERSION_MINOR rfp_VERSION_MINOR)
+set (rf_phreaker_gui_VERSION_PATCH rfp_VERSION_PATCH)
+set (rf_phreaker_gui_VERSION_TWEAK rfp_VERSION_TWEAK)
 
 # Set the source files.
 set (rf_phreaker_gui_SRCS

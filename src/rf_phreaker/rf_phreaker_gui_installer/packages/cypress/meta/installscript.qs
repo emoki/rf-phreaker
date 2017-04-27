@@ -28,7 +28,7 @@ Component.prototype.createOperations = function()
 	}
 		
 	var arch_dir = "x86";
-	var dp_inst = "DPInst_x86.exe"
+	var dp_inst = "DPInst_x86.exe";
 	if (systemInfo.currentCpuArchitecture == "x86_64") {
 		arch_dir = "x64";
 		dp_inst = "DPInst_amd64.exe";
@@ -37,17 +37,17 @@ Component.prototype.createOperations = function()
 	var win_dir;
 	var version = majorMinorVersion(systemInfo.kernelVersion);
 	if (version == "5.1" || version == "5.2")
-		win_dir = "wxp";
+		win_dir = "xp_vista";
 	else if (version == "6.0")
-		win_dir = "vista";
+		win_dir = "xp_vista";
 	else if (version == "6.1")
-		win_dir = "win7";
+		win_dir = "win7_8";
 	else if (version == "6.2")
-		win_dir = "win8";
+		win_dir = "win7_8";
 	else if (version == "6.3" || version == "10.0")
-		win_dir = "win81";
+		win_dir = "win7_8";
 	
-	var driver_path = "@TargetDir@\\cypress_usb3\\" + win_dir + "\\" + arch_dir;
+	var driver_path = "@TargetDir@\\cypress_usb3\\" + arch_dir + "\\" + win_dir;
 	var exe_string =  "@TargetDir@/cypress_usb3/" + dp_inst;
 
 	//if(installer.value()) {
