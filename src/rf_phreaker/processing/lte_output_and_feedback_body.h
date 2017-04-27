@@ -200,10 +200,14 @@ public:
 			// Until we get the LTE dll sorted out only output measurements with known bandwidths that match what we think to be the correct bandwidth.
 			// Also only output them after we have decoded two pbchs on that channel.  Lowers the likeihood of outputting a false pbch.
 			if(tracker_.is_considered_valid_channel(meas.frequency()) || tracker_.has_decoded_layer_3(info.processed_data_)) {
-				for(auto &data : info.processed_data_) {
-					if(data.NumAntennaPorts != LteAntPorts_Unknown && (tracker_.has_decoded_layer_3(data) || data.Bandwidth == decoded_bw)) {
-						auto tmp = convert_to_lte_data(meas, data, info.power_info_group_[0].avg_rms_);
-						lte_group.push_back(std::move(tmp));
+				// In addition only output measurements that have the proper measurement bandwidth.  This prevents the user from seeing measurements that 
+				// are added by the sweeper every collection round.  In the future perhaps change sweeper so we do not add channels that are already tracking.
+				if (meas.bandwidth() == decoded_bw) {
+					for (auto &data : info.processed_data_) {
+						if (data.NumAntennaPorts != LteAntPorts_Unknown && (tracker_.has_decoded_layer_3(data) || data.Bandwidth == decoded_bw)) {
+							auto tmp = convert_to_lte_data(meas, data, info.power_info_group_[0].avg_rms_);
+							lte_group.push_back(std::move(tmp));
+						}
 					}
 				}
 			}
