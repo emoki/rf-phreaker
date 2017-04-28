@@ -178,7 +178,7 @@ public:
 	int32_t sschID() const { return lte_.ssch_id_; }
 	double sschQuality() const { return lte_.ssch_quality_; }
 	double syncQuality() const { return lte_.sync_quality_; }
-	double syncSignalLevel() const { return lte_.carrier_signal_level_ + lte_.sync_quality_; }
+	double syncSignalLevel() const { return lte_.measurement_signal_level_ + lte_.sync_quality_; }
 	int numAntennaPorts() const { return lte_.num_antenna_ports_; }
 	int downlinkBandwidth() const { return lte_.dl_bandwidth_; }
 	int frameNumber() const { return lte_.frame_number_; }
@@ -190,7 +190,7 @@ public:
 	QString pschQualityStr() const { return QString::number(lte_.psch_quality_, 'f', 1); }
 	QString sschQualityStr() const { return QString::number(lte_.ssch_quality_, 'f', 1); }
 	QString syncQualityStr() const { return QString::number(lte_.sync_quality_, 'f', 1); }
-	QString syncSignalLevelStr() const { return QString::number(lte_.carrier_signal_level_ + lte_.sync_quality_, 'f', 1); }
+	QString syncSignalLevelStr() const { return QString::number(lte_.measurement_signal_level_ + lte_.sync_quality_, 'f', 1); }
 	QString cyclicPrefixStr() const { return lte_.cyclic_prefix_ == 1 ? "Normal" : "Extended"; }
 
 signals:

@@ -18,10 +18,10 @@ struct freq{};
 struct index_frequency {
 	typedef rf_phreaker::frequency_type result_type;
 	result_type operator()(const Base *b) const {
-		return b->base().carrier_frequency_;
+		return b->base().measurement_frequency_;
 	}
 	result_type operator()(const rf_phreaker::basic_data &b) const {
-		return b.carrier_frequency_;
+		return b.measurement_frequency_;
 	}
 };
 
@@ -66,7 +66,7 @@ struct index_cell_sl {
 		return b.rscp_;
 	}
 	result_type operator()(const rf_phreaker::lte_data &b) const {
-		return b.carrier_signal_level_ + b.sync_quality_;
+		return b.measurement_signal_level_ + b.sync_quality_;
 	}
 };
 

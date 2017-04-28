@@ -130,8 +130,8 @@ public:
 		output_gsm_layer_3();
 
 		beagle_api::gsm_sweep_info a;
-		a.frequency_ = t.carrier_frequency_;
-		a.rssi_ = t.carrier_signal_level_;
+		a.frequency_ = t.measurement_frequency_;
+		a.rssi_ = t.measurement_signal_level_;
 
 		delegate_->available_gsm_sweep_info(beagle_info_.beagle_id_, &a, 1);
 	}
@@ -157,7 +157,7 @@ public:
 					it->second.cell_signal_level_ = i.cell_signal_level_;
 					it->second.ctoi_ = i.ctoi_;
 					it->second.collection_round_ = i.collection_round_;
-					it->second.carrier_signal_level_ =  i.carrier_signal_level_;
+					it->second.measurement_signal_level_ =  i.measurement_signal_level_;
 					it->second.time_ = i.time_;
 					it->second.status_flags_ = i.status_flags_;
 					if(i.bsic_ != -1)
@@ -202,8 +202,8 @@ public:
 		for(auto &j : gsm_layer_3_buffer_) {
 			auto &gsm = j.second;
 			v[i].operating_band_ = convert_band_to_tech_band(gsm.operating_band_);
-			v[i].carrier_freq_ = gsm.carrier_frequency_;
-			v[i].rssi_ = gsm.carrier_signal_level_;
+			v[i].carrier_freq_ = gsm.measurement_frequency_;
+			v[i].rssi_ = gsm.measurement_signal_level_;
 			v[i].collection_round_ = static_cast<uint32_t>(gsm.collection_round_);
 			v[i].arfcn_ = gsm.arfcn_;
 			v[i].bsic_ = gsm.bsic_;
@@ -242,8 +242,8 @@ public:
 		std::vector<gsm_si_4_wrapper> si4; si4.reserve(1);
 
 		v.operating_band_ = convert_band_to_tech_band(gsm.operating_band_);
-		v.carrier_freq_ = gsm.carrier_frequency_;
-		v.rssi_ = gsm.carrier_signal_level_;
+		v.carrier_freq_ = gsm.measurement_frequency_;
+		v.rssi_ = gsm.measurement_signal_level_;
 		v.collection_round_ = static_cast<uint32_t>(gsm.collection_round_);
 		v.arfcn_ = gsm.arfcn_;
 		v.bsic_ = gsm.bsic_;
@@ -279,8 +279,8 @@ public:
 		output_gsm_layer_3();
 
 		beagle_api::umts_sweep_info a;
-		a.frequency_ = t.carrier_frequency_;
-		a.rssi_ = t.carrier_signal_level_;
+		a.frequency_ = t.measurement_frequency_;
+		a.rssi_ = t.measurement_signal_level_;
 
 		delegate_->available_umts_sweep_info(beagle_info_.beagle_id_, &a, 1);
 	}
@@ -303,8 +303,8 @@ public:
 		int i = 0;
 		for(auto &umts : t) {
 			v[i].band_ = convert_band_to_hw_band(umts.operating_band_);
-			v[i].carrier_freq_ = umts.carrier_frequency_;
-			v[i].carrier_sl_ = umts.carrier_signal_level_;
+			v[i].carrier_freq_ = umts.measurement_frequency_;
+			v[i].carrier_sl_ = umts.measurement_signal_level_;
 			v[i].collection_round_ = (uint32_t)umts.collection_round_;
 			v[i].cpich_ = umts.cpich_;
 			v[i].uarfcn_ = umts.uarfcn_;
@@ -360,8 +360,8 @@ public:
 		output_gsm_layer_3();
 
 		beagle_api::lte_sweep_info a;
-		a.frequency_ = t.carrier_frequency_;
-		a.rssi_ = t.carrier_signal_level_;
+		a.frequency_ = t.measurement_frequency_;
+		a.rssi_ = t.measurement_signal_level_;
 
 		delegate_->available_lte_sweep_info(beagle_info_.beagle_id_, &a, 1);
 	}
@@ -384,8 +384,8 @@ public:
 		for(auto &lte : t) {
 			v[i].antenna_ports_ = lte.num_antenna_ports_;
 			v[i].carrier_bandwidth_ = lte.dl_bandwidth_;
-			v[i].carrier_freq_ = lte.carrier_frequency_;
-			v[i].carrier_sl_ = lte.carrier_signal_level_;
+			v[i].carrier_freq_ = lte.measurement_frequency_;
+			v[i].carrier_sl_ = lte.measurement_signal_level_;
 			v[i].collection_round_ = static_cast<uint32_t>(lte.collection_round_);
 			v[i].cyclic_prefix_length_ = lte.cyclic_prefix_;
 			v[i].earfcn_ = lte.earfcn_;

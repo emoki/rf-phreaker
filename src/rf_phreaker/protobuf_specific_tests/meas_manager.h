@@ -58,9 +58,9 @@ protected:
 		gsm_data gsm;
 		{
 			basic_data &b = gsm;
-			b.carrier_bandwidth_ = tmp++;
-			b.carrier_frequency_ = tmp++;
-			b.carrier_signal_level_ = tmp++;
+			b.measurement_bandwidth_ = tmp++;
+			b.measurement_frequency_ = tmp++;
+			b.measurement_signal_level_ = tmp++;
 			b.collection_round_ = tmp++;
 			b.serial_ = "aldskfj";
 			b.status_flags_ = tmp++;
@@ -217,9 +217,9 @@ protected:
 		umts_data u;
 		{
 			basic_data &b = u;
-			b.carrier_bandwidth_ = var++;
-			b.carrier_frequency_ = var++;
-			b.carrier_signal_level_ = var++;
+			b.measurement_bandwidth_ = var++;
+			b.measurement_frequency_ = var++;
+			b.measurement_signal_level_ = var++;
 			b.collection_round_ = var++;
 			b.serial_ = "aldskfj";
 			b.status_flags_ = var++;
@@ -306,9 +306,9 @@ protected:
 		lte_data lte;
 		{
 			basic_data &b = lte;
-			b.carrier_bandwidth_ = var++;
-			b.carrier_frequency_ = var++;
-			b.carrier_signal_level_ = var++;
+			b.measurement_bandwidth_ = var++;
+			b.measurement_frequency_ = var++;
+			b.measurement_signal_level_ = var++;
 			b.collection_round_ = var++;
 			b.serial_ = "aldskfj";
 			b.status_flags_ = var++;

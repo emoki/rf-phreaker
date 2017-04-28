@@ -203,9 +203,9 @@ public:
 	static void populate(const rp_base &pb, basic_data &t) {
 		t.serial_ = pb.serial();
 		t.collection_round_ = pb.collection_round();
-		t.carrier_frequency_ = pb.carrier_frequency();
-		t.carrier_bandwidth_ = pb.carrier_bandwidth();
-		t.carrier_signal_level_ = pb.carrier_signal_level();
+		t.measurement_frequency_ = pb.measurement_frequency();
+		t.measurement_bandwidth_ = pb.measurement_bandwidth();
+		t.measurement_signal_level_ = pb.measurement_signal_level();
 		t.time_ = pb.time();
 		t.status_flags_ = pb.status_flags();
 	}
@@ -213,9 +213,9 @@ public:
 		pb->Clear();
 		pb->set_serial(t.serial_);
 		pb->set_collection_round(t.collection_round_);
-		pb->set_carrier_frequency(t.carrier_frequency_);
-		pb->set_carrier_bandwidth(t.carrier_bandwidth_);
-		pb->set_carrier_signal_level(t.carrier_signal_level_);
+		pb->set_measurement_frequency(t.measurement_frequency_);
+		pb->set_measurement_bandwidth(t.measurement_bandwidth_);
+		pb->set_measurement_signal_level(t.measurement_signal_level_);
 		pb->set_time(t.time_);
 		pb->set_status_flags(t.status_flags_);
 	}

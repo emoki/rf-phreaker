@@ -27,7 +27,7 @@ public:
 
 	// Normalize signal level
 	QString carrierSignalLevelStr() const Q_DECL_OVERRIDE {
-		return QString::number(base_.carrier_signal_level_, 'f', 1);
+		return QString::number(base_.measurement_signal_level_, 'f', 1);
 	}
 
 signals:

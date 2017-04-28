@@ -1020,9 +1020,9 @@ rp_status rf_phreaker_impl::get_iq_data_using_auto_gain(rp_device *device, rp_fr
 		// check license
 
 
-		raw_data->base_.carrier_bandwidth_ = meas.bandwidth();
-		raw_data->base_.carrier_frequency_ = meas.frequency();
-		raw_data->base_.carrier_signal_level_ = 0;
+		raw_data->base_.measurement_bandwidth_ = meas.bandwidth();
+		raw_data->base_.measurement_frequency_ = meas.frequency();
+		raw_data->base_.measurement_signal_level_ = 0;
 		raw_data->base_.collection_round_ = meas.collection_round();
 		copy_serial(meas.serial(), raw_data->base_.serial_);
 		raw_data->base_.status_flags_ = 0;

@@ -51,9 +51,9 @@ namespace rf_phreaker {
 	{
 		scanner_serial_type serial_;
 		int64_t collection_round_;
-		frequency_type carrier_frequency_;
-		bandwidth_type carrier_bandwidth_;
-		double carrier_signal_level_;
+		frequency_type measurement_frequency_;
+		bandwidth_type measurement_bandwidth_;
+		double measurement_signal_level_;
 		time_type time_;
 		int32_t status_flags_;
 	};

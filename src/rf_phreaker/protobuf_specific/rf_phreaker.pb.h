@@ -1404,23 +1404,23 @@ class rp_base : public ::google::protobuf::Message {
   ::google::protobuf::int64 collection_round() const;
   void set_collection_round(::google::protobuf::int64 value);
 
-  // optional int64 carrier_frequency = 3;
-  void clear_carrier_frequency();
-  static const int kCarrierFrequencyFieldNumber = 3;
-  ::google::protobuf::int64 carrier_frequency() const;
-  void set_carrier_frequency(::google::protobuf::int64 value);
+  // optional int64 measurement_frequency = 3;
+  void clear_measurement_frequency();
+  static const int kMeasurementFrequencyFieldNumber = 3;
+  ::google::protobuf::int64 measurement_frequency() const;
+  void set_measurement_frequency(::google::protobuf::int64 value);
 
-  // optional int32 carrier_bandwidth = 4;
-  void clear_carrier_bandwidth();
-  static const int kCarrierBandwidthFieldNumber = 4;
-  ::google::protobuf::int32 carrier_bandwidth() const;
-  void set_carrier_bandwidth(::google::protobuf::int32 value);
+  // optional int32 measurement_bandwidth = 4;
+  void clear_measurement_bandwidth();
+  static const int kMeasurementBandwidthFieldNumber = 4;
+  ::google::protobuf::int32 measurement_bandwidth() const;
+  void set_measurement_bandwidth(::google::protobuf::int32 value);
 
-  // optional double carrier_signal_level = 5;
-  void clear_carrier_signal_level();
-  static const int kCarrierSignalLevelFieldNumber = 5;
-  double carrier_signal_level() const;
-  void set_carrier_signal_level(double value);
+  // optional double measurement_signal_level = 5;
+  void clear_measurement_signal_level();
+  static const int kMeasurementSignalLevelFieldNumber = 5;
+  double measurement_signal_level() const;
+  void set_measurement_signal_level(double value);
 
   // optional int64 time = 6;
   void clear_time();
@@ -1441,9 +1441,9 @@ class rp_base : public ::google::protobuf::Message {
   bool _is_default_instance_;
   ::google::protobuf::internal::ArenaStringPtr serial_;
   ::google::protobuf::int64 collection_round_;
-  ::google::protobuf::int64 carrier_frequency_;
-  double carrier_signal_level_;
-  ::google::protobuf::int32 carrier_bandwidth_;
+  ::google::protobuf::int64 measurement_frequency_;
+  double measurement_signal_level_;
+  ::google::protobuf::int32 measurement_bandwidth_;
   ::google::protobuf::int32 status_flags_;
   ::google::protobuf::int64 time_;
   mutable int _cached_size_;
@@ -8036,46 +8036,46 @@ inline void rp_base::set_collection_round(::google::protobuf::int64 value) {
   // @@protoc_insertion_point(field_set:rf_phreaker.protobuf.rp_base.collection_round)
 }
 
-// optional int64 carrier_frequency = 3;
-inline void rp_base::clear_carrier_frequency() {
-  carrier_frequency_ = GOOGLE_LONGLONG(0);
+// optional int64 measurement_frequency = 3;
+inline void rp_base::clear_measurement_frequency() {
+  measurement_frequency_ = GOOGLE_LONGLONG(0);
 }
-inline ::google::protobuf::int64 rp_base::carrier_frequency() const {
-  // @@protoc_insertion_point(field_get:rf_phreaker.protobuf.rp_base.carrier_frequency)
-  return carrier_frequency_;
+inline ::google::protobuf::int64 rp_base::measurement_frequency() const {
+  // @@protoc_insertion_point(field_get:rf_phreaker.protobuf.rp_base.measurement_frequency)
+  return measurement_frequency_;
 }
-inline void rp_base::set_carrier_frequency(::google::protobuf::int64 value) {
+inline void rp_base::set_measurement_frequency(::google::protobuf::int64 value) {
   
-  carrier_frequency_ = value;
-  // @@protoc_insertion_point(field_set:rf_phreaker.protobuf.rp_base.carrier_frequency)
+  measurement_frequency_ = value;
+  // @@protoc_insertion_point(field_set:rf_phreaker.protobuf.rp_base.measurement_frequency)
 }
 
-// optional int32 carrier_bandwidth = 4;
-inline void rp_base::clear_carrier_bandwidth() {
-  carrier_bandwidth_ = 0;
+// optional int32 measurement_bandwidth = 4;
+inline void rp_base::clear_measurement_bandwidth() {
+  measurement_bandwidth_ = 0;
 }
-inline ::google::protobuf::int32 rp_base::carrier_bandwidth() const {
-  // @@protoc_insertion_point(field_get:rf_phreaker.protobuf.rp_base.carrier_bandwidth)
-  return carrier_bandwidth_;
+inline ::google::protobuf::int32 rp_base::measurement_bandwidth() const {
+  // @@protoc_insertion_point(field_get:rf_phreaker.protobuf.rp_base.measurement_bandwidth)
+  return measurement_bandwidth_;
 }
-inline void rp_base::set_carrier_bandwidth(::google::protobuf::int32 value) {
+inline void rp_base::set_measurement_bandwidth(::google::protobuf::int32 value) {
   
-  carrier_bandwidth_ = value;
-  // @@protoc_insertion_point(field_set:rf_phreaker.protobuf.rp_base.carrier_bandwidth)
+  measurement_bandwidth_ = value;
+  // @@protoc_insertion_point(field_set:rf_phreaker.protobuf.rp_base.measurement_bandwidth)
 }
 
-// optional double carrier_signal_level = 5;
-inline void rp_base::clear_carrier_signal_level() {
-  carrier_signal_level_ = 0;
+// optional double measurement_signal_level = 5;
+inline void rp_base::clear_measurement_signal_level() {
+  measurement_signal_level_ = 0;
 }
-inline double rp_base::carrier_signal_level() const {
-  // @@protoc_insertion_point(field_get:rf_phreaker.protobuf.rp_base.carrier_signal_level)
-  return carrier_signal_level_;
+inline double rp_base::measurement_signal_level() const {
+  // @@protoc_insertion_point(field_get:rf_phreaker.protobuf.rp_base.measurement_signal_level)
+  return measurement_signal_level_;
 }
-inline void rp_base::set_carrier_signal_level(double value) {
+inline void rp_base::set_measurement_signal_level(double value) {
   
-  carrier_signal_level_ = value;
-  // @@protoc_insertion_point(field_set:rf_phreaker.protobuf.rp_base.carrier_signal_level)
+  measurement_signal_level_ = value;
+  // @@protoc_insertion_point(field_set:rf_phreaker.protobuf.rp_base.measurement_signal_level)
 }
 
 // optional int64 time = 6;

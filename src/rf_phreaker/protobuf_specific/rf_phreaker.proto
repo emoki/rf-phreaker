@@ -188,9 +188,9 @@ message rp_gps {
 message rp_base {
 	string serial = 1;
 	int64 collection_round = 2;
-	int64 carrier_frequency = 3;
-	int32 carrier_bandwidth = 4;
-	double carrier_signal_level = 5;
+	int64 measurement_frequency = 3;
+	int32 measurement_bandwidth = 4;
+	double measurement_signal_level = 5;
 	int64 time = 6;
 	int32 status_flags = 7;
 }

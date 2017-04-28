@@ -50,25 +50,25 @@ public:
 			base_.collection_round_ = a.collection_round_;
 			emit collectionRoundChanged();
 		}
-		if(base_.carrier_frequency_ != a.carrier_frequency_) {
-			base_.carrier_frequency_ = a.carrier_frequency_;
+		if(base_.measurement_frequency_ != a.measurement_frequency_) {
+			base_.measurement_frequency_ = a.measurement_frequency_;
 			emit carrierFreqChanged();
 		}
-		if(base_.carrier_bandwidth_ != a.carrier_bandwidth_) {
-			base_.carrier_bandwidth_ = a.carrier_bandwidth_;
+		if(base_.measurement_bandwidth_ != a.measurement_bandwidth_) {
+			base_.measurement_bandwidth_ = a.measurement_bandwidth_;
 			emit carrierBandwidthChanged();
 		}
-		if(base_.carrier_signal_level_ != a.carrier_signal_level_) {
-			base_.carrier_signal_level_ = a.carrier_signal_level_;
+		if(base_.measurement_signal_level_ != a.measurement_signal_level_) {
+			base_.measurement_signal_level_ = a.measurement_signal_level_;
 			emit carrierSignalLevelChanged();
 		}
 		timeElapsed_.start();
 		emit timeElapsedChanged();
 	}
 
-	virtual double carrierFreq() const { return base_.carrier_frequency_ / 1e6; }
-	virtual double carrierBandwidth() const { return base_.carrier_bandwidth_ / 1e6; }
-	virtual double carrierSignalLevel() const { return base_.carrier_signal_level_; }
+	virtual double carrierFreq() const { return base_.measurement_frequency_ / 1e6; }
+	virtual double carrierBandwidth() const { return base_.measurement_bandwidth_ / 1e6; }
+	virtual double carrierSignalLevel() const { return base_.measurement_signal_level_; }
 	virtual ApiTypes::Tech cellTech() const { return tech_; }
 	virtual ApiTypes::OperatingBand cellBand() const { return ApiTypes::OPERATING_BAND_UNKNOWN; }
 	virtual int32_t cellChannel() const { return -1; }
@@ -83,9 +83,9 @@ public:
 	QTime timeElapsed() const { return timeElapsed_; }
 	QString serial() const { return base_.serial_.c_str(); }
 	virtual int64_t collectionRound() const { return base_.collection_round_; }
-	virtual QString carrierFreqStr() const { return QString::number(base_.carrier_frequency_ / 1e6, 'f', 1); }
-	virtual QString carrierBandwidthStr() const { return QString::number(base_.carrier_bandwidth_ / 1e6, 'f', 1); }
-	virtual QString carrierSignalLevelStr() const { return QString::number(base_.carrier_signal_level_, 'f', 1); }
+	virtual QString carrierFreqStr() const { return QString::number(base_.measurement_frequency_ / 1e6, 'f', 1); }
+	virtual QString carrierBandwidthStr() const { return QString::number(base_.measurement_bandwidth_ / 1e6, 'f', 1); }
+	virtual QString carrierSignalLevelStr() const { return QString::number(base_.measurement_signal_level_, 'f', 1); }
 	const rf_phreaker::basic_data& base() const { return base_; }
 
 signals:

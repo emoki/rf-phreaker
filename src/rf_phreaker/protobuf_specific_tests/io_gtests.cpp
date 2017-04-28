@@ -45,8 +45,8 @@ TEST_F(MeasManager, QFileTest) {
 			for(int i = 0; i < 500; i++) {
 				update_pb pb;
 				auto &t = umts_[0];
-				t.carrier_bandwidth_ = i;
-				t.carrier_frequency_ = i + 1;
+				t.measurement_bandwidth_ = i;
+				t.measurement_frequency_ = i + 1;
 				t.cpich_ = i + 2;
 				pb.populate_wcdma_full_scan(umts_, umts_[0]);
 				EXPECT_TRUE(rf_phreaker::protobuf::write_delimited_to(pb.protobuf(), p.get()));
@@ -65,11 +65,11 @@ TEST_F(MeasManager, QFileTest) {
 				update_pb pb;
 				EXPECT_TRUE(rf_phreaker::protobuf::read_delimited_from(p.get(), &pb.protobuf()));
 				EXPECT_TRUE(pb.protobuf().has_wcdma_full_scan());
-				EXPECT_EQ(i, pb.get_wcdma_full_scan()[0].carrier_bandwidth_);
-				EXPECT_EQ(i + 1, pb.get_wcdma_full_scan()[0].carrier_frequency_);
+				EXPECT_EQ(i, pb.get_wcdma_full_scan()[0].measurement_bandwidth_);
+				EXPECT_EQ(i + 1, pb.get_wcdma_full_scan()[0].measurement_frequency_);
 				EXPECT_EQ(i + 2, pb.get_wcdma_full_scan()[0].cpich_);
-				EXPECT_EQ(i, pb.get_wcdma_full_scan_basic().carrier_bandwidth_);
-				EXPECT_EQ(i + 1, pb.get_wcdma_full_scan_basic().carrier_frequency_);
+				EXPECT_EQ(i, pb.get_wcdma_full_scan_basic().measurement_bandwidth_);
+				EXPECT_EQ(i + 1, pb.get_wcdma_full_scan_basic().measurement_frequency_);
 			}
 		}
 	}

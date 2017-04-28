@@ -308,7 +308,7 @@ bool Api::event(QEvent *e) {
 		}
 		case rf_phreaker::protobuf::rp_update::UpdateCase::kGsmSweep: {
 			auto &t = update_pb_.get_gsm_sweep_basic();
-			auto bands = band_specifier_.find_avaliable_gsm_operating_bands(t.carrier_frequency_);
+			auto bands = band_specifier_.find_avaliable_gsm_operating_bands(t.measurement_frequency_);
 			for(auto i : bands) {
 				if(sweepModels_.contains(ApiTypes::toOperatingBand(i.band_)))
 					sweepModels_[ApiTypes::toOperatingBand(i.band_)]->update_with_basic_data(t, ApiTypes::GSM_SWEEP);
@@ -317,7 +317,7 @@ bool Api::event(QEvent *e) {
 		}
 		case rf_phreaker::protobuf::rp_update::UpdateCase::kWcdmaSweep: {
 			auto &t = update_pb_.get_wcdma_sweep_basic();
-			auto bands = band_specifier_.find_avaliable_umts_operating_bands(t.carrier_frequency_);
+			auto bands = band_specifier_.find_avaliable_umts_operating_bands(t.measurement_frequency_);
 			for(auto i : bands) {
 				if(sweepModels_.contains(ApiTypes::toOperatingBand(i.band_)))
 					sweepModels_[ApiTypes::toOperatingBand(i.band_)]->update_with_basic_data(t, ApiTypes::WCDMA_SWEEP);
@@ -326,7 +326,7 @@ bool Api::event(QEvent *e) {
 		}
 		case rf_phreaker::protobuf::rp_update::UpdateCase::kLteSweep: {
 			auto &t = update_pb_.get_lte_sweep_basic();
-			auto bands = band_specifier_.find_avaliable_lte_operating_bands(t.carrier_frequency_);
+			auto bands = band_specifier_.find_avaliable_lte_operating_bands(t.measurement_frequency_);
 			for(auto i : bands) {
 				if(sweepModels_.contains(ApiTypes::toOperatingBand(i.band_)))
 					sweepModels_[ApiTypes::toOperatingBand(i.band_)]->update_with_basic_data(t, ApiTypes::LTE_SWEEP);

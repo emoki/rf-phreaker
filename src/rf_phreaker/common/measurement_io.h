@@ -140,9 +140,9 @@ inline std::ostream& header(std::ostream &os, const basic_data &t) {
 inline std::ostream& operator<<(std::ostream &os, const basic_data &t) {
 	os << t.serial_ << delimiter
 		<< t.collection_round_ << delimiter
-		<< t.carrier_frequency_ << delimiter
-		<< t.carrier_bandwidth_ << delimiter
-		<< t.carrier_signal_level_ << delimiter
+		<< t.measurement_frequency_ << delimiter
+		<< t.measurement_bandwidth_ << delimiter
+		<< t.measurement_signal_level_ << delimiter
 		<< t.time_ << delimiter
 		<< t.status_flags_;
 	return os;

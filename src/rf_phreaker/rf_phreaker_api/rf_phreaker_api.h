@@ -240,9 +240,9 @@ typedef struct rp_gps {
 typedef struct rp_base {
 	rp_serial serial_;
 	int64_t collection_round_;
-	rp_frequency_type carrier_frequency_;
-	rp_bandwidth_type carrier_bandwidth_;
-	double carrier_signal_level_;
+	rp_frequency_type measurement_frequency_;
+	rp_bandwidth_type measurement_bandwidth_;
+	double measurement_signal_level_;
 	rp_time_type time_;
 	int32_t status_flags_;
 } rp_base;

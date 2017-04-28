@@ -13,9 +13,9 @@ namespace rf_phreaker { namespace processing {
 inline void convert_to_basic_data(basic_data &data, const scanner::measurement_info &info, double avg_rms)
 {
 	data.serial_ = info.serial();
-	data.carrier_signal_level_ = scanner::signal_level_calculator::calculate_sl(avg_rms, info);
-	data.carrier_bandwidth_ = info.bandwidth();
-	data.carrier_frequency_ = info.frequency();
+	data.measurement_signal_level_ = scanner::signal_level_calculator::calculate_sl(avg_rms, info);
+	data.measurement_bandwidth_ = info.bandwidth();
+	data.measurement_frequency_ = info.frequency();
 	data.collection_round_ = info.collection_round();
 	data.status_flags_ = 0;
 	data.time_ = info.origin_time_pc().count();
@@ -30,9 +30,9 @@ inline basic_data convert_to_basic_data(const scanner::measurement_info &info, d
 
 inline void convert_to_basic_data(basic_data &data, const scanner::measurement_info &info, const power_info &p_info) {
 	data.serial_ = info.serial();
-	data.carrier_signal_level_ = scanner::signal_level_calculator::calculate_sl(p_info.avg_rms_, info);
-	data.carrier_bandwidth_ = p_info.bandwidth_;
-	data.carrier_frequency_ = p_info.freq_;
+	data.measurement_signal_level_ = scanner::signal_level_calculator::calculate_sl(p_info.avg_rms_, info);
+	data.measurement_bandwidth_ = p_info.bandwidth_;
+	data.measurement_frequency_ = p_info.freq_;
 	data.collection_round_ = info.collection_round();
 	data.status_flags_ = 0;
 	data.time_ = info.origin_time_pc().count();
@@ -46,9 +46,9 @@ inline basic_data convert_to_basic_data(const scanner::measurement_info &info, c
 
 inline void convert_to_basic_data(basic_data &data, const scanner::measurement_info &info, const gsm_measurement &gsm) {
 	data.serial_ = info.serial();
-	data.carrier_signal_level_ = scanner::signal_level_calculator::calculate_sl(gsm.channel_power_, info, gsm.center_frequency_);
-	data.carrier_bandwidth_ = khz(200);
-	data.carrier_frequency_ = gsm.center_frequency_;
+	data.measurement_signal_level_ = scanner::signal_level_calculator::calculate_sl(gsm.channel_power_, info, gsm.center_frequency_);
+	data.measurement_bandwidth_ = khz(200);
+	data.measurement_frequency_ = gsm.center_frequency_;
 	data.collection_round_ = info.collection_round();
 	data.status_flags_ = 0;
 	data.time_ = info.origin_time_pc().count();
@@ -80,14 +80,14 @@ inline gsm_data convert_to_gsm_data(const scanner::measurement_info &info, const
 
 inline void convert_to_umts_data(umts_data &data, const scanner::measurement_info &info, const umts_measurement &umts) {
 	convert_to_basic_data(data, info, umts.rms_signal_);
-	data.carrier_frequency_ += umts.intermediate_frequency_;
+	data.measurement_frequency_ += umts.intermediate_frequency_;
 	data.cpich_ = umts.cpich_;
 	data.ecio_ = umts.ecio_;
 	data.operating_band_ = info.get_umts_band();
-	data.rscp_ = data.carrier_signal_level_ + data.ecio_;
+	data.rscp_ = data.measurement_signal_level_ + data.ecio_;
 	data.layer_3_ = umts.layer_3_;
 	static channel_conversion conversion;
-	data.uarfcn_ = conversion.frequency_to_uarfcn(data.carrier_frequency_, info.get_umts_band()).channel_;
+	data.uarfcn_ = conversion.frequency_to_uarfcn(data.measurement_frequency_, info.get_umts_band()).channel_;
 }
 
 inline umts_data convert_to_umts_data(const scanner::measurement_info &info, const umts_measurement &umts) {
@@ -99,7 +99,7 @@ inline umts_data convert_to_umts_data(const scanner::measurement_info &info, con
 inline void convert_to_lte_data(lte_data &data, const scanner::measurement_info &info, const lte_measurement &lte, double avg_rms)
 {
 	convert_to_basic_data(data, info, avg_rms);
-	data.carrier_frequency_ += lte.intermediate_frequency_;
+	data.measurement_frequency_ += lte.intermediate_frequency_;
 	data.cyclic_prefix_ = lte.CyclicPrefix;
 	data.dl_bandwidth_ = convert_bandwidth(lte.Bandwidth);
 	data.frame_number_ = lte.frame_number;
@@ -107,7 +107,7 @@ inline void convert_to_lte_data(lte_data &data, const scanner::measurement_info 
 	data.num_antenna_ports_ = lte.NumAntennaPorts;
 	static channel_conversion conversion;
 	data.operating_band_ = info.get_lte_band();
-	data.earfcn_ = conversion.frequency_to_earfcn(data.carrier_frequency_, info.get_lte_band()).channel_;
+	data.earfcn_ = conversion.frequency_to_earfcn(data.measurement_frequency_, info.get_lte_band()).channel_;
 	data.physical_cell_id_ = lte.RsRecord.ID;
 	data.psch_id_ = lte.PschRecord.ID;
 	data.psch_quality_ = lte.PschRecord.NormCorr;

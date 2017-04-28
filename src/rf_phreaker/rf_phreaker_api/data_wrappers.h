@@ -96,9 +96,9 @@ public:
 	basic_wrap(const basic_data &t) {
 		copy_serial(t.serial_, buf_.serial_);
 		buf_.collection_round_ = t.collection_round_;
-		buf_.carrier_frequency_ = t.carrier_frequency_;
-		buf_.carrier_bandwidth_ = t.carrier_bandwidth_;
-		buf_.carrier_signal_level_ = t.carrier_signal_level_;
+		buf_.measurement_frequency_ = t.measurement_frequency_;
+		buf_.measurement_bandwidth_ = t.measurement_bandwidth_;
+		buf_.measurement_signal_level_ = t.measurement_signal_level_;
 		buf_.time_ = t.time_;
 		buf_.status_flags_ = t.status_flags_;
 	}
