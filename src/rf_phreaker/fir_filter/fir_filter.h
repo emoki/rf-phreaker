@@ -33,6 +33,7 @@ namespace rf_phreaker {
 
 class fir_filter_impl;
 
+// See DSP algorithms using C (chapter 7 and 8) for an explanation of digital filters.
 class DLL_PUBLIC fir_filter
 {
 public:

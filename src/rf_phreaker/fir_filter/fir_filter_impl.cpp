@@ -98,8 +98,14 @@ int fir_filter_impl::set_taps(int length, double normFactor, double norm_cutoff_
 
 	// Rule of thumb for norm cutoff freq is 1 / max(up, down).  We mulitple by .5 because IPP specifies the cutoff freq 
 	// has to be 0 to 0.5.
-	if(norm_cutoff_freq <= 0.0)
-		norm_cutoff_freq = std::min(.49, (1.0 / std::max(m_UpFactor, m_DownFactor)) * .5);
+	// To be more specific:
+	// Transition width (tw) for hamming window is: tw = 3.3 / N  where N is filter length.
+	// Transition width (tw) for blackman window is: tw = 5.5 / N where N is filter length.
+	// Effective norm cutoff freq is fc = fp + tw / 2 where fc is cutoff freq and fp is passband cutoff.
+	// But as to whether IPP is wanting fc or fp I don't know.
+	// Also when looking at a multirate filter I'm assuming you normalize against the output samplerate?
+	if(norm_cutoff_freq <= 0.0 || norm_cutoff_freq >= 0.5)
+		norm_cutoff_freq = std::min(.499, (1.0 / std::max(m_UpFactor, m_DownFactor)) * .5);
 
 	Ipp64f* pTmpTaps = ippsMalloc_64f(length);
 	if ( pTmpTaps == NULL ) return _WIF_MEMORY_ALLOCATION;
@@ -182,7 +188,6 @@ int fir_filter_impl::init_state(const Ipp32fc* taps)
 	return _WIF_NO_ERROR;
 }
 
-
 int fir_filter_impl::filter(Ipp32fc *in, int numIters) const
 {
 	// TODO: note that this doesn't work with ZeroDelay!!!!
@@ -250,7 +255,6 @@ int fir_filter_impl::num_output_samples_required(int num_input_samples_desired) 
 int fir_filter_impl::ensure_output_samples_large_enough(int num_output_samples_desired) const {
 	return num_output_samples_required(num_input_samples_required(num_output_samples_desired));
 }
-
 
 int fir_filter_impl::num_iterations_required(int num_input_samples_desired) const
 {

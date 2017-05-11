@@ -15,7 +15,7 @@
 namespace rf_phreaker {
 
 
-// Provides for channel filtering of a signal.
+// See DSP algorithms using C (chapter 7 and 8) for an explanation of digital filters.
 class fir_filter_impl
 {
 public:
