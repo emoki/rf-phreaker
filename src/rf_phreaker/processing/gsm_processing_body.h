@@ -137,11 +137,15 @@ public:
 			tracker_.clear();
 		}
 
-		// For GSM the history freq actually corresponds to multiple bcchs.
+		// Tracking the layer 3 is done on the bcch center freqs.
+		// Therefore when clearing the history we need to iterate over every possible
+		// bcch center freq.
 		if(!config_.layer_3_.should_prioritize_layer_3_ && meas.collection_round() % config_.layer_3_.complete_decode_interval_ == 0) {
-			tracker_.clear_history(meas.frequency());
+			for(frequency_type freq = -GSM_LOW_BANDWIDTH_HZ; freq <= GSM_HIGH_BANDWIDTH_HZ; freq += gsm_channel_bandwidth_)
+			tracker_.clear_history(meas.frequency() + freq);
 		}
 
+		// Tracking the layer 3 is done on the bcch center freqs.
 		for(auto &data : info.processed_data_) {
 			if(!tracker_.is_fully_decoded(data.center_frequency_, data) && (data.c_i_ratio_ > config_.layer_3_.decode_threshold_ 
 				|| (config_.layer_3_.should_prioritize_layer_3_ && tracker_.in_history(data.center_frequency_, data)))) {
@@ -166,6 +170,7 @@ public:
 		}
 
 		// No minimum decode threshold because each base station is on a different freq.
+		// Tracking below is done on the freq of the measurement, not the center freq of the different bcchs.
 		auto freq = meas.frequency();
 		if(info.measurement_package_.can_remove_) {
 			tracker_.update_decodes(freq, !info.processed_data_.empty());
