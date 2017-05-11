@@ -30,6 +30,7 @@ set (common_SRCS
 	exception_types.h
 	fft_helper.cpp
 	fft_helper.h
+	filters.h
 	frequency_shifter.h
 	frequency_bin_calculator.h
 	ipp_array.h
