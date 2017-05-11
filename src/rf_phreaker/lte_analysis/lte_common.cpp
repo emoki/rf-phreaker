@@ -8,6 +8,7 @@
 #include "lte_common.h"
 #include "cc_tb.h"
 #include "lte_fft.h"
+#include "rf_phreaker/common/ipp_array.h"
 
 
 namespace rf_phreaker {
@@ -781,6 +782,21 @@ void multMatVect_fc(Ipp32fc *destVec,  Ipp32fc *srcMat, unsigned int rows,
 		}
 	}
 }
+
+void multMatVect_fc_fast(Ipp32fc *destVec, Ipp32fc *srcMat, unsigned int rows,
+	unsigned int cols, Ipp32fc *srcVec) {
+	Ipp32fc fcTmp1, fcTmp2;
+
+	static ipp_32fc_array tmp(cols);
+	if(tmp.length() < cols)
+		tmp.reset(cols);
+
+	for(int i = 0; i < rows; ++i) {
+		ipp_helper::check_status(ippsMul_32fc(&srcMat[i*cols], srcVec, tmp.get(), cols));
+		ipp_helper::check_status(ippsSum_32fc(tmp.get(), cols, &destVec[i], ippAlgHintAccurate));
+	}
+}
+
 
 
 void stDiversityDet(Ipp32f* detLLR, Ipp32fc* signalF, Ipp32fc* H, unsigned int subcarrierNum, 

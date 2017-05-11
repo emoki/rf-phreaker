@@ -955,7 +955,7 @@ void LteNoiseVarEst(Ipp32f* noiseVar, Ipp32fc* H, CYCLICPREFIX cyclicPrefixMode,
 
 		for(unsigned int jj=0;jj<numSymbsPerSubframe;jj++)
 		{
-			multMatVect_fc(vec1, QmatConj, useSubCarriers, useSubCarriers, 
+			multMatVect_fc_fast(vec1, QmatConj, useSubCarriers, useSubCarriers, 
 				H1+ii*numSymbsPerSubframe*useSubCarriers+jj*useSubCarriers);
 
 			for(unsigned int kk=curCPLen;kk<useSubCarriers;kk++)
