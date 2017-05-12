@@ -10,14 +10,15 @@ set (common_tests_VERSION_PATCH 0)
 set (common_tests_VERSION_TWEAK 0)
 
 set (common_tests_SRCS 
+	channel_conversion_gtests.cpp
 	common_tests.cpp
 	common_serialization_gtests.cpp
 	common_utility_gtests.cpp
 	frequency_bin_calculator_gtests.cpp
-	test_operating_band_range_specifier.cpp
-	channel_conversion_gtests.cpp
+	power_spectrum_calculator_gtests.cpp
 	raw_signal_gtests.cpp
 	serialization_helper_gtests.cpp
+	test_operating_band_range_specifier.cpp
 	${SRC_PLATFORM_SPECIFIC}/stdafx.cpp)
 
 add_executable (common_tests ${common_tests_SRCS})

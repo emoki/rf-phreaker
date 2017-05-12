@@ -122,6 +122,7 @@ EXPORTS
 	ippsSwapBytes_16u_I	
 	ippsSwapBytes_32u_I	
 	ippsTone_Direct_32fc	
+	ippsWinBartlett_32fc
 	ippsXor_8u	
 	ippsXor_8u_I	
 	ippsZero_16s	

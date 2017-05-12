@@ -44,6 +44,7 @@ set (common_SRCS
 	moving_window_calculator.h
 	operating_band_range_specifier.h
 	operating_band_range_specifier.cpp
+	power_spectrum_calculator.h
 	raw_signal.h
 	settings.h
 	serialization_helper.h
