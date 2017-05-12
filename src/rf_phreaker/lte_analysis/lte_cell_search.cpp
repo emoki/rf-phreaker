@@ -79,7 +79,7 @@ int lte_cell_search(const Ipp32fc* SignalSamples,
 	// Buffer at least a full second's worth of data.  Doing so prevents access violations 
 	// from occurring when lte analysis oversteps.
 	static ipp_32fc_array signal_buffer(NumSamples + 19200 * 4);
-	if(signal_buffer.length() < NumSamples + 19200 * 4)
+	if((uint32_t)signal_buffer.length() < NumSamples + 19200 * 4)
 		signal_buffer.reset(NumSamples + 19200 * 4);
 	signal_buffer.zero_out();
 	signal192 = signal_buffer.get();

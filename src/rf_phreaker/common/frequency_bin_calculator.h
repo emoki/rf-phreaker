@@ -26,7 +26,7 @@ public:
 
 		power_info_group group;
 		for(auto inter_freq = low_if; inter_freq <= high_if; inter_freq += step_size_hz) {
-			group.push_back(power_info(center_freq + inter_freq, bin_size_hz, get_power_in_bin(inter_freq)));
+			group.push_back(power_info(center_freq + inter_freq, (bandwidth_type)bin_size_hz, get_power_in_bin(inter_freq)));
 		}
 		return group;
 	}
