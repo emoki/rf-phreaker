@@ -20,6 +20,10 @@ public:
 
 	void reset(int fft_order, int flag);
 
+	void fft_forward(const Ipp32fc *src, Ipp32fc *dst);
+
+	void fft_inverse(const Ipp32fc *src, Ipp32fc *dst);
+
 	void fft_forward(const ipp_32fc_array &src, ipp_32fc_array &dst);
 
 	void fft_inverse(const ipp_32fc_array &src, ipp_32fc_array &dst);

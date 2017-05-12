@@ -55,6 +55,14 @@ void fft_helper::reset(int fft_order, int flag) {
 	internal_buffer_.reset(buf_size);
 }
 
+void fft_helper::fft_forward(const Ipp32fc *src, Ipp32fc *dst) {
+	ipp_helper::check_status(ippsFFTFwd_CToC_32fc(src, dst, fft_spec_, internal_buffer_.get()));
+}
+
+void fft_helper::fft_inverse(const Ipp32fc *src, Ipp32fc *dst) {
+	ipp_helper::check_status(ippsFFTInv_CToC_32fc(src, dst, fft_spec_, internal_buffer_.get()));
+}
+
 void fft_helper::fft_forward(const ipp_32fc_array &src, ipp_32fc_array &dst) {
 	ipp_helper::check_status(ippsFFTFwd_CToC_32fc(src.get(), dst.get(), fft_spec_, internal_buffer_.get()));
 }
