@@ -104,3 +104,50 @@ TEST(GsmFrequencyTracker, BetweenTwoFreqs) {
 	auto calc_freq = rf_phreaker::round_to_nearest<khz(200)>((low_freq + high_freq) / 2);
 	EXPECT_EQ(tracker.ensure_proper_processing_if(calc_freq), tracker.calculate_closest_freq(freq, range.band_));
 }
+
+TEST(PowerSpectrumApproximator, GeneralTest) {
+	using namespace rf_phreaker;
+	frequency_type start_freq = mhz(500);
+	frequency_type span = mhz(1);
+	frequency_type bin_size = 10;
+	frequency_type dwell_time = milli_to_nano(60);
+
+	span = 1600000;
+	bin_size = 10;
+	dwell_time = milli_to_nano(60);
+	power_spectrum_approximator approx;
+	approx.determine_spectrum_parameters(start_freq, span, bin_size, dwell_time);
+
+
+	std::ofstream file("power_spectrum_params.txt");
+	file << "start_freq\tspan\tbin_size\tdwell_time\t";
+	file << "bin_size\tstep_size\tstart_freq\tend_freq\tspan\tdwell_time\tsampling_rate\twindow_length\tnum_windows\n";
+
+	for(int k = 0; k < 1000; k += 15) {
+		bin_size = 10 + k * 250;
+		for(int i = 0; i < 1000; i += 15) {
+			span = mhz(1) + khz(200) * i;
+			power_spectrum_approximator approx;
+			approx.determine_spectrum_parameters(start_freq, span, bin_size, dwell_time);
+			if(file) {
+				for(auto s : approx.power_specs()) {
+					file << start_freq << "\t"
+						<< span << "\t"
+						<< bin_size << "\t"
+						<< dwell_time / 1.0e9<< "\t";
+					file << s.bin_size_ << "\t"
+						<< s.step_size_ << "\t"
+						<< s.start_frequency_ << "\t"
+						<< s.end_frequency_ << "\t"
+						<< s.span_ << "\t"
+						<< s.dwell_time_/ 1.0e9 << "\t"
+						<< s.sampling_rate_ << "\t"
+						<< s.window_length_ << "\t"
+						<< s.num_windows_ << "\t"
+						<< std::endl;
+				}
+			}
+
+		}
+	}
+}

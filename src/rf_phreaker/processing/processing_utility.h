@@ -1,12 +1,14 @@
 #pragma once
 
 #include <map>
+#include <algorithm>
 #include "rf_phreaker/common/common_types.h"
 #include "rf_phreaker/common/common_utility.h"
+#include "rf_phreaker/common/operating_band_range_specifier.h"
+#include "rf_phreaker/common/power_spectrum_calculator.h"
 #include "rf_phreaker/lte_analysis/lte_types.h"
 #include "rf_phreaker/lte_analysis/lte_measurement.h"
 #include "rf_phreaker/gsm_analysis/gsm_defs.h"
-#include "rf_phreaker/common/operating_band_range_specifier.h"
 
 namespace rf_phreaker { namespace processing {
 
@@ -49,6 +51,78 @@ inline bandwidth_type determine_bandwidth_for_collection(LteChannelBandwidth bw)
 	default:
 		return 0;
 	}
+}
+
+inline bandwidth_type get_upper_scanner_bandwidth(frequency_type bw) {
+	// These should be valid bandwidths for bladeRF.  
+	if(bw > mhz(20))
+		return mhz(28);
+	else if(bw > mhz(14))
+		return mhz(20);
+	else if(bw > mhz(12))
+		return mhz(14);
+	else if(bw > mhz(10))
+		return mhz(12);
+	else if(bw > khz(8750))
+		return mhz(10);
+	else if(bw > mhz(7))
+		return khz(8750);
+	else if(bw > mhz(6))
+		return mhz(7);
+	else if(bw > khz(5500))
+		return mhz(6);
+	else if(bw > mhz(5))
+		return khz(5500);
+	else if(bw > khz(3840))
+		return mhz(5);
+	else if(bw > mhz(3))
+		return khz(3840);
+	else if(bw > khz(2750))
+		return mhz(3);
+	else if(bw > khz(2500))
+		return khz(2750);
+	else if(bw > khz(1750))
+		return khz(2500);
+	else if(bw > khz(1500))
+		return khz(1750);
+	else
+		return khz(1500);
+}
+
+inline bandwidth_type get_lower_scanner_bandwidth(frequency_type bw) {
+	// These should be valid bandwidths for bladeRF.  
+	if(bw < khz(1750))
+		return khz(1500);
+	else if(bw < khz(2500))
+		return khz(1750);
+	else if(bw < khz(2750))
+		return khz(2500);
+	else if(bw < khz(3))
+		return khz(2750);
+	else if(bw < khz(3840))
+		return mhz(3);
+	else if(bw < mhz(5))
+		return khz(3840);
+	else if(bw < khz(5500))
+		return mhz(5);
+	else if(bw < mhz(6))
+		return khz(5500);
+	else if(bw < mhz(7))
+		return mhz(6);
+	else if(bw < khz(8750))
+		return mhz(7);
+	else if(bw < mhz(10))
+		return khz(8750);
+	else if(bw < mhz(12))
+		return mhz(10);
+	else if(bw < mhz(14))
+		return mhz(12);
+	else if(bw < mhz(20))
+		return mhz(14);
+	else if(bw < mhz(28))
+		return mhz(20);
+	else
+		return mhz(28);
 }
 
 inline bandwidth_type convert_bandwidth(LteChannelBandwidth bw)
@@ -271,6 +345,86 @@ private:
 	static const bandwidth_type high_bandwidth_range_ = GSM_HIGH_BANDWIDTH_HZ;
 	static const bandwidth_type gsm_processing_if_ = GSM_PROCESSING_IF;
 	operating_band_range_specifier range_specifier_;
+};
+
+class power_spectrum_approximator {
+public:
+	power_spectrum_approximator()
+		: max_num_samples_(mhz(3))
+		, min_fft_order_(9)
+		, max_fft_order_(15)
+		, max_bandwidth_(get_upper_scanner_bandwidth(mhz(28)))
+		, min_sampling_rate_(khz(80))
+		, max_sampling_rate_(mhz(32))
+		, num_windows_(30)
+	{}
+
+	void determine_spectrum_parameters(frequency_type start_freq, frequency_type span, frequency_type bin_size, time_type dwell_time_ns) {
+		// Using the same dwell time the processing time doubles (1.15x) every increment of fft_order.
+		// Given a bin size required we can calculate the sampling rate and fft order.  This will give us the max 
+		// bandwidth we can use.  Get the closest nuand bandwidth and then adjust center freq so the start freq is
+		// at the beginning of the bin.task
+		// TODO - make sure the bandwidth can be the same as the sampling_rate since we're downconverting.
+		power_specs_.clear();
+		determine_spectrum_parameters_(start_freq, span, bin_size, dwell_time_ns);
+	}
+	
+	frequency_type calculate_allowed_bandwidth(frequency_type sampling_rate) {
+		// Because we're converting signal to baseband we can actually get away with using the sampling_rate as the actual bandwidth.
+		return sampling_rate;
+	}
+
+	std::vector<power_spectrum_spec>& power_specs() { return power_specs_; }
+
+private:	
+	void determine_spectrum_parameters_(frequency_type start_freq, frequency_type span, frequency_type bin_size, time_type dwell_time_ns) {
+		// Using the same dwell time the processing time doubles (1.15x) every increment of fft_order.
+		// Given a bin size required we can calculate the sampling rate and fft order.  This will give us the max 
+		// bandwidth we can use.  Get the closest nuand bandwidth and then adjust center freq so the start freq is
+		// at the beginning of the bin.task
+		// TODO - make sure the bandwidth can be the same as the sampling_rate since we're downconverting.
+		power_spectrum_spec spec;
+		spec.bin_size_ = bin_size;
+		spec.step_size_ = bin_size;
+
+		auto fft_order = min_fft_order_ - 1;
+		frequency_type sampling_rate;		
+		frequency_type scanner_bandwidth;
+		while(fft_order < max_fft_order_) {
+			fft_order = fft_order + 1;
+			sampling_rate = std::min(max_sampling_rate_, std::max(min_sampling_rate_, power_spectrum_calculator::determine_sampling_rate(fft_order, bin_size)));
+			scanner_bandwidth = get_lower_scanner_bandwidth(calculate_allowed_bandwidth(sampling_rate));
+			if(scanner_bandwidth > span && sampling_rate > min_sampling_rate_) {
+				break;
+			}
+		}
+
+		if(scanner_bandwidth < span) {
+			determine_spectrum_parameters_(start_freq, span / 2, bin_size, dwell_time_ns);
+			determine_spectrum_parameters_(start_freq + span / 2, span / 2, bin_size, dwell_time_ns);
+		}
+		else {
+			spec.window_length_ = (int)pow(2, fft_order);
+			spec.sampling_rate_ = sampling_rate;
+			auto min_dwell_time = rf_phreaker::convert_to_time(spec.window_length_ * num_windows_, spec.sampling_rate_);
+			auto max_dwell_time = rf_phreaker::convert_to_time(max_num_samples_, spec.sampling_rate_);
+			spec.dwell_time_ = std::max(std::min(max_dwell_time, dwell_time_ns), min_dwell_time);
+			spec.num_windows_ = rf_phreaker::convert_to_samples(spec.dwell_time_, spec.sampling_rate_) / spec.window_length_;
+			spec.start_frequency_ = start_freq;
+			spec.end_frequency_ = start_freq + span;
+			spec.span_ = span;
+			power_specs_.push_back(spec);
+		}
+	}
+
+	int max_num_samples_;
+	int min_fft_order_;
+	int max_fft_order_;
+	frequency_type max_bandwidth_;
+	frequency_type min_sampling_rate_;
+	frequency_type max_sampling_rate_;
+	int num_windows_;
+	std::vector<power_spectrum_spec> power_specs_;
 };
 
 }}
