@@ -17,6 +17,18 @@ typedef int32_t bandwidth_type;
 
 typedef int64_t time_type;
 
+struct power_spectrum_spec {
+	time_type dwell_time_;
+	frequency_type sampling_rate_;
+	frequency_type start_frequency_;
+	frequency_type end_frequency_;
+	frequency_type span_;
+	double bin_size_;
+	double step_size_;
+	int32_t window_length_;
+	int32_t num_windows_;
+};
+
 enum scheduling_algorithm_type {
 	tech_based,
 	collection_round_based,

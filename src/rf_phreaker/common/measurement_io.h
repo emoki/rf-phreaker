@@ -22,6 +22,7 @@ inline std::ostream& operator<<(std::ostream &os, const basic_data &t);
 inline std::ostream& operator<<(std::ostream &os, const gsm_data &t);
 inline std::ostream& operator<<(std::ostream &os, const umts_data &t);
 inline std::ostream& operator<<(std::ostream &os, const lte_data &t);
+inline std::ostream& operator<<(std::ostream &os, const power_spectrum_data &t);
 
 inline std::string file_base(const hardware &) { return "scanner_"; }
 inline std::string file_base(const gps &) { return "gps_"; }
@@ -29,6 +30,7 @@ inline std::string file_base(const basic_data &) { return "basic_"; }
 inline std::string file_base(const gsm_data &) { return "gsm_"; }
 inline std::string file_base(const umts_data &) { return "umts_"; }
 inline std::string file_base(const lte_data &) { return "lte_"; }
+inline std::string file_base(const power_spectrum_data &) { return "power_spectrum_"; }
 
 inline std::ostream& header(std::ostream &os, const hardware &t) {
 	os << "scanner_serial" << delimiter
@@ -233,6 +235,47 @@ inline std::ostream& operator<<(std::ostream &os, const lte_data &t) {
 		<< t.dl_bandwidth_ << delimiter
 		<< t.frame_number_ << delimiter
 		<< t.layer_3_;
+	return os;
+}
+
+inline std::ostream& header(std::ostream &os, const power_spectrum_spec &t) {
+	os << "dwell_time" << delimiter
+		<< "sampling_rate" << delimiter
+		<< "start_frequency" << delimiter
+		<< "end_frequency" << delimiter
+		<< "span" << delimiter
+		<< "window_length" << delimiter
+		<< "num_windows" << delimiter
+		<< "bin_size" << delimiter
+		<< "step_size";
+	return os;
+}
+
+inline std::ostream& operator<<(std::ostream &os, const power_spectrum_spec &t) {
+	os << t.dwell_time_ << delimiter
+		<< t.sampling_rate_ << delimiter
+		<< t.start_frequency_ << delimiter
+		<< t.end_frequency_ << delimiter
+		<< t.span_ << delimiter
+		<< t.window_length_ << delimiter
+		<< t.num_windows_ << delimiter
+		<< t.bin_size_ << delimiter
+		<< t.step_size_;
+	return os;
+}
+
+inline std::ostream& header(std::ostream &os, const power_spectrum_data &t) {
+	header(os, static_cast<basic_data>(t)) << delimiter;
+	header(os, t.params_) << delimiter
+		<< "power...";
+	return os;
+}
+
+inline std::ostream& operator<<(std::ostream &os, const power_spectrum_data &t) {
+	os << static_cast<basic_data>(t) << delimiter
+		<< t.params_;
+	for(auto &i : t.power_)
+		os << delimiter << i;
 	return os;
 }
 

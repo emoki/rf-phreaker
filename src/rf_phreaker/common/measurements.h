@@ -98,4 +98,9 @@ namespace rf_phreaker {
 		layer_3_information::lte_rrc_message_aggregate layer_3_;
 	};
 
+	struct power_spectrum_data : public basic_data {
+		power_spectrum_spec params_;
+		std::vector<double> power_;
+	};
+
 }
