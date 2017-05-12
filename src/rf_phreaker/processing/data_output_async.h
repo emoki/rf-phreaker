@@ -105,6 +105,13 @@ public:
 		});
 	}
 
+	template<typename Func>
+	std::future<void> connect_power_spectrum(Func &f) {
+		return out_([=](data_output out) {
+			out.connect_power_spectrum(f);
+		});
+	}
+
 	void clear_queue() {
 		out_.clear_queue();
 	}

@@ -18,6 +18,7 @@ typedef boost::signals2::signal<void(const basic_data&, const std::vector<umts_d
 typedef boost::signals2::signal<void(const basic_data&, const std::vector<lte_data>&)> lte_sweep_signal_type;
 typedef boost::signals2::signal<void(const basic_data&, const std::vector<gsm_data>&,
 	const std::vector<umts_data>&, const std::vector<lte_data>&)> sweep_signal_type;
+typedef boost::signals2::signal<void(const power_spectrum_data&)> power_spectrum_signal_type;
 
 typedef hardware_signal_type::slot_type hardware_slot_type;
 typedef gps_signal_type::slot_type gps_slot_type;
@@ -26,5 +27,6 @@ typedef gsm_signal_type::slot_type gsm_slot_type;
 typedef umts_signal_type::slot_type umts_slot_type;
 typedef lte_signal_type::slot_type lte_slot_type;
 typedef sweep_signal_type::slot_type sweep_slot_type;
+typedef power_spectrum_signal_type::slot_type power_spectrum_slot_type;
 
 }
