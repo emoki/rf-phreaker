@@ -74,6 +74,7 @@ public:
 	bool lte_sweep_;
 	bool lte_layer_3_;
 	bool sweep_;
+	bool power_spectrum_;
 };
 
 class output_interval_settings {

@@ -22,6 +22,16 @@ public:
 	bool can_remove_;
 };
 
+class power_spectrum_package {
+public:
+	power_spectrum_package() {}
+	power_spectrum_package(std::shared_ptr<scanner::measurement_info> &info, const power_spectrum_spec &params)
+		: measurement_info_(info)
+		, params_(params) {}
+	std::shared_ptr<scanner::measurement_info> measurement_info_;
+	power_spectrum_spec params_;
+};
+
 template<typename Data>
 class analysis_data
 {
@@ -62,9 +72,11 @@ typedef tbb::flow::queue_node<add_remove_collection_info> queue_node;
 #define LTE_LAYER3_PORT 3
 #define GSM_SWEEP_PORT 4
 #define GSM_LAYER3_PORT 5
-#define LIMITER_PORT 6
+#define POWER_SPECTRUM_PORT 6
+#define LIMITER_PORT 7
 
-typedef tbb::flow::tuple<measurement_package, measurement_package, measurement_package, measurement_package, measurement_package, measurement_package, tbb::flow::continue_msg> tech_measurement_ports;
+// Use port defines for tech_measurement_ports
+typedef tbb::flow::tuple<measurement_package, measurement_package, measurement_package, measurement_package, measurement_package, measurement_package, power_spectrum_package, tbb::flow::continue_msg> tech_measurement_ports;
 typedef tbb::flow::multifunction_node<add_remove_collection_info, tech_measurement_ports, tbb::flow::rejecting> collection_manager_node;
 
 typedef tbb::flow::function_node<measurement_package, gsm_info> gsm_cell_search_node;
@@ -79,6 +91,8 @@ typedef tbb::flow::multifunction_node<gsm_info, std::tuple<add_remove_collection
 typedef tbb::flow::multifunction_node<umts_info, std::tuple<add_remove_collection_info, tbb::flow::continue_msg>> umts_output_and_feedback_node;
 typedef tbb::flow::multifunction_node<lte_info, std::tuple<add_remove_collection_info, tbb::flow::continue_msg>> lte_output_and_feedback_node;
 typedef tbb::flow::multifunction_node<measurement_package, std::tuple<add_remove_collection_info, tbb::flow::continue_msg>> frequency_correction_node;
+
+typedef tbb::flow::function_node<power_spectrum_package, tbb::flow::continue_msg> power_spectrum_processing_and_output_node;
 
 struct gps_command {
 	enum GPS_COMMAND

@@ -161,6 +161,15 @@ public:
 	static frequency_type sampling_rate__;
 };
 
+class power_spectrum_collection_info : public collection_info
+{
+public:
+	power_spectrum_collection_info(frequency_type freq, time_type time_ns, time_type overlap_time_ns, bandwidth_type bw, frequency_type sampling_rate, const power_spectrum_spec &spec)
+		: collection_info(freq, time_ns, overlap_time_ns, bw, sampling_rate, POWER_SPECTRUM)
+		, params_(spec) {}
+	power_spectrum_spec params_;
+};
+
 
 
 }}

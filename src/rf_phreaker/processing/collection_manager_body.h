@@ -42,6 +42,7 @@ public:
 		, umts_layer_3_(a.umts_layer_3_)
 		, lte_sweep_(a.lte_sweep_)
 		, lte_layer_3_(a.lte_layer_3_)
+		, power_spectrum_(a.power_spectrum_)
 		, timestamp_(a.timestamp_)
 		, scheduler_(&containers_, &settings_, a.scheduler_.has_multiple_scans())
 		, token_count_(0)
@@ -62,6 +63,7 @@ public:
 		, umts_layer_3_(0)
 		, lte_sweep_(0)
 		, lte_layer_3_(0)
+		, power_spectrum_(0)
 		, token_count_(0)
 		, exit_count_(num_items_in_flight)
 	{}
@@ -135,6 +137,13 @@ public:
 				send_msg<LTE_LAYER3_PORT>(out, package);
 				if(packet_output_settings_.lte_layer_3_) { output(meas.get(), "lte_layer_3_", lte_layer_3_++); }
 			}
+			if(ci.specs_.has_spec(POWER_SPECTRUM)) {
+				log += "power_spectrum ";
+				// TODO - does this cut off the derived class?!?
+				power_spectrum_package spec_pak(meas_ptr, static_cast<power_spectrum_collection_info&>(ci).params_);
+				send_msg<POWER_SPECTRUM_PORT>(out, spec_pak);
+				if(packet_output_settings_.power_spectrum_) { output(meas.get(), "power_spectrum_", power_spectrum_++); }
+			}
 			LOG(LCOLLECTION) << log;
 		}
 
@@ -192,6 +201,7 @@ protected:
 	int umts_layer_3_;
 	int lte_sweep_;
 	int lte_layer_3_;
+	int power_spectrum_;
 
 	std::string timestamp_;
 

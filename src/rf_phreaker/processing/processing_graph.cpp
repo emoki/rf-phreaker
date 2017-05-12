@@ -9,6 +9,7 @@
 #include "rf_phreaker/processing/umts_output_and_feedback_body.h"
 #include "rf_phreaker/processing/lte_processing_body.h"
 #include "rf_phreaker/processing/lte_output_and_feedback_body.h"
+#include "rf_phreaker/processing/power_spectrum_processing_and_output_body.h"
 #include "rf_phreaker/common/delegate_sink.h"
 #include "rf_phreaker/common/log.h"
 #include "rf_phreaker/layer_3_common/layer_3_utility.h"
@@ -85,8 +86,6 @@ void processing_graph::start(scanner_controller_interface *sc, data_output_async
 			for(auto i : config.umts_layer_3_decode_.wanted_layer_3_)
 				umts_layer_3 += convert_umts_sib(i) + " ";
 			LOG(LINFO) << umts_layer_3;
-
-
 
 			LOG(LINFO) << "lte sweep collection settings: " << config.lte_sweep_collection_.sampling_rate_ << ", " << config.lte_sweep_collection_.bandwidth_ << ", "
 				<< config.lte_sweep_collection_.collection_time_ << ", " << config.lte_sweep_collection_.overlap_time_ << ", "
@@ -166,6 +165,8 @@ void processing_graph::start(scanner_controller_interface *sc, data_output_async
 				lte_processing_settings(config.lte_layer_3_collection_, config.lte_layer_3_decode_, config.lte_layer_3_general_, false), &is_cancelled_));
 			auto lte_layer_3_output_feedback = std::make_shared<lte_output_and_feedback_node>(*graph_, tbb::flow::serial, lte_layer_3_output_and_feedback_body(out, config.lte_layer_3_decode_.minimum_collection_round_));
 
+			auto power_spectrum_processing = std::make_shared <power_spectrum_processing_and_output_node>(*graph_, tbb::flow::serial, power_spectrum_processing_and_output_body(out));
+
 			auto collection_queue = std::make_shared<queue_node>(*graph_);
 			auto limiter_queue = std::make_shared<tbb::flow::queue_node<tbb::flow::continue_msg>>(*graph_);
 
@@ -209,6 +210,9 @@ void processing_graph::start(scanner_controller_interface *sc, data_output_async
 			tbb::flow::output_port<1>(*lte_layer_3_output_feedback).register_successor(*limiter_queue);
 
 
+			power_spectrum_processing->register_successor(*limiter_queue);
+
+
 			tbb::flow::output_port<LIMITER_PORT>(*collection_manager_node_).register_successor(*limiter_queue);
 
 			nodes_.push_back(limiter);
@@ -229,6 +233,7 @@ void processing_graph::start(scanner_controller_interface *sc, data_output_async
 			nodes_.push_back(lte_layer_3_cell_search);
 			nodes_.push_back(lte_layer_3_decode);
 			nodes_.push_back(lte_layer_3_output_feedback);
+			nodes_.push_back(power_spectrum_processing);
 
 			start_node_->activate();
 

@@ -32,6 +32,7 @@ set (processing_SRCS
 	lte_processing_body.h
 	measurement_conversion.h
 	node_defs.h
+	power_spectrum_processing_and_output_body.h
 	processing_and_feedback_helper.h
 	processing_graph.cpp
 	processing_graph.h
