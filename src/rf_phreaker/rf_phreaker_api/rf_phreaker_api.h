@@ -723,6 +723,23 @@ typedef struct rp_lte {
 	rp_lte_layer_3 layer_3_;
 } rp_lte;
 
+
+typedef struct rp_power_spectrum {
+	rp_base base_;
+	rp_time_type dwell_time_;
+	rp_frequency_type sampling_rate_;
+	rp_frequency_type start_frequency_;
+	rp_frequency_type end_frequency_;
+	rp_frequency_type span_;
+	int32_t window_length_;
+	int32_t num_windows_;
+	int32_t bin_size_;
+	int32_t step_size_;
+	int32_t num_power_;
+	double *power_;
+} rp_power_spectrum;
+
+
 typedef enum rp_sample_format_type {
 	LITTLE_ENDIAN_FLOAT_REAL_IMAGINARY
 } rp_sample_format_type;
@@ -734,6 +751,7 @@ typedef struct rp_raw_data {
 	int64_t num_samples_;
 	void *samples_;
 } rp_raw_data;
+
 
 typedef struct rp_callbacks {
 	void (RP_CALLCONV *rp_update)(const int8_t *google_protocol_buffer_stream, int32_t size);

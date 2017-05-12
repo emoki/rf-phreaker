@@ -594,7 +594,29 @@ public:
 	std::list<std::vector<rp_lte_neighbor_cells_per_band_class_cdma_2000>> sib8_cpb_class_xxrt_;
 };
 
+class power_spectrum_wrap {
+public:
+	power_spectrum_wrap(const power_spectrum_data &t) {
+		buf_.base_ = basic_wrap(t).buf_;
+		buf_.dwell_time_ = t.params_.dwell_time_;
+		buf_.sampling_rate_ = t.params_.sampling_rate_;
+		buf_.start_frequency_ = t.params_.start_frequency_;
+		buf_.end_frequency_ = t.params_.end_frequency_;
+		buf_.span_ = t.params_.span_;
+		buf_.window_length_ = t.params_.window_length_;
+		buf_.num_windows_ = t.params_.num_windows_;
+		buf_.bin_size_ = t.params_.bin_size_;
+		buf_.step_size_ = t.params_.step_size_;
+		buf_.num_power_ = t.power_.size();
+		bins_.resize(t.power_.size());
+		memcpy(bins_.data(), t.power_.data(), sizeof(double) * t.power_.size());
+	}
 
+	rp_power_spectrum buf_;
+	typedef rp_power_spectrum buf_type;
+
+	std::vector<double> bins_;
+};
 
 
 }}
