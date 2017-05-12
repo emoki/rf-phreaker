@@ -1017,7 +1017,7 @@ public:
 	}
 };
 
-class gsm_update_pb : public pb<rp_gsm_update>{
+class gsm_update_pb : public pb<rp_gsm_update> {
 public:
 	gsm_update_pb() {}
 	gsm_update_pb(const std::vector<gsm_data> &t, const basic_data &b) {
@@ -1044,7 +1044,7 @@ public:
 	}
 };
 
-class wcdma_update_pb : public pb<rp_wcdma_update>{
+class wcdma_update_pb : public pb<rp_wcdma_update> {
 public:
 	wcdma_update_pb() {}
 	wcdma_update_pb(const std::vector<umts_data> &t, const basic_data &b) {
@@ -1071,7 +1071,7 @@ public:
 	}
 };
 
-class lte_update_pb : public pb<rp_lte_update>{
+class lte_update_pb : public pb<rp_lte_update> {
 public:
 	lte_update_pb() {}
 	lte_update_pb(const std::vector<lte_data> &t, const basic_data &b) {
