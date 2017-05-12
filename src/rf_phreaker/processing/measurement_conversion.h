@@ -126,5 +126,29 @@ inline lte_data convert_to_lte_data(const scanner::measurement_info &info, const
 	return data;
 }
 
+inline void convert_to_power_spectrum_data(power_spectrum_data &data, const scanner::measurement_info &info, const ipp_32f_array &power_array, const power_spectrum_spec &spec) {
+	Ipp32f sum = 0;
+	if(power_array.length())
+		ippsSum_32f(power_array.get(), power_array.length(), &sum, ippAlgHintFast);
+	convert_to_basic_data(data, info, sum);
+	data.params_ = spec;
+	data.power_.resize(spec.span_ / spec.bin_size_);
+	auto packet_start_freq = info.frequency() - (info.sampling_rate() / 2);
+	int start_bin = static_cast<int>((spec.start_frequency_ - packet_start_freq) / spec.bin_size_);
+	int end_bin = static_cast<int>((spec.end_frequency_ - packet_start_freq) / spec.bin_size_);
+	if(end_bin > power_array.length())
+		throw processing_error("power_spectrum_array is too small for conversion");
+	for(size_t i = 0; i < data.power_.size(); ++i) {
+		data.power_[i] = scanner::signal_level_calculator::calculate_sl(power_array[start_bin + i],
+			info, data.params_.start_frequency_ + data.params_.step_size_ * i);
+	}
+}
+
+inline power_spectrum_data convert_to_power_spectrum_data(const scanner::measurement_info &info, const ipp_32f_array &power_array, const power_spectrum_spec &spec) {
+	power_spectrum_data data;
+	convert_to_power_spectrum_data(data, info, power_array, spec);
+	return data;
+}
+
 
 }}
