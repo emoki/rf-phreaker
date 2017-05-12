@@ -15,6 +15,7 @@ message rp_update {
 		rp_wcdma_update wcdma_sweep = 8;
 		rp_lte_update lte_full_scan = 9;
 		rp_lte_update lte_sweep = 10;
+		rp_power_spectrum power_spectrum = 11;
 	}
 }
 
@@ -636,6 +637,20 @@ message rp_lte {
 message rp_lte_update {
 	rp_base base = 1;
 	repeated rp_lte lte = 2;
+}
+
+message rp_power_spectrum {
+	rp_base base = 1;
+	int64 dwell_time = 2;
+	int64 sampling_rate = 3;
+	int64 start_frequency = 4;
+	int64 end_frequency = 5;
+	int64 span = 6;
+	int32 window_length = 7;
+	int32 num_windows = 8;
+	double bin_size = 9;
+	double step_size = 10;
+	repeated double power = 11 [packed=true];
 }
 
 enum rp_sample_format_type {

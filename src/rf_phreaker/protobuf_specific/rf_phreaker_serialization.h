@@ -1098,6 +1098,49 @@ public:
 	}
 };
 
+class power_spectrum_pb : public pb<rp_power_spectrum> {
+public:
+	power_spectrum_pb() {}
+	power_spectrum_pb(const power_spectrum_data &t) {
+		populate(t, pb_.get());
+	}
+	void populate(const power_spectrum_data &t) {
+		populate(t, pb_.get());
+	}
+	static void populate(const rp_power_spectrum &pb, power_spectrum_data &t) {
+		base_pb::populate(pb.base(), t);
+		t.params_.bin_size_ = pb.bin_size();
+		t.params_.dwell_time_= pb.dwell_time();
+		t.params_.end_frequency_ = pb.end_frequency();
+		t.params_.num_windows_ = pb.num_windows();
+		t.params_.sampling_rate_ = pb.sampling_rate();
+		t.params_.span_ = pb.span();
+		t.params_.start_frequency_ = pb.start_frequency();
+		t.params_.step_size_ = pb.step_size();
+		t.params_.window_length_ = pb.window_length();
+		t.params_.num_windows_ = pb.num_windows();
+		t.power_.resize(pb.power_size());
+		for(auto i = 0; i < pb.power_size(); ++i) {
+			t.power_[i] = pb.power().Get(i);
+		}
+	}
+	static void populate(const power_spectrum_data &t, rp_power_spectrum *pb) {
+		pb->Clear();
+		pb->set_bin_size(t.params_.bin_size_);
+		pb->set_dwell_time(t.params_.dwell_time_);
+		pb->set_sampling_rate(t.params_.sampling_rate_);
+		pb->set_end_frequency(t.params_.end_frequency_);
+		pb->set_span(t.params_.span_);
+		pb->set_start_frequency(t.params_.start_frequency_);
+		pb->set_step_size(t.params_.step_size_);
+		pb->set_window_length(t.params_.window_length_);
+		pb->set_num_windows(t.params_.num_windows_);
+		for(auto i : t.power_) {
+			pb->add_power(i);
+		}
+	}
+};
+
 class update_pb : public pb<rp_update> {
 public:
 	update_pb() {}
@@ -1130,6 +1173,9 @@ public:
 	}
 	void populate_lte_sweep(const std::vector<lte_data> &t, const basic_data &b) {
 		populate_lte_sweep(t, b, pb_.get());
+	}
+	void populate_power_spectrum(const power_spectrum_data &t) {
+		populate_power_spectrum(t, pb_.get());
 	}
 
 	hardware get_hardware() {
@@ -1202,6 +1248,11 @@ public:
 		base_pb::populate(pb_->lte_sweep().base(), t);
 		return t;
 	}
+	power_spectrum_data get_power_spectrum() {
+		power_spectrum_data t;
+		power_spectrum_pb::populate(pb_->power_spectrum(), t);
+		return t;
+	}
 	static void populate_message(const ::rp_status s, const std::string &str, rp_update *pb) {
 		message_pb::populate(s, str, pb->mutable_msg());
 	}
@@ -1232,6 +1283,10 @@ public:
 	static void populate_lte_sweep(const std::vector<lte_data> &t, const basic_data &b, rp_update *pb) {
 		lte_update_pb::populate(t, b, pb->mutable_lte_sweep());
 	}
+	static void populate_power_spectrum(const power_spectrum_data &t, rp_update *pb) {
+		power_spectrum_pb::populate(t, pb->mutable_power_spectrum());
+	}
+
 };
 
 }}

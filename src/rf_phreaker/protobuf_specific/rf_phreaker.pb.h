@@ -82,6 +82,7 @@ class rp_lte_update;
 class rp_message;
 class rp_pcid_group;
 class rp_plmn;
+class rp_power_spectrum;
 class rp_raw_data;
 class rp_raw_layer_3;
 class rp_satellite;
@@ -491,6 +492,7 @@ class rp_update : public ::google::protobuf::Message {
     kWcdmaSweep = 8,
     kLteFullScan = 9,
     kLteSweep = 10,
+    kPowerSpectrum = 11,
     UPDATE_NOT_SET = 0,
   };
 
@@ -625,6 +627,15 @@ class rp_update : public ::google::protobuf::Message {
   ::rf_phreaker::protobuf::rp_lte_update* release_lte_sweep();
   void set_allocated_lte_sweep(::rf_phreaker::protobuf::rp_lte_update* lte_sweep);
 
+  // optional .rf_phreaker.protobuf.rp_power_spectrum power_spectrum = 11;
+  bool has_power_spectrum() const;
+  void clear_power_spectrum();
+  static const int kPowerSpectrumFieldNumber = 11;
+  const ::rf_phreaker::protobuf::rp_power_spectrum& power_spectrum() const;
+  ::rf_phreaker::protobuf::rp_power_spectrum* mutable_power_spectrum();
+  ::rf_phreaker::protobuf::rp_power_spectrum* release_power_spectrum();
+  void set_allocated_power_spectrum(::rf_phreaker::protobuf::rp_power_spectrum* power_spectrum);
+
   UpdateCase update_case() const;
   // @@protoc_insertion_point(class_scope:rf_phreaker.protobuf.rp_update)
  private:
@@ -638,6 +649,7 @@ class rp_update : public ::google::protobuf::Message {
   inline void set_has_wcdma_sweep();
   inline void set_has_lte_full_scan();
   inline void set_has_lte_sweep();
+  inline void set_has_power_spectrum();
 
   inline bool has_update() const;
   void clear_update();
@@ -657,6 +669,7 @@ class rp_update : public ::google::protobuf::Message {
     ::rf_phreaker::protobuf::rp_wcdma_update* wcdma_sweep_;
     ::rf_phreaker::protobuf::rp_lte_update* lte_full_scan_;
     ::rf_phreaker::protobuf::rp_lte_update* lte_sweep_;
+    ::rf_phreaker::protobuf::rp_power_spectrum* power_spectrum_;
   } update_;
   mutable int _cached_size_;
   ::google::protobuf::uint32 _oneof_case_[1];
@@ -6796,6 +6809,164 @@ class rp_lte_update : public ::google::protobuf::Message {
 };
 // -------------------------------------------------------------------
 
+class rp_power_spectrum : public ::google::protobuf::Message {
+ public:
+  rp_power_spectrum();
+  virtual ~rp_power_spectrum();
+
+  rp_power_spectrum(const rp_power_spectrum& from);
+
+  inline rp_power_spectrum& operator=(const rp_power_spectrum& from) {
+    CopyFrom(from);
+    return *this;
+  }
+
+  static const ::google::protobuf::Descriptor* descriptor();
+  static const rp_power_spectrum& default_instance();
+
+  void Swap(rp_power_spectrum* other);
+
+  // implements Message ----------------------------------------------
+
+  inline rp_power_spectrum* New() const { return New(NULL); }
+
+  rp_power_spectrum* New(::google::protobuf::Arena* arena) const;
+  void CopyFrom(const ::google::protobuf::Message& from);
+  void MergeFrom(const ::google::protobuf::Message& from);
+  void CopyFrom(const rp_power_spectrum& from);
+  void MergeFrom(const rp_power_spectrum& from);
+  void Clear();
+  bool IsInitialized() const;
+
+  int ByteSize() const;
+  bool MergePartialFromCodedStream(
+      ::google::protobuf::io::CodedInputStream* input);
+  void SerializeWithCachedSizes(
+      ::google::protobuf::io::CodedOutputStream* output) const;
+  ::google::protobuf::uint8* SerializeWithCachedSizesToArray(::google::protobuf::uint8* output) const;
+  int GetCachedSize() const { return _cached_size_; }
+  private:
+  void SharedCtor();
+  void SharedDtor();
+  void SetCachedSize(int size) const;
+  void InternalSwap(rp_power_spectrum* other);
+  private:
+  inline ::google::protobuf::Arena* GetArenaNoVirtual() const {
+    return _internal_metadata_.arena();
+  }
+  inline void* MaybeArenaPtr() const {
+    return _internal_metadata_.raw_arena_ptr();
+  }
+  public:
+
+  ::google::protobuf::Metadata GetMetadata() const;
+
+  // nested types ----------------------------------------------------
+
+  // accessors -------------------------------------------------------
+
+  // optional .rf_phreaker.protobuf.rp_base base = 1;
+  bool has_base() const;
+  void clear_base();
+  static const int kBaseFieldNumber = 1;
+  const ::rf_phreaker::protobuf::rp_base& base() const;
+  ::rf_phreaker::protobuf::rp_base* mutable_base();
+  ::rf_phreaker::protobuf::rp_base* release_base();
+  void set_allocated_base(::rf_phreaker::protobuf::rp_base* base);
+
+  // optional int64 dwell_time = 2;
+  void clear_dwell_time();
+  static const int kDwellTimeFieldNumber = 2;
+  ::google::protobuf::int64 dwell_time() const;
+  void set_dwell_time(::google::protobuf::int64 value);
+
+  // optional int64 sampling_rate = 3;
+  void clear_sampling_rate();
+  static const int kSamplingRateFieldNumber = 3;
+  ::google::protobuf::int64 sampling_rate() const;
+  void set_sampling_rate(::google::protobuf::int64 value);
+
+  // optional int64 start_frequency = 4;
+  void clear_start_frequency();
+  static const int kStartFrequencyFieldNumber = 4;
+  ::google::protobuf::int64 start_frequency() const;
+  void set_start_frequency(::google::protobuf::int64 value);
+
+  // optional int64 end_frequency = 5;
+  void clear_end_frequency();
+  static const int kEndFrequencyFieldNumber = 5;
+  ::google::protobuf::int64 end_frequency() const;
+  void set_end_frequency(::google::protobuf::int64 value);
+
+  // optional int64 span = 6;
+  void clear_span();
+  static const int kSpanFieldNumber = 6;
+  ::google::protobuf::int64 span() const;
+  void set_span(::google::protobuf::int64 value);
+
+  // optional int32 window_length = 7;
+  void clear_window_length();
+  static const int kWindowLengthFieldNumber = 7;
+  ::google::protobuf::int32 window_length() const;
+  void set_window_length(::google::protobuf::int32 value);
+
+  // optional int32 num_windows = 8;
+  void clear_num_windows();
+  static const int kNumWindowsFieldNumber = 8;
+  ::google::protobuf::int32 num_windows() const;
+  void set_num_windows(::google::protobuf::int32 value);
+
+  // optional double bin_size = 9;
+  void clear_bin_size();
+  static const int kBinSizeFieldNumber = 9;
+  double bin_size() const;
+  void set_bin_size(double value);
+
+  // optional double step_size = 10;
+  void clear_step_size();
+  static const int kStepSizeFieldNumber = 10;
+  double step_size() const;
+  void set_step_size(double value);
+
+  // repeated double power = 11 [packed = true];
+  int power_size() const;
+  void clear_power();
+  static const int kPowerFieldNumber = 11;
+  double power(int index) const;
+  void set_power(int index, double value);
+  void add_power(double value);
+  const ::google::protobuf::RepeatedField< double >&
+      power() const;
+  ::google::protobuf::RepeatedField< double >*
+      mutable_power();
+
+  // @@protoc_insertion_point(class_scope:rf_phreaker.protobuf.rp_power_spectrum)
+ private:
+
+  ::google::protobuf::internal::InternalMetadataWithArena _internal_metadata_;
+  bool _is_default_instance_;
+  ::rf_phreaker::protobuf::rp_base* base_;
+  ::google::protobuf::int64 dwell_time_;
+  ::google::protobuf::int64 sampling_rate_;
+  ::google::protobuf::int64 start_frequency_;
+  ::google::protobuf::int64 end_frequency_;
+  ::google::protobuf::int64 span_;
+  ::google::protobuf::int32 window_length_;
+  ::google::protobuf::int32 num_windows_;
+  double bin_size_;
+  double step_size_;
+  ::google::protobuf::RepeatedField< double > power_;
+  mutable int _power_cached_byte_size_;
+  mutable int _cached_size_;
+  friend void  protobuf_AddDesc_rf_5fphreaker_2eproto();
+  friend void protobuf_AssignDesc_rf_5fphreaker_2eproto();
+  friend void protobuf_ShutdownFile_rf_5fphreaker_2eproto();
+
+  void InitAsDefaultInstance();
+  static rp_power_spectrum* default_instance_;
+};
+// -------------------------------------------------------------------
+
 class rp_raw_data : public ::google::protobuf::Message {
  public:
   rp_raw_data();
@@ -7386,6 +7557,53 @@ inline void rp_update::set_allocated_lte_sweep(::rf_phreaker::protobuf::rp_lte_u
     update_.lte_sweep_ = lte_sweep;
   }
   // @@protoc_insertion_point(field_set_allocated:rf_phreaker.protobuf.rp_update.lte_sweep)
+}
+
+// optional .rf_phreaker.protobuf.rp_power_spectrum power_spectrum = 11;
+inline bool rp_update::has_power_spectrum() const {
+  return update_case() == kPowerSpectrum;
+}
+inline void rp_update::set_has_power_spectrum() {
+  _oneof_case_[0] = kPowerSpectrum;
+}
+inline void rp_update::clear_power_spectrum() {
+  if (has_power_spectrum()) {
+    delete update_.power_spectrum_;
+    clear_has_update();
+  }
+}
+inline  const ::rf_phreaker::protobuf::rp_power_spectrum& rp_update::power_spectrum() const {
+  // @@protoc_insertion_point(field_get:rf_phreaker.protobuf.rp_update.power_spectrum)
+  return has_power_spectrum()
+      ? *update_.power_spectrum_
+      : ::rf_phreaker::protobuf::rp_power_spectrum::default_instance();
+}
+inline ::rf_phreaker::protobuf::rp_power_spectrum* rp_update::mutable_power_spectrum() {
+  if (!has_power_spectrum()) {
+    clear_update();
+    set_has_power_spectrum();
+    update_.power_spectrum_ = new ::rf_phreaker::protobuf::rp_power_spectrum;
+  }
+  // @@protoc_insertion_point(field_mutable:rf_phreaker.protobuf.rp_update.power_spectrum)
+  return update_.power_spectrum_;
+}
+inline ::rf_phreaker::protobuf::rp_power_spectrum* rp_update::release_power_spectrum() {
+  if (has_power_spectrum()) {
+    clear_has_update();
+    ::rf_phreaker::protobuf::rp_power_spectrum* temp = update_.power_spectrum_;
+    update_.power_spectrum_ = NULL;
+    return temp;
+  } else {
+    return NULL;
+  }
+}
+inline void rp_update::set_allocated_power_spectrum(::rf_phreaker::protobuf::rp_power_spectrum* power_spectrum) {
+  clear_update();
+  if (power_spectrum) {
+    set_has_power_spectrum();
+    update_.power_spectrum_ = power_spectrum;
+  }
+  // @@protoc_insertion_point(field_set_allocated:rf_phreaker.protobuf.rp_update.power_spectrum)
 }
 
 inline bool rp_update::has_update() const {
@@ -12829,6 +13047,203 @@ rp_lte_update::lte() const {
 
 // -------------------------------------------------------------------
 
+// rp_power_spectrum
+
+// optional .rf_phreaker.protobuf.rp_base base = 1;
+inline bool rp_power_spectrum::has_base() const {
+  return !_is_default_instance_ && base_ != NULL;
+}
+inline void rp_power_spectrum::clear_base() {
+  if (GetArenaNoVirtual() == NULL && base_ != NULL) delete base_;
+  base_ = NULL;
+}
+inline const ::rf_phreaker::protobuf::rp_base& rp_power_spectrum::base() const {
+  // @@protoc_insertion_point(field_get:rf_phreaker.protobuf.rp_power_spectrum.base)
+  return base_ != NULL ? *base_ : *default_instance_->base_;
+}
+inline ::rf_phreaker::protobuf::rp_base* rp_power_spectrum::mutable_base() {
+  
+  if (base_ == NULL) {
+    base_ = new ::rf_phreaker::protobuf::rp_base;
+  }
+  // @@protoc_insertion_point(field_mutable:rf_phreaker.protobuf.rp_power_spectrum.base)
+  return base_;
+}
+inline ::rf_phreaker::protobuf::rp_base* rp_power_spectrum::release_base() {
+  
+  ::rf_phreaker::protobuf::rp_base* temp = base_;
+  base_ = NULL;
+  return temp;
+}
+inline void rp_power_spectrum::set_allocated_base(::rf_phreaker::protobuf::rp_base* base) {
+  delete base_;
+  base_ = base;
+  if (base) {
+    
+  } else {
+    
+  }
+  // @@protoc_insertion_point(field_set_allocated:rf_phreaker.protobuf.rp_power_spectrum.base)
+}
+
+// optional int64 dwell_time = 2;
+inline void rp_power_spectrum::clear_dwell_time() {
+  dwell_time_ = GOOGLE_LONGLONG(0);
+}
+inline ::google::protobuf::int64 rp_power_spectrum::dwell_time() const {
+  // @@protoc_insertion_point(field_get:rf_phreaker.protobuf.rp_power_spectrum.dwell_time)
+  return dwell_time_;
+}
+inline void rp_power_spectrum::set_dwell_time(::google::protobuf::int64 value) {
+  
+  dwell_time_ = value;
+  // @@protoc_insertion_point(field_set:rf_phreaker.protobuf.rp_power_spectrum.dwell_time)
+}
+
+// optional int64 sampling_rate = 3;
+inline void rp_power_spectrum::clear_sampling_rate() {
+  sampling_rate_ = GOOGLE_LONGLONG(0);
+}
+inline ::google::protobuf::int64 rp_power_spectrum::sampling_rate() const {
+  // @@protoc_insertion_point(field_get:rf_phreaker.protobuf.rp_power_spectrum.sampling_rate)
+  return sampling_rate_;
+}
+inline void rp_power_spectrum::set_sampling_rate(::google::protobuf::int64 value) {
+  
+  sampling_rate_ = value;
+  // @@protoc_insertion_point(field_set:rf_phreaker.protobuf.rp_power_spectrum.sampling_rate)
+}
+
+// optional int64 start_frequency = 4;
+inline void rp_power_spectrum::clear_start_frequency() {
+  start_frequency_ = GOOGLE_LONGLONG(0);
+}
+inline ::google::protobuf::int64 rp_power_spectrum::start_frequency() const {
+  // @@protoc_insertion_point(field_get:rf_phreaker.protobuf.rp_power_spectrum.start_frequency)
+  return start_frequency_;
+}
+inline void rp_power_spectrum::set_start_frequency(::google::protobuf::int64 value) {
+  
+  start_frequency_ = value;
+  // @@protoc_insertion_point(field_set:rf_phreaker.protobuf.rp_power_spectrum.start_frequency)
+}
+
+// optional int64 end_frequency = 5;
+inline void rp_power_spectrum::clear_end_frequency() {
+  end_frequency_ = GOOGLE_LONGLONG(0);
+}
+inline ::google::protobuf::int64 rp_power_spectrum::end_frequency() const {
+  // @@protoc_insertion_point(field_get:rf_phreaker.protobuf.rp_power_spectrum.end_frequency)
+  return end_frequency_;
+}
+inline void rp_power_spectrum::set_end_frequency(::google::protobuf::int64 value) {
+  
+  end_frequency_ = value;
+  // @@protoc_insertion_point(field_set:rf_phreaker.protobuf.rp_power_spectrum.end_frequency)
+}
+
+// optional int64 span = 6;
+inline void rp_power_spectrum::clear_span() {
+  span_ = GOOGLE_LONGLONG(0);
+}
+inline ::google::protobuf::int64 rp_power_spectrum::span() const {
+  // @@protoc_insertion_point(field_get:rf_phreaker.protobuf.rp_power_spectrum.span)
+  return span_;
+}
+inline void rp_power_spectrum::set_span(::google::protobuf::int64 value) {
+  
+  span_ = value;
+  // @@protoc_insertion_point(field_set:rf_phreaker.protobuf.rp_power_spectrum.span)
+}
+
+// optional int32 window_length = 7;
+inline void rp_power_spectrum::clear_window_length() {
+  window_length_ = 0;
+}
+inline ::google::protobuf::int32 rp_power_spectrum::window_length() const {
+  // @@protoc_insertion_point(field_get:rf_phreaker.protobuf.rp_power_spectrum.window_length)
+  return window_length_;
+}
+inline void rp_power_spectrum::set_window_length(::google::protobuf::int32 value) {
+  
+  window_length_ = value;
+  // @@protoc_insertion_point(field_set:rf_phreaker.protobuf.rp_power_spectrum.window_length)
+}
+
+// optional int32 num_windows = 8;
+inline void rp_power_spectrum::clear_num_windows() {
+  num_windows_ = 0;
+}
+inline ::google::protobuf::int32 rp_power_spectrum::num_windows() const {
+  // @@protoc_insertion_point(field_get:rf_phreaker.protobuf.rp_power_spectrum.num_windows)
+  return num_windows_;
+}
+inline void rp_power_spectrum::set_num_windows(::google::protobuf::int32 value) {
+  
+  num_windows_ = value;
+  // @@protoc_insertion_point(field_set:rf_phreaker.protobuf.rp_power_spectrum.num_windows)
+}
+
+// optional double bin_size = 9;
+inline void rp_power_spectrum::clear_bin_size() {
+  bin_size_ = 0;
+}
+inline double rp_power_spectrum::bin_size() const {
+  // @@protoc_insertion_point(field_get:rf_phreaker.protobuf.rp_power_spectrum.bin_size)
+  return bin_size_;
+}
+inline void rp_power_spectrum::set_bin_size(double value) {
+  
+  bin_size_ = value;
+  // @@protoc_insertion_point(field_set:rf_phreaker.protobuf.rp_power_spectrum.bin_size)
+}
+
+// optional double step_size = 10;
+inline void rp_power_spectrum::clear_step_size() {
+  step_size_ = 0;
+}
+inline double rp_power_spectrum::step_size() const {
+  // @@protoc_insertion_point(field_get:rf_phreaker.protobuf.rp_power_spectrum.step_size)
+  return step_size_;
+}
+inline void rp_power_spectrum::set_step_size(double value) {
+  
+  step_size_ = value;
+  // @@protoc_insertion_point(field_set:rf_phreaker.protobuf.rp_power_spectrum.step_size)
+}
+
+// repeated double power = 11 [packed = true];
+inline int rp_power_spectrum::power_size() const {
+  return power_.size();
+}
+inline void rp_power_spectrum::clear_power() {
+  power_.Clear();
+}
+inline double rp_power_spectrum::power(int index) const {
+  // @@protoc_insertion_point(field_get:rf_phreaker.protobuf.rp_power_spectrum.power)
+  return power_.Get(index);
+}
+inline void rp_power_spectrum::set_power(int index, double value) {
+  power_.Set(index, value);
+  // @@protoc_insertion_point(field_set:rf_phreaker.protobuf.rp_power_spectrum.power)
+}
+inline void rp_power_spectrum::add_power(double value) {
+  power_.Add(value);
+  // @@protoc_insertion_point(field_add:rf_phreaker.protobuf.rp_power_spectrum.power)
+}
+inline const ::google::protobuf::RepeatedField< double >&
+rp_power_spectrum::power() const {
+  // @@protoc_insertion_point(field_list:rf_phreaker.protobuf.rp_power_spectrum.power)
+  return power_;
+}
+inline ::google::protobuf::RepeatedField< double >*
+rp_power_spectrum::mutable_power() {
+  // @@protoc_insertion_point(field_mutable_list:rf_phreaker.protobuf.rp_power_spectrum.power)
+  return &power_;
+}
+
+// -------------------------------------------------------------------
+
 // rp_raw_data
 
 // optional .rf_phreaker.protobuf.rp_base base = 1;
@@ -12941,6 +13356,8 @@ rp_raw_data::mutable_samples() {
 }
 
 #endif  // !PROTOBUF_INLINE_NOT_IN_HEADERS
+// -------------------------------------------------------------------
+
 // -------------------------------------------------------------------
 
 // -------------------------------------------------------------------
