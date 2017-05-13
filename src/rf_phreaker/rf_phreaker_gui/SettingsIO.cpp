@@ -8,7 +8,7 @@ void SettingsIO::readSettings(Settings &settings) {
 	settings.themePrimaryColor_ = qs_.value(themePrimaryColorKey, "indigo").toString();
 	settings.themeAccentColor_ = qs_.value(themeAccentColorkey, "green").toString();
 	settings.themeTabHighlightColor_ = qs_.value(themeTabHighlightColorKey, "white").toString();
-	settings.measurementRemovalTime_ = qs_.value(measurementRemovalTimeKey, 30).toInt();
+	settings.measurementRemovalTime_ = qs_.value(measurementRemovalTimeKey, 60).toInt();
 	settings.convertRfpToAscii_ = qs_.value(convertRfpToAsciiKey, false).toBool();
 }
 
