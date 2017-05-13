@@ -506,10 +506,12 @@ void Api::convertRfp(QString filename) {
 		try {
 			fn.remove("file:///"); 
 			IO::convert_rpf(fn);
-			Api::instance()->addMessageAsync(fn + " conversion successfully.");
+			qInfo() << fn << " text conversion successfully.";
+			Api::instance()->addMessageAsync(fn + " text conversion successfully.");
 		}
 		catch(const std::exception &err) {
-			Api::instance()->addMessageAsync(fn + " conversion failed!  " + err.what());
+			qWarning() << fn << " text conversion failed!";
+			Api::instance()->addMessageAsync(fn + " text conversion failed!  " + err.what());
 		}
 	}, filename));
 }

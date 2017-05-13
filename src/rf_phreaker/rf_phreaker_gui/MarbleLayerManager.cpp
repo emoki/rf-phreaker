@@ -62,11 +62,16 @@ void MarbleLayerManager::init() {
 			recordingDoc_->setDocumentRole(DocumentRole::TrackingDocument);
 			model_.treeModel()->addDocument(recordingDoc_);
 
-			QFileInfo rpFile(MarbleDirs::path("rf_phreaker/rf_phreaker.kml"));
-			//if(!rpFile.exists())
-			//	 Signal error
-			model_.addGeoDataFile(rpFile.absoluteFilePath());
+			SettingsIO io;
+			QFileInfo rpFile(QFileInfo(io.fileName()).absolutePath(), "rf_phreaker.kml");
 
+			//QFileInfo rpFile(MarbleDirs::path("rf_phreaker/rf_phreaker.kml"));
+			if(!rpFile.exists()) {
+				qWarning() << "Unable to find rf_phreaker.kml.  Mapping styles are unknown.";
+			}
+			else {
+				model_.addGeoDataFile(rpFile.absoluteFilePath());
+			}
 			// Add our position plugin which gives Marble our location.
 			auto pluginManager = model_.pluginManager();
 			pluginManager->addPositionProviderPlugin(&rpPositionProviderPlugin_);
@@ -87,9 +92,12 @@ MarbleLayerManager::~MarbleLayerManager() {
 }
 
 void MarbleLayerManager::GeoObjectAdded(Marble::GeoDataObject *object) {
+	qDebug() << "GeoDataObject added.";
 	if(rpDoc_ == nullptr && object->nodeType() == Marble::GeoDataTypes::GeoDataDocumentType) {
+		qDebug() << "Looking for rpDoc.";
 		auto doc = static_cast<Marble::GeoDataDocument*>(object);
 		if(doc->name() == "RfPhreaker") {
+			qDebug() << "rpDoc found...";
 			rpDoc_ = doc;
 			configureStyles();
 			openPreviousLayers();
@@ -99,6 +107,8 @@ void MarbleLayerManager::GeoObjectAdded(Marble::GeoDataObject *object) {
 
 void MarbleLayerManager::configureStyles() {
 	std::lock_guard<std::recursive_mutex> lock(mutex_);
+	qInfo() << "Configuring RF Phreaker mapping styles.";
+
 	// Disable PositionTracking current position and use our own built in QML
 	using namespace Marble;
 
@@ -140,6 +150,8 @@ void MarbleLayerManager::openPreviousLayers() {
 void MarbleLayerManager::storePreviousLayers() {
 	std::lock_guard<std::recursive_mutex> lock(mutex_);
 	QStringList placemarkList;
+	if(rpDoc_ == nullptr)
+		return;
 	for(auto i = 0; i < rpDoc_->size(); ++i) {
 		auto placemark = static_cast<GeoDataPlacemark*>(rpDoc_->child(i));
 		if(placemark == nullptr)
@@ -184,10 +196,10 @@ void MarbleLayerManager::addRpf(const QString &filename) {
 	addLayerFutures_.push_back(std::async(std::launch::async, [&](const QString filename) {
 		try {
 
-			qDebug() << "Converting RPF file. " << filename << ".";
+			qDebug() << "Converting RFP file to map layer. " << filename << ".";
 			QFile f(filename);
 			if(!f.open(QIODevice::ReadOnly | QIODevice::Unbuffered)) {
-				throw std::runtime_error(std::string("Failed to open RPF file. ").append(f.errorString().toStdString()));
+				throw std::runtime_error(std::string("Failed to open RFP file for map layer conversion. ").append(f.errorString().toStdString()));
 			}
 			else {
 				auto multiTrack = std::make_unique<Marble::GeoDataMultiTrack>();
@@ -261,7 +273,8 @@ void MarbleLayerManager::addPreviousTrack(Marble::GeoDataPlacemark *placemark) {
 	// Style needs to be set after placemark has been added to the document.
 	placemark->setStyleUrl("#ptrack");
 	model_.treeModel()->addDocument(rpDoc_);
-	Api::instance()->addMessageAsync(placemark->name() + " layer added.");
+	qInfo() << placemark->name() + " layer added to map.";
+	Api::instance()->addMessageAsync(placemark->name() + " layer added to map.");
 }
 
 Marble::MarbleModel* MarbleLayerManager::model() {

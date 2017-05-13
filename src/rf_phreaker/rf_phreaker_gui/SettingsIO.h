@@ -5,6 +5,7 @@
 #include <QList>
 #include <QString>
 #include <QDebug>
+#include <QFile>
 #include "rf_phreaker/rf_phreaker_gui/Serialization.h"
 #include "rf_phreaker/rf_phreaker_gui/CollectionInfo.h"
 #include "rf_phreaker/common/settings.h"
@@ -28,11 +29,16 @@ class Settings;
 class SettingsIO {
 public:
 	SettingsIO()
-		: qs_(QSettings::IniFormat, QSettings::UserScope, "rf_phreaker", "gui") {}
+		: qs_(QSettings::IniFormat, QSettings::UserScope, "rf_phreaker", "gui") {
+		if(!QFile(qs_.fileName()).exists())
+			qWarning() << "Unable to access or find the configuration file!  Settings will be set to default.";
+	}
 
 	void readSettings(Settings &settings);
 
 	void writeSettings(const Settings &settings);
+
+	QString fileName() const { return qs_.fileName(); }
 
 	Marble::GeoDataCoordinates readLastKnownCoordinate() {
 		bool success = false;

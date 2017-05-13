@@ -102,10 +102,10 @@ public:
 	}
 
 	static void convert_rpf(QString filename) {
-		qDebug() << "Converting RPF file. " << filename << ".";
+		qDebug() << "Converting RFP file to text tab-delimited files. " << filename << ".";
 		QFile f(filename);
 		if(!f.open(QIODevice::ReadOnly | QIODevice::Unbuffered)) {
-			qDebug() << "Failed to open RPF file. " << f.errorString();
+			qDebug() << "Failed to open RFP file for text conversion. " << f.errorString();
 		}
 		else {
 			auto input_file = std::make_unique<google::protobuf::io::FileInputStream>(f.handle());
