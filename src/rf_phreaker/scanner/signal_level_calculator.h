@@ -9,7 +9,7 @@ class signal_level_calculator
 public:
 	static double calculate_sl(double avg_rms, const measurement_info &info, frequency_type center_freq = 0, bool use_rf_board_adj = true)
 	{
-		if(avg_rms < .0001)
+		if(avg_rms < 1e-10)
 			return -999;
 		if(center_freq == 0)
 			center_freq = info.frequency();
