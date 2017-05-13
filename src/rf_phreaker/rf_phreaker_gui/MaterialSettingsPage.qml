@@ -90,14 +90,13 @@ Page {
                             anchors.centerIn: parent
                             implicitWidth: dp(16*8)
                             implicitHeight: parent.height
-                            model: [ "1 second", /*"5 seconds", "10 seconds",*/ "15 seconds", "30 seconds", "1 minute", "5 minutes", "Never"]
+                            model: [ "1 second", "15 seconds", "30 seconds", "1 minute", "5 minutes", "Never"]
                             floatingLabel: false
-                            maxVisibleItems: 8
+                            maxVisibleItems: 6
                             function setMeasurementRemovalTime(index) {
                                 GuiSettings.measurementRemovalTime = graphRemovalMenu.convertIndex(index);
                             }
                             Component.onCompleted: {
-                                console.debug("onCompleted: removaltime", GuiSettings.measurementRemovalTime)
                                 graphRemovalMenu.selectedIndex = graphRemovalMenu.convertValue(GuiSettings.measurementRemovalTime)
                                 graphRemovalMenu.itemSelected.connect(setMeasurementRemovalTime)
                             }
@@ -105,40 +104,40 @@ Page {
                                 switch(value) {
                                 case 1:
                                     return 0;
-//                                case 5:
-//                                    return 1;
-//                                case 10:
-//                                    return 2;
                                 case 15:
-                                    return 3;
+                                    return 1;
                                 case 30:
-                                    return 4;
+                                    return 2;
                                 case 60:
-                                    return 5;
+                                    return 3;
                                 case 60 * 5:
-                                    return 6;
+                                    return 4;
                                 case -1:
-                                    return 7;
+                                    return 5;
+                                // Default to one minute.
+                                default:
+                                    console.debug("invalid value for measurement removal time")
+                                    return 3;
                                 }
                             }
                             function convertIndex(index) {
                                 switch(index) {
                                 case 0:
                                     return 1;
-//                                case 1:
-//                                    return 5;
-//                                case 2:
-//                                    return 10;
-                                case 3:
+                                case 1:
                                     return 15;
-                                case 4:
+                                case 2:
                                     return 30;
-                                case 5:
+                                case 3:
                                     return 60;
-                                case 6:
+                                case 4:
                                     return 60 * 5;
-                                case 7:
+                                case 5:
                                     return -1;
+                                    // Default to one minute.
+                                default:
+                                    console.debug("invalid index for measurement removal time")
+                                    return 60;
                                 }
                             }
                         }
