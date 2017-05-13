@@ -46,6 +46,17 @@ QObject* SettingsSingletonTypeProvider(QQmlEngine *engine, QJSEngine *scriptEngi
 	return Settings::instance();
 }
 
+QObject* MarbleLayersSingletonTypeProvider(QQmlEngine *engine, QJSEngine *scriptEngine) {
+	Q_UNUSED(engine);
+	Q_UNUSED(scriptEngine);
+	auto marble = &MarbleLayers::instance();
+	static std::once_flag once_flag_;
+	std::call_once(once_flag_, [&]() {
+		engine->setObjectOwnership(marble, QQmlEngine::CppOwnership);
+	});
+	return marble;
+}
+
 void registerQmlTypes()
 {
 	QLatin1String uri("RfPhreaker");
@@ -73,6 +84,7 @@ void registerQmlTypes()
 	qmlRegisterType<MarbleManager>(uri.latin1(), 1, 0, "MarbleManager");
 	qmlRegisterType<MarbleProxyModel>(uri.latin1(), 1, 0, "MarbleProxyModel");
 	qmlRegisterSingletonType<Api>(uri.latin1(), 1, 0, "GuiSettings", SettingsSingletonTypeProvider);
+	qmlRegisterSingletonType<Api>(uri.latin1(), 1, 0, "MarbleLayerManager", MarbleLayersSingletonTypeProvider);
 
 	qRegisterMetaTypeStreamOperators<rf_phreaker::channel_freq>("channel_freq");
 	qRegisterMetaTypeStreamOperators<ApiTypes::Tech>("ApiTech");

@@ -67,7 +67,7 @@ public slots:
 
 	bool checkPositionStatus();
 
-	void addLayer(const QString &filename);
+	Q_INVOKABLE void addLayer(const QString &filename);
 
 	void addPreviousTrack(Marble::GeoDataPlacemark *placemark);
 
