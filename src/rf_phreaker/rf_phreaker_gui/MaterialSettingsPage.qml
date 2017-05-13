@@ -256,4 +256,23 @@ Page {
     Scrollbar {
         flickableItem: flickable
     }
+
+    FileDialog {
+        id: rpfConversionDialog
+        visible: false
+        title: "Choose RPF Files For Conversion"
+        nameFilters: [ "rf phreaker files (*.rpf)" ]
+        modality: Qt.WindowModal
+        folder: shortcuts.documents
+        selectedNameFilter: "rf phreaker files (*.rpf)"
+        sidebarVisible: true
+        selectExisting: true
+        selectMultiple: true
+        onAccepted: {
+            console.log("RPF files to convert: " + fileUrls);
+            for(var i = 0; i < fileUrls.length; ++i)
+                Api.convertRfp(fileUrls[i]);
+        }
+        onRejected: { console.log("Canceled RPF conversion dialog.") }
+    }
 }

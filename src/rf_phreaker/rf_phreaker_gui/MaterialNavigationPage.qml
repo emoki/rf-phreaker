@@ -4,6 +4,7 @@ import Material.Extras 0.1
 import Material.ListItems 0.1 as ListItem
 import QtQuick.Layouts 1.1
 import QtQuick.Controls 1.4 as Controls
+import QtQuick.Dialogs 1.2
 import RfPhreaker 1.0
 import org.kde.edu.marble 0.20
 
@@ -80,5 +81,24 @@ Page {
             bottom: parent.bottom
             margins: dp(32)
         }
+    }
+
+    FileDialog {
+        id: rpfConversionDialog
+        visible: false
+        title: "Choose RPF Files For Conversion"
+        nameFilters: [ "rf phreaker files (*.rpf)" ]
+        modality: Qt.WindowModal
+        folder: shortcuts.documents
+        selectedNameFilter: "rf phreaker files (*.rpf)"
+        sidebarVisible: true
+        selectExisting: true
+        selectMultiple: true
+        onAccepted: {
+            console.log("RPF files to convert: " + fileUrls);
+            for(var i = 0; i < fileUrls.length; ++i)
+                Api.convertRfp(fileUrls[i]);
+        }
+        onRejected: { console.log("Canceled RPF conversion dialog.") }
     }
 }
