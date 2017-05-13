@@ -56,7 +56,7 @@ public:
 		QObject::connect(this, &Lte::syncQualityChanged, this, &Base::cellInterferenceChanged);
 
 		QObject::connect(this, &Lte::syncQualityChanged, this, &Lte::syncSignalLevelChanged);
-		QObject::connect(this, &Base::carrierSignalLevelChanged, this, &Lte::syncSignalLevelChanged);
+		QObject::connect(this, &Base::measurementSignalLevelChanged, this, &Lte::syncSignalLevelChanged);
 	}
 
 	void update(const rf_phreaker::basic_data &t) {

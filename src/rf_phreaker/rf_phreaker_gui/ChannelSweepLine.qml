@@ -11,10 +11,10 @@ Item {
 
     function refresh() {
         //console.debug("sweep channel bandwidth: ", filter.lowFreqFilter, " - ", filter.highFreqFilter);
-        if(bandwidth < meas.carrierBandwidth) {
-            bandwidth = meas.carrierBandwidth;
-            filter.lowFreqFilter = meas.carrierFreq - meas.carrierBandwidth / 2;
-            filter.highFreqFilter = meas.carrierFreq + meas.carrierBandwidth / 2;
+        if(bandwidth < meas.measurementBandwidth) {
+            bandwidth = meas.measurementBandwidth;
+            filter.lowFreqFilter = meas.measurementFreq - meas.measurementBandwidth / 2;
+            filter.highFreqFilter = meas.measurementFreq + meas.measurementBandwidth / 2;
             filter.reset();
 
             // This ensures we refresh the entire sweep line!
@@ -29,16 +29,16 @@ Item {
     FilterProxyMeasurementModel {
         id: filter
         filterRole: FilterProxyMeasurementModel.FreqRangeFilter
-        lowFreqFilter: meas.carrierFreq - meas.carrierBandwidth / 2
-        highFreqFilter: meas.carrierFreq + meas.carrierBandwidth / 2
+        lowFreqFilter: meas.measurementFreq - meas.measurementBandwidth / 2
+        highFreqFilter: meas.measurementFreq + meas.measurementBandwidth / 2
     }
 
     VXYModelMapper {
         id: mapper
         model: filter
         series: lineSeries
-        xColumn: MeasurementModel.CarrierFreqColumn
-        yColumn: MeasurementModel.CarrierSignalLevelColumn
+        xColumn: MeasurementModel.MeasurementFreqColumn
+        yColumn: MeasurementModel.MeasurementSignalLevelColumn
     }
 
     Connections {
@@ -46,13 +46,13 @@ Item {
         onCellSignalLevelChanged: {
             if(sourceModel === null) {
                 lineSeries.clear();
-                lineSeries.append(meas.carrierFreq - (meas.carrierBandwidth / 2), meas.carrierSignalLevel);
-                lineSeries.append(meas.carrierFreq + (meas.carrierBandwidth / 2), meas.carrierSignalLevel);
+                lineSeries.append(meas.measurementFreq - (meas.measurementBandwidth / 2), meas.measurementSignalLevel);
+                lineSeries.append(meas.measurementFreq + (meas.measurementBandwidth / 2), meas.measurementSignalLevel);
             }
 //            else
 //                refresh();
         }
-        onCarrierBandwidthChanged: {
+        onMeasurementBandwidthChanged: {
             refresh();
         }
     }

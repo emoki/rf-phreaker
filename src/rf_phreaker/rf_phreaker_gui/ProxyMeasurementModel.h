@@ -79,7 +79,7 @@ public:
 		case NoFilterRole:
 			return true;
 		case FreqRangeFilter: {
-			auto freq = idx.data(MeasurementModel::CarrierFreqRole).toDouble();
+			auto freq = idx.data(MeasurementModel::MeasurementFreqRole).toDouble();
 			//qDebug() << "sourceRow: " << sourceRow << "   filtered: " << ((lowFreqFilter_ != -1 && highFreqFilter_ != -1) && freq >= lowFreqFilter_
 			//			&& freq <= highFreqFilter_) << "  freq:" << freq;
 			return (lowFreqFilter_ != -1 && highFreqFilter_ != -1) && freq >= lowFreqFilter_
@@ -161,8 +161,8 @@ public:
 	QVariant data(const QModelIndex &index, int role = Qt::DisplayRole) const {
 		auto v = QIdentityProxyModel::data(index, role);
 		auto column = index.column();
-		if(column == MeasurementModel::CarrierSignalLevelColumn ||
-				role == MeasurementModel::CarrierSignalLevelRole ||
+		if(column == MeasurementModel::MeasurementSignalLevelColumn ||
+				role == MeasurementModel::MeasurementSignalLevelRole ||
 				column == MeasurementModel::CellSignalLevelColumn ||
 				role == MeasurementModel::CellSignalLevelRole ||
 				column == MeasurementModel::CellInterferenceColumn ||

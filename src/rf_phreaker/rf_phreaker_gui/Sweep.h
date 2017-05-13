@@ -26,7 +26,7 @@ public:
 	~Sweep() {}
 
 	// Normalize signal level
-	QString carrierSignalLevelStr() const Q_DECL_OVERRIDE {
+	QString measurementSignalLevelStr() const Q_DECL_OVERRIDE {
 		return QString::number(base_.measurement_signal_level_, 'f', 1);
 	}
 

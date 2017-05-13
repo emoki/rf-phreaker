@@ -77,7 +77,7 @@ Rectangle {
         function convertColumn(column) {
             switch(column) {
             case 0:
-                return MeasurementModel.CarrierFreqColumn;
+                return MeasurementModel.MeasurementFreqColumn;
             case 1:
                 return MeasurementModel.CellChannelColumn;
             case 2:
@@ -104,7 +104,7 @@ Rectangle {
         Controls.TableViewColumn {
             id: column0
             title: "Frequency"
-            role: "carrierFreq"
+            role: "measurementFreq"
             width: dataTable.width / root.columnCount
             horizontalAlignment: Text.AlignRight
             delegate: MaterialItemDelegate {

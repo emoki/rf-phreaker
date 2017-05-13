@@ -104,10 +104,10 @@ struct less_than_cell_sl {
 
 struct less_than_freq_id {
 	bool operator()(const Base *a, const Base *b) const {
-		if(a->carrierFreq() == b->carrierFreq())
+		if(a->measurementFreq() == b->measurementFreq())
 			return a->cellId() < b->cellId();
 		else
-			return a->carrierFreq() < b->carrierFreq();
+			return a->measurementFreq() < b->measurementFreq();
 	}
 	template<typename Data>
 	bool operator()(const Data &a, const Data &b) const {

@@ -46,22 +46,22 @@ Item {
         //console.debug("updating channelBarLine: ", meas.cellChannel, "-", meas.cellId);
         areaSeriesSL.upperSeries.clear();
         areaSeriesSL.upperSeries.append(mainAxisX.min, topY);
-        areaSeriesSL.upperSeries.append(meas.carrierSignalLevel, topY);
+        areaSeriesSL.upperSeries.append(meas.measurementSignalLevel, topY);
         areaSeriesSL.lowerSeries.clear();
         areaSeriesSL.lowerSeries.append(mainAxisX.min, bottomY);
-        areaSeriesSL.lowerSeries.append(meas.carrierSignalLevel, bottomY);
+        areaSeriesSL.lowerSeries.append(meas.measurementSignalLevel, bottomY);
 
         areaSeriesInter.upperSeries.clear();
-        areaSeriesInter.upperSeries.append(meas.carrierSignalLevel, topY);
-        areaSeriesInter.upperSeries.append(meas.carrierSignalLevel - meas.cellInterference, topY);
+        areaSeriesInter.upperSeries.append(meas.measurementSignalLevel, topY);
+        areaSeriesInter.upperSeries.append(meas.measurementSignalLevel - meas.cellInterference, topY);
         areaSeriesInter.lowerSeries.clear();
-        areaSeriesInter.lowerSeries.append(meas.carrierSignalLevel, bottomY);
-        areaSeriesInter.lowerSeries.append(meas.carrierSignalLevel - meas.cellInterference, bottomY);
+        areaSeriesInter.lowerSeries.append(meas.measurementSignalLevel, bottomY);
+        areaSeriesInter.lowerSeries.append(meas.measurementSignalLevel - meas.cellInterference, bottomY);
 
         label.x = chart.plotArea.x
         label.y = chart.plotArea.y + ((topY + bottomY) / 2) / mainAxisY.max * chart.plotArea.height - label.height / 2
 
-//        var slPoints = [{x: startX, y: meas.carrierSignalLevel}, {x: stopX, y: meas.carrierSignalLevel}];
+//        var slPoints = [{x: startX, y: meas.measurementSignalLevel}, {x: stopX, y: meas.measurementSignalLevel}];
 //        areaSeriesLower.upperSeries.replace(slPoints);
 //        var interPoints = [{x: startX, y: meas.cellInterference}, {x: stopX, y: meas.cellInterference}];
 //        areaSeries.upperSeries.replace(interPoints);

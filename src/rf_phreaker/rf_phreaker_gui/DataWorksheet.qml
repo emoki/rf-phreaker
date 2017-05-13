@@ -59,7 +59,7 @@ TableView {
     function convertColumn(column) {
         switch(column) {
         case 0:
-            return MeasurementModel.CarrierFreqColumn;
+            return MeasurementModel.MeasurementFreqColumn;
         case 1:
             return MeasurementModel.CellChannelColumn;
         case 2:
@@ -94,7 +94,7 @@ TableView {
         title: "Frequency"
         role: "basic"
         delegate: Text {
-            text: Number(styleData.value.carrierFreq).toFixed(1)
+            text: Number(styleData.value.measurementFreq).toFixed(1)
             horizontalAlignment: Text.AlignHCenter
         }
         width: dataWorksheet.width / columnCount
@@ -202,7 +202,7 @@ TableView {
 //            function convertColumn(column) {
 //                switch(column) {
 //                case 0:
-//                    return MeasurementModel.CarrierFreqColumn;
+//                    return MeasurementModel.MeasurementFreqColumn;
 //                case 1:
 //                    return MeasurementModel.CellChannelColumn;
 //                case 2:
@@ -222,7 +222,7 @@ TableView {
 //                title: "Freq"
 //                role: "basic"
 //                delegate: Text {
-//                    text: Number(styleData.value.carrierFreq).toFixed(1)
+//                    text: Number(styleData.value.measurementFreq).toFixed(1)
 //                }
 //            }
 //            TableViewColumn {
@@ -272,7 +272,7 @@ TableView {
 //            function convertColumn(column) {
 //                switch(column) {
 //                case 0:
-//                    return MeasurementModel.CarrierFreqColumn;
+//                    return MeasurementModel.MeasurementFreqColumn;
 //                case 1:
 //                    return MeasurementModel.CellChannelColumn;
 //                case 2:
@@ -294,7 +294,7 @@ TableView {
 //                title: "Freq"
 //                role: "basic"
 //                delegate: Text {
-//                    text: Number(styleData.value.carrierFreq).toFixed(1)
+//                    text: Number(styleData.value.measurementFreq).toFixed(1)
 //                }
 //            }
 //            TableViewColumn {
@@ -329,7 +329,7 @@ TableView {
 //                title: "Bandwidth"
 //                role: "basic"
 //                delegate: Text {
-//                    text: Number(styleData.value.carrierBandwidth).toFixed(1)
+//                    text: Number(styleData.value.measurementBandwidth).toFixed(1)
 //                }
 //            }
 //        }

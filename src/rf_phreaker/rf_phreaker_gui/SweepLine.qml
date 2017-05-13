@@ -11,7 +11,7 @@ Item {
         id: mapper
         series: lineSeries
         model: sourceModel
-        xColumn: MeasurementModel.CarrierFreqColumn
-        yColumn: MeasurementModel.CarrierSignalLevelColumn
+        xColumn: MeasurementModel.MeasurementFreqColumn
+        yColumn: MeasurementModel.MeasurementSignalLevelColumn
     }
 }

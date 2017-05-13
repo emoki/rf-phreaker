@@ -25,9 +25,9 @@ public:
 		WcdmaRole,
 		LteRole,
 		TimeElapsedRole,
-		CarrierFreqRole,
-		CarrierSignalLevelRole,
-		CarrierBandwidthRole,
+		MeasurementFreqRole,
+		MeasurementSignalLevelRole,
+		MeasurementBandwidthRole,
 		CellTechRole,
 		CellBandRole,
 		CellChannelRole,
@@ -48,9 +48,9 @@ public:
 		WcdmaColumn,
 		LteColumn,
 		TimeElapsedColumn,
-		CarrierFreqColumn,
-		CarrierSignalLevelColumn,
-		CarrierBandwidthColumn,
+		MeasurementFreqColumn,
+		MeasurementSignalLevelColumn,
+		MeasurementBandwidthColumn,
 		CellTechColumn,
 		CellBandColumn,
 		CellChannelColumn,
@@ -72,8 +72,8 @@ public:
 		roles_[WcdmaRole] = "wcdma";
 		roles_[LteRole] = "lte";
 		roles_[TimeElapsedRole] = "timeElapsed";
-		roles_[CarrierFreqRole] = "carrierFreq";
-		roles_[CarrierSignalLevelRole] = "carrierSignalLevel";
+		roles_[MeasurementFreqRole] = "measurementFreq";
+		roles_[MeasurementSignalLevelRole] = "measurementSignalLevel";
 		roles_[CellTechRole] = "cellTech";
 		roles_[CellBandRole] = "cellBand";
 		roles_[CellChannelRole] = "cellChannel";
@@ -265,12 +265,12 @@ public:
 				return QVariant::fromValue((Lte*)index_.get<random_access>()[index.row()]);
 			case TimeElapsedRole:
 				return QVariant(index_.get<random_access>()[index.row()]->timeElapsed());
-			case CarrierFreqRole:
-				return QVariant(index_.get<random_access>()[index.row()]->carrierFreq());
-			case CarrierBandwidthRole:
-				return QVariant(index_.get<random_access>()[index.row()]->carrierBandwidth());
-			case CarrierSignalLevelRole:
-				return QVariant(index_.get<random_access>()[index.row()]->carrierSignalLevel());
+			case MeasurementFreqRole:
+				return QVariant(index_.get<random_access>()[index.row()]->measurementFreq());
+			case MeasurementBandwidthRole:
+				return QVariant(index_.get<random_access>()[index.row()]->measurementBandwidth());
+			case MeasurementSignalLevelRole:
+				return QVariant(index_.get<random_access>()[index.row()]->measurementSignalLevel());
 			case CellTechRole:
 				return QVariant(index_.get<random_access>()[index.row()]->cellTech());
 			case CellBandRole:
@@ -309,12 +309,12 @@ public:
 				return QVariant::fromValue((Lte*)index_.get<random_access>()[index.row()]);
 			case TimeElapsedColumn:
 				return QVariant(index_.get<random_access>()[index.row()]->timeElapsed());
-			case CarrierFreqColumn:
-				return QVariant(index_.get<random_access>()[index.row()]->carrierFreq());
-			case CarrierBandwidthColumn:
-				return QVariant(index_.get<random_access>()[index.row()]->carrierBandwidth());
-			case CarrierSignalLevelColumn:
-				return QVariant(index_.get<random_access>()[index.row()]->carrierSignalLevel());
+			case MeasurementFreqColumn:
+				return QVariant(index_.get<random_access>()[index.row()]->measurementFreq());
+			case MeasurementBandwidthColumn:
+				return QVariant(index_.get<random_access>()[index.row()]->measurementBandwidth());
+			case MeasurementSignalLevelColumn:
+				return QVariant(index_.get<random_access>()[index.row()]->measurementSignalLevel());
 			case CellChannelColumn:
 				return QVariant(index_.get<random_access>()[index.row()]->cellChannel());
 			case CellIdColumn:
@@ -351,7 +351,7 @@ private:
 		index_.get<random_access>().push_back(t);
 		endInsertRows();
 
-//		qDebug() << "Insert pos:" << size << "  channel:" << (t->cellChannel() == -1 ? t->carrierFreq() : t->cellChannel())
+//		qDebug() << "Insert pos:" << size << "  channel:" << (t->cellChannel() == -1 ? t->measurementFreq() : t->cellChannel())
 //																				   << "  cid: " << t->cellId();
 	}
 
