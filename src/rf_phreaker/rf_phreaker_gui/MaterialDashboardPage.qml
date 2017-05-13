@@ -308,6 +308,7 @@ Page {
             }
 
             MaterialCard {
+                id: scanListCard
 //                property int minHeight: scanListTitle.height + Api.scanList.rowCount * dp(32) + collectionInfoSuggestionText.height + dp(18)
 //                property int h2
                 state: scanListExpBut.expanded ? "w2h3" : "w1h2"
@@ -466,10 +467,12 @@ Page {
                             anchor: Item.TopLeft
                             closeOnResize: false
 
-                            width: dropTableView.width * 2 < layout.width - dp(100)
-                                   ? dropTableView.width * 2
+                            width: {
+                                console.debug(scanListCard.width3, layout.width - dp(100))
+                                scanListCard.width3 < layout.width - dp(100)
+                                   ? scanListCard.width3
                                    : layout.width - dp(100)
-
+                            }
                             //If there are more than max items, show an extra half item so
                             // it's clear the user can scroll
                             height: Math.min(dropTableView.maxVisibleItems*48 * Units.dp + 24 * Units.dp, (search.results.length) * 48 * Units.dp + dp(2))
