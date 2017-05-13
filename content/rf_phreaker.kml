@@ -36,7 +36,7 @@
 				<fill>1</fill>
             </PolyStyle>
 			<IconStyle><scale>0</scale></IconStyle>
-			<LabelStyle><scale>0</scale></LabelStyle>
+			<LabelStyle><color>0</color><scale>0</scale></LabelStyle>
 		</Style>
         <Style id="ptrack_hl">
              <LineStyle>
@@ -48,7 +48,7 @@
 				<fill>1</fill>
             </PolyStyle>
  			<IconStyle><scale>0</scale></IconStyle>
-			<LabelStyle><scale>0</scale></LabelStyle>
+			<LabelStyle><color>0</color><scale>0</scale></LabelStyle>
         </Style>
  
 		<StyleMap id="ctrack">
@@ -72,7 +72,7 @@
 				<fill>1</fill>
             </PolyStyle>
  			<IconStyle><scale>0</scale></IconStyle>
-			<LabelStyle><scale>0</scale></LabelStyle>
+			<LabelStyle><color>0</color><scale>0</scale></LabelStyle>
        </Style>
         <Style id="ctrack_hl">
             <LineStyle>
@@ -84,7 +84,7 @@
 				<fill>1</fill>
             </PolyStyle>
 			<IconStyle><scale>0</scale></IconStyle>
-			<LabelStyle><scale>0</scale></LabelStyle>
+			<LabelStyle><color>0</color><scale>0</scale></LabelStyle>
         </Style>
 
 		<StyleMap id="rtrack">
@@ -108,7 +108,7 @@
 				<fill>1</fill>
             </PolyStyle>
  			<IconStyle><scale>0</scale></IconStyle>
-			<LabelStyle><scale>0</scale></LabelStyle>
+			<LabelStyle><color>0</color><scale>0</scale></LabelStyle>
        </Style>
         <Style id="rtrack_hl">
             <LineStyle>
@@ -120,7 +120,7 @@
 				<fill>1</fill>
             </PolyStyle>
 			<IconStyle><scale>0</scale></IconStyle>
-			<LabelStyle><scale>0</scale></LabelStyle>
+			<LabelStyle><color>0</color><scale>0</scale></LabelStyle>
         </Style>
 
 		<!-- Dummy placemark is used because we show current location in QML -->
