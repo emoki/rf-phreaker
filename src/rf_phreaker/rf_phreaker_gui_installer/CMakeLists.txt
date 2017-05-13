@@ -67,6 +67,13 @@ add_custom_command(TARGET rf_phreaker_build_install POST_BUILD COMMAND ${CMAKE_C
 		${RF_PHREAKER_INSTALLER_BUILD_INSTALL_DIR}/packages/rf_phreaker/data/data
 )
 
+add_custom_command(TARGET rf_phreaker_build_install POST_BUILD COMMAND ${CMAKE_COMMAND} -E make_directory ${RF_PHREAKER_INSTALLER_BUILD_INSTALL_DIR}/packages/rf_phreaker/data/plugins)
+add_custom_command(TARGET rf_phreaker_build_install POST_BUILD COMMAND ${CMAKE_COMMAND} -E copy_if_different
+		${CMAKE_RUNTIME_OUTPUT_DIRECTORY}/${CMAKE_CFG_INTDIR}/KmlPlugin.dll
+		${RF_PHREAKER_INSTALLER_BUILD_INSTALL_DIR}/packages/rf_phreaker/data/plugins
+)
+
+
 # RF Phreaker Content Files
 add_custom_command(TARGET rf_phreaker_build_install POST_BUILD COMMAND ${CMAKE_COMMAND} -E copy_if_different
 		${CMAKE_SOURCE_DIR}/fpga_loads/fpga_load.rbf
@@ -78,6 +85,10 @@ add_custom_command(TARGET rf_phreaker_build_install POST_BUILD COMMAND ${CMAKE_C
 )
 add_custom_command(TARGET rf_phreaker_build_install POST_BUILD COMMAND ${CMAKE_COMMAND} -E copy_if_different
 		${CMAKE_SOURCE_DIR}/content/rf_phreaker_api.ini
+		${RF_PHREAKER_INSTALLER_BUILD_INSTALL_DIR}/packages/rf_phreaker/data
+)
+add_custom_command(TARGET rf_phreaker_build_install POST_BUILD COMMAND ${CMAKE_COMMAND} -E copy_if_different
+		${CMAKE_SOURCE_DIR}/content/rf_phreaker.kml
 		${RF_PHREAKER_INSTALLER_BUILD_INSTALL_DIR}/packages/rf_phreaker/data
 )
 
@@ -170,15 +181,20 @@ set(RF_PHREAKER_INSTALL_CONFIG "release")
 if(CMAKE_BUILD_TYPE STREQUAL "Debug")
 	set(RF_PHREAKER_INSTALL_CONFIG "debug")
 endif()
-find_program(WINDEPLOYQT_EXECUTABLE NAMES windeployqt HINTS ${QTDIR} ENV QTDIR PATH_SUFFIXES bin)
+find_program(WINDEPLOYQT_EXECUTABLE NAMES windeployqt HINTS ${qt_INSTALL_PATH} ENV qt_INSTALL_PATH PATH_SUFFIXES bin)
 if(NOT EXISTS ${WINDEPLOYQT_EXECUTABLE})
-	message(SEND_ERROR "Unable to find windeployqt.  Search path: ${QTDIR}")
+	message(SEND_ERROR "Unable to find windeployqt.  Search path: ${qt_INSTALL_PATH}")
 endif()
 add_custom_command(TARGET rf_phreaker_build_install POST_BUILD COMMAND ${WINDEPLOYQT_EXECUTABLE} ${RF_PHREAKER_INSTALLER_BUILD_INSTALL_DIR}/packages/rf_phreaker/data/rf_phreaker_gui.exe 
 	--${RF_PHREAKER_INSTALL_CONFIG} 
 	--qmldir ${CMAKE_SOURCE_DIR}/src/rf_phreaker/rf_phreaker_gui
 	--xml
 	WORKING_DIRECTORY ${RF_PHREAKER_INSTALLER_BUILD_INSTALL_DIR}/packages/rf_phreaker/data
+)
+
+add_custom_command(TARGET rf_phreaker_build_install POST_BUILD COMMAND ${CMAKE_COMMAND} -E copy_if_different
+		${qt_INSTALL_PATH}/qml/Material/FontAwesome.otf
+		${RF_PHREAKER_INSTALLER_BUILD_INSTALL_DIR}/packages/rf_phreaker/data/Material
 )
 
 add_custom_command(TARGET rf_phreaker_build_install POST_BUILD COMMAND ${CMAKE_COMMAND} -E make_directory ${PROJECT_SOURCE_DIR}/packages/rf_phreaker/data/QtQuick/Controls/Styles/Material)

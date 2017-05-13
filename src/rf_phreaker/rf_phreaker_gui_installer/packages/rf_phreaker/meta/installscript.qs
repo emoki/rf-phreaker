@@ -40,5 +40,6 @@ Component.prototype.createOperations = function()
 		component.addOperation("Mkdir", app_data_loc);
 		component.addOperation("Move", "@TargetDir@/gui.ini", app_data_loc + "/gui.ini");
 		component.addOperation("Move", "@TargetDir@/rf_phreaker_api.ini", app_data_loc + "/rf_phreaker_api.ini");
+		component.addOperation("Move", "@TargetDir@/rf_phreaker.kml", app_data_loc + "/rf_phreaker.kml");
 	}
 }
