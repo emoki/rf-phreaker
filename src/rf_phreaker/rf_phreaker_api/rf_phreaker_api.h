@@ -761,7 +761,8 @@ typedef struct rp_raw_data {
 	rp_base base_;
 	double power_adjustment_;
 	rp_sample_format_type sample_format_;
-	int64_t num_samples_;
+	rp_frequency_type sampling_rate_;
+	int32_t num_samples_;
 	void *samples_;
 } rp_raw_data;
 
@@ -791,7 +792,7 @@ typedef struct rp_callbacks {
 
 	void (RP_CALLCONV *rp_power_spectrum_update)(const rp_power_spectrum *spec);
 
-	void (RP_CALLCONV *rp_raw_data_update)(const rp_raw_data, int32_t num_raw_data);
+	void (RP_CALLCONV *rp_raw_data_update)(const rp_raw_data *raw);
 } rp_callbacks;
 
 RP_LIBEXPORT(rp_status) rp_initialize(rp_callbacks *callbacks);
@@ -814,9 +815,9 @@ RP_LIBEXPORT(rp_status) rp_stop_collection(rp_device *device);
 
 RP_LIBEXPORT(rp_status) rp_get_gps_data(rp_device *device, rp_gps gps);
 
-RP_LIBEXPORT(rp_status) rp_get_iq_data_using_auto_gain(rp_device *device, rp_frequency_type frequency, rp_time_type time_ns, rp_bandwidth_type bandwidth, rp_frequency_type sampling_rate, rp_raw_data *raw_data);
+RP_LIBEXPORT(rp_status) rp_get_iq_data_using_auto_gain(rp_device *device, rp_frequency_type frequency, rp_time_type dwell_time_ns, rp_bandwidth_type bandwidth, rp_frequency_type sampling_rate, rp_raw_data *raw_data);
 
-RP_LIBEXPORT(rp_status) rp_get_iq_data(rp_device *device, rp_frequency_type frequency, rp_time_type time_ns, rp_bandwidth_type bandwidth, rp_frequency_type sampling_rate, int32_t gain_db, rp_raw_data *raw_data);
+RP_LIBEXPORT(rp_status) rp_get_iq_data(rp_device *device, rp_frequency_type frequency, rp_time_type dwell_time_ns, rp_bandwidth_type bandwidth, rp_frequency_type sampling_rate, int32_t gain_db, rp_raw_data *raw_data);
 
 RP_LIBEXPORT(rp_status) rp_update_license(rp_device *device, const char *filename);
 
