@@ -22,7 +22,7 @@ void CollectionInfoSearch::search() {
 	results_.clear();
 
 	auto numOnly = filter_;
-	numOnly.remove(QRegularExpression("\\D+"));
+	numOnly.remove(QRegularExpression("[a-zA-z]"));
 	std::string tmp = numOnly.toStdString();
 	bool ok = false;
 	tmp_freq_ = (frequency_type)(numOnly.toDouble(&ok) * 1e6);
