@@ -19,11 +19,11 @@ Page {
             name: "Manage Layers"
             onTriggered: materialMarbleMap.layerPopup.open()
         },
-        Action {
-            iconName: "file/file_download"
-            name: "Download Current Map"
-            onTriggered: materialMarbleMap.marbleManager.downloadMapRegion()
-        },
+//        Action {
+//            iconName: "file/file_download"
+//            name: "Download Current Map"
+//            onTriggered: materialMarbleMap.marbleManager.downloadMapRegion()
+//        },
         Action {
             name: "Convert RPF file to ASCII"
             iconName: "av/note"

@@ -581,12 +581,12 @@ Page {
                             visible: true
                             onClicked: dashboardMarbleMap.layerPopup.open()
                         }
-                        Button {
-                            text: "Download Current Area"
-                            textColor: Theme.primaryColor
-                            visible: true
-                            onClicked: dashboardMarbleMap.marbleManager.downloadMapRegion()
-                        }
+//                        Button {
+//                            text: "Download Current Area"
+//                            textColor: Theme.primaryColor
+//                            visible: true
+//                            onClicked: dashboardMarbleMap.marbleManager.downloadMapRegion()
+//                        }
 
                         Item {
                             Layout.fillWidth: true
