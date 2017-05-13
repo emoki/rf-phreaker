@@ -112,10 +112,10 @@ Api::Api(QObject *parent)
 	});
 	timer->start(1000);
 
-	connect(&scanList_, SIGNAL(dataChanged(QModelIndex, QModelIndex, QVector<int>)), this, SLOT(findFreqMinMax()));
-	connect(&scanList_, SIGNAL(modelReset()), this, SLOT(findFreqMinMax()));
-	connect(&scanList_, SIGNAL(rowsInserted(QModelIndex, int, int)), this, SLOT(findFreqMinMax()));
-	connect(&scanList_, SIGNAL(rowsRemoved(QModelIndex, int, int)), this, SLOT(findFreqMinMax()));
+	//connect(&scanList_, SIGNAL(dataChanged(QModelIndex, QModelIndex, QVector<int>)), this, SLOT(findFreqMinMax()));
+	//connect(&scanList_, SIGNAL(modelReset()), this, SLOT(findFreqMinMax()));
+	//connect(&scanList_, SIGNAL(rowsInserted(QModelIndex, int, int)), this, SLOT(findFreqMinMax()));
+	//connect(&scanList_, SIGNAL(rowsRemoved(QModelIndex, int, int)), this, SLOT(findFreqMinMax()));
 
 	thread_->start();
 }
@@ -188,6 +188,8 @@ void Api::startCollection() {
 	}
 
 	updateModels();
+
+	findFreqMinMax();
 
 	QCoreApplication::postEvent(thread_->worker(), new StartCollectionEvent(sweep, raw_data, spec_data, techs));
 }
