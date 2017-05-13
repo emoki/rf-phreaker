@@ -22,6 +22,10 @@
 
 using namespace Marble;
 
+std::unique_ptr<MarbleLayerManager> MarbleLayers::ptr_;
+std::mutex MarbleLayers::mutex_;
+
+
 MarbleLayerManager::MarbleLayerManager(QObject *parent)
  : QObject(parent)
  , model_(this) 

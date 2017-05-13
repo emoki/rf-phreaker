@@ -9,8 +9,9 @@
 #include "rf_phreaker/rf_phreaker_gui/MarbleLayerManager.h"
 #include "rf_phreaker/rf_phreaker_gui/MessageHandler.h"
 
-int main(int argc, char *argv[])
-{
+int main(int argc, char *argv[]) {
+	int status = 0;
+
 	// Construct message handler.
 	MessageHandler::instance();
 
@@ -30,15 +31,24 @@ int main(int argc, char *argv[])
 
 	registerQmlTypes();
 
-	QGuiApplication::setAttribute(Qt::AA_EnableHighDpiScaling);
-	QQmlApplicationEngine engine;
-//	if (qgetenv("QT_QUICK_CONTROLS_STYLE").isEmpty()) {
-//		qputenv("QT_QUICK_CONTROLS_STYLE", "Material");
-//	}
-//	engine.addImportPath("/Material/");
-	declarativePlugin.initializeEngine(&engine, marbleUri);
-	//engine.load(QUrl(QStringLiteral("qrc:/main.qml")));
-	engine.load(QUrl(QStringLiteral("qrc:/MaterialMain.qml")));
+	{
+		QGuiApplication::setAttribute(Qt::AA_EnableHighDpiScaling);
+		QQmlApplicationEngine engine;
+		//	if (qgetenv("QT_QUICK_CONTROLS_STYLE").isEmpty()) {
+		//		qputenv("QT_QUICK_CONTROLS_STYLE", "Material");
+		//	}
+		//	engine.addImportPath("/Material/");
+		declarativePlugin.initializeEngine(&engine, marbleUri);
+		//engine.load(QUrl(QStringLiteral("qrc:/main.qml")));
+		MessageHandler::logToApi(true);
+		engine.load(QUrl(QStringLiteral("qrc:/MaterialMain.qml")));
 
-	return app.exec();
+		status = app.exec();
+	}
+
+	// MarbleLayers is destroyed after qml has destroy MarbleManager to stop a crash from occurring inside
+	// qt5network.dll.  It seems to happen when exiting while we are loading new tiles.
+	MarbleLayers::destroy();
+
+	return status;
 }

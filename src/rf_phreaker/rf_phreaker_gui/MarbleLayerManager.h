@@ -17,7 +17,26 @@
 #include "rf_phreaker/rf_phreaker_gui/RpPositionProviderPlugin.h"
 
 class MarbleLayerManager;
-typedef rf_phreaker::singleton<MarbleLayerManager> MarbleLayers;
+//typedef rf_phreaker::singleton<MarbleLayerManager> MarbleLayers;
+
+class MarbleLayers {
+public:
+	static MarbleLayerManager& instance() {
+		if(!ptr_) {
+			std::lock_guard<std::mutex> lock(mutex_);
+			if(!ptr_) {
+				ptr_ = std::make_unique<MarbleLayerManager>();
+			}
+		}
+		return *ptr_.get();
+	}
+	static void destroy() {
+		ptr_.reset();
+	}
+private:
+	static std::unique_ptr<MarbleLayerManager> ptr_;
+	static std::mutex mutex_;
+};
 
 class MarbleLayerManager : public QObject {
 	Q_OBJECT
