@@ -75,7 +75,8 @@ Page {
 
                 MaterialCard {
                     id: rpCard
-                    state: rpExpBut.expanded ? "w1h2" : "w1h1"
+                    //state: rpExpBut.expanded ? "w1h2" : "w1h1"
+                    state: "w1h1"
 
                     Item {
                         anchors.fill: parent
@@ -219,15 +220,16 @@ Page {
                             Item {
                                 Layout.fillWidth: true
                             }
-                            MaterialExpansionButton {
-                                id: rpExpBut
-                            }
+//                            MaterialExpansionButton {
+//                                id: rpExpBut
+//                            }
                         }
                     }
                 }
 
                 MaterialCard {
-                    state: gpsExpBut.expanded ? "w1h2" : "w1h1"
+                    //state: gpsExpBut.expanded ? "w1h2" : "w1h1"
+                    state: "w1h1"
                     ColumnLayout {
                         anchors {
                             fill: parent
@@ -297,9 +299,9 @@ Page {
                             Item {
                                 Layout.fillWidth: true
                             }
-                            MaterialExpansionButton {
-                                id: gpsExpBut
-                            }
+//                            MaterialExpansionButton {
+//                                id: gpsExpBut
+//                            }
                         }
                     }
                 }
