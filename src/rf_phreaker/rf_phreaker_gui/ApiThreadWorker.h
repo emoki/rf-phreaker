@@ -56,7 +56,7 @@ public:
 		}
 		else if(e->type() == StartCollectionEvent::getType()) {
 			auto ev = static_cast<StartCollectionEvent*>(e);
-			auto status = startCollection(ev->sweep(), ev->raw(), ev->techs());
+			auto status = startCollection(ev->sweep(), ev->raw(), ev->spec(), ev->techs());
 			if(ApiTypes::statusOk(status))
 				QCoreApplication::postEvent(Api::instance(), new CollectionStartedEvent());
 			else
@@ -163,6 +163,7 @@ private:
 
 	rp_status startCollection(api_storage<rp_operating_band, rp_operating_band_group> sweep,
 							  api_storage<rp_frequency_type, rp_frequency_group> raw,
+							  api_storage<rp_power_spectrum_spec, rp_power_spectrum_spec_group> &spec,
 							  QMap<ApiTypes::Tech, api_storage<rp_frequency_band, rp_frequency_band_group>> techs) {
 		qDebug() << "Starting collection.";
 
@@ -171,6 +172,7 @@ private:
 		info.wcdma_ = techs[ApiTypes::WCDMA_FULL_SCAN].get_group();
 		info.lte_ = techs[ApiTypes::LTE_FULL_SCAN].get_group();
 		info.raw_data_ = raw.get_group();
+		info.power_spectrum_spec_ = spec.get_group();
 		info.sweep_ = sweep.get_group();
 
 		auto status = rp_start_collection(device_, &info);

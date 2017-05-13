@@ -96,6 +96,7 @@ Api::Api(QObject *parent)
 	callbacks_.rp_gsm_sweep_update = nullptr;
 	callbacks_.rp_wcdma_sweep_update = nullptr;
 	callbacks_.rp_lte_sweep_update = nullptr;
+	callbacks_.rp_power_spectrum_update = nullptr;
 
 	apiOutput_ = Settings::instance()->apiOutput();
 	QObject::connect(Settings::instance(), &Settings::apiOutputChanged, [&](bool apiOutput) {
@@ -165,6 +166,7 @@ void Api::startCollection() {
 	// Create storage for all possible techs.  Note, QMap automatically inserts a default item if it is empty.
 	api_storage<rp_operating_band, rp_operating_band_group> sweep;
 	api_storage<rp_frequency_type, rp_frequency_group> raw_data;
+	api_storage<rp_power_spectrum_spec, rp_power_spectrum_spec_group> spec_data;
 	QMap<ApiTypes::Tech, api_storage<rp_frequency_band, rp_frequency_band_group>> techs;
 
 	foreach(const auto &ci, scanList_.list()) {
@@ -187,7 +189,7 @@ void Api::startCollection() {
 
 	updateModels();
 
-	QCoreApplication::postEvent(thread_->worker(), new StartCollectionEvent(sweep, raw_data, techs));
+	QCoreApplication::postEvent(thread_->worker(), new StartCollectionEvent(sweep, raw_data, spec_data, techs));
 }
 
 void Api::clearModels() {
@@ -326,6 +328,15 @@ bool Api::event(QEvent *e) {
 		}
 		case rf_phreaker::protobuf::rp_update::UpdateCase::kLteSweep: {
 			auto &t = update_pb_.get_lte_sweep_basic();
+			auto bands = band_specifier_.find_avaliable_lte_operating_bands(t.measurement_frequency_);
+			for(auto i : bands) {
+				if(sweepModels_.contains(ApiTypes::toOperatingBand(i.band_)))
+					sweepModels_[ApiTypes::toOperatingBand(i.band_)]->update_with_basic_data(t, ApiTypes::LTE_SWEEP);
+			}
+			break;
+		}
+		case rf_phreaker::protobuf::rp_update::UpdateCase::kPowerSpectrum: {
+			auto &t = update_pb_.get_power_spectrum();
 			auto bands = band_specifier_.find_avaliable_lte_operating_bands(t.measurement_frequency_);
 			for(auto i : bands) {
 				if(sweepModels_.contains(ApiTypes::toOperatingBand(i.band_)))

@@ -80,20 +80,25 @@ class StartCollectionEvent : public QEvent, public TypeInterface<StartCollection
 public:
 	StartCollectionEvent(const api_storage<rp_operating_band, rp_operating_band_group> &sweep,
 					const api_storage<rp_frequency_type, rp_frequency_group> &raw,
+					const api_storage<rp_power_spectrum_spec, rp_power_spectrum_spec_group> &spec,
 					const QMap<ApiTypes::Tech, api_storage<rp_frequency_band, rp_frequency_band_group>> &techs)
 		: QEvent(getType())
 		, sweep_(sweep)
 		, raw_(raw)
+		, spec_(spec)
 		, techs_(techs)
+		
 	{}
 
 	api_storage<rp_operating_band, rp_operating_band_group>& sweep() { return sweep_; }
 	api_storage<rp_frequency_type, rp_frequency_group>& raw() { return raw_; }
+	api_storage<rp_power_spectrum_spec, rp_power_spectrum_spec_group>& spec() { return spec_; }
 	QMap<ApiTypes::Tech, api_storage<rp_frequency_band, rp_frequency_band_group>>& techs() { return techs_; }
 
 private:
 	api_storage<rp_operating_band, rp_operating_band_group> sweep_;
 	api_storage<rp_frequency_type, rp_frequency_group> raw_;
+	api_storage<rp_power_spectrum_spec, rp_power_spectrum_spec_group> spec_;
 	QMap<ApiTypes::Tech, api_storage<rp_frequency_band, rp_frequency_band_group>> techs_;
 };
 
