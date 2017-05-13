@@ -89,6 +89,7 @@ Page {
                             id: graphRemovalMenu
                             anchors.centerIn: parent
                             implicitWidth: dp(16*8)
+                            implicitHeight: parent.height
                             model: [ "1 second", /*"5 seconds", "10 seconds",*/ "15 seconds", "30 seconds", "1 minute", "5 minutes", "Never"]
                             floatingLabel: false
                             maxVisibleItems: 8
@@ -170,6 +171,7 @@ Page {
                             id: logLevelAppVerbosityMenu
                             anchors.centerIn: parent
                             implicitWidth: dp(16*8)
+                            implicitHeight: parent.height
                             model: [ "Verbose", "Debug", "Info", "Warning", "Error", "Critical"]
                             floatingLabel: false
                             maxVisibleItems: 6
@@ -216,6 +218,7 @@ Page {
                             id: hardwareVerbosityMenu
                             anchors.centerIn: parent
                             implicitWidth: dp(16*8)
+                            implicitHeight: parent.height
                             model: [ "Verbose", "Debug", "Info", "Warning", "Error", "Critical"]
                             floatingLabel: false
                             maxVisibleItems: 6
