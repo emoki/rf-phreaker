@@ -597,6 +597,63 @@ rp_status rf_phreaker_impl::add_collection_frequency(rp_device *device, rp_frequ
 	return s;
 }
 
+rp_status rf_phreaker_impl::add_power_spectrum_frequency(rp_device *device, const rp_power_spectrum_spec &spec) {
+	using namespace ::rf_phreaker::processing;
+	rp_status s = RP_STATUS_OK;
+	try {
+		std::lock_guard<std::recursive_mutex> lock(mutex_);
+
+		LOG(LINFO) << "Adding power spectrum spec {start_freq: " << spec.start_frequency_ << ", span: " << spec.span_ 
+			<< ", bin_size: " << spec.bin_size_ << ".";
+
+		general_checks(device);
+
+		auto hw = device->async_.get_scanner().get()->get_hardware();
+
+		// Determine collection parameters.
+		power_spectrum_approximator approx;
+		approx.determine_spectrum_parameters(spec.start_frequency_, spec.span_, spec.bin_size_, spec.dwell_time_);
+
+		// Ensure we can collect on center freqs.
+		for(auto s : approx.power_specs()) {
+			check_calibration(hw, s.start_frequency_ + s.span_ / 2);
+		}
+
+		// Check for license.
+
+		auto specifier = POWER_SPECTRUM;
+		auto it = std::find_if(containers_.begin(), containers_.end(), [&](const collection_info_container &c) {
+			return c.has_specifier(specifier);
+		});
+
+		if(it == containers_.end()) {
+			// If simultaneous collection is enabled we do not want to stop collection after one iteration of freqs.
+			containers_.push_back(collection_info_container(specifier, find_collection_settings(specifier, config_).is_streaming_));
+			it = std::find_if(containers_.begin(), containers_.end(), [&](const collection_info_container &c) {
+				return c.has_specifier(specifier);
+			});
+		}
+
+		for(auto s : approx.power_specs()) {
+			it->adjust(add_collection_info(rf_phreaker::processing::power_spectrum_collection_info(s.start_frequency_ + s.span_ / 2, s.dwell_time_, 0,
+				s.span_, s.sampling_rate_, s)));
+		}
+	}
+	catch(const rf_phreaker_error &err) {
+		s = to_rp_status(err);
+		save_error(err.what(), err.error_type_, err.error_code_);
+	}
+	catch(const std::exception &err) {
+		s = RP_STATUS_GENERIC_ERROR;
+		save_error(err.what(), generic_error_type);
+	}
+	catch(...) {
+		s = RP_STATUS_UNKNOWN_ERROR;
+		save_error("an unknown error has occurred", unknown_error_type);
+	}
+	return s;
+}
+
 void rf_phreaker_impl::check_calibration(hardware hw, frequency_type freq) {
 	// Check for calibration.
 	if(!rf_phreaker::is_within_freq_paths(hw.frequency_paths_, freq))
@@ -891,6 +948,11 @@ rp_status rf_phreaker_impl::start_collection(rp_device *device, const rp_collect
 		}
 		for(int i = 0; i < info->lte_.size_; ++i) {
 			rp_status status = add_collection_frequency(device, info->lte_.e_[i].freq_, info->lte_.e_[i].band_);
+			if(status != RP_STATUS_OK)
+				return status;
+		}
+		for(int i = 0; i < info->power_spectrum_spec_.size_; ++i) {
+			rp_status status = add_collection_frequency(device, info->raw_data_.e_[i], rp_operating_band::OPERATING_BAND_UNKNOWN);
 			if(status != RP_STATUS_OK)
 				return status;
 		}

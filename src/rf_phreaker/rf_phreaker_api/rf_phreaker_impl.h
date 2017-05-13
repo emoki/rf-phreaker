@@ -82,6 +82,8 @@ public:
 private:
 	rp_status add_gsm_collection_frequencies(rp_device *device, const rp_frequency_band_group &gsm_freqs);
 
+	rp_status add_power_spectrum_frequency(rp_device *device, const rp_power_spectrum_spec &spec);
+		
 	void general_checks(rp_device *device);
 
 	void check_calibration(hardware hw, frequency_type freq);

@@ -32,6 +32,8 @@ public:
 			output->connect_umts_layer_3(boost::bind(&rf_phreaker_handler::output_umts_full_scan, this, _1, _2)).get();
 		if(callbacks_ && callbacks_->rp_lte_full_scan_update)
 			output->connect_lte_layer_3(boost::bind(&rf_phreaker_handler::output_lte_full_scan, this, _1, _2)).get();
+		if(callbacks_ && callbacks_->rp_power_spectrum_update)
+			output->connect_power_spectrum(boost::bind(&rf_phreaker_handler::output_power_spectrum, this, _1)).get();
 	}
 
 	void output_message(rp_status stat, const std::string &str) {
@@ -82,6 +84,11 @@ public:
 		vector_wrap<lte_wrap, lte_data> wrap(t);
 		basic_wrap base(b);
 		callbacks_->rp_lte_full_scan_update(&base.buf_, wrap.get(), wrap.size());
+	}
+
+	void output_power_spectrum(const power_spectrum_data &t) {
+		power_spectrum_wrap wrap(t);
+		callbacks_->rp_power_spectrum_update(&wrap.buf_);
 	}
 
 private:

@@ -186,6 +186,18 @@ typedef struct rp_frequency_band {
 	rp_operating_band band_;
 } rp_frequency_band;
 
+typedef struct rp_power_spectrum_spec {
+	rp_frequency_type start_frequency_;
+	rp_frequency_type span_;
+	rp_frequency_type bin_size_;
+	rp_time_type dwell_time_;
+} rp_power_spectrum_spec;
+
+typedef struct rp_power_spectrum_spec_group {
+	rp_power_spectrum_spec *e_;
+	int32_t size_;
+} rp_power_spectrum_spec_group;
+
 typedef struct rp_frequency_group {
 	rp_frequency_type *e_;
 	int32_t size_;
@@ -205,6 +217,7 @@ typedef struct rp_collection_info {
 	rp_frequency_band_group gsm_;
 	rp_frequency_band_group wcdma_;
 	rp_frequency_band_group lte_;
+	rp_power_spectrum_spec_group power_spectrum_spec_;
 	rp_frequency_group raw_data_;
 	rp_operating_band_group sweep_;
 } rp_collection_info;
@@ -775,6 +788,8 @@ typedef struct rp_callbacks {
 	void (RP_CALLCONV *rp_lte_sweep_update)(const rp_base *base, const rp_lte *lte, int32_t num_lte);
 
 	void (RP_CALLCONV *rp_lte_full_scan_update)(const rp_base *base, const rp_lte *lte, int32_t num_lte);
+
+	void (RP_CALLCONV *rp_power_spectrum_update)(const rp_power_spectrum *spec);
 
 	void (RP_CALLCONV *rp_raw_data_update)(const rp_raw_data, int32_t num_raw_data);
 } rp_callbacks;
