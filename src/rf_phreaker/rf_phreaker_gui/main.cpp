@@ -17,7 +17,6 @@ int main(int argc, char *argv[]) {
 
 	//qputenv("QML_IMPORT_TRACE", "1");
 	QApplication app(argc, argv);
-	//app.setOrganizationName("Cappeen");
 	app.setOrganizationDomain("cappeen.com");
 	app.setApplicationName("rf_phreaker");
 
