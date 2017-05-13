@@ -2,6 +2,7 @@
 #include <QDateTime>
 #include <QString>
 #include <QDebug>
+#include <QDir>
 #include "rf_phreaker/rf_phreaker_gui/Api.h"
 #include "rf_phreaker/rf_phreaker_gui/ApiMessage.h"
 #include "rf_phreaker/rf_phreaker_gui/Events.h"
@@ -13,6 +14,14 @@ public:
 	static MessageHandler& instance() {
 		static MessageHandler handler;
 		return handler;
+	}
+
+	static void stopLogging() {
+		qInstallMessageHandler(0);
+	}
+
+	static void logToApi(bool enable) {
+		outputToApi_ = enable;
 	}
 	
 	static void output(QtMsgType type, const QMessageLogContext &context, const QString &msg) {
@@ -44,7 +53,8 @@ public:
 		fn = fn.remove(0, fn.lastIndexOf(QRegExp("[/\\\\]")) + 1);
 		s += "[" + fn + " L: " + QString::number(context.line) + "]\t\"" + msg + "\"";
 
-		QCoreApplication::postEvent(Api::instance(), new LogUpdateEvent(s));
+		if(outputToApi_)
+			QCoreApplication::postEvent(Api::instance(), new LogUpdateEvent(s));
 
 		static std::ofstream f;
 		static bool fileOpenAttempt = false;
@@ -67,4 +77,5 @@ private:
 		qInstallMessageHandler(MessageHandler::output);
 		//qSetMessagePattern("%{time yyyy/MM/dd hh:mm:ss.zzzzzzz}\t%{category}\t%{file}:%{line}\t%{message}");
 	}
+	static bool outputToApi_;
 };

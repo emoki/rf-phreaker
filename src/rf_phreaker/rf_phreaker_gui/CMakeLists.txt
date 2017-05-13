@@ -43,6 +43,7 @@ set (rf_phreaker_gui_SRCS
 	MarbleLayerManager.h
 	MeasurementIndex.h
 	MeasurementModel.h
+	MessageHandler.cpp
 	MessageHandler.h
 	ModelGroup.h
 	ProxyMeasurementModel.h

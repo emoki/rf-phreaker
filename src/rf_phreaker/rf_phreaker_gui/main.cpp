@@ -44,6 +44,10 @@ int main(int argc, char *argv[]) {
 		engine.load(QUrl(QStringLiteral("qrc:/MaterialMain.qml")));
 
 		status = app.exec();
+
+		// When the event loop is destroyed for the application we have to disable the MessageHandler
+		// from posting events to the event loop.
+		MessageHandler::logToApi(false);
 	}
 
 	// MarbleLayers is destroyed after qml has destroy MarbleManager to stop a crash from occurring inside
