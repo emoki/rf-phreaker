@@ -10,6 +10,12 @@ Item {
    // property alias sourceModel: repeater.model
     property alias sourceModel: repeater.model
     property alias catAxis: mainAxisY
+    property string upperArea: "_UpperArea"
+    property string upperLineA: "_UpperA"
+    property string upperLineB: "_UpperB"
+    property string lowerArea: "_LowerArea"
+    property string lowerLineA: "_LowerA"
+    property string lowerLineB: "_LowerB"
     CategoryAxis {
         id: mainAxisY
         min: 0
@@ -30,7 +36,7 @@ Item {
         }
 
         onItemAdded: {
-            //console.debug("item added ------", barSeriesIndex);
+            console.debug("item added ------", barSeriesIndex);
             item.chart = chart;
             item.mainAxisX = mainAxisX;
             item.mainAxisY = mainAxisY;
@@ -41,7 +47,7 @@ Item {
         }
         onItemRemoved: {
             barSeriesIndex -= 1;
-            //console.debug("item removed -----", barSeriesIndex);
+            console.debug("item removed -----", barSeriesIndex);
             removeMeasBar(barSeriesIndex);
             if(barSeriesIndex == repeater.count)
                 refresh();
@@ -49,29 +55,51 @@ Item {
     }
 
     function createAttachMeasBar(index, item) {
-        var upperId = index + "_" + "Upper";
-        var lowerId = index + "_" + "Lower"
 
-        item.areaSeriesSL = chart.series(upperId);
+        var upperAreaId = index + upperArea
+        var upperIdA = index + upperLineA
+        var upperIdB = index + upperLineB
+        var lowerAreaId = index + lowerArea;
+        var lowerIdA = index + lowerLineA
+        var lowerIdB = index + lowerLineB
+
+        item.areaSeriesSL = chart.series(upperAreaId);
         if(item.areaSeriesSL === null) {
-            item.areaSeriesSL = chart.createSeries(ChartView.SeriesTypeArea, upperId, mainAxisX, mainAxisY, true);
+            item.areaSeriesSL = chart.createSeries(ChartView.SeriesTypeArea, upperAreaId, mainAxisX, mainAxisY);
+            item.areaSeriesSL.lowerSeries = chart.createSeries(ChartView.SeriesTypeLine, upperIdB, mainAxisX, mainAxisY);
+            item.areaSeriesSL.upperSeries.style = Qt.NoPen
+            item.areaSeriesSL.lowerSeries.style = Qt.NoPen
         }
 
-        item.areaSeriesInter = chart.series(lowerId);
+        item.areaSeriesInter = chart.series(lowerAreaId);
         if(item.areaSeriesInter === null) {
-            item.areaSeriesInter = chart.createSeries(ChartView.SeriesTypeArea, lowerId, mainAxisX, mainAxisY, true);
+            item.areaSeriesInter = chart.createSeries(ChartView.SeriesTypeArea, lowerAreaId, mainAxisX, mainAxisY);
+            item.areaSeriesInter.lowerSeries = chart.createSeries(ChartView.SeriesTypeLine, lowerIdB, mainAxisX, mainAxisY);
             item.areaSeriesInter.color = "grey";
+            item.areaSeriesInter.upperSeries.style = Qt.NoPen
+            item.areaSeriesInter.lowerSeries.style = Qt.NoPen
         }
     }
 
     function removeMeasBar(index) {
-        var upperId = index + "_" + "Upper";
-        var lowerId = index + "_" + "Lower"
-        if(chart.series(upperId) === null) {
-            console.debug("Unable to find bar series.", upperId, " ", lowerId);
+        var upperAreaId = index + upperArea
+        var upperIdA = index + upperLineA
+        var upperIdB = index + upperLineB
+        var lowerAreaId = index + lowerArea;
+        var lowerIdA = index + lowerLineA
+        var lowerIdB = index + lowerLineB
+        if(chart.series(upperIdA) === null
+                || chart.series(upperIdB) === null
+                || chart.series(lowerIdA) === null
+                || chart.series(lowerIdB) === null ) {
+            console.debug("Unable to find bar series.");
         }
-        chart.removeSeries(chart.series(upperId));
-        chart.removeSeries(chart.series(lowerId));
+        chart.removeSeries(chart.series(upperIdA));
+        chart.removeSeries(chart.series(upperIdB));
+        chart.removeSeries(chart.series(lowerIdA));
+        chart.removeSeries(chart.series(lowerIdB));
+        chart.removeSeries(chart.series(upperAreaId))
+        chart.removeSeries(chart.series(lowerAreaId))
     }
 
     function refresh() {
