@@ -182,3 +182,16 @@ target_link_libraries (rf_phreaker_gui
 	debug ${CMAKE_LIBRARY_OUTPUT_DIRECTORY}/${CMAKE_CFG_INTDIR}/materiald.lib 
 	optimized ${CMAKE_LIBRARY_OUTPUT_DIRECTORY}/${CMAKE_CFG_INTDIR}/material.lib
 )
+
+add_custom_target(rf_phreaker_gui_copy_dependencies)
+find_program(WINDEPLOYQT_EXECUTABLE NAMES windeployqt HINTS ${qt_INSTALL_PATH} ENV qt_INSTALL_PATH PATH_SUFFIXES bin)
+if(NOT EXISTS ${WINDEPLOYQT_EXECUTABLE})
+	message(SEND_ERROR "Unable to find windeployqt.  Search path: ${qt_INSTALL_PATH}")
+endif()
+add_custom_command(TARGET rf_phreaker_gui_copy_dependencies POST_BUILD COMMAND ${WINDEPLOYQT_EXECUTABLE} ${CMAKE_LIBRARY_OUTPUT_DIRECTORY}/${CMAKE_CFG_INTDIR}/rf_phreaker_gui.exe 
+	--$<$<CONFIG:debug>:debug>$<$<NOT:$<CONFIG:debug>>:release> 
+	--qmldir ${CMAKE_SOURCE_DIR}/src/rf_phreaker/rf_phreaker_gui
+	--xml
+	WORKING_DIRECTORY ${CMAKE_LIBRARY_OUTPUT_DIRECTORY}/${CMAKE_CFG_INTDIR}
+)
+
