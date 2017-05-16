@@ -114,10 +114,11 @@ set (rf_phreaker_gui_QMLS
 	qtlabscontrols.conf
 	)
 
-set (qt_PRIVATE_GUI "C:/bin/qt/5.5/msvc2013/include/QtGui/5.5.1" CACHE STRING "Path to private QT GUI.")
-set (qt_PRIVATE_CORE "C:/bin/qt/5.5/msvc2013/include/QtCore/5.5.1" CACHE STRING "Path to private QT Core.")
-set (qt_PRIVATE_GUIP "C:/bin/qt/5.5/msvc2013/include/QtGui/5.5.1/QtGui" CACHE STRING "Path to private QT GUI.")
-set (qt_PRIVATE_COREP "C:/bin/qt/5.5/msvc2013/include/QtCore/5.5.1/QtCore" CACHE STRING "Path to private QT Core.")
+set (qt_VERSION "5.8.0")
+set (qt_PRIVATE_GUI "${qt_INSTALL_PATH}/include/QtGui/${qt_VERSION}" CACHE STRING "Path to private QT GUI.")
+set (qt_PRIVATE_CORE "${qt_INSTALL_PATH}/include/QtCore/${qt_VERSION}" CACHE STRING "Path to private QT Core.")
+set (qt_PRIVATE_GUIP "${qt_INSTALL_PATH}/include/QtGui/${qt_VERSION}/QtGui" CACHE STRING "Path to private QT GUI.")
+set (qt_PRIVATE_COREP "${qt_INSTALL_PATH}/include/QtCore/${qt_VERSION}/QtCore" CACHE STRING "Path to private QT Core.")
 
 include_directories (${qt_PRIVATE_GUI})
 include_directories (${qt_PRIVATE_CORE})

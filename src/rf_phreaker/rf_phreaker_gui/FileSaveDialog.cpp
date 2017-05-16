@@ -9,7 +9,7 @@ FileSaveDialog::FileSaveDialog(QQuickItem *parent)
     : QQuickItem(parent)
     , m_dlgHelper(init_helper())
     , m_modality(Qt::WindowModal)
-    , m_options(QSharedPointer<QFileDialogOptions>(new QFileDialogOptions()))
+    , m_options(QFileDialogOptions::create())
 {
     /*
      * Qt Widgets support must be present, i.e. the main app is a QApplication.

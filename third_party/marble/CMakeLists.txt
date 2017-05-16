@@ -18,10 +18,14 @@ set (CMAKE_ARCHIVE_OUTPUT_DIRECTORY "${PROJECT_SOURCE_DIR}/../../output")
 
 # Path to QT
 set (CMAKE_INCLUDE_CURRENT_DIR ON)
-set (qt_INSTALL_PATH "e:/bin/qt/5.6/msvc2013" CACHE STRING "Path to QT.")
-set (CMAKE_PREFIX_PATH ${qt_INSTALL_PATH} ${CMAKE_PREFIX_PATH})
+set (qt_INSTALL_PATH "c:/bin/qt/5.8/5.8/msvc2013" CACHE STRING "Path to QT.")
+set (qt_CMAKE_PATH "${qt_INSTALL_PATH}/msvc2013/lib/cmake/Qt5"  CACHE STRING "Path to QT cmake file.")
+set (CMAKE_PREFIX_PATH ${qt_CMAKE_PATH} ${qt_INSTALL_PATH} ${CMAKE_PREFIX_PATH})
 # All qt packages must be found within top level dir.
-find_package (Qt5 COMPONENTS Core Quick Widgets)
+find_package (Qt5 COMPONENTS Core Gui Quick Widgets)
+if(NOT Qt5_FOUND)
+	message(SEND_ERROR "Unable to find Qt.  Make sure the drive letter is correct!")
+endif()# All qt packages must be found within top level dir.
 
 # Let CMake find the correct library dir instead of
 # relying on the obsolete LIB_SUFFIX parameter
