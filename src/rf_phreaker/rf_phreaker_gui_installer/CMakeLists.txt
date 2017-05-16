@@ -177,16 +177,12 @@ add_custom_command(TARGET rf_phreaker_build_install POST_BUILD COMMAND ${CMAKE_C
 )
 
 # Add QT Dependencies
-set(RF_PHREAKER_INSTALL_CONFIG "release")
-if(CMAKE_BUILD_TYPE STREQUAL "Debug")
-	set(RF_PHREAKER_INSTALL_CONFIG "debug")
-endif()
 find_program(WINDEPLOYQT_EXECUTABLE NAMES windeployqt HINTS ${qt_INSTALL_PATH} ENV qt_INSTALL_PATH PATH_SUFFIXES bin)
 if(NOT EXISTS ${WINDEPLOYQT_EXECUTABLE})
 	message(SEND_ERROR "Unable to find windeployqt.  Search path: ${qt_INSTALL_PATH}")
 endif()
 add_custom_command(TARGET rf_phreaker_build_install POST_BUILD COMMAND ${WINDEPLOYQT_EXECUTABLE} ${RF_PHREAKER_INSTALLER_BUILD_INSTALL_DIR}/packages/rf_phreaker/data/rf_phreaker_gui.exe 
-	--${RF_PHREAKER_INSTALL_CONFIG} 
+	--$<$<CONFIG:debug>:debug>$<$<NOT:$<CONFIG:debug>>:release> 
 	--qmldir ${CMAKE_SOURCE_DIR}/src/rf_phreaker/rf_phreaker_gui
 	--xml
 	WORKING_DIRECTORY ${RF_PHREAKER_INSTALLER_BUILD_INSTALL_DIR}/packages/rf_phreaker/data
