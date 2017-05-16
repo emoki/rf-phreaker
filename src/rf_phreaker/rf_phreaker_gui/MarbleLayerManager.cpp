@@ -272,6 +272,8 @@ void MarbleLayerManager::addRpf(const QString &filename) {
 }
 
 void MarbleLayerManager::addPreviousTrack(Marble::GeoDataPlacemark *placemark) {
+	if(!rpDoc_)
+		return;
 	model_.treeModel()->removeDocument(rpDoc_);
 	rpDoc_->append(placemark);
 	// Style needs to be set after placemark has been added to the document.
