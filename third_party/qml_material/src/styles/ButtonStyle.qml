@@ -22,6 +22,8 @@ ButtonStyle {
         bottom: 0
     }
 
+    property int radius: dp(2)
+
     property bool darkBackground: control.hasOwnProperty("darkBackground")
                 ? control.darkBackground : Theme.isDarkColor(controlBackground)
 
@@ -37,7 +39,7 @@ ButtonStyle {
 
         implicitHeight: 36 * Units.dp
 
-        radius: 2 * Units.dp
+        radius: style.radius
 
         backgroundColor: control.enabled || controlElevation === 0
                 ? controlBackground

@@ -39,6 +39,7 @@
 	<file>MaterialSettingsPage.qml</file>
 	<file>MaterialStateMachine.qml</file>
 	<file>MaterialTabbedNavigationDrawerPage.qml</file>
+	<file>MaterialToggleButton.qml</file>
 	<file>OverviewChart.qml</file>
 	<file>PositionButton.qml</file>
 	<file>PositionMarker.qml</file>

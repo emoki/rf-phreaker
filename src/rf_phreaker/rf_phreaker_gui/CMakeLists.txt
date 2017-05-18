@@ -98,6 +98,7 @@ set (rf_phreaker_gui_QMLS
 	MaterialSettingsPage.qml
 	MaterialStateMachine.qml
 	MaterialTabbedNavigationDrawerPage.qml
+	MaterialToggleButton.qml
 	OverviewChart.qml
 	PositionButton.qml
 	PositionMarker.qml

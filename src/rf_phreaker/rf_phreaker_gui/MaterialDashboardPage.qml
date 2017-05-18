@@ -413,6 +413,33 @@ Page {
                         Layout.fillWidth: true
                         Layout.preferredHeight: dp(8)
                     }
+                    Item {
+                        id: filter
+                        property int numColumns: scanListExpBut.expanded ? 6 : 4
+                        property int numRows: scanListExpBut.expanded ? 1 : 2
+                        property int numSpan: scanListExpBut.expanded ? 1 : 2
+                        Layout.fillWidth: true
+                        Layout.preferredHeight: dp(36) * numRows
+                        Layout.rightMargin: dp(8)
+                        Layout.leftMargin: dp(8)
+
+                        GridLayout {
+                            anchors.fill: parent
+                            rowSpacing: 0
+                            columnSpacing: 0
+                            rows: {filter.numRows; console.debug("num rows!!", filter.numRows) }
+                            columns: filter.numColumns
+                            MaterialToggleButton { implicitWidth: parent.width / filter.numColumns; text: "GSM";
+                                checked: search.searchGsm; onClicked: { search.searchGsm = !search.searchGsm; search.search(); }}
+                            MaterialToggleButton { implicitWidth: parent.width / filter.numColumns; text: "WCDMA";
+                                checked: search.searchWcdma; onClicked: { search.searchWcdma= !search.searchWcdma; search.search(); }}
+                            MaterialToggleButton { implicitWidth: parent.width / filter.numColumns; text: "LTE";
+                                checked: search.searchLte; onClicked: { search.searchLte = !search.searchLte; search.search(); }}
+                            MaterialToggleButton { implicitWidth: parent.width / (filter.numSpan == 1 ? filter.numColumns : 2);
+                                Layout.columnSpan: filter.numSpan; text: "IQ Data"; checked: search.searchRaw;
+                                onClicked: { search.searchRaw = !search.searchRaw; search.search(); }}
+                        }
+                    }
                     RowLayout {
                         Layout.alignment: Qt.AlignRight
                         spacing: dp(8)
