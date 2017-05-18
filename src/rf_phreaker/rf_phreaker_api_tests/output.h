@@ -83,7 +83,7 @@ void RP_CALLCONV rp_wcdma_sweep_update(const rp_base *base, const rp_wcdma *wcdm
 
 void RP_CALLCONV rp_lte_sweep_update(const rp_base *base, const rp_lte *lte, int num_lte) {}
 
-void RP_CALLCONV rp_raw_data_update(const rp_raw_data, int num_raw_data) {}
+void RP_CALLCONV rp_iq_data_update(const rp_iq_data, int num_raw_data) {}
 
 class api_output {
 public:

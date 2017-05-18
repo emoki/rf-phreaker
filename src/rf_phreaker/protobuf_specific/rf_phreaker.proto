@@ -657,7 +657,7 @@ enum rp_sample_format_type {
 	LITTLE_ENDIAN_FLOAT_REAL_IMAGINARY = 0;
 }
 
-message rp_raw_data {
+message rp_iq_data {
 	rp_base base = 1;
 	double power_adjustment = 2;
 	rp_sample_format_type sample_format = 3;

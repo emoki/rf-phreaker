@@ -6,7 +6,7 @@ using namespace rf_phreaker;
 
 CollectionInfoSearch::CollectionInfoSearch(QObject *parent)
 	: QObject(parent)
-	, searchRaw_(false)
+	, searchIq_(false)
 	, searchGsm_(false)
 	, searchCdma_(false)
 	, searchWcdma_(false)
@@ -43,14 +43,14 @@ void CollectionInfoSearch::search() {
 		populateWithWcdma();
 	if(tmpSearchLte_)
 		populateWithLte();
-	if(tmpSearchRaw_)
-		populateWithRaw();
+	if(tmpSearchIq_)
+		populateWithIq();
 		
 	emit resultsChanged();
 }
 
 void CollectionInfoSearch::determineFilters() {
-	tmpSearchRaw_ = searchRaw_ | (filter_.indexOf(QRegularExpression("raw", QRegularExpression::CaseInsensitiveOption)) != -1);
+	tmpSearchIq_ = searchIq_ | (filter_.indexOf(QRegularExpression("raw", QRegularExpression::CaseInsensitiveOption)) != -1);
 	tmpSearchGsm_ = searchGsm_ | (filter_.indexOf(QRegularExpression("gsm", QRegularExpression::CaseInsensitiveOption)) != -1);
 	//tmpSearchCdma_ = searchCdma_ | (filter_.indexOf(QRegularExpression("cdma", QRegularExpression::CaseInsensitiveOption)) != -1);
 	tmpSearchWcdma_ = searchWcdma_ | (filter_.indexOf(QRegularExpression("wcdma", QRegularExpression::CaseInsensitiveOption)) != -1);
@@ -60,12 +60,12 @@ void CollectionInfoSearch::determineFilters() {
 	tmpScan_ = scan_ | (filter_.indexOf(QRegularExpression("scan", QRegularExpression::CaseInsensitiveOption)) != -1);
 
 	// If no tech filters have been specified then we search all techs.
-	if(!tmpSearchGsm_ /*&& !tmpSearchCdma_*/ && !tmpSearchWcdma_ && !tmpSearchLte_ && !tmpSearchRaw_) {
+	if(!tmpSearchGsm_ /*&& !tmpSearchCdma_*/ && !tmpSearchWcdma_ && !tmpSearchLte_ && !tmpSearchIq_) {
 		tmpSearchGsm_ = true;
 		//tmpSearchCdma_ = true;
 		tmpSearchWcdma_ = true;
 		tmpSearchLte_ = true;
-		tmpSearchRaw_ = true;
+		tmpSearchIq_ = true;
 	}
 
 	// If neither sweep nor scan has been specified then do both.
@@ -179,11 +179,11 @@ void CollectionInfoSearch::populateWithLteFreqRange(const rf_phreaker::channel_f
 	results_.append(new CollectionInfo(cf_low, cf_high, ApiTypes::LTE_SWEEP));
 }
 
-void CollectionInfoSearch::populateWithRaw() {
+void CollectionInfoSearch::populateWithIq() {
 	if(tmp_freq_ > 300e6 && tmp_freq_ < 3800e6) {
 		channel_freq cf;
 		cf.freq_ = tmp_freq_;
-		results_.append(new CollectionInfo(cf, ApiTypes::RAW_DATA));
+		results_.append(new CollectionInfo(cf, ApiTypes::IQ_DATA));
 	}
 }
 

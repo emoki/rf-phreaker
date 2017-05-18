@@ -102,8 +102,8 @@ public:
 		case ApiTypes::LTE_FULL_SCAN:
 		case ApiTypes::LTE_SWEEP:
 			return "LTE";
-		case ApiTypes::RAW_DATA:
-			return "RAW_DATA";
+		case ApiTypes::IQ_DATA:
+			return "IQ DATA";
 		default:
 			return "UNKNOWN";
 		}

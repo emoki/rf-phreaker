@@ -125,7 +125,7 @@ rp_status rf_phreaker_impl::initialize(rp_callbacks *callbacks) {
 		data_output_.reset(new processing::data_output_async());
 		if(callbacks_->rp_device_info_update || callbacks_->rp_gps_update || callbacks_->rp_gsm_sweep_update || callbacks_->rp_gsm_full_scan_update
 			|| callbacks_->rp_log_update || callbacks_->rp_lte_sweep_update || callbacks_->rp_lte_full_scan_update || callbacks_->rp_message_update
-			|| callbacks_->rp_raw_data_update || callbacks_->rp_wcdma_sweep_update || callbacks_->rp_wcdma_full_scan_update)
+			|| callbacks_->rp_iq_data_update || callbacks_->rp_wcdma_sweep_update || callbacks_->rp_wcdma_full_scan_update)
 			handler_.reset(new rf_phreaker_handler(data_output_.get(), callbacks));
 		if(callbacks_->rp_update)
 			handler_pb_.reset(new rf_phreaker_handler_protobuf(data_output_.get(), callbacks));
@@ -952,13 +952,13 @@ rp_status rf_phreaker_impl::start_collection(rp_device *device, const rp_collect
 				return status;
 		}
 		for(int i = 0; i < info->power_spectrum_spec_.size_; ++i) {
-			rp_status status = add_collection_frequency(device, info->raw_data_.e_[i], rp_operating_band::OPERATING_BAND_UNKNOWN);
+			rp_status status = add_collection_frequency(device, info->iq_data_.e_[i], rp_operating_band::OPERATING_BAND_UNKNOWN);
 			if(status != RP_STATUS_OK)
 				return status;
 		}
-		for(int i = 0; i < info->raw_data_.size_; ++i) {
+		for(int i = 0; i < info->iq_data_.size_; ++i) {
 			throw rf_phreaker_api_error("RAW_DATA not yet supported.", INVALID_PARAMETER);
-			rp_status status = add_collection_frequency(device, info->raw_data_.e_[i], rp_operating_band::OPERATING_BAND_UNKNOWN);
+			rp_status status = add_collection_frequency(device, info->iq_data_.e_[i], rp_operating_band::OPERATING_BAND_UNKNOWN);
 			if(status != RP_STATUS_OK)
 				return status;
 		}
@@ -1055,22 +1055,22 @@ rp_status rf_phreaker_impl::get_gps_data(rp_device *device, rp_gps gps) {
 }
 
 rp_status rf_phreaker_impl::get_iq_data_using_auto_gain(rp_device *device, rp_frequency_type frequency, rp_time_type time_ns,
-	rp_bandwidth_type bandwidth, rp_frequency_type sampling_rate, rp_raw_data *raw_data) {
+	rp_bandwidth_type bandwidth, rp_frequency_type sampling_rate, rp_iq_data *iq_data) {
 	rp_status s = RP_STATUS_OK;
 	try {
 		std::lock_guard<std::recursive_mutex> lock(mutex_);
 
 		general_checks(device);
 
-		if(raw_data == nullptr)
-			throw rf_phreaker_api_error("Null rp_raw_data.", INVALID_PARAMETER);
+		if(iq_data == nullptr)
+			throw rf_phreaker_api_error("Null rp_iq_data.", INVALID_PARAMETER);
 		else if(time_ns < 0)
 			throw rf_phreaker_api_error("Invalid time.", INVALID_PARAMETER);
 
 		auto hw = device->async_.get_scanner();
 
 		auto samples_required = rf_phreaker::convert_to_samples(time_ns, sampling_rate);
-		if(samples_required > raw_data->num_samples_)
+		if(samples_required > iq_data->num_samples_)
 			throw rf_phreaker_api_error("Insufficient number of samples supplied.  At least " + std::to_string(samples_required)
 			+ " samples are required.", INVALID_PARAMETER);
 
@@ -1082,19 +1082,19 @@ rp_status rf_phreaker_impl::get_iq_data_using_auto_gain(rp_device *device, rp_fr
 		// check license
 
 
-		raw_data->base_.measurement_bandwidth_ = meas.bandwidth();
-		raw_data->base_.measurement_frequency_ = meas.frequency();
-		raw_data->base_.measurement_signal_level_ = 0;
-		raw_data->base_.collection_round_ = meas.collection_round();
-		copy_serial(meas.serial(), raw_data->base_.serial_);
-		raw_data->base_.status_flags_ = 0;
-		raw_data->base_.time_ = 0;
-		throw rf_phreaker_error("raw_data not supported!");
-		//raw_data->power_adjustment_ = meas.blade_adjustment() - config_.use_rf_board_adjustment_ ? meas.rf_board_adjustment() : 0;
-		raw_data->sample_format_ = LITTLE_ENDIAN_FLOAT_REAL_IMAGINARY;
-		if(meas.get_iq().length() < raw_data->num_samples_)
-			raw_data->num_samples_ = meas.get_iq().length();
-		memcpy(raw_data->samples_, meas.get_iq().get(), (size_t)raw_data->num_samples_ * sizeof(scanner::measurement_info::sample_type));
+		iq_data->base_.measurement_bandwidth_ = meas.bandwidth();
+		iq_data->base_.measurement_frequency_ = meas.frequency();
+		iq_data->base_.measurement_signal_level_ = 0;
+		iq_data->base_.collection_round_ = meas.collection_round();
+		copy_serial(meas.serial(), iq_data->base_.serial_);
+		iq_data->base_.status_flags_ = 0;
+		iq_data->base_.time_ = 0;
+		throw rf_phreaker_error("iq_data not supported!");
+		//iq_data->power_adjustment_ = meas.blade_adjustment() - config_.use_rf_board_adjustment_ ? meas.rf_board_adjustment() : 0;
+		iq_data->sample_format_ = LITTLE_ENDIAN_FLOAT_REAL_IMAGINARY;
+		if(meas.get_iq().length() < iq_data->num_samples_)
+			iq_data->num_samples_ = meas.get_iq().length();
+		memcpy(iq_data->samples_, meas.get_iq().get(), (size_t)iq_data->num_samples_ * sizeof(scanner::measurement_info::sample_type));
 	}
 	catch(const rf_phreaker_error &err) {
 		s = to_rp_status(err);
@@ -1112,7 +1112,7 @@ rp_status rf_phreaker_impl::get_iq_data_using_auto_gain(rp_device *device, rp_fr
 }
 
 rp_status rf_phreaker_impl::get_iq_data(rp_device *device, rp_frequency_type frequency, rp_time_type time_ns,
-	rp_bandwidth_type bandwidth, rp_frequency_type sampling_rate, int32_t gain_db, rp_raw_data *raw_data) {
+	rp_bandwidth_type bandwidth, rp_frequency_type sampling_rate, int32_t gain_db, rp_iq_data *iq_data) {
 	rp_status s = RP_STATUS_OK;
 	try {
 		throw rf_phreaker_api_error("get_iq_data with gain is not supported.", INVALID_PARAMETER);
@@ -1124,7 +1124,7 @@ rp_status rf_phreaker_impl::get_iq_data(rp_device *device, rp_frequency_type fre
 		auto hw = device->async_.get_scanner();
 
 		auto samples_required = rf_phreaker::convert_to_samples(time_ns, sampling_rate);
-		if(samples_required > raw_data->num_samples_)
+		if(samples_required > iq_data->num_samples_)
 			throw rf_phreaker_api_error("Insufficient number of samples supplied.  At least " + std::to_string(samples_required)
 			+ " samples are required.", INVALID_PARAMETER);
 

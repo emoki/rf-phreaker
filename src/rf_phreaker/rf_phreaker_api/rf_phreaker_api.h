@@ -218,7 +218,7 @@ typedef struct rp_collection_info {
 	rp_frequency_band_group wcdma_;
 	rp_frequency_band_group lte_;
 	rp_power_spectrum_spec_group power_spectrum_spec_;
-	rp_frequency_group raw_data_;
+	rp_frequency_group iq_data_;
 	rp_operating_band_group sweep_;
 } rp_collection_info;
 
@@ -757,14 +757,14 @@ typedef enum rp_sample_format_type {
 	LITTLE_ENDIAN_FLOAT_REAL_IMAGINARY
 } rp_sample_format_type;
 
-typedef struct rp_raw_data {
+typedef struct rp_iq_data {
 	rp_base base_;
 	double power_adjustment_;
 	rp_sample_format_type sample_format_;
 	rp_frequency_type sampling_rate_;
 	int32_t num_samples_;
 	void *samples_;
-} rp_raw_data;
+} rp_iq_data;
 
 
 typedef struct rp_callbacks {
@@ -792,7 +792,7 @@ typedef struct rp_callbacks {
 
 	void (RP_CALLCONV *rp_power_spectrum_update)(const rp_power_spectrum *spec);
 
-	void (RP_CALLCONV *rp_raw_data_update)(const rp_raw_data *raw);
+	void (RP_CALLCONV *rp_iq_data_update)(const rp_iq_data *iq);
 } rp_callbacks;
 
 RP_LIBEXPORT(rp_status) rp_initialize(rp_callbacks *callbacks);
@@ -815,9 +815,9 @@ RP_LIBEXPORT(rp_status) rp_stop_collection(rp_device *device);
 
 RP_LIBEXPORT(rp_status) rp_get_gps_data(rp_device *device, rp_gps gps);
 
-RP_LIBEXPORT(rp_status) rp_get_iq_data_using_auto_gain(rp_device *device, rp_frequency_type frequency, rp_time_type dwell_time_ns, rp_bandwidth_type bandwidth, rp_frequency_type sampling_rate, rp_raw_data *raw_data);
+RP_LIBEXPORT(rp_status) rp_get_iq_data_using_auto_gain(rp_device *device, rp_frequency_type frequency, rp_time_type dwell_time_ns, rp_bandwidth_type bandwidth, rp_frequency_type sampling_rate, rp_iq_data *iq_data);
 
-RP_LIBEXPORT(rp_status) rp_get_iq_data(rp_device *device, rp_frequency_type frequency, rp_time_type dwell_time_ns, rp_bandwidth_type bandwidth, rp_frequency_type sampling_rate, int32_t gain_db, rp_raw_data *raw_data);
+RP_LIBEXPORT(rp_status) rp_get_iq_data(rp_device *device, rp_frequency_type frequency, rp_time_type dwell_time_ns, rp_bandwidth_type bandwidth, rp_frequency_type sampling_rate, int32_t gain_db, rp_iq_data *iq_data);
 
 RP_LIBEXPORT(rp_status) rp_update_license(rp_device *device, const char *filename);
 

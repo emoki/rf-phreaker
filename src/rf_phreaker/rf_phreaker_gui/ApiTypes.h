@@ -46,7 +46,7 @@ public:
 		CDMA_SWEEP = ::rf_phreaker::CDMA_SWEEP,
 		WCDMA_SWEEP = ::rf_phreaker::UMTS_SWEEP,
 		LTE_SWEEP = ::rf_phreaker::LTE_SWEEP,
-		RAW_DATA = ::rf_phreaker::RAW_DATA,
+		IQ_DATA = ::rf_phreaker::IQ_DATA
 	};
 
 	enum OperatingBand {
@@ -130,12 +130,12 @@ public:
 		LTE_OPERATING_BAND_43 = ::rp_operating_band::LTE_OPERATING_BAND_43,	//	3600�- 3800		TDD
 		LTE_OPERATING_BAND_44 = ::rp_operating_band::LTE_OPERATING_BAND_44,	//	703�- 803		TDD
 
-		FIRST_GSM_OPERATING_BAND = GSM_T_380,
-		LAST_GSM_OPERATING_BAND = GSM_PCS_1900,
-		FIRST_UMTS_OPERATING_BAND = UMTS_OPERATING_BAND_1,
-		LAST_UMTS_OPERATING_BAND = UMTS_OPERATING_BAND_26,
-		FIRST_LTE_OPERATING_BAND = LTE_OPERATING_BAND_1,
-		LAST_LTE_OPERATING_BAND = LTE_OPERATING_BAND_44
+		FIRST_GSM_OPERATING_BAND = OperatingBand::GSM_T_380,
+		LAST_GSM_OPERATING_BAND = OperatingBand::GSM_PCS_1900,
+		FIRST_UMTS_OPERATING_BAND = OperatingBand::WCDMA_OPERATING_BAND_1,
+		LAST_UMTS_OPERATING_BAND = OperatingBand::WCDMA_OPERATING_BAND_26,
+		FIRST_LTE_OPERATING_BAND = OperatingBand::LTE_OPERATING_BAND_1,
+		LAST_LTE_OPERATING_BAND = OperatingBand::LTE_OPERATING_BAND_44
 	};
 
 	const static int serialLength = 6;
@@ -158,8 +158,8 @@ public:
 			return rf_phreaker::UMTS_SWEEP;
 		case LTE_SWEEP:
 			return rf_phreaker::LTE_SWEEP;
-		case RAW_DATA:
-			return rf_phreaker::RAW_DATA;
+		case IQ_DATA:
+			return rf_phreaker::IQ_DATA;
 		default:
 			return rf_phreaker::UNKOWN_SPECIFIER;
 
@@ -183,8 +183,8 @@ public:
 			return WCDMA_SWEEP;
 		else if(s == "LTE SWEEP")
 			return LTE_SWEEP;
-		else if(s == "RAW DATA")
-			return RAW_DATA;
+		else if(s == "IQ DATA")
+			return IQ_DATA;
 		else
 			return UNKNOWN_TECH;
 	}
@@ -198,8 +198,8 @@ public:
 			return is_sweep ? WCDMA_SWEEP : WCDMA_FULL_SCAN;
 		else if(b >= rf_phreaker::FIRST_LTE_OPERATING_BAND && b <= rf_phreaker::LAST_LTE_OPERATING_BAND)
 			return is_sweep ? LTE_SWEEP : LTE_FULL_SCAN;
-		//else if(b == "RAW DATA")
-		//	return RAW_DATA;
+		//else if(b == "IQ DATA")
+		//	return IQ_DATA;
 		else
 			return UNKNOWN_TECH;
 	}
@@ -222,8 +222,8 @@ public:
 			return "WCDMA SWEEP";
 		case LTE_SWEEP:
 			return "LTE SWEEP";
-		case RAW_DATA:
-			return "RAW DATA";
+		case IQ_DATA:
+			return "IQ DATA";
 		default:
 			return "UNKNOWN";
 		}

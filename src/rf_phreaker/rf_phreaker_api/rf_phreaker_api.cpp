@@ -67,12 +67,12 @@ RP_LIBEXPORT(rp_status) rp_get_gps_data(rp_device *device, rp_gps gps) {
 	return rf_phreaker_impl::instance().get_gps_data(device, gps);
 }
 
-RP_LIBEXPORT(rp_status) rp_get_iq_data_using_auto_gain(rp_device *device, rp_frequency_type freq, rp_time_type dwell_time_ns, rp_bandwidth_type bandwidth, rp_frequency_type sampling_rate, rp_raw_data *raw_data) {
-	return rf_phreaker_impl::instance().get_iq_data_using_auto_gain(device, freq, dwell_time_ns, bandwidth, sampling_rate, raw_data);
+RP_LIBEXPORT(rp_status) rp_get_iq_data_using_auto_gain(rp_device *device, rp_frequency_type freq, rp_time_type dwell_time_ns, rp_bandwidth_type bandwidth, rp_frequency_type sampling_rate, rp_iq_data *iq_data) {
+	return rf_phreaker_impl::instance().get_iq_data_using_auto_gain(device, freq, dwell_time_ns, bandwidth, sampling_rate, iq_data);
 }
 
-RP_LIBEXPORT(rp_status) rp_get_iq_data(rp_device *device, rp_frequency_type freq, rp_time_type dwell_time_ns, rp_bandwidth_type bandwidth, rp_frequency_type sampling_rate, int32_t gain_db, rp_raw_data *raw_data) {
-	return rf_phreaker_impl::instance().get_iq_data(device, freq, dwell_time_ns, bandwidth, sampling_rate, gain_db, raw_data);
+RP_LIBEXPORT(rp_status) rp_get_iq_data(rp_device *device, rp_frequency_type freq, rp_time_type dwell_time_ns, rp_bandwidth_type bandwidth, rp_frequency_type sampling_rate, int32_t gain_db, rp_iq_data *iq_data) {
+	return rf_phreaker_impl::instance().get_iq_data(device, freq, dwell_time_ns, bandwidth, sampling_rate, gain_db, iq_data);
 }
 
 RP_LIBEXPORT(rp_status) rp_update_license(rp_device *device, const char *filename) {

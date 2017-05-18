@@ -55,6 +55,7 @@ class rp_gsm_si3;
 class rp_gsm_si4;
 class rp_gsm_update;
 class rp_gsm_utran_neighbor;
+class rp_iq_data;
 class rp_log;
 class rp_lte;
 class rp_lte_carrier_freq_utra;
@@ -83,7 +84,6 @@ class rp_message;
 class rp_pcid_group;
 class rp_plmn;
 class rp_power_spectrum;
-class rp_raw_data;
 class rp_raw_layer_3;
 class rp_satellite;
 class rp_update;
@@ -6967,32 +6967,32 @@ class rp_power_spectrum : public ::google::protobuf::Message {
 };
 // -------------------------------------------------------------------
 
-class rp_raw_data : public ::google::protobuf::Message {
+class rp_iq_data : public ::google::protobuf::Message {
  public:
-  rp_raw_data();
-  virtual ~rp_raw_data();
+  rp_iq_data();
+  virtual ~rp_iq_data();
 
-  rp_raw_data(const rp_raw_data& from);
+  rp_iq_data(const rp_iq_data& from);
 
-  inline rp_raw_data& operator=(const rp_raw_data& from) {
+  inline rp_iq_data& operator=(const rp_iq_data& from) {
     CopyFrom(from);
     return *this;
   }
 
   static const ::google::protobuf::Descriptor* descriptor();
-  static const rp_raw_data& default_instance();
+  static const rp_iq_data& default_instance();
 
-  void Swap(rp_raw_data* other);
+  void Swap(rp_iq_data* other);
 
   // implements Message ----------------------------------------------
 
-  inline rp_raw_data* New() const { return New(NULL); }
+  inline rp_iq_data* New() const { return New(NULL); }
 
-  rp_raw_data* New(::google::protobuf::Arena* arena) const;
+  rp_iq_data* New(::google::protobuf::Arena* arena) const;
   void CopyFrom(const ::google::protobuf::Message& from);
   void MergeFrom(const ::google::protobuf::Message& from);
-  void CopyFrom(const rp_raw_data& from);
-  void MergeFrom(const rp_raw_data& from);
+  void CopyFrom(const rp_iq_data& from);
+  void MergeFrom(const rp_iq_data& from);
   void Clear();
   bool IsInitialized() const;
 
@@ -7007,7 +7007,7 @@ class rp_raw_data : public ::google::protobuf::Message {
   void SharedCtor();
   void SharedDtor();
   void SetCachedSize(int size) const;
-  void InternalSwap(rp_raw_data* other);
+  void InternalSwap(rp_iq_data* other);
   private:
   inline ::google::protobuf::Arena* GetArenaNoVirtual() const {
     return _internal_metadata_.arena();
@@ -7062,7 +7062,7 @@ class rp_raw_data : public ::google::protobuf::Message {
   ::google::protobuf::RepeatedField< float >*
       mutable_samples();
 
-  // @@protoc_insertion_point(class_scope:rf_phreaker.protobuf.rp_raw_data)
+  // @@protoc_insertion_point(class_scope:rf_phreaker.protobuf.rp_iq_data)
  private:
 
   ::google::protobuf::internal::InternalMetadataWithArena _internal_metadata_;
@@ -7079,7 +7079,7 @@ class rp_raw_data : public ::google::protobuf::Message {
   friend void protobuf_ShutdownFile_rf_5fphreaker_2eproto();
 
   void InitAsDefaultInstance();
-  static rp_raw_data* default_instance_;
+  static rp_iq_data* default_instance_;
 };
 // ===================================================================
 
@@ -13244,35 +13244,35 @@ rp_power_spectrum::mutable_power() {
 
 // -------------------------------------------------------------------
 
-// rp_raw_data
+// rp_iq_data
 
 // optional .rf_phreaker.protobuf.rp_base base = 1;
-inline bool rp_raw_data::has_base() const {
+inline bool rp_iq_data::has_base() const {
   return !_is_default_instance_ && base_ != NULL;
 }
-inline void rp_raw_data::clear_base() {
+inline void rp_iq_data::clear_base() {
   if (GetArenaNoVirtual() == NULL && base_ != NULL) delete base_;
   base_ = NULL;
 }
-inline const ::rf_phreaker::protobuf::rp_base& rp_raw_data::base() const {
-  // @@protoc_insertion_point(field_get:rf_phreaker.protobuf.rp_raw_data.base)
+inline const ::rf_phreaker::protobuf::rp_base& rp_iq_data::base() const {
+  // @@protoc_insertion_point(field_get:rf_phreaker.protobuf.rp_iq_data.base)
   return base_ != NULL ? *base_ : *default_instance_->base_;
 }
-inline ::rf_phreaker::protobuf::rp_base* rp_raw_data::mutable_base() {
+inline ::rf_phreaker::protobuf::rp_base* rp_iq_data::mutable_base() {
   
   if (base_ == NULL) {
     base_ = new ::rf_phreaker::protobuf::rp_base;
   }
-  // @@protoc_insertion_point(field_mutable:rf_phreaker.protobuf.rp_raw_data.base)
+  // @@protoc_insertion_point(field_mutable:rf_phreaker.protobuf.rp_iq_data.base)
   return base_;
 }
-inline ::rf_phreaker::protobuf::rp_base* rp_raw_data::release_base() {
+inline ::rf_phreaker::protobuf::rp_base* rp_iq_data::release_base() {
   
   ::rf_phreaker::protobuf::rp_base* temp = base_;
   base_ = NULL;
   return temp;
 }
-inline void rp_raw_data::set_allocated_base(::rf_phreaker::protobuf::rp_base* base) {
+inline void rp_iq_data::set_allocated_base(::rf_phreaker::protobuf::rp_base* base) {
   delete base_;
   base_ = base;
   if (base) {
@@ -13280,78 +13280,78 @@ inline void rp_raw_data::set_allocated_base(::rf_phreaker::protobuf::rp_base* ba
   } else {
     
   }
-  // @@protoc_insertion_point(field_set_allocated:rf_phreaker.protobuf.rp_raw_data.base)
+  // @@protoc_insertion_point(field_set_allocated:rf_phreaker.protobuf.rp_iq_data.base)
 }
 
 // optional double power_adjustment = 2;
-inline void rp_raw_data::clear_power_adjustment() {
+inline void rp_iq_data::clear_power_adjustment() {
   power_adjustment_ = 0;
 }
-inline double rp_raw_data::power_adjustment() const {
-  // @@protoc_insertion_point(field_get:rf_phreaker.protobuf.rp_raw_data.power_adjustment)
+inline double rp_iq_data::power_adjustment() const {
+  // @@protoc_insertion_point(field_get:rf_phreaker.protobuf.rp_iq_data.power_adjustment)
   return power_adjustment_;
 }
-inline void rp_raw_data::set_power_adjustment(double value) {
+inline void rp_iq_data::set_power_adjustment(double value) {
   
   power_adjustment_ = value;
-  // @@protoc_insertion_point(field_set:rf_phreaker.protobuf.rp_raw_data.power_adjustment)
+  // @@protoc_insertion_point(field_set:rf_phreaker.protobuf.rp_iq_data.power_adjustment)
 }
 
 // optional .rf_phreaker.protobuf.rp_sample_format_type sample_format = 3;
-inline void rp_raw_data::clear_sample_format() {
+inline void rp_iq_data::clear_sample_format() {
   sample_format_ = 0;
 }
-inline ::rf_phreaker::protobuf::rp_sample_format_type rp_raw_data::sample_format() const {
-  // @@protoc_insertion_point(field_get:rf_phreaker.protobuf.rp_raw_data.sample_format)
+inline ::rf_phreaker::protobuf::rp_sample_format_type rp_iq_data::sample_format() const {
+  // @@protoc_insertion_point(field_get:rf_phreaker.protobuf.rp_iq_data.sample_format)
   return static_cast< ::rf_phreaker::protobuf::rp_sample_format_type >(sample_format_);
 }
-inline void rp_raw_data::set_sample_format(::rf_phreaker::protobuf::rp_sample_format_type value) {
+inline void rp_iq_data::set_sample_format(::rf_phreaker::protobuf::rp_sample_format_type value) {
   
   sample_format_ = value;
-  // @@protoc_insertion_point(field_set:rf_phreaker.protobuf.rp_raw_data.sample_format)
+  // @@protoc_insertion_point(field_set:rf_phreaker.protobuf.rp_iq_data.sample_format)
 }
 
 // optional int64 num_samples = 4;
-inline void rp_raw_data::clear_num_samples() {
+inline void rp_iq_data::clear_num_samples() {
   num_samples_ = GOOGLE_LONGLONG(0);
 }
-inline ::google::protobuf::int64 rp_raw_data::num_samples() const {
-  // @@protoc_insertion_point(field_get:rf_phreaker.protobuf.rp_raw_data.num_samples)
+inline ::google::protobuf::int64 rp_iq_data::num_samples() const {
+  // @@protoc_insertion_point(field_get:rf_phreaker.protobuf.rp_iq_data.num_samples)
   return num_samples_;
 }
-inline void rp_raw_data::set_num_samples(::google::protobuf::int64 value) {
+inline void rp_iq_data::set_num_samples(::google::protobuf::int64 value) {
   
   num_samples_ = value;
-  // @@protoc_insertion_point(field_set:rf_phreaker.protobuf.rp_raw_data.num_samples)
+  // @@protoc_insertion_point(field_set:rf_phreaker.protobuf.rp_iq_data.num_samples)
 }
 
 // repeated float samples = 5 [packed = true];
-inline int rp_raw_data::samples_size() const {
+inline int rp_iq_data::samples_size() const {
   return samples_.size();
 }
-inline void rp_raw_data::clear_samples() {
+inline void rp_iq_data::clear_samples() {
   samples_.Clear();
 }
-inline float rp_raw_data::samples(int index) const {
-  // @@protoc_insertion_point(field_get:rf_phreaker.protobuf.rp_raw_data.samples)
+inline float rp_iq_data::samples(int index) const {
+  // @@protoc_insertion_point(field_get:rf_phreaker.protobuf.rp_iq_data.samples)
   return samples_.Get(index);
 }
-inline void rp_raw_data::set_samples(int index, float value) {
+inline void rp_iq_data::set_samples(int index, float value) {
   samples_.Set(index, value);
-  // @@protoc_insertion_point(field_set:rf_phreaker.protobuf.rp_raw_data.samples)
+  // @@protoc_insertion_point(field_set:rf_phreaker.protobuf.rp_iq_data.samples)
 }
-inline void rp_raw_data::add_samples(float value) {
+inline void rp_iq_data::add_samples(float value) {
   samples_.Add(value);
-  // @@protoc_insertion_point(field_add:rf_phreaker.protobuf.rp_raw_data.samples)
+  // @@protoc_insertion_point(field_add:rf_phreaker.protobuf.rp_iq_data.samples)
 }
 inline const ::google::protobuf::RepeatedField< float >&
-rp_raw_data::samples() const {
-  // @@protoc_insertion_point(field_list:rf_phreaker.protobuf.rp_raw_data.samples)
+rp_iq_data::samples() const {
+  // @@protoc_insertion_point(field_list:rf_phreaker.protobuf.rp_iq_data.samples)
   return samples_;
 }
 inline ::google::protobuf::RepeatedField< float >*
-rp_raw_data::mutable_samples() {
-  // @@protoc_insertion_point(field_mutable_list:rf_phreaker.protobuf.rp_raw_data.samples)
+rp_iq_data::mutable_samples() {
+  // @@protoc_insertion_point(field_mutable_list:rf_phreaker.protobuf.rp_iq_data.samples)
   return &samples_;
 }
 

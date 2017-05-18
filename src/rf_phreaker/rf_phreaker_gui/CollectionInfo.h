@@ -72,7 +72,7 @@ public:
 			return cfLow_.toFreqStr() + " MHz";
 	}
 	QString toBandStr() const {
-		if(cfLow_.tech() == ApiTypes::RAW_DATA)
+		if(cfLow_.tech() == ApiTypes::IQ_DATA)
 			return "";
 		else
 			return cfLow_.toBandStr();

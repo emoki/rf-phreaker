@@ -55,7 +55,7 @@ void (RP_CALLCONV rp_lte_sweep_update)(const rp_base *base, const rp_lte *lte, i
 	//QCoreApplication::postEvent(Api::instance(), new LteUpdateEvent(base, lte, num_lte));
 }
 
-void (RP_CALLCONV rp_raw_data_update)(const rp_raw_data *raw, int num_raw_data) {
+void (RP_CALLCONV rp_raw_data_update)(const rp_iq_data *raw, int num_iq_data) {
 
 }
 
@@ -92,7 +92,7 @@ Api::Api(QObject *parent)
 	callbacks_.rp_gsm_full_scan_update = nullptr;
 	callbacks_.rp_wcdma_full_scan_update = nullptr;
 	callbacks_.rp_lte_full_scan_update = nullptr;
-	callbacks_.rp_raw_data_update = nullptr;
+	callbacks_.rp_iq_data_update = nullptr;
 	callbacks_.rp_gsm_sweep_update = nullptr;
 	callbacks_.rp_wcdma_sweep_update = nullptr;
 	callbacks_.rp_lte_sweep_update = nullptr;
@@ -165,7 +165,7 @@ void Api::startCollection() {
 
 	// Create storage for all possible techs.  Note, QMap automatically inserts a default item if it is empty.
 	api_storage<rp_operating_band, rp_operating_band_group> sweep;
-	api_storage<rp_frequency_type, rp_frequency_group> raw_data;
+	api_storage<rp_frequency_type, rp_frequency_group> iq_data;
 	api_storage<rp_power_spectrum_spec, rp_power_spectrum_spec_group> spec_data;
 	QMap<ApiTypes::Tech, api_storage<rp_frequency_band, rp_frequency_band_group>> techs;
 
@@ -179,8 +179,8 @@ void Api::startCollection() {
 			QQmlEngine::setObjectOwnership(sweepModel->get(), QQmlEngine::CppOwnership);
 //			sweepModelList_.push_back(sweepModel->get());
 		}
-		else if(cf->tech() == ApiTypes::RAW_DATA) {
-			raw_data.push_back(cf->toRpFreq());
+		else if(cf->tech() == ApiTypes::IQ_DATA) {
+			iq_data.push_back(cf->toRpFreq());
 		}
 		else {
 			techs[cf->tech()].push_back(cf->toRpFrequencyBand());
@@ -191,7 +191,7 @@ void Api::startCollection() {
 
 	findFreqMinMax();
 
-	QCoreApplication::postEvent(thread_->worker(), new StartCollectionEvent(sweep, raw_data, spec_data, techs));
+	QCoreApplication::postEvent(thread_->worker(), new StartCollectionEvent(sweep, iq_data, spec_data, techs));
 }
 
 void Api::clearModels() {

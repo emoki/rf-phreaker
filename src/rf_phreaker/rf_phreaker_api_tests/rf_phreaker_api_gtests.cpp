@@ -25,7 +25,7 @@ TEST(RfPhreakerApi, GeneralTest) {
 		std::vector<rp_frequency_band> gsm;
 		std::vector<rp_frequency_band> umts;
 		std::vector<rp_frequency_band> lte;
-		std::vector<rp_frequency_type> raw_data;
+		std::vector<rp_frequency_type> iq_data;
 		sweep.push_back(UMTS_OPERATING_BAND_4);
 		sweep.push_back(UMTS_OPERATING_BAND_2);
 		sweep.push_back(LTE_OPERATING_BAND_1);
@@ -41,8 +41,8 @@ TEST(RfPhreakerApi, GeneralTest) {
 		info.wcdma_.size_ = umts.size();
 		info.lte_.e_ = lte.data();
 		info.lte_.size_ = lte.size();
-		info.raw_data_.e_ = raw_data.data();
-		info.raw_data_.size_ = raw_data.size();
+		info.iq_data_.e_ = iq_data.data();
+		info.iq_data_.size_ = iq_data.size();
 
 		rp_start_collection(d1, &info);
 

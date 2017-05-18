@@ -12,7 +12,7 @@ class CollectionInfoSearch : public QObject
 	Q_OBJECT
 	Q_PROPERTY(QList<QObject*> results READ results NOTIFY resultsChanged)
 	Q_PROPERTY(QString filter READ filter WRITE setFilter NOTIFY queryChanged)
-	Q_PROPERTY(bool searchRaw MEMBER searchRaw_ NOTIFY searchRawChanged)
+	Q_PROPERTY(bool searchIq MEMBER searchIq_ NOTIFY searchIqChanged)
 	Q_PROPERTY(bool searchGsm MEMBER searchGsm_ NOTIFY searchGsmChanged)
 	Q_PROPERTY(bool searchCdma MEMBER searchCdma_ NOTIFY searchCdmaChanged)
 	Q_PROPERTY(bool searchWcdma MEMBER searchWcdma_ NOTIFY searchWcdmaChanged)
@@ -39,7 +39,7 @@ public:
 signals:
 	void resultsChanged();
 	void queryChanged();
-	void searchRawChanged();
+	void searchIqChanged();
 	void searchGsmChanged();
 	void searchCdmaChanged();
 	void searchWcdmaChanged();
@@ -52,7 +52,7 @@ private:
 	void populateWithCdma();
 	void populateWithWcdma();
 	void populateWithLte();
-	void populateWithRaw();
+	void populateWithIq();
 	void populateWithGsmFreqRange(const rf_phreaker::channel_freq &cf);
 	void populateWithWcdmaFreqRange(const rf_phreaker::channel_freq &cf);
 	void populateWithLteFreqRange(const rf_phreaker::channel_freq &cf);
@@ -65,14 +65,14 @@ private:
 	rf_phreaker::frequency_type tmp_freq_;
 	rf_phreaker::channel_type tmp_channel_;
 
-	bool searchRaw_;
+	bool searchIq_;
 	bool searchGsm_;
 	bool searchCdma_;
 	bool searchWcdma_;
 	bool searchLte_;
 	bool sweep_;
 	bool scan_;
-	bool tmpSearchRaw_;
+	bool tmpSearchIq_;
 	bool tmpSearchGsm_;
 	bool tmpSearchCdma_;
 	bool tmpSearchWcdma_;
