@@ -49,6 +49,11 @@ namespace rf_phreaker {
 //	enum { v = N * 1000 };
 //};
 
+inline bool is_little_endian() {
+	uint16_t number = 0x1;
+	auto *numPtr = (unsigned char*)&number;
+	return (numPtr[0] == 1);
+}
 
 inline int16_t sign_extend_12_bits(int16_t &var) {
 	if(var & 0x0800)
