@@ -238,8 +238,9 @@ inline collection_settings& find_collection_settings(rf_phreaker::specifier tech
 		return s.lte_sweep_collection_;
 	case LTE_LAYER_3_DECODE:
 		return s.lte_layer_3_collection_;
-		//case RAW_DATA:
-		//	return s.gsm_sweep_collection_;
+	case POWER_SPECTRUM:
+	case IQ_DATA:
+		throw rf_phreaker_error("Unable to find collection_settings.  Specifier not supported!");
 	default:
 		throw rf_phreaker_error("Unable to find collection_settings.  Specifier unknown!");
 	}
