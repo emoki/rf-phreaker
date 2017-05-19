@@ -351,7 +351,7 @@ class power_spectrum_approximator {
 public:
 	power_spectrum_approximator()
 		: max_num_samples_(mhz(3))
-		, min_fft_order_(9)
+		, min_fft_order_(3)
 		, max_fft_order_(15)
 		, max_bandwidth_(get_upper_scanner_bandwidth(mhz(28)))
 		, min_sampling_rate_(khz(80))
@@ -381,20 +381,25 @@ private:
 		// Using the same dwell time the processing time doubles (1.15x) every increment of fft_order.
 		// Given a bin size required we can calculate the sampling rate and fft order.  This will give us the max 
 		// bandwidth we can use.  Get the closest nuand bandwidth and then adjust center freq so the start freq is
-		// at the beginning of the bin.task
+		// at the center of a bin.
 		// TODO - make sure the bandwidth can be the same as the sampling_rate since we're downconverting.
+
 		power_spectrum_spec spec;
 		spec.bin_size_ = bin_size;
 		spec.step_size_ = bin_size;
 
 		auto fft_order = min_fft_order_ - 1;
-		frequency_type sampling_rate;		
-		frequency_type scanner_bandwidth;
+		frequency_type sampling_rate = 0;		
+		frequency_type scanner_bandwidth = 0;
 		while(fft_order < max_fft_order_) {
 			fft_order = fft_order + 1;
-			sampling_rate = std::min(max_sampling_rate_, std::max(min_sampling_rate_, power_spectrum_calculator::determine_sampling_rate(fft_order, bin_size)));
+			sampling_rate = power_spectrum_calculator::determine_sampling_rate(fft_order, bin_size);
+			if(sampling_rate < min_sampling_rate_ || sampling_rate > max_sampling_rate_) {
+				scanner_bandwidth = 0;
+				continue;
+			}
 			scanner_bandwidth = get_lower_scanner_bandwidth(calculate_allowed_bandwidth(sampling_rate));
-			if(scanner_bandwidth > span && sampling_rate > min_sampling_rate_) {
+			if(scanner_bandwidth > span) {
 				break;
 			}
 		}
@@ -410,8 +415,8 @@ private:
 			auto max_dwell_time = rf_phreaker::convert_to_time(max_num_samples_, spec.sampling_rate_);
 			spec.dwell_time_ = std::max(std::min(max_dwell_time, dwell_time_ns), min_dwell_time);
 			spec.num_windows_ = rf_phreaker::convert_to_samples(spec.dwell_time_, spec.sampling_rate_) / spec.window_length_;
-			spec.start_frequency_ = start_freq;
-			spec.end_frequency_ = start_freq + span;
+			spec.start_frequency_ = start_freq - bin_size / 2;
+			spec.end_frequency_ = start_freq + span + bin_size / 2;
 			spec.span_ = span;
 			power_specs_.push_back(spec);
 		}

@@ -1,6 +1,7 @@
 #include "gtest/gtest.h"
 
 #include "rf_phreaker/processing/processing_utility.h"
+#include "rf_phreaker/common/measurement_io.h"
 #include "rf_phreaker/common/operating_band_range_specifier.h"
 #include "rf_phreaker/gsm_analysis/gsm_defs.h"
 
@@ -107,47 +108,41 @@ TEST(GsmFrequencyTracker, BetweenTwoFreqs) {
 
 TEST(PowerSpectrumApproximator, GeneralTest) {
 	using namespace rf_phreaker;
-	frequency_type start_freq = mhz(500);
-	frequency_type span = mhz(1);
-	frequency_type bin_size = 10;
-	frequency_type dwell_time = milli_to_nano(60);
+	power_spectrum_spec spec{};
+	spec.start_frequency_ = mhz(500);
+	spec.span_ = 1600000;
+	spec.end_frequency_ = spec.start_frequency_ + spec.span_;
+	spec.bin_size_ = 10;
+	spec.dwell_time_ = milli_to_nano(60);
+	//spec.num_windows_ = 0;
+	//spec.step_size_ = 0;
+	//spec.window_length_ = 0;
+	//spec.sampling_rate_ = 0;
 
-	span = 1600000;
-	bin_size = 10;
-	dwell_time = milli_to_nano(60);
 	power_spectrum_approximator approx;
-	approx.determine_spectrum_parameters(start_freq, span, bin_size, dwell_time);
+	approx.determine_spectrum_parameters(spec.start_frequency_, spec.span_, spec.bin_size_, spec.dwell_time_);
 
 
 	std::ofstream file("power_spectrum_params.txt");
-	file << "start_freq\tspan\tbin_size\tdwell_time\t";
-	file << "bin_size\tstep_size\tstart_freq\tend_freq\tspan\tdwell_time\tsampling_rate\twindow_length\tnum_windows\n";
+	file << "rec_num" << "\t";
+	header(file, spec) << "\t";
+	header(file, spec) << std::endl;
 
-	for(int k = 0; k < 1000; k += 15) {
-		bin_size = 10 + k * 250;
-		for(int i = 0; i < 1000; i += 15) {
-			span = mhz(1) + khz(200) * i;
-			power_spectrum_approximator approx;
-			approx.determine_spectrum_parameters(start_freq, span, bin_size, dwell_time);
-			if(file) {
-				for(auto s : approx.power_specs()) {
-					file << start_freq << "\t"
-						<< span << "\t"
-						<< bin_size << "\t"
-						<< dwell_time / 1.0e9<< "\t";
-					file << s.bin_size_ << "\t"
-						<< s.step_size_ << "\t"
-						<< s.start_frequency_ << "\t"
-						<< s.end_frequency_ << "\t"
-						<< s.span_ << "\t"
-						<< s.dwell_time_/ 1.0e9 << "\t"
-						<< s.sampling_rate_ << "\t"
-						<< s.window_length_ << "\t"
-						<< s.num_windows_ << "\t"
-						<< std::endl;
+	auto inner_loop = 60;
+	for(int k = 0; k < 5000; ++k) {
+		spec.bin_size_ = 500 + k*50;
+		try {
+			for(int i = 0; i < inner_loop; ++i) {
+				spec.span_ = mhz(1) * i;
+				power_spectrum_approximator approx;
+				approx.determine_spectrum_parameters(spec.start_frequency_, spec.span_, spec.bin_size_, spec.dwell_time_);
+				if(file) {
+					for(auto s : approx.power_specs()) {
+						file << (k * inner_loop + i) << "\t" << spec << "\t" << s << std::endl;
+					}
 				}
 			}
-
 		}
+		catch(...) {}
 	}
 }
