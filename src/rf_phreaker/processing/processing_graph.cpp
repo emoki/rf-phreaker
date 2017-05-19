@@ -210,6 +210,7 @@ void processing_graph::start(scanner_controller_interface *sc, data_output_async
 			tbb::flow::output_port<1>(*lte_layer_3_output_feedback).register_successor(*limiter_queue);
 
 
+			tbb::flow::output_port<POWER_SPECTRUM_PORT>(*collection_manager_node_).register_successor(*power_spectrum_processing);
 			power_spectrum_processing->register_successor(*limiter_queue);
 
 
