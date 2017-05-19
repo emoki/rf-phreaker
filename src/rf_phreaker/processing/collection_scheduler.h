@@ -185,6 +185,8 @@ double calculate_priority(const collection_info_container &container) const {
 			return calculate_priority(settings_->lte_layer_3_collection_.priority_, modifier);
 		case IQ_DATA:
 			return calculate_priority(settings_->iq_data_priority_, modifier);
+		case POWER_SPECTRUM:
+			return calculate_priority(settings_->power_spectrum_priority_, modifier);
 		default:
 			throw rf_phreaker_error("Unknown specifier when determining priority.");
 		}
