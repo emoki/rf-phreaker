@@ -31,11 +31,12 @@ public:
 		, overlap_time_ns_(0)
 		, bandwidth_(0)
 		, sampling_rate_(0)
-		, operating_bands_({ OPERATING_BAND_UNKNOWN })
-		, can_remove_(false) {}
+		, operating_bands_({OPERATING_BAND_UNKNOWN})
+		, can_remove_(false)
+		, params_(power_spectrum_spec{}) {}
 
 	collection_info(frequency_type freq, time_type time_ns, time_type overlap_time_ns, bandwidth_type bw, frequency_type sampling_rate = 0, specifiers spec = {UNKOWN_SPECIFIER},
-		operating_bands bands = { OPERATING_BAND_UNKNOWN }, bool can_remove = false)
+		operating_bands bands = {OPERATING_BAND_UNKNOWN}, bool can_remove = false, const power_spectrum_spec &params = {})
 		: freq_(freq)
 		, time_ns_(time_ns)
 		, overlap_time_ns_(overlap_time_ns)
@@ -43,7 +44,8 @@ public:
 		, sampling_rate_(sampling_rate)
 		, operating_bands_(bands)
 		, can_remove_(can_remove)
-		, specs_(spec) {}
+		, specs_(spec)
+		, params_(params) {}
 
 	collection_info(collection_info &&a)
 		: freq_(a.freq_)
@@ -53,7 +55,8 @@ public:
 		, sampling_rate_(a.sampling_rate_)
 		, operating_bands_(std::move(a.operating_bands_))
 		, can_remove_(a.can_remove_)
-		, specs_(std::move(a.specs_)) {}
+		, specs_(std::move(a.specs_))
+		, params_(std::move(a.params_)) {}
 
 	bool operator==(const collection_info &a) const {
 		return freq_ == a.freq_ && time_ns_ == a.time_ns_ && overlap_time_ns_ == a.overlap_time_ns_ 
@@ -81,6 +84,7 @@ public:
 	operating_bands operating_bands_;
 	bool can_remove_;
 	specifiers specs_;
+	power_spectrum_spec params_;
 };
 
 class sweep_collection_info : public collection_info
@@ -165,9 +169,7 @@ class power_spectrum_collection_info : public collection_info
 {
 public:
 	power_spectrum_collection_info(frequency_type freq, time_type time_ns, time_type overlap_time_ns, bandwidth_type bw, frequency_type sampling_rate, const power_spectrum_spec &spec)
-		: collection_info(freq, time_ns, overlap_time_ns, bw, sampling_rate, POWER_SPECTRUM)
-		, params_(spec) {}
-	power_spectrum_spec params_;
+		: collection_info(freq, time_ns, overlap_time_ns, bw, sampling_rate, POWER_SPECTRUM, OPERATING_BAND_UNKNOWN, false, spec) {}
 };
 
 
