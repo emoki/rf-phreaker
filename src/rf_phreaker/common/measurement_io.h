@@ -279,6 +279,49 @@ inline std::ostream& operator<<(std::ostream &os, const power_spectrum_data &t) 
 	return os;
 }
 
+inline std::ostream& header(std::ostream &os, const power_adjustment &t) {
+	os << "low_freq" << delimiter
+		<< "high_freq" << delimiter
+		<< "step_size";
+	// 57 is max bandwidth * 2 for 500 khz spacing.
+	for(int i = 0; i < 57; ++i)
+		os << delimiter << "power_adj_" << i;
+	return os;
+}
+
+inline std::ostream& operator<<(std::ostream &os, const power_adjustment &t) {
+	os << t.path_.low_freq_ << delimiter
+		<< t.path_.high_freq_ << delimiter
+		<< t.step_size_;
+	for(auto i : t.power_)
+		os << delimiter << i;
+	// 57 is max bandwidth * 2 for 500 khz spacing.
+	for(auto i = t.power_.size(); i < 57; ++i)
+		os << delimiter;
+	return os;
+}
+
+inline std::ostream& header(std::ostream &os, const iq_data &t) {
+	header(os, static_cast<basic_data>(t)) << delimiter;
+	header(os, t.power_adjustment_) << delimiter;
+	os << "sampling_rate" << delimiter
+		<< "dwell_time" << delimiter
+		<< "num_floats" << delimiter
+		<< "floats (samples [i {tab} q])";
+	return os;
+}
+
+inline std::ostream& operator<<(std::ostream &os, const iq_data &t) {
+	os << static_cast<basic_data>(t) << delimiter;
+	os << t.power_adjustment_ << delimiter
+		<< t.sampling_rate_ << delimiter
+		<< t.dwell_time_ << delimiter
+		<< t.samples_.size();
+	for(auto &i : t.samples_)
+		os << delimiter << i;
+	return os;
+}
+
 template<typename Data>
 inline std::ostream& header(std::ostream &os, const std::vector<Data> &t) {
 	return header(os, Data());

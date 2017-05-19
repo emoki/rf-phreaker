@@ -150,5 +150,40 @@ inline power_spectrum_data convert_to_power_spectrum_data(const scanner::measure
 	return data;
 }
 
+inline void convert_to_iq_data(iq_data &data, const scanner::measurement_info &info) {
+	auto avg_rms = ipp_helper::calculate_average_rms(info.get_iq().get(), info.get_iq().length());
+	convert_to_basic_data(data, info, avg_rms);
+
+	data.dwell_time_ = (int64_t)(info.get_iq().length()) * 1e9L / info.sampling_rate();
+	data.sampling_rate_ = info.sampling_rate();
+
+	auto blade = info.blade_adjustments();
+	auto rf_board = info.rf_board_adjustments();
+	// Use interpolation (if necessary) to reconcile rf_blade and nuand adjustments.
+	data.power_adjustment_.path_.low_freq_ = std::max(blade.path_.low_freq_, rf_board.path_.low_freq_);
+	data.power_adjustment_.path_.high_freq_ = std::min(blade.path_.high_freq_, rf_board.path_.high_freq_);
+	data.power_adjustment_.step_size_ = khz(500);
+
+	// We add one to adj_size because the last freq is inclusive.
+	auto adj_size_required = (double)((data.power_adjustment_.path_.high_freq_ - data.power_adjustment_.path_.low_freq_) / data.power_adjustment_.step_size_) + 1;
+	data.power_adjustment_.power_.resize((size_t)std::ceil(adj_size_required));
+
+	// Add an additional step_size to end_freq so that we are gauranteed to have the last freq.
+	auto end_freq = data.power_adjustment_.path_.high_freq_ + data.power_adjustment_.step_size_;
+	auto j = 0;
+	for(auto i = data.power_adjustment_.path_.low_freq_; i < end_freq; i += data.power_adjustment_.step_size_) {
+		data.power_adjustment_.power_[j++] = blade.find_adjustment(i) + rf_board.find_adjustment(i);
+	}
+
+	data.samples_.resize(info.get_iq().length() * 2);
+	memcpy(data.samples_.data(), info.get_iq().get(), info.get_iq().length() * sizeof(scanner::measurement_info::sample_type));
+}
+
+inline iq_data convert_to_iq_data(const scanner::measurement_info &info) {
+	iq_data data;
+	convert_to_iq_data(data, info);
+	return data;
+}
+
 
 }}

@@ -103,4 +103,16 @@ namespace rf_phreaker {
 		std::vector<double> power_;
 	};
 
+	struct power_adjustment {
+		frequency_path path_;
+		frequency_type step_size_;
+		std::vector<double> power_;
+	};
+
+	struct iq_data : public basic_data {
+		power_adjustment power_adjustment_;
+		frequency_type sampling_rate_;
+		time_type dwell_time_;
+		std::vector<float> samples_;
+	};
 }
