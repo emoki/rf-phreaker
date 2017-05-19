@@ -1,3 +1,4 @@
+#pragma once
 #include <map>
 #include <memory>
 #include "rf_phreaker/fir_filter/fir_filter.h"
