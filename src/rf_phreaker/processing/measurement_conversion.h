@@ -140,7 +140,7 @@ inline void convert_to_power_spectrum_data(power_spectrum_data &data, const scan
 		throw processing_error("power_spectrum_array is too small for conversion");
 	for(size_t i = 0; i < data.power_.size(); ++i) {
 		data.power_[i] = scanner::signal_level_calculator::calculate_sl(power_array[start_bin + i],
-			info, data.params_.start_frequency_ + data.params_.step_size_ * i);
+			info, static_cast<frequency_type>(data.params_.start_frequency_ + data.params_.step_size_ * i));
 	}
 }
 
