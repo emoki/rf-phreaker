@@ -112,7 +112,8 @@ public:
 		, umts_sweep_output_(std::make_shared<umts_sweep_output_type>())
 		, lte_sweep_output_(std::make_shared<lte_sweep_output_type>())
 		, sweep_output_(std::make_shared<sweep_output_type>())
-		, power_spectrum_output_(std::make_shared<power_spectrum_output_type>()) {
+		, power_spectrum_output_(std::make_shared<power_spectrum_output_type>())
+		, iq_data_output_(std::make_shared<iq_data_output_type>()) {
 		auto time = static_timestamp::to_string();
 		hardware_output_->set_filename("scanner_" + time + ".txt");
 		gps_output_->set_filename("gps_" + time + ".txt");
@@ -124,6 +125,7 @@ public:
 		lte_sweep_output_->set_filename("lte_sweep_" + time + ".txt");
 		sweep_output_->set_filename("sweep_" + time + ".txt");
 		power_spectrum_output_->set_filename("power_spectrum_" + time + ".txt");
+		iq_data_output_->set_filename("iq_data_" + time + ".txt");
 	}
 
 	data_output(data_output &out)
@@ -137,7 +139,7 @@ public:
 		, lte_sweep_output_(out.lte_sweep_output_)
 		, sweep_output_(std::make_shared<sweep_output_type>()) // why is sweep different?
 		, power_spectrum_output_(out.power_spectrum_output_)
-	{}
+		, iq_data_output_(out.iq_data_output_) {}
 
 
 	data_output(data_output &&out) {
@@ -151,6 +153,7 @@ public:
 		std::swap(lte_sweep_output_, out.lte_sweep_output_);
 		std::swap(sweep_output_, out.sweep_output_);
 		std::swap(power_spectrum_output_, out.power_spectrum_output_);
+		std::swap(iq_data_output_, out.iq_data_output_);
 	}
 
 	void output(hardware d) { hardware_output_->output(d); }
@@ -165,6 +168,7 @@ public:
 		sweep_output_->output(b, g, u, l);
 	}
 	void output(power_spectrum_data t) { power_spectrum_output_->output(t); }
+	void output(iq_data t) { iq_data_output_->output(t); }
 
 	template<typename Func> void connect_hardware(Func &f) { hardware_output_->connect(f); }
 	template<typename Func> void connect_gps(Func &f) { gps_output_->connect(f); }
@@ -176,6 +180,7 @@ public:
 	template<typename Func> void connect_lte_sweep(Func &f) { lte_sweep_output_->connect(f); }
 	template<typename Func> void connect_sweep(Func &f) { sweep_output_->connect(f); }
 	template<typename Func> void connect_power_spectrum(Func &f) { power_spectrum_output_->connect(f); }
+	template<typename Func> void connect_iq_data(Func &f) { iq_data_output_->connect(f); }
 
 	void disconnect() {
 		hardware_output_->disconnect();
@@ -188,6 +193,7 @@ public:
 		lte_sweep_output_->disconnect();
 		sweep_output_->disconnect();
 		power_spectrum_output_->disconnect();
+		iq_data_output_->disconnect();
 	}
 
 	void set_standard_output(const output_settings &settings) {
@@ -201,6 +207,7 @@ public:
 		lte_sweep_output_->set_standard_output(settings.lte_sweep_);
 		sweep_output_->set_standard_output(settings.sweep_);
 		power_spectrum_output_->set_standard_output(settings.power_spectrum_);
+		iq_data_output_->set_standard_output(settings.iq_data_);
 	}
 
 	void set_file_output(const output_settings &settings) {
@@ -214,6 +221,7 @@ public:
 		lte_sweep_output_->set_file_output(settings.lte_sweep_);
 		sweep_output_->set_file_output(settings.sweep_);
 		power_spectrum_output_->set_file_output(settings.power_spectrum_);
+		iq_data_output_->set_file_output(settings.iq_data_);
 	}
 
 	void set_signal_output(const output_settings &settings) {
@@ -226,6 +234,7 @@ public:
 		umts_sweep_output_->set_signal_output(settings.umts_sweep_);
 		sweep_output_->set_signal_output(settings.sweep_);
 		power_spectrum_output_->set_signal_output(settings.power_spectrum_);
+		iq_data_output_->set_signal_output(settings.iq_data_);
 	}
 
 	void set_output_path(const std::string &path) {
@@ -240,6 +249,7 @@ public:
 		lte_sweep_output_->set_filename(path + "lte_sweep_" + time + ".txt");
 		sweep_output_->set_filename(path + "sweep_" + time + ".txt");
 		power_spectrum_output_->set_filename(path + "power_spectrum_" + time + ".txt");
+		iq_data_output_->set_filename(path + "iq_data_" + time + ".txt");
 	}
 
 private:
@@ -256,6 +266,7 @@ private:
 		std::vector<umts_data>, std::vector<lte_data>> sweep_output_type;
 	typedef d_output<lte_sweep_signal_type, basic_data, std::vector<lte_data>> lte_sweep_output_type;
 	typedef d_output<power_spectrum_signal_type, power_spectrum_data> power_spectrum_output_type;
+	typedef d_output<iq_data_signal_type, iq_data> iq_data_output_type;
 
 	std::shared_ptr<hardware_output_type> hardware_output_;
 	std::shared_ptr<gps_output_type> gps_output_;
@@ -267,6 +278,7 @@ private:
 	std::shared_ptr<lte_sweep_output_type> lte_sweep_output_;
 	std::shared_ptr<sweep_output_type> sweep_output_;
 	std::shared_ptr<power_spectrum_output_type> power_spectrum_output_;
+	std::shared_ptr<iq_data_output_type> iq_data_output_;
 };
 
 }}

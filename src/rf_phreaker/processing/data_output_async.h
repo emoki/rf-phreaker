@@ -112,6 +112,13 @@ public:
 		});
 	}
 
+	template<typename Func>
+	std::future<void> connect_iq_data(Func &f) {
+		return out_([=](data_output out) {
+			out.connect_iq_data(f);
+		});
+	}
+
 	void clear_queue() {
 		out_.clear_queue();
 	}
