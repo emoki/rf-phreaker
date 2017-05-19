@@ -13,7 +13,6 @@
 #define ghz(x) (static_cast<rf_phreaker::frequency_type>(x)*1000000000L)       /**< Convenience for GHz */
 #define milli_to_nano(x) (static_cast<rf_phreaker::time_type>(x)*1000000L)       /**< Convenience for nano */
 
-
 namespace rf_phreaker {
 
 //template<frequency_type N>
@@ -53,6 +52,16 @@ inline bool is_little_endian() {
 	uint16_t number = 0x1;
 	auto *numPtr = (unsigned char*)&number;
 	return (numPtr[0] == 1);
+}
+
+template<typename Data>
+inline bool is_round_number(Data num, Data tolerance = 1) {
+	return abs(num - std::floor(num)) < std::numeric_limits<Data>::epsilon() * tolerance;
+}
+
+template<typename Data>
+inline bool is_approx_zero(Data num, Data tolerance = 1) {
+	return abs(num) < std::numeric_limits<Data>::epsilon() * tolerance;
 }
 
 inline int16_t sign_extend_12_bits(int16_t &var) {
