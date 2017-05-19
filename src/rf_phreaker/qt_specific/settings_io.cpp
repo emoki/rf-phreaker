@@ -53,6 +53,9 @@ void settings_io::read(settings &settings) {
 	settings.log_gps_parsing_ = qsettings_->value(log_gps_parsing_key.c_str(), log_gps_parsing_default).toBool();
 	settings.log_collection_ = qsettings_->value(log_collection_key.c_str(), log_collection_default).toBool();
 
+	settings.power_spectrum_priority_ = qsettings_->value(power_spectrum_priority_key.c_str(), settings_power_spectrum_priority_default).toInt();
+	settings.iq_data_priority_ = qsettings_->value(iq_data_priority_key.c_str(), settings_iq_data_priority_default).toInt();
+
 	read(settings.standard_output_, standard_output_group_key);
 	read(settings.signal_slots_, signal_slot_output_group_key);
 	read(settings.packet_output_, packet_output_group_key);
@@ -97,6 +100,8 @@ void settings_io::read(output_settings &settings, const std::string &group_key) 
 	settings.lte_sweep_ = qsettings_->value(lte_sweep_output_key.c_str(), settings_output_default).toBool();
 	settings.lte_layer_3_ = qsettings_->value(lte_layer_3_output_key.c_str(), settings_output_default).toBool();
 	settings.sweep_ = qsettings_->value(sweep_output_key.c_str(), settings_output_default).toBool();
+	settings.power_spectrum_ = qsettings_->value(power_spectrum_output_key.c_str(), settings_output_default).toBool();
+	settings.iq_data_ = qsettings_->value(iq_data_output_key.c_str(), settings_output_default).toBool();
 	qsettings_->endGroup();
 
 }
@@ -237,6 +242,9 @@ void settings_io::write(const settings &settings) {
 	qsettings_->setValue(log_gps_parsing_key.c_str(), settings.log_gps_parsing_);
 	qsettings_->setValue(log_collection_key.c_str(), settings.log_collection_);
 
+	qsettings_->setValue(power_spectrum_priority_key.c_str(), settings.power_spectrum_priority_);
+	qsettings_->setValue(iq_data_priority_key.c_str(), settings.iq_data_priority_);
+
 	write(settings.standard_output_, standard_output_group_key);
 	write(settings.signal_slots_, signal_slot_output_group_key);
 	write(settings.packet_output_, packet_output_group_key);
@@ -281,6 +289,8 @@ void settings_io::write(const output_settings &settings, const std::string &grou
 	qsettings_->setValue(lte_sweep_output_key.c_str(), settings.lte_sweep_);
 	qsettings_->setValue(lte_layer_3_output_key.c_str(), settings.lte_layer_3_);
 	qsettings_->setValue(sweep_output_key.c_str(), settings.sweep_);
+	qsettings_->setValue(power_spectrum_output_key.c_str(), settings.sweep_);
+	qsettings_->setValue(iq_data_output_key.c_str(), settings.sweep_);
 	qsettings_->endGroup();
 }
 

@@ -18,6 +18,8 @@ static const time_type settings_collection_time_default = (32000000);
 static const time_type settings_overlap_time_default = 10000000;
 static const bool settings_is_streaming_default = false;
 static const int settings_priority_default = 1;
+static const int settings_iq_data_priority_default = 1;
+static const int settings_power_spectrum_priority_default = 1;
 static const frequency_type settings_low_intermediate_frequency_default = 0;
 static const frequency_type settings_high_intermediate_frequency_default = 0;
 static const frequency_type settings_step_size_default = 100000;
@@ -75,6 +77,7 @@ public:
 	bool lte_layer_3_;
 	bool sweep_;
 	bool power_spectrum_;
+	bool iq_data_;
 };
 
 class output_interval_settings {
@@ -181,6 +184,8 @@ public:
 	scheduling_algorithm_type scheduling_algorithm_;
 	bool offload_umts_full_scan_;
 	bool have_common_sweep_output_;
+	int iq_data_priority_;
+	int power_spectrum_priority_;
 
 	blade_settings blade_settings_;
 

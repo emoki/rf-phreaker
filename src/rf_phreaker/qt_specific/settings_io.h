@@ -46,6 +46,8 @@ static const std::string umts_layer_3_output_key = "umts_layer_3_output";
 static const std::string lte_sweep_output_key = "lte_sweep_output";
 static const std::string lte_layer_3_output_key = "lte_layer_3_output";
 static const std::string sweep_output_key = "sweep_output";
+static const std::string power_spectrum_output_key = "power_spectrum_output";
+static const std::string iq_data_output_key = "iq_data_output";
 static const std::string output_raw_packets_key = "output_raw_packets";
 static const std::string log_level_key = "log_level";
 static const std::string scheduling_algorithm_key = "scheduling_algorithm";
@@ -93,6 +95,8 @@ static const std::string gsm_c_i_ratio_confidence_threshold_key = "c_i_ratio_con
 static const std::string low_intermediate_frequency_key = "low_intermediate_frequency";
 static const std::string high_intermediate_frequency_key = "high_intermediate_frequency";
 static const std::string step_size_key = "step_size";
+static const std::string iq_data_priority_key = "iq_data_priority";
+static const std::string power_spectrum_priority_key = "power_spectrum_priority";
 
 
 class settings_io {
