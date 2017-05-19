@@ -43,6 +43,7 @@ public:
 		, lte_sweep_(a.lte_sweep_)
 		, lte_layer_3_(a.lte_layer_3_)
 		, power_spectrum_(a.power_spectrum_)
+		, iq_data_(a.iq_data_)
 		, timestamp_(a.timestamp_)
 		, scheduler_(&containers_, &settings_, a.scheduler_.has_multiple_scans())
 		, token_count_(0)
@@ -64,6 +65,7 @@ public:
 		, lte_sweep_(0)
 		, lte_layer_3_(0)
 		, power_spectrum_(0)
+		, iq_data_(0)
 		, token_count_(0)
 		, exit_count_(num_items_in_flight)
 	{}
@@ -123,7 +125,7 @@ public:
 				if(packet_output_settings_.umts_sweep_) { output(meas.get(), "umts_sweep_", umts_sweep_++); }
 			}
 			if(ci.specs_.has_spec(UMTS_LAYER_3_DECODE)) {
-				log += "umts_layer_3" ;
+				log += "umts_layer_3 " ;
 				send_msg<UMTS_LAYER3_PORT>(out, package);
 				if(packet_output_settings_.umts_layer_3_) { output(meas.get(), "umts_layer_3_", umts_layer_3_++); }
 			}
@@ -136,6 +138,12 @@ public:
 				log += "lte_layer_3 ";
 				send_msg<LTE_LAYER3_PORT>(out, package);
 				if(packet_output_settings_.lte_layer_3_) { output(meas.get(), "lte_layer_3_", lte_layer_3_++); }
+			}
+			if(ci.specs_.has_spec(IQ_DATA)) {
+				log += "iq_data ";
+				// TODO - does this cut off the derived class?!?
+				send_msg<IQ_DATA_PORT>(out, package);
+				if(packet_output_settings_.iq_data_) { output(meas.get(), "iq_data_", iq_data_++); }
 			}
 			if(ci.specs_.has_spec(POWER_SPECTRUM)) {
 				log += "power_spectrum ";
@@ -202,6 +210,7 @@ protected:
 	int lte_sweep_;
 	int lte_layer_3_;
 	int power_spectrum_;
+	int iq_data_;
 
 	std::string timestamp_;
 

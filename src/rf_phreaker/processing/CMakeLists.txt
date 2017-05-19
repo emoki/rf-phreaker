@@ -27,6 +27,7 @@ set (processing_SRCS
 	frequency_correction_graph.cpp
 	frequency_correction_graph.h
 	frequency_range_creation.h
+	iq_data_output_body.h
 	layer_3_tracker.h
 	lte_output_and_feedback_body.h
 	lte_processing_body.h

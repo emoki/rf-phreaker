@@ -183,8 +183,8 @@ double calculate_priority(const collection_info_container &container) const {
 			return calculate_priority(settings_->lte_sweep_collection_.priority_, modifier);
 		case LTE_LAYER_3_DECODE:
 			return calculate_priority(settings_->lte_layer_3_collection_.priority_, modifier);
-		//case RAW_DATA:
-		//	return calculate_priority(settings_->raw_data_.priority_, modifier);
+		case IQ_DATA:
+			return calculate_priority(settings_->iq_data_priority_, modifier);
 		default:
 			throw rf_phreaker_error("Unknown specifier when determining priority.");
 		}
