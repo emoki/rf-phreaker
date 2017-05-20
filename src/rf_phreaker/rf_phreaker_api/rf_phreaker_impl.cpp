@@ -603,12 +603,14 @@ rp_status rf_phreaker_impl::add_power_spectrum_frequency(rp_device *device, cons
 	try {
 		std::lock_guard<std::recursive_mutex> lock(mutex_);
 
-		LOG(LINFO) << "Adding power spectrum spec {start_freq: " << spec.start_frequency_ << ", span: " << spec.span_ 
-			<< ", bin_size: " << spec.bin_size_ << ".";
+		LOG(LINFO) << "Adding rp_power_spectrum_spec {start_freq: " << spec.start_frequency_ << ", span: " << spec.span_ 
+			<< ", dwell_time: " << spec.dwell_time_ << ", bin_size: " << spec.bin_size_ << ".";
 
 		general_checks(device);
 
 		auto hw = device->async_.get_scanner().get()->get_hardware();
+
+		check_power_spectrum_spec(spec);
 
 		// Determine collection parameters.
 		power_spectrum_approximator approx;
@@ -652,6 +654,26 @@ rp_status rf_phreaker_impl::add_power_spectrum_frequency(rp_device *device, cons
 		save_error("an unknown error has occurred", unknown_error_type);
 	}
 	return s;
+}
+
+void rf_phreaker_impl::check_power_spectrum_spec(const rp_power_spectrum_spec &spec) {
+	auto min_bin_size = 100;
+	auto max_bin_size = mhz(5);
+	auto min_dwell_time = milli_to_nano(2);
+	auto max_dwell_time = milli_to_nano(2000);
+
+	if(spec.bin_size_ < min_bin_size)
+		throw rf_phreaker_api_error("power spectrum bin size is too small.  Smallest allowed bin size is "
+			+ std::to_string(min_bin_size));
+	else if(spec.bin_size_ > max_bin_size)
+		throw rf_phreaker_api_error("power spectrum bin size is too large.  Largest allowed bin size is "
+			+ std::to_string(max_bin_size));
+	else if(spec.dwell_time_ < min_dwell_time)
+		throw rf_phreaker_api_error("power spectrum dwell time is too small.  Smallest allowed dwell time is "
+			+ std::to_string(min_dwell_time));
+	else if(spec.dwell_time_ > max_dwell_time)
+		throw rf_phreaker_api_error("power spectrum dwell time is too large.  Largest allowed dwell time is "
+			+ std::to_string(max_dwell_time));
 }
 
 void rf_phreaker_impl::check_calibration(hardware hw, frequency_type freq) {

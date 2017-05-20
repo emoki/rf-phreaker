@@ -88,6 +88,8 @@ private:
 
 	void check_calibration(hardware hw, frequency_type freq);
 
+	void check_power_spectrum_spec(const rp_power_spectrum_spec &spec);
+
 	processing::collection_info_containers::iterator add_sweep(specifier sweep, specifier decode);
 
 	void rf_phreaker_impl::remove_sweep(operating_band band, specifier sweep);
