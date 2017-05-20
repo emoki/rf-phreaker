@@ -628,7 +628,7 @@ rp_status rf_phreaker_impl::add_power_spectrum_frequency(rp_device *device, cons
 
 		if(it == containers_.end()) {
 			// If simultaneous collection is enabled we do not want to stop collection after one iteration of freqs.
-			containers_.push_back(collection_info_container(specifier, find_collection_settings(specifier, config_).is_streaming_));
+			containers_.push_back(collection_info_container(specifier, false));
 			it = std::find_if(containers_.begin(), containers_.end(), [&](const collection_info_container &c) {
 				return c.has_specifier(specifier);
 			});
@@ -952,7 +952,7 @@ rp_status rf_phreaker_impl::start_collection(rp_device *device, const rp_collect
 				return status;
 		}
 		for(int i = 0; i < info->power_spectrum_spec_.size_; ++i) {
-			rp_status status = add_collection_frequency(device, info->iq_data_.e_[i], rp_operating_band::OPERATING_BAND_UNKNOWN);
+			rp_status status = add_power_spectrum_frequency(device, info->power_spectrum_spec_.e_[i]);
 			if(status != RP_STATUS_OK)
 				return status;
 		}
