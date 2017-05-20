@@ -26,6 +26,7 @@ public:
 			output->connect_umts_layer_3(boost::bind(&rf_phreaker_handler_protobuf::output_umts_full_scan, this, _1, _2)).get();
 			output->connect_lte_layer_3(boost::bind(&rf_phreaker_handler_protobuf::output_lte_full_scan, this, _1, _2)).get();
 			output->connect_power_spectrum(boost::bind(&rf_phreaker_handler_protobuf::output_power_spectrum, this, _1)).get();
+			output->connect_iq_data(boost::bind(&rf_phreaker_handler_protobuf::output_iq_data, this, _1)).get();
 		}
 	}
 
@@ -79,6 +80,12 @@ public:
 
 	void output_power_spectrum(const power_spectrum_data &t) {
 		update_.populate_power_spectrum(t);
+		update_.serialize();
+		callbacks_->rp_update(update_.to_bytes(), update_.size());
+	}
+
+	void output_iq_data(const iq_data &t) {
+		update_.populate_iq_data(t);
 		update_.serialize();
 		callbacks_->rp_update(update_.to_bytes(), update_.size());
 	}

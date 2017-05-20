@@ -34,6 +34,8 @@ public:
 			output->connect_lte_layer_3(boost::bind(&rf_phreaker_handler::output_lte_full_scan, this, _1, _2)).get();
 		if(callbacks_ && callbacks_->rp_power_spectrum_update)
 			output->connect_power_spectrum(boost::bind(&rf_phreaker_handler::output_power_spectrum, this, _1)).get();
+		if(callbacks_ && callbacks_->rp_iq_data_update)
+			output->connect_iq_data(boost::bind(&rf_phreaker_handler::output_iq_data, this, _1)).get();
 	}
 
 	void output_message(rp_status stat, const std::string &str) {
@@ -89,6 +91,11 @@ public:
 	void output_power_spectrum(const power_spectrum_data &t) {
 		power_spectrum_wrap wrap(t);
 		callbacks_->rp_power_spectrum_update(&wrap.buf_);
+	}
+
+	void output_iq_data(const iq_data &t) {
+		iq_data_wrap wrap(t);
+		callbacks_->rp_iq_data_update(&wrap.buf_);
 	}
 
 private:

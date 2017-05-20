@@ -35,24 +35,42 @@ private:
 void RP_CALLCONV rp_update(const int8_t *bytes, int32_t size) {
 	rf_phreaker::protobuf::rp_update u;
 	u.ParseFromArray(bytes, size);
-	u.PrintDebugString();
 	std::cout << "\n\n\n";
 	switch(u.update_case()) {
 	case rf_phreaker::protobuf::rp_update::UpdateCase::kLog:
 		std::cout << u.log().msg().c_str() << std::endl;
+		u.PrintDebugString();
 		break;
 	case rf_phreaker::protobuf::rp_update::UpdateCase::kDevice:
 		std::cout << u.device().serial() << "\t" << u.device().device_communication() << std::endl;
 		api_helper::instance().set_device_has_updated(true);
+		u.PrintDebugString();
 		break;
 	case rf_phreaker::protobuf::rp_update::UpdateCase::kGps:
 		std::cout << u.gps().lock() << "\t" << u.gps().latitude() << "\t" << u.gps().longitude() << "\t" << std::endl;
+		u.PrintDebugString(); 
 		break;
 	case rf_phreaker::protobuf::rp_update::UpdateCase::kMsg:
 		std::cout << u.msg().msg() << std::endl;
+		u.PrintDebugString(); 
 		if(u.msg().status() < 0)
 			api_helper::instance().set_error_has_occurred(true);
 		break;
+	case rf_phreaker::protobuf::rp_update::UpdateCase::kGsmFullScan:
+	case rf_phreaker::protobuf::rp_update::UpdateCase::kGsmSweep:
+	case rf_phreaker::protobuf::rp_update::UpdateCase::kLteFullScan:
+	case rf_phreaker::protobuf::rp_update::UpdateCase::kLteSweep:
+	case rf_phreaker::protobuf::rp_update::UpdateCase::kWcdmaFullScan:
+	case rf_phreaker::protobuf::rp_update::UpdateCase::kWcdmaSweep:
+		u.PrintDebugString();
+		break;
+	case rf_phreaker::protobuf::rp_update::UpdateCase::kPowerSpectrum:
+		u.PrintDebugString();
+		break;
+	case rf_phreaker::protobuf::rp_update::UpdateCase::kIqData:
+		std::cout << "iq_data output --------------------------------" << std::endl;
+		break;
+	default:;
 	}
 }
 

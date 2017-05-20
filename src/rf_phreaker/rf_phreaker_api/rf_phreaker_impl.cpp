@@ -4,12 +4,14 @@
 #include "rf_phreaker/rf_phreaker_api/rf_phreaker_conversion.h"
 #include "rf_phreaker/common/exception_types.h"
 #include "rf_phreaker/common/log.h"
+#include "rf_phreaker/processing/measurement_conversion.h"
 #include "rf_phreaker/processing/collection_info_container.h"
 #include "rf_phreaker/processing/frequency_range_creation.h"
 #include "rf_phreaker/processing/processing_utility.h"
 #include "rf_phreaker/qt_specific/settings_io.h"
 #include "rf_phreaker/qt_specific/file_path_validation.h"
 #include "rf_phreaker/qt_specific/qt_utility.h"
+#include "rf_phreaker/scanner/signal_level_calculator.h"
 #include "tbb/task_scheduler_init.h"
 
 namespace rf_phreaker { namespace api {
@@ -676,6 +678,83 @@ void rf_phreaker_impl::check_power_spectrum_spec(const rp_power_spectrum_spec &s
 			+ std::to_string(max_dwell_time));
 }
 
+rp_status rf_phreaker_impl::add_iq_data_frequency(rp_device *device, const rp_iq_data_spec &spec) {
+	using namespace ::rf_phreaker::processing;
+	rp_status s = RP_STATUS_OK;
+	try {
+		std::lock_guard<std::recursive_mutex> lock(mutex_);
+
+		LOG(LINFO) << "Adding iq data spec { center_freq: " << spec.center_frequency_ << ", dwell_time: " << spec.dwell_time_
+			<< ", bandwidth: " << spec.bandwidth_ << ", sampling_rate: " << spec.sampling_rate_ << ".";
+
+		general_checks(device);
+
+		auto hw = device->async_.get_scanner().get()->get_hardware();
+
+		check_calibration(hw, spec.center_frequency_);
+
+		check_iq_data_spec(spec);
+
+		// Check for license.
+
+		auto specifier = IQ_DATA;
+		auto it = std::find_if(containers_.begin(), containers_.end(), [&](const collection_info_container &c) {
+			return c.has_specifier(specifier);
+		});
+
+		if(it == containers_.end()) {
+			// If simultaneous collection is enabled we do not want to stop collection after one iteration of freqs.
+			containers_.push_back(collection_info_container(specifier, false));
+			it = std::find_if(containers_.begin(), containers_.end(), [&](const collection_info_container &c) {
+				return c.has_specifier(specifier);
+			});
+		}
+
+		it->adjust(add_collection_info(collection_info(spec.center_frequency_, spec.dwell_time_, 0, spec.bandwidth_, spec.sampling_rate_, specifier)));
+	}
+	catch(const rf_phreaker_error &err) {
+		s = to_rp_status(err);
+		save_error(err.what(), err.error_type_, err.error_code_);
+	}
+	catch(const std::exception &err) {
+		s = RP_STATUS_GENERIC_ERROR;
+		save_error(err.what(), generic_error_type);
+	}
+	catch(...) {
+		s = RP_STATUS_UNKNOWN_ERROR;
+		save_error("an unknown error has occurred", unknown_error_type);
+	}
+	return s;
+}
+
+void rf_phreaker_impl::check_iq_data_spec(const rp_iq_data_spec &spec) {
+	auto min_dwell_time = milli_to_nano(2);
+	auto max_dwell_time = milli_to_nano(2000);
+	auto min_sampling_rate = khz(160);
+	auto max_sampling_rate = mhz(40);
+	auto min_bandwidth = 1400;
+	auto max_bandwidth = mhz(28);
+
+	if(spec.dwell_time_ < min_dwell_time)
+		throw rf_phreaker_api_error("iq_data dwell time is too small.  Smallest allowed dwell time is "
+			+ std::to_string(min_dwell_time));
+	else if(spec.dwell_time_ > max_dwell_time)
+		throw rf_phreaker_api_error("iq_data dwell time is too large.  Largest allowed dwell time is "
+			+ std::to_string(max_dwell_time));
+	else if(spec.sampling_rate_ < min_sampling_rate)
+		throw rf_phreaker_api_error("iq_data bin size is too small.  Smallest allowed sampling rate is "
+			+ std::to_string(min_sampling_rate));
+	else if(spec.sampling_rate_ > max_sampling_rate)
+		throw rf_phreaker_api_error("iq_data bin size is too large.  Largest allowed sampling rate is "
+			+ std::to_string(max_sampling_rate));
+	else if(spec.bandwidth_ < min_bandwidth)
+		throw rf_phreaker_api_error("iq_data bandwidth is too small.  Smallest allowed bandwidth is "
+			+ std::to_string(min_bandwidth));
+	else if(spec.bandwidth_ > max_bandwidth)
+		throw rf_phreaker_api_error("iq_data bandwidth is too large.  Largest allowed bandwidth is "
+			+ std::to_string(max_bandwidth));
+}
+
 void rf_phreaker_impl::check_calibration(hardware hw, frequency_type freq) {
 	// Check for calibration.
 	if(!rf_phreaker::is_within_freq_paths(hw.frequency_paths_, freq))
@@ -979,8 +1058,7 @@ rp_status rf_phreaker_impl::start_collection(rp_device *device, const rp_collect
 				return status;
 		}
 		for(int i = 0; i < info->iq_data_.size_; ++i) {
-			throw rf_phreaker_api_error("RAW_DATA not yet supported.", INVALID_PARAMETER);
-			rp_status status = add_collection_frequency(device, info->iq_data_.e_[i], rp_operating_band::OPERATING_BAND_UNKNOWN);
+			rp_status status = add_iq_data_frequency(device, info->iq_data_.e_[i]);
 			if(status != RP_STATUS_OK)
 				return status;
 		}
@@ -1076,8 +1154,8 @@ rp_status rf_phreaker_impl::get_gps_data(rp_device *device, rp_gps gps) {
 	return s;
 }
 
-rp_status rf_phreaker_impl::get_iq_data_using_auto_gain(rp_device *device, rp_frequency_type frequency, rp_time_type time_ns,
-	rp_bandwidth_type bandwidth, rp_frequency_type sampling_rate, rp_iq_data *iq_data) {
+rp_status rf_phreaker_impl::get_iq_data(rp_device *device, rp_frequency_type frequency, rp_time_type time_ns,
+	rp_bandwidth_type bandwidth, rp_frequency_type sampling_rate, int gain_db, rp_iq_data *iq_data) {
 	rp_status s = RP_STATUS_OK;
 	try {
 		std::lock_guard<std::recursive_mutex> lock(mutex_);
@@ -1091,72 +1169,25 @@ rp_status rf_phreaker_impl::get_iq_data_using_auto_gain(rp_device *device, rp_fr
 
 		auto hw = device->async_.get_scanner();
 
-		auto samples_required = rf_phreaker::convert_to_samples(time_ns, sampling_rate);
-		if(samples_required > iq_data->num_samples_)
-			throw rf_phreaker_api_error("Insufficient number of samples supplied.  At least " + std::to_string(samples_required)
-			+ " samples are required.", INVALID_PARAMETER);
+		// check license
 
-		auto meas = device->async_.get_rf_data(frequency, time_ns, bandwidth, sampling_rate).get();
-
+		rp_iq_data_spec spec;
+		spec.center_frequency_ = frequency;
+		spec.dwell_time_ = time_ns;
+		spec.bandwidth_ = bandwidth;
+		spec.sampling_rate_ = sampling_rate;
+		check_iq_data_spec(spec);
 
 		check_calibration(hw.get()->get_hardware(), frequency);
 
-		// check license
+		auto meas = gain_db < 0
+			? device->async_.get_rf_data(frequency, time_ns, bandwidth, sampling_rate).get()
+			: device->async_.get_rf_data(frequency, time_ns, bandwidth, gain_db, sampling_rate).get();
 
-
-		iq_data->base_.measurement_bandwidth_ = meas.bandwidth();
-		iq_data->base_.measurement_frequency_ = meas.frequency();
-		iq_data->base_.measurement_signal_level_ = 0;
-		iq_data->base_.collection_round_ = meas.collection_round();
-		copy_serial(meas.serial(), iq_data->base_.serial_);
-		iq_data->base_.status_flags_ = 0;
-		iq_data->base_.time_ = 0;
-		throw rf_phreaker_error("iq_data not supported!");
-		//iq_data->power_adjustment_ = meas.blade_adjustment() - config_.use_rf_board_adjustment_ ? meas.rf_board_adjustment() : 0;
-		iq_data->sample_format_ = LITTLE_ENDIAN_FLOAT_REAL_IMAGINARY;
-		if(meas.get_iq().length() < iq_data->num_samples_)
-			iq_data->num_samples_ = meas.get_iq().length();
-		memcpy(iq_data->samples_, meas.get_iq().get(), (size_t)iq_data->num_samples_ * sizeof(scanner::measurement_info::sample_type));
-	}
-	catch(const rf_phreaker_error &err) {
-		s = to_rp_status(err);
-		save_error(err.what(), err.error_type_, err.error_code_);
-	}
-	catch(const std::exception &err) {
-		s = RP_STATUS_GENERIC_ERROR;
-		save_error(err.what(), generic_error_type);
-	}
-	catch(...) {
-		s = RP_STATUS_UNKNOWN_ERROR;
-		save_error("an unknown error has occurred", unknown_error_type);
-	}
-	return s;
-}
-
-rp_status rf_phreaker_impl::get_iq_data(rp_device *device, rp_frequency_type frequency, rp_time_type time_ns,
-	rp_bandwidth_type bandwidth, rp_frequency_type sampling_rate, int32_t gain_db, rp_iq_data *iq_data) {
-	rp_status s = RP_STATUS_OK;
-	try {
-		throw rf_phreaker_api_error("get_iq_data with gain is not supported.", INVALID_PARAMETER);
-
-		std::lock_guard<std::recursive_mutex> lock(mutex_);
-
-		general_checks(device);
-
-		auto hw = device->async_.get_scanner();
-
-		auto samples_required = rf_phreaker::convert_to_samples(time_ns, sampling_rate);
-		if(samples_required > iq_data->num_samples_)
-			throw rf_phreaker_api_error("Insufficient number of samples supplied.  At least " + std::to_string(samples_required)
-			+ " samples are required.", INVALID_PARAMETER);
-
-		//auto meas = device->async_.get_rf_data(frequency, time_ns, bandwidth, gain, sampling_rate).get();
-
-
-		check_calibration(hw.get()->get_hardware(), frequency);
-
-		// check license
-
+		auto internal_iq = processing::convert_to_iq_data(meas);
+		iq_data_wrap::convert_primitives(internal_iq, *iq_data);
+		iq_data_wrap::convert_power_adj_vector(internal_iq, iq_data->power_adjustment_.power_, iq_data->power_adjustment_.num_power_);
+		iq_data_wrap::convert_samples_vector(internal_iq, iq_data->samples_, iq_data->num_samples_, iq_data->sample_format_);
 	}
 	catch(const rf_phreaker_error &err) {
 		s = to_rp_status(err);

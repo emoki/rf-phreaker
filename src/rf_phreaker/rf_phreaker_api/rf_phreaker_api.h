@@ -836,8 +836,6 @@ RP_LIBEXPORT(rp_status) rp_stop_collection(rp_device *device);
 
 RP_LIBEXPORT(rp_status) rp_get_gps_data(rp_device *device, rp_gps gps);
 
-RP_LIBEXPORT(rp_status) rp_get_iq_data_using_auto_gain(rp_device *device, rp_frequency_type frequency, rp_time_type dwell_time_ns, rp_bandwidth_type bandwidth, rp_frequency_type sampling_rate, rp_iq_data *iq_data);
-
 RP_LIBEXPORT(rp_status) rp_get_iq_data(rp_device *device, rp_frequency_type frequency, rp_time_type dwell_time_ns, rp_bandwidth_type bandwidth, rp_frequency_type sampling_rate, int32_t gain_db, rp_iq_data *iq_data);
 
 RP_LIBEXPORT(rp_status) rp_update_license(rp_device *device, const char *filename);

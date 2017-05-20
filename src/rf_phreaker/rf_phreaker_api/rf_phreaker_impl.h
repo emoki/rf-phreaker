@@ -71,9 +71,6 @@ public:
 
 	rp_status get_gps_data(rp_device *device, rp_gps gps);
 
-	rp_status get_iq_data_using_auto_gain(rp_device *device, rp_frequency_type frequency, rp_time_type time_ns, 
-		rp_bandwidth_type bandwidth, rp_frequency_type sampling_rate, rp_iq_data *iq_data);
-
 	rp_status get_iq_data(rp_device *device, rp_frequency_type frequency, rp_time_type time_ns, 
 		rp_bandwidth_type bandwidth, rp_frequency_type sampling_rate, int32_t gain_db, rp_iq_data *iq_data);
 
@@ -83,12 +80,16 @@ private:
 	rp_status add_gsm_collection_frequencies(rp_device *device, const rp_frequency_band_group &gsm_freqs);
 
 	rp_status add_power_spectrum_frequency(rp_device *device, const rp_power_spectrum_spec &spec);
-		
+
+	rp_status add_iq_data_frequency(rp_device *device, const rp_iq_data_spec &spec);
+
 	void general_checks(rp_device *device);
 
 	void check_calibration(hardware hw, frequency_type freq);
 
 	void check_power_spectrum_spec(const rp_power_spectrum_spec &spec);
+
+	void check_iq_data_spec(const rp_iq_data_spec &spec);
 
 	processing::collection_info_containers::iterator add_sweep(specifier sweep, specifier decode);
 
