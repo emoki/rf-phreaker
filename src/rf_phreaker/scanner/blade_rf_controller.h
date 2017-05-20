@@ -81,6 +81,9 @@ public:
 	measurement_info get_rf_data(frequency_type freq, time_type time_ns, bandwidth_type bandwidth, const gain_type &gain, frequency_type sampling_rate = 0,
 		uint32_t switch_setting = 0, uint32_t switch_mask = 0);
 
+	measurement_info get_rf_data(frequency_type freq, time_type time_ns, bandwidth_type bandwidth, int total_gain_db, frequency_type sampling_rate = 0,
+		uint32_t switch_setting = 0, uint32_t switch_mask = 0);
+
 	void configure_rf_parameters_use_auto_gain(frequency_type frequency, bandwidth_type bandwidth, frequency_type sampling_rate = 0);
 
 	void configure_rf_parameters(frequency_type frequency, bandwidth_type bandwidth, const gain_type &gain, frequency_type sampling_rate = 0,
@@ -143,6 +146,8 @@ public:
 	void output_continuity_packet(int num_transfer_samples);
 
 	void flash_fx3_firmware(const std::string &filename);
+
+	lna_gain_values get_lna_gains(frequency_type center_freq);
 
 private:
 	void enable_blade_rx(const blade_rx_settings &settings);

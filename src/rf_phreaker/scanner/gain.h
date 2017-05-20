@@ -11,6 +11,21 @@ namespace rf_phreaker { namespace scanner {
 // lna gain (MAX, MID, BYPASS)
 // vga1 (dB, min = 5, max = 30)
 // vga2 (dB, min = 0, ~max = 30)
+
+struct lna_gain_values {
+	lna_gain_values(double bypass, double mid, double max)
+		: bypass_(bypass)
+		, mid_(mid)
+		, max_(max) {}
+	lna_gain_values() 
+		: bypass_(0)
+		, mid_(0)
+		, max_(0) {}
+	double bypass_;
+	double mid_;
+	double max_;
+};
+
 class gain_type
 {
 public:

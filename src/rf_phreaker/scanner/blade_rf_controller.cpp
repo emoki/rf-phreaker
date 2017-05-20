@@ -610,11 +610,23 @@ measurement_info blade_rf_controller::get_rf_data(frequency_type frequency, time
 	return data;
 }
 
+measurement_info blade_rf_controller::get_rf_data(frequency_type freq, time_type time_ns, bandwidth_type bandwidth, int total_gain_db, frequency_type sampling_rate,
+	uint32_t switch_setting, uint32_t switch_mask) {
+	auto lna_gains = get_lna_gains(freq);
+	auto gain = gain_manager::calculate_gain(total_gain_db, lna_gains);
+	return get_rf_data(freq, time_ns, bandwidth, gain, sampling_rate, switch_setting, switch_mask);
+}
+
 void blade_rf_controller::update_gain(const measurement_info &info) {
-	auto lna_bypass = scanner_blade_rf_->eeprom_.cal_.get_nuand_adjustment(lms::LNA_BYPASS, info.frequency());
-	auto lna_mid = scanner_blade_rf_->eeprom_.cal_.get_nuand_adjustment(lms::LNA_MID, info.frequency());
-	auto lna_max = scanner_blade_rf_->eeprom_.cal_.get_nuand_adjustment(lms::LNA_MAX, info.frequency());
-	gain_manager_.update_gain(info, lna_bypass, lna_mid, lna_max);
+	gain_manager_.update_gain(info, get_lna_gains(info.frequency()));
+}
+
+lna_gain_values blade_rf_controller::get_lna_gains(frequency_type freq) {
+	lna_gain_values lna;
+	lna.bypass_ = scanner_blade_rf_->eeprom_.cal_.get_nuand_adjustment(lms::LNA_BYPASS, freq);
+	lna.mid_ = scanner_blade_rf_->eeprom_.cal_.get_nuand_adjustment(lms::LNA_MID, freq);
+	lna.max_ = scanner_blade_rf_->eeprom_.cal_.get_nuand_adjustment(lms::LNA_MAX, freq);
+	return lna;
 }
 
 std::chrono::time_point<std::chrono::system_clock, std::chrono::system_clock::duration> blade_rf_controller::get_collection_start_time() {

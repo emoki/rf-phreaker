@@ -46,14 +46,14 @@ public:
 	class gain_history
 	{
 	public:
-		gain_history(const measurement_info &meas, double lna_bypass, double lna_mid, double lna_max)
+		gain_history(const measurement_info &meas, const lna_gain_values &lna)
 			: freq_(meas.frequency())
 			, bw_(find_valid_bandwidth(meas.bandwidth()))
 			, gain_(meas.gain())
 			, max_adc_(0)
 			, lna_bypass_gain_(0)
-			, lna_mid_gain_(abs(lna_mid - lna_bypass))
-			, lna_max_gain_(abs(lna_max - lna_bypass))
+			, lna_mid_gain_(abs(lna.mid_ - lna.bypass_))
+			, lna_max_gain_(abs(lna.max_ - lna.bypass_))
 			, last_update_(std::chrono::system_clock::now())
 		{
 			ipp_helper::check_status(ippsNorm_Inf_32fc32f(meas.get_iq().get(), meas.get_iq().length(), &max_adc_));
@@ -132,29 +132,33 @@ public:
 		if(h.max_adc_ >= 2047)
 			total_gain -= 3;
 
+		return calculate_gain(total_gain, h.lna_max_gain_, h.lna_mid_gain_);
+	}
+
+	static gain_type calculate_gain(int total_gain, double subtracted_max_gain, double subtracted_mid_gain) {
 		// vga2 is only in increments of 3 so we can adjust vga1 to account for that.
 		// This is why the starting value for vga1 is 8.  This allows us to decrement it 
 		// if necessary.
 		auto lna = lms::LNA_BYPASS;
-		int vga1 = 5; 
-		int vga2 = 0;  
+		int vga1 = 5;
+		int vga2 = 0;
 
-		if(total_gain < h.lna_max_gain_ + vga1 + vga2) {
-			if(total_gain < h.lna_mid_gain_ + vga1 + vga2) {
+		if(total_gain < subtracted_max_gain + vga1 + vga2) {
+			if(total_gain < subtracted_mid_gain + vga1 + vga2) {
 				lna = lms::LNA_BYPASS;
 				vga1 = total_gain > 30 ? 30 : std::max(total_gain, 5);
 				vga2 = total_gain > 30 ? std::min(total_gain - 30, 30) : 0;
 			}
 			else {
 				lna = lms::LNA_MID;
-				auto tmp_gain = (int)std::round(total_gain - h.lna_mid_gain_);
+				auto tmp_gain = (int)std::round(total_gain - subtracted_mid_gain);
 				vga1 = tmp_gain > 30 ? 30 : std::max(tmp_gain, 5);
 				vga2 = tmp_gain > 30 ? std::min(tmp_gain - 30, 30) : 0;
 			}
 		}
 		else {
 			lna = lms::LNA_MAX;
-			auto tmp_gain = (int)std::round(total_gain - h.lna_max_gain_);
+			auto tmp_gain = (int)std::round(total_gain - subtracted_max_gain);
 			vga1 = tmp_gain > 30 ? 30 : std::max(tmp_gain, 5);
 			vga2 = tmp_gain > 30 ? std::min(tmp_gain - 30, 30) : 0;
 		}
@@ -175,9 +179,17 @@ public:
 		return gain;
 	}
 
-	void update_gain(const measurement_info &meas, double lna_bypass, double lna_mid, double lna_max)
+	static gain_type calculate_gain(int total_gain, const lna_gain_values &lna) {
+		// We need to subtract out the bypass because that's how gain_manager uses it.  
+		if(lna.bypass_ != 0) 
+			return calculate_gain(total_gain, std::abs(lna.max_ - lna.bypass_), std::abs(lna.mid_ - lna.bypass_));
+		else 
+			return calculate_gain(total_gain, lna.max_, lna.mid_);
+	}
+
+	void update_gain(const measurement_info &meas, const lna_gain_values &lna)
 	{
-		gain_history h(meas, lna_bypass, lna_mid, lna_max);
+		gain_history h(meas, lna);
 		auto it = history_.find(h);
 		if(it == history_.end())
 			history_.insert(std::make_pair(gain_history_key(h), h));
