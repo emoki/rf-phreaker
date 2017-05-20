@@ -79,7 +79,7 @@ public:
 class StartCollectionEvent : public QEvent, public TypeInterface<StartCollectionEvent> {
 public:
 	StartCollectionEvent(const api_storage<rp_operating_band, rp_operating_band_group> &sweep,
-					const api_storage<rp_frequency_type, rp_frequency_group> &iq,
+					const api_storage<rp_iq_data_spec, rp_iq_data_spec_group> &iq,
 					const api_storage<rp_power_spectrum_spec, rp_power_spectrum_spec_group> &spec,
 					const QMap<ApiTypes::Tech, api_storage<rp_frequency_band, rp_frequency_band_group>> &techs)
 		: QEvent(getType())
@@ -91,13 +91,13 @@ public:
 	{}
 
 	api_storage<rp_operating_band, rp_operating_band_group>& sweep() { return sweep_; }
-	api_storage<rp_frequency_type, rp_frequency_group>& iq() { return iq_; }
+	api_storage<rp_iq_data_spec, rp_iq_data_spec_group>& iq() { return iq_; }
 	api_storage<rp_power_spectrum_spec, rp_power_spectrum_spec_group>& spec() { return spec_; }
 	QMap<ApiTypes::Tech, api_storage<rp_frequency_band, rp_frequency_band_group>>& techs() { return techs_; }
 
 private:
 	api_storage<rp_operating_band, rp_operating_band_group> sweep_;
-	api_storage<rp_frequency_type, rp_frequency_group> iq_;
+	api_storage<rp_iq_data_spec, rp_iq_data_spec_group> iq_;
 	api_storage<rp_power_spectrum_spec, rp_power_spectrum_spec_group> spec_;
 	QMap<ApiTypes::Tech, api_storage<rp_frequency_band, rp_frequency_band_group>> techs_;
 };

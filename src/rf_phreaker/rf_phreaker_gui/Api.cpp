@@ -165,7 +165,7 @@ void Api::startCollection() {
 
 	// Create storage for all possible techs.  Note, QMap automatically inserts a default item if it is empty.
 	api_storage<rp_operating_band, rp_operating_band_group> sweep;
-	api_storage<rp_frequency_type, rp_frequency_group> iq_data;
+	api_storage<rp_iq_data_spec, rp_iq_data_spec_group> iq_data;
 	api_storage<rp_power_spectrum_spec, rp_power_spectrum_spec_group> spec_data;
 	QMap<ApiTypes::Tech, api_storage<rp_frequency_band, rp_frequency_band_group>> techs;
 
@@ -179,9 +179,9 @@ void Api::startCollection() {
 			QQmlEngine::setObjectOwnership(sweepModel->get(), QQmlEngine::CppOwnership);
 //			sweepModelList_.push_back(sweepModel->get());
 		}
-		else if(cf->tech() == ApiTypes::IQ_DATA) {
-			iq_data.push_back(cf->toRpFreq());
-		}
+		//else if(cf->tech() == ApiTypes::IQ_DATA) {
+		//	iq_data.push_back(cf->toRpFreq());
+		//}
 		else {
 			techs[cf->tech()].push_back(cf->toRpFrequencyBand());
 		}

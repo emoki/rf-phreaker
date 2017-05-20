@@ -162,7 +162,7 @@ private:
 	}
 
 	rp_status startCollection(api_storage<rp_operating_band, rp_operating_band_group> sweep,
-							  api_storage<rp_frequency_type, rp_frequency_group> iq,
+							  api_storage<rp_iq_data_spec, rp_iq_data_spec_group> iq,
 							  api_storage<rp_power_spectrum_spec, rp_power_spectrum_spec_group> &spec,
 							  QMap<ApiTypes::Tech, api_storage<rp_frequency_band, rp_frequency_band_group>> techs) {
 		qDebug() << "Starting collection.";
