@@ -3,6 +3,7 @@
 #include "rf_phreaker/common/measurements.h"
 #include "rf_phreaker/protobuf_specific/rf_phreaker.pb.h"
 #include "rf_phreaker/rf_phreaker_api/rf_phreaker_api.h"
+#include "rf_phreaker/scanner/measurement_info.h"
 
 namespace rf_phreaker { namespace protobuf {
 
@@ -1126,6 +1127,7 @@ public:
 	}
 	static void populate(const power_spectrum_data &t, rp_power_spectrum *pb) {
 		pb->Clear();
+		base_pb::populate(t, pb->mutable_base());
 		pb->set_bin_size(t.params_.bin_size_);
 		pb->set_dwell_time(t.params_.dwell_time_);
 		pb->set_sampling_rate(t.params_.sampling_rate_);
@@ -1138,6 +1140,46 @@ public:
 		for(auto i : t.power_) {
 			pb->add_power(i);
 		}
+	}
+};
+
+class iq_data_pb : public pb<rp_iq_data> {
+public:
+	iq_data_pb() {}
+	iq_data_pb(const iq_data &t) {
+		populate(t, pb_.get());
+	}
+	void populate(const iq_data &t) {
+		populate(t, pb_.get());
+	}
+	static void populate(const rp_iq_data &pb, iq_data &t) {
+		base_pb::populate(pb.base(), t);
+		t.power_adjustment_.path_.low_freq_ = pb.power_adjustment().path().low_freq();
+		t.power_adjustment_.path_.high_freq_ = pb.power_adjustment().path().high_freq();
+		t.power_adjustment_.step_size_ = pb.power_adjustment().step_size();
+		t.power_adjustment_.power_.resize(pb.power_adjustment().power_size());
+		for(auto i = 0; i < pb.power_adjustment().power_size(); ++i)
+			t.power_adjustment_.power_[i] = pb.power_adjustment().power().Get(i);
+		t.sampling_rate_ = pb.sampling_rate();
+		t.dwell_time_ = pb.dwell_time();
+		t.samples_.resize(pb.samples_size());
+		for(auto i = 0; i < pb.samples_size(); ++i) {
+			t.samples_[i] = pb.samples().Get(i);
+		}
+	}
+	static void populate(const iq_data &t, rp_iq_data *pb) {
+		pb->Clear();
+		base_pb::populate(t, pb->mutable_base());
+		pb->mutable_power_adjustment()->mutable_path()->set_low_freq(t.power_adjustment_.path_.low_freq_);
+		pb->mutable_power_adjustment()->mutable_path()->set_high_freq(t.power_adjustment_.path_.high_freq_);
+		pb->mutable_power_adjustment()->set_step_size(t.power_adjustment_.step_size_);
+		for(auto i : t.power_adjustment_.power_) {
+			pb->mutable_power_adjustment()->add_power(i);
+		}
+		pb->set_sampling_rate(t.sampling_rate_);
+		pb->set_dwell_time(t.dwell_time_);
+		for(auto i : t.samples_)
+			pb->mutable_samples()->Add(i);
 	}
 };
 
@@ -1176,6 +1218,9 @@ public:
 	}
 	void populate_power_spectrum(const power_spectrum_data &t) {
 		populate_power_spectrum(t, pb_.get());
+	}
+	void populate_iq_data(const iq_data &t) {
+		populate_iq_data(t, pb_.get());
 	}
 
 	hardware get_hardware() {
@@ -1253,6 +1298,12 @@ public:
 		power_spectrum_pb::populate(pb_->power_spectrum(), t);
 		return t;
 	}
+	iq_data get_iq_data() {
+		iq_data t;
+		iq_data_pb::populate(pb_->iq_data(), t);
+		return t;
+	}
+
 	static void populate_message(const ::rp_status s, const std::string &str, rp_update *pb) {
 		message_pb::populate(s, str, pb->mutable_msg());
 	}
@@ -1285,6 +1336,9 @@ public:
 	}
 	static void populate_power_spectrum(const power_spectrum_data &t, rp_update *pb) {
 		power_spectrum_pb::populate(t, pb->mutable_power_spectrum());
+	}
+	static void populate_iq_data(const iq_data &t, rp_update *pb) {
+		iq_data_pb::populate(t, pb->mutable_iq_data());
 	}
 
 };

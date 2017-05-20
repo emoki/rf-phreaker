@@ -610,12 +610,65 @@ public:
 		buf_.num_power_ = t.power_.size();
 		bins_.resize(t.power_.size());
 		memcpy(bins_.data(), t.power_.data(), sizeof(double) * t.power_.size());
+		buf_.power_ = bins_.data();
 	}
 
 	rp_power_spectrum buf_;
 	typedef rp_power_spectrum buf_type;
 
 	std::vector<double> bins_;
+};
+
+class iq_data_wrap {
+public:
+	iq_data_wrap(const iq_data &t) {
+		convert_using_buf(t);
+	}
+
+	void convert_using_buf(const iq_data &t) {
+		convert_primitives(t, buf_);
+		power_.resize(t.power_adjustment_.power_.size());
+		buf_.power_adjustment_.num_power_ = power_.size();
+		convert_power_adj_vector(t, power_.data(), buf_.power_adjustment_.num_power_);
+		buf_.power_adjustment_.power_ = power_.data();
+		samples_.resize(t.samples_.size());
+		buf_.num_samples_ = samples_.size();
+		convert_samples_vector(t, samples_.data(), buf_.num_samples_, buf_.sample_format_);
+		buf_.samples_ = samples_.data();
+	}
+
+	static void convert_primitives(const iq_data &t, rp_iq_data &rp) {
+		rp.base_ = basic_wrap(t).buf_;
+		rp.power_adjustment_.path_.low_freq_ = t.power_adjustment_.path_.low_freq_;
+		rp.power_adjustment_.path_.high_freq_ = t.power_adjustment_.path_.high_freq_;
+		rp.power_adjustment_.step_size_ = t.power_adjustment_.step_size_;
+		rp.sampling_rate_ = t.sampling_rate_;
+		rp.dwell_time_ = t.dwell_time_;
+	}
+
+	static void convert_power_adj_vector(const iq_data &t, double *rp, int &num_power) {
+		if(t.power_adjustment_.power_.size() > num_power)
+			throw rf_phreaker_api_error("Insufficient power adjustment size.  The power_adjustment::power_ array needs to have a size of at least "
+				+ std::to_string(t.power_adjustment_.power_.size()) + " elements.", INVALID_PARAMETER);
+		memcpy(rp, t.power_adjustment_.power_.data(), sizeof(double) * t.power_adjustment_.power_.size());
+	}
+
+	static void convert_samples_vector(const iq_data &t, void *rp, int &num_samples, rp_sample_format_type &format) {
+		if(t.samples_.size() > num_samples)
+			throw rf_phreaker_api_error("Insufficient number of samples supplied.  At least " + std::to_string(t.samples_.size())
+				+ " samples are required.", INVALID_PARAMETER);
+
+		if(is_little_endian())
+			format = LITTLE_ENDIAN_FLOAT_REAL_IMAGINARY;
+		else
+			format = BIG_ENDIAN_FLOAT_REAL_IMAGINARY;
+		memcpy(rp, t.samples_.data(), sizeof(float) * t.samples_.size());
+	}
+
+	rp_iq_data buf_;
+	typedef rp_iq_data buf_type;
+	std::vector<double> power_;
+	std::vector<float> samples_;
 };
 
 

@@ -37,6 +37,7 @@ struct rp_updateOneofInstance {
   const ::rf_phreaker::protobuf::rp_lte_update* lte_full_scan_;
   const ::rf_phreaker::protobuf::rp_lte_update* lte_sweep_;
   const ::rf_phreaker::protobuf::rp_power_spectrum* power_spectrum_;
+  const ::rf_phreaker::protobuf::rp_iq_data* iq_data_;
 }* rp_update_default_oneof_instance_ = NULL;
 const ::google::protobuf::Descriptor* rp_log_descriptor_ = NULL;
 const ::google::protobuf::internal::GeneratedMessageReflection*
@@ -212,6 +213,9 @@ const ::google::protobuf::internal::GeneratedMessageReflection*
 const ::google::protobuf::Descriptor* rp_power_spectrum_descriptor_ = NULL;
 const ::google::protobuf::internal::GeneratedMessageReflection*
   rp_power_spectrum_reflection_ = NULL;
+const ::google::protobuf::Descriptor* rp_power_adjustment_descriptor_ = NULL;
+const ::google::protobuf::internal::GeneratedMessageReflection*
+  rp_power_adjustment_reflection_ = NULL;
 const ::google::protobuf::Descriptor* rp_iq_data_descriptor_ = NULL;
 const ::google::protobuf::internal::GeneratedMessageReflection*
   rp_iq_data_reflection_ = NULL;
@@ -224,7 +228,6 @@ const ::google::protobuf::EnumDescriptor* rp_utran_bandwidth_type_descriptor_ = 
 const ::google::protobuf::EnumDescriptor* rp_eutran_bandwidth_type_descriptor_ = NULL;
 const ::google::protobuf::EnumDescriptor* rp_lte_sib_type_descriptor_ = NULL;
 const ::google::protobuf::EnumDescriptor* rp_lte_band_class_cdma_2000_type_descriptor_ = NULL;
-const ::google::protobuf::EnumDescriptor* rp_sample_format_type_descriptor_ = NULL;
 
 }  // namespace
 
@@ -236,7 +239,7 @@ void protobuf_AssignDesc_rf_5fphreaker_2eproto() {
       "rf_phreaker.proto");
   GOOGLE_CHECK(file != NULL);
   rp_update_descriptor_ = file->message_type(0);
-  static const int rp_update_offsets_[12] = {
+  static const int rp_update_offsets_[13] = {
     PROTO2_GENERATED_DEFAULT_ONEOF_FIELD_OFFSET(rp_update_default_oneof_instance_, log_),
     PROTO2_GENERATED_DEFAULT_ONEOF_FIELD_OFFSET(rp_update_default_oneof_instance_, msg_),
     PROTO2_GENERATED_DEFAULT_ONEOF_FIELD_OFFSET(rp_update_default_oneof_instance_, device_),
@@ -248,6 +251,7 @@ void protobuf_AssignDesc_rf_5fphreaker_2eproto() {
     PROTO2_GENERATED_DEFAULT_ONEOF_FIELD_OFFSET(rp_update_default_oneof_instance_, lte_full_scan_),
     PROTO2_GENERATED_DEFAULT_ONEOF_FIELD_OFFSET(rp_update_default_oneof_instance_, lte_sweep_),
     PROTO2_GENERATED_DEFAULT_ONEOF_FIELD_OFFSET(rp_update_default_oneof_instance_, power_spectrum_),
+    PROTO2_GENERATED_DEFAULT_ONEOF_FIELD_OFFSET(rp_update_default_oneof_instance_, iq_data_),
     GOOGLE_PROTOBUF_GENERATED_MESSAGE_FIELD_OFFSET(rp_update, update_),
   };
   rp_update_reflection_ =
@@ -1323,12 +1327,29 @@ void protobuf_AssignDesc_rf_5fphreaker_2eproto() {
       sizeof(rp_power_spectrum),
       GOOGLE_PROTOBUF_GENERATED_MESSAGE_FIELD_OFFSET(rp_power_spectrum, _internal_metadata_),
       GOOGLE_PROTOBUF_GENERATED_MESSAGE_FIELD_OFFSET(rp_power_spectrum, _is_default_instance_));
-  rp_iq_data_descriptor_ = file->message_type(59);
+  rp_power_adjustment_descriptor_ = file->message_type(59);
+  static const int rp_power_adjustment_offsets_[3] = {
+    GOOGLE_PROTOBUF_GENERATED_MESSAGE_FIELD_OFFSET(rp_power_adjustment, path_),
+    GOOGLE_PROTOBUF_GENERATED_MESSAGE_FIELD_OFFSET(rp_power_adjustment, step_size_),
+    GOOGLE_PROTOBUF_GENERATED_MESSAGE_FIELD_OFFSET(rp_power_adjustment, power_),
+  };
+  rp_power_adjustment_reflection_ =
+    ::google::protobuf::internal::GeneratedMessageReflection::NewGeneratedMessageReflection(
+      rp_power_adjustment_descriptor_,
+      rp_power_adjustment::default_instance_,
+      rp_power_adjustment_offsets_,
+      -1,
+      -1,
+      -1,
+      sizeof(rp_power_adjustment),
+      GOOGLE_PROTOBUF_GENERATED_MESSAGE_FIELD_OFFSET(rp_power_adjustment, _internal_metadata_),
+      GOOGLE_PROTOBUF_GENERATED_MESSAGE_FIELD_OFFSET(rp_power_adjustment, _is_default_instance_));
+  rp_iq_data_descriptor_ = file->message_type(60);
   static const int rp_iq_data_offsets_[5] = {
     GOOGLE_PROTOBUF_GENERATED_MESSAGE_FIELD_OFFSET(rp_iq_data, base_),
     GOOGLE_PROTOBUF_GENERATED_MESSAGE_FIELD_OFFSET(rp_iq_data, power_adjustment_),
-    GOOGLE_PROTOBUF_GENERATED_MESSAGE_FIELD_OFFSET(rp_iq_data, sample_format_),
-    GOOGLE_PROTOBUF_GENERATED_MESSAGE_FIELD_OFFSET(rp_iq_data, num_samples_),
+    GOOGLE_PROTOBUF_GENERATED_MESSAGE_FIELD_OFFSET(rp_iq_data, sampling_rate_),
+    GOOGLE_PROTOBUF_GENERATED_MESSAGE_FIELD_OFFSET(rp_iq_data, dwell_time_),
     GOOGLE_PROTOBUF_GENERATED_MESSAGE_FIELD_OFFSET(rp_iq_data, samples_),
   };
   rp_iq_data_reflection_ =
@@ -1351,7 +1372,6 @@ void protobuf_AssignDesc_rf_5fphreaker_2eproto() {
   rp_eutran_bandwidth_type_descriptor_ = file->enum_type(6);
   rp_lte_sib_type_descriptor_ = file->enum_type(7);
   rp_lte_band_class_cdma_2000_type_descriptor_ = file->enum_type(8);
-  rp_sample_format_type_descriptor_ = file->enum_type(9);
 }
 
 namespace {
@@ -1483,6 +1503,8 @@ void protobuf_RegisterTypes(const ::std::string&) {
   ::google::protobuf::MessageFactory::InternalRegisterGeneratedMessage(
       rp_power_spectrum_descriptor_, &rp_power_spectrum::default_instance());
   ::google::protobuf::MessageFactory::InternalRegisterGeneratedMessage(
+      rp_power_adjustment_descriptor_, &rp_power_adjustment::default_instance());
+  ::google::protobuf::MessageFactory::InternalRegisterGeneratedMessage(
       rp_iq_data_descriptor_, &rp_iq_data::default_instance());
 }
 
@@ -1608,6 +1630,8 @@ void protobuf_ShutdownFile_rf_5fphreaker_2eproto() {
   delete rp_lte_update_reflection_;
   delete rp_power_spectrum::default_instance_;
   delete rp_power_spectrum_reflection_;
+  delete rp_power_adjustment::default_instance_;
+  delete rp_power_adjustment_reflection_;
   delete rp_iq_data::default_instance_;
   delete rp_iq_data_reflection_;
 }
@@ -1620,7 +1644,7 @@ void protobuf_AddDesc_rf_5fphreaker_2eproto() {
 
   ::google::protobuf::DescriptorPool::InternalAddGeneratedFile(
     "\n\021rf_phreaker.proto\022\024rf_phreaker.protobu"
-    "f\"\213\005\n\trp_update\022+\n\003log\030\001 \001(\0132\034.rf_phreak"
+    "f\"\300\005\n\trp_update\022+\n\003log\030\001 \001(\0132\034.rf_phreak"
     "er.protobuf.rp_logH\000\022/\n\003msg\030\002 \001(\0132 .rf_p"
     "hreaker.protobuf.rp_messageH\000\0226\n\006device\030"
     "\003 \001(\0132$.rf_phreaker.protobuf.rp_device_i"
@@ -1636,385 +1660,387 @@ void protobuf_AddDesc_rf_5fphreaker_2eproto() {
     "\0228\n\tlte_sweep\030\n \001(\0132#.rf_phreaker.protob"
     "uf.rp_lte_updateH\000\022A\n\016power_spectrum\030\013 \001"
     "(\0132\'.rf_phreaker.protobuf.rp_power_spect"
-    "rumH\000B\010\n\006update\"\025\n\006rp_log\022\013\n\003msg\030\001 \001(\t\"J"
-    "\n\nrp_message\022/\n\006status\030\001 \001(\0162\037.rf_phreak"
-    "er.protobuf.rp_status\022\013\n\003msg\030\002 \001(\t\"8\n\021rp"
-    "_frequency_path\022\020\n\010low_freq\030\001 \001(\003\022\021\n\thig"
-    "h_freq\030\002 \001(\003\"\373\001\n\016rp_device_info\022\016\n\006seria"
-    "l\030\001 \001(\t\022K\n\024device_communication\030\002 \001(\0162-."
-    "rf_phreaker.protobuf.rp_device_communica"
-    "tion\022-\n%frequency_correction_calibration"
-    "_date\030\003 \001(\003\022\033\n\023rf_calibration_date\030\004 \001(\003"
-    "\022@\n\017frequency_paths\030\005 \003(\0132\'.rf_phreaker."
-    "protobuf.rp_frequency_path\"L\n\014rp_satelli"
-    "te\022\013\n\003prn\030\001 \001(\005\022\013\n\003snr\030\002 \001(\001\022\021\n\televatio"
-    "n\030\003 \001(\001\022\017\n\007azimuth\030\004 \001(\001\"\211\003\n\006rp_gps\022\016\n\006s"
-    "erial\030\001 \001(\t\022\014\n\004lock\030\002 \001(\010\022\"\n\032coordinated"
-    "_universal_time\030\003 \001(\003\022\032\n\022visible_satelli"
-    "tes\030\004 \001(\005\022\033\n\023tracking_satellites\030\005 \001(\005\022\020"
-    "\n\010latitude\030\006 \001(\001\022\021\n\tlongitude\030\007 \001(\001\022\020\n\010a"
-    "ltitude\030\010 \001(\001\022\r\n\005angle\030\t \001(\001\022\r\n\005speed\030\n "
-    "\001(\001\022\035\n\025dilution_of_precision\030\013 \001(\001\022\"\n\032ho"
-    "rizontal_accuracy_meters\030\014 \001(\001\022 \n\030vertic"
-    "al_accuracy_meters\030\r \001(\001\022\022\n\nraw_status\030\016"
-    " \001(\003\0226\n\nsatellites\030\017 \003(\0132\".rf_phreaker.p"
-    "rotobuf.rp_satellite\"\267\001\n\007rp_base\022\016\n\006seri"
-    "al\030\001 \001(\t\022\030\n\020collection_round\030\002 \001(\003\022\035\n\025me"
-    "asurement_frequency\030\003 \001(\003\022\035\n\025measurement"
-    "_bandwidth\030\004 \001(\005\022 \n\030measurement_signal_l"
-    "evel\030\005 \001(\001\022\014\n\004time\030\006 \001(\003\022\024\n\014status_flags"
-    "\030\007 \001(\005\"#\n\007rp_plmn\022\013\n\003mcc\030\001 \001(\t\022\013\n\003mnc\030\002 "
-    "\001(\t\"4\n\016rp_raw_layer_3\022\r\n\005bytes\030\001 \001(\014\022\023\n\013"
-    "unused_bits\030\002 \001(\005\"\277\001\n\025rp_gsm_utran_neigh"
-    "bor\0227\n\tduplexing\030\001 \001(\0162$.rf_phreaker.pro"
-    "tobuf.rp_duplex_type\022\r\n\005arfcn\030\002 \001(\005\022@\n\tb"
-    "andwidth\030\003 \001(\0162-.rf_phreaker.protobuf.rp"
-    "_utran_bandwidth_type\022\034\n\020scrambling_code"
-    "s\030\004 \003(\005B\002\020\001\"\"\n\rrp_pcid_group\022\021\n\005pcids\030\001 "
-    "\003(\005B\002\020\001\"\327\003\n\026rp_gsm_eutran_neighbor\022\016\n\006ea"
-    "rfcn\030\001 \001(\005\022A\n\tbandwidth\030\002 \001(\0162..rf_phrea"
-    "ker.protobuf.rp_eutran_bandwidth_type\022\020\n"
-    "\010priority\030\003 \001(\005\022\031\n\021threshold_high_db\030\004 \001"
-    "(\005\022\030\n\020threshold_low_db\030\005 \001(\005\022\024\n\014qrxlevmi"
-    "n_db\030\006 \001(\005\022:\n\rpcids_allowed\030\007 \001(\0132#.rf_p"
-    "hreaker.protobuf.rp_pcid_group\022>\n\021pcids_"
-    "not_allowed\030\010 \001(\0132#.rf_phreaker.protobuf"
-    ".rp_pcid_group\022E\n\030pcids_same_tracking_ar"
-    "ea\030\t \003(\0132#.rf_phreaker.protobuf.rp_pcid_"
-    "group\022J\n\035pcids_different_tracking_area\030\n"
-    " \003(\0132#.rf_phreaker.protobuf.rp_pcid_grou"
-    "p\"R\n\nrp_gsm_si1\022D\n\016band_indicator\030\002 \001(\0162"
-    ",.rf_phreaker.protobuf.rp_band_indicator"
-    "_type\"j\n\nrp_gsm_si2\022\032\n\016bcch_neighbors\030\002 "
-    "\003(\005B\002\020\001\022\034\n\024extension_indication\030\003 \001(\010\022\"\n"
-    "\032bcch_allocation_indication\030\004 \001(\005\"\253\001\n\016rp"
-    "_gsm_si2_bis\022#\n\027extended_bcch_neighbors\030"
-    "\002 \003(\005B\002\020\001\022\034\n\024extension_indication\030\003 \001(\010\022"
-    "\"\n\032bcch_allocation_indication\030\004 \001(\005\022\030\n\020r"
-    "est_octet_index\030\005 \001(\005\022\030\n\020rest_octet_coun"
-    "t\030\006 \001(\005\"\203\002\n\016rp_gsm_si2_ter\022#\n\027extended_b"
-    "cch_neighbors\030\002 \003(\005B\002\020\001\022&\n\036gsm_bcch_allo"
-    "cation_indication\030\003 \001(\005\022*\n\"bcch_neighbor"
-    "s_multiband_reporting\030\004 \001(\005\022D\n\017utran_nei"
-    "ghbors\030\005 \003(\0132+.rf_phreaker.protobuf.rp_g"
-    "sm_utran_neighbor\022\030\n\020rest_octet_index\030\006 "
-    "\001(\005\022\030\n\020rest_octet_count\030\007 \001(\005\"\207\003\n\021rp_gsm"
-    "_si2_quater\022&\n\036gsm_bcch_allocation_indic"
-    "ation\030\002 \001(\005\022&\n\036p3g_bcch_allocation_indic"
-    "ation\030\003 \001(\005\022*\n\"utran_neighbor_cell_index"
-    "_start_3g\030\004 \001(\005\0224\n,utran_neighbor_cell_a"
-    "bsolute_index_start_emr\030\005 \001(\005\022D\n\017utran_n"
-    "eighbors\030\006 \003(\0132+.rf_phreaker.protobuf.rp"
-    "_gsm_utran_neighbor\022F\n\020eutran_neighbors\030"
-    "\007 \003(\0132,.rf_phreaker.protobuf.rp_gsm_eutr"
-    "an_neighbor\022\030\n\020rest_octet_index\030\010 \001(\005\022\030\n"
-    "\020rest_octet_count\030\t \001(\005\"\337\001\n\033rp_gsm_selec"
-    "tion_parameters\022\013\n\003cbq\030\001 \001(\005\022\037\n\027cell_res"
-    "elect_offset_db\030\002 \001(\005\022\033\n\023temporary_offse"
-    "t_db\030\003 \001(\005\022\034\n\024penalty_time_seconds\030\004 \001(\005"
-    "\0228\n0subtract_reselect_cell_offset_ignore"
-    "_temp_offset\030\005 \001(\010\022\035\n\025apply_infinity_off"
-    "set\030\006 \001(\010\"\251\002\n\nrp_gsm_si3\022+\n\004plmn\030\002 \001(\0132\035"
-    ".rf_phreaker.protobuf.rp_plmn\022\032\n\022locatio"
-    "n_area_code\030\003 \001(\005\022\017\n\007cell_id\030\004 \001(\005\022#\n\033ce"
-    "ll_reselect_hysteresis_db\030\005 \001(\005\022O\n\024selec"
-    "tion_parameters\030\006 \001(\01321.rf_phreaker.prot"
-    "obuf.rp_gsm_selection_parameters\022\026\n\016bs_a"
-    "g_blks_res\030\007 \001(\005\022\027\n\017is_2ter_present\030\010 \001("
-    "\010\022\032\n\022is_2quater_present\030\t \001(\010\"\237\002\n\nrp_gsm"
-    "_si4\022+\n\004plmn\030\002 \001(\0132\035.rf_phreaker.protobu"
-    "f.rp_plmn\022\032\n\022location_area_code\030\003 \001(\005\022\017\n"
-    "\007cell_id\030\004 \001(\005\022#\n\033cell_reselect_hysteres"
-    "is_db\030\005 \001(\005\022O\n\024selection_parameters\030\006 \001("
-    "\01321.rf_phreaker.protobuf.rp_gsm_selectio"
-    "n_parameters\022\027\n\017is_cbch_present\030\007 \001(\010\022(\n"
-    " have_additional_param_in_si7_si8\030\010 \001(\010\""
-    "\262\003\n\016rp_gsm_layer_3\0229\n\013raw_layer_3\030\001 \003(\0132"
-    "$.rf_phreaker.protobuf.rp_raw_layer_3\022-\n"
-    "\003si1\030\002 \001(\0132 .rf_phreaker.protobuf.rp_gsm"
-    "_si1\022-\n\003si2\030\003 \001(\0132 .rf_phreaker.protobuf"
-    ".rp_gsm_si2\0225\n\007si2_bis\030\004 \001(\0132$.rf_phreak"
-    "er.protobuf.rp_gsm_si2_bis\0225\n\007si2_ter\030\005 "
-    "\001(\0132$.rf_phreaker.protobuf.rp_gsm_si2_te"
-    "r\022;\n\nsi2_quater\030\006 \001(\0132\'.rf_phreaker.prot"
-    "obuf.rp_gsm_si2_quater\022-\n\003si3\030\007 \001(\0132 .rf"
-    "_phreaker.protobuf.rp_gsm_si3\022-\n\003si4\030\010 \001"
-    "(\0132 .rf_phreaker.protobuf.rp_gsm_si4\"\216\002\n"
-    "\006rp_gsm\022+\n\004base\030\001 \001(\0132\035.rf_phreaker.prot"
-    "obuf.rp_base\022\r\n\005arfcn\030\002 \001(\005\022\?\n\016operating"
-    "_band\030\003 \001(\0162\'.rf_phreaker.protobuf.rp_op"
-    "erating_band\022\014\n\004bsic\030\004 \001(\005\022\031\n\021tdma_frame"
-    "_number\030\005 \001(\005\022\031\n\021bcch_signal_level\030\006 \001(\001"
-    "\022\014\n\004ctoi\030\007 \001(\001\0225\n\007layer_3\030\010 \001(\0132$.rf_phr"
-    "eaker.protobuf.rp_gsm_layer_3\"g\n\rrp_gsm_"
-    "update\022+\n\004base\030\001 \001(\0132\035.rf_phreaker.proto"
-    "buf.rp_base\022)\n\003gsm\030\002 \003(\0132\034.rf_phreaker.p"
-    "rotobuf.rp_gsm\"8\n\027rp_wcdma_utran_neighbo"
-    "r\022\016\n\006uarfcn\030\001 \001(\005\022\r\n\005cpich\030\002 \001(\005\"\217\001\n\025rp_"
-    "wcdma_gsm_neighbor\022\014\n\004bsic\030\001 \001(\005\022D\n\016band"
-    "_indicator\030\002 \001(\0162,.rf_phreaker.protobuf."
-    "rp_band_indicator_type\022\r\n\005arfcn\030\003 \001(\005\022\023\n"
-    "\013qrx_lev_min\030\004 \001(\005\"r\n\014rp_wcdma_mib\022+\n\004pl"
-    "mn\030\002 \001(\0132\035.rf_phreaker.protobuf.rp_plmn\022"
-    "5\n\016multiple_plmns\030\003 \003(\0132\035.rf_phreaker.pr"
-    "otobuf.rp_plmn\"\034\n\rrp_wcdma_sib1\022\013\n\003lac\030\002"
-    " \001(\005\"\034\n\rrp_wcdma_sib3\022\013\n\003cid\030\002 \001(\005\"\034\n\rrp"
-    "_wcdma_sib4\022\013\n\003cid\030\002 \001(\005\"\321\001\n\016rp_wcdma_si"
-    "b11\022\'\n\033utran_intra_neighbor_cpichs\030\002 \003(\005"
-    "B\002\020\001\022L\n\025utran_inter_neighbors\030\003 \003(\0132-.rf"
-    "_phreaker.protobuf.rp_wcdma_utran_neighb"
-    "or\022H\n\023gsm_inter_neighbors\030\004 \003(\0132+.rf_phr"
-    "eaker.protobuf.rp_wcdma_gsm_neighbor\"\325\001\n"
-    "\022rp_wcdma_sib11_bis\022\'\n\033utran_intra_neigh"
-    "bor_cpichs\030\002 \003(\005B\002\020\001\022L\n\025utran_inter_neig"
-    "hbors\030\003 \003(\0132-.rf_phreaker.protobuf.rp_wc"
-    "dma_utran_neighbor\022H\n\023gsm_inter_neighbor"
-    "s\030\004 \003(\0132+.rf_phreaker.protobuf.rp_wcdma_"
-    "gsm_neighbor\"\211\003\n\020rp_wcdma_layer_3\0229\n\013raw"
-    "_layer_3\030\001 \003(\0132$.rf_phreaker.protobuf.rp"
-    "_raw_layer_3\022/\n\003mib\030\002 \001(\0132\".rf_phreaker."
-    "protobuf.rp_wcdma_mib\0221\n\004sib1\030\003 \001(\0132#.rf"
-    "_phreaker.protobuf.rp_wcdma_sib1\0221\n\004sib3"
-    "\030\004 \001(\0132#.rf_phreaker.protobuf.rp_wcdma_s"
-    "ib3\0221\n\004sib4\030\005 \001(\0132#.rf_phreaker.protobuf"
-    ".rp_wcdma_sib4\0223\n\005sib11\030\006 \001(\0132$.rf_phrea"
-    "ker.protobuf.rp_wcdma_sib11\022;\n\tsib11_bis"
-    "\030\007 \001(\0132(.rf_phreaker.protobuf.rp_wcdma_s"
-    "ib11_bis\"\354\001\n\010rp_wcdma\022+\n\004base\030\001 \001(\0132\035.rf"
-    "_phreaker.protobuf.rp_base\022\016\n\006uarfcn\030\002 \001"
-    "(\005\022\?\n\016operating_band\030\003 \001(\0162\'.rf_phreaker"
-    ".protobuf.rp_operating_band\022\r\n\005cpich\030\004 \001"
-    "(\005\022\014\n\004ecio\030\005 \001(\001\022\014\n\004rscp\030\006 \001(\001\0227\n\007layer_"
-    "3\030\007 \001(\0132&.rf_phreaker.protobuf.rp_wcdma_"
-    "layer_3\"m\n\017rp_wcdma_update\022+\n\004base\030\001 \001(\013"
-    "2\035.rf_phreaker.protobuf.rp_base\022-\n\005wcdma"
-    "\030\002 \003(\0132\036.rf_phreaker.protobuf.rp_wcdma\"l"
-    "\n\026rp_lte_scheduling_info\022\035\n\025periodicity_"
-    "in_frames\030\001 \001(\005\0223\n\004sibs\030\003 \003(\0162%.rf_phrea"
-    "ker.protobuf.rp_lte_sib_type\"\302\001\n\013rp_lte_"
-    "sib1\0225\n\016multiple_plmns\030\002 \003(\0132\035.rf_phreak"
-    "er.protobuf.rp_plmn\022\013\n\003tac\030\003 \001(\005\022\013\n\003cid\030"
-    "\004 \001(\005\022E\n\017scheduling_info\030\005 \003(\0132,.rf_phre"
-    "aker.protobuf.rp_lte_scheduling_info\022\033\n\023"
-    "si_window_length_ms\030\006 \001(\005\"\211\001\n)rp_lte_cel"
-    "l_reselection_serving_freq_info\022\032\n\022s_non"
-    "_intra_search\030\001 \001(\005\022\035\n\025threshold_serving"
-    "_low\030\002 \001(\005\022!\n\031cell_reselection_priority\030"
-    "\003 \001(\005\",\n\024rp_lte_s_search_v920\022\t\n\001p\030\001 \001(\005"
-    "\022\t\n\001q\030\002 \001(\005\"\352\002\n\013rp_lte_sib3\022k\n\"cell_rese"
-    "lection_serving_freq_info\030\002 \001(\0132\?.rf_phr"
-    "eaker.protobuf.rp_lte_cell_reselection_s"
-    "erving_freq_info\0227\n/intra_freq_cell_rese"
-    "lection_info_s_intra_search\030\003 \001(\005\022G\n\023s_i"
-    "ntra_search_v920\030\004 \001(\0132*.rf_phreaker.pro"
-    "tobuf.rp_lte_s_search_v920\022K\n\027s_non_intr"
-    "a_search_v920\030\005 \001(\0132*.rf_phreaker.protob"
-    "uf.rp_lte_s_search_v920\022\037\n\027threshold_ser"
-    "ving_low_q\030\006 \001(\005\"<\n\034rp_lte_physical_cell"
-    "id_range\022\r\n\005start\030\001 \001(\005\022\r\n\005range\030\002 \001(\005\"G"
-    "\n\024rp_lte_neighbor_cell\022\030\n\020physical_cell_"
-    "id\030\001 \001(\005\022\025\n\rq_offset_cell\030\002 \001(\005\"\217\002\n\013rp_l"
-    "te_sib4\022Q\n\035intra_freq_neighbor_cell_list"
-    "\030\002 \003(\0132*.rf_phreaker.protobuf.rp_lte_nei"
-    "ghbor_cell\022V\n\032intra_freq_black_cell_list"
-    "\030\003 \003(\01322.rf_phreaker.protobuf.rp_lte_phy"
-    "sical_cellid_range\022U\n\031csg_physical_celli"
-    "d_range\030\004 \001(\01322.rf_phreaker.protobuf.rp_"
-    "lte_physical_cellid_range\"\374\003\n#rp_lte_int"
-    "er_freq_carrier_freq_info\022\"\n\032downlink_ar"
-    "fcn_value_eutra\030\001 \001(\005\022\024\n\014q_rx_lev_min\030\002 "
-    "\001(\005\022\025\n\rq_offset_freq\030\003 \001(\005\022%\n\035allowed_me"
-    "asurement_bandwidth\030\004 \001(\005\022\037\n\027presence_an"
-    "tenna_port_1\030\005 \001(\010\022\030\n\020threshold_x_high\030\006"
-    " \001(\005\022\027\n\017threshold_x_low\030\007 \001(\005\022\035\n\025thresho"
-    "ld_x_high_q_r9\030\010 \001(\005\022\034\n\024threshold_x_low_"
-    "q_r9\030\t \001(\005\022!\n\031cell_reselection_priority\030"
-    "\n \001(\005\022Q\n\035inter_freq_neighbor_cell_list\030\013"
-    " \003(\0132*.rf_phreaker.protobuf.rp_lte_neigh"
-    "bor_cell\022V\n\032inter_freq_black_cell_list\030\014"
-    " \003(\01322.rf_phreaker.protobuf.rp_lte_physi"
-    "cal_cellid_range\"n\n\013rp_lte_sib5\022_\n\034inter"
-    "_freq_carrier_info_list\030\002 \003(\01329.rf_phrea"
-    "ker.protobuf.rp_lte_inter_freq_carrier_f"
-    "req_info\"\307\001\n\030rp_lte_carrier_freq_utra\022\030\n"
-    "\020arfcn_value_utra\030\001 \001(\005\022\027\n\017threshold_x_l"
-    "ow\030\002 \001(\005\022\030\n\020threshold_x_high\030\003 \001(\005\022\034\n\024th"
-    "reshold_x_low_q_r9\030\004 \001(\005\022\035\n\025threshold_x_"
-    "high_q_r9\030\005 \001(\005\022!\n\031cell_reselection_prio"
-    "rity\030\006 \001(\005\"\265\001\n\013rp_lte_sib6\022R\n\032carrier_fr"
-    "eq_list_utra_fdd\030\002 \003(\0132..rf_phreaker.pro"
-    "tobuf.rp_lte_carrier_freq_utra\022R\n\032carrie"
-    "r_freq_list_utra_tdd\030\003 \003(\0132..rf_phreaker"
-    ".protobuf.rp_lte_carrier_freq_utra\"v\n\032rp"
-    "_lte_carrier_freqs_geran\022D\n\016band_indicat"
-    "or\030\001 \001(\0162,.rf_phreaker.protobuf.rp_band_"
-    "indicator_type\022\022\n\006arfcns\030\002 \003(\005B\002\020\001\"p\n\030rp"
-    "_lte_geran_common_info\022!\n\031cell_reselecti"
-    "on_priority\030\001 \001(\005\022\030\n\020threshold_x_high\030\002 "
-    "\001(\005\022\027\n\017threshold_x_low\030\003 \001(\005\"\257\001\n\037rp_lte_"
-    "carrier_freqs_info_geran\022G\n\rcarrier_freq"
-    "s\030\001 \001(\01320.rf_phreaker.protobuf.rp_lte_ca"
-    "rrier_freqs_geran\022C\n\013common_info\030\002 \001(\0132."
-    ".rf_phreaker.protobuf.rp_lte_geran_commo"
-    "n_info\"k\n\013rp_lte_sib7\022\\\n\035carrier_freqs_i"
-    "nfo_list_geran\030\002 \003(\01325.rf_phreaker.proto"
-    "buf.rp_lte_carrier_freqs_info_geran\"n\n.r"
-    "p_lte_neighbor_cells_per_band_class_cdma"
-    "_2000\022\035\n\025arfcn_value_cdma_2000\030\001 \001(\005\022\035\n\021"
-    "physical_cell_ids\030\002 \003(\005B\002\020\001\"\322\001\n\036rp_lte_n"
-    "eighbor_cell_cdma_2000\022D\n\004band\030\001 \001(\01626.r"
-    "f_phreaker.protobuf.rp_lte_band_class_cd"
-    "ma_2000_type\022j\n\034neighbor_cells_per_freq_"
-    "list\030\002 \003(\0132D.rf_phreaker.protobuf.rp_lte"
-    "_neighbor_cells_per_band_class_cdma_2000"
-    "\"\200\001\n,rp_lte_cell_reselection_parameters_"
-    "cmda_2000\022P\n\022neighbor_cell_list\030\001 \003(\01324."
-    "rf_phreaker.protobuf.rp_lte_neighbor_cel"
-    "l_cdma_2000\"\310\001\n\013rp_lte_sib8\022[\n\017parameter"
-    "s_hrpd\030\002 \001(\0132B.rf_phreaker.protobuf.rp_l"
-    "te_cell_reselection_parameters_cmda_2000"
-    "\022\\\n\020parameters_1xrtt\030\003 \001(\0132B.rf_phreaker"
-    ".protobuf.rp_lte_cell_reselection_parame"
-    "ters_cmda_2000\"\242\003\n\016rp_lte_layer_3\0229\n\013raw"
-    "_layer_3\030\001 \003(\0132$.rf_phreaker.protobuf.rp"
-    "_raw_layer_3\022/\n\004sib1\030\002 \001(\0132!.rf_phreaker"
-    ".protobuf.rp_lte_sib1\022/\n\004sib3\030\004 \001(\0132!.rf"
-    "_phreaker.protobuf.rp_lte_sib3\022/\n\004sib4\030\005"
-    " \001(\0132!.rf_phreaker.protobuf.rp_lte_sib4\022"
-    "/\n\004sib5\030\006 \001(\0132!.rf_phreaker.protobuf.rp_"
-    "lte_sib5\022/\n\004sib6\030\007 \001(\0132!.rf_phreaker.pro"
-    "tobuf.rp_lte_sib6\022/\n\004sib7\030\010 \001(\0132!.rf_phr"
-    "eaker.protobuf.rp_lte_sib7\022/\n\004sib8\030\t \001(\013"
-    "2!.rf_phreaker.protobuf.rp_lte_sib8\"\311\003\n\006"
-    "rp_lte\022+\n\004base\030\001 \001(\0132\035.rf_phreaker.proto"
-    "buf.rp_base\022\016\n\006earfcn\030\002 \001(\005\022\?\n\016operating"
-    "_band\030\003 \001(\0162\'.rf_phreaker.protobuf.rp_op"
-    "erating_band\022\030\n\020physical_cell_id\030\004 \001(\005\022\014"
-    "\n\004rsrp\030\005 \001(\001\022\014\n\004rsrq\030\006 \001(\001\022\014\n\004rssi\030\007 \001(\001"
-    "\022\017\n\007psch_id\030\010 \001(\005\022\024\n\014psch_quality\030\t \001(\001\022"
-    "\017\n\007ssch_id\030\n \001(\005\022\024\n\014ssch_quality\030\013 \001(\001\022\024"
-    "\n\014sync_quality\030\014 \001(\001\022\025\n\rcyclic_prefix\030\r "
-    "\001(\005\022\031\n\021num_antenna_ports\030\016 \001(\005\022\032\n\022downli"
-    "nk_bandwidth\030\017 \001(\005\022\024\n\014frame_number\030\020 \001(\005"
-    "\0225\n\007layer_3\030\021 \001(\0132$.rf_phreaker.protobuf"
-    ".rp_lte_layer_3\"g\n\rrp_lte_update\022+\n\004base"
-    "\030\001 \001(\0132\035.rf_phreaker.protobuf.rp_base\022)\n"
-    "\003lte\030\002 \003(\0132\034.rf_phreaker.protobuf.rp_lte"
-    "\"\215\002\n\021rp_power_spectrum\022+\n\004base\030\001 \001(\0132\035.r"
-    "f_phreaker.protobuf.rp_base\022\022\n\ndwell_tim"
-    "e\030\002 \001(\003\022\025\n\rsampling_rate\030\003 \001(\003\022\027\n\017start_"
-    "frequency\030\004 \001(\003\022\025\n\rend_frequency\030\005 \001(\003\022\014"
-    "\n\004span\030\006 \001(\003\022\025\n\rwindow_length\030\007 \001(\005\022\023\n\013n"
-    "um_windows\030\010 \001(\005\022\020\n\010bin_size\030\t \001(\001\022\021\n\tst"
-    "ep_size\030\n \001(\001\022\021\n\005power\030\013 \003(\001B\002\020\001\"\301\001\n\nrp_"
-    "iq_data\022+\n\004base\030\001 \001(\0132\035.rf_phreaker.prot"
-    "obuf.rp_base\022\030\n\020power_adjustment\030\002 \001(\001\022B"
-    "\n\rsample_format\030\003 \001(\0162+.rf_phreaker.prot"
-    "obuf.rp_sample_format_type\022\023\n\013num_sample"
-    "s\030\004 \001(\003\022\023\n\007samples\030\005 \003(\002B\002\020\001*\334\004\n\trp_stat"
-    "us\022\020\n\014RP_STATUS_OK\020\000\022\035\n\031RP_STATUS_NOT_IN"
-    "ITIALIZED\020\001\022\037\n\033RP_STATUS_INVALID_PARAMET"
-    "ER\020\002\022!\n\035RP_STATUS_COMMUNICATION_ERROR\020\003\022"
-    " \n\034RP_STATUS_SCANNER_INIT_ERROR\020\004\022!\n\035RP_"
-    "STATUS_HARDWARE_INFO_ERROR\020\005\022\030\n\024RP_STATU"
-    "S_MISC_ERROR\020\006\022\033\n\027RP_STATUS_FILE_IO_ERRO"
-    "R\020\007\022\034\n\030RP_STATUS_BLADE_RF_ERROR\020\010\022\027\n\023RP_"
-    "STATUS_IPP_ERROR\020\t\022\032\n\026RP_STATUS_FILTER_E"
-    "RROR\020\n\022 \n\034RP_STATUS_GSM_ANALYSIS_ERROR\020\013"
-    "\022!\n\035RP_STATUS_UMTS_ANALYSIS_ERROR\020\014\022 \n\034R"
-    "P_STATUS_LTE_ANALYSIS_ERROR\020\r\022\036\n\032RP_STAT"
-    "US_PROCESSING_ERROR\020\016\022%\n!RP_STATUS_GPS_C"
-    "OMMUNICATION_ERROR\020\017\022#\n\037RP_STATUS_RF_PHR"
-    "EAKER_API_ERROR\020\020\022\033\n\027RP_STATUS_GENERIC_E"
-    "RROR\020\021\022\033\n\027RP_STATUS_UNKNOWN_ERROR\020\022*\232\020\n\021"
-    "rp_operating_band\022\032\n\026OPERATING_BAND_UNKN"
-    "OWN\020\000\022\r\n\tGSM_T_380\020\000\022\r\n\tGSM_T_410\020\001\022\013\n\007G"
-    "SM_450\020\002\022\013\n\007GSM_480\020\003\022\013\n\007GSM_710\020\004\022\013\n\007GS"
-    "M_750\020\005\022\r\n\tGSM_T_810\020\006\022\013\n\007GSM_850\020\007\022\r\n\tG"
-    "SM_P_900\020\010\022\r\n\tGSM_E_900\020\t\022\r\n\tGSM_R_900\020\n"
-    "\022\016\n\nGSM_ER_900\020\013\022\r\n\tGSM_T_900\020\014\022\020\n\014GSM_D"
-    "CS_1800\020\r\022\020\n\014GSM_PCS_1900\020\016\022\031\n\025UMTS_OPER"
-    "ATING_BAND_1\020\017\022\031\n\025UMTS_OPERATING_BAND_2\020"
-    "\020\022\031\n\025UMTS_OPERATING_BAND_3\020\021\022\031\n\025UMTS_OPE"
-    "RATING_BAND_4\020\022\022\031\n\025UMTS_OPERATING_BAND_5"
-    "\020\023\022\031\n\025UMTS_OPERATING_BAND_6\020\024\022\031\n\025UMTS_OP"
-    "ERATING_BAND_7\020\025\022\031\n\025UMTS_OPERATING_BAND_"
-    "8\020\026\022\031\n\025UMTS_OPERATING_BAND_9\020\027\022\032\n\026UMTS_O"
-    "PERATING_BAND_10\020\030\022\032\n\026UMTS_OPERATING_BAN"
-    "D_11\020\031\022\032\n\026UMTS_OPERATING_BAND_12\020\032\022\032\n\026UM"
-    "TS_OPERATING_BAND_13\020\033\022\032\n\026UMTS_OPERATING"
-    "_BAND_14\020\034\022\032\n\026UMTS_OPERATING_BAND_19\020\035\022\032"
-    "\n\026UMTS_OPERATING_BAND_20\020\036\022\032\n\026UMTS_OPERA"
-    "TING_BAND_21\020\037\022\032\n\026UMTS_OPERATING_BAND_22"
-    "\020 \022\032\n\026UMTS_OPERATING_BAND_25\020!\022\032\n\026UMTS_O"
-    "PERATING_BAND_26\020\"\022\030\n\024LTE_OPERATING_BAND"
-    "_1\020#\022\030\n\024LTE_OPERATING_BAND_2\020$\022\030\n\024LTE_OP"
-    "ERATING_BAND_3\020%\022\030\n\024LTE_OPERATING_BAND_4"
-    "\020&\022\030\n\024LTE_OPERATING_BAND_5\020\'\022\030\n\024LTE_OPER"
-    "ATING_BAND_6\020(\022\030\n\024LTE_OPERATING_BAND_7\020)"
-    "\022\030\n\024LTE_OPERATING_BAND_8\020*\022\030\n\024LTE_OPERAT"
-    "ING_BAND_9\020+\022\031\n\025LTE_OPERATING_BAND_10\020,\022"
-    "\031\n\025LTE_OPERATING_BAND_11\020-\022\031\n\025LTE_OPERAT"
-    "ING_BAND_12\020.\022\031\n\025LTE_OPERATING_BAND_13\020/"
-    "\022\031\n\025LTE_OPERATING_BAND_14\0200\022\031\n\025LTE_OPERA"
-    "TING_BAND_17\0201\022\031\n\025LTE_OPERATING_BAND_18\020"
-    "2\022\031\n\025LTE_OPERATING_BAND_19\0203\022\031\n\025LTE_OPER"
-    "ATING_BAND_20\0204\022\031\n\025LTE_OPERATING_BAND_21"
-    "\0205\022\031\n\025LTE_OPERATING_BAND_22\0206\022\031\n\025LTE_OPE"
-    "RATING_BAND_23\0207\022\031\n\025LTE_OPERATING_BAND_2"
-    "4\0208\022\031\n\025LTE_OPERATING_BAND_25\0209\022\031\n\025LTE_OP"
-    "ERATING_BAND_26\020:\022\031\n\025LTE_OPERATING_BAND_"
-    "27\020;\022\031\n\025LTE_OPERATING_BAND_28\020<\022\031\n\025LTE_O"
-    "PERATING_BAND_29\020=\022\031\n\025LTE_OPERATING_BAND"
-    "_30\020>\022\031\n\025LTE_OPERATING_BAND_33\020\?\022\031\n\025LTE_"
-    "OPERATING_BAND_34\020@\022\031\n\025LTE_OPERATING_BAN"
-    "D_35\020A\022\031\n\025LTE_OPERATING_BAND_36\020B\022\031\n\025LTE"
-    "_OPERATING_BAND_37\020C\022\031\n\025LTE_OPERATING_BA"
-    "ND_38\020D\022\031\n\025LTE_OPERATING_BAND_39\020E\022\031\n\025LT"
-    "E_OPERATING_BAND_40\020F\022\031\n\025LTE_OPERATING_B"
-    "AND_41\020G\022\031\n\025LTE_OPERATING_BAND_42\020H\022\031\n\025L"
-    "TE_OPERATING_BAND_43\020I\022\031\n\025LTE_OPERATING_"
-    "BAND_44\020J\022\034\n\030FIRST_GSM_OPERATING_BAND\020\000\022"
-    "\033\n\027LAST_GSM_OPERATING_BAND\020\016\022\035\n\031FIRST_UM"
-    "TS_OPERATING_BAND\020\017\022\034\n\030LAST_UMTS_OPERATI"
-    "NG_BAND\020\"\022\034\n\030FIRST_LTE_OPERATING_BAND\020#\022"
-    "\033\n\027LAST_LTE_OPERATING_BAND\020J\032\002\020\001*b\n\027rp_d"
-    "evice_communication\022\020\n\014USB_HI_SPEED\020\000\022\023\n"
-    "\017USB_SUPER_SPEED\020\001\022 \n\034UNKNOWN_DEVICE_COM"
-    "MUNICATION\020\002*a\n\026rp_band_indicator_type\022\025"
-    "\n\021dcs_1800_was_used\020\000\022\025\n\021pcs_1900_was_us"
-    "ed\020\001\022\031\n\025unknown_band_was_used\020\002*\"\n\016rp_du"
-    "plex_type\022\007\n\003fdd\020\000\022\007\n\003tdd\020\001*\313\001\n\027rp_utran"
-    "_bandwidth_type\022\023\n\017utran_3_84_mcps\020\000\022\023\n\017"
-    "utran_1_24_mcps\020\001\022\020\n\014utran_2_mcps\020\002\022\020\n\014u"
-    "tran_3_mcps\020\003\022\020\n\014utran_4_mcps\020\004\022\020\n\014utran"
-    "_5_mcps\020\005\022\020\n\014utran_6_mcps\020\006\022\020\n\014utran_7_m"
-    "cps\020\007\022\026\n\022utran_default_mcps\020\000\032\002\020\001*\302\001\n\030rp"
-    "_eutran_bandwidth_type\022\031\n\025num_resource_b"
-    "locks_6\020\000\022\032\n\026num_resource_blocks_15\020\001\022\032\n"
-    "\026num_resource_blocks_25\020\002\022\032\n\026num_resourc"
-    "e_blocks_50\020\003\022\032\n\026num_resource_blocks_75\020"
-    "\004\022\033\n\027num_resource_blocks_100\020\005*\264\002\n\017rp_lt"
-    "e_sib_type\022\014\n\010LTE_SIB1\020\000\022\014\n\010LTE_SIB2\020\001\022\014"
-    "\n\010LTE_SIB3\020\002\022\014\n\010LTE_SIB4\020\003\022\014\n\010LTE_SIB5\020\004"
-    "\022\014\n\010LTE_SIB6\020\005\022\014\n\010LTE_SIB7\020\006\022\014\n\010LTE_SIB8"
-    "\020\007\022\014\n\010LTE_SIB9\020\010\022\r\n\tLTE_SIB10\020\t\022\r\n\tLTE_S"
-    "IB11\020\n\022\022\n\016LTE_SIB12_V920\020\013\022\022\n\016LTE_SIB13_"
-    "V920\020\014\022\023\n\017LTE_SIB14_V1130\020\r\022\023\n\017LTE_SIB15"
-    "_V1130\020\016\022\023\n\017LTE_SIB16_V1130\020\017\022\016\n\nLTE_SPA"
-    "RE2\020\020\022\016\n\nLTE_SPARE1\020\021*\201\003\n rp_lte_band_cl"
-    "ass_cdma_2000_type\022\007\n\003bc0\020\000\022\007\n\003bc1\020\001\022\007\n\003"
-    "bc2\020\002\022\007\n\003bc3\020\003\022\007\n\003bc4\020\004\022\007\n\003bc5\020\005\022\007\n\003bc6\020"
-    "\006\022\007\n\003bc7\020\007\022\007\n\003bc8\020\010\022\007\n\003bc9\020\t\022\010\n\004bc10\020\n\022\010"
-    "\n\004bc11\020\013\022\010\n\004bc12\020\014\022\010\n\004bc13\020\r\022\010\n\004bc14\020\016\022\010"
-    "\n\004bc15\020\017\022\010\n\004bc16\020\020\022\010\n\004bc17\020\021\022\r\n\tbc18_v9a"
-    "0\020\022\022\r\n\tbc19_v9a0\020\023\022\r\n\tbc20_v9a0\020\024\022\r\n\tbc2"
-    "1_v9a0\020\025\022\013\n\007spare10\020\026\022\n\n\006spare9\020\027\022\n\n\006spa"
-    "re8\020\030\022\n\n\006spare7\020\031\022\n\n\006spare6\020\032\022\n\n\006spare5\020"
-    "\033\022\n\n\006spare4\020\034\022\n\n\006spare3\020\035\022\n\n\006spare2\020\036\022\n\n"
-    "\006spare1\020\037*\?\n\025rp_sample_format_type\022&\n\"LI"
-    "TTLE_ENDIAN_FLOAT_REAL_IMAGINARY\020\000b\006prot"
-    "o3", 15802);
+    "rumH\000\0223\n\007iq_data\030\014 \001(\0132 .rf_phreaker.pro"
+    "tobuf.rp_iq_dataH\000B\010\n\006update\"\025\n\006rp_log\022\013"
+    "\n\003msg\030\001 \001(\t\"J\n\nrp_message\022/\n\006status\030\001 \001("
+    "\0162\037.rf_phreaker.protobuf.rp_status\022\013\n\003ms"
+    "g\030\002 \001(\t\"8\n\021rp_frequency_path\022\020\n\010low_freq"
+    "\030\001 \001(\003\022\021\n\thigh_freq\030\002 \001(\003\"\373\001\n\016rp_device_"
+    "info\022\016\n\006serial\030\001 \001(\t\022K\n\024device_communica"
+    "tion\030\002 \001(\0162-.rf_phreaker.protobuf.rp_dev"
+    "ice_communication\022-\n%frequency_correctio"
+    "n_calibration_date\030\003 \001(\003\022\033\n\023rf_calibrati"
+    "on_date\030\004 \001(\003\022@\n\017frequency_paths\030\005 \003(\0132\'"
+    ".rf_phreaker.protobuf.rp_frequency_path\""
+    "L\n\014rp_satellite\022\013\n\003prn\030\001 \001(\005\022\013\n\003snr\030\002 \001("
+    "\001\022\021\n\televation\030\003 \001(\001\022\017\n\007azimuth\030\004 \001(\001\"\211\003"
+    "\n\006rp_gps\022\016\n\006serial\030\001 \001(\t\022\014\n\004lock\030\002 \001(\010\022\""
+    "\n\032coordinated_universal_time\030\003 \001(\003\022\032\n\022vi"
+    "sible_satellites\030\004 \001(\005\022\033\n\023tracking_satel"
+    "lites\030\005 \001(\005\022\020\n\010latitude\030\006 \001(\001\022\021\n\tlongitu"
+    "de\030\007 \001(\001\022\020\n\010altitude\030\010 \001(\001\022\r\n\005angle\030\t \001("
+    "\001\022\r\n\005speed\030\n \001(\001\022\035\n\025dilution_of_precisio"
+    "n\030\013 \001(\001\022\"\n\032horizontal_accuracy_meters\030\014 "
+    "\001(\001\022 \n\030vertical_accuracy_meters\030\r \001(\001\022\022\n"
+    "\nraw_status\030\016 \001(\003\0226\n\nsatellites\030\017 \003(\0132\"."
+    "rf_phreaker.protobuf.rp_satellite\"\267\001\n\007rp"
+    "_base\022\016\n\006serial\030\001 \001(\t\022\030\n\020collection_roun"
+    "d\030\002 \001(\003\022\035\n\025measurement_frequency\030\003 \001(\003\022\035"
+    "\n\025measurement_bandwidth\030\004 \001(\005\022 \n\030measure"
+    "ment_signal_level\030\005 \001(\001\022\014\n\004time\030\006 \001(\003\022\024\n"
+    "\014status_flags\030\007 \001(\005\"#\n\007rp_plmn\022\013\n\003mcc\030\001 "
+    "\001(\t\022\013\n\003mnc\030\002 \001(\t\"4\n\016rp_raw_layer_3\022\r\n\005by"
+    "tes\030\001 \001(\014\022\023\n\013unused_bits\030\002 \001(\005\"\277\001\n\025rp_gs"
+    "m_utran_neighbor\0227\n\tduplexing\030\001 \001(\0162$.rf"
+    "_phreaker.protobuf.rp_duplex_type\022\r\n\005arf"
+    "cn\030\002 \001(\005\022@\n\tbandwidth\030\003 \001(\0162-.rf_phreake"
+    "r.protobuf.rp_utran_bandwidth_type\022\034\n\020sc"
+    "rambling_codes\030\004 \003(\005B\002\020\001\"\"\n\rrp_pcid_grou"
+    "p\022\021\n\005pcids\030\001 \003(\005B\002\020\001\"\327\003\n\026rp_gsm_eutran_n"
+    "eighbor\022\016\n\006earfcn\030\001 \001(\005\022A\n\tbandwidth\030\002 \001"
+    "(\0162..rf_phreaker.protobuf.rp_eutran_band"
+    "width_type\022\020\n\010priority\030\003 \001(\005\022\031\n\021threshol"
+    "d_high_db\030\004 \001(\005\022\030\n\020threshold_low_db\030\005 \001("
+    "\005\022\024\n\014qrxlevmin_db\030\006 \001(\005\022:\n\rpcids_allowed"
+    "\030\007 \001(\0132#.rf_phreaker.protobuf.rp_pcid_gr"
+    "oup\022>\n\021pcids_not_allowed\030\010 \001(\0132#.rf_phre"
+    "aker.protobuf.rp_pcid_group\022E\n\030pcids_sam"
+    "e_tracking_area\030\t \003(\0132#.rf_phreaker.prot"
+    "obuf.rp_pcid_group\022J\n\035pcids_different_tr"
+    "acking_area\030\n \003(\0132#.rf_phreaker.protobuf"
+    ".rp_pcid_group\"R\n\nrp_gsm_si1\022D\n\016band_ind"
+    "icator\030\002 \001(\0162,.rf_phreaker.protobuf.rp_b"
+    "and_indicator_type\"j\n\nrp_gsm_si2\022\032\n\016bcch"
+    "_neighbors\030\002 \003(\005B\002\020\001\022\034\n\024extension_indica"
+    "tion\030\003 \001(\010\022\"\n\032bcch_allocation_indication"
+    "\030\004 \001(\005\"\253\001\n\016rp_gsm_si2_bis\022#\n\027extended_bc"
+    "ch_neighbors\030\002 \003(\005B\002\020\001\022\034\n\024extension_indi"
+    "cation\030\003 \001(\010\022\"\n\032bcch_allocation_indicati"
+    "on\030\004 \001(\005\022\030\n\020rest_octet_index\030\005 \001(\005\022\030\n\020re"
+    "st_octet_count\030\006 \001(\005\"\203\002\n\016rp_gsm_si2_ter\022"
+    "#\n\027extended_bcch_neighbors\030\002 \003(\005B\002\020\001\022&\n\036"
+    "gsm_bcch_allocation_indication\030\003 \001(\005\022*\n\""
+    "bcch_neighbors_multiband_reporting\030\004 \001(\005"
+    "\022D\n\017utran_neighbors\030\005 \003(\0132+.rf_phreaker."
+    "protobuf.rp_gsm_utran_neighbor\022\030\n\020rest_o"
+    "ctet_index\030\006 \001(\005\022\030\n\020rest_octet_count\030\007 \001"
+    "(\005\"\207\003\n\021rp_gsm_si2_quater\022&\n\036gsm_bcch_all"
+    "ocation_indication\030\002 \001(\005\022&\n\036p3g_bcch_all"
+    "ocation_indication\030\003 \001(\005\022*\n\"utran_neighb"
+    "or_cell_index_start_3g\030\004 \001(\005\0224\n,utran_ne"
+    "ighbor_cell_absolute_index_start_emr\030\005 \001"
+    "(\005\022D\n\017utran_neighbors\030\006 \003(\0132+.rf_phreake"
+    "r.protobuf.rp_gsm_utran_neighbor\022F\n\020eutr"
+    "an_neighbors\030\007 \003(\0132,.rf_phreaker.protobu"
+    "f.rp_gsm_eutran_neighbor\022\030\n\020rest_octet_i"
+    "ndex\030\010 \001(\005\022\030\n\020rest_octet_count\030\t \001(\005\"\337\001\n"
+    "\033rp_gsm_selection_parameters\022\013\n\003cbq\030\001 \001("
+    "\005\022\037\n\027cell_reselect_offset_db\030\002 \001(\005\022\033\n\023te"
+    "mporary_offset_db\030\003 \001(\005\022\034\n\024penalty_time_"
+    "seconds\030\004 \001(\005\0228\n0subtract_reselect_cell_"
+    "offset_ignore_temp_offset\030\005 \001(\010\022\035\n\025apply"
+    "_infinity_offset\030\006 \001(\010\"\251\002\n\nrp_gsm_si3\022+\n"
+    "\004plmn\030\002 \001(\0132\035.rf_phreaker.protobuf.rp_pl"
+    "mn\022\032\n\022location_area_code\030\003 \001(\005\022\017\n\007cell_i"
+    "d\030\004 \001(\005\022#\n\033cell_reselect_hysteresis_db\030\005"
+    " \001(\005\022O\n\024selection_parameters\030\006 \001(\01321.rf_"
+    "phreaker.protobuf.rp_gsm_selection_param"
+    "eters\022\026\n\016bs_ag_blks_res\030\007 \001(\005\022\027\n\017is_2ter"
+    "_present\030\010 \001(\010\022\032\n\022is_2quater_present\030\t \001"
+    "(\010\"\237\002\n\nrp_gsm_si4\022+\n\004plmn\030\002 \001(\0132\035.rf_phr"
+    "eaker.protobuf.rp_plmn\022\032\n\022location_area_"
+    "code\030\003 \001(\005\022\017\n\007cell_id\030\004 \001(\005\022#\n\033cell_rese"
+    "lect_hysteresis_db\030\005 \001(\005\022O\n\024selection_pa"
+    "rameters\030\006 \001(\01321.rf_phreaker.protobuf.rp"
+    "_gsm_selection_parameters\022\027\n\017is_cbch_pre"
+    "sent\030\007 \001(\010\022(\n have_additional_param_in_s"
+    "i7_si8\030\010 \001(\010\"\262\003\n\016rp_gsm_layer_3\0229\n\013raw_l"
+    "ayer_3\030\001 \003(\0132$.rf_phreaker.protobuf.rp_r"
+    "aw_layer_3\022-\n\003si1\030\002 \001(\0132 .rf_phreaker.pr"
+    "otobuf.rp_gsm_si1\022-\n\003si2\030\003 \001(\0132 .rf_phre"
+    "aker.protobuf.rp_gsm_si2\0225\n\007si2_bis\030\004 \001("
+    "\0132$.rf_phreaker.protobuf.rp_gsm_si2_bis\022"
+    "5\n\007si2_ter\030\005 \001(\0132$.rf_phreaker.protobuf."
+    "rp_gsm_si2_ter\022;\n\nsi2_quater\030\006 \001(\0132\'.rf_"
+    "phreaker.protobuf.rp_gsm_si2_quater\022-\n\003s"
+    "i3\030\007 \001(\0132 .rf_phreaker.protobuf.rp_gsm_s"
+    "i3\022-\n\003si4\030\010 \001(\0132 .rf_phreaker.protobuf.r"
+    "p_gsm_si4\"\216\002\n\006rp_gsm\022+\n\004base\030\001 \001(\0132\035.rf_"
+    "phreaker.protobuf.rp_base\022\r\n\005arfcn\030\002 \001(\005"
+    "\022\?\n\016operating_band\030\003 \001(\0162\'.rf_phreaker.p"
+    "rotobuf.rp_operating_band\022\014\n\004bsic\030\004 \001(\005\022"
+    "\031\n\021tdma_frame_number\030\005 \001(\005\022\031\n\021bcch_signa"
+    "l_level\030\006 \001(\001\022\014\n\004ctoi\030\007 \001(\001\0225\n\007layer_3\030\010"
+    " \001(\0132$.rf_phreaker.protobuf.rp_gsm_layer"
+    "_3\"g\n\rrp_gsm_update\022+\n\004base\030\001 \001(\0132\035.rf_p"
+    "hreaker.protobuf.rp_base\022)\n\003gsm\030\002 \003(\0132\034."
+    "rf_phreaker.protobuf.rp_gsm\"8\n\027rp_wcdma_"
+    "utran_neighbor\022\016\n\006uarfcn\030\001 \001(\005\022\r\n\005cpich\030"
+    "\002 \001(\005\"\217\001\n\025rp_wcdma_gsm_neighbor\022\014\n\004bsic\030"
+    "\001 \001(\005\022D\n\016band_indicator\030\002 \001(\0162,.rf_phrea"
+    "ker.protobuf.rp_band_indicator_type\022\r\n\005a"
+    "rfcn\030\003 \001(\005\022\023\n\013qrx_lev_min\030\004 \001(\005\"r\n\014rp_wc"
+    "dma_mib\022+\n\004plmn\030\002 \001(\0132\035.rf_phreaker.prot"
+    "obuf.rp_plmn\0225\n\016multiple_plmns\030\003 \003(\0132\035.r"
+    "f_phreaker.protobuf.rp_plmn\"\034\n\rrp_wcdma_"
+    "sib1\022\013\n\003lac\030\002 \001(\005\"\034\n\rrp_wcdma_sib3\022\013\n\003ci"
+    "d\030\002 \001(\005\"\034\n\rrp_wcdma_sib4\022\013\n\003cid\030\002 \001(\005\"\321\001"
+    "\n\016rp_wcdma_sib11\022\'\n\033utran_intra_neighbor"
+    "_cpichs\030\002 \003(\005B\002\020\001\022L\n\025utran_inter_neighbo"
+    "rs\030\003 \003(\0132-.rf_phreaker.protobuf.rp_wcdma"
+    "_utran_neighbor\022H\n\023gsm_inter_neighbors\030\004"
+    " \003(\0132+.rf_phreaker.protobuf.rp_wcdma_gsm"
+    "_neighbor\"\325\001\n\022rp_wcdma_sib11_bis\022\'\n\033utra"
+    "n_intra_neighbor_cpichs\030\002 \003(\005B\002\020\001\022L\n\025utr"
+    "an_inter_neighbors\030\003 \003(\0132-.rf_phreaker.p"
+    "rotobuf.rp_wcdma_utran_neighbor\022H\n\023gsm_i"
+    "nter_neighbors\030\004 \003(\0132+.rf_phreaker.proto"
+    "buf.rp_wcdma_gsm_neighbor\"\211\003\n\020rp_wcdma_l"
+    "ayer_3\0229\n\013raw_layer_3\030\001 \003(\0132$.rf_phreake"
+    "r.protobuf.rp_raw_layer_3\022/\n\003mib\030\002 \001(\0132\""
+    ".rf_phreaker.protobuf.rp_wcdma_mib\0221\n\004si"
+    "b1\030\003 \001(\0132#.rf_phreaker.protobuf.rp_wcdma"
+    "_sib1\0221\n\004sib3\030\004 \001(\0132#.rf_phreaker.protob"
+    "uf.rp_wcdma_sib3\0221\n\004sib4\030\005 \001(\0132#.rf_phre"
+    "aker.protobuf.rp_wcdma_sib4\0223\n\005sib11\030\006 \001"
+    "(\0132$.rf_phreaker.protobuf.rp_wcdma_sib11"
+    "\022;\n\tsib11_bis\030\007 \001(\0132(.rf_phreaker.protob"
+    "uf.rp_wcdma_sib11_bis\"\354\001\n\010rp_wcdma\022+\n\004ba"
+    "se\030\001 \001(\0132\035.rf_phreaker.protobuf.rp_base\022"
+    "\016\n\006uarfcn\030\002 \001(\005\022\?\n\016operating_band\030\003 \001(\0162"
+    "\'.rf_phreaker.protobuf.rp_operating_band"
+    "\022\r\n\005cpich\030\004 \001(\005\022\014\n\004ecio\030\005 \001(\001\022\014\n\004rscp\030\006 "
+    "\001(\001\0227\n\007layer_3\030\007 \001(\0132&.rf_phreaker.proto"
+    "buf.rp_wcdma_layer_3\"m\n\017rp_wcdma_update\022"
+    "+\n\004base\030\001 \001(\0132\035.rf_phreaker.protobuf.rp_"
+    "base\022-\n\005wcdma\030\002 \003(\0132\036.rf_phreaker.protob"
+    "uf.rp_wcdma\"l\n\026rp_lte_scheduling_info\022\035\n"
+    "\025periodicity_in_frames\030\001 \001(\005\0223\n\004sibs\030\003 \003"
+    "(\0162%.rf_phreaker.protobuf.rp_lte_sib_typ"
+    "e\"\302\001\n\013rp_lte_sib1\0225\n\016multiple_plmns\030\002 \003("
+    "\0132\035.rf_phreaker.protobuf.rp_plmn\022\013\n\003tac\030"
+    "\003 \001(\005\022\013\n\003cid\030\004 \001(\005\022E\n\017scheduling_info\030\005 "
+    "\003(\0132,.rf_phreaker.protobuf.rp_lte_schedu"
+    "ling_info\022\033\n\023si_window_length_ms\030\006 \001(\005\"\211"
+    "\001\n)rp_lte_cell_reselection_serving_freq_"
+    "info\022\032\n\022s_non_intra_search\030\001 \001(\005\022\035\n\025thre"
+    "shold_serving_low\030\002 \001(\005\022!\n\031cell_reselect"
+    "ion_priority\030\003 \001(\005\",\n\024rp_lte_s_search_v9"
+    "20\022\t\n\001p\030\001 \001(\005\022\t\n\001q\030\002 \001(\005\"\352\002\n\013rp_lte_sib3"
+    "\022k\n\"cell_reselection_serving_freq_info\030\002"
+    " \001(\0132\?.rf_phreaker.protobuf.rp_lte_cell_"
+    "reselection_serving_freq_info\0227\n/intra_f"
+    "req_cell_reselection_info_s_intra_search"
+    "\030\003 \001(\005\022G\n\023s_intra_search_v920\030\004 \001(\0132*.rf"
+    "_phreaker.protobuf.rp_lte_s_search_v920\022"
+    "K\n\027s_non_intra_search_v920\030\005 \001(\0132*.rf_ph"
+    "reaker.protobuf.rp_lte_s_search_v920\022\037\n\027"
+    "threshold_serving_low_q\030\006 \001(\005\"<\n\034rp_lte_"
+    "physical_cellid_range\022\r\n\005start\030\001 \001(\005\022\r\n\005"
+    "range\030\002 \001(\005\"G\n\024rp_lte_neighbor_cell\022\030\n\020p"
+    "hysical_cell_id\030\001 \001(\005\022\025\n\rq_offset_cell\030\002"
+    " \001(\005\"\217\002\n\013rp_lte_sib4\022Q\n\035intra_freq_neigh"
+    "bor_cell_list\030\002 \003(\0132*.rf_phreaker.protob"
+    "uf.rp_lte_neighbor_cell\022V\n\032intra_freq_bl"
+    "ack_cell_list\030\003 \003(\01322.rf_phreaker.protob"
+    "uf.rp_lte_physical_cellid_range\022U\n\031csg_p"
+    "hysical_cellid_range\030\004 \001(\01322.rf_phreaker"
+    ".protobuf.rp_lte_physical_cellid_range\"\374"
+    "\003\n#rp_lte_inter_freq_carrier_freq_info\022\""
+    "\n\032downlink_arfcn_value_eutra\030\001 \001(\005\022\024\n\014q_"
+    "rx_lev_min\030\002 \001(\005\022\025\n\rq_offset_freq\030\003 \001(\005\022"
+    "%\n\035allowed_measurement_bandwidth\030\004 \001(\005\022\037"
+    "\n\027presence_antenna_port_1\030\005 \001(\010\022\030\n\020thres"
+    "hold_x_high\030\006 \001(\005\022\027\n\017threshold_x_low\030\007 \001"
+    "(\005\022\035\n\025threshold_x_high_q_r9\030\010 \001(\005\022\034\n\024thr"
+    "eshold_x_low_q_r9\030\t \001(\005\022!\n\031cell_reselect"
+    "ion_priority\030\n \001(\005\022Q\n\035inter_freq_neighbo"
+    "r_cell_list\030\013 \003(\0132*.rf_phreaker.protobuf"
+    ".rp_lte_neighbor_cell\022V\n\032inter_freq_blac"
+    "k_cell_list\030\014 \003(\01322.rf_phreaker.protobuf"
+    ".rp_lte_physical_cellid_range\"n\n\013rp_lte_"
+    "sib5\022_\n\034inter_freq_carrier_info_list\030\002 \003"
+    "(\01329.rf_phreaker.protobuf.rp_lte_inter_f"
+    "req_carrier_freq_info\"\307\001\n\030rp_lte_carrier"
+    "_freq_utra\022\030\n\020arfcn_value_utra\030\001 \001(\005\022\027\n\017"
+    "threshold_x_low\030\002 \001(\005\022\030\n\020threshold_x_hig"
+    "h\030\003 \001(\005\022\034\n\024threshold_x_low_q_r9\030\004 \001(\005\022\035\n"
+    "\025threshold_x_high_q_r9\030\005 \001(\005\022!\n\031cell_res"
+    "election_priority\030\006 \001(\005\"\265\001\n\013rp_lte_sib6\022"
+    "R\n\032carrier_freq_list_utra_fdd\030\002 \003(\0132..rf"
+    "_phreaker.protobuf.rp_lte_carrier_freq_u"
+    "tra\022R\n\032carrier_freq_list_utra_tdd\030\003 \003(\0132"
+    "..rf_phreaker.protobuf.rp_lte_carrier_fr"
+    "eq_utra\"v\n\032rp_lte_carrier_freqs_geran\022D\n"
+    "\016band_indicator\030\001 \001(\0162,.rf_phreaker.prot"
+    "obuf.rp_band_indicator_type\022\022\n\006arfcns\030\002 "
+    "\003(\005B\002\020\001\"p\n\030rp_lte_geran_common_info\022!\n\031c"
+    "ell_reselection_priority\030\001 \001(\005\022\030\n\020thresh"
+    "old_x_high\030\002 \001(\005\022\027\n\017threshold_x_low\030\003 \001("
+    "\005\"\257\001\n\037rp_lte_carrier_freqs_info_geran\022G\n"
+    "\rcarrier_freqs\030\001 \001(\01320.rf_phreaker.proto"
+    "buf.rp_lte_carrier_freqs_geran\022C\n\013common"
+    "_info\030\002 \001(\0132..rf_phreaker.protobuf.rp_lt"
+    "e_geran_common_info\"k\n\013rp_lte_sib7\022\\\n\035ca"
+    "rrier_freqs_info_list_geran\030\002 \003(\01325.rf_p"
+    "hreaker.protobuf.rp_lte_carrier_freqs_in"
+    "fo_geran\"n\n.rp_lte_neighbor_cells_per_ba"
+    "nd_class_cdma_2000\022\035\n\025arfcn_value_cdma_2"
+    "000\030\001 \001(\005\022\035\n\021physical_cell_ids\030\002 \003(\005B\002\020\001"
+    "\"\322\001\n\036rp_lte_neighbor_cell_cdma_2000\022D\n\004b"
+    "and\030\001 \001(\01626.rf_phreaker.protobuf.rp_lte_"
+    "band_class_cdma_2000_type\022j\n\034neighbor_ce"
+    "lls_per_freq_list\030\002 \003(\0132D.rf_phreaker.pr"
+    "otobuf.rp_lte_neighbor_cells_per_band_cl"
+    "ass_cdma_2000\"\200\001\n,rp_lte_cell_reselectio"
+    "n_parameters_cmda_2000\022P\n\022neighbor_cell_"
+    "list\030\001 \003(\01324.rf_phreaker.protobuf.rp_lte"
+    "_neighbor_cell_cdma_2000\"\310\001\n\013rp_lte_sib8"
+    "\022[\n\017parameters_hrpd\030\002 \001(\0132B.rf_phreaker."
+    "protobuf.rp_lte_cell_reselection_paramet"
+    "ers_cmda_2000\022\\\n\020parameters_1xrtt\030\003 \001(\0132"
+    "B.rf_phreaker.protobuf.rp_lte_cell_resel"
+    "ection_parameters_cmda_2000\"\242\003\n\016rp_lte_l"
+    "ayer_3\0229\n\013raw_layer_3\030\001 \003(\0132$.rf_phreake"
+    "r.protobuf.rp_raw_layer_3\022/\n\004sib1\030\002 \001(\0132"
+    "!.rf_phreaker.protobuf.rp_lte_sib1\022/\n\004si"
+    "b3\030\004 \001(\0132!.rf_phreaker.protobuf.rp_lte_s"
+    "ib3\022/\n\004sib4\030\005 \001(\0132!.rf_phreaker.protobuf"
+    ".rp_lte_sib4\022/\n\004sib5\030\006 \001(\0132!.rf_phreaker"
+    ".protobuf.rp_lte_sib5\022/\n\004sib6\030\007 \001(\0132!.rf"
+    "_phreaker.protobuf.rp_lte_sib6\022/\n\004sib7\030\010"
+    " \001(\0132!.rf_phreaker.protobuf.rp_lte_sib7\022"
+    "/\n\004sib8\030\t \001(\0132!.rf_phreaker.protobuf.rp_"
+    "lte_sib8\"\311\003\n\006rp_lte\022+\n\004base\030\001 \001(\0132\035.rf_p"
+    "hreaker.protobuf.rp_base\022\016\n\006earfcn\030\002 \001(\005"
+    "\022\?\n\016operating_band\030\003 \001(\0162\'.rf_phreaker.p"
+    "rotobuf.rp_operating_band\022\030\n\020physical_ce"
+    "ll_id\030\004 \001(\005\022\014\n\004rsrp\030\005 \001(\001\022\014\n\004rsrq\030\006 \001(\001\022"
+    "\014\n\004rssi\030\007 \001(\001\022\017\n\007psch_id\030\010 \001(\005\022\024\n\014psch_q"
+    "uality\030\t \001(\001\022\017\n\007ssch_id\030\n \001(\005\022\024\n\014ssch_qu"
+    "ality\030\013 \001(\001\022\024\n\014sync_quality\030\014 \001(\001\022\025\n\rcyc"
+    "lic_prefix\030\r \001(\005\022\031\n\021num_antenna_ports\030\016 "
+    "\001(\005\022\032\n\022downlink_bandwidth\030\017 \001(\005\022\024\n\014frame"
+    "_number\030\020 \001(\005\0225\n\007layer_3\030\021 \001(\0132$.rf_phre"
+    "aker.protobuf.rp_lte_layer_3\"g\n\rrp_lte_u"
+    "pdate\022+\n\004base\030\001 \001(\0132\035.rf_phreaker.protob"
+    "uf.rp_base\022)\n\003lte\030\002 \003(\0132\034.rf_phreaker.pr"
+    "otobuf.rp_lte\"\215\002\n\021rp_power_spectrum\022+\n\004b"
+    "ase\030\001 \001(\0132\035.rf_phreaker.protobuf.rp_base"
+    "\022\022\n\ndwell_time\030\002 \001(\003\022\025\n\rsampling_rate\030\003 "
+    "\001(\003\022\027\n\017start_frequency\030\004 \001(\003\022\025\n\rend_freq"
+    "uency\030\005 \001(\003\022\014\n\004span\030\006 \001(\003\022\025\n\rwindow_leng"
+    "th\030\007 \001(\005\022\023\n\013num_windows\030\010 \001(\005\022\020\n\010bin_siz"
+    "e\030\t \001(\001\022\021\n\tstep_size\030\n \001(\001\022\021\n\005power\030\013 \003("
+    "\001B\002\020\001\"r\n\023rp_power_adjustment\0225\n\004path\030\001 \001"
+    "(\0132\'.rf_phreaker.protobuf.rp_frequency_p"
+    "ath\022\021\n\tstep_size\030\002 \001(\003\022\021\n\005power\030\003 \003(\001B\002\020"
+    "\001\"\276\001\n\nrp_iq_data\022+\n\004base\030\001 \001(\0132\035.rf_phre"
+    "aker.protobuf.rp_base\022C\n\020power_adjustmen"
+    "t\030\002 \001(\0132).rf_phreaker.protobuf.rp_power_"
+    "adjustment\022\025\n\rsampling_rate\030\003 \001(\003\022\022\n\ndwe"
+    "ll_time\030\004 \001(\003\022\023\n\007samples\030\005 \003(\002B\002\020\001*\334\004\n\tr"
+    "p_status\022\020\n\014RP_STATUS_OK\020\000\022\035\n\031RP_STATUS_"
+    "NOT_INITIALIZED\020\001\022\037\n\033RP_STATUS_INVALID_P"
+    "ARAMETER\020\002\022!\n\035RP_STATUS_COMMUNICATION_ER"
+    "ROR\020\003\022 \n\034RP_STATUS_SCANNER_INIT_ERROR\020\004\022"
+    "!\n\035RP_STATUS_HARDWARE_INFO_ERROR\020\005\022\030\n\024RP"
+    "_STATUS_MISC_ERROR\020\006\022\033\n\027RP_STATUS_FILE_I"
+    "O_ERROR\020\007\022\034\n\030RP_STATUS_BLADE_RF_ERROR\020\010\022"
+    "\027\n\023RP_STATUS_IPP_ERROR\020\t\022\032\n\026RP_STATUS_FI"
+    "LTER_ERROR\020\n\022 \n\034RP_STATUS_GSM_ANALYSIS_E"
+    "RROR\020\013\022!\n\035RP_STATUS_UMTS_ANALYSIS_ERROR\020"
+    "\014\022 \n\034RP_STATUS_LTE_ANALYSIS_ERROR\020\r\022\036\n\032R"
+    "P_STATUS_PROCESSING_ERROR\020\016\022%\n!RP_STATUS"
+    "_GPS_COMMUNICATION_ERROR\020\017\022#\n\037RP_STATUS_"
+    "RF_PHREAKER_API_ERROR\020\020\022\033\n\027RP_STATUS_GEN"
+    "ERIC_ERROR\020\021\022\033\n\027RP_STATUS_UNKNOWN_ERROR\020"
+    "\022*\232\020\n\021rp_operating_band\022\032\n\026OPERATING_BAN"
+    "D_UNKNOWN\020\000\022\r\n\tGSM_T_380\020\000\022\r\n\tGSM_T_410\020"
+    "\001\022\013\n\007GSM_450\020\002\022\013\n\007GSM_480\020\003\022\013\n\007GSM_710\020\004"
+    "\022\013\n\007GSM_750\020\005\022\r\n\tGSM_T_810\020\006\022\013\n\007GSM_850\020"
+    "\007\022\r\n\tGSM_P_900\020\010\022\r\n\tGSM_E_900\020\t\022\r\n\tGSM_R"
+    "_900\020\n\022\016\n\nGSM_ER_900\020\013\022\r\n\tGSM_T_900\020\014\022\020\n"
+    "\014GSM_DCS_1800\020\r\022\020\n\014GSM_PCS_1900\020\016\022\031\n\025UMT"
+    "S_OPERATING_BAND_1\020\017\022\031\n\025UMTS_OPERATING_B"
+    "AND_2\020\020\022\031\n\025UMTS_OPERATING_BAND_3\020\021\022\031\n\025UM"
+    "TS_OPERATING_BAND_4\020\022\022\031\n\025UMTS_OPERATING_"
+    "BAND_5\020\023\022\031\n\025UMTS_OPERATING_BAND_6\020\024\022\031\n\025U"
+    "MTS_OPERATING_BAND_7\020\025\022\031\n\025UMTS_OPERATING"
+    "_BAND_8\020\026\022\031\n\025UMTS_OPERATING_BAND_9\020\027\022\032\n\026"
+    "UMTS_OPERATING_BAND_10\020\030\022\032\n\026UMTS_OPERATI"
+    "NG_BAND_11\020\031\022\032\n\026UMTS_OPERATING_BAND_12\020\032"
+    "\022\032\n\026UMTS_OPERATING_BAND_13\020\033\022\032\n\026UMTS_OPE"
+    "RATING_BAND_14\020\034\022\032\n\026UMTS_OPERATING_BAND_"
+    "19\020\035\022\032\n\026UMTS_OPERATING_BAND_20\020\036\022\032\n\026UMTS"
+    "_OPERATING_BAND_21\020\037\022\032\n\026UMTS_OPERATING_B"
+    "AND_22\020 \022\032\n\026UMTS_OPERATING_BAND_25\020!\022\032\n\026"
+    "UMTS_OPERATING_BAND_26\020\"\022\030\n\024LTE_OPERATIN"
+    "G_BAND_1\020#\022\030\n\024LTE_OPERATING_BAND_2\020$\022\030\n\024"
+    "LTE_OPERATING_BAND_3\020%\022\030\n\024LTE_OPERATING_"
+    "BAND_4\020&\022\030\n\024LTE_OPERATING_BAND_5\020\'\022\030\n\024LT"
+    "E_OPERATING_BAND_6\020(\022\030\n\024LTE_OPERATING_BA"
+    "ND_7\020)\022\030\n\024LTE_OPERATING_BAND_8\020*\022\030\n\024LTE_"
+    "OPERATING_BAND_9\020+\022\031\n\025LTE_OPERATING_BAND"
+    "_10\020,\022\031\n\025LTE_OPERATING_BAND_11\020-\022\031\n\025LTE_"
+    "OPERATING_BAND_12\020.\022\031\n\025LTE_OPERATING_BAN"
+    "D_13\020/\022\031\n\025LTE_OPERATING_BAND_14\0200\022\031\n\025LTE"
+    "_OPERATING_BAND_17\0201\022\031\n\025LTE_OPERATING_BA"
+    "ND_18\0202\022\031\n\025LTE_OPERATING_BAND_19\0203\022\031\n\025LT"
+    "E_OPERATING_BAND_20\0204\022\031\n\025LTE_OPERATING_B"
+    "AND_21\0205\022\031\n\025LTE_OPERATING_BAND_22\0206\022\031\n\025L"
+    "TE_OPERATING_BAND_23\0207\022\031\n\025LTE_OPERATING_"
+    "BAND_24\0208\022\031\n\025LTE_OPERATING_BAND_25\0209\022\031\n\025"
+    "LTE_OPERATING_BAND_26\020:\022\031\n\025LTE_OPERATING"
+    "_BAND_27\020;\022\031\n\025LTE_OPERATING_BAND_28\020<\022\031\n"
+    "\025LTE_OPERATING_BAND_29\020=\022\031\n\025LTE_OPERATIN"
+    "G_BAND_30\020>\022\031\n\025LTE_OPERATING_BAND_33\020\?\022\031"
+    "\n\025LTE_OPERATING_BAND_34\020@\022\031\n\025LTE_OPERATI"
+    "NG_BAND_35\020A\022\031\n\025LTE_OPERATING_BAND_36\020B\022"
+    "\031\n\025LTE_OPERATING_BAND_37\020C\022\031\n\025LTE_OPERAT"
+    "ING_BAND_38\020D\022\031\n\025LTE_OPERATING_BAND_39\020E"
+    "\022\031\n\025LTE_OPERATING_BAND_40\020F\022\031\n\025LTE_OPERA"
+    "TING_BAND_41\020G\022\031\n\025LTE_OPERATING_BAND_42\020"
+    "H\022\031\n\025LTE_OPERATING_BAND_43\020I\022\031\n\025LTE_OPER"
+    "ATING_BAND_44\020J\022\034\n\030FIRST_GSM_OPERATING_B"
+    "AND\020\000\022\033\n\027LAST_GSM_OPERATING_BAND\020\016\022\035\n\031FI"
+    "RST_UMTS_OPERATING_BAND\020\017\022\034\n\030LAST_UMTS_O"
+    "PERATING_BAND\020\"\022\034\n\030FIRST_LTE_OPERATING_B"
+    "AND\020#\022\033\n\027LAST_LTE_OPERATING_BAND\020J\032\002\020\001*b"
+    "\n\027rp_device_communication\022\020\n\014USB_HI_SPEE"
+    "D\020\000\022\023\n\017USB_SUPER_SPEED\020\001\022 \n\034UNKNOWN_DEVI"
+    "CE_COMMUNICATION\020\002*a\n\026rp_band_indicator_"
+    "type\022\025\n\021dcs_1800_was_used\020\000\022\025\n\021pcs_1900_"
+    "was_used\020\001\022\031\n\025unknown_band_was_used\020\002*\"\n"
+    "\016rp_duplex_type\022\007\n\003fdd\020\000\022\007\n\003tdd\020\001*\313\001\n\027rp"
+    "_utran_bandwidth_type\022\023\n\017utran_3_84_mcps"
+    "\020\000\022\023\n\017utran_1_24_mcps\020\001\022\020\n\014utran_2_mcps\020"
+    "\002\022\020\n\014utran_3_mcps\020\003\022\020\n\014utran_4_mcps\020\004\022\020\n"
+    "\014utran_5_mcps\020\005\022\020\n\014utran_6_mcps\020\006\022\020\n\014utr"
+    "an_7_mcps\020\007\022\026\n\022utran_default_mcps\020\000\032\002\020\001*"
+    "\302\001\n\030rp_eutran_bandwidth_type\022\031\n\025num_reso"
+    "urce_blocks_6\020\000\022\032\n\026num_resource_blocks_1"
+    "5\020\001\022\032\n\026num_resource_blocks_25\020\002\022\032\n\026num_r"
+    "esource_blocks_50\020\003\022\032\n\026num_resource_bloc"
+    "ks_75\020\004\022\033\n\027num_resource_blocks_100\020\005*\264\002\n"
+    "\017rp_lte_sib_type\022\014\n\010LTE_SIB1\020\000\022\014\n\010LTE_SI"
+    "B2\020\001\022\014\n\010LTE_SIB3\020\002\022\014\n\010LTE_SIB4\020\003\022\014\n\010LTE_"
+    "SIB5\020\004\022\014\n\010LTE_SIB6\020\005\022\014\n\010LTE_SIB7\020\006\022\014\n\010LT"
+    "E_SIB8\020\007\022\014\n\010LTE_SIB9\020\010\022\r\n\tLTE_SIB10\020\t\022\r\n"
+    "\tLTE_SIB11\020\n\022\022\n\016LTE_SIB12_V920\020\013\022\022\n\016LTE_"
+    "SIB13_V920\020\014\022\023\n\017LTE_SIB14_V1130\020\r\022\023\n\017LTE"
+    "_SIB15_V1130\020\016\022\023\n\017LTE_SIB16_V1130\020\017\022\016\n\nL"
+    "TE_SPARE2\020\020\022\016\n\nLTE_SPARE1\020\021*\201\003\n rp_lte_b"
+    "and_class_cdma_2000_type\022\007\n\003bc0\020\000\022\007\n\003bc1"
+    "\020\001\022\007\n\003bc2\020\002\022\007\n\003bc3\020\003\022\007\n\003bc4\020\004\022\007\n\003bc5\020\005\022\007"
+    "\n\003bc6\020\006\022\007\n\003bc7\020\007\022\007\n\003bc8\020\010\022\007\n\003bc9\020\t\022\010\n\004bc"
+    "10\020\n\022\010\n\004bc11\020\013\022\010\n\004bc12\020\014\022\010\n\004bc13\020\r\022\010\n\004bc"
+    "14\020\016\022\010\n\004bc15\020\017\022\010\n\004bc16\020\020\022\010\n\004bc17\020\021\022\r\n\tbc"
+    "18_v9a0\020\022\022\r\n\tbc19_v9a0\020\023\022\r\n\tbc20_v9a0\020\024\022"
+    "\r\n\tbc21_v9a0\020\025\022\013\n\007spare10\020\026\022\n\n\006spare9\020\027\022"
+    "\n\n\006spare8\020\030\022\n\n\006spare7\020\031\022\n\n\006spare6\020\032\022\n\n\006s"
+    "pare5\020\033\022\n\n\006spare4\020\034\022\n\n\006spare3\020\035\022\n\n\006spare"
+    "2\020\036\022\n\n\006spare1\020\037b\006proto3", 15903);
   ::google::protobuf::MessageFactory::InternalRegisterGeneratedFile(
     "rf_phreaker.proto", &protobuf_RegisterTypes);
   rp_update::default_instance_ = new rp_update();
@@ -2077,6 +2103,7 @@ void protobuf_AddDesc_rf_5fphreaker_2eproto() {
   rp_lte::default_instance_ = new rp_lte();
   rp_lte_update::default_instance_ = new rp_lte_update();
   rp_power_spectrum::default_instance_ = new rp_power_spectrum();
+  rp_power_adjustment::default_instance_ = new rp_power_adjustment();
   rp_iq_data::default_instance_ = new rp_iq_data();
   rp_update::default_instance_->InitAsDefaultInstance();
   rp_log::default_instance_->InitAsDefaultInstance();
@@ -2137,6 +2164,7 @@ void protobuf_AddDesc_rf_5fphreaker_2eproto() {
   rp_lte::default_instance_->InitAsDefaultInstance();
   rp_lte_update::default_instance_->InitAsDefaultInstance();
   rp_power_spectrum::default_instance_->InitAsDefaultInstance();
+  rp_power_adjustment::default_instance_->InitAsDefaultInstance();
   rp_iq_data::default_instance_->InitAsDefaultInstance();
   ::google::protobuf::internal::OnShutdown(&protobuf_ShutdownFile_rf_5fphreaker_2eproto);
 }
@@ -2421,19 +2449,6 @@ bool rp_lte_band_class_cdma_2000_type_IsValid(int value) {
   }
 }
 
-const ::google::protobuf::EnumDescriptor* rp_sample_format_type_descriptor() {
-  protobuf_AssignDescriptorsOnce();
-  return rp_sample_format_type_descriptor_;
-}
-bool rp_sample_format_type_IsValid(int value) {
-  switch(value) {
-    case 0:
-      return true;
-    default:
-      return false;
-  }
-}
-
 
 namespace {
 
@@ -2459,6 +2474,7 @@ const int rp_update::kWcdmaSweepFieldNumber;
 const int rp_update::kLteFullScanFieldNumber;
 const int rp_update::kLteSweepFieldNumber;
 const int rp_update::kPowerSpectrumFieldNumber;
+const int rp_update::kIqDataFieldNumber;
 #endif  // !defined(_MSC_VER) || _MSC_VER >= 1900
 
 rp_update::rp_update()
@@ -2480,6 +2496,7 @@ void rp_update::InitAsDefaultInstance() {
   rp_update_default_oneof_instance_->lte_full_scan_ = const_cast< ::rf_phreaker::protobuf::rp_lte_update*>(&::rf_phreaker::protobuf::rp_lte_update::default_instance());
   rp_update_default_oneof_instance_->lte_sweep_ = const_cast< ::rf_phreaker::protobuf::rp_lte_update*>(&::rf_phreaker::protobuf::rp_lte_update::default_instance());
   rp_update_default_oneof_instance_->power_spectrum_ = const_cast< ::rf_phreaker::protobuf::rp_power_spectrum*>(&::rf_phreaker::protobuf::rp_power_spectrum::default_instance());
+  rp_update_default_oneof_instance_->iq_data_ = const_cast< ::rf_phreaker::protobuf::rp_iq_data*>(&::rf_phreaker::protobuf::rp_iq_data::default_instance());
 }
 
 rp_update::rp_update(const rp_update& from)
@@ -2578,6 +2595,10 @@ void rp_update::clear_update() {
     }
     case kPowerSpectrum: {
       delete update_.power_spectrum_;
+      break;
+    }
+    case kIqData: {
+      delete update_.iq_data_;
       break;
     }
     case UPDATE_NOT_SET: {
@@ -2740,6 +2761,19 @@ bool rp_update::MergePartialFromCodedStream(
         } else {
           goto handle_unusual;
         }
+        if (input->ExpectTag(98)) goto parse_iq_data;
+        break;
+      }
+
+      // optional .rf_phreaker.protobuf.rp_iq_data iq_data = 12;
+      case 12: {
+        if (tag == 98) {
+         parse_iq_data:
+          DO_(::google::protobuf::internal::WireFormatLite::ReadMessageNoVirtual(
+               input, mutable_iq_data()));
+        } else {
+          goto handle_unusual;
+        }
         if (input->ExpectAtEnd()) goto success;
         break;
       }
@@ -2834,6 +2868,12 @@ void rp_update::SerializeWithCachedSizes(
       11, *update_.power_spectrum_, output);
   }
 
+  // optional .rf_phreaker.protobuf.rp_iq_data iq_data = 12;
+  if (has_iq_data()) {
+    ::google::protobuf::internal::WireFormatLite::WriteMessageMaybeToArray(
+      12, *update_.iq_data_, output);
+  }
+
   // @@protoc_insertion_point(serialize_end:rf_phreaker.protobuf.rp_update)
 }
 
@@ -2915,6 +2955,13 @@ void rp_update::SerializeWithCachedSizes(
     target = ::google::protobuf::internal::WireFormatLite::
       WriteMessageNoVirtualToArray(
         11, *update_.power_spectrum_, target);
+  }
+
+  // optional .rf_phreaker.protobuf.rp_iq_data iq_data = 12;
+  if (has_iq_data()) {
+    target = ::google::protobuf::internal::WireFormatLite::
+      WriteMessageNoVirtualToArray(
+        12, *update_.iq_data_, target);
   }
 
   // @@protoc_insertion_point(serialize_to_array_end:rf_phreaker.protobuf.rp_update)
@@ -3002,6 +3049,13 @@ int rp_update::ByteSize() const {
           *update_.power_spectrum_);
       break;
     }
+    // optional .rf_phreaker.protobuf.rp_iq_data iq_data = 12;
+    case kIqData: {
+      total_size += 1 +
+        ::google::protobuf::internal::WireFormatLite::MessageSizeNoVirtual(
+          *update_.iq_data_);
+      break;
+    }
     case UPDATE_NOT_SET: {
       break;
     }
@@ -3069,6 +3123,10 @@ void rp_update::MergeFrom(const rp_update& from) {
     }
     case kPowerSpectrum: {
       mutable_power_spectrum()->::rf_phreaker::protobuf::rp_power_spectrum::MergeFrom(from.power_spectrum());
+      break;
+    }
+    case kIqData: {
+      mutable_iq_data()->::rf_phreaker::protobuf::rp_iq_data::MergeFrom(from.iq_data());
       break;
     }
     case UPDATE_NOT_SET: {
@@ -3631,6 +3689,53 @@ void rp_update::set_allocated_power_spectrum(::rf_phreaker::protobuf::rp_power_s
     update_.power_spectrum_ = power_spectrum;
   }
   // @@protoc_insertion_point(field_set_allocated:rf_phreaker.protobuf.rp_update.power_spectrum)
+}
+
+// optional .rf_phreaker.protobuf.rp_iq_data iq_data = 12;
+bool rp_update::has_iq_data() const {
+  return update_case() == kIqData;
+}
+void rp_update::set_has_iq_data() {
+  _oneof_case_[0] = kIqData;
+}
+void rp_update::clear_iq_data() {
+  if (has_iq_data()) {
+    delete update_.iq_data_;
+    clear_has_update();
+  }
+}
+ const ::rf_phreaker::protobuf::rp_iq_data& rp_update::iq_data() const {
+  // @@protoc_insertion_point(field_get:rf_phreaker.protobuf.rp_update.iq_data)
+  return has_iq_data()
+      ? *update_.iq_data_
+      : ::rf_phreaker::protobuf::rp_iq_data::default_instance();
+}
+::rf_phreaker::protobuf::rp_iq_data* rp_update::mutable_iq_data() {
+  if (!has_iq_data()) {
+    clear_update();
+    set_has_iq_data();
+    update_.iq_data_ = new ::rf_phreaker::protobuf::rp_iq_data;
+  }
+  // @@protoc_insertion_point(field_mutable:rf_phreaker.protobuf.rp_update.iq_data)
+  return update_.iq_data_;
+}
+::rf_phreaker::protobuf::rp_iq_data* rp_update::release_iq_data() {
+  if (has_iq_data()) {
+    clear_has_update();
+    ::rf_phreaker::protobuf::rp_iq_data* temp = update_.iq_data_;
+    update_.iq_data_ = NULL;
+    return temp;
+  } else {
+    return NULL;
+  }
+}
+void rp_update::set_allocated_iq_data(::rf_phreaker::protobuf::rp_iq_data* iq_data) {
+  clear_update();
+  if (iq_data) {
+    set_has_iq_data();
+    update_.iq_data_ = iq_data;
+  }
+  // @@protoc_insertion_point(field_set_allocated:rf_phreaker.protobuf.rp_update.iq_data)
 }
 
 bool rp_update::has_update() const {
@@ -29602,10 +29707,406 @@ rp_power_spectrum::mutable_power() {
 // ===================================================================
 
 #if !defined(_MSC_VER) || _MSC_VER >= 1900
+const int rp_power_adjustment::kPathFieldNumber;
+const int rp_power_adjustment::kStepSizeFieldNumber;
+const int rp_power_adjustment::kPowerFieldNumber;
+#endif  // !defined(_MSC_VER) || _MSC_VER >= 1900
+
+rp_power_adjustment::rp_power_adjustment()
+  : ::google::protobuf::Message(), _internal_metadata_(NULL) {
+  SharedCtor();
+  // @@protoc_insertion_point(constructor:rf_phreaker.protobuf.rp_power_adjustment)
+}
+
+void rp_power_adjustment::InitAsDefaultInstance() {
+  _is_default_instance_ = true;
+  path_ = const_cast< ::rf_phreaker::protobuf::rp_frequency_path*>(&::rf_phreaker::protobuf::rp_frequency_path::default_instance());
+}
+
+rp_power_adjustment::rp_power_adjustment(const rp_power_adjustment& from)
+  : ::google::protobuf::Message(),
+    _internal_metadata_(NULL) {
+  SharedCtor();
+  MergeFrom(from);
+  // @@protoc_insertion_point(copy_constructor:rf_phreaker.protobuf.rp_power_adjustment)
+}
+
+void rp_power_adjustment::SharedCtor() {
+    _is_default_instance_ = false;
+  _cached_size_ = 0;
+  path_ = NULL;
+  step_size_ = GOOGLE_LONGLONG(0);
+}
+
+rp_power_adjustment::~rp_power_adjustment() {
+  // @@protoc_insertion_point(destructor:rf_phreaker.protobuf.rp_power_adjustment)
+  SharedDtor();
+}
+
+void rp_power_adjustment::SharedDtor() {
+  if (this != default_instance_) {
+    delete path_;
+  }
+}
+
+void rp_power_adjustment::SetCachedSize(int size) const {
+  GOOGLE_SAFE_CONCURRENT_WRITES_BEGIN();
+  _cached_size_ = size;
+  GOOGLE_SAFE_CONCURRENT_WRITES_END();
+}
+const ::google::protobuf::Descriptor* rp_power_adjustment::descriptor() {
+  protobuf_AssignDescriptorsOnce();
+  return rp_power_adjustment_descriptor_;
+}
+
+const rp_power_adjustment& rp_power_adjustment::default_instance() {
+  if (default_instance_ == NULL) protobuf_AddDesc_rf_5fphreaker_2eproto();
+  return *default_instance_;
+}
+
+rp_power_adjustment* rp_power_adjustment::default_instance_ = NULL;
+
+rp_power_adjustment* rp_power_adjustment::New(::google::protobuf::Arena* arena) const {
+  rp_power_adjustment* n = new rp_power_adjustment;
+  if (arena != NULL) {
+    arena->Own(n);
+  }
+  return n;
+}
+
+void rp_power_adjustment::Clear() {
+  if (GetArenaNoVirtual() == NULL && path_ != NULL) delete path_;
+  path_ = NULL;
+  step_size_ = GOOGLE_LONGLONG(0);
+  power_.Clear();
+}
+
+bool rp_power_adjustment::MergePartialFromCodedStream(
+    ::google::protobuf::io::CodedInputStream* input) {
+#define DO_(EXPRESSION) if (!(EXPRESSION)) goto failure
+  ::google::protobuf::uint32 tag;
+  // @@protoc_insertion_point(parse_start:rf_phreaker.protobuf.rp_power_adjustment)
+  for (;;) {
+    ::std::pair< ::google::protobuf::uint32, bool> p = input->ReadTagWithCutoff(127);
+    tag = p.first;
+    if (!p.second) goto handle_unusual;
+    switch (::google::protobuf::internal::WireFormatLite::GetTagFieldNumber(tag)) {
+      // optional .rf_phreaker.protobuf.rp_frequency_path path = 1;
+      case 1: {
+        if (tag == 10) {
+          DO_(::google::protobuf::internal::WireFormatLite::ReadMessageNoVirtual(
+               input, mutable_path()));
+        } else {
+          goto handle_unusual;
+        }
+        if (input->ExpectTag(16)) goto parse_step_size;
+        break;
+      }
+
+      // optional int64 step_size = 2;
+      case 2: {
+        if (tag == 16) {
+         parse_step_size:
+          DO_((::google::protobuf::internal::WireFormatLite::ReadPrimitive<
+                   ::google::protobuf::int64, ::google::protobuf::internal::WireFormatLite::TYPE_INT64>(
+                 input, &step_size_)));
+
+        } else {
+          goto handle_unusual;
+        }
+        if (input->ExpectTag(26)) goto parse_power;
+        break;
+      }
+
+      // repeated double power = 3 [packed = true];
+      case 3: {
+        if (tag == 26) {
+         parse_power:
+          DO_((::google::protobuf::internal::WireFormatLite::ReadPackedPrimitive<
+                   double, ::google::protobuf::internal::WireFormatLite::TYPE_DOUBLE>(
+                 input, this->mutable_power())));
+        } else if (tag == 25) {
+          DO_((::google::protobuf::internal::WireFormatLite::ReadRepeatedPrimitiveNoInline<
+                   double, ::google::protobuf::internal::WireFormatLite::TYPE_DOUBLE>(
+                 1, 26, input, this->mutable_power())));
+        } else {
+          goto handle_unusual;
+        }
+        if (input->ExpectAtEnd()) goto success;
+        break;
+      }
+
+      default: {
+      handle_unusual:
+        if (tag == 0 ||
+            ::google::protobuf::internal::WireFormatLite::GetTagWireType(tag) ==
+            ::google::protobuf::internal::WireFormatLite::WIRETYPE_END_GROUP) {
+          goto success;
+        }
+        DO_(::google::protobuf::internal::WireFormatLite::SkipField(input, tag));
+        break;
+      }
+    }
+  }
+success:
+  // @@protoc_insertion_point(parse_success:rf_phreaker.protobuf.rp_power_adjustment)
+  return true;
+failure:
+  // @@protoc_insertion_point(parse_failure:rf_phreaker.protobuf.rp_power_adjustment)
+  return false;
+#undef DO_
+}
+
+void rp_power_adjustment::SerializeWithCachedSizes(
+    ::google::protobuf::io::CodedOutputStream* output) const {
+  // @@protoc_insertion_point(serialize_start:rf_phreaker.protobuf.rp_power_adjustment)
+  // optional .rf_phreaker.protobuf.rp_frequency_path path = 1;
+  if (this->has_path()) {
+    ::google::protobuf::internal::WireFormatLite::WriteMessageMaybeToArray(
+      1, *this->path_, output);
+  }
+
+  // optional int64 step_size = 2;
+  if (this->step_size() != 0) {
+    ::google::protobuf::internal::WireFormatLite::WriteInt64(2, this->step_size(), output);
+  }
+
+  // repeated double power = 3 [packed = true];
+  if (this->power_size() > 0) {
+    ::google::protobuf::internal::WireFormatLite::WriteTag(3, ::google::protobuf::internal::WireFormatLite::WIRETYPE_LENGTH_DELIMITED, output);
+    output->WriteVarint32(_power_cached_byte_size_);
+  }
+  for (int i = 0; i < this->power_size(); i++) {
+    ::google::protobuf::internal::WireFormatLite::WriteDoubleNoTag(
+      this->power(i), output);
+  }
+
+  // @@protoc_insertion_point(serialize_end:rf_phreaker.protobuf.rp_power_adjustment)
+}
+
+::google::protobuf::uint8* rp_power_adjustment::SerializeWithCachedSizesToArray(
+    ::google::protobuf::uint8* target) const {
+  // @@protoc_insertion_point(serialize_to_array_start:rf_phreaker.protobuf.rp_power_adjustment)
+  // optional .rf_phreaker.protobuf.rp_frequency_path path = 1;
+  if (this->has_path()) {
+    target = ::google::protobuf::internal::WireFormatLite::
+      WriteMessageNoVirtualToArray(
+        1, *this->path_, target);
+  }
+
+  // optional int64 step_size = 2;
+  if (this->step_size() != 0) {
+    target = ::google::protobuf::internal::WireFormatLite::WriteInt64ToArray(2, this->step_size(), target);
+  }
+
+  // repeated double power = 3 [packed = true];
+  if (this->power_size() > 0) {
+    target = ::google::protobuf::internal::WireFormatLite::WriteTagToArray(
+      3,
+      ::google::protobuf::internal::WireFormatLite::WIRETYPE_LENGTH_DELIMITED,
+      target);
+    target = ::google::protobuf::io::CodedOutputStream::WriteVarint32ToArray(
+      _power_cached_byte_size_, target);
+  }
+  for (int i = 0; i < this->power_size(); i++) {
+    target = ::google::protobuf::internal::WireFormatLite::
+      WriteDoubleNoTagToArray(this->power(i), target);
+  }
+
+  // @@protoc_insertion_point(serialize_to_array_end:rf_phreaker.protobuf.rp_power_adjustment)
+  return target;
+}
+
+int rp_power_adjustment::ByteSize() const {
+  int total_size = 0;
+
+  // optional .rf_phreaker.protobuf.rp_frequency_path path = 1;
+  if (this->has_path()) {
+    total_size += 1 +
+      ::google::protobuf::internal::WireFormatLite::MessageSizeNoVirtual(
+        *this->path_);
+  }
+
+  // optional int64 step_size = 2;
+  if (this->step_size() != 0) {
+    total_size += 1 +
+      ::google::protobuf::internal::WireFormatLite::Int64Size(
+        this->step_size());
+  }
+
+  // repeated double power = 3 [packed = true];
+  {
+    int data_size = 0;
+    data_size = 8 * this->power_size();
+    if (data_size > 0) {
+      total_size += 1 +
+        ::google::protobuf::internal::WireFormatLite::Int32Size(data_size);
+    }
+    GOOGLE_SAFE_CONCURRENT_WRITES_BEGIN();
+    _power_cached_byte_size_ = data_size;
+    GOOGLE_SAFE_CONCURRENT_WRITES_END();
+    total_size += data_size;
+  }
+
+  GOOGLE_SAFE_CONCURRENT_WRITES_BEGIN();
+  _cached_size_ = total_size;
+  GOOGLE_SAFE_CONCURRENT_WRITES_END();
+  return total_size;
+}
+
+void rp_power_adjustment::MergeFrom(const ::google::protobuf::Message& from) {
+  if (GOOGLE_PREDICT_FALSE(&from == this)) MergeFromFail(__LINE__);
+  const rp_power_adjustment* source = 
+      ::google::protobuf::internal::DynamicCastToGenerated<const rp_power_adjustment>(
+          &from);
+  if (source == NULL) {
+    ::google::protobuf::internal::ReflectionOps::Merge(from, this);
+  } else {
+    MergeFrom(*source);
+  }
+}
+
+void rp_power_adjustment::MergeFrom(const rp_power_adjustment& from) {
+  if (GOOGLE_PREDICT_FALSE(&from == this)) MergeFromFail(__LINE__);
+  power_.MergeFrom(from.power_);
+  if (from.has_path()) {
+    mutable_path()->::rf_phreaker::protobuf::rp_frequency_path::MergeFrom(from.path());
+  }
+  if (from.step_size() != 0) {
+    set_step_size(from.step_size());
+  }
+}
+
+void rp_power_adjustment::CopyFrom(const ::google::protobuf::Message& from) {
+  if (&from == this) return;
+  Clear();
+  MergeFrom(from);
+}
+
+void rp_power_adjustment::CopyFrom(const rp_power_adjustment& from) {
+  if (&from == this) return;
+  Clear();
+  MergeFrom(from);
+}
+
+bool rp_power_adjustment::IsInitialized() const {
+
+  return true;
+}
+
+void rp_power_adjustment::Swap(rp_power_adjustment* other) {
+  if (other == this) return;
+  InternalSwap(other);
+}
+void rp_power_adjustment::InternalSwap(rp_power_adjustment* other) {
+  std::swap(path_, other->path_);
+  std::swap(step_size_, other->step_size_);
+  power_.UnsafeArenaSwap(&other->power_);
+  _internal_metadata_.Swap(&other->_internal_metadata_);
+  std::swap(_cached_size_, other->_cached_size_);
+}
+
+::google::protobuf::Metadata rp_power_adjustment::GetMetadata() const {
+  protobuf_AssignDescriptorsOnce();
+  ::google::protobuf::Metadata metadata;
+  metadata.descriptor = rp_power_adjustment_descriptor_;
+  metadata.reflection = rp_power_adjustment_reflection_;
+  return metadata;
+}
+
+#if PROTOBUF_INLINE_NOT_IN_HEADERS
+// rp_power_adjustment
+
+// optional .rf_phreaker.protobuf.rp_frequency_path path = 1;
+bool rp_power_adjustment::has_path() const {
+  return !_is_default_instance_ && path_ != NULL;
+}
+void rp_power_adjustment::clear_path() {
+  if (GetArenaNoVirtual() == NULL && path_ != NULL) delete path_;
+  path_ = NULL;
+}
+const ::rf_phreaker::protobuf::rp_frequency_path& rp_power_adjustment::path() const {
+  // @@protoc_insertion_point(field_get:rf_phreaker.protobuf.rp_power_adjustment.path)
+  return path_ != NULL ? *path_ : *default_instance_->path_;
+}
+::rf_phreaker::protobuf::rp_frequency_path* rp_power_adjustment::mutable_path() {
+  
+  if (path_ == NULL) {
+    path_ = new ::rf_phreaker::protobuf::rp_frequency_path;
+  }
+  // @@protoc_insertion_point(field_mutable:rf_phreaker.protobuf.rp_power_adjustment.path)
+  return path_;
+}
+::rf_phreaker::protobuf::rp_frequency_path* rp_power_adjustment::release_path() {
+  
+  ::rf_phreaker::protobuf::rp_frequency_path* temp = path_;
+  path_ = NULL;
+  return temp;
+}
+void rp_power_adjustment::set_allocated_path(::rf_phreaker::protobuf::rp_frequency_path* path) {
+  delete path_;
+  path_ = path;
+  if (path) {
+    
+  } else {
+    
+  }
+  // @@protoc_insertion_point(field_set_allocated:rf_phreaker.protobuf.rp_power_adjustment.path)
+}
+
+// optional int64 step_size = 2;
+void rp_power_adjustment::clear_step_size() {
+  step_size_ = GOOGLE_LONGLONG(0);
+}
+ ::google::protobuf::int64 rp_power_adjustment::step_size() const {
+  // @@protoc_insertion_point(field_get:rf_phreaker.protobuf.rp_power_adjustment.step_size)
+  return step_size_;
+}
+ void rp_power_adjustment::set_step_size(::google::protobuf::int64 value) {
+  
+  step_size_ = value;
+  // @@protoc_insertion_point(field_set:rf_phreaker.protobuf.rp_power_adjustment.step_size)
+}
+
+// repeated double power = 3 [packed = true];
+int rp_power_adjustment::power_size() const {
+  return power_.size();
+}
+void rp_power_adjustment::clear_power() {
+  power_.Clear();
+}
+ double rp_power_adjustment::power(int index) const {
+  // @@protoc_insertion_point(field_get:rf_phreaker.protobuf.rp_power_adjustment.power)
+  return power_.Get(index);
+}
+ void rp_power_adjustment::set_power(int index, double value) {
+  power_.Set(index, value);
+  // @@protoc_insertion_point(field_set:rf_phreaker.protobuf.rp_power_adjustment.power)
+}
+ void rp_power_adjustment::add_power(double value) {
+  power_.Add(value);
+  // @@protoc_insertion_point(field_add:rf_phreaker.protobuf.rp_power_adjustment.power)
+}
+ const ::google::protobuf::RepeatedField< double >&
+rp_power_adjustment::power() const {
+  // @@protoc_insertion_point(field_list:rf_phreaker.protobuf.rp_power_adjustment.power)
+  return power_;
+}
+ ::google::protobuf::RepeatedField< double >*
+rp_power_adjustment::mutable_power() {
+  // @@protoc_insertion_point(field_mutable_list:rf_phreaker.protobuf.rp_power_adjustment.power)
+  return &power_;
+}
+
+#endif  // PROTOBUF_INLINE_NOT_IN_HEADERS
+
+// ===================================================================
+
+#if !defined(_MSC_VER) || _MSC_VER >= 1900
 const int rp_iq_data::kBaseFieldNumber;
 const int rp_iq_data::kPowerAdjustmentFieldNumber;
-const int rp_iq_data::kSampleFormatFieldNumber;
-const int rp_iq_data::kNumSamplesFieldNumber;
+const int rp_iq_data::kSamplingRateFieldNumber;
+const int rp_iq_data::kDwellTimeFieldNumber;
 const int rp_iq_data::kSamplesFieldNumber;
 #endif  // !defined(_MSC_VER) || _MSC_VER >= 1900
 
@@ -29618,6 +30119,7 @@ rp_iq_data::rp_iq_data()
 void rp_iq_data::InitAsDefaultInstance() {
   _is_default_instance_ = true;
   base_ = const_cast< ::rf_phreaker::protobuf::rp_base*>(&::rf_phreaker::protobuf::rp_base::default_instance());
+  power_adjustment_ = const_cast< ::rf_phreaker::protobuf::rp_power_adjustment*>(&::rf_phreaker::protobuf::rp_power_adjustment::default_instance());
 }
 
 rp_iq_data::rp_iq_data(const rp_iq_data& from)
@@ -29632,9 +30134,9 @@ void rp_iq_data::SharedCtor() {
     _is_default_instance_ = false;
   _cached_size_ = 0;
   base_ = NULL;
-  power_adjustment_ = 0;
-  sample_format_ = 0;
-  num_samples_ = GOOGLE_LONGLONG(0);
+  power_adjustment_ = NULL;
+  sampling_rate_ = GOOGLE_LONGLONG(0);
+  dwell_time_ = GOOGLE_LONGLONG(0);
 }
 
 rp_iq_data::~rp_iq_data() {
@@ -29645,6 +30147,7 @@ rp_iq_data::~rp_iq_data() {
 void rp_iq_data::SharedDtor() {
   if (this != default_instance_) {
     delete base_;
+    delete power_adjustment_;
   }
 }
 
@@ -29682,10 +30185,11 @@ void rp_iq_data::Clear() {
            ZR_HELPER_(last) - ZR_HELPER_(first) + sizeof(last));\
 } while (0)
 
-  ZR_(power_adjustment_, num_samples_);
+  ZR_(sampling_rate_, dwell_time_);
   if (GetArenaNoVirtual() == NULL && base_ != NULL) delete base_;
   base_ = NULL;
-  sample_format_ = 0;
+  if (GetArenaNoVirtual() == NULL && power_adjustment_ != NULL) delete power_adjustment_;
+  power_adjustment_ = NULL;
 
 #undef ZR_HELPER_
 #undef ZR_
@@ -29711,48 +30215,45 @@ bool rp_iq_data::MergePartialFromCodedStream(
         } else {
           goto handle_unusual;
         }
-        if (input->ExpectTag(17)) goto parse_power_adjustment;
+        if (input->ExpectTag(18)) goto parse_power_adjustment;
         break;
       }
 
-      // optional double power_adjustment = 2;
+      // optional .rf_phreaker.protobuf.rp_power_adjustment power_adjustment = 2;
       case 2: {
-        if (tag == 17) {
+        if (tag == 18) {
          parse_power_adjustment:
-          DO_((::google::protobuf::internal::WireFormatLite::ReadPrimitive<
-                   double, ::google::protobuf::internal::WireFormatLite::TYPE_DOUBLE>(
-                 input, &power_adjustment_)));
-
+          DO_(::google::protobuf::internal::WireFormatLite::ReadMessageNoVirtual(
+               input, mutable_power_adjustment()));
         } else {
           goto handle_unusual;
         }
-        if (input->ExpectTag(24)) goto parse_sample_format;
+        if (input->ExpectTag(24)) goto parse_sampling_rate;
         break;
       }
 
-      // optional .rf_phreaker.protobuf.rp_sample_format_type sample_format = 3;
+      // optional int64 sampling_rate = 3;
       case 3: {
         if (tag == 24) {
-         parse_sample_format:
-          int value;
+         parse_sampling_rate:
           DO_((::google::protobuf::internal::WireFormatLite::ReadPrimitive<
-                   int, ::google::protobuf::internal::WireFormatLite::TYPE_ENUM>(
-                 input, &value)));
-          set_sample_format(static_cast< ::rf_phreaker::protobuf::rp_sample_format_type >(value));
+                   ::google::protobuf::int64, ::google::protobuf::internal::WireFormatLite::TYPE_INT64>(
+                 input, &sampling_rate_)));
+
         } else {
           goto handle_unusual;
         }
-        if (input->ExpectTag(32)) goto parse_num_samples;
+        if (input->ExpectTag(32)) goto parse_dwell_time;
         break;
       }
 
-      // optional int64 num_samples = 4;
+      // optional int64 dwell_time = 4;
       case 4: {
         if (tag == 32) {
-         parse_num_samples:
+         parse_dwell_time:
           DO_((::google::protobuf::internal::WireFormatLite::ReadPrimitive<
                    ::google::protobuf::int64, ::google::protobuf::internal::WireFormatLite::TYPE_INT64>(
-                 input, &num_samples_)));
+                 input, &dwell_time_)));
 
         } else {
           goto handle_unusual;
@@ -29809,20 +30310,20 @@ void rp_iq_data::SerializeWithCachedSizes(
       1, *this->base_, output);
   }
 
-  // optional double power_adjustment = 2;
-  if (this->power_adjustment() != 0) {
-    ::google::protobuf::internal::WireFormatLite::WriteDouble(2, this->power_adjustment(), output);
+  // optional .rf_phreaker.protobuf.rp_power_adjustment power_adjustment = 2;
+  if (this->has_power_adjustment()) {
+    ::google::protobuf::internal::WireFormatLite::WriteMessageMaybeToArray(
+      2, *this->power_adjustment_, output);
   }
 
-  // optional .rf_phreaker.protobuf.rp_sample_format_type sample_format = 3;
-  if (this->sample_format() != 0) {
-    ::google::protobuf::internal::WireFormatLite::WriteEnum(
-      3, this->sample_format(), output);
+  // optional int64 sampling_rate = 3;
+  if (this->sampling_rate() != 0) {
+    ::google::protobuf::internal::WireFormatLite::WriteInt64(3, this->sampling_rate(), output);
   }
 
-  // optional int64 num_samples = 4;
-  if (this->num_samples() != 0) {
-    ::google::protobuf::internal::WireFormatLite::WriteInt64(4, this->num_samples(), output);
+  // optional int64 dwell_time = 4;
+  if (this->dwell_time() != 0) {
+    ::google::protobuf::internal::WireFormatLite::WriteInt64(4, this->dwell_time(), output);
   }
 
   // repeated float samples = 5 [packed = true];
@@ -29848,20 +30349,21 @@ void rp_iq_data::SerializeWithCachedSizes(
         1, *this->base_, target);
   }
 
-  // optional double power_adjustment = 2;
-  if (this->power_adjustment() != 0) {
-    target = ::google::protobuf::internal::WireFormatLite::WriteDoubleToArray(2, this->power_adjustment(), target);
+  // optional .rf_phreaker.protobuf.rp_power_adjustment power_adjustment = 2;
+  if (this->has_power_adjustment()) {
+    target = ::google::protobuf::internal::WireFormatLite::
+      WriteMessageNoVirtualToArray(
+        2, *this->power_adjustment_, target);
   }
 
-  // optional .rf_phreaker.protobuf.rp_sample_format_type sample_format = 3;
-  if (this->sample_format() != 0) {
-    target = ::google::protobuf::internal::WireFormatLite::WriteEnumToArray(
-      3, this->sample_format(), target);
+  // optional int64 sampling_rate = 3;
+  if (this->sampling_rate() != 0) {
+    target = ::google::protobuf::internal::WireFormatLite::WriteInt64ToArray(3, this->sampling_rate(), target);
   }
 
-  // optional int64 num_samples = 4;
-  if (this->num_samples() != 0) {
-    target = ::google::protobuf::internal::WireFormatLite::WriteInt64ToArray(4, this->num_samples(), target);
+  // optional int64 dwell_time = 4;
+  if (this->dwell_time() != 0) {
+    target = ::google::protobuf::internal::WireFormatLite::WriteInt64ToArray(4, this->dwell_time(), target);
   }
 
   // repeated float samples = 5 [packed = true];
@@ -29892,22 +30394,25 @@ int rp_iq_data::ByteSize() const {
         *this->base_);
   }
 
-  // optional double power_adjustment = 2;
-  if (this->power_adjustment() != 0) {
-    total_size += 1 + 8;
-  }
-
-  // optional .rf_phreaker.protobuf.rp_sample_format_type sample_format = 3;
-  if (this->sample_format() != 0) {
+  // optional .rf_phreaker.protobuf.rp_power_adjustment power_adjustment = 2;
+  if (this->has_power_adjustment()) {
     total_size += 1 +
-      ::google::protobuf::internal::WireFormatLite::EnumSize(this->sample_format());
+      ::google::protobuf::internal::WireFormatLite::MessageSizeNoVirtual(
+        *this->power_adjustment_);
   }
 
-  // optional int64 num_samples = 4;
-  if (this->num_samples() != 0) {
+  // optional int64 sampling_rate = 3;
+  if (this->sampling_rate() != 0) {
     total_size += 1 +
       ::google::protobuf::internal::WireFormatLite::Int64Size(
-        this->num_samples());
+        this->sampling_rate());
+  }
+
+  // optional int64 dwell_time = 4;
+  if (this->dwell_time() != 0) {
+    total_size += 1 +
+      ::google::protobuf::internal::WireFormatLite::Int64Size(
+        this->dwell_time());
   }
 
   // repeated float samples = 5 [packed = true];
@@ -29948,14 +30453,14 @@ void rp_iq_data::MergeFrom(const rp_iq_data& from) {
   if (from.has_base()) {
     mutable_base()->::rf_phreaker::protobuf::rp_base::MergeFrom(from.base());
   }
-  if (from.power_adjustment() != 0) {
-    set_power_adjustment(from.power_adjustment());
+  if (from.has_power_adjustment()) {
+    mutable_power_adjustment()->::rf_phreaker::protobuf::rp_power_adjustment::MergeFrom(from.power_adjustment());
   }
-  if (from.sample_format() != 0) {
-    set_sample_format(from.sample_format());
+  if (from.sampling_rate() != 0) {
+    set_sampling_rate(from.sampling_rate());
   }
-  if (from.num_samples() != 0) {
-    set_num_samples(from.num_samples());
+  if (from.dwell_time() != 0) {
+    set_dwell_time(from.dwell_time());
   }
 }
 
@@ -29983,8 +30488,8 @@ void rp_iq_data::Swap(rp_iq_data* other) {
 void rp_iq_data::InternalSwap(rp_iq_data* other) {
   std::swap(base_, other->base_);
   std::swap(power_adjustment_, other->power_adjustment_);
-  std::swap(sample_format_, other->sample_format_);
-  std::swap(num_samples_, other->num_samples_);
+  std::swap(sampling_rate_, other->sampling_rate_);
+  std::swap(dwell_time_, other->dwell_time_);
   samples_.UnsafeArenaSwap(&other->samples_);
   _internal_metadata_.Swap(&other->_internal_metadata_);
   std::swap(_cached_size_, other->_cached_size_);
@@ -30038,46 +30543,69 @@ void rp_iq_data::set_allocated_base(::rf_phreaker::protobuf::rp_base* base) {
   // @@protoc_insertion_point(field_set_allocated:rf_phreaker.protobuf.rp_iq_data.base)
 }
 
-// optional double power_adjustment = 2;
-void rp_iq_data::clear_power_adjustment() {
-  power_adjustment_ = 0;
+// optional .rf_phreaker.protobuf.rp_power_adjustment power_adjustment = 2;
+bool rp_iq_data::has_power_adjustment() const {
+  return !_is_default_instance_ && power_adjustment_ != NULL;
 }
- double rp_iq_data::power_adjustment() const {
+void rp_iq_data::clear_power_adjustment() {
+  if (GetArenaNoVirtual() == NULL && power_adjustment_ != NULL) delete power_adjustment_;
+  power_adjustment_ = NULL;
+}
+const ::rf_phreaker::protobuf::rp_power_adjustment& rp_iq_data::power_adjustment() const {
   // @@protoc_insertion_point(field_get:rf_phreaker.protobuf.rp_iq_data.power_adjustment)
+  return power_adjustment_ != NULL ? *power_adjustment_ : *default_instance_->power_adjustment_;
+}
+::rf_phreaker::protobuf::rp_power_adjustment* rp_iq_data::mutable_power_adjustment() {
+  
+  if (power_adjustment_ == NULL) {
+    power_adjustment_ = new ::rf_phreaker::protobuf::rp_power_adjustment;
+  }
+  // @@protoc_insertion_point(field_mutable:rf_phreaker.protobuf.rp_iq_data.power_adjustment)
   return power_adjustment_;
 }
- void rp_iq_data::set_power_adjustment(double value) {
+::rf_phreaker::protobuf::rp_power_adjustment* rp_iq_data::release_power_adjustment() {
   
-  power_adjustment_ = value;
-  // @@protoc_insertion_point(field_set:rf_phreaker.protobuf.rp_iq_data.power_adjustment)
+  ::rf_phreaker::protobuf::rp_power_adjustment* temp = power_adjustment_;
+  power_adjustment_ = NULL;
+  return temp;
+}
+void rp_iq_data::set_allocated_power_adjustment(::rf_phreaker::protobuf::rp_power_adjustment* power_adjustment) {
+  delete power_adjustment_;
+  power_adjustment_ = power_adjustment;
+  if (power_adjustment) {
+    
+  } else {
+    
+  }
+  // @@protoc_insertion_point(field_set_allocated:rf_phreaker.protobuf.rp_iq_data.power_adjustment)
 }
 
-// optional .rf_phreaker.protobuf.rp_sample_format_type sample_format = 3;
-void rp_iq_data::clear_sample_format() {
-  sample_format_ = 0;
+// optional int64 sampling_rate = 3;
+void rp_iq_data::clear_sampling_rate() {
+  sampling_rate_ = GOOGLE_LONGLONG(0);
 }
- ::rf_phreaker::protobuf::rp_sample_format_type rp_iq_data::sample_format() const {
-  // @@protoc_insertion_point(field_get:rf_phreaker.protobuf.rp_iq_data.sample_format)
-  return static_cast< ::rf_phreaker::protobuf::rp_sample_format_type >(sample_format_);
+ ::google::protobuf::int64 rp_iq_data::sampling_rate() const {
+  // @@protoc_insertion_point(field_get:rf_phreaker.protobuf.rp_iq_data.sampling_rate)
+  return sampling_rate_;
 }
- void rp_iq_data::set_sample_format(::rf_phreaker::protobuf::rp_sample_format_type value) {
+ void rp_iq_data::set_sampling_rate(::google::protobuf::int64 value) {
   
-  sample_format_ = value;
-  // @@protoc_insertion_point(field_set:rf_phreaker.protobuf.rp_iq_data.sample_format)
+  sampling_rate_ = value;
+  // @@protoc_insertion_point(field_set:rf_phreaker.protobuf.rp_iq_data.sampling_rate)
 }
 
-// optional int64 num_samples = 4;
-void rp_iq_data::clear_num_samples() {
-  num_samples_ = GOOGLE_LONGLONG(0);
+// optional int64 dwell_time = 4;
+void rp_iq_data::clear_dwell_time() {
+  dwell_time_ = GOOGLE_LONGLONG(0);
 }
- ::google::protobuf::int64 rp_iq_data::num_samples() const {
-  // @@protoc_insertion_point(field_get:rf_phreaker.protobuf.rp_iq_data.num_samples)
-  return num_samples_;
+ ::google::protobuf::int64 rp_iq_data::dwell_time() const {
+  // @@protoc_insertion_point(field_get:rf_phreaker.protobuf.rp_iq_data.dwell_time)
+  return dwell_time_;
 }
- void rp_iq_data::set_num_samples(::google::protobuf::int64 value) {
+ void rp_iq_data::set_dwell_time(::google::protobuf::int64 value) {
   
-  num_samples_ = value;
-  // @@protoc_insertion_point(field_set:rf_phreaker.protobuf.rp_iq_data.num_samples)
+  dwell_time_ = value;
+  // @@protoc_insertion_point(field_set:rf_phreaker.protobuf.rp_iq_data.dwell_time)
 }
 
 // repeated float samples = 5 [packed = true];

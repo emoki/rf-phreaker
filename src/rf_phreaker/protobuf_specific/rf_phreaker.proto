@@ -16,6 +16,7 @@ message rp_update {
 		rp_lte_update lte_full_scan = 9;
 		rp_lte_update lte_sweep = 10;
 		rp_power_spectrum power_spectrum = 11;
+		rp_iq_data iq_data = 12;
 	}
 }
 
@@ -653,14 +654,16 @@ message rp_power_spectrum {
 	repeated double power = 11 [packed=true];
 }
 
-enum rp_sample_format_type {
-	LITTLE_ENDIAN_FLOAT_REAL_IMAGINARY = 0;
+message rp_power_adjustment {
+	rp_frequency_path path = 1;
+	int64 step_size = 2;
+	repeated double power = 3 [packed=true];
 }
 
 message rp_iq_data {
 	rp_base base = 1;
-	double power_adjustment = 2;
-	rp_sample_format_type sample_format = 3;
-	int64 num_samples = 4;
+	rp_power_adjustment power_adjustment = 2;
+	int64 sampling_rate = 3;
+	int64 dwell_time = 4;
 	repeated float samples = 5 [packed=true];
 }

@@ -186,18 +186,6 @@ typedef struct rp_frequency_band {
 	rp_operating_band band_;
 } rp_frequency_band;
 
-typedef struct rp_power_spectrum_spec {
-	rp_frequency_type start_frequency_;
-	rp_frequency_type span_;
-	rp_frequency_type bin_size_;
-	rp_time_type dwell_time_;
-} rp_power_spectrum_spec;
-
-typedef struct rp_power_spectrum_spec_group {
-	rp_power_spectrum_spec *e_;
-	int32_t size_;
-} rp_power_spectrum_spec_group;
-
 typedef struct rp_frequency_group {
 	rp_frequency_type *e_;
 	int32_t size_;
@@ -213,12 +201,36 @@ typedef struct rp_frequency_band_group {
 	int32_t size_;
 } rp_frequency_band_group;
 
+typedef struct rp_power_spectrum_spec {
+	rp_frequency_type start_frequency_;
+	rp_frequency_type span_;
+	rp_frequency_type bin_size_;
+	rp_time_type dwell_time_;
+} rp_power_spectrum_spec;
+
+typedef struct rp_power_spectrum_spec_group {
+	rp_power_spectrum_spec *e_;
+	int32_t size_;
+} rp_power_spectrum_spec_group;
+
+typedef struct rp_iq_data_spec {
+	rp_frequency_type center_frequency_;
+	rp_bandwidth_type bandwidth_;
+	rp_frequency_type sampling_rate_;
+	rp_time_type dwell_time_;
+} rp_iq_data_spec;
+
+typedef struct rp_iq_spec_group {
+	rp_iq_data_spec *e_;
+	int32_t size_;
+} rp_iq_data_spec_group;
+
 typedef struct rp_collection_info {
 	rp_frequency_band_group gsm_;
 	rp_frequency_band_group wcdma_;
 	rp_frequency_band_group lte_;
 	rp_power_spectrum_spec_group power_spectrum_spec_;
-	rp_frequency_group iq_data_;
+	rp_iq_spec_group iq_data_;
 	rp_operating_band_group sweep_;
 } rp_collection_info;
 
@@ -754,14 +766,23 @@ typedef struct rp_power_spectrum {
 
 
 typedef enum rp_sample_format_type {
-	LITTLE_ENDIAN_FLOAT_REAL_IMAGINARY
+	LITTLE_ENDIAN_FLOAT_REAL_IMAGINARY,
+	BIG_ENDIAN_FLOAT_REAL_IMAGINARY
 } rp_sample_format_type;
+
+typedef struct power_adjustment {
+	rp_frequency_path path_;
+	rp_frequency_type step_size_;
+	int32_t num_power_;
+	double *power_;
+} rp_power_adjustment;
 
 typedef struct rp_iq_data {
 	rp_base base_;
-	double power_adjustment_;
+	rp_time_type dwell_time_;
 	rp_sample_format_type sample_format_;
 	rp_frequency_type sampling_rate_;
+	power_adjustment power_adjustment_;
 	int32_t num_samples_;
 	void *samples_;
 } rp_iq_data;
