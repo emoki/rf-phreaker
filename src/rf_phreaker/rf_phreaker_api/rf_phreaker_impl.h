@@ -92,7 +92,7 @@ private:
 
 	processing::collection_info_containers::iterator add_sweep(specifier sweep, specifier decode);
 
-	void rf_phreaker_impl::remove_sweep(operating_band band, specifier sweep);
+	void remove_sweep(operating_band band, specifier sweep);
 
 	bool is_within_freq_paths(frequency_type f);
 
