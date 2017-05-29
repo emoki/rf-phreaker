@@ -33,7 +33,7 @@ Window {
 
     ColumnLayout {
         anchors.fill: parent
-        spacing: textMargins / 2
+        spacing: dp(16) / 2
 
         TableView {
             id: scannerList
