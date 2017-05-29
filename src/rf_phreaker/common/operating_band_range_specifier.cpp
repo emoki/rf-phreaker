@@ -1,8 +1,7 @@
 #include "rf_phreaker/common/operating_band_range_specifier.h"
 #include "rf_phreaker/common/common_utility.h"
 
-namespace rf_phreaker
-{
+namespace rf_phreaker {
 
 
 operating_band_range_specifier::operating_band_range_specifier(void) {
@@ -90,6 +89,16 @@ operating_band_range_specifier::operating_band_range_specifier(void) {
 	operating_bands_.push_back(operating_band_range(LTE_OPERATING_BAND_42, khz(3400000LL), khz(3600000LL)));	//	
 	operating_bands_.push_back(operating_band_range(LTE_OPERATING_BAND_43, khz(3600000LL), khz(3800000LL)));	//	
 	operating_bands_.push_back(operating_band_range(LTE_OPERATING_BAND_44, khz(703000), khz(803000)));	//	
+
+	for(int i = FIRST_GSM_OPERATING_BAND; i < LAST_GSM_OPERATING_BAND; ++i) {
+		gsm_lookup_.insert(std::make_pair(interval_t::closed(operating_bands_[i].low_freq_hz_, operating_bands_[i].high_freq_hz_), i));
+	}
+	for(int i = FIRST_UMTS_OPERATING_BAND; i < LAST_UMTS_OPERATING_BAND; ++i) {
+		umts_lookup_.insert(std::make_pair(interval_t::closed(operating_bands_[i].low_freq_hz_, operating_bands_[i].high_freq_hz_), i));
+	}
+	for(int i = FIRST_LTE_OPERATING_BAND; i < LAST_LTE_OPERATING_BAND; ++i) {
+		lte_lookup_.insert(std::make_pair(interval_t::closed(operating_bands_[i].low_freq_hz_, operating_bands_[i].high_freq_hz_), i));
+	}
 }
 
 operating_band_range_specifier::~operating_band_range_specifier(void) {}
@@ -99,15 +108,33 @@ operating_band_range operating_band_range_specifier::get_band_freq_range(operati
 }
 
 std::vector<operating_band_range> operating_band_range_specifier::find_avaliable_gsm_operating_bands(frequency_type freq) const {
-	return find_avaliable_operating_bands(freq, FIRST_GSM_OPERATING_BAND, LAST_GSM_OPERATING_BAND);
+	//return find_avaliable_operating_bands(freq, FIRST_GSM_OPERATING_BAND, LAST_GSM_OPERATING_BAND);
+	return find_avaliable_operating_bands(freq, gsm_lookup_);
 }
 
 std::vector<operating_band_range> operating_band_range_specifier::find_avaliable_umts_operating_bands(frequency_type freq) const {
-	return find_avaliable_operating_bands(freq, FIRST_UMTS_OPERATING_BAND, LAST_UMTS_OPERATING_BAND);
+	//return find_avaliable_operating_bands(freq, FIRST_UMTS_OPERATING_BAND, LAST_UMTS_OPERATING_BAND);
+	return find_avaliable_operating_bands(freq, umts_lookup_);
 }
 
 std::vector<operating_band_range> operating_band_range_specifier::find_avaliable_lte_operating_bands(frequency_type freq) const {
-	return find_avaliable_operating_bands(freq, FIRST_LTE_OPERATING_BAND, LAST_LTE_OPERATING_BAND);
+	//return find_avaliable_operating_bands(freq, FIRST_LTE_OPERATING_BAND, LAST_LTE_OPERATING_BAND);
+	return find_avaliable_operating_bands(freq, lte_lookup_);
+}
+
+std::vector<operating_band_range> operating_band_range_specifier::find_avaliable_operating_bands(frequency_type freq, const map_t &m) const {
+	using namespace boost::icl;
+	std::vector<operating_band_range> valid_bands;
+
+	auto i = discrete_interval<frequency_type>::closed(freq, freq);
+
+	auto t = m & i;
+		
+	for(auto i = t.begin(); i != t.end(); ++i) {
+		valid_bands.push_back(operating_bands_[i->second]);
+	}
+
+	return valid_bands;
 }
 
 std::vector<operating_band_range> operating_band_range_specifier::find_avaliable_operating_bands(frequency_type freq, operating_band begin, operating_band inclusive_end) const {
@@ -123,6 +150,8 @@ std::vector<operating_band_range> operating_band_range_specifier::find_avaliable
 
 std::vector<operating_band_range> operating_band_range_specifier::get_all_operating_bands(operating_band begin, operating_band inclusive_end) const {
 	std::vector<operating_band_range> valid_bands;
+
+	valid_bands.reserve(inclusive_end - begin + 1);
 
 	for(int i = begin; i <= inclusive_end; ++i) {
 		valid_bands.push_back(operating_bands_[i]);
