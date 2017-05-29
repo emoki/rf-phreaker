@@ -13,7 +13,7 @@ import QtQuick.Controls.Styles 1.3
 import Material 0.3
 
 ButtonStyle {
-    id: style
+    id: _style
 
     padding {
         left: 0
@@ -39,7 +39,7 @@ ButtonStyle {
 
         implicitHeight: 36 * Units.dp
 
-        radius: style.radius
+        radius: _style.radius
 
         backgroundColor: control.enabled || controlElevation === 0
                 ? controlBackground
