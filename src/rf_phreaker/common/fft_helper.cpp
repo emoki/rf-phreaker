@@ -52,7 +52,9 @@ void fft_helper::reset(int fft_order, int flag) {
 
 	ipp_helper::check_status(ippsFFTGetBufSize_C_32fc(fft_spec_, &buf_size));
 
-	internal_buffer_.reset(buf_size);
+	// With small ffts the library doesn't need an internal buffer, in such cases we set the size to 
+	// be 1 just so we don't assert when using ipp_array::get() during the fft.
+	internal_buffer_.reset(buf_size < 1 ? 1 : buf_size);
 }
 
 void fft_helper::fft_forward(const Ipp32fc *src, Ipp32fc *dst) {
