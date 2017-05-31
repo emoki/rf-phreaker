@@ -54,14 +54,19 @@
 	<file>SweepLine.qml</file>
 	<file>SweepLines.qml</file>
 	<file>WorkbenchPage.qml</file>
+	<file>icons\action_done.svg</file>
 	<file>icons\action_help.svg</file>
 	<file>icons\action_highlight_off.svg</file>
 	<file>icons\action_settings.svg</file>
+	<file>icons\action_subject.svg</file>
 	<file>icons\alert_error.svg</file>
 	<file>icons\alert_warning.svg</file>
+	<file>icons\av_note.svg</file>
 	<file>icons\av_play_arrow.svg</file>
+	<file>icons\av_play_circle_filled.svg</file>
 	<file>icons\av_stop.svg</file>
 	<file>icons\content_add.svg</file>
+	<file>icons\content_clear.svg</file>
 	<file>icons\content_remove.svg</file>
 	<file>icons\device_gps_fixed.svg</file>
 	<file>icons\device_gps_not_fixed.svg</file>
