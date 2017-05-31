@@ -67,7 +67,7 @@ TEST(SerializationHelperTest, ClearTest) {
 	auto bytes = serialization_helper::serialize_to_bytes(ret, 256, true);
 
 	bytes.clear();
-	EXPECT_THROW(serialization_helper::init(bytes, ret, true), boost::archive::archive_exception);
+	EXPECT_NO_THROW(serialization_helper::init(bytes, ret, true), boost::archive::archive_exception);
 	EXPECT_EQ(0, ret.a_);
 	EXPECT_EQ(0, ret.b_);
 	EXPECT_EQ(0, ret.c_);
