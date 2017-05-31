@@ -74,12 +74,6 @@ public:
 		emit loggingPacketsChanged(loggingPackets_);
 	}
 
-	bool apiOutput() { return apiOutput_; }
-
-	double rpfTrackMinDistance() { return rpfTrackMinDistance_; }
-
-private:
-	friend class SettingsIO;
 	bool apiOutput_;
 	double rpfTrackMinDistance_;
 	QString themePrimaryColor_;
@@ -92,6 +86,8 @@ private:
 	bool loggingGps_;
 	bool loggingCollection_;
 	bool loggingPackets_;
+private:
+	friend class SettingsIO;
 	static Settings *instance_;
 	static QMutex instance_mutex_;
 };

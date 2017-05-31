@@ -28,12 +28,12 @@ std::mutex MarbleLayers::mutex_;
 
 MarbleLayerManager::MarbleLayerManager(QObject *parent)
  : QObject(parent)
- , model_(this) 
+ , model_(this)
  , rpDoc_(nullptr)
  , positionDoc_(nullptr)
  , recordingPlacemark_(nullptr)
  , multiTrack_(nullptr)
- , currentTrack_(nullptr) 
+ , currentTrack_(nullptr)
  , minDistance_(0) {
 	init_ = false;
 	collecting_ = false;
@@ -42,7 +42,7 @@ MarbleLayerManager::MarbleLayerManager(QObject *parent)
 	QObject::connect(&rpPositionProviderPlugin_, &RpPositionProviderPlugin::positionChanged, this, &MarbleLayerManager::updateRecordingTrack);
 	QObject::connect(&rpPositionProviderPlugin_, &RpPositionProviderPlugin::statusChanged, this, &MarbleLayerManager::updatePositionStatus);
 	QObject::connect(Api::instance(), &Api::deviceStatusChanged, this, &MarbleLayerManager::deviceStatusChanged);
-	minDistance_ = Settings::instance()->rpfTrackMinDistance();
+	minDistance_ = Settings::instance()->rpfTrackMinDistance_;
 	QObject::connect(Settings::instance(), &Settings::rpfTrackMinDistanceChanged, this, &MarbleLayerManager::changeMinDistance);
 }
 
@@ -60,7 +60,7 @@ void MarbleLayerManager::init() {
 			QObject::connect(model_.treeModel(), &GeoDataTreeModel::added,
 				this, &MarbleLayerManager::GeoObjectAdded);
 
-			// Add the recording document before styles so that it will be there when we 
+			// Add the recording document before styles so that it will be there when we
 			// configure the doc styles
 			recordingDoc_ = new GeoDataDocument();
 			recordingDoc_->setDocumentRole(DocumentRole::TrackingDocument);
@@ -260,7 +260,7 @@ void MarbleLayerManager::addRpf(const QString &filename) {
 				placemark->setVisible(true);
 				multiTrack.release();
 
-				QMetaObject::invokeMethod(&MarbleLayers::instance(), "addPreviousTrack", 
+				QMetaObject::invokeMethod(&MarbleLayers::instance(), "addPreviousTrack",
 					Qt::QueuedConnection, Q_ARG(Marble::GeoDataPlacemark*, placemark.get()));
 				placemark.release();
 			}

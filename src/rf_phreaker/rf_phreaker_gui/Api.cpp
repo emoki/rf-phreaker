@@ -98,7 +98,7 @@ Api::Api(QObject *parent)
 	callbacks_.rp_lte_sweep_update = nullptr;
 	callbacks_.rp_power_spectrum_update = nullptr;
 
-	apiOutput_ = Settings::instance()->apiOutput();
+	apiOutput_ = Settings::instance()->apiOutput_;
 	QObject::connect(Settings::instance(), &Settings::apiOutputChanged, [&](bool apiOutput) {
 		this->apiOutput_ = apiOutput;
 	});
