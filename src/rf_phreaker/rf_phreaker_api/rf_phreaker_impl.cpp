@@ -639,6 +639,8 @@ rp_status rf_phreaker_impl::add_power_spectrum_frequency(rp_device *device, cons
 		}
 
 		for(auto s : approx.power_specs()) {
+			// We use the span as the bandwidth knowing that if will be bumped up to the next valid bandwidth.
+			// power_spectrum_approximator takes into account the scanner's valid bandwidth when calculating specs.
 			it->adjust(add_collection_info(rf_phreaker::processing::power_spectrum_collection_info(s.start_frequency_ + s.span_ / 2, s.dwell_time_, 0,
 				s.span_, s.sampling_rate_, s)));
 		}
