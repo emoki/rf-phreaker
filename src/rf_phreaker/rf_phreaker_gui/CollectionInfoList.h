@@ -18,6 +18,9 @@ public:
 		INFO,
 		TECH,
 		ISSWEEP,
+		ISGSM,
+		ISWCDMA,
+		ISLTE,
 		RADIOTYPE,
 		MAXCOLUMNS
 	};
@@ -31,6 +34,9 @@ public:
 		roleNames_[INFO] = "info";
 		roleNames_[TECH] = "tech";
 		roleNames_[ISSWEEP] = "isSweep";
+		roleNames_[ISGSM] = "isGsm";
+		roleNames_[ISWCDMA] = "isWcdma";
+		roleNames_[ISLTE] = "isLte";
 		roleNames_[RADIOTYPE] = "radioType";
 	}
 
@@ -55,9 +61,15 @@ public:
 				return "Common Name";
 			 case TECH:
 				return "Tech";
-			case ISSWEEP:
-			   return "Is Sweeping";
-			case RADIOTYPE:
+			 case ISSWEEP:
+				 return "Is Sweeping";
+			 case ISGSM:
+				 return "Is Gsm";
+			 case ISWCDMA:
+				 return "Is Wcdma";
+			 case ISLTE:
+				 return "Is Lte";
+			 case RADIOTYPE:
 			   return "Radio Type";
 			default:
 				return QVariant();
@@ -92,6 +104,12 @@ public:
 			return QVariant::fromValue(list_[index.row()]->toTechStr());
 		case ISSWEEP:
 			return QVariant::fromValue(list_[index.row()]->isSweep());
+		case ISGSM:
+			return QVariant::fromValue(list_[index.row()]->isGsm());
+		case ISWCDMA:
+			return QVariant::fromValue(list_[index.row()]->isWcdma());
+		case ISLTE:
+			return QVariant::fromValue(list_[index.row()]->isLte());
 		case RADIOTYPE:
 			return QVariant::fromValue(list_[index.row()]->toRadioTypeStr());
 		default:
