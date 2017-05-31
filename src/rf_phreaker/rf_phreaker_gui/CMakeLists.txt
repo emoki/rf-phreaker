@@ -105,6 +105,7 @@ set (rf_phreaker_gui_QMLS
 	MaterialTabbedNavigationDrawerPage.qml
 	MaterialToggleButton.qml
 	OverviewChart.qml
+	OverviewChartSweepChannel.qml
 	PositionButton.qml
 	PositionMarker.qml
 	ScanConfigurationPage.qml

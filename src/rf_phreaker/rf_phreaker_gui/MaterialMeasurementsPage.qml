@@ -67,7 +67,7 @@ TabbedPage {
                 Layout.fillHeight: true
                 spacing: dp(16)
 
-                OverviewChart {
+                OverviewChartSweepChannel {
                     id: lteOverviewChart
                     Layout.fillWidth: true
                     Layout.preferredHeight: lteGrid.height * .3
@@ -126,7 +126,7 @@ TabbedPage {
                 Layout.fillHeight: true
                 spacing: dp(16)
 
-                OverviewChart {
+                OverviewChartSweepChannel {
                     id: wcdmaOverviewChart
                     Layout.fillWidth: true
                     Layout.preferredHeight: wcdmaGrid.height * .3
@@ -185,7 +185,7 @@ TabbedPage {
                 Layout.fillHeight: true
                 spacing: dp(16)
 
-                OverviewChart {
+                OverviewChartSweepChannel {
                     id: gsmOverviewChart
                     Layout.fillWidth: true
                     Layout.preferredHeight: gsmGrid.height * .3

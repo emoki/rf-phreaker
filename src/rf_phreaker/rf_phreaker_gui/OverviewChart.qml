@@ -10,8 +10,8 @@ ChartView {
     property var xMax: Api.highestFreq
     property var yMin: -130
     property var yMax: 0
-    property alias sweepModelList: sweepLines.sourceModel
-    property alias channelModel: channelSweepLines.sourceModel
+    property alias overviewAxisX: _overviewAxisX
+    property alias overviewAxisY: _overviewAxisY
 
     margins {
         right: 0
@@ -20,10 +20,8 @@ ChartView {
         bottom: 0
     }
 
-    //title: "Spectrum Overview"
     antialiasing: true
     animationOptions: ChartView.NoAnimation
-    //theme: ChartView.ChartThemeDark
     legend.visible: false
     focus: true
 
@@ -32,26 +30,26 @@ ChartView {
         running: true
         repeat: true
         onTriggered: {
-            if(overviewAxisX.max > overviewChart.xMax) overviewAxisX.max = overviewChart.xMax;
-            if(overviewAxisX.max < overviewChart.xMin) overviewAxisX.max = overviewChart.xMin + 1;
-            if(overviewAxisX.min > overviewChart.xMax) overviewAxisX.min = overviewChart.xMax - 1;
-            if(overviewAxisX.min < overviewChart.xMin) overviewAxisX.min = overviewChart.xMin;
-            if(overviewAxisY.max > overviewChart.yMax) overviewAxisY.max = overviewChart.yMax;
-            if(overviewAxisY.max < overviewChart.yMin) overviewAxisY.max = overviewChart.yMin + 1;
-            if(overviewAxisY.min > overviewChart.yMax) overviewAxisY.min = overviewChart.yMax - 1;
-            if(overviewAxisY.min < overviewChart.yMin) overviewAxisY.min = overviewChart.yMin;
+            if(_overviewAxisX.max > overviewChart.xMax) _overviewAxisX.max = overviewChart.xMax;
+            if(_overviewAxisX.max < overviewChart.xMin) _overviewAxisX.max = overviewChart.xMin + 1;
+            if(_overviewAxisX.min > overviewChart.xMax) _overviewAxisX.min = overviewChart.xMax - 1;
+            if(_overviewAxisX.min < overviewChart.xMin) _overviewAxisX.min = overviewChart.xMin;
+            if(_overviewAxisY.max > overviewChart.yMax) _overviewAxisY.max = overviewChart.yMax;
+            if(_overviewAxisY.max < overviewChart.yMin) _overviewAxisY.max = overviewChart.yMin + 1;
+            if(_overviewAxisY.min > overviewChart.yMax) _overviewAxisY.min = overviewChart.yMax - 1;
+            if(_overviewAxisY.min < overviewChart.yMin) _overviewAxisY.min = overviewChart.yMin;
         }
     }
 
     ValueAxis {
-        id: overviewAxisX
+        id: _overviewAxisX
         min: xMin
         max: xMax
         gridVisible: true
         minorGridVisible: true
     }
     ValueAxis {
-        id: overviewAxisY
+        id: _overviewAxisY
         min: yMin
         max: yMax
         gridVisible: true
@@ -59,22 +57,9 @@ ChartView {
     }
     LineSeries{
         id: dummy
-        axisX: overviewAxisX
-        axisY: overviewAxisY
-    }
-    SweepLines {
-        id: sweepLines
-        chart: overviewChart
-        mainAxisX: overviewAxisX
-        mainAxisY: overviewAxisY
-        //sourceModel: Api.sweepModelList
-    }
-    ChannelSweepLines {
-        id: channelSweepLines
-        chart: overviewChart
-        mainAxisX: overviewAxisX
-        mainAxisY: overviewAxisY
-        //sourceModel: Api.highestCellPerChannelModel
+        useOpenGL: true
+        axisX: _overviewAxisX
+        axisY: _overviewAxisY
     }
 
     Rectangle {

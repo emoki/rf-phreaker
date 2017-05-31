@@ -41,6 +41,7 @@
 	<file>MaterialTabbedNavigationDrawerPage.qml</file>
 	<file>MaterialToggleButton.qml</file>
 	<file>OverviewChart.qml</file>
+	<file>OverviewChartSweepChannel.qml</file>
 	<file>PositionButton.qml</file>
 	<file>PositionMarker.qml</file>
 	<file>ScanConfigurationPage.qml</file>
