@@ -26,6 +26,15 @@ class Settings : public QObject {
 	Q_PROPERTY(bool loggingGps MEMBER loggingGps_ NOTIFY loggingGpsChanged)
 	Q_PROPERTY(bool loggingCollection MEMBER loggingCollection_ NOTIFY loggingCollectionChanged)
 	Q_PROPERTY(bool loggingPackets MEMBER loggingPackets_ NOTIFY loggingPacketsChanged)
+	Q_PROPERTY(int spectrumBinSize MEMBER spectrumBinSize_ NOTIFY spectrumBinSizeChanged)
+	Q_PROPERTY(int spectrumDwellTime MEMBER spectrumDwellTime_ NOTIFY spectrumDwellTimeChanged)
+	Q_PROPERTY(int cwBinSize MEMBER cwBinSize_ NOTIFY cwBinSizeChanged)
+	Q_PROPERTY(int cwSpan MEMBER cwSpan_ NOTIFY cwSpanChanged)
+	Q_PROPERTY(int cwDwellTime MEMBER cwDwellTime_ NOTIFY cwDwellTimeChanged)
+	Q_PROPERTY(int cwOffset MEMBER cwOffset_ NOTIFY cwOffsetChanged)
+	Q_PROPERTY(int iqBandwidth MEMBER iqBandwidth_ NOTIFY iqBandwidthChanged)
+	Q_PROPERTY(int iqSamplingRate MEMBER iqSamplingRate_ NOTIFY iqSamplingRateChanged)
+	Q_PROPERTY(int iqDwellTime MEMBER iqDwellTime_ NOTIFY iqDwellTimeChanged)
 
 signals:
 	void apiOutputChanged(bool);
@@ -40,6 +49,15 @@ signals:
 	void loggingGpsChanged(bool);
 	void loggingCollectionChanged(bool);
 	void loggingPacketsChanged(bool);
+	void spectrumBinSizeChanged(int);
+	void spectrumDwellTimeChanged(int);
+	void cwBinSizeChanged(int);
+	void cwSpanChanged(int);
+	void cwDwellTimeChanged(int);
+	void cwOffsetChanged(int);
+	void iqBandwidthChanged(int);
+	void iqSamplingRateChanged(int);
+	void iqDwellTimeChanged(int);
 
 public:
 	Settings(QObject *parent = nullptr) 
@@ -72,6 +90,15 @@ public:
 		emit loggingGpsChanged(loggingGps_);
 		emit loggingCollectionChanged(loggingCollection_);
 		emit loggingPacketsChanged(loggingPackets_);
+		emit spectrumBinSizeChanged(spectrumBinSize_);
+		emit spectrumDwellTimeChanged(spectrumDwellTime_);
+		emit cwBinSizeChanged(cwBinSize_);
+		emit cwSpanChanged(cwSpan_);
+		emit cwDwellTimeChanged(cwDwellTime_);
+		emit cwOffsetChanged(cwOffset_);
+		emit iqBandwidthChanged(iqBandwidth_);
+		emit iqSamplingRateChanged(iqSamplingRate_);
+		emit iqDwellTimeChanged(iqDwellTime_);
 	}
 
 	bool apiOutput_;
@@ -86,6 +113,19 @@ public:
 	bool loggingGps_;
 	bool loggingCollection_;
 	bool loggingPackets_;
+
+	int spectrumBinSize_;
+	int spectrumDwellTime_;
+
+	int cwBinSize_;
+	int cwSpan_;
+	int cwDwellTime_;
+	int cwOffset_;
+
+	int iqBandwidth_;
+	int iqSamplingRate_;
+	int iqDwellTime_;
+
 private:
 	friend class SettingsIO;
 	static Settings *instance_;
