@@ -35,7 +35,7 @@ Rectangle {
         implicitHeight: dp(48)
         margins: dp(24)
         selected: styleData.selected
-        showDivider: true
+        showDivider: false
         dividerInset: 0
         text: styleData.value;
         itemLabel.horizontalAlignment: isNumber ? Qt.AlignRight : Qt.AlignLeft
