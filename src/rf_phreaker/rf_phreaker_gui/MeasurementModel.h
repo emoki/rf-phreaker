@@ -200,7 +200,7 @@ public:
 		auto pos = index_position(index_, it);
 		// Assume that if something is using one of the measurement classes then it
 		// using connections to update the object.
-		emit dataChanged(createIndex(pos, BasicMeasColumn), createIndex(pos, ColumnSize - 1));
+		emit dataChanged(createIndex(pos, BasicMeasColumn), createIndex(pos, columnCount() - 1));
 	}
 
 	template<typename Comparator, typename Data>
@@ -244,6 +244,10 @@ public:
 	}
 
 	int columnCount(const QModelIndex &) const {
+		return columnCount();
+	}
+
+	virtual int columnCount() const {
 		return ColumnSize;
 	}
 
@@ -339,10 +343,70 @@ public:
 		}
 	}
 
+	QVariant headerData(int section, Qt::Orientation orientation, int role = Qt::DisplayRole) const {
+		if(role != Qt::DisplayRole) {
+			switch(role) {
+			case BasicMeasRole:
+				return "Measurement";
+			case GsmRole:
+				return "Gsm";
+			case WcdmaRole:
+				return "Wcdma";
+			case LteRole:
+				return "Lte";
+			case CwRole:
+				return "Cw";
+			case TimeElapsedRole:
+				return "Time Elapsed";
+			case MeasurementFreqRole:
+				return "Frequency";
+			case MeasurementBandwidthRole:
+				return "Measurement Bandwidth";
+			case MeasurementSignalLevelRole:
+				return "Measurement SL";
+			case CellTechRole:
+				return "Tech";
+			case CellBandRole:
+				return "Band";
+			case CellChannelRole:
+				return "Channel";
+			case CellIdRole:
+				return "ID";
+			case CellSignalLevelRole:
+				return "Signal Level";
+			case CellInterferenceRole:
+				return "Interference";
+			case CellMccRole:
+				return "MCC";
+			case CellMncRole:
+				return "MNC";
+			case CellLacTacRole:
+				return "LAC/TAC";
+			case CellCidRole:
+				return "CELLID";
+			case LteDownlinkBandwidthRole:
+				return "Downlink Bandwidth";
+			case GraphLabelRole:
+				return "Graph Label";
+			default:
+				return QVariant();
+			}
+		}
+		return QVariant();
+	}
 protected:
 	QHash<int, QByteArray> roleNames() const {
 		return roles_;
 	}
+	
+	data_index index_;
+
+	QVector<int> rolesToUpdate_;
+
+	QHash<int, QByteArray> roles_;
+
+	QHash<QByteArray, int> roleLookup_;
+
 private:
 	void insert(Base* t) {
 		// Always append to the end.
@@ -380,12 +444,84 @@ private:
 			erase(i);
 	}
 
-	data_index index_;
-
-	QVector<int> rolesToUpdate_;
-
-	QHash<int, QByteArray> roles_;
 };
 
+class GsmMeasurementModel : public MeasurementModel {
+	Q_OBJECT
+public:
+	GsmMeasurementModel(QObject *parent = nullptr)
+		: MeasurementModel(parent) {}
+	QVariant headerData(int section, Qt::Orientation orientation, int role = Qt::DisplayRole) const {
+		if(role != Qt::DisplayRole) {
+			switch(role) {
+			case CellChannelRole:
+				return "ARFCN";
+			case CellIdRole:
+				return "BSIC";
+			case CellInterferenceRole:
+				return "C/I";
+			case CellSignalLevelRole:
+				return "BCCH Signal Level";
+			case CellLacTacRole:
+				return "LAC";
+			default:
+				return MeasurementModel::headerData(section, orientation, role);
+			}
+		}
+		return QVariant();
+	}
+};
+
+class WcdmaMeasurementModel : public MeasurementModel {
+	Q_OBJECT
+public:
+	WcdmaMeasurementModel(QObject *parent = nullptr)
+		: MeasurementModel(parent) {}
+	QVariant headerData(int section, Qt::Orientation orientation, int role = Qt::DisplayRole) const {
+		if(role != Qt::DisplayRole) {
+			switch(role) {
+			case CellChannelRole:
+				return "UARFCN";
+			case CellIdRole:
+				return "CPICH";
+			case CellSignalLevelRole:
+				return "RSCP";
+			case CellInterferenceRole:
+				return "Ec/Io";
+			case CellLacTacRole:
+				return "LAC";
+			default:
+				return MeasurementModel::headerData(section, orientation, role);
+			}
+		}
+		return QVariant();
+	}
+};
+
+class LteMeasurementModel : public MeasurementModel {
+	Q_OBJECT
+public:
+	LteMeasurementModel(QObject *parent = nullptr)
+		: MeasurementModel(parent) {}
+	QVariant headerData(int section, Qt::Orientation orientation, int role = Qt::DisplayRole) const {
+		if(role != Qt::DisplayRole) {
+			switch(role) {
+				case CellChannelRole:
+					return "EARFCN";
+				case CellIdRole:
+					return "Physical CID";
+				case CellSignalLevelRole:
+					return "Sync Signal Level";
+				case CellInterferenceRole:
+					return "Sync Quality";
+				case CellLacTacRole:
+					return "TAC";
+				default:
+					return MeasurementModel::headerData(section, orientation, role);
+			}
+		}
+		return QVariant();
+	}
+};
 
 //}}

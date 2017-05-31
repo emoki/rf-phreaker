@@ -1,6 +1,8 @@
 #pragma once
+#include <memory>
 #include <QObject>
 #include <QList>
+#include <QQmlEngine>
 #include "rf_phreaker/rf_phreaker_gui/ApiTypes.h"
 #include "rf_phreaker/rf_phreaker_gui/ProxyMeasurementModel.h"
 #include "rf_phreaker/rf_phreaker_gui/CollectionInfoList.h"
@@ -29,6 +31,19 @@ public:
 		, lowBand_(lowBand)
 		, highBand_(highBand) {
 		setHighestCellSourceModel(highestCellSourceModel);
+		if(lowBand_ >= ApiTypes::FIRST_GSM_OPERATING_BAND && lowBand_ <= ApiTypes::LAST_GSM_OPERATING_BAND
+				&& highBand_ >= ApiTypes::FIRST_GSM_OPERATING_BAND && highBand_ <= ApiTypes::LAST_GSM_OPERATING_BAND)
+			fullScanModel_ = std::make_shared<GsmMeasurementModel>();
+		else if(lowBand_ >= ApiTypes::FIRST_WCDMA_OPERATING_BAND && lowBand_ <= ApiTypes::LAST_WCDMA_OPERATING_BAND
+				&& highBand_ >= ApiTypes::FIRST_WCDMA_OPERATING_BAND && highBand_ <= ApiTypes::LAST_WCDMA_OPERATING_BAND)
+			fullScanModel_ = std::make_shared<WcdmaMeasurementModel>();
+		else if(lowBand_ >= ApiTypes::FIRST_LTE_OPERATING_BAND && lowBand_ <= ApiTypes::LAST_LTE_OPERATING_BAND
+				&& highBand_ >= ApiTypes::FIRST_LTE_OPERATING_BAND && highBand_ <= ApiTypes::LAST_LTE_OPERATING_BAND)
+			fullScanModel_ = std::make_shared<LteMeasurementModel>();
+		else
+			fullScanModel_ = std::make_shared<MeasurementModel>();
+
+		QQmlEngine::setObjectOwnership(fullScanModel_.get(), QQmlEngine::CppOwnership);
 	}
 
 	void setHighestCellSourceModel(MeasurementModel &highestCellSourceModel) {
@@ -92,18 +107,18 @@ public:
 	}
 
 	void clear() {
-		fullScanModel_.clear();
+		fullScanModel_->clear();
 		sweepModelList_.clear();
 	}
 
 	FilterProxyMeasurementModel* highestCellPerChannelModel() { return &highestCellPerChannelModel_; }
-	MeasurementModel* fullScanModel() { return &fullScanModel_; }
+	MeasurementModel* fullScanModel() { return fullScanModel_.get(); }
 	QList<QObject*> sweepModelList() { return sweepModelList_; }
 	int lowestFreq() { return lowestFreq_; }
 	int highestFreq() { return highestFreq_; }
 
 private:
-	MeasurementModel fullScanModel_;
+	std::shared_ptr<MeasurementModel> fullScanModel_;
 	FilterProxyMeasurementModel highestCellPerChannelModel_;
 	QList<QObject*> sweepModelList_;
 	int lowestFreq_;
