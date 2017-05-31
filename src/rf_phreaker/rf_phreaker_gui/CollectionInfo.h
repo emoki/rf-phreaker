@@ -58,15 +58,15 @@ public:
 
 	QString toInfoStr() const { return "Info placeholder"; }
 	QString toChannelsStr() const {
-		if(cfHigh_.channelFreq().is_valid())
+		if(cfHigh_.isChannelValid())
 			return cfLow_.toChannelStr() + " - " + cfHigh_.toChannelStr();
-		else if(cfLow_.channelFreq().is_valid())
+		else if(cfLow_.isChannelValid())
 			return cfLow_.toChannelStr();
 		else
 			return "";
 	}
 	QString toFreqsStr() const {
-		if(cfHigh_.channelFreq().is_valid())
+		if(cfHigh_.isFreqValid())
 			return cfLow_.toFreqStr() + " - " + cfHigh_.toFreqStr() + " MHz";
 		else
 			return cfLow_.toFreqStr() + " MHz";

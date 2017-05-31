@@ -128,6 +128,19 @@ public:
 	rp_channel_type toRpChannel() const { return (rp_channel_type)cf_.channel_; }
 	ApiTypes::Tech tech() const { return tech_; }
 
+	bool isValid() const {
+		return isFreqValid() || isChannelValid();
+	}
+
+	bool isFreqValid() const {
+		return tech_ != ApiTypes::UNKNOWN_TECH && (cf_.freq_ != -1);
+	}
+
+	bool isChannelValid() const {
+		return tech_ != ApiTypes::UNKNOWN_TECH
+			&& (cf_.channel_ != -1 && cf_.band_ != rf_phreaker::OPERATING_BAND_UNKNOWN);
+	}
+
 signals:
 	void channelChanged();
 	void freqChanged();
