@@ -117,11 +117,11 @@ public:
 			return false;
 	}
 
-	bool setData(const QModelIndex &index, const QVariant &value, int role) {
+	bool setData(const QModelIndex &, const QVariant &, int ) {
 		return true;
 	}
 
-	Qt::ItemFlags flags(const QModelIndex &index) const {
+	Qt::ItemFlags flags(const QModelIndex &) const {
 		return Qt::ItemIsSelectable | Qt::ItemIsEnabled /*| Qt::ItemIsEditable*/;
 	}
 
