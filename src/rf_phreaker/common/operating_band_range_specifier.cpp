@@ -90,14 +90,14 @@ operating_band_range_specifier::operating_band_range_specifier(void) {
 	operating_bands_.push_back(operating_band_range(LTE_OPERATING_BAND_43, khz(3600000LL), khz(3800000LL)));	//	
 	operating_bands_.push_back(operating_band_range(LTE_OPERATING_BAND_44, khz(703000), khz(803000)));	//	
 
-	for(int i = FIRST_GSM_OPERATING_BAND; i < LAST_GSM_OPERATING_BAND; ++i) {
-		gsm_lookup_.insert(std::make_pair(interval_t::closed(operating_bands_[i].low_freq_hz_, operating_bands_[i].high_freq_hz_), i));
+	for(int i = FIRST_GSM_OPERATING_BAND; i <= LAST_GSM_OPERATING_BAND; ++i) {
+		gsm_lookup_ += std::make_pair(interval_t::closed(operating_bands_[i].low_freq_hz_, operating_bands_[i].high_freq_hz_), std::set<int>{i});
 	}
-	for(int i = FIRST_UMTS_OPERATING_BAND; i < LAST_UMTS_OPERATING_BAND; ++i) {
-		umts_lookup_.insert(std::make_pair(interval_t::closed(operating_bands_[i].low_freq_hz_, operating_bands_[i].high_freq_hz_), i));
+	for(int i = FIRST_UMTS_OPERATING_BAND; i <= LAST_UMTS_OPERATING_BAND; ++i) {
+		umts_lookup_ += std::make_pair(interval_t::closed(operating_bands_[i].low_freq_hz_, operating_bands_[i].high_freq_hz_), std::set<int>{i});
 	}
-	for(int i = FIRST_LTE_OPERATING_BAND; i < LAST_LTE_OPERATING_BAND; ++i) {
-		lte_lookup_.insert(std::make_pair(interval_t::closed(operating_bands_[i].low_freq_hz_, operating_bands_[i].high_freq_hz_), i));
+	for(int i = FIRST_LTE_OPERATING_BAND; i <= LAST_LTE_OPERATING_BAND; ++i) {
+		lte_lookup_ += std::make_pair(interval_t::closed(operating_bands_[i].low_freq_hz_, operating_bands_[i].high_freq_hz_), std::set<int>{i});
 	}
 }
 
@@ -126,12 +126,13 @@ std::vector<operating_band_range> operating_band_range_specifier::find_avaliable
 	using namespace boost::icl;
 	std::vector<operating_band_range> valid_bands;
 
-	auto i = discrete_interval<frequency_type>::closed(freq, freq);
+	auto f = interval_t::closed(freq, freq);
 
-	auto t = m & i;
-		
-	for(auto i = t.begin(); i != t.end(); ++i) {
-		valid_bands.push_back(operating_bands_[i->second]);
+	auto t = m.find(f);
+
+	if(t != m.end()) {
+		for(auto i : t->second)
+			valid_bands.push_back(operating_bands_[i]);
 	}
 
 	return valid_bands;

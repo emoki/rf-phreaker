@@ -40,7 +40,7 @@ public:
 	std::vector<operating_band_range> get_all_operating_bands(operating_band begin, operating_band inclusive_end) const;
 
 private:
-	typedef boost::icl::interval_map<frequency_type, int> map_t;
+	typedef boost::icl::interval_map<frequency_type, std::set<int>> map_t;
 	typedef map_t::interval_type interval_t;
 
 	std::vector<operating_band_range> find_avaliable_operating_bands(frequency_type freq, operating_band begin, operating_band inclusive_end) const;
