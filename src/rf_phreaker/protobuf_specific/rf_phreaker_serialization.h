@@ -1120,6 +1120,7 @@ public:
 		t.params_.step_size_ = pb.step_size();
 		t.params_.window_length_ = pb.window_length();
 		t.params_.num_windows_ = pb.num_windows();
+		t.params_.identifier_ = pb.identifier();
 		t.power_.resize(pb.power_size());
 		for(auto i = 0; i < pb.power_size(); ++i) {
 			t.power_[i] = pb.power().Get(i);
@@ -1137,6 +1138,7 @@ public:
 		pb->set_step_size(t.params_.step_size_);
 		pb->set_window_length(t.params_.window_length_);
 		pb->set_num_windows(t.params_.num_windows_);
+		pb->set_identifier(t.params_.identifier_);
 		for(auto i : t.power_) {
 			pb->add_power(i);
 		}

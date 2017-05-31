@@ -247,7 +247,8 @@ inline std::ostream& header(std::ostream &os, const power_spectrum_spec &t) {
 		<< "window_length" << delimiter
 		<< "num_windows" << delimiter
 		<< "bin_size" << delimiter
-		<< "step_size";
+		<< "step_size" << delimiter
+		<< "identifier";
 	return os;
 }
 
@@ -260,7 +261,8 @@ inline std::ostream& operator<<(std::ostream &os, const power_spectrum_spec &t) 
 		<< t.window_length_ << delimiter
 		<< t.num_windows_ << delimiter
 		<< t.bin_size_ << delimiter
-		<< t.step_size_;
+		<< t.step_size_ << delimiter
+		<< t.identifier_;
 	return os;
 }
 

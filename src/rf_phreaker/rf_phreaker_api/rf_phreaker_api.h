@@ -206,6 +206,7 @@ typedef struct rp_power_spectrum_spec {
 	rp_frequency_type span_;
 	rp_frequency_type bin_size_;
 	rp_time_type dwell_time_;
+	int64_t identifier_;
 } rp_power_spectrum_spec;
 
 typedef struct rp_power_spectrum_spec_group {
@@ -760,6 +761,7 @@ typedef struct rp_power_spectrum {
 	int32_t num_windows_;
 	int32_t bin_size_;
 	int32_t step_size_;
+	int64_t identifier_;
 	int32_t num_power_;
 	double *power_;
 } rp_power_spectrum;

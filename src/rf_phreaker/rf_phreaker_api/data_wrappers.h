@@ -607,6 +607,7 @@ public:
 		buf_.num_windows_ = t.params_.num_windows_;
 		buf_.bin_size_ = t.params_.bin_size_;
 		buf_.step_size_ = t.params_.step_size_;
+		buf_.identifier_ = t.params_.identifier_;
 		buf_.num_power_ = t.power_.size();
 		bins_.resize(t.power_.size());
 		memcpy(bins_.data(), t.power_.data(), sizeof(double) * t.power_.size());

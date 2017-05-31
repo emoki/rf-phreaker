@@ -120,7 +120,7 @@ TEST(PowerSpectrumApproximator, GeneralTest) {
 	//spec.sampling_rate_ = 0;
 
 	power_spectrum_approximator approx;
-	approx.determine_spectrum_parameters(spec.start_frequency_, spec.span_, spec.bin_size_, spec.dwell_time_);
+	approx.determine_spectrum_parameters(spec.start_frequency_, spec.span_, spec.bin_size_, spec.dwell_time_, 0);
 
 
 	std::ofstream file("power_spectrum_params.txt");
@@ -135,10 +135,10 @@ TEST(PowerSpectrumApproximator, GeneralTest) {
 			for(int i = 0; i < inner_loop; ++i) {
 				spec.span_ = mhz(1) * i;
 				power_spectrum_approximator approx;
-				approx.determine_spectrum_parameters(spec.start_frequency_, spec.span_, spec.bin_size_, spec.dwell_time_);
+				approx.determine_spectrum_parameters(spec.start_frequency_, spec.span_, spec.bin_size_, spec.dwell_time_, k * inner_loop + i);
 				if(file) {
 					for(auto s : approx.power_specs()) {
-						file << (k * inner_loop + i) << "\t" << spec << "\t" << s << std::endl;
+						file << spec << "\t" << s << std::endl;
 					}
 				}
 			}

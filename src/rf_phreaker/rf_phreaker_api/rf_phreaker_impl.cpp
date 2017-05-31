@@ -616,7 +616,7 @@ rp_status rf_phreaker_impl::add_power_spectrum_frequency(rp_device *device, cons
 
 		// Determine collection parameters.
 		power_spectrum_approximator approx;
-		approx.determine_spectrum_parameters(spec.start_frequency_, spec.span_, spec.bin_size_, spec.dwell_time_);
+		approx.determine_spectrum_parameters(spec.start_frequency_, spec.span_, spec.bin_size_, spec.dwell_time_, spec.identifier_);
 
 		// Ensure we can collect on center freqs.
 		for(auto s : approx.power_specs()) {

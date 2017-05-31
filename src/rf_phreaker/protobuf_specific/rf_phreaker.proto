@@ -651,7 +651,8 @@ message rp_power_spectrum {
 	int32 num_windows = 8;
 	double bin_size = 9;
 	double step_size = 10;
-	repeated double power = 11 [packed=true];
+	int64 identifier = 11;
+	repeated double power = 12 [packed=true];
 }
 
 message rp_power_adjustment {

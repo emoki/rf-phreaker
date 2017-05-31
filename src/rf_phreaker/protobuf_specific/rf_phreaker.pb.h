@@ -6921,10 +6921,16 @@ class rp_power_spectrum : public ::google::protobuf::Message {
   double step_size() const;
   void set_step_size(double value);
 
-  // repeated double power = 11 [packed = true];
+  // optional int64 identifier = 11;
+  void clear_identifier();
+  static const int kIdentifierFieldNumber = 11;
+  ::google::protobuf::int64 identifier() const;
+  void set_identifier(::google::protobuf::int64 value);
+
+  // repeated double power = 12 [packed = true];
   int power_size() const;
   void clear_power();
-  static const int kPowerFieldNumber = 11;
+  static const int kPowerFieldNumber = 12;
   double power(int index) const;
   void set_power(int index, double value);
   void add_power(double value);
@@ -6948,6 +6954,7 @@ class rp_power_spectrum : public ::google::protobuf::Message {
   ::google::protobuf::int32 num_windows_;
   double bin_size_;
   double step_size_;
+  ::google::protobuf::int64 identifier_;
   ::google::protobuf::RepeatedField< double > power_;
   mutable int _power_cached_byte_size_;
   mutable int _cached_size_;
@@ -13357,7 +13364,21 @@ inline void rp_power_spectrum::set_step_size(double value) {
   // @@protoc_insertion_point(field_set:rf_phreaker.protobuf.rp_power_spectrum.step_size)
 }
 
-// repeated double power = 11 [packed = true];
+// optional int64 identifier = 11;
+inline void rp_power_spectrum::clear_identifier() {
+  identifier_ = GOOGLE_LONGLONG(0);
+}
+inline ::google::protobuf::int64 rp_power_spectrum::identifier() const {
+  // @@protoc_insertion_point(field_get:rf_phreaker.protobuf.rp_power_spectrum.identifier)
+  return identifier_;
+}
+inline void rp_power_spectrum::set_identifier(::google::protobuf::int64 value) {
+  
+  identifier_ = value;
+  // @@protoc_insertion_point(field_set:rf_phreaker.protobuf.rp_power_spectrum.identifier)
+}
+
+// repeated double power = 12 [packed = true];
 inline int rp_power_spectrum::power_size() const {
   return power_.size();
 }

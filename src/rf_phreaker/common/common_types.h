@@ -17,6 +17,8 @@ typedef int32_t bandwidth_type;
 
 typedef int64_t time_type;
 
+#define SPECTRUM_MIN_IDENTIFIER 100000000000
+
 struct power_spectrum_spec {
 	time_type dwell_time_;
 	frequency_type sampling_rate_;
@@ -27,6 +29,7 @@ struct power_spectrum_spec {
 	double step_size_;
 	int32_t window_length_;
 	int32_t num_windows_;
+	int64_t identifier_;
 };
 
 enum scheduling_algorithm_type {

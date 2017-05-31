@@ -359,14 +359,14 @@ public:
 		, num_windows_(30)
 	{}
 
-	void determine_spectrum_parameters(frequency_type start_freq, frequency_type span, frequency_type bin_size, time_type dwell_time_ns) {
+	void determine_spectrum_parameters(frequency_type start_freq, frequency_type span, frequency_type bin_size, time_type dwell_time_ns, int64_t identifier) {
 		// Using the same dwell time the processing time doubles (1.15x) every increment of fft_order.
 		// Given a bin size required we can calculate the sampling rate and fft order.  This will give us the max 
 		// bandwidth we can use.  Get the closest nuand bandwidth and then adjust center freq so the start freq is
 		// at the beginning of the bin.task
 		// TODO - make sure the bandwidth can be the same as the sampling_rate since we're downconverting.
 		power_specs_.clear();
-		determine_spectrum_parameters_(start_freq, span, bin_size, dwell_time_ns);
+		determine_spectrum_parameters_(start_freq, span, bin_size, dwell_time_ns, identifier);
 	}
 	
 	frequency_type calculate_allowed_bandwidth(frequency_type sampling_rate) {
@@ -377,7 +377,7 @@ public:
 	std::vector<power_spectrum_spec>& power_specs() { return power_specs_; }
 
 private:	
-	void determine_spectrum_parameters_(frequency_type start_freq, frequency_type span, frequency_type bin_size, time_type dwell_time_ns) {
+	void determine_spectrum_parameters_(frequency_type start_freq, frequency_type span, frequency_type bin_size, time_type dwell_time_ns, int64_t identifier) {
 		// Using the same dwell time the processing time doubles (1.15x) every increment of fft_order.
 		// Given a bin size required we can calculate the sampling rate and fft order.  This will give us the max 
 		// bandwidth we can use.  Get the closest nuand bandwidth and then adjust center freq so the start freq is
@@ -387,6 +387,7 @@ private:
 		power_spectrum_spec spec;
 		spec.bin_size_ = bin_size;
 		spec.step_size_ = bin_size;
+		spec.identifier_ = identifier;
 
 		auto fft_order = min_fft_order_ - 1;
 		frequency_type sampling_rate = 0;		
@@ -405,8 +406,8 @@ private:
 		}
 
 		if(scanner_bandwidth < span) {
-			determine_spectrum_parameters_(start_freq, span / 2, bin_size, dwell_time_ns);
-			determine_spectrum_parameters_(start_freq + span / 2, span / 2, bin_size, dwell_time_ns);
+			determine_spectrum_parameters_(start_freq, span / 2, bin_size, dwell_time_ns, identifier);
+			determine_spectrum_parameters_(start_freq + span / 2, span / 2, bin_size, dwell_time_ns, identifier);
 		}
 		else {
 			spec.window_length_ = (int)pow(2, fft_order);
