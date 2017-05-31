@@ -96,12 +96,12 @@ MarbleLayerManager::~MarbleLayerManager() {
 }
 
 void MarbleLayerManager::GeoObjectAdded(Marble::GeoDataObject *object) {
-	qDebug() << "GeoDataObject added.";
+	//qDebug() << "GeoDataObject added.";
 	if(rpDoc_ == nullptr && object->nodeType() == Marble::GeoDataTypes::GeoDataDocumentType) {
-		qDebug() << "Looking for rpDoc.";
+		//qDebug() << "Looking for rpDoc.";
 		auto doc = static_cast<Marble::GeoDataDocument*>(object);
 		if(doc->name() == "RfPhreaker") {
-			qDebug() << "rpDoc found...";
+			//qDebug() << "rpDoc found...";
 			rpDoc_ = doc;
 			configureStyles();
 			openPreviousLayers();

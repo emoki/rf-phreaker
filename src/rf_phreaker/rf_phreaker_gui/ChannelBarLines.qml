@@ -36,7 +36,7 @@ Item {
         }
 
         onItemAdded: {
-            console.debug("item added ------", barSeriesIndex);
+            //console.debug("item added ------", barSeriesIndex);
             item.chart = chart;
             item.mainAxisX = mainAxisX;
             item.mainAxisY = mainAxisY;
@@ -47,7 +47,7 @@ Item {
         }
         onItemRemoved: {
             barSeriesIndex -= 1;
-            console.debug("item removed -----", barSeriesIndex);
+            //console.debug("item removed -----", barSeriesIndex);
             removeMeasBar(barSeriesIndex);
             if(barSeriesIndex == repeater.count)
                 refresh();
@@ -88,16 +88,14 @@ Item {
         var lowerAreaId = index + lowerArea;
         var lowerIdA = index + lowerLineA
         var lowerIdB = index + lowerLineB
-        if(chart.series(upperIdA) === null
-                || chart.series(upperIdB) === null
-                || chart.series(lowerIdA) === null
-                || chart.series(lowerIdB) === null ) {
-            console.debug("Unable to find bar series.");
-        }
-        chart.removeSeries(chart.series(upperIdA));
-        chart.removeSeries(chart.series(upperIdB));
-        chart.removeSeries(chart.series(lowerIdA));
-        chart.removeSeries(chart.series(lowerIdB));
+//        if(chart.series(upperAreaId) === null
+//                || chart.series(upperIdB) === null
+//                || chart.series(lowerAreaId) === null
+//                || chart.series(lowerIdB) === null ) {
+//            console.debug("Unable to find bar series.");
+//            console.debug(chart.series(upperAreaId), chart.series(upperIdA), chart.series(upperIdB),
+//                          chart.series(lowerAreaId), chart.series(lowerIdA), chart.series(lowerIdB))
+//        }
         chart.removeSeries(chart.series(upperAreaId))
         chart.removeSeries(chart.series(lowerAreaId))
     }

@@ -21,7 +21,7 @@ Controls.TableView {
 
     function sendCurrentSelection(row) {
         if(row !== -1) {
-            console.debug("Sending current selection (", suggestionModel[row], ".")
+            //console.debug("Sending current selection (", suggestionModel[row], ".")
             sTextField.update(suggestionModel[row]);
         }
         close();

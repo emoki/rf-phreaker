@@ -17,6 +17,7 @@ Item {
             //line.color = Api.getColorTheme()
             line.useOpenGL = true;
             item.lineSeries = line;
+            //console.debug("sweep", index, " - ", line);
         }
     }
 }

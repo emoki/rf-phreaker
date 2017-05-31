@@ -51,15 +51,15 @@ TextField {
     }
 
     function doSearch(text) {
-        console.debug("Searching for \"", text, "\".")
+        //console.debug("Searching for \"", text, "\".")
         sSearch.filter = text;
         sSearch.search();
-        console.debug("filter text: ", filter);
+        //console.debug("filter text: ", filter);
         toggleOpen();
     }
 
     function update(item) {
-        console.debug("Updating searchtextfield item. (clearing model)")
+        //console.debug("Updating searchtextfield item. (clearing model)")
         selectedItem = item;
         filter = "";
         doSearch("");
