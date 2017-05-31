@@ -80,8 +80,8 @@ Api::Api(QObject *parent)
 	, thread_(new ApiThread)
 	, allTechModels_(highestCellPerChannelModel_, ApiTypes::FIRST_GSM_OPERATING_BAND, ApiTypes::LAST_LTE_OPERATING_BAND)
 	, gsmModels_(highestCellPerChannelModel_, ApiTypes::FIRST_GSM_OPERATING_BAND, ApiTypes::LAST_GSM_OPERATING_BAND)
-	, wcdmaModels_(highestCellPerChannelModel_, ApiTypes::FIRST_UMTS_OPERATING_BAND, ApiTypes::LAST_UMTS_OPERATING_BAND)
-	, lteModels_(highestCellPerChannelModel_, ApiTypes::FIRST_LTE_OPERATING_BAND, ApiTypes::LAST_LTE_OPERATING_BAND) {
+	, wcdmaModels_(highestCellPerChannelModel_, ApiTypes::FIRST_WCDMA_OPERATING_BAND, ApiTypes::LAST_WCDMA_OPERATING_BAND)
+	, lteModels_(highestCellPerChannelModel_, ApiTypes::FIRST_LTE_OPERATING_BAND, ApiTypes::LAST_LTE_OPERATING_BAND)
 	canRecordData_ = false;
 	shouldUpdateLog_ = false;
 	callbacks_.rp_update = rp_update;
