@@ -8,6 +8,7 @@
 #include "rf_phreaker/rf_phreaker_gui/Wcdma.h"
 #include "rf_phreaker/rf_phreaker_gui/Lte.h"
 #include "rf_phreaker/rf_phreaker_gui/Sweep.h"
+#include "rf_phreaker/rf_phreaker_gui/Cw.h"
 #include "rf_phreaker/common/measurements.h"
 #include "rf_phreaker/common/exception_types.h"
 
@@ -24,6 +25,7 @@ public:
 		GsmRole,
 		WcdmaRole,
 		LteRole,
+		CwRole,
 		TimeElapsedRole,
 		MeasurementFreqRole,
 		MeasurementSignalLevelRole,
@@ -39,6 +41,7 @@ public:
 		CellLacTacRole,
 		CellCidRole,
 		LteDownlinkBandwidthRole,
+		GraphLabelRole,
 		MeasurementRoleSize
 	};
 
@@ -47,6 +50,7 @@ public:
 		GsmColumn,
 		WcdmaColumn,
 		LteColumn,
+		CwColumn,
 		TimeElapsedColumn,
 		MeasurementFreqColumn,
 		MeasurementSignalLevelColumn,
@@ -62,6 +66,7 @@ public:
 		CellLacTacColumn,
 		CellCidColumn,
 		LteDownlinkBandwidthColumn,
+		GraphLabelColumn,
 		ColumnSize
 	};
 
@@ -71,6 +76,7 @@ public:
 		roles_[GsmRole] = "gsm";
 		roles_[WcdmaRole] = "wcdma";
 		roles_[LteRole] = "lte";
+		roles_[CwRole] = "cw";
 		roles_[TimeElapsedRole] = "timeElapsed";
 		roles_[MeasurementFreqRole] = "measurementFreq";
 		roles_[MeasurementSignalLevelRole] = "measurementSignalLevel";
@@ -85,6 +91,10 @@ public:
 		roles_[CellLacTacRole] = "lactac";
 		roles_[CellCidRole] = "cid";
 		roles_[LteDownlinkBandwidthRole] = "lteDownlinkBandwidth";
+		roles_[GraphLabelRole] = "graphLabelRole";
+
+		for(auto i = roles_.begin(); i != roles_.end(); ++i)
+			roleLookup_.insert(i.value(), i.key());
 	}
 
 	~MeasurementModel() {
@@ -191,6 +201,10 @@ public:
 		return new Lte(t, this);
 	}
 
+	Base* create_data(const rf_phreaker::power_spectrum_data &t) {
+		return new Cw(t, this);
+	}
+
 	template<typename Data>
 	void modify(const by_unique_lookup::type::iterator &it, const Data &t) {
 		auto success = index_.modify(it, index_update<Data>(t));
@@ -254,8 +268,6 @@ public:
 	QVariant data(const QModelIndex &index, int role = Qt::DisplayRole) const {
 		if(index.row() < 0 || index.row() >= (int)index_.size())
 			return QVariant();
-		if(index.column() < 0 || index.column() >= (int)ColumnSize)
-			return QVariant();
 
 		if(role != Qt::DisplayRole) {
 			switch(role) {
@@ -267,6 +279,8 @@ public:
 				return QVariant::fromValue((Wcdma*)index_.get<random_access>()[index.row()]);
 			case LteRole:
 				return QVariant::fromValue((Lte*)index_.get<random_access>()[index.row()]);
+			case CwRole:
+				return QVariant::fromValue((Cw*)index_.get<random_access>()[index.row()]);
 			case TimeElapsedRole:
 				return QVariant(index_.get<random_access>()[index.row()]->timeElapsed());
 			case MeasurementFreqRole:
@@ -297,11 +311,17 @@ public:
 				return QVariant(index_.get<random_access>()[index.row()]->cellCidStr());
 			case LteDownlinkBandwidthRole:
 				return QVariant(reinterpret_cast<Lte*>(index_.get<random_access>()[index.row()])->downlinkBandwidth());
+			case GraphLabelRole: {
+				return QVariant(graphLabel(index.row()));
+			}
 			default:
 				return QVariant();
 			}
 		}
 		else {
+			if(index.column() < 0 || index.column() >= (int)ColumnSize)
+				return QVariant();
+
 			switch(index.column()) {
 			case BasicMeasColumn:
 				return QVariant::fromValue((Base*)index_.get<random_access>()[index.row()]);
@@ -311,6 +331,8 @@ public:
 				return QVariant::fromValue((Wcdma*)index_.get<random_access>()[index.row()]);
 			case LteColumn:
 				return QVariant::fromValue((Lte*)index_.get<random_access>()[index.row()]);
+			case CwColumn:
+				return QVariant::fromValue((Cw*)index_.get<random_access>()[index.row()]);
 			case TimeElapsedColumn:
 				return QVariant(index_.get<random_access>()[index.row()]->timeElapsed());
 			case MeasurementFreqColumn:
@@ -337,10 +359,21 @@ public:
 				return QVariant(index_.get<random_access>()[index.row()]->cellCidStr());
 			case LteDownlinkBandwidthColumn:
 				return QVariant(reinterpret_cast<Lte*>(index_.get<random_access>()[index.row()])->downlinkBandwidth());
+			case GraphLabelColumn: 
+				return QVariant(graphLabel(index.row()));
 			default:;
 				return QVariant();
 			}
 		}
+	}
+
+	virtual QString graphLabel(int row) const {
+		auto meas = index_.get<random_access>()[row];
+		QString t(" ");
+		t += QString::number(meas->cellChannel());
+		if(meas->cellId() != -1)
+			t += " - " + QString::number(meas->cellId());
+		return t;
 	}
 
 	QVariant headerData(int section, Qt::Orientation orientation, int role = Qt::DisplayRole) const {
@@ -394,6 +427,62 @@ public:
 		}
 		return QVariant();
 	}
+
+	Q_INVOKABLE virtual int convertRoleToColumn(QString role) {
+		auto r = findRole(role);
+		switch(r) {
+		case BasicMeasRole:
+			return BasicMeasColumn;
+		case GsmRole:
+			return GsmColumn;
+		case WcdmaRole:
+			return WcdmaColumn;
+		case LteRole:
+			return LteColumn;
+		case CwRole:
+			return CwColumn;
+		case TimeElapsedRole:
+			return TimeElapsedColumn;
+		case MeasurementFreqRole:
+			return MeasurementFreqColumn;
+		case MeasurementBandwidthRole:
+			return MeasurementBandwidthColumn;
+		case MeasurementSignalLevelRole:
+			return MeasurementSignalLevelColumn;
+		case CellTechRole:
+			return CellTechColumn;
+		case CellBandRole:
+			return CellBandColumn;
+		case CellChannelRole:
+			return CellChannelColumn;
+		case CellIdRole:
+			return CellIdColumn;
+		case CellSignalLevelRole:
+			return CellSignalLevelColumn;
+		case CellInterferenceRole:
+			return CellInterferenceColumn;
+		case CellMccRole:
+			return CellMccColumn;
+		case CellMncRole:
+			return CellMncRole;
+		case CellLacTacRole:
+			return CellLacTacColumn;
+		case CellCidRole:
+			return CellCidColumn;
+		case LteDownlinkBandwidthRole:
+			return LteDownlinkBandwidthColumn;
+		case GraphLabelRole:
+			return GraphLabelColumn;
+		default:
+			qDebug() << "Unknown role when converting to column.";
+			return MeasurementFreqColumn;
+		}
+	}
+
+	Q_INVOKABLE int findRole(QString role) {
+		return roleLookup_.find(role.toLocal8Bit()).value();
+	}
+
 protected:
 	QHash<int, QByteArray> roleNames() const {
 		return roles_;
@@ -521,6 +610,111 @@ public:
 			}
 		}
 		return QVariant();
+	}
+};
+
+class CwMeasurementModel : public MeasurementModel {
+	Q_OBJECT
+	Q_ENUMS(CwMeasurementRole)
+	Q_ENUMS(CwMeasurementColumn)
+public:
+	enum CwMeasurementRole {
+		IdentifierRole = MeasurementRoleSize,
+		BinSizeRole,
+		DwellTimeRole,
+		CwRoleSize
+	};
+
+	enum CwMeasurementColumn {
+		IdentifierColumn = ColumnSize,
+		BinSizeColumn,
+		DwellTimeColumn,
+		CwColumnSize
+	};
+
+public:
+	CwMeasurementModel(QObject *parent = nullptr)
+		: MeasurementModel(parent) {
+		roles_[IdentifierRole] = "identifierRole";
+		roles_[BinSizeRole] = "binSizeRole";
+		roles_[DwellTimeRole] = "dwellTimeRole";
+
+		for(auto i = (int)IdentifierRole; i <= CwRoleSize; ++i)
+			roleLookup_.insert(roles_[i], i);
+	}
+
+
+	QVariant headerData(int section, Qt::Orientation orientation, int role = Qt::DisplayRole) const {
+		if(role != Qt::DisplayRole) {
+			switch(role) {
+				case BinSizeRole:
+					return "Bandwidth (kHz)";
+				case IdentifierRole:
+					return "Frequency";
+				case DwellTimeRole:
+					return "Dwell Time (ms)";
+				case CellSignalLevelRole:
+					return "Signal Level";
+				default:
+					return MeasurementModel::headerData(section, orientation, role);
+			}
+		}
+		return QVariant();
+	}
+	virtual QString graphLabel(int row) const {
+		auto meas = reinterpret_cast<Cw*>(index_.get<random_access>()[row]);
+		QString t(" ");
+		t += QString::number(meas->identifier(), 'f', 1);
+		return t;
+	}
+
+	QVariant data(const QModelIndex &index, int role = Qt::DisplayRole) const {
+		if(role != Qt::DisplayRole) {
+			switch(role) {
+				case IdentifierRole:
+					return MeasurementModel::data(index, CwRole).value<Cw*>()->identifier();
+				case BinSizeRole:
+					return MeasurementModel::data(index, CwRole).value<Cw*>()->binSize();
+				case DwellTimeRole:
+					return MeasurementModel::data(index, CwRole).value<Cw*>()->dwellTime();
+				default:
+					return MeasurementModel::data(index, role);
+			}
+		}
+		else {
+			switch(index.column()) {
+				case IdentifierColumn:
+					return MeasurementModel::data(index, CwRole).value<Cw*>()->identifier();
+				case BinSizeColumn:
+					return MeasurementModel::data(index, CwRole).value<Cw*>()->binSize();
+				case DwellTimeColumn:
+					return MeasurementModel::data(index, CwRole).value<Cw*>()->dwellTime();
+				default:
+					return MeasurementModel::data(index, role);
+			}
+		}
+	}
+
+	int columnCount(const QModelIndex &) const {
+		return columnCount();
+	}
+
+	virtual int columnCount() const {
+		return CwColumnSize;
+	}
+
+	Q_INVOKABLE int convertRoleToColumn(QString role) {
+		int r = roleLookup_.find(role.toLocal8Bit()).value();
+		switch(r) {
+			case IdentifierRole:
+				return IdentifierColumn;
+			case BinSizeRole:
+				return BinSizeColumn;
+			case DwellTimeRole:
+				return DwellTimeColumn;
+			default:
+				return MeasurementModel::convertRoleToColumn(role);
+		}
 	}
 };
 

@@ -67,7 +67,7 @@ set (qt_INSTALL_PATH "c:/bin/qt/5.8/msvc2013" CACHE STRING "Path to QT.")
 set (qt_CMAKE_PATH "${qt_INSTALL_PATH}/lib/cmake/Qt5"  CACHE STRING "Path to QT cmake file.")
 set (CMAKE_PREFIX_PATH ${qt_CMAKE_PATH} ${qt_INSTALL_PATH} ${CMAKE_PREFIX_PATH})
 # All qt packages must be found within top level dir.
-find_package (Qt5 COMPONENTS Core Gui Quick Widgets)
+find_package (Qt5 COMPONENTS Core Gui Quick Widgets DataVisualization Charts)
 if(NOT Qt5_FOUND)
 	message(SEND_ERROR "Unable to find Qt.  Make sure the drive letter is correct!")
 endif()

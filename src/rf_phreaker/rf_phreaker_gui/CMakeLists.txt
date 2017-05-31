@@ -29,9 +29,11 @@ set (rf_phreaker_gui_SRCS
 	CollectionInfoList.h
 	CollectionInfoSearch.cpp
 	CollectionInfoSearch.h
+	Cw.h
 	Events.h
 	FileSaveDialog.cpp
 	FileSaveDialog.h
+	FreqLimits.h
 	Gps.h
 	Gsm.h
 	IO.h
@@ -55,6 +57,9 @@ set (rf_phreaker_gui_SRCS
 	Settings.h
 	SettingsIO.cpp
 	SettingsIO.h
+	SpectrumManager.h
+	SpectrumModel.h
+	Spectrum3d.h
 	Stats.h
 	Sweep.h
 	Utility.h
@@ -164,6 +169,8 @@ target_link_libraries (rf_phreaker_gui Qt5::Core)
 target_link_libraries (rf_phreaker_gui Qt5::Gui)
 target_link_libraries (rf_phreaker_gui Qt5::Widgets)
 target_link_libraries (rf_phreaker_gui Qt5::Quick)
+target_link_libraries (rf_phreaker_gui Qt5::DataVisualization)
+target_link_libraries (rf_phreaker_gui Qt5::Charts)
 target_link_libraries (rf_phreaker_gui rf_phreaker_api)
 
 # Marble libraries should be built and placed in the output directory

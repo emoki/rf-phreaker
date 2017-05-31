@@ -3,11 +3,11 @@
 #include <QtQml/QQmlApplicationEngine>
 #include <QtGui/QFontDatabase>
 #include <QtCore/QDir>
-
 #include "marble/declarative/MarbleDeclarativePlugin.h"
 #include "rf_phreaker/rf_phreaker_gui/ApiPlugin.h"
 #include "rf_phreaker/rf_phreaker_gui/MarbleLayerManager.h"
 #include "rf_phreaker/rf_phreaker_gui/MessageHandler.h"
+#include <QtDataVisualization/qutils.h>// Has to go after ApiPlugin.h
 
 int main(int argc, char *argv[]) {
 	int status = 0;
@@ -33,14 +33,16 @@ int main(int argc, char *argv[]) {
 	{
 		QGuiApplication::setAttribute(Qt::AA_EnableHighDpiScaling);
 		QQmlApplicationEngine engine;
-		//	if (qgetenv("QT_QUICK_CONTROLS_STYLE").isEmpty()) {
-		//		qputenv("QT_QUICK_CONTROLS_STYLE", "Material");
-		//	}
-		//	engine.addImportPath("/Material/");
 		declarativePlugin.initializeEngine(&engine, marbleUri);
-		//engine.load(QUrl(QStringLiteral("qrc:/main.qml")));
 		MessageHandler::logToApi(true);
 		engine.load(QUrl(QStringLiteral("qrc:/MaterialMain.qml")));
+		
+		//// Enable antialiasing in direct rendering mode
+		//// TODO - Look into using this for spectrum graph.
+		//auto windowList = app.topLevelWindows();
+		//for(auto &i : windowList) {
+		//	i->setFormat(QtDataVisualization::qDefaultSurfaceFormat());
+		//}
 
 		status = app.exec();
 

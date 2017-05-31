@@ -103,7 +103,11 @@ public:
 		case ApiTypes::LTE_SWEEP:
 			return "LTE";
 		case ApiTypes::IQ_DATA:
-			return "IQ DATA";
+			return "IQ Data";
+		case ApiTypes::POWER_SPECTRUM:
+			return "Spectrum";
+		case ApiTypes::CW:
+			return "CW";
 		default:
 			return "UNKNOWN";
 		}

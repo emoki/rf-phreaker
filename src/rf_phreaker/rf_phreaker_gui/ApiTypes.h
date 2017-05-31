@@ -46,7 +46,9 @@ public:
 		CDMA_SWEEP = ::rf_phreaker::CDMA_SWEEP,
 		WCDMA_SWEEP = ::rf_phreaker::UMTS_SWEEP,
 		LTE_SWEEP = ::rf_phreaker::LTE_SWEEP,
-		IQ_DATA = ::rf_phreaker::IQ_DATA
+		IQ_DATA = ::rf_phreaker::IQ_DATA,
+		POWER_SPECTRUM = ::rf_phreaker::POWER_SPECTRUM,
+		CW = ::rf_phreaker::UNKOWN_SPECIFIER + 1
 	};
 
 	enum OperatingBand {
@@ -160,6 +162,10 @@ public:
 			return rf_phreaker::LTE_SWEEP;
 		case IQ_DATA:
 			return rf_phreaker::IQ_DATA;
+		case POWER_SPECTRUM:
+			return rf_phreaker::POWER_SPECTRUM;
+		case CW:
+			throw std::runtime_error("we have a cw!");
 		default:
 			return rf_phreaker::UNKOWN_SPECIFIER;
 
@@ -185,6 +191,10 @@ public:
 			return LTE_SWEEP;
 		else if(s == "IQ DATA")
 			return IQ_DATA;
+		else if(s == "POWER SPECTRUM")
+			return POWER_SPECTRUM;
+		else if(s == "CW")
+			return CW;
 		else
 			return UNKNOWN_TECH;
 	}
@@ -198,8 +208,6 @@ public:
 			return is_sweep ? WCDMA_SWEEP : WCDMA_FULL_SCAN;
 		else if(b >= rf_phreaker::FIRST_LTE_OPERATING_BAND && b <= rf_phreaker::LAST_LTE_OPERATING_BAND)
 			return is_sweep ? LTE_SWEEP : LTE_FULL_SCAN;
-		//else if(b == "IQ DATA")
-		//	return IQ_DATA;
 		else
 			return UNKNOWN_TECH;
 	}
@@ -224,6 +232,10 @@ public:
 			return "LTE SWEEP";
 		case IQ_DATA:
 			return "IQ DATA";
+		case POWER_SPECTRUM:
+			return "POWER SPECTRUM";
+		case CW:
+			return "CW";
 		default:
 			return "UNKNOWN";
 		}

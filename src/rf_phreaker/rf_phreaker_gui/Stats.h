@@ -34,6 +34,8 @@ public:
 			.append(QString::number(count_[rf_phreaker::UMTS_SWEEP] / t));
 		s.append("\nlte_sweep\t").append(QString::number(count_[rf_phreaker::LTE_SWEEP])).append("\t")
 			.append(QString::number(count_[rf_phreaker::LTE_SWEEP] / t));
+		s.append("\ncw_and_spectrum\t").append(QString::number(count_[rf_phreaker::POWER_SPECTRUM])).append("\t")
+			.append(QString::number(count_[rf_phreaker::POWER_SPECTRUM] / t));
 		benchmark_.output_total_time_elapsed(s.toStdString());
 		benchmark_.close_benchmark();
 	}
@@ -65,6 +67,9 @@ public:
 			break;
 		case rf_phreaker::protobuf::rp_update::UpdateCase::kLteSweep:
 			count_[rf_phreaker::LTE_SWEEP]++;
+			break;
+		case rf_phreaker::protobuf::rp_update::UpdateCase::kPowerSpectrum:
+			count_[rf_phreaker::POWER_SPECTRUM]++;
 			break;
 		default:
 			qDebug() << "Unknown protobuf message.";

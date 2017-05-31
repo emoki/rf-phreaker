@@ -82,6 +82,7 @@ Api::Api(QObject *parent)
 	, gsmModels_(highestCellPerChannelModel_, ApiTypes::FIRST_GSM_OPERATING_BAND, ApiTypes::LAST_GSM_OPERATING_BAND)
 	, wcdmaModels_(highestCellPerChannelModel_, ApiTypes::FIRST_WCDMA_OPERATING_BAND, ApiTypes::LAST_WCDMA_OPERATING_BAND)
 	, lteModels_(highestCellPerChannelModel_, ApiTypes::FIRST_LTE_OPERATING_BAND, ApiTypes::LAST_LTE_OPERATING_BAND)
+	, specIdentifier_(SPECTRUM_MIN_IDENTIFIER) {
 	canRecordData_ = false;
 	shouldUpdateLog_ = false;
 	callbacks_.rp_update = rp_update;
@@ -162,6 +163,7 @@ void Api::startCollection() {
 	qDebug() << "Starting collection.";
 
 	clearModels();
+	cwLookup_.clear();
 
 	// Create storage for all possible techs.  Note, QMap automatically inserts a default item if it is empty.
 	api_storage<rp_operating_band, rp_operating_band_group> sweep;
@@ -170,20 +172,48 @@ void Api::startCollection() {
 	QMap<ApiTypes::Tech, api_storage<rp_frequency_band, rp_frequency_band_group>> techs;
 
 	foreach(const auto &ci, scanList_.list()) {
-		auto cf = ci->channelFreqLow();
-		if(ci->isSweep()) {
-			sweep.push_back(cf->toRpBand());
+		auto cfLow = ci->channelFreqLow();
+		auto cfHigh = ci->channelFreqHigh();
+		if(!cfLow->isValid())
+			continue;
 
+		if(ci->isSweep()) {
+			sweep.push_back(cfLow->toRpBand());
 			// Add operating band to sweep models
-			auto sweepModel = sweepModels_.insert(cf->band(), std::make_shared<MeasurementModel>());
+			auto sweepModel = sweepModels_.insert(cfLow->band(), std::make_shared<MeasurementModel>());
 			QQmlEngine::setObjectOwnership(sweepModel->get(), QQmlEngine::CppOwnership);
-//			sweepModelList_.push_back(sweepModel->get());
 		}
-		//else if(cf->tech() == ApiTypes::IQ_DATA) {
-		//	iq_data.push_back(cf->toRpFreq());
-		//}
-		else {
-			techs[cf->tech()].push_back(cf->toRpFrequencyBand());
+		else if(ci->isGsm() || ci->isWcdma() || ci->isLte()) {
+			techs[cfLow->tech()].push_back(cfLow->toRpFrequencyBand());
+		}
+		else if(ci->isSpectrum()) {
+			if(!cfHigh->isValid())
+				continue;
+			rp_power_spectrum_spec spec;
+			spec.start_frequency_ = cfLow->toRpFreq() < cfHigh->toRpFreq() ? cfLow->toRpFreq() : cfHigh->toRpFreq();
+			spec.span_ = abs(cfHigh->toRpFreq() - cfLow->toRpFreq());
+			spec.bin_size_ = Settings::instance()->spectrumBinSize_;
+			spec.dwell_time_ = Settings::instance()->spectrumDwellTime_;
+			spec.identifier_ = specIdentifier_++;
+			spec_data.push_back(spec);
+			spectrumManager_.freqLimits()->update(spec);
+		}
+		else if(ci->isCw()) {
+			rp_power_spectrum_spec spec;
+			spec.start_frequency_ = cfLow->toRpFreq() - Settings::instance()->cwOffset_;
+			spec.span_ = Settings::instance()->cwSpan_;
+			spec.bin_size_ = Settings::instance()->cwBinSize_;
+			spec.dwell_time_ = Settings::instance()->cwDwellTime_;
+			spec.identifier_ = cfLow->toRpFreq();
+			spec_data.push_back(spec);
+			cwLookup_.insert(spec);
+		}
+		else if(ci->isIq()) {
+			rp_iq_data_spec spec;
+			spec.center_frequency_ = cfLow->toRpFreq();
+			spec.bandwidth_ = Settings::instance()->iqBandwidth_;
+			spec.dwell_time_ = Settings::instance()->iqDwellTime_;
+			spec.sampling_rate_ = Settings::instance()->iqSamplingRate_;
 		}
 	}
 
@@ -201,6 +231,8 @@ void Api::clearModels() {
 	lteModels_.clear();
 	highestCellPerChannelModel_.clear();
 	sweepModels_.clear();
+	spectrumManager_.clear();
+	cwModel_.clear();
 }
 
 void Api::updateModels() {
@@ -216,6 +248,7 @@ void Api::findFreqMinMax() {
 	gsmModels_.findFreqMinMax(list);
 	wcdmaModels_.findFreqMinMax(list);
 	lteModels_.findFreqMinMax(list);
+	// spectrum is done within model
 }
 
 void Api::stopCollection() {
@@ -234,7 +267,8 @@ bool Api::event(QEvent *e) {
 		stats_.update_benchmark(proto.update_case());
 
 		if(canRecordData_) {
-			if(proto.update_case() != rf_phreaker::protobuf::rp_update::UpdateCase::kLog)
+			if(proto.update_case() != rf_phreaker::protobuf::rp_update::UpdateCase::kLog
+				&& proto.update_case() != rf_phreaker::protobuf::rp_update::UpdateCase::kPowerSpectrum)
 				rf_phreaker::protobuf::write_delimited_to(proto, output_file_.get());
 			if(apiOutput_) {
 				api_debug_output_.output_api_data(update_pb_, collectionFilename_, current_gps_);
@@ -272,7 +306,7 @@ bool Api::event(QEvent *e) {
 			}
 			else {
 				gsmModels_.fullScanModel()->update(t);
-				// Manually sort vector and only pass in the first meas (hopefully with a decoded bsic) for each freq 
+				// Manually sort vector and only pass in the first meas (hopefully with a decoded bsic) for each freq
 				less_than_freq_id cmp;
 				std::sort(t.begin(), t.end(), cmp);
 				// We at least have one measurement.
@@ -338,11 +372,12 @@ bool Api::event(QEvent *e) {
 			break;
 		}
 		case rf_phreaker::protobuf::rp_update::UpdateCase::kPowerSpectrum: {
-			auto &t = update_pb_.get_power_spectrum();
-			auto bands = band_specifier_.find_avaliable_lte_operating_bands(t.measurement_frequency_);
-			for(auto i : bands) {
-				if(sweepModels_.contains(ApiTypes::toOperatingBand(i.band_)))
-					sweepModels_[ApiTypes::toOperatingBand(i.band_)]->update_with_basic_data(t, ApiTypes::LTE_SWEEP);
+			auto t = update_pb_.get_power_spectrum();
+			if(t.params_.identifier_ >= SPECTRUM_MIN_IDENTIFIER) {
+				spectrumManager_.update(std::move(t));
+			}
+			else {
+				cwModel_.update(std::vector<rf_phreaker::power_spectrum_data>{t});
 			}
 			break;
 		}
@@ -504,7 +539,7 @@ void Api::close_collection_file() {
 void Api::convertRfp(QString filename) {
 	rpf_conversions_.push_back(std::async(std::launch::async, [=](QString fn) {
 		try {
-			fn.remove("file:///"); 
+			fn.remove("file:///");
 			IO::convert_rpf(fn);
 			qInfo() << fn << " text conversion successfully.";
 			Api::instance()->addMessageAsync(fn + " text conversion successfully.");

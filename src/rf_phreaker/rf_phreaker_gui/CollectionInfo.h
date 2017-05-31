@@ -51,10 +51,16 @@ public:
 		}
 	}
 
-	bool isSweep() const { return cfLow_.channelFreq().is_valid() && cfHigh_.channelFreq().is_valid(); }
+	bool isSweep() const {
+		return cfLow_.tech() == ApiTypes::GSM_SWEEP || cfLow_.tech() == ApiTypes::WCDMA_SWEEP ||
+			cfLow_.tech() == ApiTypes::LTE_SWEEP;
+	}
 	bool isGsm() const { return cfLow_.tech() == ApiTypes::GSM_SWEEP || cfLow_.tech() == ApiTypes::GSM_FULL_SCAN; }
 	bool isWcdma() const { return cfLow_.tech() == ApiTypes::WCDMA_SWEEP || cfLow_.tech() == ApiTypes::WCDMA_FULL_SCAN; }
 	bool isLte() const { return cfLow_.tech() == ApiTypes::LTE_SWEEP || cfLow_.tech() == ApiTypes::LTE_FULL_SCAN; }
+	bool isIq() const { return cfLow_.tech() == ApiTypes::IQ_DATA; }
+	bool isSpectrum() const { return cfLow_.tech() == ApiTypes::POWER_SPECTRUM; }
+	bool isCw() const { return cfLow_.tech() == ApiTypes::CW; }
 
 	QString toInfoStr() const { return "Info placeholder"; }
 	QString toChannelsStr() const {
@@ -72,7 +78,7 @@ public:
 			return cfLow_.toFreqStr() + " MHz";
 	}
 	QString toBandStr() const {
-		if(cfLow_.tech() == ApiTypes::IQ_DATA)
+		if(cfLow_.tech() == ApiTypes::IQ_DATA || cfLow_.tech() == ApiTypes::POWER_SPECTRUM || cfLow_.tech() == ApiTypes::CW)
 			return "";
 		else
 			return cfLow_.toBandStr();

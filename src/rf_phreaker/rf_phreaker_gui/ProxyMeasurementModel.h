@@ -40,6 +40,7 @@ public:
 	};
 
 	Q_INVOKABLE void sort(int column, Qt::SortOrder order = Qt::AscendingOrder) Q_DECL_OVERRIDE {
+		//qDebug() << "sort - (" << column << ", " << (order == Qt::AscendingOrder ? "Ascending)" : "Descending)");
 		QSortFilterProxyModel::sort(column, order);
 	}
 
@@ -65,6 +66,26 @@ public:
 
 	Q_INVOKABLE void refilter() {
 		QSortFilterProxyModel::invalidateFilter();
+	}
+
+	Q_INVOKABLE int convertRoleToColumn(QString role) {
+		int column = 0;
+		if(sourceModel()->inherits("MeasurementModel")) {
+			column = static_cast<MeasurementModel*>(sourceModel())->convertRoleToColumn(role);
+		}
+		else
+			qDebug() << "model is not of type MeasurementModel";
+		return column;
+	}
+
+	Q_INVOKABLE int findRole(QString role) {
+		int column = 0;
+		if(sourceModel()->inherits("MeasurementModel")) {
+			column = static_cast<MeasurementModel*>(sourceModel())->findRole(role);
+		}
+		else
+			qDebug() << "model is not of type MeasurementModel";
+		return column;
 	}
 
 	bool filterAcceptsRow(int sourceRow, const QModelIndex & sourceParent) const Q_DECL_OVERRIDE {

@@ -131,5 +131,26 @@ private:
 	std::chrono::milliseconds sleep_duration_ms_;
 };
 
+struct SpecSort {
+	SpecSort(const rp_power_spectrum_spec &spec)
+		: start_(spec.start_frequency_)
+		, identifier_(spec.identifier_) {}
+	SpecSort(const rf_phreaker::power_spectrum_data &spec)
+		: start_(spec.params_.start_frequency_)
+		, identifier_(spec.params_.identifier_) {}
+	rf_phreaker::frequency_type start_;
+	int64_t identifier_;
+
+	bool operator<(const SpecSort &b) const {
+		if(start_ == b.start_)
+			return identifier_ < b.identifier_;
+		else
+			return start_ < b.start_;
+	}
+	bool operator==(const SpecSort &b) const {
+		return start_ == b.start_ && identifier_ == b.identifier_;
+	}
+};
+
 
 //}

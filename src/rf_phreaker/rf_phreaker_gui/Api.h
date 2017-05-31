@@ -20,6 +20,8 @@
 #include "rf_phreaker/rf_phreaker_gui/MeasurementModel.h"
 #include "rf_phreaker/rf_phreaker_gui/ProxyMeasurementModel.h"
 #include "rf_phreaker/rf_phreaker_gui/ApiMessage.h"
+#include "rf_phreaker/rf_phreaker_gui/SpectrumManager.h"
+#include "rf_phreaker/rf_phreaker_gui/Utility.h"
 #include "rf_phreaker/protobuf_specific/rf_phreaker_serialization.h"
 #include <google/protobuf/io/zero_copy_stream_impl.h>
 //namespace rf_phreaker { namespace gui {
@@ -48,6 +50,8 @@ class Api : public QObject {
 	Q_PROPERTY(ModelGroup* gsmModels READ gsmModels NOTIFY gsmModelsChanged)
 	Q_PROPERTY(ModelGroup* wcdmaModels READ wcdmaModels NOTIFY wcdmaModelsChanged)
 	Q_PROPERTY(ModelGroup* lteModels READ lteModels NOTIFY lteModelsChanged)
+	Q_PROPERTY(MeasurementModel* cwModel READ cwModel NOTIFY cwModelChanged)
+	Q_PROPERTY(SpectrumManager* spectrumManager READ spectrumManager NOTIFY spectrumManagerChanged)
 
 public:
 	Q_INVOKABLE void initializeApi();
@@ -91,6 +95,8 @@ signals:
 	void gsmModelsChanged();
 	void wcdmaModelsChanged();
 	void lteModelsChanged();
+	void cwModelChanged();
+	void spectrumManagerChanged();
 
 
 	// Signals for state machine
@@ -132,6 +138,8 @@ public:
 	ModelGroup* gsmModels() { return &gsmModels_; }
 	ModelGroup* wcdmaModels() { return &wcdmaModels_; }
 	ModelGroup* lteModels() { return &lteModels_; }
+	SpectrumManager* spectrumManager() { return &spectrumManager_; }
+	MeasurementModel* cwModel() { return &cwModel_; }
 
 	void setDeviceStatus(ApiTypes::DeviceStatus s) {
 		if(deviceStatus_ != s) {
@@ -216,8 +224,14 @@ private:
 	ModelGroup gsmModels_;
 	ModelGroup wcdmaModels_;
 	ModelGroup lteModels_;
+	CwMeasurementModel cwModel_;
+	std::set<SpecSort> cwLookup_;
+	SpectrumManager spectrumManager_;
 
 	std::vector<std::future<void>> rpf_conversions_;
+
+	int64_t specIdentifier_;
 };
+
 
 //}}

@@ -39,6 +39,9 @@ struct index_tech {
 	result_type operator()(const rf_phreaker::lte_data &) const {
 		return ApiTypes::LTE_FULL_SCAN;
 	}
+	result_type operator()(const rf_phreaker::power_spectrum_data &) const {
+		return ApiTypes::CW;
+	}
 };
 
 struct index_id {
@@ -55,6 +58,9 @@ struct index_id {
 	result_type operator()(const rf_phreaker::lte_data &b) const {
 		return b.physical_cell_id_;
 	}
+	result_type operator()(const rf_phreaker::power_spectrum_data &b) const {
+		return b.params_.identifier_;
+	}
 };
 
 struct index_cell_sl {
@@ -67,6 +73,13 @@ struct index_cell_sl {
 	}
 	result_type operator()(const rf_phreaker::lte_data &b) const {
 		return b.measurement_signal_level_ + b.sync_quality_;
+	}
+	result_type operator()(const rf_phreaker::power_spectrum_data &b) const {
+		auto pos = (b.params_.start_frequency_ - b.params_.identifier_) / b.params_.step_size_;
+		if(pos < b.power_.size())
+			return b.power_.at(pos);
+		else
+			return b.power_.at(0);
 	}
 };
 

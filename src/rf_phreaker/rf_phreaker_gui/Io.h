@@ -49,6 +49,16 @@ public:
 		case rf_phreaker::protobuf::rp_update::UpdateCase::kLteSweep:
 			output_data(rf_phreaker::protobuf::rp_update::kLteSweepFieldNumber, filename.toStdString() + "_" + "lte_sweep", update_pb.get_lte_sweep_basic(), g);
 			break;
+		case rf_phreaker::protobuf::rp_update::UpdateCase::kPowerSpectrum: {
+			auto spec = update_pb.get_power_spectrum();
+			if(spec.params_.identifier_ > SPECTRUM_MIN_IDENTIFIER) {
+				output_data(rf_phreaker::protobuf::rp_update::kPowerSpectrumFieldNumber, filename.toStdString() + "_" + "power_spectrum", spec, g);
+			}
+			else {
+				output_data(rf_phreaker::protobuf::rp_update::kPowerSpectrumFieldNumber, filename.toStdString() + "_" + "cw", spec, g);
+			}
+			break;
+		}
 		default:
 			qDebug() << "Unknown protobuf message.";
 		}
@@ -155,6 +165,14 @@ public:
 					break;
 				case rf_phreaker::protobuf::rp_update::UpdateCase::kLteSweep:
 						io.output_data(rf_phreaker::protobuf::rp_update::kLteSweepFieldNumber, filename.toStdString() + "_converted_" + "lte_sweep", message.get_lte_sweep_basic(), gps);
+					break;
+				case rf_phreaker::protobuf::rp_update::UpdateCase::kPowerSpectrum: {
+						auto spec = message.get_power_spectrum();
+						if(spec.params_.identifier_ > SPECTRUM_MIN_IDENTIFIER)
+							io.output_data(rf_phreaker::protobuf::rp_update::kPowerSpectrumFieldNumber, filename.toStdString() + "_converted_" + "power_spectrum", spec, gps);
+						else
+							io.output_data(rf_phreaker::protobuf::rp_update::kPowerSpectrumFieldNumber, filename.toStdString() + "_converted_" + "cw", spec, gps);
+					}
 					break;
 				default:
 					qDebug() << "Unknown protobuf message.";
