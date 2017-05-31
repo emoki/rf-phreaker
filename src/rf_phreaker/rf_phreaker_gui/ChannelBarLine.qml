@@ -15,13 +15,7 @@ Item {
     property real topY/*: bottomY + barWidth*/
     property bool shouldUpdate: true
     property int index
-
-//    property real index: 0
-//    property int totalNumBars
-//    property real borderSpacing: ((mainAxisY.max - mainAxisY.min) / totalNumBars) / 6
-//    property real barArea: (mainAxisY.max - mainAxisY.min - 2 * borderSpacing) / totalNumBars
-//    property real barSpacing: barArea / 5
-//    property real barWidth: barArea - barSpacing * 2
+    property string title: ""
 
     Timer {
         interval: 1000
@@ -37,27 +31,29 @@ Item {
 
     Label {
         id: label
-        text: meas ? " " + meas.cellChannel + " - " + (meas.cellId !== -1 ? meas.cellId : "N/A") : ""
+        text: meas ? channelBarLine.title : ""
     }
 
     function update() {
         if(!visible)
             return;
         //console.debug("updating channelBarLine: ", meas.cellChannel, "-", meas.cellId);
-        areaSeriesSL.upperSeries.clear();
-        areaSeriesSL.upperSeries.append(mainAxisX.min, topY);
-        areaSeriesSL.upperSeries.append(meas.measurementSignalLevel, topY);
-        areaSeriesSL.lowerSeries.clear();
-        areaSeriesSL.lowerSeries.append(mainAxisX.min, bottomY);
-        areaSeriesSL.lowerSeries.append(meas.measurementSignalLevel, bottomY);
-
-        areaSeriesInter.upperSeries.clear();
-        areaSeriesInter.upperSeries.append(meas.measurementSignalLevel, topY);
-        areaSeriesInter.upperSeries.append(meas.measurementSignalLevel - meas.cellInterference, topY);
-        areaSeriesInter.lowerSeries.clear();
-        areaSeriesInter.lowerSeries.append(meas.measurementSignalLevel, bottomY);
-        areaSeriesInter.lowerSeries.append(meas.measurementSignalLevel - meas.cellInterference, bottomY);
-
+        if(areaSeriesSL) {
+            areaSeriesSL.upperSeries.clear();
+            areaSeriesSL.upperSeries.append(mainAxisX.min, topY);
+            areaSeriesSL.upperSeries.append(meas.cellSignalLevel, topY);
+            areaSeriesSL.lowerSeries.clear();
+            areaSeriesSL.lowerSeries.append(mainAxisX.min, bottomY);
+            areaSeriesSL.lowerSeries.append(meas.cellSignalLevel, bottomY);
+        }
+        if(areaSeriesInter) {
+            areaSeriesInter.upperSeries.clear();
+            areaSeriesInter.upperSeries.append(meas.cellSignalLevel, topY);
+            areaSeriesInter.upperSeries.append(meas.cellSignalLevel - meas.cellInterference, topY);
+            areaSeriesInter.lowerSeries.clear();
+            areaSeriesInter.lowerSeries.append(meas.cellSignalLevel, bottomY);
+            areaSeriesInter.lowerSeries.append(meas.cellSignalLevel - meas.cellInterference, bottomY);
+        }
         label.x = chart.plotArea.x
         label.y = chart.plotArea.y + ((topY + bottomY) / 2) / mainAxisY.max * chart.plotArea.height - label.height / 2
 

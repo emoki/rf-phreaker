@@ -309,14 +309,7 @@ Page {
 
             MaterialCard {
                 id: scanListCard
-//                property int minHeight: scanListTitle.height + Api.scanList.rowCount * dp(32) + collectionInfoSuggestionText.height + dp(18)
-//                property int h2
                 state: scanListExpBut.expanded ? "w2h3" : "w1h2"
-//                state: scanListExpBut.expanded ? "w2h3" : "w2h1"
-
-//                height2: minHeight
-
-//                Component.onCompleted: { h2 = hieght; }
 
                 ColumnLayout {
                     id: scanListLayout
@@ -366,8 +359,10 @@ Page {
                                     text: {
                                         if(isSweep)
                                             return "Sweeping " + band
-                                        else
+                                        else if(isGsm || isWcdma || isLte)
                                             return "Scanning " + radioType + " " + channels
+                                        else
+                                            return "Scanning " + radioType + " " + freqs
                                     }
                                 }
                                 secondaryItem: IconButton {
@@ -394,12 +389,19 @@ Page {
                                 showDivider: true
                                 text: {
                                     if(isSweep)
-                                        return "Sweeping " + channels
+                                        return "Sweeping " + band
+                                    else if(isGsm || isWcdma || isLte)
+                                        return "Scanning " + radioType + " " + channels
                                     else
-                                        return "Scanning " + channels
+                                        return "Scanning " + radioType + " " + freqs
                                 }
                                 valueText: freqs
-                                subText: band + " - " + info
+                                subText: {
+                                    if(isSweep || isGsm || isWcdma || isLte)
+                                        band + " - " + info
+                                    else
+                                        "Placeholder for iq, spec, cw specific info"
+                                }
                                 secondaryItem: IconButton {
                                     iconName: "content/remove"
                                     color: Theme.light.textColor
@@ -415,29 +417,47 @@ Page {
                     }
                     Item {
                         id: filter
-                        property int numColumns: scanListExpBut.expanded ? 6 : 4
+                        property int numColumns: scanListExpBut.expanded ? 8 : 4
                         property int numRows: scanListExpBut.expanded ? 1 : 2
-                        property int numSpan: scanListExpBut.expanded ? 1 : 2
                         Layout.fillWidth: true
                         Layout.preferredHeight: dp(36) * numRows
                         Layout.rightMargin: dp(8)
                         Layout.leftMargin: dp(8)
 
+                        Rectangle {
+                            x: scanListExpBut.expanded ? sweepFilter.x + sweepFilter.width : scanFilter.x + scanFilter.width
+                            y: scanFilter.y
+                            color: "lightgrey"
+                            width: 1
+                            height: filterGrid.height
+                        }
                         GridLayout {
+                            id:filterGrid
                             anchors.fill: parent
                             rowSpacing: 0
                             columnSpacing: 0
-                            rows: {filter.numRows; console.debug("num rows!!", filter.numRows) }
+                            rows: scanListExpBut.expanded ? 1 : 2
                             columns: filter.numColumns
-                            MaterialToggleButton { implicitWidth: parent.width / filter.numColumns; text: "GSM";
-                                checked: search.searchGsm; onClicked: { search.searchGsm = !search.searchGsm; search.search(); }}
-                            MaterialToggleButton { implicitWidth: parent.width / filter.numColumns; text: "WCDMA";
-                                checked: search.searchWcdma; onClicked: { search.searchWcdma= !search.searchWcdma; search.search(); }}
-                            MaterialToggleButton { implicitWidth: parent.width / filter.numColumns; text: "LTE";
-                                checked: search.searchLte; onClicked: { search.searchLte = !search.searchLte; search.search(); }}
-                            MaterialToggleButton { implicitWidth: parent.width / (filter.numSpan == 1 ? filter.numColumns : 2);
-                                Layout.columnSpan: filter.numSpan; text: "IQ Data"; checked: search.searchRaw;
-                                onClicked: { search.searchRaw = !search.searchRaw; search.search(); }}
+                            MaterialToggleButton { id: scanFilter; text: "Scan"; implicitWidth: parent.width / filter.numColumns; checked: search.scan;
+                                onClicked: { search.scan = !search.scan; search.search(); if(search.scan) suggestText.openIf(); }}
+                            MaterialToggleButton { id: sweepFilter; text: "Sweep"; visible: scanListExpBut.expanded;
+                                implicitWidth: parent.width / filter.numColumns; checked: search.sweep;
+                                onClicked: { search.sweep = !search.sweep; search.search(); if(search.sweep) suggestText.openIf(); }}
+                            MaterialToggleButton { text: "GSM"; implicitWidth: parent.width / filter.numColumns; checked: search.searchGsm;
+                                onClicked: { search.searchGsm = !search.searchGsm; search.search(); if(search.searchGsm) suggestText.openIf(); }}
+                            MaterialToggleButton { text: "WCDMA"; implicitWidth: parent.width / filter.numColumns; checked: search.searchWcdma;
+                                onClicked: { search.searchWcdma= !search.searchWcdma; search.search(); if(search.searchWcdma) suggestText.openIf(); }}
+                            MaterialToggleButton { text: "LTE"; implicitWidth: parent.width / filter.numColumns; checked: search.searchLte;
+                                onClicked: { search.searchLte = !search.searchLte; search.search(); if(search.searchLte) suggestText.openIf(); }}
+                            MaterialToggleButton { text: "Sweep"; visible: !scanListExpBut.expanded;
+                                implicitWidth: parent.width / filter.numColumns; checked: search.sweep;
+                                onClicked: { search.sweep = !search.sweep; search.search(); if(search.sweep) suggestText.openIf(); }}
+                            MaterialToggleButton { text: "CW"; implicitWidth: parent.width / filter.numColumns; checked: search.searchCw;
+                                onClicked: { search.searchCw = !search.searchCw; search.search(); if(search.searchCw) suggestText.openIf(); }}
+                            MaterialToggleButton { text: "Spectrum"; implicitWidth: parent.width / filter.numColumns; checked: search.searchSpectrum;
+                                onClicked: { search.searchSpectrum = !search.searchSpectrum; search.search(); if(search.searchSpectrum) suggestText.openIf(); }}
+                            MaterialToggleButton { text: "IQ Data"; implicitWidth: parent.width / filter.numColumns; checked: search.searchIq;
+                                onClicked: { search.searchIq = !search.searchIq; search.search(); if(search.searchIq) suggestText.openIf(); }}
                         }
                     }
                     RowLayout {
@@ -452,7 +472,7 @@ Page {
                         }
 
                         SuggestionTextField {
-                            id: collectionInfoSuggestionText
+                            id: suggestText
 
                             Layout.fillWidth: true
 
@@ -469,11 +489,13 @@ Page {
                             }
 
                             onClose: menu.close()
-                            onToggleOpen: {
+                            onToggleOpen: openIf()
+
+                            function openIf() {
                                 if(suggestView.rowCount === 0 && menu.state === "open")
                                     menu.close();
                                 else if(suggestView.rowCount > 0 && menu.state === "closed") {
-                                    menu.open(collectionInfoSuggestionText, 0, collectionInfoSuggestionText.height)
+                                    menu.open(suggestText, 0, suggestText.height)
                                     suggestView.currentRow = -1;
                                 }
                             }
@@ -495,14 +517,13 @@ Page {
                             closeOnResize: false
 
                             width: {
-                                console.debug(scanListCard.width3, layout.width - dp(100))
                                 scanListCard.width3 < layout.width - dp(100)
                                    ? scanListCard.width3
                                    : layout.width - dp(100)
                             }
                             //If there are more than max items, show an extra half item so
                             // it's clear the user can scroll
-                            height: Math.min(dropTableView.maxVisibleItems*48 * Units.dp + 24 * Units.dp, (search.results.length) * 48 * Units.dp + dp(2))
+                            height: Math.min(dropTableView.maxVisibleItems * dp(48) + dp(24), search.results.length * dp(48) + dp(2))
 
                             SuggestionView {
                                 id: suggestView
@@ -512,7 +533,9 @@ Page {
                                 visible: menu.opacity === 1
 
                                 suggestionModel: search.results
-                                sTextField: collectionInfoSuggestionText
+                                sTextField: suggestText
+
+
 
                                 rowDelegate: MaterialRowDelegate{ control: suggestView }
 

@@ -6,27 +6,46 @@ import RfPhreaker 1.0
 
 Rectangle {
     id: root
+    property alias tableView: dataTable
     property alias sourceModel: filter.sourceModel
     property alias filteredModel: dataTable.model
-    property int columnCount: 9
+    property alias columnCount: dataTable.columnCount
+
 
     signal filteredModelUpdated()
+    signal tableViewCompleted()
 
     implicitWidth: dp(96) * 9 + dp(64) * 4
     implicitHeight: Math.max(4, filter.rowCount()) * dp(48) + dp(16) + dp(56)
 
-    //    height: 8 * dp(48) + dp(16) + dp(56)
-//    width: dp(96) * 6 + dp(64) * 4
+    function removeAllColumns() {
+        while(dataTable.columnCount) {
+            dataTable.removeColumn(0);
+        }
+    }
 
+    function insertColumn(role, isString, index) {
+        var idx = dataTable.model.findRole(role);
+        var title = dataTable.model.headerData(0, 0, idx);
+        console.debug("insert ", role, isString, index, root.tableView, idx, title);
+        dataTable.insertColumn(index, columnComponent.createObject(dataTable, {"role": role, "title": title, "isString": isString, "_control": dataTable}));
+    }
 
-//    ColumnLayout {
-//        anchors.fill: parent
-//        clip:  true
+    function sortAndUpdate(tableColumn, sortOrder) {
+        var column = dataTable.getColumn(tableColumn);
+        if(column !== null && column.role !== null) {
+            filter.sort(dataTable.model.convertRoleToColumn(column.role), sortOrder);
+            root.filteredModelUpdated();
+        }
+    }
 
     Controls.TableView {
         id: dataTable
 
         anchors.fill: parent
+
+        Component.onCompleted: tableViewCompleted()
+
 
         backgroundVisible: true
         sortIndicatorVisible: true
@@ -38,24 +57,17 @@ Rectangle {
         headerDelegate: MaterialHeaderDelegate { control: dataTable; }
 
         rowDelegate: MaterialRowDelegate{ control: dataTable; }
-//        rowDelegate: Rectangle {
-//            height: dp(48);
-//            width: dataTable.viewport.width
-//            color: styleData.selected
-//                             ? Palette.colors.grey[200]
-//                             : Palette.colors.grey[100]
-//        }
 
         model: FilterProxyMeasurementModel {
             id: filter
             filterRole: FilterProxyMeasurementModel.TimeFilter
             dynamicSortFilter: false // Must be set to false if we want to manually sort.
             expirationTimeFilter: GuiSettings.measurementRemovalTime
-            Component.onCompleted: dataTable.sortAndUpdate()
+            Component.onCompleted: root.sortAndUpdate(dataTable.sortIndicatorColumn, dataTable.sortIndicatorOrder)
             onRowsInserted: {
                 //console.debug("onRowsInserted")
                 dataTable.implicitHeight = filter.rowCount() * dp(48) + dp(16) + dp(56)
-                //dataTable.sortAndUpdate();
+                root.sortAndUpdate(dataTable.sortIndicatorColumn, dataTable.sortIndicatorOrder);
             }
         }
         Timer {
@@ -69,41 +81,13 @@ Rectangle {
             }
         }
 
-        function sortAndUpdate() {
-            filter.sort(dataTable.convertColumn(dataTable.sortIndicatorColumn), dataTable.sortIndicatorOrder);
-            root.filteredModelUpdated();
-        }
+        onSortIndicatorColumnChanged: root.sortAndUpdate(dataTable.sortIndicatorColumn, dataTable.sortIndicatorOrder)
 
-        function convertColumn(column) {
-            switch(column) {
-            case 0:
-                return MeasurementModel.MeasurementFreqColumn;
-            case 1:
-                return MeasurementModel.CellChannelColumn;
-            case 2:
-                return MeasurementModel.CellIdColumn;
-            case 3:
-                return MeasurementModel.CellSignalLevelColumn;
-            case 4:
-                return MeasurementModel.CellInterferenceColumn;
-            case 5:
-                return MeasurementModel.CellMccColumn;
-            case 6:
-                return MeasurementModel.CellMncColumn;
-            case 7:
-                return MeasurementModel.CellLacTacColumn;
-            case 8:
-                return MeasurementModel.CellCidColumn;
-            }
-        }
-
-        onSortIndicatorColumnChanged: dataTable.sortAndUpdate()
-
-        onSortIndicatorOrderChanged: dataTable.sortAndUpdate()
+        onSortIndicatorOrderChanged: root.sortAndUpdate(dataTable.sortIndicatorColumn, dataTable.sortIndicatorOrder)
 
         Controls.TableViewColumn {
             id: column0
-            title: "Frequency"
+            title: dataTable.model.headerData(0, 0, MeasurementModel.MeasurementFreqRole);
             role: "measurementFreq"
             width: dataTable.width / root.columnCount
             horizontalAlignment: Text.AlignRight
@@ -115,7 +99,7 @@ Rectangle {
         }
         Controls.TableViewColumn {
             id: column1
-            title: "Channel"
+            title: dataTable.model.headerData(0, 0, MeasurementModel.CellChannelRole);
             role: "cellChannel"
             width: dataTable.width / root.columnCount
             horizontalAlignment: Text.AlignRight
@@ -127,7 +111,7 @@ Rectangle {
         }
         Controls.TableViewColumn {
             id: column2
-            title: "Identifier"
+            title: dataTable.model.headerData(0, 0, MeasurementModel.CellIdRole);
             role: "cellId"
             width: dataTable.width / root.columnCount
             horizontalAlignment: Text.AlignRight
@@ -139,7 +123,7 @@ Rectangle {
         }
         Controls.TableViewColumn {
             id: column3
-            title: "SL"
+            title: dataTable.model.headerData(0, 0, MeasurementModel.CellSignalLevelRole);
             role: "cellSignalLevel"
             width: dataTable.width / root.columnCount
             horizontalAlignment: Text.AlignRight
@@ -151,7 +135,7 @@ Rectangle {
         }
         Controls.TableViewColumn {
             id: column4
-            title: "Interference"
+            title: dataTable.model.headerData(0, 0, MeasurementModel.CellInterferenceRole);
             role: "cellInterference"
             width: dataTable.width / root.columnCount
             horizontalAlignment: Text.AlignRight
@@ -163,7 +147,7 @@ Rectangle {
         }
         Controls.TableViewColumn {
             id: column5
-            title: "MCC"
+            title: dataTable.model.headerData(0, 0, MeasurementModel.CellMccRole);
             role: "mcc"
             width: dataTable.width / root.columnCount
             horizontalAlignment: Text.AlignRight
@@ -175,7 +159,7 @@ Rectangle {
         }
         Controls.TableViewColumn {
             id: column6
-            title: "MNC"
+            title: dataTable.model.headerData(0, 0, MeasurementModel.CellMncRole);
             role: "mnc"
             width: dataTable.width / root.columnCount
             horizontalAlignment: Text.AlignRight
@@ -187,7 +171,7 @@ Rectangle {
         }
         Controls.TableViewColumn {
             id: column7
-            title: "LAC/TAC"
+            title: dataTable.model.headerData(0, 0, MeasurementModel.CellLacTacRole);
             role: "lactac"
             width: dataTable.width / root.columnCount
             horizontalAlignment: Text.AlignRight
@@ -199,7 +183,7 @@ Rectangle {
         }
         Controls.TableViewColumn {
             id: column8
-            title: "CELLID"
+            title: dataTable.model.headerData(0, 0, MeasurementModel.CellCidRole);
             role: "cid"
             width: dataTable.width / root.columnCount
             horizontalAlignment: Text.AlignRight
@@ -208,6 +192,22 @@ Rectangle {
                 control: dataTable
                 text: String(styleData.value)
             }
+        }
+    }
+
+    Component {
+        id: columnComponent
+        Controls.TableViewColumn {
+            property bool isString;
+            property var _control;
+            //width: dataTable.width / root.columnCount
+            horizontalAlignment: Text.AlignRight;
+            delegate: MaterialItemDelegate {
+                isNumber: true;
+                control: _control;
+                text: isString ? String(styleData.value) : Number(styleData.value).toFixed(1);
+            }
+            Component.onCompleted: console.debug("column ", role, title, isString, _control, delegate)
         }
     }
 }

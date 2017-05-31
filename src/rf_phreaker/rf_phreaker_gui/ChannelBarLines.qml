@@ -16,6 +16,8 @@ Item {
     property string lowerArea: "_LowerArea"
     property string lowerLineA: "_LowerA"
     property string lowerLineB: "_LowerB"
+    property bool displaySecondArea: true
+
     CategoryAxis {
         id: mainAxisY
         min: 0
@@ -71,13 +73,15 @@ Item {
             item.areaSeriesSL.lowerSeries.style = Qt.NoPen
         }
 
-        item.areaSeriesInter = chart.series(lowerAreaId);
-        if(item.areaSeriesInter === null) {
-            item.areaSeriesInter = chart.createSeries(ChartView.SeriesTypeArea, lowerAreaId, mainAxisX, mainAxisY);
-            item.areaSeriesInter.lowerSeries = chart.createSeries(ChartView.SeriesTypeLine, lowerIdB, mainAxisX, mainAxisY);
-            item.areaSeriesInter.color = "grey";
-            item.areaSeriesInter.upperSeries.style = Qt.NoPen
-            item.areaSeriesInter.lowerSeries.style = Qt.NoPen
+        if(displaySecondArea) {
+            item.areaSeriesInter = chart.series(lowerAreaId);
+            if(item.areaSeriesInter === null) {
+                item.areaSeriesInter = chart.createSeries(ChartView.SeriesTypeArea, lowerAreaId, mainAxisX, mainAxisY);
+                item.areaSeriesInter.lowerSeries = chart.createSeries(ChartView.SeriesTypeLine, lowerIdB, mainAxisX, mainAxisY);
+                item.areaSeriesInter.color = "grey";
+                item.areaSeriesInter.upperSeries.style = Qt.NoPen
+                item.areaSeriesInter.lowerSeries.style = Qt.NoPen
+            }
         }
     }
 
@@ -97,7 +101,11 @@ Item {
 //                          chart.series(lowerAreaId), chart.series(lowerIdA), chart.series(lowerIdB))
 //        }
         chart.removeSeries(chart.series(upperAreaId))
-        chart.removeSeries(chart.series(lowerAreaId))
+        chart.removeSeries(chart.series(upperIdB));
+        if(displaySecondArea) {
+            chart.removeSeries(chart.series(lowerAreaId))
+            chart.removeSeries(chart.series(lowerIdB));
+        }
     }
 
     function refresh() {
@@ -112,10 +120,12 @@ Item {
 
         for(var i = 0; i < repeater.count; ++i) {
             var meas = repeater.model.data(repeater.model.index(i, 0), MeasurementModel.BasicMeasRole);
+            var measLabel = repeater.model.data(repeater.model.index(i,0), MeasurementModel.GraphLabelRole);
             var channel = repeater.itemAt(i);
 
             createAttachMeasBar(i, channel)
             channel.meas = meas;
+            channel.title = measLabel;
             channel.bottomY = (borderSpacing + barArea * i + barSpacing);
             channel.topY = (channel.bottomY + barWidth);
 //            console.debug("channel: ", channel.meas.cellChannel, "  cellid: ", channel.meas.cellId, "  bottomY: ",

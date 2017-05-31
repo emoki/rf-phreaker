@@ -1,9 +1,11 @@
-import QtQuick 2.5
+import QtQuick 2.7
 import RfPhreaker 1.0
 import Material 0.3
 import QtQuick.Layouts 1.1
 import QtQuick.Controls 1.4 as Controls
 import QtQuick.Dialogs 1.2
+import QtDataVisualization 1.2
+import QtCharts 2.2
 import Material.ListItems 0.1 as ListItem
 
 
@@ -219,6 +221,220 @@ TabbedPage {
 
                 slMin: -120
                 slMax: -10
+            }
+        }
+    }
+
+    Tab {
+        id: cwTab
+        title: "CW"
+
+        RowLayout {
+            id: cwGrid
+            anchors {
+                fill: parent
+                topMargin: dp(16)
+                bottomMargin: dp(16)
+                leftMargin: dp(16)
+                rightMargin: dp(16)
+            }
+
+            spacing: dp(16)
+
+            ColumnLayout {
+                Layout.maximumWidth: cwGrid.width * .4
+                Layout.fillHeight: true
+                spacing: dp(16)
+
+                MaterialMeasurementTable {
+                    id: cwDataWorksheet
+
+                    Layout.fillHeight: true
+                    Layout.fillWidth: true
+
+                    sourceModel: Api.cwModel
+
+                    onFilteredModelUpdated: cwBarChart.update();
+
+                    onTableViewCompleted: {
+                        cwDataWorksheet.removeAllColumns();
+                        cwDataWorksheet.insertColumn("dwellTimeRole", false, 0);
+                        cwDataWorksheet.insertColumn("binSizeRole", false, 0);
+                        cwDataWorksheet.insertColumn("cellSignalLevel", false, 0);
+                        cwDataWorksheet.insertColumn("identifierRole", false, 0);
+                    }
+                }
+            }
+            BarChart {
+                id: cwBarChart
+                Layout.fillHeight: true
+                Layout.fillWidth: true
+
+                sourceModel: cwDataWorksheet.filteredModel
+
+                displaySecondArea: false
+
+                slMin: -160
+                slMax: -10
+            }
+        }
+    }
+
+    Tab {
+        id: spectrumTab
+        title: "Spectrum"
+
+        ColumnLayout {
+            id: spectrumGrid
+            anchors {
+                fill: parent
+                topMargin: dp(16)
+                bottomMargin: dp(16)
+                leftMargin: dp(16)
+                rightMargin: dp(16)
+            }
+            spacing: dp(16)
+
+            function update() {
+                for(var i = 0; i < spectrumOverviewChart.count; ++i) {
+                    Api.spectrumManager.updateLineSeries(spectrumOverviewChart.series(i), i);
+                }
+                for(var j = 0; j < spectrumWaterfall.seriesList.length; ++j) {
+                    Api.spectrumManager.updateSurfaceSeries(spectrumWaterfall.seriesList[j], j);
+                }
+            }
+
+            function create() {
+                // Account for dummy series
+                for(var i = spectrumOverviewChart.count; i < Api.spectrumManager.numItems; ++i) {
+                    var line = spectrumOverviewChart.createSeries(ChartView.SeriesTypeLine, i,
+                                                                  spectrumOverviewChart.overviewAxisX, spectrumOverviewChart.overviewAxisY);
+                    line.useOpenGl = true;
+                }
+                for(var j = spectrumWaterfall.seriesList.length; j < Api.spectrumManager.numItems; ++j) {
+                    spectrumWaterfall.addSeries(Api.spectrumManager.createSurfaceSeries(j));
+                }
+
+            }
+
+            Timer {
+                id: specRefresh
+                interval: 300
+                running: true
+                repeat: true
+                onTriggered: spectrumGrid.update()
+            }
+
+            Connections {
+                target: Api.spectrumManager
+                onNumItemsChanged: spectrumGrid.create()
+                onFinishedReset: {
+                    spectrumOverviewChart.removeAllSeries();
+                    while(spectrumWaterfall.seriesList.length)
+                        spectrumWaterfall.removeSeries(spectrumWaterfall.seriesList[0]);
+                }
+            }
+
+            Component.onCompleted: {
+                spectrumGrid.create();
+                spectrumGrid.update();
+            }
+
+            OverviewChart {
+                id: spectrumOverviewChart
+
+                Layout.fillWidth: true
+                Layout.preferredHeight: spectrumGrid.height * .5
+
+                xMin: (Api.spectrumManager.freqLimits.low < 300 || Api.spectrumManager.freqLimits.low > 2600) ? 300 : Api.spectrumManager.freqLimits.low
+                xMax: (Api.spectrumManager.freqLimits.high > 2600 || Api.spectrumManager.freqLimits.high < 300) ? 2600 : Api.spectrumManager.freqLimits.high
+                yMin: -160
+                yMax: -10
+            }
+
+            Rectangle {
+                Layout.fillWidth: true
+                Layout.fillHeight: true
+                visible: Api.spectrumManager.isDisabled
+                Text {
+                    id: noWaterfallLabel
+                    anchors.centerIn: parent
+                    color: Theme.light.subTextColor
+                    fontSizeMode: Text.Fit
+                    minimumPixelSize: 10
+                    font.pixelSize: 100
+                    font.family: "Roboto"
+                    text: "Waterfall plot disabled"
+                    opacity: .25
+                }
+            }
+
+            Item {
+                id: surface
+                Layout.fillWidth: true
+                Layout.fillHeight: true
+                visible: !Api.spectrumManager.isDisabled
+
+                ColorGradient {
+                    id: surfaceGradient
+                    ColorGradientStop { position: 0.0; color: "blue" }
+                    ColorGradientStop { position: 0.25; color: "lightblue" }
+                    ColorGradientStop { position: 0.55; color: "green" }
+                    ColorGradientStop { position: 0.75; color: "yellow" }
+                    ColorGradientStop { position: 1.0; color: "red" }
+                }
+
+                Surface3D {
+                    id: spectrumWaterfall
+                    width: spectrumOverviewChart.plotArea.width
+                    height: surface.height
+                    x: spectrumOverviewChart.plotArea.x
+
+                    shadowQuality: AbstractGraph3D.ShadowQualityNone
+                    selectionMode: AbstractGraph3D.SelectionSlice | AbstractGraph3D.SelectionItemAndRow
+                    scene.activeCamera.cameraPreset: Camera3D.CameraPresetDirectlyAbove
+                    orthoProjection: true
+
+
+                    // Using the width / height ratio allows us to precisely match the overviewchart.
+                    horizontalAspectRatio: spectrumWaterfall.width / spectrumWaterfall.height
+                    scene.activeCamera.zoomLevel: spectrumWaterfall.width / spectrumWaterfall.height * 100
+
+                    // Margin keeps the border away so we don't see the graph lines.
+                    margin: 100
+                    axisY.min: -160
+                    axisY.max: -10
+                    axisX.min: spectrumOverviewChart.overviewAxisX.min
+                    axisX.max: spectrumOverviewChart.overviewAxisX.max
+                    axisZ.min: 0
+                    axisZ.max: Api.spectrumManager.capacity
+                    axisY.title: ""
+                    axisX.title: ""
+                    axisZ.title: ""
+                    axisX.labelAutoRotation: 0
+                    axisY.labelAutoRotation: 0
+                    axisZ.labelAutoRotation: 0
+                    axisX.labelFormat: ""
+                    axisY.labelFormat: ""
+                    axisZ.labelFormat: ""
+                    axisX.segmentCount: 1
+                    axisX.subSegmentCount: 1
+                    axisZ.segmentCount: 1
+                    axisZ.subSegmentCount: 1
+
+                    theme: Theme3D {
+                        type: Theme3D.ThemeDigia
+                        colorStyle: Theme3D.ColorStyleRangeGradient
+                        baseGradients: [surfaceGradient]
+                    }
+
+//                    Surface3DSeries {
+//                        id: surfaceSeries
+//                        drawMode: Surface3DSeries.DrawSurface
+//                        meshSmooth: false
+//                        flatShadingEnabled: false
+//                    }
+                }
             }
         }
     }

@@ -9,6 +9,7 @@ ChartView {
     property var sourceModel
     property var slMin: -120
     property var slMax: -20
+    property bool displaySecondArea: true
 
     //title: "Bar Chart"
     antialiasing: true
@@ -45,6 +46,7 @@ ChartView {
         chart: barChart
         mainAxisX: barAxisX
         sourceModel: barChart.sourceModel
+        displaySecondArea: barChart.displaySecondArea
     }
 
     function update() {
