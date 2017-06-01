@@ -1,30 +1,28 @@
 /*
-    Copyright 2005-2014 Intel Corporation.  All Rights Reserved.
+    Copyright (c) 2005-2017 Intel Corporation
 
-    This file is part of Threading Building Blocks. Threading Building Blocks is free software;
-    you can redistribute it and/or modify it under the terms of the GNU General Public License
-    version 2  as  published  by  the  Free Software Foundation.  Threading Building Blocks is
-    distributed in the hope that it will be useful, but WITHOUT ANY WARRANTY; without even the
-    implied warranty of MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.
-    See  the GNU General Public License for more details.   You should have received a copy of
-    the  GNU General Public License along with Threading Building Blocks; if not, write to the
-    Free Software Foundation, Inc.,  51 Franklin St,  Fifth Floor,  Boston,  MA 02110-1301 USA
+    Licensed under the Apache License, Version 2.0 (the "License");
+    you may not use this file except in compliance with the License.
+    You may obtain a copy of the License at
 
-    As a special exception,  you may use this file  as part of a free software library without
-    restriction.  Specifically,  if other files instantiate templates  or use macros or inline
-    functions from this file, or you compile this file and link it with other files to produce
-    an executable,  this file does not by itself cause the resulting executable to be covered
-    by the GNU General Public License. This exception does not however invalidate any other
-    reasons why the executable file might be covered by the GNU General Public License.
+        http://www.apache.org/licenses/LICENSE-2.0
+
+    Unless required by applicable law or agreed to in writing, software
+    distributed under the License is distributed on an "AS IS" BASIS,
+    WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+    See the License for the specific language governing permissions and
+    limitations under the License.
+
+
+
+
 */
+
+#include "../../common/utility/utility.h"
 
 #if __TBB_MIC_OFFLOAD
 #pragma offload_attribute (push,target(mic))
 #endif // __TBB_MIC_OFFLOAD
-
-// This header should come before any other one.
-// For details, see Known Issues in the Release Notes.
-#include "tbb/tbb_stddef.h"
 
 #include <cstdio>
 #include <cstdlib>
@@ -35,17 +33,7 @@
 #include "tbb/task_scheduler_init.h"
 #include "tbb/task_group.h"
 
-#include "../../common/utility/utility.h"
-
 #pragma warning(disable: 4996)
-
-#if __INTEL_COMPILER
-#define __TBB_LAMBDAS_PRESENT ( _TBB_CPP0X && __INTEL_COMPILER > 1100 )
-#elif __GNUC__
-#define __TBB_LAMBDAS_PRESENT ( _TBB_CPP0X && __TBB_GCC_VERSION >= 40500 )
-#elif _MSC_VER
-#define __TBB_LAMBDAS_PRESENT ( _MSC_VER>=1600 )
-#endif
 
 const unsigned BOARD_SIZE=81;
 const unsigned BOARD_DIM=9;
@@ -205,7 +193,7 @@ bool examine_potentials(board_element *b, bool *progress) {
     return valid_board(b);
 }
 
-#if !__TBB_LAMBDAS_PRESENT
+#if !__TBB_CPP11_LAMBDAS_PRESENT
 void partial_solve(board_element *b, unsigned first_potential_set);
 
 class PartialSolveBoard {
@@ -243,7 +231,7 @@ void partial_solve(board_element *b, unsigned first_potential_set) {
                 new_board = (board_element *)malloc(BOARD_SIZE*sizeof(board_element));
                 copy_board(b, new_board);
                 new_board[first_potential_set].solved_element = potential;
-#if __TBB_LAMBDAS_PRESENT
+#if __TBB_CPP11_LAMBDAS_PRESENT
                 g->run( [=]{ partial_solve(new_board, first_potential_set); } );
 #else
                 g->run(PartialSolveBoard(new_board, first_potential_set));

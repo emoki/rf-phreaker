@@ -129,7 +129,7 @@
     </None>
     <CustomBuild Include="copy_libraries_and_assets.bat">
       <FileType>Document</FileType>
-      <Command Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">call "$(SolutionDir)\copy_libraries_and_assets.bat" ia32 release $(SolutionDir)</Command>
+      <Command Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">call "$(SolutionDir)\copy_libraries_and_assets.bat" ia32 release "$(SolutionDir)"</Command>
       <Command Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">call "$(SolutionDir)\copy_libraries_and_assets.bat" ia32 debug "$(SolutionDir)"</Command>
       <Command Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">call "$(SolutionDir)\copy_libraries_and_assets.bat" intel64 debug "$(SolutionDir)"</Command>
       <Command Condition="'$(Configuration)|$(Platform)'=='Release|x64'">call "$(SolutionDir)\copy_libraries_and_assets.bat" intel64 release "$(SolutionDir)"</Command>

@@ -33,7 +33,7 @@
   </div>
 <div id="nav-path" class="navpath">
   <ul>
-<li class="navelem"><a class="el" href="a00232.html">tbb</a></li><li class="navelem"><b>interface5</b></li><li class="navelem"><a class="el" href="a00036.html">concurrent_hash_map</a></li>  </ul>
+<li class="navelem"><a class="el" href="a00233.html">tbb</a></li><li class="navelem"><b>interface5</b></li><li class="navelem"><a class="el" href="a00036.html">concurrent_hash_map</a></li>  </ul>
 </div>
 </div><!-- top -->
 <div class="header">
@@ -48,7 +48,7 @@
 <a href="#friends">Friends</a> &#124;
 <a href="a00355.html">List of all members</a>  </div>
   <div class="headertitle">
-<div class="title">tbb::interface5::concurrent_hash_map&lt; Key, T, HashCompare, A &gt; Class Template Reference<div class="ingroups"><a class="el" href="a00246.html">Containers</a></div></div>  </div>
+<div class="title">tbb::interface5::concurrent_hash_map&lt; Key, T, HashCompare, A &gt; Class Template Reference<div class="ingroups"><a class="el" href="a00253.html">Containers</a></div></div>  </div>
 </div><!--header-->
 <div class="contents">
 
@@ -67,18 +67,20 @@ Inheritance diagram for tbb::interface5::concurrent_hash_map&lt; Key, T, HashCom
 <table class="memberdecls">
 <tr class="heading"><td colspan="2"><h2 class="groupheader"><a name="nested-classes"></a>
 Classes</h2></td></tr>
-<tr class="memitem:"><td class="memItemLeft" align="right" valign="top">class &#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="a00010.html">accessor</a></td></tr>
-<tr class="memdesc:"><td class="mdescLeft">&#160;</td><td class="mdescRight">Allows write access to elements and combines data access, locking, and garbage collection.  <a href="a00010.html#details">More...</a><br/></td></tr>
+<tr class="memitem:"><td class="memItemLeft" align="right" valign="top">class &#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="a00009.html">accessor</a></td></tr>
+<tr class="memdesc:"><td class="mdescLeft">&#160;</td><td class="mdescRight">Allows write access to elements and combines data access, locking, and garbage collection.  <a href="a00009.html#details">More...</a><br/></td></tr>
+<tr class="separator:"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:"><td class="memItemLeft" align="right" valign="top">struct &#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="a00010.html">accessor_not_used</a></td></tr>
 <tr class="separator:"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="memitem:"><td class="memItemLeft" align="right" valign="top">class &#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="a00026.html">bucket_accessor</a></td></tr>
 <tr class="memdesc:"><td class="mdescLeft">&#160;</td><td class="mdescRight">bucket accessor is to find, rehash, acquire a lock, and access a bucket  <a href="a00026.html#details">More...</a><br/></td></tr>
 <tr class="separator:"><td class="memSeparator" colspan="2">&#160;</td></tr>
-<tr class="memitem:"><td class="memItemLeft" align="right" valign="top">struct &#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="a00031.html">call_clear_on_leave</a></td></tr>
+<tr class="memitem:"><td class="memItemLeft" align="right" valign="top">struct &#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="a00029.html">call_clear_on_leave</a></td></tr>
 <tr class="separator:"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="memitem:"><td class="memItemLeft" align="right" valign="top">class &#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="a00047.html">const_accessor</a></td></tr>
 <tr class="memdesc:"><td class="mdescLeft">&#160;</td><td class="mdescRight">Combines data access, locking, and garbage collection.  <a href="a00047.html#details">More...</a><br/></td></tr>
 <tr class="separator:"><td class="memSeparator" colspan="2">&#160;</td></tr>
-<tr class="memitem:"><td class="memItemLeft" align="right" valign="top">struct &#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="a00094.html">node</a></td></tr>
+<tr class="memitem:"><td class="memItemLeft" align="right" valign="top">struct &#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="a00083.html">node</a></td></tr>
 <tr class="separator:"><td class="memSeparator" colspan="2">&#160;</td></tr>
 </table><table class="memberdecls">
 <tr class="heading"><td colspan="2"><h2 class="groupheader"><a name="pub-types"></a>
@@ -246,24 +248,45 @@ size_type&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href=
 <tr class="memitem:a27a3f296dc170ae25f8e3fd9efa93cff"><td class="memItemLeft" align="right" valign="top">bool&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="a00036.html#a27a3f296dc170ae25f8e3fd9efa93cff">find</a> (<a class="el" href="a00047.html">const_accessor</a> &amp;result, const Key &amp;key) const </td></tr>
 <tr class="memdesc:a27a3f296dc170ae25f8e3fd9efa93cff"><td class="mdescLeft">&#160;</td><td class="mdescRight">Find item and acquire a read lock on the item.  <a href="#a27a3f296dc170ae25f8e3fd9efa93cff">More...</a><br/></td></tr>
 <tr class="separator:a27a3f296dc170ae25f8e3fd9efa93cff"><td class="memSeparator" colspan="2">&#160;</td></tr>
-<tr class="memitem:a6b61799e2018381b5ee4b78752a41483"><td class="memItemLeft" align="right" valign="top">bool&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="a00036.html#a6b61799e2018381b5ee4b78752a41483">find</a> (<a class="el" href="a00010.html">accessor</a> &amp;result, const Key &amp;key)</td></tr>
+<tr class="memitem:a6b61799e2018381b5ee4b78752a41483"><td class="memItemLeft" align="right" valign="top">bool&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="a00036.html#a6b61799e2018381b5ee4b78752a41483">find</a> (<a class="el" href="a00009.html">accessor</a> &amp;result, const Key &amp;key)</td></tr>
 <tr class="memdesc:a6b61799e2018381b5ee4b78752a41483"><td class="mdescLeft">&#160;</td><td class="mdescRight">Find item and acquire a write lock on the item.  <a href="#a6b61799e2018381b5ee4b78752a41483">More...</a><br/></td></tr>
 <tr class="separator:a6b61799e2018381b5ee4b78752a41483"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="memitem:aaebb10a9e9dcb24e63860caa745a281d"><td class="memItemLeft" align="right" valign="top">bool&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="a00036.html#aaebb10a9e9dcb24e63860caa745a281d">insert</a> (<a class="el" href="a00047.html">const_accessor</a> &amp;result, const Key &amp;key)</td></tr>
 <tr class="memdesc:aaebb10a9e9dcb24e63860caa745a281d"><td class="mdescLeft">&#160;</td><td class="mdescRight">Insert item (if not already present) and acquire a read lock on the item.  <a href="#aaebb10a9e9dcb24e63860caa745a281d">More...</a><br/></td></tr>
 <tr class="separator:aaebb10a9e9dcb24e63860caa745a281d"><td class="memSeparator" colspan="2">&#160;</td></tr>
-<tr class="memitem:a766c6033c203e8f342501d85a7cf3405"><td class="memItemLeft" align="right" valign="top">bool&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="a00036.html#a766c6033c203e8f342501d85a7cf3405">insert</a> (<a class="el" href="a00010.html">accessor</a> &amp;result, const Key &amp;key)</td></tr>
+<tr class="memitem:a766c6033c203e8f342501d85a7cf3405"><td class="memItemLeft" align="right" valign="top">bool&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="a00036.html#a766c6033c203e8f342501d85a7cf3405">insert</a> (<a class="el" href="a00009.html">accessor</a> &amp;result, const Key &amp;key)</td></tr>
 <tr class="memdesc:a766c6033c203e8f342501d85a7cf3405"><td class="mdescLeft">&#160;</td><td class="mdescRight">Insert item (if not already present) and acquire a write lock on the item.  <a href="#a766c6033c203e8f342501d85a7cf3405">More...</a><br/></td></tr>
 <tr class="separator:a766c6033c203e8f342501d85a7cf3405"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="memitem:ae0b420cdb752e749790c8a7daa15c3c2"><td class="memItemLeft" align="right" valign="top">bool&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="a00036.html#ae0b420cdb752e749790c8a7daa15c3c2">insert</a> (<a class="el" href="a00047.html">const_accessor</a> &amp;result, const value_type &amp;value)</td></tr>
 <tr class="memdesc:ae0b420cdb752e749790c8a7daa15c3c2"><td class="mdescLeft">&#160;</td><td class="mdescRight">Insert item by copying if there is no such key present already and acquire a read lock on the item.  <a href="#ae0b420cdb752e749790c8a7daa15c3c2">More...</a><br/></td></tr>
 <tr class="separator:ae0b420cdb752e749790c8a7daa15c3c2"><td class="memSeparator" colspan="2">&#160;</td></tr>
-<tr class="memitem:a2047214e041b7674c3b83e204d0d6c6a"><td class="memItemLeft" align="right" valign="top">bool&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="a00036.html#a2047214e041b7674c3b83e204d0d6c6a">insert</a> (<a class="el" href="a00010.html">accessor</a> &amp;result, const value_type &amp;value)</td></tr>
+<tr class="memitem:a2047214e041b7674c3b83e204d0d6c6a"><td class="memItemLeft" align="right" valign="top">bool&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="a00036.html#a2047214e041b7674c3b83e204d0d6c6a">insert</a> (<a class="el" href="a00009.html">accessor</a> &amp;result, const value_type &amp;value)</td></tr>
 <tr class="memdesc:a2047214e041b7674c3b83e204d0d6c6a"><td class="mdescLeft">&#160;</td><td class="mdescRight">Insert item by copying if there is no such key present already and acquire a write lock on the item.  <a href="#a2047214e041b7674c3b83e204d0d6c6a">More...</a><br/></td></tr>
 <tr class="separator:a2047214e041b7674c3b83e204d0d6c6a"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="memitem:a8e39501f9edb3210504c9c4ca05384b7"><td class="memItemLeft" align="right" valign="top">bool&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="a00036.html#a8e39501f9edb3210504c9c4ca05384b7">insert</a> (const value_type &amp;value)</td></tr>
 <tr class="memdesc:a8e39501f9edb3210504c9c4ca05384b7"><td class="mdescLeft">&#160;</td><td class="mdescRight">Insert item by copying if there is no such key present already.  <a href="#a8e39501f9edb3210504c9c4ca05384b7">More...</a><br/></td></tr>
 <tr class="separator:a8e39501f9edb3210504c9c4ca05384b7"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:a446910c1ca4818bdb00f4ffa91b9108a"><td class="memItemLeft" align="right" valign="top">bool&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="a00036.html#a446910c1ca4818bdb00f4ffa91b9108a">insert</a> (<a class="el" href="a00047.html">const_accessor</a> &amp;result, value_type &amp;&amp;value)</td></tr>
+<tr class="memdesc:a446910c1ca4818bdb00f4ffa91b9108a"><td class="mdescLeft">&#160;</td><td class="mdescRight">Insert item by copying if there is no such key present already and acquire a read lock on the item.  <a href="#a446910c1ca4818bdb00f4ffa91b9108a">More...</a><br/></td></tr>
+<tr class="separator:a446910c1ca4818bdb00f4ffa91b9108a"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:a50c929e78ecfa36986c8821287665a70"><td class="memItemLeft" align="right" valign="top">bool&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="a00036.html#a50c929e78ecfa36986c8821287665a70">insert</a> (<a class="el" href="a00009.html">accessor</a> &amp;result, value_type &amp;&amp;value)</td></tr>
+<tr class="memdesc:a50c929e78ecfa36986c8821287665a70"><td class="mdescLeft">&#160;</td><td class="mdescRight">Insert item by copying if there is no such key present already and acquire a write lock on the item.  <a href="#a50c929e78ecfa36986c8821287665a70">More...</a><br/></td></tr>
+<tr class="separator:a50c929e78ecfa36986c8821287665a70"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:a5d3da283d2e74c7ff0ecb0dfd4d371fd"><td class="memItemLeft" align="right" valign="top">bool&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="a00036.html#a5d3da283d2e74c7ff0ecb0dfd4d371fd">insert</a> (value_type &amp;&amp;value)</td></tr>
+<tr class="memdesc:a5d3da283d2e74c7ff0ecb0dfd4d371fd"><td class="mdescLeft">&#160;</td><td class="mdescRight">Insert item by copying if there is no such key present already.  <a href="#a5d3da283d2e74c7ff0ecb0dfd4d371fd">More...</a><br/></td></tr>
+<tr class="separator:a5d3da283d2e74c7ff0ecb0dfd4d371fd"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:a382178ea2f00f69096c91bcf76ae7913"><td class="memTemplParams" colspan="2">template&lt;typename... Args&gt; </td></tr>
+<tr class="memitem:a382178ea2f00f69096c91bcf76ae7913"><td class="memTemplItemLeft" align="right" valign="top">bool&#160;</td><td class="memTemplItemRight" valign="bottom"><a class="el" href="a00036.html#a382178ea2f00f69096c91bcf76ae7913">emplace</a> (<a class="el" href="a00047.html">const_accessor</a> &amp;result, Args &amp;&amp;...args)</td></tr>
+<tr class="memdesc:a382178ea2f00f69096c91bcf76ae7913"><td class="mdescLeft">&#160;</td><td class="mdescRight">Insert item by copying if there is no such key present already and acquire a read lock on the item.  <a href="#a382178ea2f00f69096c91bcf76ae7913">More...</a><br/></td></tr>
+<tr class="separator:a382178ea2f00f69096c91bcf76ae7913"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:a17e51c8864282c35aa4d23f22909cc4a"><td class="memTemplParams" colspan="2">template&lt;typename... Args&gt; </td></tr>
+<tr class="memitem:a17e51c8864282c35aa4d23f22909cc4a"><td class="memTemplItemLeft" align="right" valign="top">bool&#160;</td><td class="memTemplItemRight" valign="bottom"><a class="el" href="a00036.html#a17e51c8864282c35aa4d23f22909cc4a">emplace</a> (<a class="el" href="a00009.html">accessor</a> &amp;result, Args &amp;&amp;...args)</td></tr>
+<tr class="memdesc:a17e51c8864282c35aa4d23f22909cc4a"><td class="mdescLeft">&#160;</td><td class="mdescRight">Insert item by copying if there is no such key present already and acquire a write lock on the item.  <a href="#a17e51c8864282c35aa4d23f22909cc4a">More...</a><br/></td></tr>
+<tr class="separator:a17e51c8864282c35aa4d23f22909cc4a"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:acbe1d0f3a87786a83a7021af2ef52ee0"><td class="memTemplParams" colspan="2">template&lt;typename... Args&gt; </td></tr>
+<tr class="memitem:acbe1d0f3a87786a83a7021af2ef52ee0"><td class="memTemplItemLeft" align="right" valign="top">bool&#160;</td><td class="memTemplItemRight" valign="bottom"><a class="el" href="a00036.html#acbe1d0f3a87786a83a7021af2ef52ee0">emplace</a> (Args &amp;&amp;...args)</td></tr>
+<tr class="memdesc:acbe1d0f3a87786a83a7021af2ef52ee0"><td class="mdescLeft">&#160;</td><td class="mdescRight">Insert item by copying if there is no such key present already.  <a href="#acbe1d0f3a87786a83a7021af2ef52ee0">More...</a><br/></td></tr>
+<tr class="separator:acbe1d0f3a87786a83a7021af2ef52ee0"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="memitem:ab84dfd77316252cbf39c7ae89e365a00"><td class="memTemplParams" colspan="2"><a class="anchor" id="ab84dfd77316252cbf39c7ae89e365a00"></a>
 template&lt;typename I &gt; </td></tr>
 <tr class="memitem:ab84dfd77316252cbf39c7ae89e365a00"><td class="memTemplItemLeft" align="right" valign="top">void&#160;</td><td class="memTemplItemRight" valign="bottom"><a class="el" href="a00036.html#ab84dfd77316252cbf39c7ae89e365a00">insert</a> (I first, I last)</td></tr>
@@ -279,7 +302,7 @@ void&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="a000
 <tr class="memitem:a2ec6f95ed9beda9d32df56cdd45c1842"><td class="memItemLeft" align="right" valign="top">bool&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="a00036.html#a2ec6f95ed9beda9d32df56cdd45c1842">erase</a> (<a class="el" href="a00047.html">const_accessor</a> &amp;item_accessor)</td></tr>
 <tr class="memdesc:a2ec6f95ed9beda9d32df56cdd45c1842"><td class="mdescLeft">&#160;</td><td class="mdescRight">Erase item by <a class="el" href="a00047.html" title="Combines data access, locking, and garbage collection. ">const_accessor</a>.  <a href="#a2ec6f95ed9beda9d32df56cdd45c1842">More...</a><br/></td></tr>
 <tr class="separator:a2ec6f95ed9beda9d32df56cdd45c1842"><td class="memSeparator" colspan="2">&#160;</td></tr>
-<tr class="memitem:a3ed0fbcc6cfd4db8242e100355ac1fa5"><td class="memItemLeft" align="right" valign="top">bool&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="a00036.html#a3ed0fbcc6cfd4db8242e100355ac1fa5">erase</a> (<a class="el" href="a00010.html">accessor</a> &amp;item_accessor)</td></tr>
+<tr class="memitem:a3ed0fbcc6cfd4db8242e100355ac1fa5"><td class="memItemLeft" align="right" valign="top">bool&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="a00036.html#a3ed0fbcc6cfd4db8242e100355ac1fa5">erase</a> (<a class="el" href="a00009.html">accessor</a> &amp;item_accessor)</td></tr>
 <tr class="memdesc:a3ed0fbcc6cfd4db8242e100355ac1fa5"><td class="mdescLeft">&#160;</td><td class="mdescRight">Erase item by accessor.  <a href="#a3ed0fbcc6cfd4db8242e100355ac1fa5">More...</a><br/></td></tr>
 <tr class="separator:a3ed0fbcc6cfd4db8242e100355ac1fa5"><td class="memSeparator" colspan="2">&#160;</td></tr>
 </table><table class="memberdecls">
@@ -287,7 +310,7 @@ void&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="a000
 Protected Types</h2></td></tr>
 <tr class="memitem:a81dddc5d509f7f074d84d9c38e83efb9"><td class="memItemLeft" align="right" valign="top"><a class="anchor" id="a81dddc5d509f7f074d84d9c38e83efb9"></a>
 typedef Allocator::template <br class="typebreak"/>
-rebind&lt; <a class="el" href="a00094.html">node</a> &gt;::other&#160;</td><td class="memItemRight" valign="bottom"><b>node_allocator_type</b></td></tr>
+rebind&lt; <a class="el" href="a00083.html">node</a> &gt;::other&#160;</td><td class="memItemRight" valign="bottom"><b>node_allocator_type</b></td></tr>
 <tr class="separator:a81dddc5d509f7f074d84d9c38e83efb9"><td class="memSeparator" colspan="2">&#160;</td></tr>
 </table><table class="memberdecls">
 <tr class="heading"><td colspan="2"><h2 class="groupheader"><a name="pro-methods"></a>
@@ -296,15 +319,23 @@ Protected Member Functions</h2></td></tr>
 void&#160;</td><td class="memItemRight" valign="bottom"><b>delete_node</b> (node_base *n)</td></tr>
 <tr class="separator:aed0e0def29516d9ee7aab2192727b69b"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="memitem:ae44a70417f9674a2169f9a1fd437a3bd"><td class="memItemLeft" align="right" valign="top"><a class="anchor" id="ae44a70417f9674a2169f9a1fd437a3bd"></a>
-<a class="el" href="a00094.html">node</a> *&#160;</td><td class="memItemRight" valign="bottom"><b>search_bucket</b> (const key_type &amp;key, bucket *b) const </td></tr>
+<a class="el" href="a00083.html">node</a> *&#160;</td><td class="memItemRight" valign="bottom"><b>search_bucket</b> (const key_type &amp;key, bucket *b) const </td></tr>
 <tr class="separator:ae44a70417f9674a2169f9a1fd437a3bd"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="memitem:a1b57e036f82bc2b1ef1ede41b02d46b5"><td class="memItemLeft" align="right" valign="top"><a class="anchor" id="a1b57e036f82bc2b1ef1ede41b02d46b5"></a>
 void&#160;</td><td class="memItemRight" valign="bottom"><b>rehash_bucket</b> (bucket *b_new, const hashcode_t h)</td></tr>
 <tr class="separator:a1b57e036f82bc2b1ef1ede41b02d46b5"><td class="memSeparator" colspan="2">&#160;</td></tr>
-<tr class="memitem:a54c7e526a1dc75509a1f059195d4f24c"><td class="memItemLeft" align="right" valign="top"><a class="anchor" id="a54c7e526a1dc75509a1f059195d4f24c"></a>
-bool&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="a00036.html#a54c7e526a1dc75509a1f059195d4f24c">lookup</a> (bool op_insert, const Key &amp;key, const T *t, <a class="el" href="a00047.html">const_accessor</a> *result, bool write, <a class="el" href="a00094.html">node</a> *(*allocate_node)(node_allocator_type &amp;, const Key &amp;, const T *))</td></tr>
-<tr class="memdesc:a54c7e526a1dc75509a1f059195d4f24c"><td class="mdescLeft">&#160;</td><td class="mdescRight">Insert or find item and optionally acquire a lock on the item. <br/></td></tr>
-<tr class="separator:a54c7e526a1dc75509a1f059195d4f24c"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:a2a319cf46fb9cf9a88aab6c0a20c98b3"><td class="memItemLeft" align="right" valign="top"><a class="anchor" id="a2a319cf46fb9cf9a88aab6c0a20c98b3"></a>
+bool&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="a00036.html#a2a319cf46fb9cf9a88aab6c0a20c98b3">lookup</a> (bool op_insert, const Key &amp;key, const T *t, <a class="el" href="a00047.html">const_accessor</a> *result, bool write, <a class="el" href="a00083.html">node</a> *(*allocate_node)(node_allocator_type &amp;, const Key &amp;, const T *), <a class="el" href="a00083.html">node</a> *tmp_n=0)</td></tr>
+<tr class="memdesc:a2a319cf46fb9cf9a88aab6c0a20c98b3"><td class="mdescLeft">&#160;</td><td class="mdescRight">Insert or find item and optionally acquire a lock on the item. <br/></td></tr>
+<tr class="separator:a2a319cf46fb9cf9a88aab6c0a20c98b3"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:a6204ad5c57618556931e4c90e1938d1e"><td class="memTemplParams" colspan="2"><a class="anchor" id="a6204ad5c57618556931e4c90e1938d1e"></a>
+template&lt;typename Accessor &gt; </td></tr>
+<tr class="memitem:a6204ad5c57618556931e4c90e1938d1e"><td class="memTemplItemLeft" align="right" valign="top">bool&#160;</td><td class="memTemplItemRight" valign="bottom"><b>generic_move_insert</b> (Accessor &amp;&amp;result, value_type &amp;&amp;value)</td></tr>
+<tr class="separator:a6204ad5c57618556931e4c90e1938d1e"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:a81c0a242bf8d4a210d74d551dbc61c18"><td class="memTemplParams" colspan="2"><a class="anchor" id="a81c0a242bf8d4a210d74d551dbc61c18"></a>
+template&lt;typename Accessor , typename... Args&gt; </td></tr>
+<tr class="memitem:a81c0a242bf8d4a210d74d551dbc61c18"><td class="memTemplItemLeft" align="right" valign="top">bool&#160;</td><td class="memTemplItemRight" valign="bottom"><b>generic_emplace</b> (Accessor &amp;&amp;result, Args &amp;&amp;...args)</td></tr>
+<tr class="separator:a81c0a242bf8d4a210d74d551dbc61c18"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="memitem:a6fec452b31b8f0e185dc2de64b7128b2"><td class="memItemLeft" align="right" valign="top"><a class="anchor" id="a6fec452b31b8f0e185dc2de64b7128b2"></a>
 bool&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="a00036.html#a6fec452b31b8f0e185dc2de64b7128b2">exclude</a> (<a class="el" href="a00047.html">const_accessor</a> &amp;item_accessor)</td></tr>
 <tr class="memdesc:a6fec452b31b8f0e185dc2de64b7128b2"><td class="mdescLeft">&#160;</td><td class="mdescRight">delete item by accessor <br/></td></tr>
@@ -329,13 +360,20 @@ template&lt;typename I &gt; </td></tr>
 <tr class="heading"><td colspan="2"><h2 class="groupheader"><a name="pro-static-methods"></a>
 Static Protected Member Functions</h2></td></tr>
 <tr class="memitem:aa220373171ca2feccb74c23823c6329f"><td class="memItemLeft" align="right" valign="top"><a class="anchor" id="aa220373171ca2feccb74c23823c6329f"></a>
-static <a class="el" href="a00094.html">node</a> *&#160;</td><td class="memItemRight" valign="bottom"><b>allocate_node_copy_construct</b> (node_allocator_type &amp;allocator, const Key &amp;key, const T *t)</td></tr>
+static <a class="el" href="a00083.html">node</a> *&#160;</td><td class="memItemRight" valign="bottom"><b>allocate_node_copy_construct</b> (node_allocator_type &amp;allocator, const Key &amp;key, const T *t)</td></tr>
 <tr class="separator:aa220373171ca2feccb74c23823c6329f"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:a59416689b95d20f4d69e43a23aa4f300"><td class="memItemLeft" align="right" valign="top"><a class="anchor" id="a59416689b95d20f4d69e43a23aa4f300"></a>
+static <a class="el" href="a00083.html">node</a> *&#160;</td><td class="memItemRight" valign="bottom"><b>allocate_node_move_construct</b> (node_allocator_type &amp;allocator, const Key &amp;key, const T *t)</td></tr>
+<tr class="separator:a59416689b95d20f4d69e43a23aa4f300"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:a8e8388c1d433042b67d3cc12181189c3"><td class="memTemplParams" colspan="2"><a class="anchor" id="a8e8388c1d433042b67d3cc12181189c3"></a>
+template&lt;typename... Args&gt; </td></tr>
+<tr class="memitem:a8e8388c1d433042b67d3cc12181189c3"><td class="memTemplItemLeft" align="right" valign="top">static <a class="el" href="a00083.html">node</a> *&#160;</td><td class="memTemplItemRight" valign="bottom"><b>allocate_node_emplace_construct</b> (node_allocator_type &amp;allocator, Args &amp;&amp;...args)</td></tr>
+<tr class="separator:a8e8388c1d433042b67d3cc12181189c3"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="memitem:a1f92f68816357df14d30650b29ab94cb"><td class="memItemLeft" align="right" valign="top"><a class="anchor" id="a1f92f68816357df14d30650b29ab94cb"></a>
-static <a class="el" href="a00094.html">node</a> *&#160;</td><td class="memItemRight" valign="bottom"><b>allocate_node_default_construct</b> (node_allocator_type &amp;allocator, const Key &amp;key, const T *)</td></tr>
+static <a class="el" href="a00083.html">node</a> *&#160;</td><td class="memItemRight" valign="bottom"><b>allocate_node_default_construct</b> (node_allocator_type &amp;allocator, const Key &amp;key, const T *)</td></tr>
 <tr class="separator:a1f92f68816357df14d30650b29ab94cb"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="memitem:a684cc0d3eb4b6ba8b88a14189c40bb20"><td class="memItemLeft" align="right" valign="top"><a class="anchor" id="a684cc0d3eb4b6ba8b88a14189c40bb20"></a>
-static <a class="el" href="a00094.html">node</a> *&#160;</td><td class="memItemRight" valign="bottom"><b>do_not_allocate_node</b> (node_allocator_type &amp;, const Key &amp;, const T *)</td></tr>
+static <a class="el" href="a00083.html">node</a> *&#160;</td><td class="memItemRight" valign="bottom"><b>do_not_allocate_node</b> (node_allocator_type &amp;, const Key &amp;, const T *)</td></tr>
 <tr class="separator:a684cc0d3eb4b6ba8b88a14189c40bb20"><td class="memSeparator" colspan="2">&#160;</td></tr>
 </table><table class="memberdecls">
 <tr class="heading"><td colspan="2"><h2 class="groupheader"><a name="pro-attribs"></a>
@@ -360,6 +398,21 @@ template&lt;typename I &gt; </td></tr>
 <tr class="memitem:a584bf754a8408612d4bfd33a3eafd80d"><td class="memItemLeft" align="right" valign="top"><a class="anchor" id="a584bf754a8408612d4bfd33a3eafd80d"></a>
 class&#160;</td><td class="memItemRight" valign="bottom"><b>const_accessor</b></td></tr>
 <tr class="separator:a584bf754a8408612d4bfd33a3eafd80d"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:a6e234c756e22e65a3c99771fdeb67d7a"><td class="memItemLeft" align="right" valign="top"><a class="anchor" id="a6e234c756e22e65a3c99771fdeb67d7a"></a>
+<a class="el" href="a00047.html">const_accessor</a> *&#160;</td><td class="memItemRight" valign="bottom"><b>accessor_location</b> (<a class="el" href="a00010.html">accessor_not_used</a> const &amp;)</td></tr>
+<tr class="separator:a6e234c756e22e65a3c99771fdeb67d7a"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:a0216633e60539f42cf9d645d3f3b7117"><td class="memItemLeft" align="right" valign="top"><a class="anchor" id="a0216633e60539f42cf9d645d3f3b7117"></a>
+<a class="el" href="a00047.html">const_accessor</a> *&#160;</td><td class="memItemRight" valign="bottom"><b>accessor_location</b> (<a class="el" href="a00047.html">const_accessor</a> &amp;a)</td></tr>
+<tr class="separator:a0216633e60539f42cf9d645d3f3b7117"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:afa491682f70c12a8c7f783a427791ce4"><td class="memItemLeft" align="right" valign="top"><a class="anchor" id="afa491682f70c12a8c7f783a427791ce4"></a>
+bool&#160;</td><td class="memItemRight" valign="bottom"><b>is_write_access_needed</b> (<a class="el" href="a00009.html">accessor</a> const &amp;)</td></tr>
+<tr class="separator:afa491682f70c12a8c7f783a427791ce4"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:a34c835f5e1b689d1fbbff61519c0ef5f"><td class="memItemLeft" align="right" valign="top"><a class="anchor" id="a34c835f5e1b689d1fbbff61519c0ef5f"></a>
+bool&#160;</td><td class="memItemRight" valign="bottom"><b>is_write_access_needed</b> (<a class="el" href="a00047.html">const_accessor</a> const &amp;)</td></tr>
+<tr class="separator:a34c835f5e1b689d1fbbff61519c0ef5f"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:a7b4bdfdc062d155dc1ace8cc18acc8d6"><td class="memItemLeft" align="right" valign="top"><a class="anchor" id="a7b4bdfdc062d155dc1ace8cc18acc8d6"></a>
+bool&#160;</td><td class="memItemRight" valign="bottom"><b>is_write_access_needed</b> (<a class="el" href="a00010.html">accessor_not_used</a> const &amp;)</td></tr>
+<tr class="separator:a7b4bdfdc062d155dc1ace8cc18acc8d6"><td class="memSeparator" colspan="2">&#160;</td></tr>
 </table>
 <a name="details" id="details"></a><h2 class="groupheader">Detailed Description</h2>
 <div class="textblock"><h3>template&lt;typename Key, typename T, typename HashCompare = tbb_hash_compare&lt;Key&gt;, typename A = tbb_allocator&lt;std::pair&lt;Key, T&gt; &gt;&gt;<br/>
@@ -395,6 +448,119 @@ class tbb::interface5::concurrent_hash_map&lt; Key, T, HashCompare, A &gt;</h3>
 </ul>
 </dd></dl>
 </div><h2 class="groupheader">Member Function Documentation</h2>
+<a class="anchor" id="a382178ea2f00f69096c91bcf76ae7913"></a>
+<div class="memitem">
+<div class="memproto">
+<div class="memtemplate">
+template&lt;typename Key , typename T , typename HashCompare  = tbb_hash_compare&lt;Key&gt;, typename A  = tbb_allocator&lt;std::pair&lt;Key, T&gt; &gt;&gt; </div>
+<div class="memtemplate">
+template&lt;typename... Args&gt; </div>
+<table class="mlabels">
+  <tr>
+  <td class="mlabels-left">
+      <table class="memname">
+        <tr>
+          <td class="memname">bool <a class="el" href="a00036.html">tbb::interface5::concurrent_hash_map</a>&lt; Key, T, HashCompare, A &gt;::emplace </td>
+          <td>(</td>
+          <td class="paramtype"><a class="el" href="a00047.html">const_accessor</a> &amp;&#160;</td>
+          <td class="paramname"><em>result</em>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype">Args &amp;&amp;...&#160;</td>
+          <td class="paramname"><em>args</em>&#160;</td>
+        </tr>
+        <tr>
+          <td></td>
+          <td>)</td>
+          <td></td><td></td>
+        </tr>
+      </table>
+  </td>
+  <td class="mlabels-right">
+<span class="mlabels"><span class="mlabel">inline</span></span>  </td>
+  </tr>
+</table>
+</div><div class="memdoc">
+
+<p>Insert item by copying if there is no such key present already and acquire a read lock on the item. </p>
+<p>Returns true if item is new. </p>
+
+</div>
+</div>
+<a class="anchor" id="a17e51c8864282c35aa4d23f22909cc4a"></a>
+<div class="memitem">
+<div class="memproto">
+<div class="memtemplate">
+template&lt;typename Key , typename T , typename HashCompare  = tbb_hash_compare&lt;Key&gt;, typename A  = tbb_allocator&lt;std::pair&lt;Key, T&gt; &gt;&gt; </div>
+<div class="memtemplate">
+template&lt;typename... Args&gt; </div>
+<table class="mlabels">
+  <tr>
+  <td class="mlabels-left">
+      <table class="memname">
+        <tr>
+          <td class="memname">bool <a class="el" href="a00036.html">tbb::interface5::concurrent_hash_map</a>&lt; Key, T, HashCompare, A &gt;::emplace </td>
+          <td>(</td>
+          <td class="paramtype"><a class="el" href="a00009.html">accessor</a> &amp;&#160;</td>
+          <td class="paramname"><em>result</em>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype">Args &amp;&amp;...&#160;</td>
+          <td class="paramname"><em>args</em>&#160;</td>
+        </tr>
+        <tr>
+          <td></td>
+          <td>)</td>
+          <td></td><td></td>
+        </tr>
+      </table>
+  </td>
+  <td class="mlabels-right">
+<span class="mlabels"><span class="mlabel">inline</span></span>  </td>
+  </tr>
+</table>
+</div><div class="memdoc">
+
+<p>Insert item by copying if there is no such key present already and acquire a write lock on the item. </p>
+<p>Returns true if item is new. </p>
+
+</div>
+</div>
+<a class="anchor" id="acbe1d0f3a87786a83a7021af2ef52ee0"></a>
+<div class="memitem">
+<div class="memproto">
+<div class="memtemplate">
+template&lt;typename Key , typename T , typename HashCompare  = tbb_hash_compare&lt;Key&gt;, typename A  = tbb_allocator&lt;std::pair&lt;Key, T&gt; &gt;&gt; </div>
+<div class="memtemplate">
+template&lt;typename... Args&gt; </div>
+<table class="mlabels">
+  <tr>
+  <td class="mlabels-left">
+      <table class="memname">
+        <tr>
+          <td class="memname">bool <a class="el" href="a00036.html">tbb::interface5::concurrent_hash_map</a>&lt; Key, T, HashCompare, A &gt;::emplace </td>
+          <td>(</td>
+          <td class="paramtype">Args &amp;&amp;...&#160;</td>
+          <td class="paramname"><em>args</em>)</td><td></td>
+          <td></td>
+        </tr>
+      </table>
+  </td>
+  <td class="mlabels-right">
+<span class="mlabels"><span class="mlabel">inline</span></span>  </td>
+  </tr>
+</table>
+</div><div class="memdoc">
+
+<p>Insert item by copying if there is no such key present already. </p>
+<p>Returns true if item is inserted. </p>
+
+</div>
+</div>
 <a class="anchor" id="a5144122dbb946d933b94a92117543b33"></a>
 <div class="memitem">
 <div class="memproto">
@@ -459,7 +625,7 @@ template&lt;typename Key , typename T , typename HashCompare  = tbb_hash_compare
         <tr>
           <td class="memname">bool <a class="el" href="a00036.html">tbb::interface5::concurrent_hash_map</a>&lt; Key, T, HashCompare, A &gt;::erase </td>
           <td>(</td>
-          <td class="paramtype"><a class="el" href="a00010.html">accessor</a> &amp;&#160;</td>
+          <td class="paramtype"><a class="el" href="a00009.html">accessor</a> &amp;&#160;</td>
           <td class="paramname"><em>item_accessor</em>)</td><td></td>
           <td></td>
         </tr>
@@ -529,7 +695,7 @@ template&lt;typename Key , typename T , typename HashCompare  = tbb_hash_compare
         <tr>
           <td class="memname">bool <a class="el" href="a00036.html">tbb::interface5::concurrent_hash_map</a>&lt; Key, T, HashCompare, A &gt;::find </td>
           <td>(</td>
-          <td class="paramtype"><a class="el" href="a00010.html">accessor</a> &amp;&#160;</td>
+          <td class="paramtype"><a class="el" href="a00009.html">accessor</a> &amp;&#160;</td>
           <td class="paramname"><em>result</em>, </td>
         </tr>
         <tr>
@@ -611,7 +777,7 @@ template&lt;typename Key , typename T , typename HashCompare  = tbb_hash_compare
         <tr>
           <td class="memname">bool <a class="el" href="a00036.html">tbb::interface5::concurrent_hash_map</a>&lt; Key, T, HashCompare, A &gt;::insert </td>
           <td>(</td>
-          <td class="paramtype"><a class="el" href="a00010.html">accessor</a> &amp;&#160;</td>
+          <td class="paramtype"><a class="el" href="a00009.html">accessor</a> &amp;&#160;</td>
           <td class="paramname"><em>result</em>, </td>
         </tr>
         <tr>
@@ -693,7 +859,7 @@ template&lt;typename Key , typename T , typename HashCompare  = tbb_hash_compare
         <tr>
           <td class="memname">bool <a class="el" href="a00036.html">tbb::interface5::concurrent_hash_map</a>&lt; Key, T, HashCompare, A &gt;::insert </td>
           <td>(</td>
-          <td class="paramtype"><a class="el" href="a00010.html">accessor</a> &amp;&#160;</td>
+          <td class="paramtype"><a class="el" href="a00009.html">accessor</a> &amp;&#160;</td>
           <td class="paramname"><em>result</em>, </td>
         </tr>
         <tr>
@@ -735,6 +901,113 @@ template&lt;typename Key , typename T , typename HashCompare  = tbb_hash_compare
           <td class="memname">bool <a class="el" href="a00036.html">tbb::interface5::concurrent_hash_map</a>&lt; Key, T, HashCompare, A &gt;::insert </td>
           <td>(</td>
           <td class="paramtype">const value_type &amp;&#160;</td>
+          <td class="paramname"><em>value</em>)</td><td></td>
+          <td></td>
+        </tr>
+      </table>
+  </td>
+  <td class="mlabels-right">
+<span class="mlabels"><span class="mlabel">inline</span></span>  </td>
+  </tr>
+</table>
+</div><div class="memdoc">
+
+<p>Insert item by copying if there is no such key present already. </p>
+<p>Returns true if item is inserted. </p>
+
+</div>
+</div>
+<a class="anchor" id="a446910c1ca4818bdb00f4ffa91b9108a"></a>
+<div class="memitem">
+<div class="memproto">
+<div class="memtemplate">
+template&lt;typename Key , typename T , typename HashCompare  = tbb_hash_compare&lt;Key&gt;, typename A  = tbb_allocator&lt;std::pair&lt;Key, T&gt; &gt;&gt; </div>
+<table class="mlabels">
+  <tr>
+  <td class="mlabels-left">
+      <table class="memname">
+        <tr>
+          <td class="memname">bool <a class="el" href="a00036.html">tbb::interface5::concurrent_hash_map</a>&lt; Key, T, HashCompare, A &gt;::insert </td>
+          <td>(</td>
+          <td class="paramtype"><a class="el" href="a00047.html">const_accessor</a> &amp;&#160;</td>
+          <td class="paramname"><em>result</em>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype">value_type &amp;&amp;&#160;</td>
+          <td class="paramname"><em>value</em>&#160;</td>
+        </tr>
+        <tr>
+          <td></td>
+          <td>)</td>
+          <td></td><td></td>
+        </tr>
+      </table>
+  </td>
+  <td class="mlabels-right">
+<span class="mlabels"><span class="mlabel">inline</span></span>  </td>
+  </tr>
+</table>
+</div><div class="memdoc">
+
+<p>Insert item by copying if there is no such key present already and acquire a read lock on the item. </p>
+<p>Returns true if item is new. </p>
+
+</div>
+</div>
+<a class="anchor" id="a50c929e78ecfa36986c8821287665a70"></a>
+<div class="memitem">
+<div class="memproto">
+<div class="memtemplate">
+template&lt;typename Key , typename T , typename HashCompare  = tbb_hash_compare&lt;Key&gt;, typename A  = tbb_allocator&lt;std::pair&lt;Key, T&gt; &gt;&gt; </div>
+<table class="mlabels">
+  <tr>
+  <td class="mlabels-left">
+      <table class="memname">
+        <tr>
+          <td class="memname">bool <a class="el" href="a00036.html">tbb::interface5::concurrent_hash_map</a>&lt; Key, T, HashCompare, A &gt;::insert </td>
+          <td>(</td>
+          <td class="paramtype"><a class="el" href="a00009.html">accessor</a> &amp;&#160;</td>
+          <td class="paramname"><em>result</em>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype">value_type &amp;&amp;&#160;</td>
+          <td class="paramname"><em>value</em>&#160;</td>
+        </tr>
+        <tr>
+          <td></td>
+          <td>)</td>
+          <td></td><td></td>
+        </tr>
+      </table>
+  </td>
+  <td class="mlabels-right">
+<span class="mlabels"><span class="mlabel">inline</span></span>  </td>
+  </tr>
+</table>
+</div><div class="memdoc">
+
+<p>Insert item by copying if there is no such key present already and acquire a write lock on the item. </p>
+<p>Returns true if item is new. </p>
+
+</div>
+</div>
+<a class="anchor" id="a5d3da283d2e74c7ff0ecb0dfd4d371fd"></a>
+<div class="memitem">
+<div class="memproto">
+<div class="memtemplate">
+template&lt;typename Key , typename T , typename HashCompare  = tbb_hash_compare&lt;Key&gt;, typename A  = tbb_allocator&lt;std::pair&lt;Key, T&gt; &gt;&gt; </div>
+<table class="mlabels">
+  <tr>
+  <td class="mlabels-left">
+      <table class="memname">
+        <tr>
+          <td class="memname">bool <a class="el" href="a00036.html">tbb::interface5::concurrent_hash_map</a>&lt; Key, T, HashCompare, A &gt;::insert </td>
+          <td>(</td>
+          <td class="paramtype">value_type &amp;&amp;&#160;</td>
           <td class="paramname"><em>value</em>)</td><td></td>
           <td></td>
         </tr>
@@ -807,7 +1080,7 @@ template&lt;typename Key , typename T , typename HashCompare , typename A &gt; <
 </div><!-- contents -->
 <hr>
 <p></p>
-Copyright &copy; 2005-2014 Intel Corporation.  All Rights Reserved.
+Copyright &copy; 2005-2017 Intel Corporation.  All Rights Reserved.
 <p></p>
 Intel, Pentium, Intel Xeon, Itanium, Intel XScale and VTune are
 registered trademarks or trademarks of Intel Corporation or its

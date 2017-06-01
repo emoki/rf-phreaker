@@ -4,7 +4,7 @@
 <meta http-equiv="Content-Type" content="text/xhtml;charset=UTF-8"/>
 <meta http-equiv="X-UA-Compatible" content="IE=9"/>
 <meta name="generator" content="Doxygen 1.8.4"/>
-<title>tbb::flow::interface7::indexer_node&lt; T0, T1, T2, T3, T4, T5, T6, T7, T8, T9 &gt; Class Template Reference</title>
+<title>tbb::flow::interface9::gfx_factory Class Reference</title>
 <link href="tabs.css" rel="stylesheet" type="text/css"/>
 <script type="text/javascript" src="jquery.js"></script>
 <script type="text/javascript" src="dynsections.js"></script>
@@ -33,63 +33,65 @@
   </div>
 <div id="nav-path" class="navpath">
   <ul>
-<li class="navelem"><a class="el" href="a00232.html">tbb</a></li><li class="navelem"><b>flow</b></li><li class="navelem"><b>interface7</b></li><li class="navelem"><a class="el" href="a00067.html">indexer_node</a></li>  </ul>
+<li class="navelem"><a class="el" href="a00233.html">tbb</a></li><li class="navelem"><b>flow</b></li><li class="navelem"><b>interface9</b></li><li class="navelem"><a class="el" href="a00067.html">gfx_factory</a></li>  </ul>
 </div>
 </div><!-- top -->
 <div class="header">
   <div class="summary">
+<a href="#nested-classes">Classes</a> &#124;
 <a href="#pub-types">Public Types</a> &#124;
 <a href="#pub-methods">Public Member Functions</a> &#124;
-<a href="a00345.html">List of all members</a>  </div>
+<a href="a00350.html">List of all members</a>  </div>
   <div class="headertitle">
-<div class="title">tbb::flow::interface7::indexer_node&lt; T0, T1, T2, T3, T4, T5, T6, T7, T8, T9 &gt; Class Template Reference</div>  </div>
+<div class="title">tbb::flow::interface9::gfx_factory Class Reference</div>  </div>
 </div><!--header-->
 <div class="contents">
-<div class="dynheader">
-Inheritance diagram for tbb::flow::interface7::indexer_node&lt; T0, T1, T2, T3, T4, T5, T6, T7, T8, T9 &gt;:</div>
-<div class="dyncontent">
- <div class="center">
-  <img src="a00067.png" usemap="#tbb::flow::interface7::indexer_node&lt; T0, T1, T2, T3, T4, T5, T6, T7, T8, T9 &gt;_map" alt=""/>
-  <map id="tbb::flow::interface7::indexer_node&lt; T0, T1, T2, T3, T4, T5, T6, T7, T8, T9 &gt;_map" name="tbb::flow::interface7::indexer_node&lt; T0, T1, T2, T3, T4, T5, T6, T7, T8, T9 &gt;_map">
-</map>
- </div></div>
 <table class="memberdecls">
+<tr class="heading"><td colspan="2"><h2 class="groupheader"><a name="nested-classes"></a>
+Classes</h2></td></tr>
+<tr class="memitem:"><td class="memItemLeft" align="right" valign="top">struct &#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="a00054.html">device_type</a></td></tr>
+<tr class="separator:"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:"><td class="memItemLeft" align="right" valign="top">class &#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="a00055.html">dummy_device_selector</a></td></tr>
+<tr class="separator:"><td class="memSeparator" colspan="2">&#160;</td></tr>
+</table><table class="memberdecls">
 <tr class="heading"><td colspan="2"><h2 class="groupheader"><a name="pub-types"></a>
 Public Types</h2></td></tr>
-<tr class="memitem:aa03aeff58b09fa3c2a13558681ea21fa"><td class="memItemLeft" align="right" valign="top"><a class="anchor" id="aa03aeff58b09fa3c2a13558681ea21fa"></a>
-typedef tuple&lt; T0, T1, T2, T3, <br class="typebreak"/>
-T4, T5, T6, T7, T8, T9 &gt;&#160;</td><td class="memItemRight" valign="bottom"><b>InputTuple</b></td></tr>
-<tr class="separator:aa03aeff58b09fa3c2a13558681ea21fa"><td class="memSeparator" colspan="2">&#160;</td></tr>
-<tr class="memitem:a501735482a834c96f2bfd0eb4f25f098"><td class="memItemLeft" align="right" valign="top"><a class="anchor" id="a501735482a834c96f2bfd0eb4f25f098"></a>
-typedef internal::tagged_msg<br class="typebreak"/>
-&lt; size_t, T0, T1, T2, T3, T4, <br class="typebreak"/>
-T5, T6, T7, T8, T9 &gt;&#160;</td><td class="memItemRight" valign="bottom"><b>output_type</b></td></tr>
-<tr class="separator:a501735482a834c96f2bfd0eb4f25f098"><td class="memSeparator" colspan="2">&#160;</td></tr>
-<tr class="memitem:a52e8f318e1e746e442789d697f43c2d5"><td class="memItemLeft" align="right" valign="top"><a class="anchor" id="a52e8f318e1e746e442789d697f43c2d5"></a>
-typedef <br class="typebreak"/>
-internal::unfolded_indexer_node<br class="typebreak"/>
-&lt; InputTuple &gt;&#160;</td><td class="memItemRight" valign="bottom"><b>unfolded_type</b></td></tr>
-<tr class="separator:a52e8f318e1e746e442789d697f43c2d5"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:ad7170d237ab8e643a73adbe258527eca"><td class="memTemplParams" colspan="2"><a class="anchor" id="ad7170d237ab8e643a73adbe258527eca"></a>
+template&lt;typename T &gt; </td></tr>
+<tr class="memitem:ad7170d237ab8e643a73adbe258527eca"><td class="memTemplItemLeft" align="right" valign="top">using&#160;</td><td class="memTemplItemRight" valign="bottom"><b>async_msg_type</b> = <a class="el" href="a00065.html">gfx_async_msg</a>&lt; T &gt;</td></tr>
+<tr class="separator:ad7170d237ab8e643a73adbe258527eca"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:a9c26133f572549b4730f33d951bfcccf"><td class="memItemLeft" align="right" valign="top"><a class="anchor" id="a9c26133f572549b4730f33d951bfcccf"></a>
+typedef func_wrapper&#160;</td><td class="memItemRight" valign="bottom"><b>kernel_type</b></td></tr>
+<tr class="separator:a9c26133f572549b4730f33d951bfcccf"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:a437863d05736e2fb9efead005bb009ca"><td class="memItemLeft" align="right" valign="top"><a class="anchor" id="a437863d05736e2fb9efead005bb009ca"></a>
+typedef gfx_offload::task_id_type&#160;</td><td class="memItemRight" valign="bottom"><b>kernel_id_type</b></td></tr>
+<tr class="separator:a437863d05736e2fb9efead005bb009ca"><td class="memSeparator" colspan="2">&#160;</td></tr>
 </table><table class="memberdecls">
 <tr class="heading"><td colspan="2"><h2 class="groupheader"><a name="pub-methods"></a>
 Public Member Functions</h2></td></tr>
-<tr class="memitem:adb3dca9548b0cc44d39ad49a98580be8"><td class="memItemLeft" align="right" valign="top"><a class="anchor" id="adb3dca9548b0cc44d39ad49a98580be8"></a>
-&#160;</td><td class="memItemRight" valign="bottom"><b>indexer_node</b> (<a class="el" href="a00062.html">graph</a> &amp;g)</td></tr>
-<tr class="separator:adb3dca9548b0cc44d39ad49a98580be8"><td class="memSeparator" colspan="2">&#160;</td></tr>
-<tr class="memitem:a5a30f9c453e390e68a0d5388218dda7e"><td class="memItemLeft" align="right" valign="top"><a class="anchor" id="a5a30f9c453e390e68a0d5388218dda7e"></a>
-&#160;</td><td class="memItemRight" valign="bottom"><b>indexer_node</b> (const <a class="el" href="a00067.html">indexer_node</a> &amp;other)</td></tr>
-<tr class="separator:a5a30f9c453e390e68a0d5388218dda7e"><td class="memSeparator" colspan="2">&#160;</td></tr>
-<tr class="memitem:a3fbf113cf2affa15858afc2bbc36cd01"><td class="memItemLeft" align="right" valign="top"><a class="anchor" id="a3fbf113cf2affa15858afc2bbc36cd01"></a>
-void&#160;</td><td class="memItemRight" valign="bottom"><b>set_name</b> (const char *name)</td></tr>
-<tr class="separator:a3fbf113cf2affa15858afc2bbc36cd01"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:ae67f4514754d58e524c30b6567f3829b"><td class="memItemLeft" align="right" valign="top"><a class="anchor" id="ae67f4514754d58e524c30b6567f3829b"></a>
+&#160;</td><td class="memItemRight" valign="bottom"><b>gfx_factory</b> (tbb::flow::graph &amp;g)</td></tr>
+<tr class="separator:ae67f4514754d58e524c30b6567f3829b"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:a8ba5e88a76a43cd85e122d30e25761ce"><td class="memTemplParams" colspan="2"><a class="anchor" id="a8ba5e88a76a43cd85e122d30e25761ce"></a>
+template&lt;typename... Args&gt; </td></tr>
+<tr class="memitem:a8ba5e88a76a43cd85e122d30e25761ce"><td class="memTemplItemLeft" align="right" valign="top">void&#160;</td><td class="memTemplItemRight" valign="bottom"><b>send_data</b> (<a class="el" href="a00054.html">device_type</a>, Args &amp;...args)</td></tr>
+<tr class="separator:a8ba5e88a76a43cd85e122d30e25761ce"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:ad02cbeeadac99f4ebecfb849439a3eb6"><td class="memTemplParams" colspan="2"><a class="anchor" id="ad02cbeeadac99f4ebecfb849439a3eb6"></a>
+template&lt;typename... Args&gt; </td></tr>
+<tr class="memitem:ad02cbeeadac99f4ebecfb849439a3eb6"><td class="memTemplItemLeft" align="right" valign="top">void&#160;</td><td class="memTemplItemRight" valign="bottom"><b>send_kernel</b> (<a class="el" href="a00054.html">device_type</a>, const kernel_type &amp;kernel, Args &amp;...args)</td></tr>
+<tr class="separator:ad02cbeeadac99f4ebecfb849439a3eb6"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:ae01ef652b38b2ef99729a39bd26eac5a"><td class="memTemplParams" colspan="2"><a class="anchor" id="ae01ef652b38b2ef99729a39bd26eac5a"></a>
+template&lt;typename FinalizeFn , typename... Args&gt; </td></tr>
+<tr class="memitem:ae01ef652b38b2ef99729a39bd26eac5a"><td class="memTemplItemLeft" align="right" valign="top">void&#160;</td><td class="memTemplItemRight" valign="bottom"><b>finalize</b> (<a class="el" href="a00054.html">device_type</a>, FinalizeFn fn, Args &amp;...)</td></tr>
+<tr class="separator:ae01ef652b38b2ef99729a39bd26eac5a"><td class="memSeparator" colspan="2">&#160;</td></tr>
 </table>
 <hr/>The documentation for this class was generated from the following file:<ul>
-<li><a class="el" href="a00189.html">flow_graph.h</a></li>
+<li>gfx_factory.h</li>
 </ul>
 </div><!-- contents -->
 <hr>
 <p></p>
-Copyright &copy; 2005-2014 Intel Corporation.  All Rights Reserved.
+Copyright &copy; 2005-2017 Intel Corporation.  All Rights Reserved.
 <p></p>
 Intel, Pentium, Intel Xeon, Itanium, Intel XScale and VTune are
 registered trademarks or trademarks of Intel Corporation or its

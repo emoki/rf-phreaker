@@ -1,26 +1,34 @@
 /*
-    Copyright 2005-2014 Intel Corporation.  All Rights Reserved.
+    Copyright (c) 2005-2017 Intel Corporation
 
-    This file is part of Threading Building Blocks. Threading Building Blocks is free software;
-    you can redistribute it and/or modify it under the terms of the GNU General Public License
-    version 2  as  published  by  the  Free Software Foundation.  Threading Building Blocks is
-    distributed in the hope that it will be useful, but WITHOUT ANY WARRANTY; without even the
-    implied warranty of MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.
-    See  the GNU General Public License for more details.   You should have received a copy of
-    the  GNU General Public License along with Threading Building Blocks; if not, write to the
-    Free Software Foundation, Inc.,  51 Franklin St,  Fifth Floor,  Boston,  MA 02110-1301 USA
+    Licensed under the Apache License, Version 2.0 (the "License");
+    you may not use this file except in compliance with the License.
+    You may obtain a copy of the License at
 
-    As a special exception,  you may use this file  as part of a free software library without
-    restriction.  Specifically,  if other files instantiate templates  or use macros or inline
-    functions from this file, or you compile this file and link it with other files to produce
-    an executable,  this file does not by itself cause the resulting executable to be covered
-    by the GNU General Public License. This exception does not however invalidate any other
-    reasons why the executable file might be covered by the GNU General Public License.
+        http://www.apache.org/licenses/LICENSE-2.0
+
+    Unless required by applicable law or agreed to in writing, software
+    distributed under the License is distributed on an "AS IS" BASIS,
+    WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+    See the License for the specific language governing permissions and
+    limitations under the License.
+
+
+
+
 */
 
 #ifndef UTILITY_H_
 #define UTILITY_H_
 
+#if __TBB_MIC_OFFLOAD
+#pragma offload_attribute (push,target(mic))
+#include <exception>
+#include <cstdio>
+#pragma offload_attribute (pop)
+#endif // __TBB_MIC_OFFLOAD
+
+#include <utility>
 #include <string>
 #include <cstring>
 #include <vector>
@@ -39,7 +47,9 @@
 namespace utility{
     namespace internal{
 
-#if ((__GNUC__*100+__GNUC_MINOR__>=404 && __GXX_EXPERIMENTAL_CXX0X__) || _MSC_VER >= 1600) && (!__INTEL_COMPILER || __INTEL_COMPILER >= 1200 )
+#if (_MSC_VER >= 1600 || __cplusplus >= 201103L || __GXX_EXPERIMENTAL_CXX0X__) \
+    && (_CPPLIB_VER || _LIBCPP_VERSION || __GLIBCXX__ && _UNIQUE_PTR_H ) \
+    && (!__INTEL_COMPILER || __INTEL_COMPILER >= 1200 )
     // std::unique_ptr is available, and compiler can use it
     #define smart_ptr std::unique_ptr
     using std::swap;
@@ -85,9 +95,9 @@ namespace utility{
             const std::string description;
 
             type_base (std::string a_name, std::string a_description) : name(a_name), description(a_description) {}
-            virtual void parse_and_store (const std::string & s)=0;
-            virtual std::string value() const =0;
-            virtual smart_ptr<type_base> clone()const =0;
+            virtual void parse_and_store(const std::string & s) = 0;
+            virtual std::string value() const = 0;
+            virtual smart_ptr<type_base> clone() const = 0;
             virtual ~type_base(){}
         };
         template <typename type>
@@ -102,7 +112,7 @@ namespace utility{
             type_impl(std::string a_name, std::string a_description, type & a_target, validating_function_type a_validating_function = NULL)
                 : type_base (a_name,a_description), target(a_target),validating_function(a_validating_function)
             {};
-            void parse_and_store (const std::string & s){
+            void parse_and_store (const std::string & s) /*override*/ {
                 try{
                     const bool is_bool = internal::is_bool<type>::value();
                     if (is_bool && s.empty()){
@@ -127,12 +137,16 @@ namespace utility{
                     }
                 }
             }
-            virtual std::string value()const{
+            template <typename t>
+            static bool is_null_c_str(t&){return false;}
+            static bool is_null_c_str(char* s){return s==NULL;}
+            std::string value() const /*override*/ {
                 std::stringstream str;
-                str<<target;
+                if (!is_null_c_str(target))
+                    str<<target;
                 return str.str();
             }
-            virtual smart_ptr<type_base> clone() const {
+            smart_ptr<type_base> clone() const /*override*/ {
                 return smart_ptr<type_base>(new type_impl(*this));
             }
         };
@@ -477,7 +491,11 @@ namespace utility{
    ;
 
     inline void report_elapsed_time(double seconds){
-        std::cout << "elapsed time : "<<seconds<<" seconds \n";
+        std::cout<<"elapsed time : "<<seconds<<" seconds"<<std::endl;
+    }
+
+    inline void report_skipped(){
+        std::cout<<"skip"<<std::endl;
     }
 
     inline void parse_cli_arguments(int argc, const char* argv[], utility::cli_argument_pack cli_pack){
