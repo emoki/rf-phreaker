@@ -1307,7 +1307,7 @@ const char* rf_phreaker_impl::status_message(rp_status status) {
 }
 
 const char* rf_phreaker_impl::build_version() {
-	return "0.0.0.1";
+	return "1.1.0.0";
 }
 
 void rf_phreaker_impl::message_handling(const std::string &str, int type, int code) {
