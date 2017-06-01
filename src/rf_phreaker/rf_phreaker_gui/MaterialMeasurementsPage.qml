@@ -284,7 +284,7 @@ TabbedPage {
         id: spectrumTab
         title: "Spectrum"
 
-        ColumnLayout {
+        GridLayout {
             id: spectrumGrid
             anchors {
                 fill: parent
@@ -293,7 +293,9 @@ TabbedPage {
                 leftMargin: dp(16)
                 rightMargin: dp(16)
             }
-            spacing: dp(16)
+            rowSpacing: dp(16)
+            columns: 2
+            rows: 2
 
             function update() {
                 for(var i = 0; i < spectrumOverviewChart.count; ++i) {
@@ -342,12 +344,14 @@ TabbedPage {
 
             OverviewChart {
                 id: spectrumOverviewChart
-
                 Layout.fillWidth: true
                 Layout.preferredHeight: spectrumGrid.height * .5
+                Layout.column: 1
+                Layout.row: 0
 
-                xMin: (Api.spectrumManager.freqLimits.low < 300 || Api.spectrumManager.freqLimits.low > 2600) ? 300 : Api.spectrumManager.freqLimits.low
-                xMax: (Api.spectrumManager.freqLimits.high > 2600 || Api.spectrumManager.freqLimits.high < 300) ? 2600 : Api.spectrumManager.freqLimits.high
+
+                xMin: (Api.spectrumManager.freqLimits.low < 300 || Api.spectrumManager.freqLimits.low > 2600) ? 300 : Api.spectrumManager.freqLimits.low - 20
+                xMax: (Api.spectrumManager.freqLimits.high > 2600 || Api.spectrumManager.freqLimits.high < 300) ? 2600 : Api.spectrumManager.freqLimits.high + 20
                 yMin: -160
                 yMax: -10
             }
@@ -356,6 +360,9 @@ TabbedPage {
                 Layout.fillWidth: true
                 Layout.fillHeight: true
                 visible: Api.spectrumManager.isDisabled
+                Layout.column: 0
+                Layout.columnSpan: 2
+                Layout.row: 1
                 Text {
                     id: noWaterfallLabel
                     anchors.centerIn: parent
@@ -370,16 +377,60 @@ TabbedPage {
             }
 
             Item {
+                Layout.fillHeight: true
+                Layout.preferredWidth: legend.width + dp(35)
+                Layout.column: 0
+                Layout.row: 1
+                visible: !Api.spectrumManager.isDisabled
+
+                Rectangle {
+                    id: legend
+                    anchors.margins: dp(5)
+                    height: parent.height
+                    width: dp(35)
+                    rotation: 180
+                    gradient: Gradient {
+                        GradientStop { position: 0.0; color: "blue" }
+                        GradientStop { position: 0.25; color: "lightblue" }
+                        GradientStop { position: 0.50; color: "green" }
+                        GradientStop { position: 0.75; color: "yellow" }
+                        GradientStop { position: 1.0; color: "red" }
+                    }
+                }
+                Text {
+                    anchors.verticalCenter: legend.top
+                    anchors.left: legend.right
+                    anchors.margins: dp(5)
+                    text: spectrumWaterfall.axisY.max + " dBm"
+                }
+                Text {
+                    anchors.verticalCenter: legend.verticalCenter
+                    anchors.left: legend.right
+                    anchors.margins: dp(5)
+                    text: ((spectrumWaterfall.axisY.max - spectrumWaterfall.axisY.min) * .5 +
+                           spectrumWaterfall.axisY.min) + " dBm"
+                }
+                Text {
+                    anchors.verticalCenter: legend.bottom
+                    anchors.left: legend.right
+                    anchors.rightMargin: dp(5)
+                    text: spectrumWaterfall.axisY.min + " dBm"
+                }
+            }
+
+            Item {
                 id: surface
                 Layout.fillWidth: true
                 Layout.fillHeight: true
                 visible: !Api.spectrumManager.isDisabled
+                Layout.column: 1
+                Layout.row: 1
 
                 ColorGradient {
                     id: surfaceGradient
                     ColorGradientStop { position: 0.0; color: "blue" }
                     ColorGradientStop { position: 0.25; color: "lightblue" }
-                    ColorGradientStop { position: 0.55; color: "green" }
+                    ColorGradientStop { position: 0.50; color: "green" }
                     ColorGradientStop { position: 0.75; color: "yellow" }
                     ColorGradientStop { position: 1.0; color: "red" }
                 }
@@ -394,6 +445,7 @@ TabbedPage {
                     selectionMode: AbstractGraph3D.SelectionSlice | AbstractGraph3D.SelectionItemAndRow
                     scene.activeCamera.cameraPreset: Camera3D.CameraPresetDirectlyAbove
                     orthoProjection: true
+                    //renderingMode: AbstractGraph3D.RenderDirectToBackground
 
 
                     // Using the width / height ratio allows us to precisely match the overviewchart.
