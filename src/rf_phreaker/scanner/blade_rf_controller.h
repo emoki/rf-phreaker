@@ -165,7 +165,7 @@ private:
 
 	void update_vctcxo_based_on_eeprom();
 
-	std::chrono::time_point<std::chrono::system_clock, std::chrono::system_clock::duration> get_collection_start_time();
+	std::chrono::time_point<std::chrono::steady_clock> get_collection_start_time();
 
 	measurement_info pop_measurement_buffer();
 

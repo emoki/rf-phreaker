@@ -2,5 +2,5 @@
 
 using namespace layer_3_information;
 
-lte_rrc_message_aggregate::lte_rrc_message_aggregate()
-{}
+//lte_rrc_message_aggregate::lte_rrc_message_aggregate()
+//{}

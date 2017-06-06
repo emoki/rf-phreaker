@@ -63,37 +63,37 @@ public:
 	//}
 
 	std::future<void> log_error(const rf_phreaker_error &err) {
-		return sink_([=](delegate_sink_impl sink) {
+		return sink_.lambda([=](delegate_sink_impl &sink) {
 			sink.log_error(err);
 		});
 	}
 
 	std::future<void> log_error(const std::string &str, int type, int code) {
-		return sink_([=](delegate_sink_impl sink) {
+		return sink_.lambda([=](delegate_sink_impl &sink) {
 			sink.log_error(str, type, code);
 		});
 	}
 
 	std::future<void> log_message(const rf_phreaker_error &err) {
-		return sink_([=](delegate_sink_impl sink) {
+		return sink_.lambda([=](delegate_sink_impl &sink) {
 			sink.log_error(err);
 		});
 	}
 	std::future<void> log_message(const std::string &str, int type, int code) {
-		return sink_([=](delegate_sink_impl sink) {
+		return sink_.lambda([=](delegate_sink_impl &sink) {
 			sink.log_message(str, type, code);
 		});
 	}
 
 	template<typename Func>
 	std::future<void> connect_error(Func &func) {
-		return sink_([=](delegate_sink_impl sink) {
+		return sink_.lambda([=](delegate_sink_impl &sink) {
 			sink.connect_error(func);
 		});
 	}
 	template<typename Func>
 	std::future<void> connect_message(Func &func) {
-		return sink_([=](delegate_sink_impl sink) {
+		return sink_.lambda([=](delegate_sink_impl &sink) {
 			sink.connect_message(func);
 		});
 	}

@@ -30,8 +30,17 @@ public:
 		, time_(-1)
 		, intermediate_frequency_(0) {}
 
+	umts_measurement(const umts_measurement& meas) 
+		: cpich_(meas.cpich_)
+		, norm_corr_(meas.norm_corr_)
+		, rms_signal_(meas.rms_signal_)
+		, ecio_(meas.ecio_)
+		, sample_num_(meas.sample_num_)
+		, time_(meas.time_)
+		, intermediate_frequency_(meas.intermediate_frequency_) 
+		, layer_3_(meas.layer_3_) {}
+
 	umts_measurement(umts_measurement&& meas)
-		//: umts_measurement()
 	{
 		this->swap(meas);
 	}

@@ -17,11 +17,11 @@ class lte_sib1_wrapper
 {
 public:
 	lte_sib1_wrapper() {};
-	lte_sib1_wrapper(lte_sib1_wrapper &&s)
-		: s_(std::move(s.s_))
-		, plmns_(std::move(s.plmns_))
-		, scheduled_sibs_(std::move(s.scheduled_sibs_))
-	{}
+	//lte_sib1_wrapper(lte_sib1_wrapper &&s)
+	//	: s_(std::move(s.s_))
+	//	, plmns_(std::move(s.plmns_))
+	//	, scheduled_sibs_(std::move(s.scheduled_sibs_))
+	//{}
 	lte_sib1_wrapper(const layer_3_information::lte_sib1_type &s)
 	{
 		s_.decoded_ = s.is_decoded_;
@@ -56,9 +56,10 @@ public:
 class lte_sib3_wrapper {
 public:
 	lte_sib3_wrapper() {};
-	lte_sib3_wrapper(lte_sib3_wrapper &&s)
-		: s_(std::move(s.s_))
-		{}
+	//lte_sib3_wrapper(const lte_sib3_wrapper &) = default;
+	//lte_sib3_wrapper(lte_sib3_wrapper &&s)
+	//	: s_(std::move(s.s_))
+	//	{}
 	lte_sib3_wrapper(const layer_3_information::lte_sib3_type &s) {
 		s_.decoded_ = s.is_decoded_;
 		s_.cell_reselection_serving_freq_info_.cell_reselection_priority_ = s.cell_reselection_serving_freq_info_.cell_reselection_priority_;
@@ -78,10 +79,10 @@ public:
 class lte_sib4_wrapper {
 public:
 	lte_sib4_wrapper() {};
-	lte_sib4_wrapper(lte_sib4_wrapper &&s)
-		: s_(std::move(s.s_))
-		, intra_cells_(std::move(s.intra_cells_))
-		, intra_blacks_(std::move(s.intra_blacks_)) {}
+	//lte_sib4_wrapper(lte_sib4_wrapper &&s)
+	//	: s_(std::move(s.s_))
+	//	, intra_cells_(std::move(s.intra_cells_))
+	//	, intra_blacks_(std::move(s.intra_blacks_)) {}
 	lte_sib4_wrapper(const layer_3_information::lte_sib4_type &s) {
 		s_.decoded_ = s.is_decoded_;
 
@@ -116,12 +117,12 @@ class lte_sib5_wrapper
 {
 public:
 	lte_sib5_wrapper() {};
-	lte_sib5_wrapper(lte_sib5_wrapper &&s)
-		: s_(std::move(s.s_))
-		, inter_neighbors_(std::move(s.inter_neighbors_))
-		, inter_cells_(std::move(s.inter_cells_))
-		, inter_blacks_(std::move(s.inter_blacks_))
-	{}
+	//lte_sib5_wrapper(lte_sib5_wrapper &&s)
+	//	: s_(std::move(s.s_))
+	//	, inter_neighbors_(std::move(s.inter_neighbors_))
+	//	, inter_cells_(std::move(s.inter_cells_))
+	//	, inter_blacks_(std::move(s.inter_blacks_))
+	//{}
 	lte_sib5_wrapper(const layer_3_information::lte_sib5_type &s)
 	{
 		s_.decoded_ = s.is_decoded_;
@@ -178,11 +179,11 @@ class lte_sib6_wrapper
 {
 public:
 	lte_sib6_wrapper() {};
-	lte_sib6_wrapper(lte_sib6_wrapper &&s)
-		: s_(std::move(s.s_))
-		, fdd_(std::move(s.fdd_))
-		, tdd_(std::move(s.tdd_))
-	{}
+	//lte_sib6_wrapper(lte_sib6_wrapper &&s)
+	//	: s_(std::move(s.s_))
+	//	, fdd_(std::move(s.fdd_))
+	//	, tdd_(std::move(s.tdd_))
+	//{}
 	lte_sib6_wrapper(const layer_3_information::lte_sib6_type &s)
 	{
 		s_.decoded_ = s.is_decoded_;
@@ -223,11 +224,11 @@ class lte_sib7_wrapper
 {
 public:
 	lte_sib7_wrapper() {};
-	lte_sib7_wrapper(lte_sib7_wrapper &&s)
-		: s_(std::move(s.s_))
-		, gerans_(std::move(s.gerans_))
-		, channels_(std::move(s.channels_))
-	{}
+	//lte_sib7_wrapper(lte_sib7_wrapper &&s)
+	//	: s_(std::move(s.s_))
+	//	, gerans_(std::move(s.gerans_))
+	//	, channels_(std::move(s.channels_))
+	//{}
  	lte_sib7_wrapper(const layer_3_information::lte_sib7_type &s)
 	{
 		s_.decoded_ = s.is_decoded_;
@@ -264,12 +265,12 @@ class lte_sib8_wrapper
 {
 public:
 	lte_sib8_wrapper() {};
-	lte_sib8_wrapper(lte_sib8_wrapper &&s)
-		: s_(std::move(s.s_))
-		, hrpd_(std::move(s.hrpd_))
-		, xrtt_(std::move(s.xrtt_))
-		, channels_(std::move(s.channels_))
-	{}
+	//lte_sib8_wrapper(lte_sib8_wrapper &&s)
+	//	: s_(std::move(s.s_))
+	//	, hrpd_(std::move(s.hrpd_))
+	//	, xrtt_(std::move(s.xrtt_))
+	//	, channels_(std::move(s.channels_))
+	//{}
 	lte_sib8_wrapper(const layer_3_information::lte_sib8_type &s)
 	{
 		s_.decoded_ = s.is_decoded_;
@@ -326,9 +327,9 @@ public:
 class gsm_si_2_wrapper {
 public:
 	gsm_si_2_wrapper() {}
-	gsm_si_2_wrapper(gsm_si_2_wrapper &&s)
-		: s_(std::move(s.s_))
-		, bcchs_(std::move(s.bcchs_)) {}
+	//gsm_si_2_wrapper(gsm_si_2_wrapper &&s)
+	//	: s_(std::move(s.s_))
+	//	, bcchs_(std::move(s.bcchs_)) {}
 	gsm_si_2_wrapper(const layer_3_information::gsm_si_2 &s) {
 		s_.decoded_ = s.is_decoded_;
 		s_.ba_ind_ = s.gsm_ba_ind_;
@@ -347,9 +348,9 @@ public:
 class gsm_si_2bis_wrapper {
 public:
 	gsm_si_2bis_wrapper() {}
-	gsm_si_2bis_wrapper(gsm_si_2bis_wrapper &&s)
-		: s_(std::move(s.s_)) 
-		, bcchs_(std::move(s.bcchs_)) {}
+	//gsm_si_2bis_wrapper(gsm_si_2bis_wrapper &&s)
+	//	: s_(std::move(s.s_)) 
+	//	, bcchs_(std::move(s.bcchs_)) {}
 	gsm_si_2bis_wrapper(const layer_3_information::gsm_si_2bis &s) {
 		s_.decoded_ = s.is_decoded_;
 		s_.ba_ind_ = s.gsm_ba_ind_;
@@ -370,11 +371,11 @@ public:
 class gsm_si_2ter_wrapper {
 public:
 	gsm_si_2ter_wrapper() {}
-	gsm_si_2ter_wrapper(gsm_si_2ter_wrapper &&s)
-		: s_(std::move(s.s_)) 
-		, bcchs_(std::move(s.bcchs_))
-		, scrambling_codes_(std::move(s.scrambling_codes_))
-		, utran_(std::move(s.utran_)) {}
+	//gsm_si_2ter_wrapper(gsm_si_2ter_wrapper &&s)
+	//	: s_(std::move(s.s_)) 
+	//	, bcchs_(std::move(s.bcchs_))
+	//	, scrambling_codes_(std::move(s.scrambling_codes_))
+	//	, utran_(std::move(s.utran_)) {}
 	gsm_si_2ter_wrapper(const layer_3_information::gsm_si_2ter &s) {
 		s_.decoded_ = s.is_decoded_;
 		s_.ba_ind_ = s.gsm_ba_ind_;
@@ -430,18 +431,18 @@ inline int convert(const layer_3_information::eutran_bandwidth_type b) {
 class gsm_si_2quater_wrapper {
 public:
 	gsm_si_2quater_wrapper() {}
-	gsm_si_2quater_wrapper(gsm_si_2quater_wrapper &&s)
-		: s_(std::move(s.s_))
-		, scrambling_codes_(std::move(s.scrambling_codes_))
-		, utran_(std::move(s.utran_))
-		, allowed_(std::move(s.allowed_))
-		, not_allowed_(std::move(s.not_allowed_))
-		, same_ta_(std::move(s.same_ta_))
-		, different_ta_(std::move(s.different_ta_)) 
-		, same_tas_(std::move(s.same_tas_))
-		, different_tas_(std::move(s.different_tas_))
-		, eutran_(std::move(s.eutran_))
-	{}
+	//gsm_si_2quater_wrapper(gsm_si_2quater_wrapper &&s)
+	//	: s_(std::move(s.s_))
+	//	, scrambling_codes_(std::move(s.scrambling_codes_))
+	//	, utran_(std::move(s.utran_))
+	//	, allowed_(std::move(s.allowed_))
+	//	, not_allowed_(std::move(s.not_allowed_))
+	//	, same_ta_(std::move(s.same_ta_))
+	//	, different_ta_(std::move(s.different_ta_)) 
+	//	, same_tas_(std::move(s.same_tas_))
+	//	, different_tas_(std::move(s.different_tas_))
+	//	, eutran_(std::move(s.eutran_))
+	//{}
 	gsm_si_2quater_wrapper(const layer_3_information::gsm_si_2quater &s) {
 		s_.decoded_ = s.is_decoded_;
 		s_.ba_ind_ = s.gsm_ba_ind_;
@@ -558,8 +559,8 @@ public:
 class gsm_si_3_wrapper {
 public:
 	gsm_si_3_wrapper() {}
-	gsm_si_3_wrapper(gsm_si_3_wrapper &&s)
-		: s_(std::move(s.s_)) {}
+	//gsm_si_3_wrapper(gsm_si_3_wrapper &&s)
+	//	: s_(std::move(s.s_)) {}
 	gsm_si_3_wrapper(const layer_3_information::gsm_si_3 &s) {
 		s_.decoded_ = s.is_decoded_;
 		copy_mcc_mnc(s_.plmn_.mcc_, s.plmn_.mcc_);
@@ -577,8 +578,8 @@ public:
 class gsm_si_4_wrapper {
 public:
 	gsm_si_4_wrapper() {}
-	gsm_si_4_wrapper(gsm_si_4_wrapper &&s)
-		: s_(std::move(s.s_)) {}
+	//gsm_si_4_wrapper(gsm_si_4_wrapper &&s)
+	//	: s_(std::move(s.s_)) {}
 	gsm_si_4_wrapper(const layer_3_information::gsm_si_4 &s) {
 		s_.decoded_ = s.is_decoded_;
 		copy_mcc_mnc(s_.plmn_.mcc_, s.plmn_.mcc_);

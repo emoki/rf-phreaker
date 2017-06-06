@@ -28,18 +28,18 @@
 #define HOST_CONFIG_H__
 
 #cmakedefine01  BLADERF_OS_LINUX
+#cmakedefine01  BLADERF_OS_FREEBSD
 #cmakedefine01  BLADERF_OS_OSX
 #cmakedefine01  BLADERF_OS_WINDOWS
 #cmakedefine01  BLADERF_BIG_ENDIAN
 
-#if !(BLADERF_OS_LINUX || BLADERF_OS_OSX || BLADERF_OS_WINDOWS)
+#if !(BLADERF_OS_LINUX || BLADERF_OS_OSX || BLADERF_OS_WINDOWS || BLADERF_OS_FREEBSD)
 #   error "Build not configured for any supported operating systems"
 #endif
 
-#if 1 < (BLADERF_OS_LINUX + BLADERF_OS_OSX + BLADERF_OS_WINDOWS)
+#if 1 < (BLADERF_OS_LINUX + BLADERF_OS_OSX + BLADERF_OS_WINDOWS + BLADERF_OS_FREEBSD)
 #error "Build configured for multiple operating systems"
 #endif
-
 
 /*******************************************************************************
  * Endianness conversions
@@ -61,6 +61,27 @@
  *---------------------*/
 #if BLADERF_OS_LINUX
 #include <endian.h>
+
+#define HOST_TO_LE16(val) htole16(val)
+#define LE16_TO_HOST(val) le16toh(val)
+#define HOST_TO_BE16(val) htobe16(val)
+#define BE16_TO_HOST(val) be16toh(val)
+
+#define HOST_TO_LE32(val) htole32(val)
+#define LE32_TO_HOST(val) le32toh(val)
+#define HOST_TO_BE32(val) htobe32(val)
+#define BE32_TO_HOST(val) be32toh(val)
+
+#define HOST_TO_LE64(val) htole64(val)
+#define LE64_TO_HOST(val) le64toh(val)
+#define HOST_TO_BE64(val) be64toh(val)
+#define BE64_TO_HOST(val) be64toh(val)
+
+/*-----------------------
+ * FREEBSD
+ *---------------------*/
+#elif BLADERF_OS_FREEBSD
+#include <sys/endian.h>
 
 #define HOST_TO_LE16(val) htole16(val)
 #define LE16_TO_HOST(val) le16toh(val)
@@ -131,6 +152,63 @@
 #endif
 
 /*******************************************************************************
+ * Endianness conversions for constants
+ *
+ * We shouldn't be using the above items for assigning constants because the
+ * implementations may be functions [1].
+ *
+ * [1] https://sourceware.org/bugzilla/show_bug.cgi?id=17679#c7
+ ******************************************************************************/
+
+#define BLADERF_BYTESWAP16(x) ((((x) & 0xff00) >> 8) | (((x) & 0x00ff) << 8))
+
+#define BLADERF_BYTESWAP32(x) ((((x) & 0xff000000) >> 24) | \
+                               (((x) & 0x00ff0000) >>  8) | \
+                               (((x) & 0x0000ff00) <<  8) | \
+                               (((x) & 0x000000ff) << 24) )
+
+#define BLADERF_BYTESWAP64(x) ((((x) & 0xff00000000000000llu) >> 56) | \
+                               (((x) & 0x00ff000000000000llu) >> 40) | \
+                               (((x) & 0x0000ff0000000000llu) >> 24) | \
+                               (((x) & 0x000000ff00000000llu) >>  8) | \
+                               (((x) & 0x00000000ff000000llu) <<  8) | \
+                               (((x) & 0x0000000000ff0000llu) << 24) | \
+                               (((x) & 0x000000000000ff00llu) << 40) | \
+                               (((x) & 0x00000000000000ffllu) << 56) | \
+
+#if BLADERF_BIG_ENDIAN
+#   define HOST_TO_LE16_CONST(x) (BLADERF_BYTESWAP16(x))
+#   define LE16_TO_HOST_CONST(x) (BLADERF_BYTESWAP16(x))
+#   define HOST_TO_BE16_CONST(x) (x)
+#   define BE16_TO_HOST_CONST(x) (x)
+
+#   define HOST_TO_LE32_CONST(x) (BLADERF_BYTESWAP32(x))
+#   define LE32_TO_HOST_CONST(x) (BLADERF_BYTESWAP32(x))
+#   define HOST_TO_BE32_CONST(x) (x)
+#   define BE32_TO_HOST_CONST(x) (x)
+
+#   define HOST_TO_LE64_CONST(x) (BLADERF_BYTESWAP64(x))
+#   define LE64_TO_HOST_CONST(x) (BLADERF_BYTESWAP64(x))
+#   define HOST_TO_BE64_CONST(x) (x)
+#   define BE64_TO_HOST_CONST(x) (x)
+#else
+#   define HOST_TO_LE16_CONST(x) (x)
+#   define LE16_TO_HOST_CONST(x) (x)
+#   define HOST_TO_BE16_CONST(x) (BLADERF_BYTESWAP16(x))
+#   define BE16_TO_HOST_CONST(x) (BLADERF_BYTESWAP16(x))
+
+#   define HOST_TO_LE32_CONST(x) (x)
+#   define LE32_TO_HOST_CONST(x) (x)
+#   define HOST_TO_BE32_CONST(x) (BLADERF_BYTESWAP32(x))
+#   define BE32_TO_HOST_CONST(x) (BLADERF_BYTESWAP32(x))
+
+#   define HOST_TO_LE64_CONST(x) (x)
+#   define LE64_TO_HOST_CONST(x) (x)
+#   define HOST_TO_BE64_CONST(x) (BLADERF_BYTESWAP64(x))
+#   define BE64_TO_HOST_CONST(x) (BLADERF_BYTESWAP64(x))
+#endif
+
+/*******************************************************************************
  * Miscellaneous Linux fixups
  ******************************************************************************/
 #if BLADERF_OS_LINUX
@@ -139,6 +217,15 @@
  * a few Windows replacements for unistd.h items. */
 #include <unistd.h>
 #include <pwd.h>
+
+/*******************************************************************************
+ * Miscellaneous FREEBSD fixups
+ ******************************************************************************/
+#elif BLADERF_OS_FREEBSD
+
+#include <unistd.h>
+#include <pwd.h>
+#include <sys/sysctl.h>
 
 /*******************************************************************************
  * Miscellaneous OSX fixups
@@ -162,8 +249,14 @@
 #if _MSC_VER
 #   define strtok_r    strtok_s
 #   define strtoull    _strtoui64
+#if _MSC_VER < 1900
 #   define snprintf    _snprintf
 #   define vsnprintf   _vsnprintf
+#else
+#	define __STDC_LIMIT_MACROS
+#	define STDC99
+# 	include <inttypes.h>
+#endif
 #   define strcasecmp  _stricmp
 #   define strncasecmp _strnicmp
 #   define fileno      _fileno
@@ -176,7 +269,23 @@
 
 /* With msvc, inline is only available for C++. Otherwise we need to use __inline:
  *  http://msdn.microsoft.com/en-us/library/z8y1yy88.aspx */
-#   define inline __inline
+#   if !defined(__cplusplus)
+#       define inline __inline
+#   endif
+
+/* Visual studio 2012 compiler (v17.00.XX) doesn't have round functions */
+#   if _MSC_VER <= 1700
+#       include <math.h>
+        static inline float roundf(float x)
+        {
+            return x >= 0.0f ? floorf(x + 0.5f) : ceilf(x - 0.5f);
+        }
+        static inline double round(double x)
+        {
+            return x >= 0.0 ? floor(x + 0.5) : ceil(x - 0.5);
+        }
+#   endif
+
 #endif // _MSC_VER
 
 #endif
@@ -196,13 +305,6 @@
 #   define FIELD_INIT(field, ...) __VA_ARGS__
 #else
 #   define FIELD_INIT(field, ...) field = __VA_ARGS__
-#endif // _MSC_VER
-
-/* MSVC doesn't have inttypes.h.  We'll use a local version for this environment. */
-#if _MSC_VER
-#   include <inttypes_msvc.h>
-#else
-#   include <inttypes.h>
 #endif // _MSC_VER
 
 /*******************************************************************************

@@ -120,7 +120,7 @@ public:
 		// the min_collection_round with no measurements found which would cause the API to remove
 		if(scan_type == umts_scan_type::full_scan_type && config_.offload_full_scan_) {
 			scan_type = umts_scan_type::candidate_all_timeslots_scan_type;
-			helper_.track_future((*offloaded_analysis_)([meas, this](offloaded_analysis &a) {
+			helper_.track_future((*offloaded_analysis_).lambda([meas, this](offloaded_analysis &a) {
 				a.perform_full_scan(&analysis_, meas, config_.umts_general_.sensitivity_, g_scanner_error_tracker::instance().current_error());
 			}));
 		}

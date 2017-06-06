@@ -121,7 +121,7 @@ set (rf_phreaker_gui_QMLS
 	qtlabscontrols.conf
 	)
 
-set (qt_VERSION "5.8.0")
+set (qt_VERSION "5.9.0")
 set (qt_PRIVATE_GUI "${qt_INSTALL_PATH}/include/QtGui/${qt_VERSION}" CACHE STRING "Path to private QT GUI.")
 set (qt_PRIVATE_CORE "${qt_INSTALL_PATH}/include/QtCore/${qt_VERSION}" CACHE STRING "Path to private QT Core.")
 set (qt_PRIVATE_GUIP "${qt_INSTALL_PATH}/include/QtGui/${qt_VERSION}/QtGui" CACHE STRING "Path to private QT GUI.")

@@ -1,6 +1,10 @@
 TEMPLATE = lib
-TARGET = material
 
+CONFIG(debug, debug|release) {
+    TARGET = materiald
+} else {
+    TARGET = material
+}
 CONFIG += c++11
 QT += qml quick
 

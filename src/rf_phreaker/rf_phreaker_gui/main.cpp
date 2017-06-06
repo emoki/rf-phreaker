@@ -36,7 +36,7 @@ int main(int argc, char *argv[]) {
 		declarativePlugin.initializeEngine(&engine, marbleUri);
 		MessageHandler::logToApi(true);
 		engine.load(QUrl(QStringLiteral("qrc:/MaterialMain.qml")));
-		
+
 		//// Enable antialiasing in direct rendering mode
 		//// TODO - Look into using this for spectrum graph.
 		//auto windowList = app.topLevelWindows();

@@ -59,11 +59,13 @@ class specifiers {
 public:
 	specifiers() {}
 	specifiers(specifier spec) : specs_({spec}) {}
+	specifiers(const specifiers &s) : specs_(s.specs_) {}
 	specifiers(specifiers &&specs) : specs_(std::move(specs.specs_)) {}
 	specifiers(const std::vector<specifier> &specs) {
 		for(auto &i : specs)
 			specs_.insert(i);
 	}
+	specifiers& operator=(specifiers s) { this->swap(s); return *this; }
 	void add_spec(specifier spec) { specs_.insert(spec); }
 	void remove_spec(specifier spec) { specs_.erase(spec); }
 	bool has_spec(specifier spec) const { return specs_.find(spec) != specs_.end(); }
@@ -74,6 +76,7 @@ public:
 		}
 		return false;
 	}
+	void swap(specifiers &s) { specs_.swap(s.specs_); }
 	bool operator==(const specifiers& s) const { return specs_ == s.specs_; }
 	bool operator!=(const specifiers& s) const { return specs_ != s.specs_; }
 	size_t size() const { return specs_.size(); }
@@ -211,11 +214,15 @@ class operating_bands {
 public:
 	operating_bands() {}
 	operating_bands(operating_band band) : bands_({band}) {}
+	operating_bands(const operating_bands &bands) : bands_(bands.bands_) {}
 	operating_bands(operating_bands &&bands) : bands_(std::move(bands.bands_)) {}
 	operating_bands(const std::vector<operating_band> &bands) {
 		for(auto &i : bands)
 			bands_.insert(i);
 	}
+	operating_bands& operator=(operating_bands &&b) { this->swap(b); return *this; }
+	operating_bands& operator=(const operating_bands &b) { bands_ = b.bands_; return *this; }
+	void swap(operating_bands &b) { bands_.swap(b.bands_); }
 	void add_band(operating_band band) { bands_.insert(band); }
 	void remove_band(operating_band band) { bands_.erase(band); }
 	bool has_band(operating_band band) const { return bands_.find(band) != bands_.end(); }

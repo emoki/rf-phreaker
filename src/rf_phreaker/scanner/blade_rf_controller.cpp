@@ -629,7 +629,7 @@ lna_gain_values blade_rf_controller::get_lna_gains(frequency_type freq) {
 	return lna;
 }
 
-std::chrono::time_point<std::chrono::system_clock, std::chrono::system_clock::duration> blade_rf_controller::get_collection_start_time() {
+std::chrono::time_point<std::chrono::steady_clock> blade_rf_controller::get_collection_start_time() {
 	static auto start_time = std::chrono::high_resolution_clock::now();
 	return start_time;
 }

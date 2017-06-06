@@ -44,11 +44,6 @@ public:
 		, power_info_group_(std::move(p_info))
 		, remove_(remove)
 	{}
-	analysis_data(analysis_data &&a)
-		: measurement_package_(std::move(a.measurement_package_))
-		, processed_data_(std::move(a.processed_data_))
-		, power_info_group_(std::move(a.power_info_group_))
-		, remove_(a.remove_) {}
 
 	measurement_package measurement_package_;
 	Data processed_data_;

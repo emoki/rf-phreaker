@@ -383,7 +383,7 @@ struct gsm_si_23 : public gsm_si_base {
 class gsm_layer_3_message_aggregate : public bcch_bch_message_aggregate
 {
 public:
-	gsm_layer_3_message_aggregate();
+	//gsm_layer_3_message_aggregate();
 	
 	void clear() {
 		si_1_.clear();

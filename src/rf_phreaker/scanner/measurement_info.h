@@ -57,8 +57,7 @@ public:
 	{}
 
 	measurement_info& operator =(measurement_info other) {
-		measurement_info tmp(other);
-		tmp.swap(*this);
+		this->swap(std::move(other));
 		return *this;
 	}
 
@@ -94,7 +93,7 @@ public:
 	std::string serial() const { return serial_; }
 
 	void collection_round(int64_t cr) { collection_round_ = cr; }
-	void set_operating_bands(operating_bands bands) { operating_bands_ = bands; }
+	void set_operating_bands(const operating_bands &bands) { operating_bands_ = bands; }
 	void blade_adjustments(rf_adjustment adj) { blade_adjustments_ = adj; }
 	void rf_board_adjustments(rf_adjustment adj) { rf_board_adjustments_ = adj; }
 	void serial(std::string serial) { serial_ = serial; }

@@ -84,6 +84,11 @@ struct lte_si_info_group {
 		std::swap(g_, a.g_);
 	}
 
+	lte_si_info_group& operator=(lte_si_info_group a) {
+		this->swap(a);
+		return *this;
+	}
+
 	int si_window_length_ms() const { return si_window_length_ms_; }
 
 	lte_dci_format_type dci_format() const { return dci_format_; }

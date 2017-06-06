@@ -11,6 +11,7 @@ set(CMAKE_POSITION_INDEPENDENT_CODE ON)
 
 cmake_policy(SET CMP0054 NEW) # Variables/keywords should be unquoted.
 cmake_policy(SET CMP0020 NEW) # This should also be specified in any project that uses QT.
+cmake_policy(SET CMP0053 OLD)
 
 set (CMAKE_RUNTIME_OUTPUT_DIRECTORY "${PROJECT_SOURCE_DIR}/../../output")
 set (CMAKE_LIBRARY_OUTPUT_DIRECTORY "${PROJECT_SOURCE_DIR}/../../output")
@@ -18,8 +19,8 @@ set (CMAKE_ARCHIVE_OUTPUT_DIRECTORY "${PROJECT_SOURCE_DIR}/../../output")
 
 # Path to QT
 set (CMAKE_INCLUDE_CURRENT_DIR ON)
-set (qt_INSTALL_PATH "c:/bin/qt/5.8/5.8/msvc2013" CACHE STRING "Path to QT.")
-set (qt_CMAKE_PATH "${qt_INSTALL_PATH}/msvc2013/lib/cmake/Qt5"  CACHE STRING "Path to QT cmake file.")
+set (qt_INSTALL_PATH "c:/bin/qt/5.9/msvc2015" CACHE STRING "Path to QT.")
+set (qt_CMAKE_PATH "${qt_INSTALL_PATH}/lib/cmake/Qt5"  CACHE STRING "Path to QT cmake file.")
 set (CMAKE_PREFIX_PATH ${qt_CMAKE_PATH} ${qt_INSTALL_PATH} ${CMAKE_PREFIX_PATH})
 # All qt packages must be found within top level dir.
 find_package (Qt5 COMPONENTS Core Gui Quick Widgets)
@@ -382,13 +383,6 @@ add_custom_command(
 	COMMAND ${CMAKE_COMMAND} -E copy_directory
 		${CMAKE_CURRENT_SOURCE_DIR}/data
 		${CMAKE_RUNTIME_OUTPUT_DIRECTORY}/${CMAKE_CFG_INTDIR}/data
-)
-
-add_custom_command(
-	TARGET copy_data POST_BUILD
-	COMMAND ${CMAKE_COMMAND} -E copy_if_different
-		${CMAKE_CURRENT_SOURCE_DIR}/../zlib_win/bin/zlib.dll
-		${CMAKE_RUNTIME_OUTPUT_DIRECTORY}/${CMAKE_CFG_INTDIR}
 )
 
 add_custom_command(

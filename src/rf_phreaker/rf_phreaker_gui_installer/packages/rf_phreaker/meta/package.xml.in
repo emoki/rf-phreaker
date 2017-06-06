@@ -4,7 +4,7 @@
     <Description>Cappeen collection software</Description>
     <Version>@rfp_VERSION_MAJOR@.@rfp_VERSION_MINOR@.@rfp_VERSION_PATCH@</Version>
     <ReleaseDate>@RELEASEDATE@</ReleaseDate>
-	<Dependencies>cypress, vcredist_msvc2010_x86, vcredist_msvc2013_x86</Dependencies>
+	<Dependencies>cypress, vcredist_msvc2015_x86, vcredist_msvc2013_x86</Dependencies>
     <Licenses>
         <License name="RF Phreaker License Agreement" file="license.txt" />
     </Licenses>

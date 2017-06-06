@@ -149,10 +149,10 @@ private:
 
 	rf_phreaker::scanner::scanner_controller_interface *scanner_;
 	data_output_async *data_output_;
-	std::chrono::duration<std::chrono::system_clock::rep, std::chrono::system_clock::period> sleep_time_ms_;
+	std::chrono::duration<std::chrono::steady_clock::rep, std::chrono::steady_clock::period> sleep_time_ms_;
 	std::vector<std::future<void>> past_output_;
 	bool calibration_requested_;
-	std::chrono::system_clock::time_point start_1pps_integration_time_;
+	std::chrono::steady_clock::time_point start_1pps_integration_time_;
 	int min_integration_time_;
 	int max_integration_time_;
 	int current_integration_time_;

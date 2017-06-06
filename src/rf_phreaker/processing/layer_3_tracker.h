@@ -22,7 +22,7 @@ typedef layer_3_tracker<layer_3_information::umts_sib_type, bool> umts_layer_3_t
 class bit_index {
 public:
 	bit_index() : mask_(0), elements_(0), is_complete_(false) {}
-	bit_index(bit_index &t) : mask_(t.mask_), elements_(t.elements_), is_complete_(t.is_complete_) {}
+	bit_index(const bit_index &t) : mask_(t.mask_), elements_(t.elements_), is_complete_(t.is_complete_) {}
 	uint64_t elements_;
 	uint64_t mask_;
 	bool is_complete_;

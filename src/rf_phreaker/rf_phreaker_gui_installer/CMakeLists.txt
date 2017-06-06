@@ -44,18 +44,18 @@ add_custom_command(TARGET rf_phreaker_build_install POST_BUILD COMMAND ${CMAKE_C
 		${RF_PHREAKER_INSTALLER_BUILD_INSTALL_DIR}/packages/cypress/data
 )
 
-# vcredist_msvc2010_x86
-add_custom_command(TARGET rf_phreaker_build_install POST_BUILD COMMAND ${CMAKE_COMMAND} -E make_directory ${RF_PHREAKER_INSTALLER_BUILD_INSTALL_DIR}/packages/vcredist_msvc2010_x86/data)
-add_custom_command(TARGET rf_phreaker_build_install POST_BUILD COMMAND ${CMAKE_COMMAND} -E copy_if_different
-		${CMAKE_SOURCE_DIR}/content/vcredist_msvc2010_sp1_x86.7z
-		${RF_PHREAKER_INSTALLER_BUILD_INSTALL_DIR}/packages/vcredist_msvc2010_x86/data
-)
-
 # vcredist_msvc2013_x86
 add_custom_command(TARGET rf_phreaker_build_install POST_BUILD COMMAND ${CMAKE_COMMAND} -E make_directory ${RF_PHREAKER_INSTALLER_BUILD_INSTALL_DIR}/packages/vcredist_msvc2013_x86/data)
 add_custom_command(TARGET rf_phreaker_build_install POST_BUILD COMMAND ${CMAKE_COMMAND} -E copy_if_different
 		${CMAKE_SOURCE_DIR}/content/2014-30-12vcredist_msvc2013_x86.7z
 		${RF_PHREAKER_INSTALLER_BUILD_INSTALL_DIR}/packages/vcredist_msvc2013_x86/data
+)
+
+# vcredist_msvc2015_x86
+add_custom_command(TARGET rf_phreaker_build_install POST_BUILD COMMAND ${CMAKE_COMMAND} -E make_directory ${RF_PHREAKER_INSTALLER_BUILD_INSTALL_DIR}/packages/vcredist_msvc2015_x86/data)
+add_custom_command(TARGET rf_phreaker_build_install POST_BUILD COMMAND ${CMAKE_COMMAND} -E copy_if_different
+		${CMAKE_SOURCE_DIR}/content/vcredist_msvc2015_x86.7z
+		${RF_PHREAKER_INSTALLER_BUILD_INSTALL_DIR}/packages/vcredist_msvc2015_x86/data
 )
 
 # RF Phreaker Directories

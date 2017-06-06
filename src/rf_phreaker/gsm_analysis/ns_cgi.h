@@ -64,7 +64,7 @@ protected:
 	DATASTRUCT *RESAMP_LPF_TAPS;
 
 	modulated_signal_correlator *bcch_correlator_;
-	(const DATASTRUCT) *NORMAL_TS_04_[GSM_NUM_TS];
+	DATASTRUCT const *NORMAL_TS_04_[GSM_NUM_TS];
 	const unsigned int Len_TS_04_;
 	// used to point to the correct training seq template
 	// based on the BCC that is passed into the Decode function.

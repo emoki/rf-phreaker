@@ -2,5 +2,5 @@
 
 using namespace layer_3_information;
 
-gsm_layer_3_message_aggregate::gsm_layer_3_message_aggregate()
-{}
+//gsm_layer_3_message_aggregate::gsm_layer_3_message_aggregate()
+//{}

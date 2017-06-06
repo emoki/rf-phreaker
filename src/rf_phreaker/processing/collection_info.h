@@ -47,6 +47,17 @@ public:
 		, specs_(spec)
 		, params_(params) {}
 
+	collection_info(const collection_info &a)
+		: freq_(a.freq_)
+		, time_ns_(a.time_ns_)
+		, overlap_time_ns_(a.overlap_time_ns_)
+		, bandwidth_(a.bandwidth_)
+		, sampling_rate_(a.sampling_rate_)
+		, operating_bands_(a.operating_bands_)
+		, can_remove_(a.can_remove_)
+		, specs_(a.specs_)
+		, params_(a.params_) {}
+
 	collection_info(collection_info &&a)
 		: freq_(a.freq_)
 		, time_ns_(a.time_ns_)
@@ -57,6 +68,23 @@ public:
 		, can_remove_(a.can_remove_)
 		, specs_(std::move(a.specs_))
 		, params_(std::move(a.params_)) {}
+
+	collection_info& operator=(collection_info a) {
+		this->swap(a);
+		return *this;
+	}
+
+	void swap(collection_info &a) {
+		std::swap(freq_, a.freq_);
+		std::swap(time_ns_, a.time_ns_);
+		std::swap(overlap_time_ns_, a.overlap_time_ns_);
+		std::swap(bandwidth_, a.bandwidth_);
+		std::swap(sampling_rate_, a.sampling_rate_);
+		operating_bands_.swap(a.operating_bands_);
+		std::swap(can_remove_, a.can_remove_);
+		specs_.swap(a.specs_);
+		std::swap(params_, a.params_);
+	}
 
 	bool operator==(const collection_info &a) const {
 		return freq_ == a.freq_ && time_ns_ == a.time_ns_ && overlap_time_ns_ == a.overlap_time_ns_ 

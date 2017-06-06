@@ -14,7 +14,7 @@ struct sampling_rates {
 	rf_phreaker::frequency_type input_sampling_rate_;
 	rf_phreaker::frequency_type output_sampling_rate_;
 	double norm_cutoff_freq_;
-	bool operator()(const sampling_rates &a, const sampling_rates &b) {
+	bool operator()(const sampling_rates &a, const sampling_rates &b) const {
 		if(a.input_sampling_rate_ == b.input_sampling_rate_) {
 			if(a.output_sampling_rate_ == b.output_sampling_rate_)
 				return a.norm_cutoff_freq_ < b.norm_cutoff_freq_;

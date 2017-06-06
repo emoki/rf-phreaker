@@ -148,11 +148,11 @@ struct umts_sib11_bis_type : public umts_sib_base {
 class umts_bcch_bch_message_aggregate : public bcch_bch_message_aggregate
 {
 public:
-	umts_bcch_bch_message_aggregate();
+	//umts_bcch_bch_message_aggregate();
 
-	umts_bcch_bch_message_aggregate(umts_bcch_bch_message_aggregate &&a) {
-		this->swap(a);
-	}
+	//umts_bcch_bch_message_aggregate(umts_bcch_bch_message_aggregate &&a) {
+	//	this->swap(a);
+	//}
 
 	void swap(umts_bcch_bch_message_aggregate &a) {
 		bcch_bch_message_aggregate::swap(a);

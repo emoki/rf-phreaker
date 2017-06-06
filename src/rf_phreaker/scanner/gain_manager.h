@@ -98,7 +98,7 @@ public:
 	class gain_history_sort
 	{
 	public:
-		bool operator()(const gain_history_key &a, const gain_history_key &b)
+		bool operator()(const gain_history_key &a, const gain_history_key &b) const
 		{
 			if(a.freq_ == b.freq_)
 				return a.bw_ < b.bw_;
@@ -107,12 +107,12 @@ public:
 		}
 	};
 
-	gain_type default_gain()
+	gain_type default_gain() const
 	{
 		return gain_type(lms::LNA_MAX, 20, 0);
 	}
 
-	bool in_history(frequency_type freq, bandwidth_type bw)
+	bool in_history(frequency_type freq, bandwidth_type bw) const
 	{
 		return history_.find(gain_history_key(freq, bw)) != history_.end();
 	}

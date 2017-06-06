@@ -280,7 +280,7 @@ struct lte_sib8_type : public lte_sib_base {
 
 class lte_rrc_message_aggregate : public bcch_bch_message_aggregate {
 public:
-	lte_rrc_message_aggregate();
+	//lte_rrc_message_aggregate();
 	void clear() {
 		bcch_bch_message_aggregate::clear();
 		sib1_.clear();

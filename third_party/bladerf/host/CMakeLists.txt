@@ -115,6 +115,12 @@ if(MSVC)
     if(TREAT_WARNINGS_AS_ERRORS)
         set(CMAKE_C_FLAGS "${CMAKE_C_FLAGS} /WX")
     endif()
+	
+	# Prior to V12.0 2013, certain C99 headers we use were not supported.
+    # We have to supply our own.
+    if(MSVC_VERSION LESS 1800)
+        set(MSVC_C99_INCLUDES ${CMAKE_CURRENT_SOURCE_DIR}/common/include/windows/c99)
+    endif()
 endif(MSVC)
 
 ################################################################################

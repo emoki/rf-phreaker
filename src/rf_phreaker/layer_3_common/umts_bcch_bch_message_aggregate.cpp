@@ -2,6 +2,6 @@
 
 using namespace layer_3_information;
 
-umts_bcch_bch_message_aggregate::umts_bcch_bch_message_aggregate() 
-	: system_frame_number_(not_decoded_16) 
-{}
+//umts_bcch_bch_message_aggregate::umts_bcch_bch_message_aggregate() 
+//	: system_frame_number_(not_decoded_16) 
+//{}

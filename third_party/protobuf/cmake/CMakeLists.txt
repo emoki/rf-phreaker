@@ -70,25 +70,30 @@ if (CMAKE_USE_PTHREADS_INIT)
   add_definitions(-DHAVE_PTHREAD)
 endif (CMAKE_USE_PTHREADS_INIT)
 
-if (protobuf_WITH_ZLIB)
-  find_package(ZLIB)
-  if (ZLIB_FOUND)
-    set(HAVE_ZLIB 1)
-    # FindZLIB module define ZLIB_INCLUDE_DIRS variable
-    # Set ZLIB_INCLUDE_DIRECTORIES for compatible
-    set(ZLIB_INCLUDE_DIRECTORIES ${ZLIB_INCLUDE_DIRECTORIES} ${ZLIB_INCLUDE_DIRS})
-    # Using imported target if exists
-    if (TARGET ZLIB::ZLIB)
-      set(ZLIB_LIBRARIES ZLIB::ZLIB)
-    endif (TARGET ZLIB::ZLIB)
-  else (ZLIB_FOUND)
-    set(HAVE_ZLIB 0)
-    # Explicitly set these to empty (override NOT_FOUND) so cmake doesn't
-    # complain when we use them later.
-    set(ZLIB_INCLUDE_DIRECTORIES)
-    set(ZLIB_LIBRARIES)
-  endif (ZLIB_FOUND)
-endif (protobuf_WITH_ZLIB)
+#if (protobuf_WITH_ZLIB)
+#  find_package(ZLIB)
+#  if (ZLIB_FOUND)
+#    set(HAVE_ZLIB 1)
+#    # FindZLIB module define ZLIB_INCLUDE_DIRS variable
+#    # Set ZLIB_INCLUDE_DIRECTORIES for compatible
+#    set(ZLIB_INCLUDE_DIRECTORIES ${ZLIB_INCLUDE_DIRECTORIES} ${ZLIB_INCLUDE_DIRS})
+#    # Using imported target if exists
+#    if (TARGET ZLIB::ZLIB)
+#      set(ZLIB_LIBRARIES ZLIB::ZLIB)
+#    endif (TARGET ZLIB::ZLIB)
+#  else (ZLIB_FOUND)
+#    set(HAVE_ZLIB 0)
+#    # Explicitly set these to empty (override NOT_FOUND) so cmake doesn't
+#    # complain when we use them later.
+#    set(ZLIB_INCLUDE_DIRECTORIES)
+#    set(ZLIB_LIBRARIES)
+#  endif (ZLIB_FOUND)
+#endif (protobuf_WITH_ZLIB)
+
+set(ZLIB_LIBRARIES zlib)
+set(ZLIB_INCLUDE_DIRECTORIES ${CMAKE_SOURCE_DIR}/third_party/zlib ${CMAKE_BINARY_DIR}/third_party/zlib)
+set(HAVE_ZLIB 1)
+
 
 if (HAVE_ZLIB)
   add_definitions(-DHAVE_ZLIB)
@@ -148,4 +153,4 @@ if (protobuf_BUILD_TESTS)
   include(tests.cmake)
 endif (protobuf_BUILD_TESTS)
 
-include(install.cmake)
+#include(install.cmake)
