@@ -5,7 +5,7 @@ cmake_policy(SET CMP0020 NEW)
 # rf_phreaker_gui version number.
 # TODO - finish this when you have time!
 set (rfp_VERSION_MAJOR 1 CACHE INTERNAL "rf_phreaker_gui versioning" FORCE)
-set (rfp_VERSION_MINOR 3 CACHE INTERNAL "rf_phreaker_gui versioning" FORCE)
+set (rfp_VERSION_MINOR 4 CACHE INTERNAL "rf_phreaker_gui versioning" FORCE)
 set (rfp_VERSION_PATCH 0 CACHE INTERNAL "rf_phreaker_gui versioning" FORCE)
 set (rfp_VERSION_TWEAK 0 CACHE INTERNAL "rf_phreaker_gui versioning" FORCE)
 
