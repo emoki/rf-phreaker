@@ -176,6 +176,20 @@ add_custom_command(TARGET rf_phreaker_build_install POST_BUILD COMMAND ${CMAKE_C
 		${RF_PHREAKER_INSTALLER_BUILD_INSTALL_DIR}/packages/rf_phreaker/data
 )
 
+# OpenSSL DLL Files - Used by marble
+add_custom_command(TARGET rf_phreaker_build_install POST_BUILD COMMAND ${CMAKE_COMMAND} -E copy_if_different
+		${CMAKE_SOURCE_DIR}/third_party/openssl_win32/libeay32.dll
+		${RF_PHREAKER_INSTALLER_BUILD_INSTALL_DIR}/packages/rf_phreaker/data
+)
+add_custom_command(TARGET rf_phreaker_build_install POST_BUILD COMMAND ${CMAKE_COMMAND} -E copy_if_different
+		${CMAKE_SOURCE_DIR}/third_party/openssl_win32/libssl32.dll
+		${RF_PHREAKER_INSTALLER_BUILD_INSTALL_DIR}/packages/rf_phreaker/data
+)
+add_custom_command(TARGET rf_phreaker_build_install POST_BUILD COMMAND ${CMAKE_COMMAND} -E copy_if_different
+		${CMAKE_SOURCE_DIR}/third_party/openssl_win32/ssleay32.dll
+		${RF_PHREAKER_INSTALLER_BUILD_INSTALL_DIR}/packages/rf_phreaker/data
+)
+
 # Add QT Dependencies
 find_program(WINDEPLOYQT_EXECUTABLE NAMES windeployqt HINTS ${qt_INSTALL_PATH} ENV qt_INSTALL_PATH PATH_SUFFIXES bin)
 if(NOT EXISTS ${WINDEPLOYQT_EXECUTABLE})
