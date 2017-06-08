@@ -82,6 +82,8 @@ ChartView {
     MouseArea {
         anchors.fill:parent
         acceptedButtons: Qt.LeftButton | Qt.RightButton | Qt.MiddleButton
+        propagateComposedEvents: false
+        preventStealing: true
         onWheel: {
             //console.debug("onwheel");
             if (wheel.angleDelta.y > 0)
