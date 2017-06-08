@@ -54,10 +54,10 @@ public:
 			QVector<QPointF> vec(storage_.rbegin()->first);
 			int i = 0;
 			for(auto &spec : storage_) {
-				float freq = spec.second.params_.start_frequency_ / 1e6;
-				float step = spec.second.params_.step_size_ / 1e6;
-				for(auto &p : spec.second.power_) {
-					vec[i].setX(freq);
+				auto freq = spec.second.params_.start_frequency_;
+				auto step = spec.second.params_.step_size_;
+				for(const auto &p : spec.second.power_) {
+					vec[i].setX(freq / 1e6f);
 					vec[i++].setY(p);
 					freq += step;
 				}
