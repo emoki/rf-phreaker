@@ -298,21 +298,12 @@ TabbedPage {
             rows: 2
 
             function update() {
-                for(var i = 0; i < spectrumOverviewChart.count; ++i) {
-                    Api.spectrumManager.updateLineSeries(spectrumOverviewChart.series(i), i);
-                }
                 for(var j = 0; j < spectrumWaterfall.seriesList.length; ++j) {
                     Api.spectrumManager.updateSurfaceSeries(spectrumWaterfall.seriesList[j], j);
                 }
             }
 
             function create() {
-                // Account for dummy series
-                for(var i = spectrumOverviewChart.count; i < Api.spectrumManager.numItems; ++i) {
-                    var line = spectrumOverviewChart.createSeries(ChartView.SeriesTypeLine, i,
-                                                                  spectrumOverviewChart.overviewAxisX, spectrumOverviewChart.overviewAxisY);
-                    line.useOpenGl = true;
-                }
                 for(var j = spectrumWaterfall.seriesList.length; j < Api.spectrumManager.numItems; ++j) {
                     spectrumWaterfall.addSeries(Api.spectrumManager.createSurfaceSeries(j));
                 }
@@ -331,7 +322,6 @@ TabbedPage {
                 target: Api.spectrumManager
                 onNumItemsChanged: spectrumGrid.create()
                 onFinishedReset: {
-                    spectrumOverviewChart.removeAllSeries();
                     while(spectrumWaterfall.seriesList.length)
                         spectrumWaterfall.removeSeries(spectrumWaterfall.seriesList[0]);
                 }
@@ -342,18 +332,14 @@ TabbedPage {
                 spectrumGrid.update();
             }
 
-            OverviewChart {
+            OverviewChartSpectrum {
                 id: spectrumOverviewChart
                 Layout.fillWidth: true
                 Layout.preferredHeight: spectrumGrid.height * .5
                 Layout.column: 1
                 Layout.row: 0
+                spectrumManager: Api.spectrumManager
 
-
-                xMin: (Api.spectrumManager.freqLimits.low < 300 || Api.spectrumManager.freqLimits.low > 2600) ? 300 : Api.spectrumManager.freqLimits.low - 20
-                xMax: (Api.spectrumManager.freqLimits.high > 2600 || Api.spectrumManager.freqLimits.high < 300) ? 2600 : Api.spectrumManager.freqLimits.high + 20
-                yMin: -160
-                yMax: -10
             }
 
             Rectangle {
