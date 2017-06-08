@@ -350,13 +350,13 @@ private:
 class power_spectrum_approximator {
 public:
 	power_spectrum_approximator()
-		: max_num_samples_(mhz(3))
+		: max_num_samples_((int)3e6)
 		, min_fft_order_(3)
 		, max_fft_order_(15)
 		, max_bandwidth_(get_upper_scanner_bandwidth(mhz(28)))
 		, min_sampling_rate_(khz(1500)) // Minimum sampling_rate must be at least 1.5khz to support the lowest scanner bandwidth of 1.5khz
 		, max_sampling_rate_(mhz(32))
-		, num_windows_(30)
+		, num_windows_(10)
 	{}
 
 	void determine_spectrum_parameters(frequency_type start_freq, frequency_type span, frequency_type bin_size, time_type dwell_time_ns, int64_t identifier) {
@@ -399,13 +399,14 @@ private:
 				scanner_bandwidth = 0;
 				continue;
 			}
-			scanner_bandwidth = get_upper_scanner_bandwidth(calculate_allowed_bandwidth(sampling_rate));
-			if(scanner_bandwidth > span) {
+			auto bw_based_on_sr = calculate_allowed_bandwidth(sampling_rate);
+			scanner_bandwidth = get_upper_scanner_bandwidth(std::min(span, bw_based_on_sr));
+			if(scanner_bandwidth > span && scanner_bandwidth < sampling_rate) {
 				break;
 			}
 		}
 
-		if(scanner_bandwidth < span) {
+		if(scanner_bandwidth < span || scanner_bandwidth > sampling_rate) {
 			determine_spectrum_parameters_(start_freq, span / 2, bin_size, dwell_time_ns, identifier);
 			determine_spectrum_parameters_(start_freq + span / 2, span / 2, bin_size, dwell_time_ns, identifier);
 		}
@@ -417,8 +418,8 @@ private:
 			spec.dwell_time_ = std::max(std::min(max_dwell_time, dwell_time_ns), min_dwell_time);
 			spec.num_windows_ = rf_phreaker::convert_to_samples(spec.dwell_time_, spec.sampling_rate_) / spec.window_length_;
 			spec.start_frequency_ = start_freq - bin_size / 2;
-			spec.end_frequency_ = start_freq + span - bin_size / 2;
-			spec.span_ = span;
+			spec.end_frequency_ = start_freq + span + bin_size / 2;
+			spec.span_ = span + bin_size;
 			power_specs_.push_back(spec);
 		}
 	}
