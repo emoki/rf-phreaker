@@ -53,7 +53,7 @@ Page {
         id: flickable
         anchors.fill: parent
         contentWidth: parent.width;
-        contentHeight: layout.childrenRect.height + dp(16)
+        contentHeight: layout.childrenRect.height + dp(100)
 
         Flow {
             id: layout
