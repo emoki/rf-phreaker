@@ -128,10 +128,10 @@ Rectangle {
         id: openLayerDialog
         visible: false
         title: "Choose layers"
-        nameFilters: [ "rf phreaker files (*.rpf)", "kml files (*.kml)", "All files (*)" ]
+        nameFilters: [ "map files (*.rpf *.kml)", "rf phreaker files (*.rpf)", "kml files (*.kml)", "All files (*)" ]
         modality: Qt.WindowModal
         folder: shortcuts.documents
-        selectedNameFilter: "rf phreaker files (*.rpf)"
+        selectedNameFilter: "Map Files (*.rpf *.kml)"
         sidebarVisible: true
         selectExisting: true
         selectMultiple: true
