@@ -376,8 +376,8 @@ TabbedPage {
                     width: dp(35)
                     rotation: 180
                     gradient: Gradient {
-                        GradientStop { position: 0.0; color: "blue" }
-                        GradientStop { position: 0.25; color: "lightblue" }
+                        GradientStop { position: 0.0; color: "purple" }
+                        GradientStop { position: 0.25; color: "blue" }
                         GradientStop { position: 0.50; color: "green" }
                         GradientStop { position: 0.75; color: "yellow" }
                         GradientStop { position: 1.0; color: "red" }
@@ -414,8 +414,8 @@ TabbedPage {
 
                 ColorGradient {
                     id: surfaceGradient
-                    ColorGradientStop { position: 0.0; color: "blue" }
-                    ColorGradientStop { position: 0.25; color: "lightblue" }
+                    ColorGradientStop { position: 0.0; color: "purple" }
+                    ColorGradientStop { position: 0.25; color: "blue" }
                     ColorGradientStop { position: 0.50; color: "green" }
                     ColorGradientStop { position: 0.75; color: "yellow" }
                     ColorGradientStop { position: 1.0; color: "red" }
