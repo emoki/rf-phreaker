@@ -32,14 +32,15 @@ rf_phreaker_impl::~rf_phreaker_impl() {
 		// Order of components is important when destructing.
 		// VS 2013 bug can cause access violations when destructing at application's 
 		// exit due to synchronization issues like acquiring a mutex.  
-		//gps_graph_.reset();
-		//processing_graph_.reset();
-		//frequency_correction_graph_.reset();
-		//data_output_.reset();
-		//handler_.reset();
-		//handler_pb_.reset();
-		//scanners_.clear();
-		//logger_.reset();
+		gps_graph_.reset();
+		processing_graph_.reset();
+		frequency_correction_graph_.reset();
+		data_output_.reset();
+		tbb_task_scheduler_.reset();
+		handler_.reset();
+		handler_pb_.reset();
+		scanners_.clear();
+		logger_.reset();
 	}
 	catch(...) {}
 }
