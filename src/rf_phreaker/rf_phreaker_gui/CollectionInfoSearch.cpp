@@ -119,7 +119,7 @@ void CollectionInfoSearcher::populateWithGsm() {
 	}
 
 	// Find all possible options if it was a frequency.
-	auto ranges_a = finder_.ranges_.find_avaliable_gsm_operating_bands(tmp_freq_b_);
+	auto ranges_a = finder_.ranges_.find_avaliable_gsm_operating_bands(tmp_freq_a_);
 	if(tmp_freq_a_ != -1 && tmp_freq_b_ != -1) {
 		auto ranges_b = finder_.ranges_.find_avaliable_gsm_operating_bands(tmp_freq_b_);
 		for(auto r_a : ranges_a) {
@@ -127,7 +127,7 @@ void CollectionInfoSearcher::populateWithGsm() {
 			if(!cf_a.is_valid())
 				continue;
 			for(auto r_b : ranges_b) {
-				auto cf_b = finder_.frequency_to_arfcn(tmp_freq_a_, r_a.band_);
+				auto cf_b = finder_.frequency_to_arfcn(tmp_freq_b_, r_a.band_);
 				if(cf_b.is_valid() && cf_a.band_ == cf_b.band_) {
 					if(tmpScan_)
 						results_->append(new CollectionInfo(cf_a, cf_b, ApiTypes::GSM_FULL_SCAN));
