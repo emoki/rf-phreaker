@@ -309,7 +309,7 @@ Page {
 
             MaterialCard {
                 id: scanListCard
-                state: scanListExpBut.expanded ? "w2h3" : "w1h2"
+                state: scanListExpBut.expanded ? "w2h2" : "w1h2"
 
                 ColumnLayout {
                     id: scanListLayout
@@ -386,7 +386,7 @@ Page {
                             model: Api.scanList
                             delegate: ListItem.Subtitled {
                                 Layout.fillWidth: false
-                                showDivider: true
+                                showDivider: false
                                 text: {
                                     if(isSweep)
                                         return "Sweeping " + band
@@ -581,7 +581,7 @@ Page {
             }
 
             MaterialCard {
-                state: mapExpBut.expanded ? "w4h4" : "w2h2"
+                state: mapExpBut.expanded ? "w3h3" : "w2h2"
                 MouseArea {
                     anchors.fill: parent
                     propagateComposedEvents: true
@@ -824,6 +824,110 @@ Page {
                         }
                         MaterialExpansionButton {
                             id: gsmExpBut
+                        }
+                    }
+                }
+            }
+
+            MaterialCard {
+                state: cwExpBut.expanded ? "w2h3" : "w1h2"
+                ColumnLayout {
+                    anchors {
+                        fill: parent
+                        topMargin: dp(24)
+                        bottomMargin: dp(8)
+                        rightMargin: dp(16)
+                        leftMargin: dp(16)
+                    }
+
+                    Label {
+                        style: "headline"
+                        text: "CW Measurements"
+                    }
+                    BarChart {
+                        id: cwBarChart
+                        Layout.fillWidth: true
+                        Layout.fillHeight: true
+                        sourceModel: FilterProxyMeasurementModel {
+                            id: filterCw
+                            sourceModel: Api.cwModel
+                            filterRole: FilterProxyMeasurementModel.TimeFilter
+                            expirationTimeFilter: GuiSettings.measurementRemovalTime
+
+                        }
+                        Timer {
+                            interval: 1000
+                            running: true
+                            repeat: true
+                            onTriggered: filterCw.refilter()
+                        }
+
+                        slMin: -120
+                        slMax: -10
+                    }
+                    Item {
+                        Layout.fillWidth: true
+                        Layout.preferredHeight: dp(8)
+                    }
+                    RowLayout {
+                        Layout.alignment: Qt.AlignRight
+                        spacing: dp(8)
+
+                        anchors {
+                            right: parent.right
+                            left: parent.left
+                            rightMargin: dp(8)
+                            leftMargin: dp(8)
+                        }
+                        Item {
+                            Layout.fillWidth: true
+                        }
+                        MaterialExpansionButton {
+                            id: cwExpBut
+                        }
+                    }
+                }
+            }
+
+            MaterialCard {
+                state: spectrumExpBut.expanded ? "w3h3" : "w2h2"
+                ColumnLayout {
+                    anchors {
+                        fill: parent
+                        topMargin: dp(24)
+                        bottomMargin: dp(8)
+                        rightMargin: dp(16)
+                        leftMargin: dp(16)
+                    }
+
+                    Label {
+                        style: "headline"
+                        text: "Power Spectrum"
+                    }
+                    OverviewChartSpectrum {
+                        Layout.fillHeight: true
+                        Layout.fillWidth: true
+                        spectrumManager: Api.spectrumManager
+                    }
+                    Item {
+                        Layout.fillWidth: true
+                        Layout.preferredHeight: dp(8)
+                    }
+                    RowLayout {
+                        Layout.alignment: Qt.AlignRight
+                        spacing: dp(8)
+
+                        anchors {
+                            right: parent.right
+                            left: parent.left
+                            rightMargin: dp(8)
+                            leftMargin: dp(8)
+                        }
+                        Item {
+                            Layout.fillWidth: true
+                        }
+                        MaterialExpansionButton {
+                            id: spectrumExpBut
                         }
                     }
                 }
