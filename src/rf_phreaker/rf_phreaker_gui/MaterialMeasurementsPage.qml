@@ -465,13 +465,6 @@ TabbedPage {
                         colorStyle: Theme3D.ColorStyleRangeGradient
                         baseGradients: [surfaceGradient]
                     }
-
-//                    Surface3DSeries {
-//                        id: surfaceSeries
-//                        drawMode: Surface3DSeries.DrawSurface
-//                        meshSmooth: false
-//                        flatShadingEnabled: false
-//                    }
                 }
             }
         }
