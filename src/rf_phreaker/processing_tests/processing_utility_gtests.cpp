@@ -124,7 +124,6 @@ TEST(PowerSpectrumApproximator, GeneralTest) {
 
 
 	std::ofstream file("power_spectrum_params.txt");
-	file << "rec_num" << "\t";
 	header(file, spec) << "\t";
 	header(file, spec) << std::endl;
 
