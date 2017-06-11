@@ -19,6 +19,10 @@ public:
 
 	void parse_data(layer_3_information::umts_bcch_bch_message_aggregate &message);
 
+	std::vector<std::string> get_text_description() const;
+
+	void store_text_description(bool store);
+
 private:
 	void handle_first_segment(const FirstSegmentShort_t &first_segment);
 	void handle_first_segment(const FirstSegment_t &first_segment);

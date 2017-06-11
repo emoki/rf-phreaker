@@ -9,9 +9,9 @@
 #include "rf_phreaker/umts_layer_3_decoder_tests/test_segmented_sib.h"
 #include "rf_phreaker/umts_layer_3_decoder_tests/test_bit_stream_container.h"
 #include "rf_phreaker/umts_layer_3_decoder/umts_layer_3_decoder.h"
-#include "rf_phreaker/layer_3_common/lte_rrc_message_aggregate.h"
+#include "rf_phreaker/layer_3_common/umts_bcch_bch_message_aggregate.h"
+#include "rf_phreaker/layer_3_common/umts_bcch_bch_message_aggregate_io.h"
 #include "rf_phreaker/layer_3_common/pdu_element_types.h"
-#include "rf_phreaker/layer_3_common/bcch_bch_message_aggregate.h"
 
 int main(int argc, char* argv[])
 {
@@ -26,21 +26,9 @@ int main(int argc, char* argv[])
 	
 	BOOST_VERIFY(output.good());
 
-	//lte_asn1_decoder lte_decoder;
-	//layer_3_information::lte_rrc_message_aggregate lte_message;
-	//lte_message.clear();
-	//lte_decoder.decode_bcch_bch_message(lte_sib_1_bit_stream, 22, 0, lte_message);
-	//output << 
-	//	lte_message.mcc_.num_characters() << "|" << 
-	//	lte_message.mcc_.to_string() << "," << 
-	//	lte_message.mnc_.num_characters() << "|" << 
-	//	lte_message.mnc_.to_string() << "," << 
-	//	lte_message.lac_ << "," << 
-	//	lte_message.cid_ << "," << 
-	//	lte_message.unique_sector_key_ << std::endl;
-
-
+	auto store_description = true;
 	umts_asn1_decoder umts_decoder;
+	umts_decoder.store_text_description(store_description);
 
 	std::vector<layer_3_information::pdu_element_type> elements;
 
@@ -53,64 +41,37 @@ int main(int argc, char* argv[])
 
 	umts_decoder.specify_sibs_for_decoding(&elements.at(0), elements.size());
 
-	std::string input_dir("E:\\werk\\tno\\software_projects\\asn_decoder\\asn1c_open_source_dll\\test_data\\");
-	//std::string input_dir("C:\\Users\\tno\\Documents\\WindFiles\\wider_testing\\sib_11_and_sib_11_bis\\data_for_sib_11\\");
-	//std::string input_dir("C:\\tno\\wind3g_trunk\\asn_decoder\\asn1c_open_source_dll\\test_data\\");	
+	std::string base_filename = "../../../../rf_phreaker/test_files/";
+	std::ifstream file(base_filename + "umts_bitstreams.txt");
 
-	//std::string input_dir("C:\\cappeen\\beagle_dev\\Debug\\");	
-	//std::string input_dir("C:\\Users\\tno\\Documents\\WindFiles\\wider_testing\\v2.11.4.1\\test_segments\\");	
-	//std::string input_dir("C:\\Users\\tno\\Documents\\WindFiles\\wider_testing\\v2.11.4.1\\bit_stream_data\\");	
-	//std::string filename("wcmda_bit_stream_with_cellid.per");
-	//std::string filename("wcmda_bit_stream_test_access_violation_cobham_2100");
-	std::string filename("wcmda_bit_stream_1409024166_");
-	
-	for(int i = 0; i <= 104; i++)
-	{
-		std::string current_file(input_dir);
-		
-		current_file.append(filename).append(boost::lexical_cast<std::string>(i)).append(".bin");
-	
-		std::ifstream file(current_file, std::ios_base::binary);
-	
-		BOOST_VERIFY(file.good());
+	BOOST_ASSERT(file);
+
+
+	while(file) {
+		layer_3_information::unique_sector_key_type sector_key;
+		bit_stream_container_mem bit_stream;
+		file >> sector_key;
+		file >> bit_stream;
 
 		layer_3_information::umts_bcch_bch_message_aggregate umts_message;
 		umts_message.clear();
+		umts_message.unique_sector_key_ = sector_key;
 
-		uint8_t buf[272];
-		memset(buf, 0, 272);
-		file.read((char*)&umts_message.unique_sector_key_, 4);
-		file.read((char*)buf, 272);
+		umts_decoder.decode_bcch_bch_message(bit_stream.bit_stream(), bit_stream.num_of_bytes(), bit_stream.unused_bits(), umts_message);
 
-		umts_decoder.decode_bcch_bch_message(buf, 34, 4, umts_message);
+		static std::ofstream file("umts_layer_3.txt");
+		std::cout << umts_message << std::endl;
+		file << umts_message << std::endl;
 
-		output << 
-			umts_message.system_frame_number_ << "," << 
-			umts_message.mcc_.num_characters() << "|" << 
-			umts_message.mcc_.to_string() << "," << 
-			umts_message.mnc_.num_characters() << "|" << 
-			umts_message.mnc_.to_string() << "," << 
-			umts_message.lac_ << "," << 
-			umts_message.cid_ << "," <<
-			umts_message.neighbor_intra_group_.size() << "," <<
-			umts_message.neighbor_inter_group_.size() << "," <<
-			umts_message.neighbor_inter_rat_group_.size() << "," <<
-			umts_message.unique_sector_key_ << std::endl;
-
-		std::cout <<
-			umts_message.system_frame_number_ << "," << 
-			umts_message.mcc_.num_characters() << "|" << 
-			umts_message.mcc_.to_string() << "," << 
-			umts_message.mnc_.num_characters() << "|" << 
-			umts_message.mnc_.to_string() << "," << 
-			umts_message.lac_ << "," << 
-			umts_message.cid_ << "," << 
-			umts_message.neighbor_intra_group_.size() << "," <<
-			umts_message.neighbor_inter_group_.size() << "," <<
-			umts_message.neighbor_inter_rat_group_.size() << "," <<
-			umts_message.unique_sector_key_ << std::endl;
+		if(store_description) {
+			static std::ofstream d_file("umts_layer_3_description.txt");
+			auto v = umts_decoder.get_text_description();
+			for(auto &i : v) {
+				d_file << i << "\n";
+				std::cout << i << "\n";
+			}
+			d_file << std::endl;
+		}
 	}
-
-	system("Pause");
 }
 

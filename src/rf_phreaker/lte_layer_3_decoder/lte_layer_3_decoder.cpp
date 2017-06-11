@@ -41,6 +41,12 @@ int lte_asn1_decoder::decode_bcch_bch_message(const uint8_t* raw_bits, uint32_t 
 		status = -1;
 	}
 	return status;
-};
+}
 
+std::vector<std::string> lte_asn1_decoder::get_text_description() {
+	return lte_bcch_bch_message_->get_text_description();
+}
 
+void lte_asn1_decoder::store_text_description(bool store_text) {
+	lte_bcch_bch_message_->store_text_description(store_text);
+}

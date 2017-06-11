@@ -46,6 +46,10 @@ public:
 
 	int decode_bcch_bch_message(const uint8_t* bit_stream, uint32_t num_of_bytes, uint32_t unused_bits, layer_3_information::umts_bcch_bch_message_aggregate &message);
 
+	std::vector<std::string> get_text_description();
+
+	void store_text_description(bool store_text);
+
 	void output_debug_bit_stream(bool out) { debug_ = out; }
 
 private:

@@ -7,7 +7,9 @@
 
 void lte_decoding_tests::run_automated_tests()
 {
+	auto store_description = true;
 	lte_asn1_decoder decoder;
+	decoder.store_text_description(store_description);
 
 	std::string base_filename = "../../../../rf_phreaker/test_files/";
 	std::ifstream file(base_filename + "lte_bitstreams_sib6.txt");
@@ -48,6 +50,13 @@ void lte_decoding_tests::run_automated_tests()
 		output_file << total_messages << "\t" << message << "\n";
 		std::cout << total_messages << "\t" << message << "\n";
 
+		if(store_description) {
+			static std::ofstream description_file("lte_decoded_sibs_discription.txt");
+			auto d = decoder.get_text_description();
+			for(auto &k : d)
+				description_file << k << "\n";
+			description_file << std::endl;
+		}
 	}
 
 	std::cout << "\n\ntotal messages: " << total_messages

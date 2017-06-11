@@ -52,7 +52,7 @@ int umts_asn1_decoder::decode_bcch_bch_message(const uint8_t* raw_bits, uint32_t
 
 		if(debug_) {
 			static std::ofstream f("umts_bitstreams_" + rf_phreaker::static_timestamp::to_string() + ".txt", std::ios::app);
-			f << bits << std::endl;
+			f << std::dec << message.unique_sector_key_ << "\t" << bits << std::endl;
 		}
 
 		umts_bcch_bch_message_->populate_data(bits, message);
@@ -65,6 +65,14 @@ int umts_asn1_decoder::decode_bcch_bch_message(const uint8_t* raw_bits, uint32_t
 	return status;
 }
 
+
+std::vector<std::string> umts_asn1_decoder::get_text_description() {
+	return umts_bcch_bch_message_->get_text_description();
+}
+
+void umts_asn1_decoder::store_text_description(bool store_text) {
+	umts_bcch_bch_message_->store_text_description(store_text);
+}
 
 
 

@@ -1,3 +1,4 @@
+#include <algorithm>
 #include "rf_phreaker/umts_rrc_asn_library/BCCH-BCH-Message.h"
 #include "rf_phreaker/umts_rrc_asn_library/SIB-Type.h"
 #include "rf_phreaker/umts_layer_3_decoder/umts_bcch_bch_message.h"
@@ -220,5 +221,24 @@ void umts_bcch_bch_message::check_for_complete_sib_and_process(umts_system_infor
 		bit_stream_container bit_stream(segmented_sibs_container_.get_completed_sib(key));
 		sys_info->populate_data(bit_stream, *current_message_aggregate_);
 		segmented_sibs_container_.clear_segments(key);
+	}
+}
+
+std::vector<std::string> umts_bcch_bch_message::get_text_description() const {
+	std::vector<std::string> v;
+	if(!text_description_.empty())
+		v.push_back(text_description_);
+	for(auto &i : system_information_to_decode_) {
+		auto k = i->get_text_description();
+		if(!k.empty())
+			v.insert(std::end(v), std::begin(k), std::end(k));
+	}
+	return v;
+}
+
+void umts_bcch_bch_message::store_text_description(bool store) {
+	store_text_description_ = store;
+	for(auto &i : system_information_to_decode_) {
+		i->store_text_description(true);
 	}
 }
