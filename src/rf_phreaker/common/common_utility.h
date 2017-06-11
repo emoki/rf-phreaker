@@ -159,6 +159,18 @@ template<typename T> struct is_vector : public std::false_type {};
 template<typename T, typename A>
 struct is_vector<std::vector<T, A>> : public std::true_type{};
 
+struct cout_redirect {
+	cout_redirect(std::streambuf * new_buffer)
+		: old(std::cout.rdbuf(new_buffer)) {}
+
+	~cout_redirect() {
+		std::cout.rdbuf(old);
+	}
+
+private:
+	std::streambuf * old;
+};
+
 inline bool is_within_freq_paths(const std::vector<frequency_path> &paths, frequency_type f) {
 	bool found_freq = false;
 	for(auto path : paths) {
