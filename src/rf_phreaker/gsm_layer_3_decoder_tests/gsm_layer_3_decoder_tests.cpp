@@ -28,18 +28,23 @@ int main(int argc, char* argv[])
 	// ./lte_phreaker/test_files		(directory containing test data)
 	std::string folder_path =
 		"../../../../rf_phreaker/test_files/cobham10/"
+		//"../../../../rf_phreaker/test_files/"
 		;
 
 	std::string prefix =
 		"gsm_bit_streams3"
+		//"gsm_bit_streams"
 		;
 
 	std::string suffix =
 		//".bin";
 		".txt";
 
+	auto store_description = true;
 	gsm_layer_3_decoder decoder;
 
+	decoder.store_text_description(store_description);
+	
 	auto filename = folder_path + prefix + suffix;
 	std::ifstream f(filename.c_str());
 
@@ -62,6 +67,14 @@ int main(int argc, char* argv[])
 			out_header = true;
 		}
 		out << i << "\t" << message << std::endl;
+
+		if(store_description) {
+			static std::ofstream description_file("gsm_decoded_sibs_discription.txt");
+			auto d = decoder.get_text_description();
+			for(auto &k : d)
+				description_file << k << "\n";
+			description_file << std::endl;
+		}
 	}
 	
 	layer_3_information::gsm_layer_3_message_aggregate message;

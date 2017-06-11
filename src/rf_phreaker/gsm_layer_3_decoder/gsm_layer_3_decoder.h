@@ -43,9 +43,15 @@ public:
 
 	void update_message_decode_list(layer_3_information::gsm_bcch_si_type message_t);
 
+	std::vector<std::string> get_text_description();
+
+	void store_text_description(bool store_text);
+
 	void output_debug_bit_stream(bool out) { debug_ = out; }
 
 private:
 	bool debug_;
+	bool store_text_description_;
+	std::string text_description_;
 };
 

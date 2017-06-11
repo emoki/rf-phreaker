@@ -37618,7 +37618,7 @@ static const unsigned char Program_RR_ProgramCode [] = {
 	/*-----------------------------------------------------------------
 		DEFINITION 'Compressed_Inter_RAT_HO_INFO_IND'
 		DEFINITION FIELD-ID: 80  COMPLEXITY: 9
-		SOURCE: ./TS_44.018_Rel12.src, 2791
+		SOURCE: ../../Encodix/TS44.018/TS_44.018_Rel12.src, 2791
 	-----------------------------------------------------------------*/
 	/* 000032 */ CSN1C_CHOICE_NODE(0,9),                  /* (ID:2343:138500:138553) VBIT choice at 32, node 1, jump to 41 */
 	/* 000034 */ CSN1C_LABEL_BEGIN, CSN1C_VAL1(45),       /* (ID:2347:138504:138552) Label=<Compressed_Inter_RAT_HO_INFO_IND> Terminal=<1> LabelId=1 */
@@ -37634,13 +37634,13 @@ static const unsigned char Program_RR_ProgramCode [] = {
 	/*-----------------------------------------------------------------
 		DEFINITION 'Extension2'
 		DEFINITION FIELD-ID: 106  COMPLEXITY: 3
-		SOURCE: ./TS_44.018_Rel12.src, 3623
+		SOURCE: ../../Encodix/TS44.018/TS_44.018_Rel12.src, 3623
 	-----------------------------------------------------------------*/
 	/* 000049 */ CSN1C_RETURN,
 	/*-----------------------------------------------------------------
 		DEFINITION 'SI_CHANGE_ALT'
 		DEFINITION FIELD-ID: 201  COMPLEXITY: 9
-		SOURCE: ./TS_44.018_Rel12.src, 4854
+		SOURCE: ../../Encodix/TS44.018/TS_44.018_Rel12.src, 4854
 	-----------------------------------------------------------------*/
 	/* 000050 */ CSN1C_CHOICE_NODE(0,9),                  /* (ID:7936:214125:214162) VBIT choice at 50, node 1, jump to 59 */
 	/* 000052 */ CSN1C_LABEL_BEGIN, CSN1C_VAL1(55),       /* (ID:7940:214129:214160) Label=<SI_CHANGE_ALT_H> Terminal=<1> LabelId=2 */
@@ -37731,7 +37731,7 @@ static const unsigned char Program_RR_ProgramCode [] = {
 	/*-----------------------------------------------------------------
 		DEFINITION 'Group_Channel_Description'
 		DEFINITION FIELD-ID: 64  COMPLEXITY: 24
-		SOURCE: ./TS_44.018_Rel12.src, 1672
+		SOURCE: ../../Encodix/TS44.018/TS_44.018_Rel12.src, 1672
 	-----------------------------------------------------------------*/
 	/* 000147 */ CSN1C_LABEL_A, CSN1C_VAL1(66), CSN1C_VAL1(24), /* (ID:1799:102555:102589) Label=<Channel_Description> LabelId=7 */
 	/* 000150 */ CSN1C_CHOICE_NODE(0,31),                 /* (ID:1803:102590:102705) VBIT choice at 150, node 1, jump to 181 */
@@ -37759,7 +37759,7 @@ static const unsigned char Program_RR_ProgramCode [] = {
 	/*-----------------------------------------------------------------
 		DEFINITION 'DYNAMIC_ARFCN_MAPPING'
 		DEFINITION FIELD-ID: 77  COMPLEXITY: 18
-		SOURCE: ./TS_44.018_Rel12.src, 2662
+		SOURCE: ../../Encodix/TS44.018/TS_44.018_Rel12.src, 2662
 	-----------------------------------------------------------------*/
 	/* 000189 */ CSN1C_LABEL_A, CSN1C_VAL2(129), CSN1C_VAL1(4), /* (ID:2226:135010:135035) Label=<GSM_Band> LabelId=10 */
 	/* 000193 */ CSN1C_LABEL_A, CSN1C_VAL2(138), CSN1C_VAL1(10), /* (ID:2230:135035:135064) Label=<ARFCN_FIRST> LabelId=11 */
@@ -37769,7 +37769,7 @@ static const unsigned char Program_RR_ProgramCode [] = {
 	/*-----------------------------------------------------------------
 		DEFINITION 'Access_Technologies_Request_struct'
 		DEFINITION FIELD-ID: 85  COMPLEXITY: 12
-		SOURCE: ./TS_44.018_Rel12.src, 2980
+		SOURCE: ../../Encodix/TS44.018/TS_44.018_Rel12.src, 2980
 	-----------------------------------------------------------------*/
 	/* 000206 */ CSN1C_LABEL_A, CSN1C_VAL2(165), CSN1C_VAL1(4), /* (ID:2955:145185:145222) Label=<Access_Technology_Type> LabelId=14 */
 	/* 000210 */ CSN1C_CHOICE_NODE(0,8),                  /* (ID:2959:145224:145267) VBIT choice at 210, node 1, jump to 218 */
@@ -37785,7 +37785,7 @@ static const unsigned char Program_RR_ProgramCode [] = {
 	/*-----------------------------------------------------------------
 		DEFINITION 'IARRestOctets'
 		DEFINITION FIELD-ID: 87  COMPLEXITY: 46
-		SOURCE: ./TS_44.018_Rel12.src, 3021
+		SOURCE: ../../Encodix/TS44.018/TS_44.018_Rel12.src, 3021
 	-----------------------------------------------------------------*/
 	/* 000226 */ CSN1C_EXECUTE, CSN1C_VAL1(0),            /* (ID:3039:146853:146891) Execute custom action Program_RR_action0000 */
 	/* 000228 */ CSN1C_CHOICE_NODE(0,9),                  /* (ID:3040:146893:146927) VBIT choice at 228, node 1, jump to 237 */
@@ -37834,7 +37834,7 @@ static const unsigned char Program_RR_ProgramCode [] = {
 	/*-----------------------------------------------------------------
 		DEFINITION 'NCELL_Report_struct'
 		DEFINITION FIELD-ID: 90  COMPLEXITY: 14
-		SOURCE: ./TS_44.018_Rel12.src, 3078
+		SOURCE: ../../Encodix/TS44.018/TS_44.018_Rel12.src, 3078
 	-----------------------------------------------------------------*/
 	/* 000308 */ CSN1C_LABEL_A, CSN1C_VAL2(182), CSN1C_VAL1(6), /* (ID:3189:148387:148414) Label=<RXLEV_NCELL> LabelId=19 */
 	/* 000312 */ CSN1C_LABEL_A, CSN1C_VAL2(187), CSN1C_VAL1(5), /* (ID:3193:148414:148446) Label=<BCCH_FREQ_NCELL> LabelId=20 */
@@ -37843,7 +37843,7 @@ static const unsigned char Program_RR_ProgramCode [] = {
 	/*-----------------------------------------------------------------
 		DEFINITION 'List_of_Emergency_information'
 		DEFINITION FIELD-ID: 94  COMPLEXITY: 9
-		SOURCE: ./TS_44.018_Rel12.src, 3296
+		SOURCE: ../../Encodix/TS44.018/TS_44.018_Rel12.src, 3296
 	-----------------------------------------------------------------*/
 	/* 000321 */ CSN1C_CHOICE_NODE(0,26),                 /* (ID:3340:154361:154419) VBIT choice at 321, node 1, jump to 347 */
 	/* 000323 */ CSN1C_BIT_1,                             /* (ID:3344:154365:154367) */
@@ -37868,7 +37868,7 @@ static const unsigned char Program_RR_ProgramCode [] = {
 	/*-----------------------------------------------------------------
 		DEFINITION 'Dynamic_Allocation_struct'
 		DEFINITION FIELD-ID: 107  COMPLEXITY: 226
-		SOURCE: ./TS_44.018_Rel12.src, 3626
+		SOURCE: ../../Encodix/TS44.018/TS_44.018_Rel12.src, 3626
 	-----------------------------------------------------------------*/
 	/* 000355 */ CSN1C_LABEL_A, CSN1C_VAL2(204), CSN1C_VAL1(1), /* (ID:4240:165570:165613) Label=<Extended_Dynamic_Allocation> LabelId=23 */
 	/* 000359 */ CSN1C_CHOICE_NODE(0,13),                 /* (ID:4244:165614:165663) VBIT choice at 359, node 1, jump to 372 */
@@ -38064,7 +38064,7 @@ static const unsigned char Program_RR_ProgramCode [] = {
 	/*-----------------------------------------------------------------
 		DEFINITION 'Additional_PFCs_struct_UP'
 		DEFINITION FIELD-ID: 114  COMPLEXITY: 19
-		SOURCE: ./TS_44.018_Rel12.src, 3729
+		SOURCE: ../../Encodix/TS44.018/TS_44.018_Rel12.src, 3729
 	-----------------------------------------------------------------*/
 	/* 000718 */ CSN1C_LABEL_A, CSN1C_VAL2(359), CSN1C_VAL1(5), /* (ID:4870:169903:169941) Label=<UPLINK_TFI_ASSIGNMENT> LabelId=46 */
 	/* 000722 */ CSN1C_CHOICE_NODE(0,9),                  /* (ID:4874:169943:169981) VBIT choice at 722, node 1, jump to 731 */
@@ -38081,7 +38081,7 @@ static const unsigned char Program_RR_ProgramCode [] = {
 	/*-----------------------------------------------------------------
 		DEFINITION 'Additional_PFCs_struct_DN'
 		DEFINITION FIELD-ID: 119  COMPLEXITY: 19
-		SOURCE: ./TS_44.018_Rel12.src, 3825
+		SOURCE: ../../Encodix/TS44.018/TS_44.018_Rel12.src, 3825
 	-----------------------------------------------------------------*/
 	/* 000743 */ CSN1C_LABEL_A, CSN1C_VAL2(386), CSN1C_VAL1(5), /* (ID:5254:173439:173484) Label=<DOWNLINK_TFI_ASSIGNMENT> LabelId=49 */
 	/* 000747 */ CSN1C_CHOICE_NODE(0,9),                  /* (ID:5258:173486:173524) VBIT choice at 747, node 1, jump to 756 */
@@ -38098,7 +38098,7 @@ static const unsigned char Program_RR_ProgramCode [] = {
 	/*-----------------------------------------------------------------
 		DEFINITION 'RTD6_Struct'
 		DEFINITION FIELD-ID: 137  COMPLEXITY: 11
-		SOURCE: ./TS_44.018_Rel12.src, 4314
+		SOURCE: ../../Encodix/TS44.018/TS_44.018_Rel12.src, 4314
 	-----------------------------------------------------------------*/
 	/* 000768 */ CSN1C_LOOP_BEGIN_INFINITE, CSN1C_VAL3(22), /* (ID:6288:192272:192292) Infinite loop start, jump to 779 */
 	/* 000772 */ CSN1C_BIT_0,                             /* (ID:6291:192272:192274) */
@@ -38109,7 +38109,7 @@ static const unsigned char Program_RR_ProgramCode [] = {
 	/*-----------------------------------------------------------------
 		DEFINITION 'RTD12_Struct'
 		DEFINITION FIELD-ID: 138  COMPLEXITY: 11
-		SOURCE: ./TS_44.018_Rel12.src, 4315
+		SOURCE: ../../Encodix/TS44.018/TS_44.018_Rel12.src, 4315
 	-----------------------------------------------------------------*/
 	/* 000781 */ CSN1C_LOOP_BEGIN_INFINITE, CSN1C_VAL3(22), /* (ID:6299:192393:192414) Infinite loop start, jump to 792 */
 	/* 000785 */ CSN1C_BIT_0,                             /* (ID:6302:192393:192395) */
@@ -38120,7 +38120,7 @@ static const unsigned char Program_RR_ProgramCode [] = {
 	/*-----------------------------------------------------------------
 		DEFINITION '_3G_Additional_Measurement_Parameters_Description_2_struct'
 		DEFINITION FIELD-ID: 150  COMPLEXITY: 11
-		SOURCE: ./TS_44.018_Rel12.src, 4387
+		SOURCE: ../../Encodix/TS44.018/TS_44.018_Rel12.src, 4387
 	-----------------------------------------------------------------*/
 	/* 000794 */ CSN1C_CHOICE_NODE(0,9),                  /* (ID:6545:195754:195800) VBIT choice at 794, node 1, jump to 803 */
 	/* 000796 */ CSN1C_BIT_1,                             /* (ID:6549:195758:195760) */
@@ -38135,7 +38135,7 @@ static const unsigned char Program_RR_ProgramCode [] = {
 	/*-----------------------------------------------------------------
 		DEFINITION 'E_UTRAN_Measurement_Parameters_Description_struct'
 		DEFINITION FIELD-ID: 159  COMPLEXITY: 131
-		SOURCE: ./TS_44.018_Rel12.src, 4480
+		SOURCE: ../../Encodix/TS44.018/TS_44.018_Rel12.src, 4480
 	-----------------------------------------------------------------*/
 	/* 000811 */ CSN1C_LABEL_A, CSN1C_VAL2(452), CSN1C_VAL1(4), /* (ID:6926:199194:199235) Label=<Qsearch_C_E_UTRAN_Initial> LabelId=55 */
 	/* 000815 */ CSN1C_LABEL_A, CSN1C_VAL2(459), CSN1C_VAL1(1), /* (ID:6930:199235:199265) Label=<E_UTRAN_REP_QUANT> LabelId=56 */
@@ -38260,7 +38260,7 @@ static const unsigned char Program_RR_ProgramCode [] = {
 	/*-----------------------------------------------------------------
 		DEFINITION 'UTRAN_CSG_Cells_Reporting_Description_struct'
 		DEFINITION FIELD-ID: 167  COMPLEXITY: 24
-		SOURCE: ./TS_44.018_Rel12.src, 4542
+		SOURCE: ../../Encodix/TS44.018/TS_44.018_Rel12.src, 4542
 	-----------------------------------------------------------------*/
 	/* 001030 */ CSN1C_CHOICE_NODE(0,13),                 /* (ID:7304:202323:202431) VBIT choice at 1030, node 1, jump to 1043 */
 	/* 001032 */ CSN1C_BIT_1,                             /* (ID:7308:202327:202329) */
@@ -38285,7 +38285,7 @@ static const unsigned char Program_RR_ProgramCode [] = {
 	/*-----------------------------------------------------------------
 		DEFINITION 'Optional_Power_Offset'
 		DEFINITION FIELD-ID: 174  COMPLEXITY: 9
-		SOURCE: ./TS_44.018_Rel12.src, 4588
+		SOURCE: ../../Encodix/TS44.018/TS_44.018_Rel12.src, 4588
 	-----------------------------------------------------------------*/
 	/* 001067 */ CSN1C_CHOICE_NODE(0,9),                  /* (ID:7441:204047:204231) VBIT choice at 1067, node 1, jump to 1076 */
 	/* 001069 */ CSN1C_BIT_H,                             /* (ID:7445:204051:204053) */
@@ -38300,7 +38300,7 @@ static const unsigned char Program_RR_ProgramCode [] = {
 	/*-----------------------------------------------------------------
 		DEFINITION 'VGCSCipheringParameters'
 		DEFINITION FIELD-ID: 220  COMPLEXITY: 40
-		SOURCE: ./TS_44.018_Rel12.src, 5126
+		SOURCE: ../../Encodix/TS44.018/TS_44.018_Rel12.src, 5126
 	-----------------------------------------------------------------*/
 	/* 001084 */ CSN1C_BIT_A(2),                          /* (ID:1718:28658:28659) */
 	/* 001085 */ CSN1C_LABEL_A, CSN1C_VAL2(598), CSN1C_VAL1(1), /* (ID:8536:223355:223375) Label=<RAND_IND> LabelId=71 */
@@ -38320,7 +38320,7 @@ static const unsigned char Program_RR_ProgramCode [] = {
 	/*-----------------------------------------------------------------
 		DEFINITION 'A5_CM3_bits'
 		DEFINITION FIELD-ID: 236  COMPLEXITY: 18
-		SOURCE: ./TS_44.018_Rel12.src, 5682
+		SOURCE: ../../Encodix/TS44.018/TS_44.018_Rel12.src, 5682
 	-----------------------------------------------------------------*/
 	/* 001124 */ CSN1C_LABEL_A, CSN1C_VAL2(622), CSN1C_VAL1(1), /* (ID:9507:240412:240427) Label=<A5_7> LabelId=79 */
 	/* 001128 */ CSN1C_LABEL_A, CSN1C_VAL2(627), CSN1C_VAL1(1), /* (ID:9511:240427:240442) Label=<A5_6> LabelId=80 */
@@ -38330,7 +38330,7 @@ static const unsigned char Program_RR_ProgramCode [] = {
 	/*-----------------------------------------------------------------
 		DEFINITION 'RFL_number_list_struct'
 		DEFINITION FIELD-ID: 248  COMPLEXITY: 12
-		SOURCE: ./TS_44.018_Rel12.src, 5896
+		SOURCE: ../../Encodix/TS44.018/TS_44.018_Rel12.src, 5896
 	-----------------------------------------------------------------*/
 	/* 001141 */ CSN1C_LABEL_A, CSN1C_VAL2(642), CSN1C_VAL1(4), /* (ID:9726:247713:247740) Label=<RFL_NUMBER> LabelId=83 */
 	/* 001145 */ CSN1C_CHOICE_NODE(0,8),                  /* (ID:9730:247742:247775) VBIT choice at 1145, node 1, jump to 1153 */
@@ -38346,7 +38346,7 @@ static const unsigned char Program_RR_ProgramCode [] = {
 	/*-----------------------------------------------------------------
 		DEFINITION 'ARFCN_index_list_struct'
 		DEFINITION FIELD-ID: 249  COMPLEXITY: 12
-		SOURCE: ./TS_44.018_Rel12.src, 5899
+		SOURCE: ../../Encodix/TS44.018/TS_44.018_Rel12.src, 5899
 	-----------------------------------------------------------------*/
 	/* 001161 */ CSN1C_LABEL_A, CSN1C_VAL2(671), CSN1C_VAL1(6), /* (ID:9738:247820:247848) Label=<ARFCN_INDEX> LabelId=84 */
 	/* 001165 */ CSN1C_CHOICE_NODE(0,8),                  /* (ID:9742:247850:247884) VBIT choice at 1165, node 1, jump to 1173 */
@@ -38362,7 +38362,7 @@ static const unsigned char Program_RR_ProgramCode [] = {
 	/*-----------------------------------------------------------------
 		DEFINITION 'Packet_Timing_Advance_IE'
 		DEFINITION FIELD-ID: 254  COMPLEXITY: 24
-		SOURCE: ./TS_44.018_Rel12.src, 5946
+		SOURCE: ../../Encodix/TS44.018/TS_44.018_Rel12.src, 5946
 	-----------------------------------------------------------------*/
 	/* 001181 */ CSN1C_CHOICE_NODE(0,9),                  /* (ID:9771:248988:249029) VBIT choice at 1181, node 1, jump to 1190 */
 	/* 001183 */ CSN1C_BIT_1,                             /* (ID:9775:248992:248994) */
@@ -38387,7 +38387,7 @@ static const unsigned char Program_RR_ProgramCode [] = {
 	/*-----------------------------------------------------------------
 		DEFINITION 'Power_Control_Parameters_IE'
 		DEFINITION FIELD-ID: 255  COMPLEXITY: 78
-		SOURCE: ./TS_44.018_Rel12.src, 5958
+		SOURCE: ../../Encodix/TS44.018/TS_44.018_Rel12.src, 5958
 	-----------------------------------------------------------------*/
 	/* 001218 */ CSN1C_LABEL_A, CSN1C_VAL2(727), CSN1C_VAL1(4), /* (ID:9795:249329:249351) Label=<ALPHA> LabelId=88 */
 	/* 001222 */ CSN1C_CHOICE_NODE(0,9),                  /* (ID:9799:249353:249383) VBIT choice at 1222, node 1, jump to 1231 */
@@ -38466,7 +38466,7 @@ static const unsigned char Program_RR_ProgramCode [] = {
 	/*-----------------------------------------------------------------
 		DEFINITION 'TMGI_IE'
 		DEFINITION FIELD-ID: 262  COMPLEXITY: 23
-		SOURCE: ./TS_44.018_Rel12.src, 6133
+		SOURCE: ../../Encodix/TS44.018/TS_44.018_Rel12.src, 6133
 	-----------------------------------------------------------------*/
 	/* 001351 */ CSN1C_CHOICE_NODE(0,17),                 /* (ID:10041:254546:254755) VBIT choice at 1351, node 1, jump to 1368 */
 	/* 001353 */ CSN1C_BIT_1,                             /* (ID:10049:254632:254680) */
@@ -38483,7 +38483,7 @@ static const unsigned char Program_RR_ProgramCode [] = {
 	/*-----------------------------------------------------------------
 		DEFINITION 'PCID_Group_IE'
 		DEFINITION FIELD-ID: 269  COMPLEXITY: 37
-		SOURCE: ./TS_44.018_Rel12.src, 6225
+		SOURCE: ../../Encodix/TS44.018/TS_44.018_Rel12.src, 6225
 	-----------------------------------------------------------------*/
 	/* 001378 */ CSN1C_LOOP_BEGIN_INFINITE, CSN1C_VAL3(22), /* (ID:10244:257222:257243) Infinite loop start, jump to 1389 */
 	/* 001382 */ CSN1C_BIT_1,                             /* (ID:10247:257222:257224) */
@@ -38516,7 +38516,7 @@ static const unsigned char Program_RR_ProgramCode [] = {
 	/*-----------------------------------------------------------------
 		DEFINITION 'PLMN_ID_struct'
 		DEFINITION FIELD-ID: 274  COMPLEXITY: 10
-		SOURCE: ./TS_44.018_Rel12.src, 6285
+		SOURCE: ../../Encodix/TS44.018/TS_44.018_Rel12.src, 6285
 	-----------------------------------------------------------------*/
 	/* 001442 */ CSN1C_LABEL_A, CSN1C_VAL2(1003), CSN1C_VAL1(12), /* (ID:10402:259139:259160) Label=<MCC> LabelId=105 */
 	/* 001446 */ CSN1C_LABEL_A, CSN1C_VAL2(1010), CSN1C_VAL1(12), /* (ID:10406:259160:259179) Label=<MNC> LabelId=106 */
@@ -38524,7 +38524,7 @@ static const unsigned char Program_RR_ProgramCode [] = {
 	/*-----------------------------------------------------------------
 		DEFINITION 'GPRS_Power_Control_Parameters_IE'
 		DEFINITION FIELD-ID: 287  COMPLEXITY: 22
-		SOURCE: ./TS_44.018_Rel12.src, 6416
+		SOURCE: ../../Encodix/TS44.018/TS_44.018_Rel12.src, 6416
 	-----------------------------------------------------------------*/
 	/* 001451 */ CSN1C_LABEL_A, CSN1C_VAL2(1017), CSN1C_VAL1(4), /* (ID:10760:263032:263054) Label=<ALPHA> LabelId=107 */
 	/* 001455 */ CSN1C_LABEL_A, CSN1C_VAL2(1024), CSN1C_VAL1(5), /* (ID:10764:263054:263078) Label=<T_AVG_W> LabelId=108 */
@@ -38696,7 +38696,7 @@ static const unsigned char Program_RR_ProgramCode [] = {
 	/*-----------------------------------------------------------------
 		DEFINITION 'Group_Call_information'
 		DEFINITION FIELD-ID: 63  COMPLEXITY: 12
-		SOURCE: ./TS_44.018_Rel12.src, 1668
+		SOURCE: ../../Encodix/TS44.018/TS_44.018_Rel12.src, 1668
 	-----------------------------------------------------------------*/
 	/* 001778 */ CSN1C_LABEL_A, CSN1C_VAL2(1164), CSN1C_VAL1(36), /* (ID:1787:102442:102477) Label=<Group_Call_Reference> LabelId=142 */
 	/* 001782 */ CSN1C_CHOICE_NODE(0,8),                  /* (ID:1791:102478:102509) VBIT choice at 1782, node 1, jump to 1790 */
@@ -38712,7 +38712,7 @@ static const unsigned char Program_RR_ProgramCode [] = {
 	/*-----------------------------------------------------------------
 		DEFINITION 'BA_List_Pref'
 		DEFINITION FIELD-ID: 66  COMPLEXITY: 21
-		SOURCE: ./TS_44.018_Rel12.src, 2070
+		SOURCE: ../../Encodix/TS44.018/TS_44.018_Rel12.src, 2070
 	-----------------------------------------------------------------*/
 	/* 001798 */ CSN1C_LOOP_BEGIN_INFINITE, CSN1C_VAL3(42), /* (ID:1832:115498:115522) Infinite loop start, jump to 1819 */
 	/* 001802 */ CSN1C_BIT_1,                             /* (ID:1835:115498:115500) */
@@ -38732,7 +38732,7 @@ static const unsigned char Program_RR_ProgramCode [] = {
 	/*-----------------------------------------------------------------
 		DEFINITION 'UTRANFreqList'
 		DEFINITION FIELD-ID: 68  COMPLEXITY: 21
-		SOURCE: ./TS_44.018_Rel12.src, 2085
+		SOURCE: ../../Encodix/TS44.018/TS_44.018_Rel12.src, 2085
 	-----------------------------------------------------------------*/
 	/* 001835 */ CSN1C_LOOP_BEGIN_INFINITE, CSN1C_VAL3(22), /* (ID:1863:115817:115843) Infinite loop start, jump to 1846 */
 	/* 001839 */ CSN1C_BIT_1,                             /* (ID:1866:115817:115819) */
@@ -38749,7 +38749,7 @@ static const unsigned char Program_RR_ProgramCode [] = {
 	/*-----------------------------------------------------------------
 		DEFINITION 'ChReqDesc2'
 		DEFINITION FIELD-ID: 74  COMPLEXITY: 88
-		SOURCE: ./TS_44.018_Rel12.src, 2508
+		SOURCE: ../../Encodix/TS44.018/TS_44.018_Rel12.src, 2508
 	-----------------------------------------------------------------*/
 	/* 001862 */ CSN1C_LABEL_A, CSN1C_VAL2(1197), CSN1C_VAL1(2), /* (ID:2081:129108:129149) Label=<PACKET_ESTABLISHMENT_CAUSE> LabelId=149 */
 	/* 001866 */ CSN1C_LABEL_BEGIN, CSN1C_VAL2(2400),     /* (ID:2085:129149:129246) Label=<Channel_Request_Description> Terminal=<0> LabelId=150 */
@@ -38817,7 +38817,7 @@ static const unsigned char Program_RR_ProgramCode [] = {
 	/*-----------------------------------------------------------------
 		DEFINITION 'DTMInfoRestOctets'
 		DEFINITION FIELD-ID: 75  COMPLEXITY: 35
-		SOURCE: ./TS_44.018_Rel12.src, 2632
+		SOURCE: ../../Encodix/TS44.018/TS_44.018_Rel12.src, 2632
 	-----------------------------------------------------------------*/
 	/* 001999 */ CSN1C_LABEL_A, CSN1C_VAL2(1255), CSN1C_VAL1(3), /* (ID:2169:134046:134072) Label=<MAX_LAPDm> LabelId=165 */
 	/* 002003 */ CSN1C_LABEL_A, CSN1C_VAL2(1258), CSN1C_VAL1(5), /* (ID:2173:134072:134110) Label=<GPRS_MS_TXPWR_MAX_CCH> LabelId=166 */
@@ -38846,7 +38846,7 @@ static const unsigned char Program_RR_ProgramCode [] = {
 	/*-----------------------------------------------------------------
 		DEFINITION 'DynamicARFCNMapping'
 		DEFINITION FIELD-ID: 76  COMPLEXITY: 22
-		SOURCE: ./TS_44.018_Rel12.src, 2654
+		SOURCE: ../../Encodix/TS44.018/TS_44.018_Rel12.src, 2654
 	-----------------------------------------------------------------*/
 	/* 002048 */ CSN1C_LABEL_BEGIN, CSN1C_VAL2(2540),     /* (ID:2204:134856:134969) Label=<DYNAMIC_ARFCN_MAPPING_Description> Terminal=<0> LabelId=170 */
 	/* 002051 */ CSN1C_LOOP_BEGIN_INFINITE, CSN1C_VAL3(20), /* (ID:2207:134896:134924) Infinite loop start, jump to 2061 */
@@ -38870,7 +38870,7 @@ static const unsigned char Program_RR_ProgramCode [] = {
 	/*-----------------------------------------------------------------
 		DEFINITION 'IAXRestOctets'
 		DEFINITION FIELD-ID: 88  COMPLEXITY: 7
-		SOURCE: ./TS_44.018_Rel12.src, 3037
+		SOURCE: ../../Encodix/TS44.018/TS_44.018_Rel12.src, 3037
 	-----------------------------------------------------------------*/
 	/* 002088 */ CSN1C_LABEL_A, CSN1C_VAL2(1273), CSN1C_VAL1(1), /* (ID:3085:147282:147327) Label=<Compressed_Inter_RAT_HO_INFO_IND> LabelId=171 */
 	/* 002092 */ CSN1C_GOSUB, CSN1C_VAL1(107),            /* (ID:3089:147327:147342) Reference to 'spare_padding' */
@@ -38878,7 +38878,7 @@ static const unsigned char Program_RR_ProgramCode [] = {
 	/*-----------------------------------------------------------------
 		DEFINITION 'MultirateSpeechCfgIE'
 		DEFINITION FIELD-ID: 91  COMPLEXITY: 46
-		SOURCE: ./TS_44.018_Rel12.src, 3154
+		SOURCE: ../../Encodix/TS44.018/TS_44.018_Rel12.src, 3154
 	-----------------------------------------------------------------*/
 	/* 002095 */ CSN1C_LABEL_A, CSN1C_VAL2(1276), CSN1C_VAL1(3), /* (ID:3203:150167:150306) Label=<MR_version> LabelId=172 */
 	/* 002099 */ CSN1C_LABEL_A, CSN1C_VAL2(1279), CSN1C_VAL1(1), /* (ID:3207:150306:150443) Label=<NSCB> LabelId=173 */
@@ -38908,7 +38908,7 @@ static const unsigned char Program_RR_ProgramCode [] = {
 	/*-----------------------------------------------------------------
 		DEFINITION 'P3RestOctets'
 		DEFINITION FIELD-ID: 103  COMPLEXITY: 94
-		SOURCE: ./TS_44.018_Rel12.src, 3466
+		SOURCE: ../../Encodix/TS44.018/TS_44.018_Rel12.src, 3466
 	-----------------------------------------------------------------*/
 	/* 002161 */ CSN1C_EXECUTE, CSN1C_VAL1(0),            /* (ID:3795:160192:160233) Execute custom action Program_RR_action0000 */
 	/* 002163 */ CSN1C_CHOICE_NODE(0,13),                 /* (ID:3796:160234:160271) VBIT choice at 2163, node 1, jump to 2176 */
@@ -38996,7 +38996,7 @@ static const unsigned char Program_RR_ProgramCode [] = {
 	/*-----------------------------------------------------------------
 		DEFINITION 'PacketChannelDescription'
 		DEFINITION FIELD-ID: 104  COMPLEXITY: 59
-		SOURCE: ./TS_44.018_Rel12.src, 3495
+		SOURCE: ../../Encodix/TS44.018/TS_44.018_Rel12.src, 3495
 	-----------------------------------------------------------------*/
 	/* 002318 */ CSN1C_LABEL_A, CSN1C_VAL2(1333), CSN1C_VAL1(5), /* (ID:3889:161176:161205) Label=<Channel_type> LabelId=191 */
 	/* 002322 */ CSN1C_LABEL_A, CSN1C_VAL2(1336), CSN1C_VAL1(3), /* (ID:3893:161205:161224) Label=<TN> LabelId=192 */
@@ -39035,7 +39035,7 @@ static const unsigned char Program_RR_ProgramCode [] = {
 	/*-----------------------------------------------------------------
 		DEFINITION 'Fixed_Allocation_struct'
 		DEFINITION FIELD-ID: 108  COMPLEXITY: 87
-		SOURCE: ./TS_44.018_Rel12.src, 3664
+		SOURCE: ../../Encodix/TS44.018/TS_44.018_Rel12.src, 3664
 	-----------------------------------------------------------------*/
 	/* 002391 */ CSN1C_CHOICE_NODE(0,9),                  /* (ID:4466:166965:167007) VBIT choice at 2391, node 1, jump to 2400 */
 	/* 002393 */ CSN1C_BIT_1,                             /* (ID:4470:166969:166971) */
@@ -39110,7 +39110,7 @@ static const unsigned char Program_RR_ProgramCode [] = {
 	/*-----------------------------------------------------------------
 		DEFINITION 'RLC_Entity_Struct_UP'
 		DEFINITION FIELD-ID: 113  COMPLEXITY: 23
-		SOURCE: ./TS_44.018_Rel12.src, 3723
+		SOURCE: ../../Encodix/TS44.018/TS_44.018_Rel12.src, 3723
 	-----------------------------------------------------------------*/
 	/* 002545 */ CSN1C_LABEL_A, CSN1C_VAL2(1433), CSN1C_VAL1(5), /* (ID:4847:169716:169754) Label=<UPLINK_TFI_ASSIGNMENT> LabelId=212 */
 	/* 002549 */ CSN1C_LABEL_A, CSN1C_VAL2(1440), CSN1C_VAL1(1), /* (ID:4851:169754:169779) Label=<RLC_MODE> LabelId=213 */
@@ -39130,7 +39130,7 @@ static const unsigned char Program_RR_ProgramCode [] = {
 	/*-----------------------------------------------------------------
 		DEFINITION 'RLC_Entity_Struct_DN'
 		DEFINITION FIELD-ID: 118  COMPLEXITY: 23
-		SOURCE: ./TS_44.018_Rel12.src, 3819
+		SOURCE: ../../Encodix/TS44.018/TS_44.018_Rel12.src, 3819
 	-----------------------------------------------------------------*/
 	/* 002580 */ CSN1C_LABEL_A, CSN1C_VAL2(1504), CSN1C_VAL1(5), /* (ID:5231:173250:173290) Label=<DOWNLINK_TFI_ASSIGNMENT> LabelId=217 */
 	/* 002584 */ CSN1C_LABEL_A, CSN1C_VAL2(1515), CSN1C_VAL1(1), /* (ID:5235:173290:173315) Label=<RLC_MODE> LabelId=218 */
@@ -39150,7 +39150,7 @@ static const unsigned char Program_RR_ProgramCode [] = {
 	/*-----------------------------------------------------------------
 		DEFINITION 'Downlink_TBF_assignment_2_struct'
 		DEFINITION FIELD-ID: 124  COMPLEXITY: 40
-		SOURCE: ./TS_44.018_Rel12.src, 3924
+		SOURCE: ../../Encodix/TS44.018/TS_44.018_Rel12.src, 3924
 	-----------------------------------------------------------------*/
 	/* 002615 */ CSN1C_LABEL_A, CSN1C_VAL2(1591), CSN1C_VAL1(7), /* (ID:5675:177520:177540) Label=<PFI> LabelId=221 */
 	/* 002619 */ CSN1C_LABEL_A, CSN1C_VAL2(1600), CSN1C_VAL1(1), /* (ID:5679:177540:177565) Label=<RLC_MODE> LabelId=222 */
@@ -39181,7 +39181,7 @@ static const unsigned char Program_RR_ProgramCode [] = {
 	/*-----------------------------------------------------------------
 		DEFINITION 'SI1RestOctets'
 		DEFINITION FIELD-ID: 125  COMPLEXITY: 13
-		SOURCE: ./TS_44.018_Rel12.src, 4095
+		SOURCE: ../../Encodix/TS44.018/TS_44.018_Rel12.src, 4095
 	-----------------------------------------------------------------*/
 	/* 002674 */ CSN1C_CHOICE_NODE(0,9),                  /* (ID:5715:182825:184367) VBIT choice at 2674, node 1, jump to 2683 */
 	/* 002676 */ CSN1C_BIT_H,                             /* (ID:5719:182837:182840) */
@@ -39198,7 +39198,7 @@ static const unsigned char Program_RR_ProgramCode [] = {
 	/*-----------------------------------------------------------------
 		DEFINITION 'SI2bisRestOctets'
 		DEFINITION FIELD-ID: 127  COMPLEXITY: 7
-		SOURCE: ./TS_44.018_Rel12.src, 4139
+		SOURCE: ../../Encodix/TS44.018/TS_44.018_Rel12.src, 4139
 	-----------------------------------------------------------------*/
 	/* 002697 */ CSN1C_LABEL_BEGIN, CSN1C_VAL2(3415),     /* (ID:5734:184631:184649) Label=<dummy> Terminal=<1> LabelId=230 */
 	/* 002700 */ CSN1C_LABEL_END, CSN1C_VAL2(3415),       /* (ID:5734:184631:184649) Label=<dummy> Terminal=<1> */
@@ -39207,7 +39207,7 @@ static const unsigned char Program_RR_ProgramCode [] = {
 	/*-----------------------------------------------------------------
 		DEFINITION 'SI2terRestOctets'
 		DEFINITION FIELD-ID: 128  COMPLEXITY: 67
-		SOURCE: ./TS_44.018_Rel12.src, 4147
+		SOURCE: ../../Encodix/TS44.018/TS_44.018_Rel12.src, 4147
 	-----------------------------------------------------------------*/
 	/* 002706 */ CSN1C_CHOICE_NODE(0,199),                /* (ID:5741:184835:185575) VBIT choice at 2706, node 1, jump to 2905 */
 	/* 002708 */ CSN1C_BIT_H,                             /* (ID:5745:184839:184847) */
@@ -39319,7 +39319,7 @@ static const unsigned char Program_RR_ProgramCode [] = {
 	/*-----------------------------------------------------------------
 		DEFINITION 'UTRAN_FDD_Description_struct'
 		DEFINITION FIELD-ID: 143  COMPLEXITY: 20
-		SOURCE: ./TS_44.018_Rel12.src, 4349
+		SOURCE: ../../Encodix/TS44.018/TS_44.018_Rel12.src, 4349
 	-----------------------------------------------------------------*/
 	/* 002915 */ CSN1C_CHOICE_NODE(0,9),                  /* (ID:6425:193712:193746) VBIT choice at 2915, node 1, jump to 2924 */
 	/* 002917 */ CSN1C_BIT_1,                             /* (ID:6429:193716:193718) */
@@ -39350,7 +39350,7 @@ static const unsigned char Program_RR_ProgramCode [] = {
 	/*-----------------------------------------------------------------
 		DEFINITION 'UTRAN_TDD_Description_struct'
 		DEFINITION FIELD-ID: 145  COMPLEXITY: 20
-		SOURCE: ./TS_44.018_Rel12.src, 4360
+		SOURCE: ../../Encodix/TS44.018/TS_44.018_Rel12.src, 4360
 	-----------------------------------------------------------------*/
 	/* 002975 */ CSN1C_CHOICE_NODE(0,9),                  /* (ID:6465:194412:194446) VBIT choice at 2975, node 1, jump to 2984 */
 	/* 002977 */ CSN1C_BIT_1,                             /* (ID:6469:194416:194418) */
@@ -39388,7 +39388,7 @@ static const unsigned char Program_RR_ProgramCode [] = {
 	/*-----------------------------------------------------------------
 		DEFINITION 'Repeated_E_UTRAN_Not_Allowed_Cells_struct'
 		DEFINITION FIELD-ID: 162  COMPLEXITY: 15
-		SOURCE: ./TS_44.018_Rel12.src, 4517
+		SOURCE: ../../Encodix/TS44.018/TS_44.018_Rel12.src, 4517
 	-----------------------------------------------------------------*/
 	/* 003048 */ CSN1C_LABEL_BEGIN, CSN1C_VAL2(3750),     /* (ID:7179:201083:201126) Label=<Not_Allowed_Cells> Terminal=<0> LabelId=262 */
 	/* 003051 */ CSN1C_GOSUB, CSN1C_VAL2(1378),           /* (ID:7182:201105:201122) Reference to 'PCID_Group_IE' */
@@ -39402,7 +39402,7 @@ static const unsigned char Program_RR_ProgramCode [] = {
 	/*-----------------------------------------------------------------
 		DEFINITION 'Repeated_E_UTRAN_PCID_to_TA_mapping_struct'
 		DEFINITION FIELD-ID: 163  COMPLEXITY: 20
-		SOURCE: ./TS_44.018_Rel12.src, 4521
+		SOURCE: ../../Encodix/TS44.018/TS_44.018_Rel12.src, 4521
 	-----------------------------------------------------------------*/
 	/* 003070 */ CSN1C_LOOP_BEGIN_INFINITE, CSN1C_VAL3(32), /* (ID:7194:201239:201399) Infinite loop start, jump to 3086 */
 	/* 003074 */ CSN1C_BIT_1,                             /* (ID:7197:201239:201309) */
@@ -39420,7 +39420,7 @@ static const unsigned char Program_RR_ProgramCode [] = {
 	/*-----------------------------------------------------------------
 		DEFINITION '_3G_CSG_Description_struct'
 		DEFINITION FIELD-ID: 164  COMPLEXITY: 38
-		SOURCE: ./TS_44.018_Rel12.src, 4527
+		SOURCE: ../../Encodix/TS44.018/TS_44.018_Rel12.src, 4527
 	-----------------------------------------------------------------*/
 	/* 003100 */ CSN1C_LOOP_BEGIN_INFINITE, CSN1C_VAL3(144), /* (ID:7214:201504:201593) Infinite loop start, jump to 3172 */
 	/* 003104 */ CSN1C_BIT_1,                             /* (ID:7217:201504:201506) */
@@ -39468,7 +39468,7 @@ static const unsigned char Program_RR_ProgramCode [] = {
 	/*-----------------------------------------------------------------
 		DEFINITION 'LSA_ID_information'
 		DEFINITION FIELD-ID: 191  COMPLEXITY: 9
-		SOURCE: ./TS_44.018_Rel12.src, 4685
+		SOURCE: ../../Encodix/TS44.018/TS_44.018_Rel12.src, 4685
 	-----------------------------------------------------------------*/
 	/* 003200 */ CSN1C_CHOICE_NODE(0,9),                  /* (ID:7648:207802:207872) VBIT choice at 3200, node 1, jump to 3209 */
 	/* 003202 */ CSN1C_BIT_0,                             /* (ID:7650:207802:207804) */
@@ -39492,7 +39492,7 @@ static const unsigned char Program_RR_ProgramCode [] = {
 	/*-----------------------------------------------------------------
 		DEFINITION 'SI18RestOctet'
 		DEFINITION FIELD-ID: 204  COMPLEXITY: 20
-		SOURCE: ./TS_44.018_Rel12.src, 4888
+		SOURCE: ../../Encodix/TS44.018/TS_44.018_Rel12.src, 4888
 	-----------------------------------------------------------------*/
 	/* 003234 */ CSN1C_LABEL_A, CSN1C_VAL2(2005), CSN1C_VAL1(2), /* (ID:7980:214952:214985) Label=<SI18_CHANGE_MARK> LabelId=276 */
 	/* 003238 */ CSN1C_LABEL_A, CSN1C_VAL2(2008), CSN1C_VAL1(3), /* (ID:7984:214985:215012) Label=<SI18_INDEX> LabelId=277 */
@@ -39514,7 +39514,7 @@ static const unsigned char Program_RR_ProgramCode [] = {
 	/*-----------------------------------------------------------------
 		DEFINITION 'SI14RestOctets'
 		DEFINITION FIELD-ID: 206  COMPLEXITY: 24
-		SOURCE: ./TS_44.018_Rel12.src, 4911
+		SOURCE: ../../Encodix/TS44.018/TS_44.018_Rel12.src, 4911
 	-----------------------------------------------------------------*/
 	/* 003287 */ CSN1C_LABEL_A, CSN1C_VAL2(2032), CSN1C_VAL1(2), /* (ID:8017:215624:215651) Label=<SI14_INDEX> LabelId=283 */
 	/* 003291 */ CSN1C_LABEL_A, CSN1C_VAL2(2035), CSN1C_VAL1(2), /* (ID:8021:215651:215678) Label=<SI14_COUNT> LabelId=284 */
@@ -39531,7 +39531,7 @@ static const unsigned char Program_RR_ProgramCode [] = {
 	/*-----------------------------------------------------------------
 		DEFINITION 'SI15RestOctets'
 		DEFINITION FIELD-ID: 207  COMPLEXITY: 24
-		SOURCE: ./TS_44.018_Rel12.src, 4930
+		SOURCE: ../../Encodix/TS44.018/TS_44.018_Rel12.src, 4930
 	-----------------------------------------------------------------*/
 	/* 003319 */ CSN1C_LABEL_A, CSN1C_VAL2(2044), CSN1C_VAL1(2), /* (ID:8041:216181:216208) Label=<SI15_INDEX> LabelId=287 */
 	/* 003323 */ CSN1C_LABEL_A, CSN1C_VAL2(2047), CSN1C_VAL1(2), /* (ID:8045:216208:216235) Label=<SI15_COUNT> LabelId=288 */
@@ -39548,7 +39548,7 @@ static const unsigned char Program_RR_ProgramCode [] = {
 	/*-----------------------------------------------------------------
 		DEFINITION 'SI21RestOctets'
 		DEFINITION FIELD-ID: 210  COMPLEXITY: 28
-		SOURCE: ./TS_44.018_Rel12.src, 4966
+		SOURCE: ../../Encodix/TS44.018/TS_44.018_Rel12.src, 4966
 	-----------------------------------------------------------------*/
 	/* 003351 */ CSN1C_LABEL_A, CSN1C_VAL2(2056), CSN1C_VAL1(2), /* (ID:8090:217195:217229) Label=<SI_21_CHANGE_MARK> LabelId=291 */
 	/* 003355 */ CSN1C_LABEL_A, CSN1C_VAL2(2059), CSN1C_VAL1(3), /* (ID:8094:217229:217257) Label=<SI_21_INDEX> LabelId=292 */
@@ -39568,7 +39568,7 @@ static const unsigned char Program_RR_ProgramCode [] = {
 	/*-----------------------------------------------------------------
 		DEFINITION 'SI22RestOctets'
 		DEFINITION FIELD-ID: 211  COMPLEXITY: 31
-		SOURCE: ./TS_44.018_Rel12.src, 4980
+		SOURCE: ../../Encodix/TS44.018/TS_44.018_Rel12.src, 4980
 	-----------------------------------------------------------------*/
 	/* 003386 */ CSN1C_EXECUTE, CSN1C_VAL1(0),            /* (ID:8118:217552:217590) Execute custom action Program_RR_action0000 */
 	/* 003388 */ CSN1C_LABEL_A, CSN1C_VAL2(2071), CSN1C_VAL1(2), /* (ID:8119:217590:217624) Label=<SI_22_CHANGE_MARK> LabelId=296 */
@@ -39647,7 +39647,7 @@ static const unsigned char Program_RR_ProgramCode [] = {
 	/*-----------------------------------------------------------------
 		DEFINITION '_3GTargetCell'
 		DEFINITION FIELD-ID: 221  COMPLEXITY: 59
-		SOURCE: ./TS_44.018_Rel12.src, 5175
+		SOURCE: ../../Encodix/TS44.018/TS_44.018_Rel12.src, 5175
 	-----------------------------------------------------------------*/
 	/* 003542 */ CSN1C_CHOICE_NODE(0,33),                 /* (ID:8575:224404:224553) VBIT choice at 3542, node 1, jump to 3575 */
 	/* 003544 */ CSN1C_BIT_1,                             /* (ID:8579:224408:224411) */
@@ -39697,7 +39697,7 @@ static const unsigned char Program_RR_ProgramCode [] = {
 	/*-----------------------------------------------------------------
 		DEFINITION 'SI10bis_Neighbour_Cell_Info'
 		DEFINITION FIELD-ID: 223  COMPLEXITY: 92
-		SOURCE: ./TS_44.018_Rel12.src, 5285
+		SOURCE: ../../Encodix/TS44.018/TS_44.018_Rel12.src, 5285
 	-----------------------------------------------------------------*/
 	/* 003635 */ CSN1C_GOSUB, CSN1C_VAL2(147),            /* (ID:8669:227112:227144) Reference to 'Group_Channel_Description' */
 	/* 003638 */ CSN1C_CHOICE_NODE(0,32),                 /* (ID:8670:227146:227275) VBIT choice at 3638, node 1, jump to 3670 */
@@ -39790,7 +39790,7 @@ static const unsigned char Program_RR_ProgramCode [] = {
 	/*-----------------------------------------------------------------
 		DEFINITION 'RRClassmark3Value'
 		DEFINITION FIELD-ID: 235  COMPLEXITY: 400
-		SOURCE: ./TS_44.018_Rel12.src, 5583
+		SOURCE: ../../Encodix/TS44.018/TS_44.018_Rel12.src, 5583
 	-----------------------------------------------------------------*/
 	/* 003798 */ CSN1C_BIT_A(1),                          /* (ID:1718:28658:28659) */
 	/* 003799 */ CSN1C_CHOICE_NODE(0,35),                 /* (ID:9108:236387:236737) VBIT choice at 3799, node 1, jump to 3834 */
@@ -40122,7 +40122,7 @@ static const unsigned char Program_RR_ProgramCode [] = {
 	/*-----------------------------------------------------------------
 		DEFINITION 'GPRS_Mobile_Allocation_IE'
 		DEFINITION FIELD-ID: 247  COMPLEXITY: 37
-		SOURCE: ./TS_44.018_Rel12.src, 5890
+		SOURCE: ../../Encodix/TS44.018/TS_44.018_Rel12.src, 5890
 	-----------------------------------------------------------------*/
 	/* 004486 */ CSN1C_LABEL_A, CSN1C_VAL2(2485), CSN1C_VAL1(6), /* (ID:9689:247449:247469) Label=<HSN> LabelId=394 */
 	/* 004490 */ CSN1C_CHOICE_NODE(0,14),                 /* (ID:9693:247471:247526) VBIT choice at 4490, node 1, jump to 4504 */
@@ -40166,7 +40166,7 @@ static const unsigned char Program_RR_ProgramCode [] = {
 	/*-----------------------------------------------------------------
 		DEFINITION 'MBMS_Sessions_List_IE'
 		DEFINITION FIELD-ID: 266  COMPLEXITY: 20
-		SOURCE: ./TS_44.018_Rel12.src, 6185
+		SOURCE: ../../Encodix/TS44.018/TS_44.018_Rel12.src, 6185
 	-----------------------------------------------------------------*/
 	/* 004566 */ CSN1C_LOOP_BEGIN_INFINITE, CSN1C_VAL3(64), /* (ID:10136:256052:256125) Infinite loop start, jump to 4598 */
 	/* 004570 */ CSN1C_BIT_1,                             /* (ID:10139:256052:256054) */
@@ -40188,7 +40188,7 @@ static const unsigned char Program_RR_ProgramCode [] = {
 	/*-----------------------------------------------------------------
 		DEFINITION 'Enhanced_Cell_Reselection_Parameters_IE'
 		DEFINITION FIELD-ID: 271  COMPLEXITY: 11
-		SOURCE: ./TS_44.018_Rel12.src, 6254
+		SOURCE: ../../Encodix/TS44.018/TS_44.018_Rel12.src, 6254
 	-----------------------------------------------------------------*/
 	/* 004600 */ CSN1C_LOOP_BEGIN_INFINITE, CSN1C_VAL3(182), /* (ID:10309:258055:258184) Infinite loop start, jump to 4691 */
 	/* 004604 */ CSN1C_BIT_1,                             /* (ID:10312:258055:258057) */
@@ -40241,7 +40241,7 @@ static const unsigned char Program_RR_ProgramCode [] = {
 	/*-----------------------------------------------------------------
 		DEFINITION 'UTRAN_CSG_Measurement_Report_IE'
 		DEFINITION FIELD-ID: 275  COMPLEXITY: 32
-		SOURCE: ./TS_44.018_Rel12.src, 6296
+		SOURCE: ../../Encodix/TS44.018/TS_44.018_Rel12.src, 6296
 	-----------------------------------------------------------------*/
 	/* 004693 */ CSN1C_CHOICE_NODE(0,9),                  /* (ID:10412:259391:259422) VBIT choice at 4693, node 1, jump to 4702 */
 	/* 004695 */ CSN1C_BIT_1,                             /* (ID:10416:259395:259397) */
@@ -40548,7 +40548,7 @@ static const unsigned char Program_RR_ProgramCode [] = {
 	/*-----------------------------------------------------------------
 		DEFINITION 'CellSelIndAfterReleaseTCHandSDCCH'
 		DEFINITION FIELD-ID: 69  COMPLEXITY: 56
-		SOURCE: ./TS_44.018_Rel12.src, 2097
+		SOURCE: ../../Encodix/TS44.018/TS_44.018_Rel12.src, 2097
 	-----------------------------------------------------------------*/
 	/* 005288 */ CSN1C_CHOICE_NODE(0,77),                 /* (ID:1884:116130:116431) VBIT choice at 5288, node 1, jump to 5365 */
 	/* 005290 */ CSN1C_VALUE, CSN1C_VAL1(50),             /* (ID:1925:116361:116362..1927:116363:116365) Bit string '011' */
@@ -40693,7 +40693,7 @@ static const unsigned char Program_RR_ProgramCode [] = {
 	/*-----------------------------------------------------------------
 		DEFINITION 'IARestOctets'
 		DEFINITION FIELD-ID: 79  COMPLEXITY: 90
-		SOURCE: ./TS_44.018_Rel12.src, 2761
+		SOURCE: ../../Encodix/TS44.018/TS_44.018_Rel12.src, 2761
 	-----------------------------------------------------------------*/
 	/* 005589 */ CSN1C_CHOICE_NODE(0,1265),               /* (ID:2255:137474:138439) VBIT choice at 5589, node 1, jump to 6854 */
 	/* 005591 */ CSN1C_CHOICE_NODE(0,592),                /* (ID:2257:137476:138232) VBIT choice at 5591, node 1, jump to 6183 */
@@ -41336,7 +41336,7 @@ static const unsigned char Program_RR_ProgramCode [] = {
 	/*-----------------------------------------------------------------
 		DEFINITION 'MeasurementResults'
 		DEFINITION FIELD-ID: 89  COMPLEXITY: 97
-		SOURCE: ./TS_44.018_Rel12.src, 3047
+		SOURCE: ../../Encodix/TS44.018/TS_44.018_Rel12.src, 3047
 	-----------------------------------------------------------------*/
 	/* 006859 */ CSN1C_EXECUTE_DEC, CSN1C_VAL1(8),
 	/* 006861 */ CSN1C_EXECUTE, CSN1C_VAL1(4),            /* (ID:3093:147561:147598) Execute custom action Program_RR_action0004 */
@@ -41402,7 +41402,7 @@ static const unsigned char Program_RR_ProgramCode [] = {
 	/*-----------------------------------------------------------------
 		DEFINITION 'List_of_Group_Call_NCH_information'
 		DEFINITION FIELD-ID: 93  COMPLEXITY: 7
-		SOURCE: ./TS_44.018_Rel12.src, 3293
+		SOURCE: ../../Encodix/TS44.018/TS_44.018_Rel12.src, 3293
 	-----------------------------------------------------------------*/
 	/* 007013 */ CSN1C_CHOICE_NODE(0,11),                 /* (ID:3331:154241:154309) VBIT choice at 7013, node 1, jump to 7024 */
 	/* 007015 */ CSN1C_BIT_1,                             /* (ID:3335:154245:154247) */
@@ -41418,7 +41418,7 @@ static const unsigned char Program_RR_ProgramCode [] = {
 	/*-----------------------------------------------------------------
 		DEFINITION 'SI3RestOctet'
 		DEFINITION FIELD-ID: 171  COMPLEXITY: 41
-		SOURCE: ./TS_44.018_Rel12.src, 4568
+		SOURCE: ../../Encodix/TS44.018/TS_44.018_Rel12.src, 4568
 	-----------------------------------------------------------------*/
 	/* 007032 */ CSN1C_EXECUTE, CSN1C_VAL1(0),            /* (ID:7378:203177:203223) Execute custom action Program_RR_action0000 */
 	/* 007034 */ CSN1C_CHOICE_NODE(0,21),                 /* (ID:7417:203796:203824) VBIT choice at 7034, node 1, jump to 7055 */
@@ -41524,7 +41524,7 @@ static const unsigned char Program_RR_ProgramCode [] = {
 	/*-----------------------------------------------------------------
 		DEFINITION 'SI4_Rest_Octets_O'
 		DEFINITION FIELD-ID: 184  COMPLEXITY: 12
-		SOURCE: ./TS_44.018_Rel12.src, 4637
+		SOURCE: ../../Encodix/TS44.018/TS_44.018_Rel12.src, 4637
 	-----------------------------------------------------------------*/
 	/* 007229 */ CSN1C_CHOICE_NODE(0,56),                 /* (ID:7533:205855:205960) Truncable concatenation, entry 0, jump to 7285 */
 	/* 007231 */ CSN1C_CHOICE_NODE(0,21),                 /* (ID:7417:203796:203824) VBIT choice at 7231, node 1, jump to 7252 */
@@ -41557,7 +41557,7 @@ static const unsigned char Program_RR_ProgramCode [] = {
 	/*-----------------------------------------------------------------
 		DEFINITION 'SI4_Rest_Octets_S'
 		DEFINITION FIELD-ID: 185  COMPLEXITY: 41
-		SOURCE: ./TS_44.018_Rel12.src, 4643
+		SOURCE: ../../Encodix/TS44.018/TS_44.018_Rel12.src, 4643
 	-----------------------------------------------------------------*/
 	/* 007286 */ CSN1C_CHOICE_NODE(0,33),                 /* (ID:7544:206052:206074) VBIT choice at 7286, node 1, jump to 7319 */
 	/* 007288 */ CSN1C_BIT_H,                             /* (ID:7548:206056:206058) */
@@ -41619,7 +41619,7 @@ static const unsigned char Program_RR_ProgramCode [] = {
 	/*-----------------------------------------------------------------
 		DEFINITION 'SI6RestOctet'
 		DEFINITION FIELD-ID: 193  COMPLEXITY: 81
-		SOURCE: ./TS_44.018_Rel12.src, 4698
+		SOURCE: ../../Encodix/TS44.018/TS_44.018_Rel12.src, 4698
 	-----------------------------------------------------------------*/
 	/* 007390 */ CSN1C_CHOICE_NODE(0,33),                 /* (ID:7663:208057:208081) VBIT choice at 7390, node 1, jump to 7423 */
 	/* 007392 */ CSN1C_BIT_H,                             /* (ID:7667:208061:208063) */
@@ -41717,7 +41717,7 @@ static const unsigned char Program_RR_ProgramCode [] = {
 	/*-----------------------------------------------------------------
 		DEFINITION 'Priority_and_UTRAN_Parameters_Description_struct'
 		DEFINITION FIELD-ID: 215  COMPLEXITY: 48
-		SOURCE: ./TS_44.018_Rel12.src, 5035
+		SOURCE: ../../Encodix/TS44.018/TS_44.018_Rel12.src, 5035
 	-----------------------------------------------------------------*/
 	/* 007568 */ CSN1C_CHOICE_NODE(0,201),                /* (ID:8287:219938:220373) VBIT choice at 7568, node 1, jump to 7769 */
 	/* 007570 */ CSN1C_BIT_1,                             /* (ID:8291:220037:220042) */
@@ -41838,7 +41838,7 @@ static const unsigned char Program_RR_ProgramCode [] = {
 	/*-----------------------------------------------------------------
 		DEFINITION 'Priority_and_E_UTRAN_Parameters_Description_struct_37o'
 		DEFINITION FIELD-ID: 218  COMPLEXITY: 75
-		SOURCE: ./TS_44.018_Rel12.src, 5058
+		SOURCE: ../../Encodix/TS44.018/TS_44.018_Rel12.src, 5058
 	-----------------------------------------------------------------*/
 	/* 007777 */ CSN1C_CHOICE_NODE(0,214),                /* (ID:8409:221010:221833) VBIT choice at 7777, node 1, jump to 7991 */
 	/* 007779 */ CSN1C_BIT_1,                             /* (ID:8413:221111:221116) */
@@ -41960,7 +41960,7 @@ static const unsigned char Program_RR_ProgramCode [] = {
 	/*-----------------------------------------------------------------
 		DEFINITION 'SI10bis_Rest_Octets'
 		DEFINITION FIELD-ID: 222  COMPLEXITY: 35
-		SOURCE: ./TS_44.018_Rel12.src, 5277
+		SOURCE: ../../Encodix/TS44.018/TS_44.018_Rel12.src, 5277
 	-----------------------------------------------------------------*/
 	/* 007999 */ CSN1C_LABEL_A, CSN1C_VAL2(4164), CSN1C_VAL1(2), /* (ID:8634:226861:226894) Label=<SI10bis_Sequence> LabelId=638 */
 	/* 008003 */ CSN1C_LOOP_BEGIN_INFINITE, CSN1C_VAL3(92), /* (ID:8638:226896:227042) Infinite loop start, jump to 8049 */
@@ -41992,7 +41992,7 @@ static const unsigned char Program_RR_ProgramCode [] = {
 	/*-----------------------------------------------------------------
 		DEFINITION 'IndividualPriorities'
 		DEFINITION FIELD-ID: 224  COMPLEXITY: 54
-		SOURCE: ./TS_44.018_Rel12.src, 5324
+		SOURCE: ../../Encodix/TS44.018/TS_44.018_Rel12.src, 5324
 	-----------------------------------------------------------------*/
 	/* 008053 */ CSN1C_CHOICE_NODE(0,253),                /* (ID:8761:228382:229080) VBIT choice at 8053, node 1, jump to 8306 */
 	/* 008055 */ CSN1C_BIT_1,                             /* (ID:8765:228434:228474) */
@@ -42130,7 +42130,7 @@ static const unsigned char Program_RR_ProgramCode [] = {
 	/*-----------------------------------------------------------------
 		DEFINITION 'GPRS_Cell_Options_IE'
 		DEFINITION FIELD-ID: 259  COMPLEXITY: 61
-		SOURCE: ./TS_44.018_Rel12.src, 6008
+		SOURCE: ../../Encodix/TS44.018/TS_44.018_Rel12.src, 6008
 	-----------------------------------------------------------------*/
 	/* 008314 */ CSN1C_LABEL_A, CSN1C_VAL2(4264), CSN1C_VAL1(2), /* (ID:9902:250551:250737) Label=<NMO> LabelId=660 */
 	/* 008318 */ CSN1C_LABEL_A, CSN1C_VAL2(4271), CSN1C_VAL1(3), /* (ID:9906:250737:250759) Label=<T3168> LabelId=661 */
@@ -42985,7 +42985,7 @@ static const unsigned char Program_RR_ProgramCode [] = {
 	/*-----------------------------------------------------------------
 		DEFINITION 'GPRSBCastInfo'
 		DEFINITION FIELD-ID: 78  COMPLEXITY: 11
-		SOURCE: ./TS_44.018_Rel12.src, 2730
+		SOURCE: ../../Encodix/TS44.018/TS_44.018_Rel12.src, 2730
 	-----------------------------------------------------------------*/
 	/* 010085 */ CSN1C_LABEL_BEGIN, CSN1C_VAL2(10072),    /* (ID:2244:136701:136752) Label=<GPRS_Cell_Options> Terminal=<0> LabelId=798 */
 	/* 010088 */ CSN1C_GOSUB, CSN1C_VAL2(8314),           /* (ID:2247:136723:136748) Reference to 'GPRS_Cell_Options_IE' */
@@ -42998,7 +42998,7 @@ static const unsigned char Program_RR_ProgramCode [] = {
 	/*-----------------------------------------------------------------
 		DEFINITION 'NTNRestOctets'
 		DEFINITION FIELD-ID: 92  COMPLEXITY: 84
-		SOURCE: ./TS_44.018_Rel12.src, 3268
+		SOURCE: ../../Encodix/TS44.018/TS_44.018_Rel12.src, 3268
 	-----------------------------------------------------------------*/
 	/* 010106 */ CSN1C_CHOICE_NODE(0,9),                  /* (ID:3249:153427:153452) VBIT choice at 10106, node 1, jump to 10115 */
 	/* 010108 */ CSN1C_BIT_1,                             /* (ID:3253:153431:153433) */
@@ -43107,7 +43107,7 @@ static const unsigned char Program_RR_ProgramCode [] = {
 	/*-----------------------------------------------------------------
 		DEFINITION 'RRPktDownlinkAssi'
 		DEFINITION FIELD-ID: 115  COMPLEXITY: 291
-		SOURCE: ./TS_44.018_Rel12.src, 3742
+		SOURCE: ../../Encodix/TS44.018/TS_44.018_Rel12.src, 3742
 	-----------------------------------------------------------------*/
 	/* 010295 */ CSN1C_LABEL_A, CSN1C_VAL2(5078), CSN1C_VAL1(2), /* (ID:4889:170195:170220) Label=<MAC_MODE> LabelId=810 */
 	/* 010299 */ CSN1C_LABEL_A, CSN1C_VAL2(5081), CSN1C_VAL1(1), /* (ID:4893:170220:170245) Label=<RLC_MODE> LabelId=811 */
@@ -43400,7 +43400,7 @@ static const unsigned char Program_RR_ProgramCode [] = {
 	/*-----------------------------------------------------------------
 		DEFINITION 'RRPacketDownlinkAssignmentType2'
 		DEFINITION FIELD-ID: 120  COMPLEXITY: 334
-		SOURCE: ./TS_44.018_Rel12.src, 3837
+		SOURCE: ../../Encodix/TS44.018/TS_44.018_Rel12.src, 3837
 	-----------------------------------------------------------------*/
 	/* 010897 */ CSN1C_LABEL_A, CSN1C_VAL2(5308), CSN1C_VAL1(1), /* (ID:5273:173729:173754) Label=<RLC_MODE> LabelId=847 */
 	/* 010901 */ CSN1C_CHOICE_NODE(0,33),                 /* (ID:5277:173756:173874) VBIT choice at 10901, node 1, jump to 10934 */
@@ -43743,7 +43743,7 @@ static const unsigned char Program_RR_ProgramCode [] = {
 	/*-----------------------------------------------------------------
 		DEFINITION 'SI4_Rest_Octets'
 		DEFINITION FIELD-ID: 183  COMPLEXITY: 13
-		SOURCE: ./TS_44.018_Rel12.src, 4629
+		SOURCE: ../../Encodix/TS44.018/TS_44.018_Rel12.src, 4629
 	-----------------------------------------------------------------*/
 	/* 011607 */ CSN1C_CHOICE_NODE(0,38),                 /* (ID:7520:205667:205739) Truncable concatenation, entry 0, jump to 11645 */
 	/* 011609 */ CSN1C_GOSUB, CSN1C_VAL2(7229),           /* (ID:7521:205667:205691) Reference to 'SI4_Rest_Octets_O' */
@@ -43772,7 +43772,7 @@ static const unsigned char Program_RR_ProgramCode [] = {
 	/*-----------------------------------------------------------------
 		DEFINITION 'SI7_Rest_Octets'
 		DEFINITION FIELD-ID: 187  COMPLEXITY: 6
-		SOURCE: ./TS_44.018_Rel12.src, 4656
+		SOURCE: ../../Encodix/TS44.018/TS_44.018_Rel12.src, 4656
 	-----------------------------------------------------------------*/
 	/* 011648 */ CSN1C_CHOICE_NODE(0,10),                 /* (ID:7592:206490:206550) VBIT choice at 11648, node 1, jump to 11658 */
 	/* 011650 */ CSN1C_GOSUB, CSN1C_VAL2(7229),           /* (ID:7594:206490:206509) Reference to 'SI4_Rest_Octets_O' */
@@ -43786,7 +43786,7 @@ static const unsigned char Program_RR_ProgramCode [] = {
 	/*-----------------------------------------------------------------
 		DEFINITION 'SI8_Rest_Octets'
 		DEFINITION FIELD-ID: 188  COMPLEXITY: 6
-		SOURCE: ./TS_44.018_Rel12.src, 4658
+		SOURCE: ../../Encodix/TS44.018/TS_44.018_Rel12.src, 4658
 	-----------------------------------------------------------------*/
 	/* 011666 */ CSN1C_CHOICE_NODE(0,10),                 /* (ID:7598:206577:206637) VBIT choice at 11666, node 1, jump to 11676 */
 	/* 011668 */ CSN1C_GOSUB, CSN1C_VAL2(7229),           /* (ID:7600:206577:206596) Reference to 'SI4_Rest_Octets_O' */
@@ -43800,7 +43800,7 @@ static const unsigned char Program_RR_ProgramCode [] = {
 	/*-----------------------------------------------------------------
 		DEFINITION 'SI13RestOctets'
 		DEFINITION FIELD-ID: 199  COMPLEXITY: 121
-		SOURCE: ./TS_44.018_Rel12.src, 4757
+		SOURCE: ../../Encodix/TS44.018/TS_44.018_Rel12.src, 4757
 	-----------------------------------------------------------------*/
 	/* 011684 */ CSN1C_EXECUTE, CSN1C_VAL1(14),           /* (ID:7786:210296:210336) Execute custom action Program_RR_action0014 */
 	/* 011686 */ CSN1C_CHOICE_NODE(0,225),                /* (ID:7787:210344:213836) VBIT choice at 11686, node 1, jump to 11911 */
@@ -43922,7 +43922,7 @@ static const unsigned char Program_RR_ProgramCode [] = {
 	/*-----------------------------------------------------------------
 		DEFINITION 'SI16RestOctet'
 		DEFINITION FIELD-ID: 202  COMPLEXITY: 9
-		SOURCE: ./TS_44.018_Rel12.src, 4863
+		SOURCE: ../../Encodix/TS44.018/TS_44.018_Rel12.src, 4863
 	-----------------------------------------------------------------*/
 	/* 011934 */ CSN1C_CHOICE_NODE(0,36),                 /* (ID:7947:214348:214375) VBIT choice at 11934, node 1, jump to 11970 */
 	/* 011936 */ CSN1C_BIT_H,                             /* (ID:7951:214352:214354) */
@@ -43950,7 +43950,7 @@ static const unsigned char Program_RR_ProgramCode [] = {
 	/*-----------------------------------------------------------------
 		DEFINITION 'Frequency_Parameters_IE'
 		DEFINITION FIELD-ID: 277  COMPLEXITY: 35
-		SOURCE: ./TS_44.018_Rel12.src, 6332
+		SOURCE: ../../Encodix/TS44.018/TS_44.018_Rel12.src, 6332
 	-----------------------------------------------------------------*/
 	/* 011980 */ CSN1C_LABEL_A, CSN1C_VAL2(5613), CSN1C_VAL1(3), /* (ID:10466:260295:260315) Label=<TSC> LabelId=911 */
 	/* 011984 */ CSN1C_CHOICE_NODE(0,25),                 /* (ID:10470:260317:260521) VBIT choice at 11984, node 1, jump to 12009 */
@@ -44011,7 +44011,7 @@ static const unsigned char Program_RR_ProgramCode [] = {
 	/*-----------------------------------------------------------------
 		DEFINITION 'RRPacketUplinkAssignment'
 		DEFINITION FIELD-ID: 105  COMPLEXITY: 289
-		SOURCE: ./TS_44.018_Rel12.src, 3553
+		SOURCE: ../../Encodix/TS44.018/TS_44.018_Rel12.src, 3553
 	-----------------------------------------------------------------*/
 	/* 012115 */ CSN1C_LABEL_A, CSN1C_VAL2(6018), CSN1C_VAL1(2), /* (ID:3948:162533:162572) Label=<CHANNEL_CODING_COMMAND> LabelId=926 */
 	/* 012119 */ CSN1C_LABEL_A, CSN1C_VAL2(6021), CSN1C_VAL1(1), /* (ID:3952:162572:162614) Label=<TLLI_BLOCK_CHANNEL_CODING> LabelId=927 */
@@ -44880,7 +44880,7 @@ static const unsigned char Program_RR_ProgramCode [] = {
 	/*-----------------------------------------------------------------
 		DEFINITION 'SI2quaterRestOctets'
 		DEFINITION FIELD-ID: 133  COMPLEXITY: 298
-		SOURCE: ./TS_44.018_Rel12.src, 4203
+		SOURCE: ../../Encodix/TS44.018/TS_44.018_Rel12.src, 4203
 	-----------------------------------------------------------------*/
 	/* 013840 */ CSN1C_EXECUTE, CSN1C_VAL1(15),           /* (ID:5880:187135:187186) Execute custom action Program_RR_action0015 */
 	/* 013842 */ CSN1C_LABEL_A, CSN1C_VAL2(6712), CSN1C_VAL1(1), /* (ID:5881:187186:187211) Label=<BA_IND> LabelId=993 */
@@ -45780,7 +45780,7 @@ static const unsigned char Program_RR_ProgramCode [] = {
 	/*-----------------------------------------------------------------
 		DEFINITION 'SI23RestOctets'
 		DEFINITION FIELD-ID: 213  COMPLEXITY: 35
-		SOURCE: ./TS_44.018_Rel12.src, 5012
+		SOURCE: ../../Encodix/TS44.018/TS_44.018_Rel12.src, 5012
 	-----------------------------------------------------------------*/
 	/* 015650 */ CSN1C_EXECUTE, CSN1C_VAL1(0),            /* (ID:8215:218821:218859) Execute custom action Program_RR_action0000 */
 	/* 015652 */ CSN1C_LABEL_A, CSN1C_VAL2(7378), CSN1C_VAL1(1), /* (ID:8216:218859:218888) Label=<SI_23_BA_IND> LabelId=1135 */
@@ -45825,7 +45825,7 @@ static const unsigned char Program_RR_ProgramCode [] = {
 	/*-----------------------------------------------------------------
 		DEFINITION 'SI13altRestOctets'
 		DEFINITION FIELD-ID: 208  COMPLEXITY: 7
-		SOURCE: ./TS_44.018_Rel12.src, 4949
+		SOURCE: ../../Encodix/TS44.018/TS_44.018_Rel12.src, 4949
 	-----------------------------------------------------------------*/
 	/* 015758 */ CSN1C_LABEL_BEGIN, CSN1C_VAL2(14846),    /* (ID:8065:216741:216797) Label=<PBCCH_Description> Terminal=<0> LabelId=1146 */
 	/* 015761 */ CSN1C_LABEL_A, CSN1C_VAL2(7426), CSN1C_VAL1(4), /* (ID:8072:216862:216897) Label=<PSI1_REPEAT_PERIOD> LabelId=1147 */
@@ -45840,7 +45840,7 @@ static const unsigned char Program_RR_ProgramCode [] = {
 	/*-----------------------------------------------------------------
 		DEFINITION 'IPARestOctets'
 		DEFINITION FIELD-ID: 231  COMPLEXITY: 21
-		SOURCE: ./TS_44.018_Rel12.src, 5387
+		SOURCE: ../../Encodix/TS44.018/TS_44.018_Rel12.src, 5387
 	-----------------------------------------------------------------*/
 	/* 015788 */ CSN1C_CHOICE_NODE(0,70),                 /* (ID:8934:230784:230822) VBIT choice at 15788, node 1, jump to 15858 */
 	/* 015790 */ CSN1C_BIT_1,                             /* (ID:8938:230788:230790) */
@@ -45954,7 +45954,7 @@ static const unsigned char Program_RR_ProgramCode [] = {
 	/*-----------------------------------------------------------------
 		DEFINITION 'MBMS_Channel_Parameters_IE'
 		DEFINITION FIELD-ID: 263  COMPLEXITY: 29
-		SOURCE: ./TS_44.018_Rel12.src, 6148
+		SOURCE: ../../Encodix/TS44.018/TS_44.018_Rel12.src, 6148
 	-----------------------------------------------------------------*/
 	/* 016026 */ CSN1C_CHOICE_NODE(0,144),                /* (ID:10064:254933:255223) VBIT choice at 16026, node 1, jump to 16170 */
 	/* 016028 */ CSN1C_BIT_0,                             /* (ID:10066:254933:254966) */
@@ -46226,7 +46226,7 @@ static const unsigned char Program_RR_ProgramCode [] = {
 	/*-----------------------------------------------------------------
 		DEFINITION 'P1RestOctets'
 		DEFINITION FIELD-ID: 97  COMPLEXITY: 211
-		SOURCE: ./TS_44.018_Rel12.src, 3314
+		SOURCE: ../../Encodix/TS44.018/TS_44.018_Rel12.src, 3314
 	-----------------------------------------------------------------*/
 	/* 016539 */ CSN1C_CHOICE_NODE(0,485),                /* (ID:3381:154793:157165) Truncable concatenation, entry 0, jump to 17024 */
 	/* 016541 */ CSN1C_CHOICE_NODE(0,13),                 /* (ID:3382:154794:154838) VBIT choice at 16541, node 1, jump to 16554 */
@@ -46488,7 +46488,7 @@ static const unsigned char Program_RR_ProgramCode [] = {
 	/*-----------------------------------------------------------------
 		DEFINITION 'P2RestOctets'
 		DEFINITION FIELD-ID: 101  COMPLEXITY: 113
-		SOURCE: ./TS_44.018_Rel12.src, 3419
+		SOURCE: ../../Encodix/TS44.018/TS_44.018_Rel12.src, 3419
 	-----------------------------------------------------------------*/
 	/* 017025 */ CSN1C_CHOICE_NODE(0,9),                  /* (ID:3654:158597:158617) VBIT choice at 17025, node 1, jump to 17034 */
 	/* 017027 */ CSN1C_BIT_H,                             /* (ID:3658:158601:158603) */

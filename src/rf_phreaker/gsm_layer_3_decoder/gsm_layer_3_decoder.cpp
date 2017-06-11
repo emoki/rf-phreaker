@@ -2,24 +2,29 @@
 #include <iostream>
 #include <string>
 #include "rf_phreaker/gsm_layer_3_library/ed_lib.h"
+#include "rf_phreaker/gsm_layer_3_library/ed_c_dump_RR.h"
 #include "rf_phreaker/gsm_layer_3_library/bitencode.h"
 #include "rf_phreaker/gsm_layer_3_library/ed_c_recog_RR.h"
 #include "rf_phreaker/gsm_layer_3_library/RRPLENDownlink_RR.h"
+#include "rf_phreaker/gsm_layer_3_library/ed_dump_file.h"
 #include "rf_phreaker/gsm_layer_3_decoder/gsm_layer_3_decoder.h"
 #include "rf_phreaker/gsm_layer_3_library/gsm_bit_stream.h"
 #include "rf_phreaker/gsm_layer_3_decoder/gsm_layer_3_utility.h"
 #include "rf_phreaker/common/common_utility.h"
+#include "rf_phreaker/qt_specific/file_io.h"
 
 using namespace layer_3_information;
 
 gsm_layer_3_decoder::gsm_layer_3_decoder()
-	: debug_(false) {}
+	: debug_(false)
+	, store_text_description_(false) {}
 
 gsm_layer_3_decoder::~gsm_layer_3_decoder() {}
 
 int32_t gsm_layer_3_decoder::decode_bcch_message(const uint8_t *raw_bits, uint32_t num_of_bytes, uint32_t unused_bits, layer_3_information::gsm_layer_3_message_aggregate &message)
 {
 	// See 3GPP spec 44.018 section 3.2.2 (Network side - System Information Broadcasting) to see when different sibs are scheduled.
+	text_description_.clear();
 	int32_t status = 0;
 	try
 	{
@@ -311,6 +316,19 @@ int32_t gsm_layer_3_decoder::decode_bcch_message(const uint8_t *raw_bits, uint32
 		default:
 			{ data.Type; };
 		}	
+
+		if(store_text_description_) {
+			rf_phreaker::temp_file file;
+			auto file_descriptor = file.get_file_descriptor();
+			if(file_descriptor != nullptr) {
+				TEDOStreamFile tedos;
+				TEDOStreamFile_Construct_Existing(&tedos, file_descriptor);
+				Dump_RRPLENDownlink(&tedos.Base, &data);
+				TEDOStreamFile_Destruct(&tedos);
+				text_description_ = file.read_entire_file();
+			}
+		}
+		
 		FREE_TRRPLENDownlink_Data(&data);
 	}
 	catch(const std::exception &err)
@@ -326,6 +344,10 @@ void gsm_layer_3_decoder::update_message_decode_list(layer_3_information::gsm_bc
 //	gsm_layer_3_container_->update_message_container_list(message_t);
 }
 
+std::vector<std::string> gsm_layer_3_decoder::get_text_description() {
+	return text_description_.empty() ? std::vector<std::string>{} : std::vector<std::string>{text_description_};
+}
 
-
-	
+void gsm_layer_3_decoder::store_text_description(bool store_text) {
+	store_text_description_ = store_text;
+}

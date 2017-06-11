@@ -46067,5 +46067,3 @@ int SETITEMS_c_BitmapTypeReporting_BitmapReporting (c_BitmapTypeReporting_Bitmap
 void FREE_c_BitmapTypeReporting_BitmapReporting_data (c_BitmapTypeReporting_BitmapReporting_data* sp) {
 ED_WARNING_REMOVER(sp);
 
-}
-

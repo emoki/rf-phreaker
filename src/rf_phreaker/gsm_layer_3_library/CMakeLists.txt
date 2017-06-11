@@ -41,6 +41,8 @@ set (gsm_layer_3_library_SRCS
 	ed_access_class.h
 	ed_access_data.h
 	ed_access_util.h
+	ed_c_dump_RR.c
+	ed_c_dump_RR.h
 	ed_data.h
 	ed_dump.c
 	ed_dump.h

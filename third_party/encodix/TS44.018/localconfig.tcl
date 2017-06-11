@@ -1,6 +1,8 @@
 # Available for local configuration
 
 set ED_DYNAMIC_DEFAULT 1
+set generateDump 1
+set generateAccess 1
 
 set IEEE80216GenericTLVTypeName GenericTLV_RR
 set ED_CSN1_PROGRAM_NAME GROUPNAMEProgram_RR

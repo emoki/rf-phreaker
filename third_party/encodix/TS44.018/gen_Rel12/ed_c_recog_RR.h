@@ -335,6 +335,9 @@ int SetDecode_RRDownlink (const char* buffer, TRRDownlink_Data* data, int bitLen
 	int Decode_RRDownlink (const char* buffer, int len, TRRDownlink_Data* data);
 #endif
 
+/* Set encode function */
+int SetEncode_RRDownlink (char* buffer, ED_EXLONG bitOffset, TRRDownlink_Data* data);
+
 
 /*-------------------------------------------------------------------------------
 	Returns number of consumed bits (>=0) if recognized. <0 otherwise.
@@ -347,6 +350,9 @@ int SetDecode_RRUplink (const char* buffer, TRRUplink_Data* data, int bitLen);
 #ifndef ED_EXCLUDE_1_0_33_COMPATIBILITY
 	int Decode_RRUplink (const char* buffer, int len, TRRUplink_Data* data);
 #endif
+
+/* Set encode function */
+int SetEncode_RRUplink (char* buffer, ED_EXLONG bitOffset, TRRUplink_Data* data);
 
 
 /*-------------------------------------------------------------------------------
@@ -361,6 +367,9 @@ int SetDecode_RRPLENDownlink (const char* buffer, TRRPLENDownlink_Data* data, in
 	int Decode_RRPLENDownlink (const char* buffer, int len, TRRPLENDownlink_Data* data);
 #endif
 
+/* Set encode function */
+int SetEncode_RRPLENDownlink (char* buffer, ED_EXLONG bitOffset, TRRPLENDownlink_Data* data);
+
 
 /*-------------------------------------------------------------------------------
 	Returns number of consumed bits (>=0) if recognized. <0 otherwise.
@@ -373,6 +382,9 @@ int SetDecode_RRShortPD (const char* buffer, TRRShortPD_Data* data, int bitLen);
 #ifndef ED_EXCLUDE_1_0_33_COMPATIBILITY
 	int Decode_RRShortPD (const char* buffer, int len, TRRShortPD_Data* data);
 #endif
+
+/* Set encode function */
+int SetEncode_RRShortPD (char* buffer, ED_EXLONG bitOffset, TRRShortPD_Data* data);
 
 #ifdef __cplusplus
 	}

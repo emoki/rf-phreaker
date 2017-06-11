@@ -1607,6 +1607,126 @@ int SetDecode_RRDownlink (const char* buffer, TRRDownlink_Data* data, int bitLen
 	}
 #endif
 
+/* Set encoder */
+int SetEncode_RRDownlink (char* buffer, ED_EXLONG bitOffset, TRRDownlink_Data* data)
+{
+	int retLen = ED_UNKNOWN_MESSAGE;
+	ED_WARNING_REMOVER(bitOffset);
+	
+	switch (data->Type) {
+		case ID_RRDownlink_ADDITIONAL_ASSIGNMENT_DN: {
+			retLen = ENCODE_c_ADDITIONAL_ASSIGNMENT_DN (buffer, 0, data->Data.fld_c_ADDITIONAL_ASSIGNMENT_DN);
+			break;
+		}
+		case ID_RRDownlink_ASSIGNMENT_COMMAND_DN: {
+			retLen = ENCODE_c_ASSIGNMENT_COMMAND_DN (buffer, 0, data->Data.fld_c_ASSIGNMENT_COMMAND_DN);
+			break;
+		}
+		case ID_RRDownlink_CHANNEL_MODE_MODIFY_DN: {
+			retLen = ENCODE_c_CHANNEL_MODE_MODIFY_DN (buffer, 0, data->Data.fld_c_CHANNEL_MODE_MODIFY_DN);
+			break;
+		}
+		case ID_RRDownlink_CHANNEL_RELEASE_DN: {
+			retLen = ENCODE_c_CHANNEL_RELEASE_DN (buffer, 0, data->Data.fld_c_CHANNEL_RELEASE_DN);
+			break;
+		}
+		case ID_RRDownlink_CIPHERING_MODE_COMMAND_DN: {
+			retLen = ENCODE_c_CIPHERING_MODE_COMMAND_DN (buffer, 0, data->Data.fld_c_CIPHERING_MODE_COMMAND_DN);
+			break;
+		}
+		case ID_RRDownlink_CLASSMARK_ENQUIRY_DN: {
+			retLen = ENCODE_c_CLASSMARK_ENQUIRY_DN (buffer, 0, data->Data.fld_c_CLASSMARK_ENQUIRY_DN);
+			break;
+		}
+		case ID_RRDownlink_CONFIGURATION_CHANGE_COMMAND_DN: {
+			retLen = ENCODE_c_CONFIGURATION_CHANGE_COMMAND_DN (buffer, 0, data->Data.fld_c_CONFIGURATION_CHANGE_COMMAND_DN);
+			break;
+		}
+		case ID_RRDownlink_DTM_ASSIGNMENT_COMMAND_DN: {
+			retLen = ENCODE_c_DTM_ASSIGNMENT_COMMAND_DN (buffer, 0, data->Data.fld_c_DTM_ASSIGNMENT_COMMAND_DN);
+			break;
+		}
+		case ID_RRDownlink_DTM_INFORMATION_DN: {
+			retLen = ENCODE_c_DTM_INFORMATION_DN (buffer, 0, data->Data.fld_c_DTM_INFORMATION_DN);
+			break;
+		}
+		case ID_RRDownlink_DTM_REJECT_DN: {
+			retLen = ENCODE_c_DTM_REJECT_DN (buffer, 0, data->Data.fld_c_DTM_REJECT_DN);
+			break;
+		}
+		case ID_RRDownlink_FREQUENCY_REDEFINITION_DN: {
+			retLen = ENCODE_c_FREQUENCY_REDEFINITION_DN (buffer, 0, data->Data.fld_c_FREQUENCY_REDEFINITION_DN);
+			break;
+		}
+		case ID_RRDownlink_PDCH_ASSIGNMENT_COMMAND_DN: {
+			retLen = ENCODE_c_PDCH_ASSIGNMENT_COMMAND_DN (buffer, 0, data->Data.fld_c_PDCH_ASSIGNMENT_COMMAND_DN);
+			break;
+		}
+		case ID_RRDownlink_HANDOVER_COMMAND_DN: {
+			retLen = ENCODE_c_HANDOVER_COMMAND_DN (buffer, 0, data->Data.fld_c_HANDOVER_COMMAND_DN);
+			break;
+		}
+		case ID_RRDownlink_INTER_SYSTEM_TO_UTRAN_HANDOVER_COMMAND_DN: {
+			retLen = ENCODE_c_INTER_SYSTEM_TO_UTRAN_HANDOVER_COMMAND_DN (buffer, 0, data->Data.fld_c_INTER_SYSTEM_TO_UTRAN_HANDOVER_COMMAND_DN);
+			break;
+		}
+		case ID_RRDownlink_INTER_SYSTEM_TO_CDMA2000_HANDOVER_COMMAND_DN: {
+			retLen = ENCODE_c_INTER_SYSTEM_TO_CDMA2000_HANDOVER_COMMAND_DN (buffer, 0, data->Data.fld_c_INTER_SYSTEM_TO_CDMA2000_HANDOVER_COMMAND_DN);
+			break;
+		}
+		case ID_RRDownlink_HANDOVER_TO_GERAN_Iu_MODE_COMMAND_DN: {
+			retLen = ENCODE_c_HANDOVER_TO_GERAN_Iu_MODE_COMMAND_DN (buffer, 0, data->Data.fld_c_HANDOVER_TO_GERAN_Iu_MODE_COMMAND_DN);
+			break;
+		}
+		case ID_RRDownlink_INTER_SYSTEM_TO_EUTRAN_HANDOVER_COMMAND_DN: {
+			retLen = ENCODE_c_INTER_SYSTEM_TO_EUTRAN_HANDOVER_COMMAND_DN (buffer, 0, data->Data.fld_c_INTER_SYSTEM_TO_EUTRAN_HANDOVER_COMMAND_DN);
+			break;
+		}
+		case ID_RRDownlink_RR_CELL_CHANGE_ORDER_DN: {
+			retLen = ENCODE_c_RR_CELL_CHANGE_ORDER_DN (buffer, 0, data->Data.fld_c_RR_CELL_CHANGE_ORDER_DN);
+			break;
+		}
+		case ID_RRDownlink_PACKET_ASSIGNMENT_DN: {
+			retLen = ENCODE_c_PACKET_ASSIGNMENT_DN (buffer, 0, data->Data.fld_c_PACKET_ASSIGNMENT_DN);
+			break;
+		}
+		case ID_RRDownlink_PACKET_NOTIFICATION_DN: {
+			retLen = ENCODE_c_PACKET_NOTIFICATION_DN (buffer, 0, data->Data.fld_c_PACKET_NOTIFICATION_DN);
+			break;
+		}
+		case ID_RRDownlink_PARTIAL_RELEASE_DN: {
+			retLen = ENCODE_c_PARTIAL_RELEASE_DN (buffer, 0, data->Data.fld_c_PARTIAL_RELEASE_DN);
+			break;
+		}
+		case ID_RRDownlink_PHYSICAL_INFORMATION_DN: {
+			retLen = ENCODE_c_PHYSICAL_INFORMATION_DN (buffer, 0, data->Data.fld_c_PHYSICAL_INFORMATION_DN);
+			break;
+		}
+		case ID_RRDownlink_RR_STATUS: {
+			retLen = ENCODE_c_RR_STATUS (buffer, 0, data->Data.fld_c_RR_STATUS);
+			break;
+		}
+		case ID_RRDownlink_UPLINK_BUSY_DN: {
+			retLen = ENCODE_c_UPLINK_BUSY_DN (buffer, 0, data->Data.fld_c_UPLINK_BUSY_DN);
+			break;
+		}
+		case ID_RRDownlink_UPLINK_RELEASE: {
+			retLen = ENCODE_c_UPLINK_RELEASE (buffer, 0, data->Data.fld_c_UPLINK_RELEASE);
+			break;
+		}
+		case ID_RRDownlink_VGCS_DNLINK_GRANT_DN: {
+			retLen = ENCODE_c_VGCS_DNLINK_GRANT_DN (buffer, 0, data->Data.fld_c_VGCS_DNLINK_GRANT_DN);
+			break;
+		}
+		case ID_RRDownlink_APPLICATION_INFORMATION: {
+			retLen = ENCODE_c_APPLICATION_INFORMATION (buffer, 0, data->Data.fld_c_APPLICATION_INFORMATION);
+			break;
+		}
+
+		default:;
+	}
+	return retLen;
+}
 #ifdef ED_REVERSED_INTEGER
 #error ED_REVERSED_INTEGER is defined!
 #endif
@@ -1886,6 +2006,134 @@ int SetDecode_RRUplink (const char* buffer, TRRUplink_Data* data, int bitLen)
 	}
 #endif
 
+/* Set encoder */
+int SetEncode_RRUplink (char* buffer, ED_EXLONG bitOffset, TRRUplink_Data* data)
+{
+	int retLen = ED_UNKNOWN_MESSAGE;
+	ED_WARNING_REMOVER(bitOffset);
+	
+	switch (data->Type) {
+		case ID_RRUplink_ASSIGNMENT_COMPLETE_UP: {
+			retLen = ENCODE_c_ASSIGNMENT_COMPLETE_UP (buffer, 0, data->Data.fld_c_ASSIGNMENT_COMPLETE_UP);
+			break;
+		}
+		case ID_RRUplink_ASSIGNMENT_FAILURE_UP: {
+			retLen = ENCODE_c_ASSIGNMENT_FAILURE_UP (buffer, 0, data->Data.fld_c_ASSIGNMENT_FAILURE_UP);
+			break;
+		}
+		case ID_RRUplink_CHANNEL_MODE_MODIFY_ACKNOWLEDGE_UP: {
+			retLen = ENCODE_c_CHANNEL_MODE_MODIFY_ACKNOWLEDGE_UP (buffer, 0, data->Data.fld_c_CHANNEL_MODE_MODIFY_ACKNOWLEDGE_UP);
+			break;
+		}
+		case ID_RRUplink_CIPHERING_MODE_COMPLETE_UP: {
+			retLen = ENCODE_c_CIPHERING_MODE_COMPLETE_UP (buffer, 0, data->Data.fld_c_CIPHERING_MODE_COMPLETE_UP);
+			break;
+		}
+		case ID_RRUplink_CLASSMARK_CHANGE_UP: {
+			retLen = ENCODE_c_CLASSMARK_CHANGE_UP (buffer, 0, data->Data.fld_c_CLASSMARK_CHANGE_UP);
+			break;
+		}
+		case ID_RRUplink_UTRAN_CLASSMARK_CHANGE_UP: {
+			retLen = ENCODE_c_UTRAN_CLASSMARK_CHANGE_UP (buffer, 0, data->Data.fld_c_UTRAN_CLASSMARK_CHANGE_UP);
+			break;
+		}
+		case ID_RRUplink_CDMA2000_CLASSMARK_CHANGE_UP: {
+			retLen = ENCODE_c_CDMA2000_CLASSMARK_CHANGE_UP (buffer, 0, data->Data.fld_c_CDMA2000_CLASSMARK_CHANGE_UP);
+			break;
+		}
+		case ID_RRUplink_GERAN_IU_MODE_CLASSMARK_CHANGE_UP: {
+			retLen = ENCODE_c_GERAN_IU_MODE_CLASSMARK_CHANGE_UP (buffer, 0, data->Data.fld_c_GERAN_IU_MODE_CLASSMARK_CHANGE_UP);
+			break;
+		}
+		case ID_RRUplink_CONFIGURATION_CHANGE_ACKNOWLEDGE_UP: {
+			retLen = ENCODE_c_CONFIGURATION_CHANGE_ACKNOWLEDGE_UP (buffer, 0, data->Data.fld_c_CONFIGURATION_CHANGE_ACKNOWLEDGE_UP);
+			break;
+		}
+		case ID_RRUplink_CONFIGURATION_CHANGE_REJECT_UP: {
+			retLen = ENCODE_c_CONFIGURATION_CHANGE_REJECT_UP (buffer, 0, data->Data.fld_c_CONFIGURATION_CHANGE_REJECT_UP);
+			break;
+		}
+		case ID_RRUplink_DTM_ASSIGNMENT_COMMAND_UP: {
+			retLen = ENCODE_c_DTM_ASSIGNMENT_COMMAND_UP (buffer, 0, data->Data.fld_c_DTM_ASSIGNMENT_COMMAND_UP);
+			break;
+		}
+		case ID_RRUplink_DTM_ASSIGNMENT_FAILURE_UP: {
+			retLen = ENCODE_c_DTM_ASSIGNMENT_FAILURE_UP (buffer, 0, data->Data.fld_c_DTM_ASSIGNMENT_FAILURE_UP);
+			break;
+		}
+		case ID_RRUplink_DTM_REQUEST_UP: {
+			retLen = ENCODE_c_DTM_REQUEST_UP (buffer, 0, data->Data.fld_c_DTM_REQUEST_UP);
+			break;
+		}
+		case ID_RRUplink_GPRS_SUSPENSION_REQUEST_UP: {
+			retLen = ENCODE_c_GPRS_SUSPENSION_REQUEST_UP (buffer, 0, data->Data.fld_c_GPRS_SUSPENSION_REQUEST_UP);
+			break;
+		}
+		case ID_RRUplink_HANDOVER_COMPLETE_UP: {
+			retLen = ENCODE_c_HANDOVER_COMPLETE_UP (buffer, 0, data->Data.fld_c_HANDOVER_COMPLETE_UP);
+			break;
+		}
+		case ID_RRUplink_HANDOVER_FAILURE_UP: {
+			retLen = ENCODE_c_HANDOVER_FAILURE_UP (buffer, 0, data->Data.fld_c_HANDOVER_FAILURE_UP);
+			break;
+		}
+		case ID_RRUplink_MEASUREMENT_REPORT_UP: {
+			retLen = ENCODE_c_MEASUREMENT_REPORT_UP (buffer, 0, data->Data.fld_c_MEASUREMENT_REPORT_UP);
+			break;
+		}
+		case ID_RRUplink_NOTIFICATION_RESPONSE_UP: {
+			retLen = ENCODE_c_NOTIFICATION_RESPONSE_UP (buffer, 0, data->Data.fld_c_NOTIFICATION_RESPONSE_UP);
+			break;
+		}
+		case ID_RRUplink_PAGING_RESPONSE_UP: {
+			retLen = ENCODE_c_PAGING_RESPONSE_UP (buffer, 0, data->Data.fld_c_PAGING_RESPONSE_UP);
+			break;
+		}
+		case ID_RRUplink_PARTIAL_RELEASE_COMPLETE_UP: {
+			retLen = ENCODE_c_PARTIAL_RELEASE_COMPLETE_UP (buffer, 0, data->Data.fld_c_PARTIAL_RELEASE_COMPLETE_UP);
+			break;
+		}
+		case ID_RRUplink_RR_INITIALISATION_REQUEST_UP: {
+			retLen = ENCODE_c_RR_INITIALISATION_REQUEST_UP (buffer, 0, data->Data.fld_c_RR_INITIALISATION_REQUEST_UP);
+			break;
+		}
+		case ID_RRUplink_RR_STATUS: {
+			retLen = ENCODE_c_RR_STATUS (buffer, 0, data->Data.fld_c_RR_STATUS);
+			break;
+		}
+		case ID_RRUplink_TALKER_INDICATION_UP: {
+			retLen = ENCODE_c_TALKER_INDICATION_UP (buffer, 0, data->Data.fld_c_TALKER_INDICATION_UP);
+			break;
+		}
+		case ID_RRUplink_PRIORITY_DNLINK_REQUEST: {
+			retLen = ENCODE_c_PRIORITY_DNLINK_REQUEST (buffer, 0, data->Data.fld_c_PRIORITY_DNLINK_REQUEST);
+			break;
+		}
+		case ID_RRUplink_DATA_INDICATION: {
+			retLen = ENCODE_c_DATA_INDICATION (buffer, 0, data->Data.fld_c_DATA_INDICATION);
+			break;
+		}
+		case ID_RRUplink_DATA_INDICATION_2: {
+			retLen = ENCODE_c_DATA_INDICATION_2 (buffer, 0, data->Data.fld_c_DATA_INDICATION_2);
+			break;
+		}
+		case ID_RRUplink_UPLINK_RELEASE: {
+			retLen = ENCODE_c_UPLINK_RELEASE (buffer, 0, data->Data.fld_c_UPLINK_RELEASE);
+			break;
+		}
+		case ID_RRUplink_EXTENDED_MEASUREMENT_REPORT_UP: {
+			retLen = ENCODE_c_EXTENDED_MEASUREMENT_REPORT_UP (buffer, 0, data->Data.fld_c_EXTENDED_MEASUREMENT_REPORT_UP);
+			break;
+		}
+		case ID_RRUplink_APPLICATION_INFORMATION: {
+			retLen = ENCODE_c_APPLICATION_INFORMATION (buffer, 0, data->Data.fld_c_APPLICATION_INFORMATION);
+			break;
+		}
+
+		default:;
+	}
+	return retLen;
+}
 #ifdef ED_REVERSED_INTEGER
 #error ED_REVERSED_INTEGER is defined!
 #endif
@@ -2213,6 +2461,158 @@ int SetDecode_RRPLENDownlink (const char* buffer, TRRPLENDownlink_Data* data, in
 	}
 #endif
 
+/* Set encoder */
+int SetEncode_RRPLENDownlink (char* buffer, ED_EXLONG bitOffset, TRRPLENDownlink_Data* data)
+{
+	int retLen = ED_UNKNOWN_MESSAGE;
+	ED_WARNING_REMOVER(bitOffset);
+	
+	switch (data->Type) {
+		case ID_RRPLENDownlink_IMMEDIATE_ASSIGNMENT_DN: {
+			retLen = ENCODE_c_IMMEDIATE_ASSIGNMENT_DN (buffer, 0, data->Data.fld_c_IMMEDIATE_ASSIGNMENT_DN);
+			break;
+		}
+		case ID_RRPLENDownlink_IMMEDIATE_PACKET_ASSIGNMENT_DN: {
+			retLen = ENCODE_c_IMMEDIATE_PACKET_ASSIGNMENT_DN (buffer, 0, data->Data.fld_c_IMMEDIATE_PACKET_ASSIGNMENT_DN);
+			break;
+		}
+		case ID_RRPLENDownlink_IMMEDIATE_ASSIGNMENT_EXTENDED_DN: {
+			retLen = ENCODE_c_IMMEDIATE_ASSIGNMENT_EXTENDED_DN (buffer, 0, data->Data.fld_c_IMMEDIATE_ASSIGNMENT_EXTENDED_DN);
+			break;
+		}
+		case ID_RRPLENDownlink_IMMEDIATE_ASSIGNMENT_REJECT_DN: {
+			retLen = ENCODE_c_IMMEDIATE_ASSIGNMENT_REJECT_DN (buffer, 0, data->Data.fld_c_IMMEDIATE_ASSIGNMENT_REJECT_DN);
+			break;
+		}
+		case ID_RRPLENDownlink_NOTIFICATION_NCH_DN: {
+			retLen = ENCODE_c_NOTIFICATION_NCH_DN (buffer, 0, data->Data.fld_c_NOTIFICATION_NCH_DN);
+			break;
+		}
+		case ID_RRPLENDownlink_PAGING_REQUEST_TYPE_1_DN: {
+			retLen = ENCODE_c_PAGING_REQUEST_TYPE_1_DN (buffer, 0, data->Data.fld_c_PAGING_REQUEST_TYPE_1_DN);
+			break;
+		}
+		case ID_RRPLENDownlink_PAGING_REQUEST_TYPE_2_DN: {
+			retLen = ENCODE_c_PAGING_REQUEST_TYPE_2_DN (buffer, 0, data->Data.fld_c_PAGING_REQUEST_TYPE_2_DN);
+			break;
+		}
+		case ID_RRPLENDownlink_PAGING_REQUEST_TYPE_3_DN: {
+			retLen = ENCODE_c_PAGING_REQUEST_TYPE_3_DN (buffer, 0, data->Data.fld_c_PAGING_REQUEST_TYPE_3_DN);
+			break;
+		}
+		case ID_RRPLENDownlink_SYSTEM_INFORMATION_TYPE_1_DN: {
+			retLen = ENCODE_c_SYSTEM_INFORMATION_TYPE_1_DN (buffer, 0, data->Data.fld_c_SYSTEM_INFORMATION_TYPE_1_DN);
+			break;
+		}
+		case ID_RRPLENDownlink_SYSTEM_INFORMATION_TYPE_2_DN: {
+			retLen = ENCODE_c_SYSTEM_INFORMATION_TYPE_2_DN (buffer, 0, data->Data.fld_c_SYSTEM_INFORMATION_TYPE_2_DN);
+			break;
+		}
+		case ID_RRPLENDownlink_SYSTEM_INFORMATION_TYPE_2BIS_DN: {
+			retLen = ENCODE_c_SYSTEM_INFORMATION_TYPE_2BIS_DN (buffer, 0, data->Data.fld_c_SYSTEM_INFORMATION_TYPE_2BIS_DN);
+			break;
+		}
+		case ID_RRPLENDownlink_SYSTEM_INFORMATION_TYPE_2TER_DN: {
+			retLen = ENCODE_c_SYSTEM_INFORMATION_TYPE_2TER_DN (buffer, 0, data->Data.fld_c_SYSTEM_INFORMATION_TYPE_2TER_DN);
+			break;
+		}
+		case ID_RRPLENDownlink_SYSTEM_INFORMATION_TYPE_2QUATER_DN: {
+			retLen = ENCODE_c_SYSTEM_INFORMATION_TYPE_2QUATER_DN (buffer, 0, data->Data.fld_c_SYSTEM_INFORMATION_TYPE_2QUATER_DN);
+			break;
+		}
+		case ID_RRPLENDownlink_SYSTEM_INFORMATION_TYPE_3_DN: {
+			retLen = ENCODE_c_SYSTEM_INFORMATION_TYPE_3_DN (buffer, 0, data->Data.fld_c_SYSTEM_INFORMATION_TYPE_3_DN);
+			break;
+		}
+		case ID_RRPLENDownlink_SYSTEM_INFORMATION_TYPE_4_DN: {
+			retLen = ENCODE_c_SYSTEM_INFORMATION_TYPE_4_DN (buffer, 0, data->Data.fld_c_SYSTEM_INFORMATION_TYPE_4_DN);
+			break;
+		}
+		case ID_RRPLENDownlink_SYSTEM_INFORMATION_TYPE_5_DN: {
+			retLen = ENCODE_c_SYSTEM_INFORMATION_TYPE_5_DN (buffer, 0, data->Data.fld_c_SYSTEM_INFORMATION_TYPE_5_DN);
+			break;
+		}
+		case ID_RRPLENDownlink_SYSTEM_INFORMATION_TYPE_5BIS_DN: {
+			retLen = ENCODE_c_SYSTEM_INFORMATION_TYPE_5BIS_DN (buffer, 0, data->Data.fld_c_SYSTEM_INFORMATION_TYPE_5BIS_DN);
+			break;
+		}
+		case ID_RRPLENDownlink_SYSTEM_INFORMATION_TYPE_5TER_DN: {
+			retLen = ENCODE_c_SYSTEM_INFORMATION_TYPE_5TER_DN (buffer, 0, data->Data.fld_c_SYSTEM_INFORMATION_TYPE_5TER_DN);
+			break;
+		}
+		case ID_RRPLENDownlink_SYSTEM_INFORMATION_TYPE_6_DN: {
+			retLen = ENCODE_c_SYSTEM_INFORMATION_TYPE_6_DN (buffer, 0, data->Data.fld_c_SYSTEM_INFORMATION_TYPE_6_DN);
+			break;
+		}
+		case ID_RRPLENDownlink_SYSTEM_INFORMATION_TYPE_7_DN: {
+			retLen = ENCODE_c_SYSTEM_INFORMATION_TYPE_7_DN (buffer, 0, data->Data.fld_c_SYSTEM_INFORMATION_TYPE_7_DN);
+			break;
+		}
+		case ID_RRPLENDownlink_SYSTEM_INFORMATION_TYPE_8_DN: {
+			retLen = ENCODE_c_SYSTEM_INFORMATION_TYPE_8_DN (buffer, 0, data->Data.fld_c_SYSTEM_INFORMATION_TYPE_8_DN);
+			break;
+		}
+		case ID_RRPLENDownlink_SYSTEM_INFORMATION_TYPE_9_DN: {
+			retLen = ENCODE_c_SYSTEM_INFORMATION_TYPE_9_DN (buffer, 0, data->Data.fld_c_SYSTEM_INFORMATION_TYPE_9_DN);
+			break;
+		}
+		case ID_RRPLENDownlink_SYSTEM_INFORMATION_TYPE_13_DN: {
+			retLen = ENCODE_c_SYSTEM_INFORMATION_TYPE_13_DN (buffer, 0, data->Data.fld_c_SYSTEM_INFORMATION_TYPE_13_DN);
+			break;
+		}
+		case ID_RRPLENDownlink_SYSTEM_INFORMATION_TYPE_16_DN: {
+			retLen = ENCODE_c_SYSTEM_INFORMATION_TYPE_16_DN (buffer, 0, data->Data.fld_c_SYSTEM_INFORMATION_TYPE_16_DN);
+			break;
+		}
+		case ID_RRPLENDownlink_SYSTEM_INFORMATION_TYPE_17_DN: {
+			retLen = ENCODE_c_SYSTEM_INFORMATION_TYPE_17_DN (buffer, 0, data->Data.fld_c_SYSTEM_INFORMATION_TYPE_17_DN);
+			break;
+		}
+		case ID_RRPLENDownlink_SYSTEM_INFORMATION_TYPE_19_DN: {
+			retLen = ENCODE_c_SYSTEM_INFORMATION_TYPE_19_DN (buffer, 0, data->Data.fld_c_SYSTEM_INFORMATION_TYPE_19_DN);
+			break;
+		}
+		case ID_RRPLENDownlink_SYSTEM_INFORMATION_TYPE_18_DN: {
+			retLen = ENCODE_c_SYSTEM_INFORMATION_TYPE_18_DN (buffer, 0, data->Data.fld_c_SYSTEM_INFORMATION_TYPE_18_DN);
+			break;
+		}
+		case ID_RRPLENDownlink_SYSTEM_INFORMATION_TYPE_20_DN: {
+			retLen = ENCODE_c_SYSTEM_INFORMATION_TYPE_20_DN (buffer, 0, data->Data.fld_c_SYSTEM_INFORMATION_TYPE_20_DN);
+			break;
+		}
+		case ID_RRPLENDownlink_SYSTEM_INFORMATION_TYPE_14_DN: {
+			retLen = ENCODE_c_SYSTEM_INFORMATION_TYPE_14_DN (buffer, 0, data->Data.fld_c_SYSTEM_INFORMATION_TYPE_14_DN);
+			break;
+		}
+		case ID_RRPLENDownlink_SYSTEM_INFORMATION_TYPE_15_DN: {
+			retLen = ENCODE_c_SYSTEM_INFORMATION_TYPE_15_DN (buffer, 0, data->Data.fld_c_SYSTEM_INFORMATION_TYPE_15_DN);
+			break;
+		}
+		case ID_RRPLENDownlink_SYSTEM_INFORMATION_TYPE_13alt_DN: {
+			retLen = ENCODE_c_SYSTEM_INFORMATION_TYPE_13alt_DN (buffer, 0, data->Data.fld_c_SYSTEM_INFORMATION_TYPE_13alt_DN);
+			break;
+		}
+		case ID_RRPLENDownlink_SYSTEM_INFORMATION_TYPE_21_DN: {
+			retLen = ENCODE_c_SYSTEM_INFORMATION_TYPE_21_DN (buffer, 0, data->Data.fld_c_SYSTEM_INFORMATION_TYPE_21_DN);
+			break;
+		}
+		case ID_RRPLENDownlink_SYSTEM_INFORMATION_TYPE_22_DN: {
+			retLen = ENCODE_c_SYSTEM_INFORMATION_TYPE_22_DN (buffer, 0, data->Data.fld_c_SYSTEM_INFORMATION_TYPE_22_DN);
+			break;
+		}
+		case ID_RRPLENDownlink_SYSTEM_INFORMATION_TYPE_23_DN: {
+			retLen = ENCODE_c_SYSTEM_INFORMATION_TYPE_23_DN (buffer, 0, data->Data.fld_c_SYSTEM_INFORMATION_TYPE_23_DN);
+			break;
+		}
+		case ID_RRPLENDownlink_EXTENDED_MEASUREMENT_ORDER_DN: {
+			retLen = ENCODE_c_EXTENDED_MEASUREMENT_ORDER_DN (buffer, 0, data->Data.fld_c_EXTENDED_MEASUREMENT_ORDER_DN);
+			break;
+		}
+
+		default:;
+	}
+	return retLen;
+}
 #ifdef ED_REVERSED_INTEGER
 #error ED_REVERSED_INTEGER is defined!
 #endif
@@ -2362,4 +2762,68 @@ int SetDecode_RRShortPD (const char* buffer, TRRShortPD_Data* data, int bitLen)
 	}
 #endif
 
+/* Set encoder */
+int SetEncode_RRShortPD (char* buffer, ED_EXLONG bitOffset, TRRShortPD_Data* data)
+{
+	int retLen = ED_UNKNOWN_MESSAGE;
+	ED_WARNING_REMOVER(bitOffset);
+	
+	switch (data->Type) {
+		case ID_RRShortPD_NOTIFICATION_FACCH: {
+			retLen = ENCODE_c_NOTIFICATION_FACCH (buffer, 0, data->Data.fld_c_NOTIFICATION_FACCH);
+			break;
+		}
+		case ID_RRShortPD_VBS_VGCS_RECONFIGURE: {
+			retLen = ENCODE_c_VBS_VGCS_RECONFIGURE (buffer, 0, data->Data.fld_c_VBS_VGCS_RECONFIGURE);
+			break;
+		}
+		case ID_RRShortPD_VBS_VGCS_RECONFIGURE2: {
+			retLen = ENCODE_c_VBS_VGCS_RECONFIGURE2 (buffer, 0, data->Data.fld_c_VBS_VGCS_RECONFIGURE2);
+			break;
+		}
+		case ID_RRShortPD_UPLINK_FREE: {
+			retLen = ENCODE_c_UPLINK_FREE (buffer, 0, data->Data.fld_c_UPLINK_FREE);
+			break;
+		}
+		case ID_RRShortPD_VGCS_ADDITIONAL_INFORMATION: {
+			retLen = ENCODE_c_VGCS_ADDITIONAL_INFORMATION (buffer, 0, data->Data.fld_c_VGCS_ADDITIONAL_INFORMATION);
+			break;
+		}
+		case ID_RRShortPD_VGCS_SMS_INFORMATION: {
+			retLen = ENCODE_c_VGCS_SMS_INFORMATION (buffer, 0, data->Data.fld_c_VGCS_SMS_INFORMATION);
+			break;
+		}
+		case ID_RRShortPD_SYSTEM_INFORMATION_TYPE_10_UP: {
+			retLen = ENCODE_c_SYSTEM_INFORMATION_TYPE_10_UP (buffer, 0, data->Data.fld_c_SYSTEM_INFORMATION_TYPE_10_UP);
+			break;
+		}
+		case ID_RRShortPD_SYSTEM_INFORMATION_TYPE_10bis_UP: {
+			retLen = ENCODE_c_SYSTEM_INFORMATION_TYPE_10bis_UP (buffer, 0, data->Data.fld_c_SYSTEM_INFORMATION_TYPE_10bis_UP);
+			break;
+		}
+		case ID_RRShortPD_SYSTEM_INFORMATION_TYPE_10ter_UP: {
+			retLen = ENCODE_c_SYSTEM_INFORMATION_TYPE_10ter_UP (buffer, 0, data->Data.fld_c_SYSTEM_INFORMATION_TYPE_10ter_UP);
+			break;
+		}
+		case ID_RRShortPD_MEASUREMENT_INFORMATION: {
+			retLen = ENCODE_c_MEASUREMENT_INFORMATION (buffer, 0, data->Data.fld_c_MEASUREMENT_INFORMATION);
+			break;
+		}
+		case ID_RRShortPD_ENHANCED_MEASUREMENT_REPORT: {
+			retLen = ENCODE_c_ENHANCED_MEASUREMENT_REPORT (buffer, 0, data->Data.fld_c_ENHANCED_MEASUREMENT_REPORT);
+			break;
+		}
+		case ID_RRShortPD_VGCS_NEIGHBOUR_CELL_INFORMATION: {
+			retLen = ENCODE_c_VGCS_NEIGHBOUR_CELL_INFORMATION (buffer, 0, data->Data.fld_c_VGCS_NEIGHBOUR_CELL_INFORMATION);
+			break;
+		}
+		case ID_RRShortPD_NOTIFY_APPLICATION_DATA: {
+			retLen = ENCODE_c_NOTIFY_APPLICATION_DATA (buffer, 0, data->Data.fld_c_NOTIFY_APPLICATION_DATA);
+			break;
+		}
+
+		default:;
+	}
+	return retLen;
+}
 
