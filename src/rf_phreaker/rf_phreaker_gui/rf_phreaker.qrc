@@ -33,6 +33,7 @@
 	<file>MaterialNavigationPage.qml</file>
 	<file>MaterialOpenScannerDialog.qml</file>
 	<file>MaterialRowDelegate.qml</file>
+	<file>MaterialRowDelegateExpansion.qml</file>
 	<file>MaterialScanConfigurationPage.qml</file>
 	<file>MaterialScanList.qml</file>
 	<file>MaterialScannerInfoPage.qml</file>

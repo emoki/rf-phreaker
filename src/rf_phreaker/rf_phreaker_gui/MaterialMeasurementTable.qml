@@ -11,7 +11,6 @@ Rectangle {
     property alias filteredModel: dataTable.model
     property alias columnCount: dataTable.columnCount
 
-
     signal filteredModelUpdated()
     signal tableViewCompleted()
 
@@ -46,8 +45,7 @@ Rectangle {
 
         Component.onCompleted: tableViewCompleted()
 
-
-        backgroundVisible: true
+        backgroundVisible: false
         sortIndicatorVisible: true
         frameVisible: false
         headerVisible: true
@@ -56,7 +54,9 @@ Rectangle {
 
         headerDelegate: MaterialHeaderDelegate { control: dataTable; }
 
-        rowDelegate: MaterialRowDelegate{ control: dataTable; }
+        rowDelegate: MaterialRowDelegateExpansion {
+                control: dataTable;
+        }
 
         model: FilterProxyMeasurementModel {
             id: filter

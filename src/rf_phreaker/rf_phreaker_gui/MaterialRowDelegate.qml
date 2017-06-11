@@ -7,8 +7,8 @@ import QtQuick.Controls 1.4 as Controls
 
 Rectangle {
     property var control
-    height: dp(48)
-    implicitHeight: dp(48)
+    height: childrenRect.height
+    implicitHeight: childrenRect.height
 
     property alias text: listItem.text
     property alias valueText: listItem.valueText

@@ -28,6 +28,11 @@ Rectangle {
     height: dp(48)
     implicitHeight: dp(48)
 
+    onHeightChanged: {
+        if(height !== dp(48))
+            height = dp(48);
+    }
+
     ListItem.Standard {
         id: listItem
 
