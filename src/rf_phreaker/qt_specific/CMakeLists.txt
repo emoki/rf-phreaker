@@ -13,6 +13,8 @@ set (qt_specific_VERSION_TWEAK 0)
 
 # Set the source files.
 set (qt_specific_SRCS 
+	file_io.cpp
+	file_io.h
 	file_path_validation.cpp
 	file_path_validation.h
 	qt_init.h
