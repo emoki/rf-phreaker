@@ -98,7 +98,7 @@ public:
 			return "";
 	}
 	virtual QString cellCidStr() const {
-		if(wcdma_.layer_3_.sib1_.is_decoded())
+		if(wcdma_.layer_3_.sib3_.is_decoded())
 			return QString::number(wcdma_.layer_3_.sib3_.cid_);
 		else if(wcdma_.layer_3_.sib4_.is_decoded())
 			return QString::number(wcdma_.layer_3_.sib4_.cid_);
