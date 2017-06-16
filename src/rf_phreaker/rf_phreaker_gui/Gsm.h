@@ -4,6 +4,8 @@
 #include "rf_phreaker/rf_phreaker_gui/ApiTypes.h"
 #include "rf_phreaker/rf_phreaker_gui/Base.h"
 #include "rf_phreaker/common/measurements.h"
+#include "rf_phreaker/gsm_layer_3_decoder/gsm_layer_3_decoder.h"
+#include "rf_phreaker/rf_phreaker_gui/RawLayer3.h"
 
 //namespace rf_phreaker { namespace gui {
 
@@ -28,6 +30,8 @@ public:
 		: Base(gsm_, ApiTypes::GSM_FULL_SCAN, parent)
 		, gsm_(gsm) {
 		make_connections();
+		if(gsm_.layer_3_.raw_layer_3_.size())
+			updateLayer3Model(layer3Converter_, gsm_.layer_3_.raw_layer_3_, 0);
 	}
 
 	~Gsm() {}
@@ -64,7 +68,11 @@ public:
 			emit bcchSignalLevelChanged();
 		}
 		if(a.layer_3_.raw_layer_3_.size()) {
+			auto &l3 = gsm_.layer_3_.raw_layer_3_;
+			auto lsize = l3.size();
 			gsm_.layer_3_.update_info(a.layer_3_);
+			if(lsize != l3.size())
+				updateLayer3Model(layer3Converter_, l3, lsize);
 			emit cellLayer3Changed();
 		}
 	}
@@ -128,6 +136,7 @@ signals:
 
 private:
 	rf_phreaker::gsm_data gsm_;
+	RawLayer3<gsm_layer_3_decoder, layer_3_information::gsm_layer_3_message_aggregate> layer3Converter_;
 };
 
 //}}

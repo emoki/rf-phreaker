@@ -4,6 +4,8 @@
 #include "rf_phreaker/rf_phreaker_gui/ApiTypes.h"
 #include "rf_phreaker/rf_phreaker_gui/Base.h"
 #include "rf_phreaker/common/measurements.h"
+#include "rf_phreaker/umts_layer_3_decoder/umts_layer_3_decoder.h"
+#include "rf_phreaker/rf_phreaker_gui/RawLayer3.h"
 
 //namespace rf_phreaker { namespace gui {
 
@@ -27,6 +29,8 @@ public:
 		: Base(wcdma_, ApiTypes::WCDMA_FULL_SCAN, parent)
 		, wcdma_(wcdma) {
 		make_connections();
+		if(wcdma_.layer_3_.raw_layer_3_.size())
+			updateLayer3Model(layer3Converter_, wcdma_.layer_3_.raw_layer_3_, 0);
 	}
 
 	~Wcdma() {}
@@ -63,7 +67,11 @@ public:
 			emit rscpChanged();
 		}
 		if(a.layer_3_.raw_layer_3_.size()) {
+			auto &l3 = wcdma_.layer_3_.raw_layer_3_;
+			auto lsize = l3.size();
 			wcdma_.layer_3_.update_info(a.layer_3_);
+			if(lsize != l3.size())
+				updateLayer3Model(layer3Converter_, l3, lsize);
 			emit cellLayer3Changed();
 		}
 	}
@@ -122,6 +130,7 @@ public slots:
 
 protected:
 	rf_phreaker::umts_data wcdma_;
+	RawLayer3<umts_asn1_decoder, layer_3_information::umts_bcch_bch_message_aggregate> layer3Converter_;
 };
 
 //}}

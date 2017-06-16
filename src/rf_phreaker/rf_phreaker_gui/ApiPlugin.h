@@ -18,6 +18,7 @@
 #include "rf_phreaker/rf_phreaker_gui/ModelGroup.h"
 #include "rf_phreaker/rf_phreaker_gui/MeasurementModel.h"
 #include "rf_phreaker/rf_phreaker_gui/ProxyMeasurementModel.h"
+#include "rf_phreaker/rf_phreaker_gui/RawLayer3Model.h"
 #include "rf_phreaker/rf_phreaker_gui/MarbleManager.h"
 #include "rf_phreaker/rf_phreaker_gui/MarbleProxyModel.h"
 #include "rf_phreaker/rf_phreaker_gui/SpectrumModel.h"
@@ -31,6 +32,7 @@
 
 Q_DECLARE_METATYPE(CollectionInfo*)
 Q_DECLARE_METATYPE(Base*)
+Q_DECLARE_METATYPE(RawLayer3Model*)
 Q_DECLARE_METATYPE(GenericMeasurement*)
 Q_DECLARE_METATYPE(Gsm*)
 Q_DECLARE_METATYPE(Wcdma*)
@@ -96,6 +98,8 @@ void registerQmlTypes()
 	qmlRegisterType<BarGraphProxyMeasurementModel>(uri.latin1(), 1, 0, "BarGraphProxyMeasurementModel");
 	qmlRegisterType<MarbleManager>(uri.latin1(), 1, 0, "MarbleManager");
 	qmlRegisterType<MarbleProxyModel>(uri.latin1(), 1, 0, "MarbleProxyModel");
+	qmlRegisterType<RawLayer3Model>(uri.latin1(), 1, 0, "RawLayer3Model");
+
 	qmlRegisterSingletonType<Settings>(uri.latin1(), 1, 0, "GuiSettings", SettingsSingletonTypeProvider);
 	qmlRegisterSingletonType<MarbleLayerManager>(uri.latin1(), 1, 0, "MarbleLayerManager", MarbleLayersSingletonTypeProvider);
 

@@ -1,14 +1,14 @@
 #pragma once
 #include <QObject>
 #include <QTime>
+#include "rf_phreaker/common/measurements.h"
+#include "rf_phreaker/rf_phreaker_gui/RawLayer3Model.h"
 #include "rf_phreaker/rf_phreaker_api/rf_phreaker_api.h"
 #include "rf_phreaker/rf_phreaker_gui/ApiTypes.h"
-#include "rf_phreaker/common/measurements.h"
 
 //namespace rf_phreaker { namespace gui {
 
-class Base : public QObject
-{
+class Base : public QObject {
 	Q_OBJECT
 	Q_PROPERTY(QString serial READ serial NOTIFY serialChanged)
 	Q_PROPERTY(QString collectionRound READ collectionRound NOTIFY collectionRoundChanged)
@@ -29,9 +29,14 @@ class Base : public QObject
 	Q_PROPERTY(QString cellMncStr READ cellMncStr NOTIFY cellLayer3Changed)
 	Q_PROPERTY(QString cellLacTacStr READ cellLacTacStr NOTIFY cellLayer3Changed)
 	Q_PROPERTY(QString cellCidStr READ cellCidStr NOTIFY cellLayer3Changed)
-
+	Q_PROPERTY(RawLayer3Model* rawLayer3 READ rawLayer3 NOTIFY rawLayer3Changed)
 
 public:
+
+	RawLayer3Model* rawLayer3() { 
+		return &rawLayerModel_;
+	}
+
 	explicit Base(rf_phreaker::basic_data& base, ApiTypes::Tech tech, QObject *parent = 0)
 		: QObject(parent)
 		, base_(base)
@@ -102,11 +107,25 @@ signals:
 	void cellSignalLevelChanged();
 	void cellInterferenceChanged();
 	void cellLayer3Changed();
+	void rawLayer3Changed();
 
 protected:
+
+	template<typename Converter>
+	void updateLayer3Model(Converter &converter, const std::vector<layer_3_information::bit_stream> &v, size_t idx) {
+		for(size_t i = idx; i < v.size(); ++i) {
+			std::string bits;
+			std::string messageType;
+			std::string description;
+			converter.update(v[i], bits, messageType, description);
+			rawLayerModel_.pushBack(std::move(bits), std::move(messageType), std::move(description));
+		}
+	}
+
 	rf_phreaker::basic_data &base_;
 	ApiTypes::Tech tech_;
 	QTime timeElapsed_;
+	RawLayer3Model rawLayerModel_;
 };
 
 class GenericMeasurement : public Base {

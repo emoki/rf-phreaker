@@ -4,6 +4,8 @@
 #include "rf_phreaker/rf_phreaker_gui/ApiTypes.h"
 #include "rf_phreaker/rf_phreaker_gui/Base.h"
 #include "rf_phreaker/common/measurements.h"
+#include "rf_phreaker/lte_layer_3_decoder/lte_layer_3_decoder.h"
+#include "rf_phreaker/rf_phreaker_gui/RawLayer3.h"
 
 //namespace rf_phreaker { namespace gui {
 
@@ -44,6 +46,8 @@ public:
 		: Base(lte_, ApiTypes::LTE_FULL_SCAN, parent)
 		, lte_(lte) {
 		make_connections();
+		if(lte.layer_3_.raw_layer_3_.size())
+			updateLayer3Model(layer3Converter_, lte.layer_3_.raw_layer_3_, 0);
 	}
 
 	~Lte() {}
@@ -124,7 +128,11 @@ public:
 			emit frameNumberChanged();
 		}
 		if(a.layer_3_.raw_layer_3_.size()) {
+			auto &l3 = lte_.layer_3_.raw_layer_3_;
+			auto lsize = l3.size();
 			lte_.layer_3_.update_info(a.layer_3_);
+			if(lsize != l3.size())
+				updateLayer3Model(layer3Converter_, l3, lsize);
 			emit cellLayer3Changed();
 		}
 
@@ -208,6 +216,7 @@ public slots:
 
 private:
 	rf_phreaker::lte_data lte_;
+	RawLayer3<lte_asn1_decoder, layer_3_information::lte_rrc_message_aggregate> layer3Converter_;
 };
 
 //}}
