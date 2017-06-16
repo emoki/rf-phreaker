@@ -438,17 +438,19 @@ public:
 	//	std::copy(it, it + Size, tmp);
 	//	return strtol(tmp, &endptr, 16);
 	//}
-	//template<size_t Size>
-	//static long convert_hex(const char* ptr)
-	//{
-	//	char tmp[Size];
-	//	char *endptr;
-	//	std::copy(ptr, ptr + Size, tmp);
-	//	return strtol(tmp, &endptr, 16);
-	//}
-
 	template<size_t Size>
-	static std::string to_string(int value) {
+	static long convert_hex(const char* ptr)
+	{
+		char tmp[Size];
+		char *endptr;
+		std::copy(ptr, ptr + Size, tmp);
+		return strtol(tmp, &endptr, 16);
+	}
+
+	// We accept the largest int possible then set the width accordingly to how bytes the user wants outputted.
+	// This is done because with smaller integers (int8, etc) boost won't actually convert properly to hex.
+	template<size_t Size>
+	static std::string to_string(uint64_t value) {
 		return std::move(str(boost::format("%x") % boost::io::group(std::setw(Size), std::setfill('0'), value)));
 	}
 };
