@@ -87,13 +87,52 @@ ApplicationWindow {
 
     Settings {
         id: settings
-        property alias x: rpWindow.x
-        property alias y: rpWindow.y
-        property alias width: rpWindow.width
-        property alias height: rpWindow.height
-        property alias visibility: rpWindow.visibility
+        category: "rpWindow"
+        property var x
+        property var y
+        property var width
+        property var height
+        property var xHistory: rpWindow.visibility === Window.Windowed ? rpWindow.x : x
+        property var yHistory: rpWindow.visibility === Window.Windowed ? rpWindow.y : y
+        property var widthHistory: rpWindow.visibility === Window.Windowed ? rpWindow.width : width
+        property var heightHistory: rpWindow.visibility === Window.Windowed ? rpWindow.height : height
         property alias logHeight: navPage.logHeight
         property alias logVisible: rpWindow.logVisible
+        property var visibility
+        Component.onDestruction: {
+            x = xHistory;
+            y = yHistory;
+            width = widthHistory;
+            height = heightHistory;
+        }
+    }
+
+    Component.onCompleted: {
+        closing.connect(beforeClosing);
+        console.debug("settings", settings.x, settings.y, settings.width, settings.height)
+        if(settings.visibility === Window.Maximized) {
+            rpWindow.showMaximized();
+        }
+        else {
+            rpWindow.x = settings.x;
+            rpWindow.y = settings.y
+            rpWindow.width = settings.width
+            rpWindow.height = settings.height
+        }
+    }
+
+    function beforeClosing() {
+        console.debug("closing window", rpWindow.visibility)
+        settings.visibility = rpWindow.visibility
+    }
+
+    onVisibilityChanged: {
+        if(visibility === Window.Windowed) {
+            rpWindow.x = settings.x;
+            rpWindow.y = settings.y
+            rpWindow.width = settings.width
+            rpWindow.height = settings.height
+        }
     }
 
     MaterialStateMachine {
