@@ -49,7 +49,7 @@ TabbedPage {
         anchors.top: parent.top
         anchors.left: parent.left
         anchors.right: parent.right
-        anchors.bottom: __snackbar.top
+        anchors.bottom: parent.bottom
         orientation: Qt.Vertical
 
         Controls.StackView {
@@ -127,6 +127,7 @@ TabbedPage {
     Snackbar {
         id: __snackbar
         anchors.bottom: parent.bottom
+        z: 1
         property var messages: new Array(0)
         Component.onCompleted: {
             Api.messagesChanged.connect(__snackbar.store)
