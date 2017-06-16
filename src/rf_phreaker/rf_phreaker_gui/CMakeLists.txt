@@ -6,7 +6,7 @@ cmake_policy(SET CMP0020 NEW)
 # TODO - finish this when you have time!
 set (rfp_VERSION_MAJOR 1 CACHE INTERNAL "rf_phreaker_gui versioning" FORCE)
 set (rfp_VERSION_MINOR 4 CACHE INTERNAL "rf_phreaker_gui versioning" FORCE)
-set (rfp_VERSION_PATCH 0 CACHE INTERNAL "rf_phreaker_gui versioning" FORCE)
+set (rfp_VERSION_PATCH 1 CACHE INTERNAL "rf_phreaker_gui versioning" FORCE)
 set (rfp_VERSION_TWEAK 0 CACHE INTERNAL "rf_phreaker_gui versioning" FORCE)
 
 set (rf_phreaker_gui_VERSION_MAJOR rfp_VERSION_MAJOR)
@@ -76,15 +76,6 @@ set (rf_phreaker_gui_QMLS
 	ChannelList.qml
 	ChannelSweepLine.qml
 	ChannelSweepLines.qml
-	CircularButton.qml
-	CustomFlatButtonStyle.qml
-	DataAnalysisLabel.qml
-	DataAnalysisPage.qml
-	DataOverviewPage.qml
-	DataWorksheet.qml
-	DevicePage.qml
-	main.qml
-	MapPage.qml
 	MarblePlacemarkList.qml
 	MaterialCard.qml
 	MaterialDashboardPage.qml
@@ -108,18 +99,12 @@ set (rf_phreaker_gui_QMLS
 	MaterialToggleButton.qml
 	OverviewChart.qml
 	OverviewChartSweepChannel.qml
-	PositionButton.qml
 	PositionMarker.qml
-	ScanConfigurationPage.qml
-	ScannerPage.qml
 	SelectScannerWindow.qml
-	SideBarLabel.qml
-	StateMachine.qml
 	SuggestionTextField.qml
 	SuggestionView.qml
 	SweepLine.qml
 	SweepLines.qml
-	WorkbenchPage.qml
 	qtlabscontrols.conf
 	)
 
