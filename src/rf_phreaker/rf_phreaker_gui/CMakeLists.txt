@@ -49,6 +49,8 @@ set (rf_phreaker_gui_SRCS
 	MessageHandler.h
 	ModelGroup.h
 	ProxyMeasurementModel.h
+	RawLayer3.h
+	RawLayer3Model.h
 	RpDevice.h
 	RpPositionProviderPlugin.cpp
 	RpPositionProviderPlugin.h
@@ -173,6 +175,9 @@ target_link_libraries (rf_phreaker_gui Qt5::Quick)
 target_link_libraries (rf_phreaker_gui Qt5::DataVisualization)
 target_link_libraries (rf_phreaker_gui Qt5::Charts)
 target_link_libraries (rf_phreaker_gui rf_phreaker_api)
+target_link_libraries (rf_phreaker_gui gsm_layer_3_decoder)
+target_link_libraries (rf_phreaker_gui umts_layer_3_decoder)
+target_link_libraries (rf_phreaker_gui lte_layer_3_decoder)
 
 # Marble libraries should be built and placed in the output directory
 if(MSVC)
