@@ -62,13 +62,7 @@ public:
 			wcdma_.rscp_ = a.rscp_;
 			emit rscpChanged();
 		}
-		if(wcdma_.layer_3_.raw_layer_3_.size() ||
-				wcdma_.layer_3_.mib_.is_decoded() ||
-				wcdma_.layer_3_.sib1_.is_decoded() ||
-				wcdma_.layer_3_.sib3_.is_decoded() ||
-				wcdma_.layer_3_.sib4_.is_decoded() ||
-				wcdma_.layer_3_.sib11_.is_decoded() ||
-				wcdma_.layer_3_.sib11_bis_.is_decoded()) {
+		if(a.layer_3_.raw_layer_3_.size()) {
 			wcdma_.layer_3_.update_info(a.layer_3_);
 			emit cellLayer3Changed();
 		}

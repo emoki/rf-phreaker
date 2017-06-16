@@ -63,17 +63,7 @@ public:
 			gsm_.cell_signal_level_ = a.cell_signal_level_;
 			emit bcchSignalLevelChanged();
 		}
-		if(gsm_.layer_3_.raw_layer_3_.size() ||
-			gsm_.layer_3_.si_1_.is_decoded() ||
-			gsm_.layer_3_.si_2_.is_decoded() ||
-			gsm_.layer_3_.si_2bis_.is_decoded() ||
-			gsm_.layer_3_.si_2ter_.is_decoded() ||
-			gsm_.layer_3_.si_2quater_.is_decoded() ||
-			gsm_.layer_3_.si_3_.is_decoded() ||
-			gsm_.layer_3_.si_4_.is_decoded() ||
-			gsm_.layer_3_.si_7_.is_decoded() ||
-			gsm_.layer_3_.si_8_.is_decoded() ||
-			gsm_.layer_3_.si_23_.is_decoded()) {
+		if(a.layer_3_.raw_layer_3_.size()) {
 			gsm_.layer_3_.update_info(a.layer_3_);
 			emit cellLayer3Changed();
 		}
