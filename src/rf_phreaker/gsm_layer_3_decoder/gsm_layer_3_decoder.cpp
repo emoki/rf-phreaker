@@ -348,6 +348,10 @@ std::vector<std::string> gsm_layer_3_decoder::get_text_description() {
 	return text_description_.empty() ? std::vector<std::string>{} : std::vector<std::string>{text_description_};
 }
 
-void gsm_layer_3_decoder::store_text_description(bool store_text) {
+void gsm_layer_3_decoder::store_descriptions(bool store_text) {
 	store_text_description_ = store_text;
+}
+
+std::vector<std::string> gsm_layer_3_decoder::get_sib_description() {
+	return std::vector<std::string>{}; 
 }

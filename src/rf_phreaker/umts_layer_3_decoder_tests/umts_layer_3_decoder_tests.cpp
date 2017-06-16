@@ -28,7 +28,7 @@ int main(int argc, char* argv[])
 
 	auto store_description = true;
 	umts_asn1_decoder umts_decoder;
-	umts_decoder.store_text_description(store_description);
+	umts_decoder.store_descriptions(store_description);
 
 	std::vector<layer_3_information::pdu_element_type> elements;
 

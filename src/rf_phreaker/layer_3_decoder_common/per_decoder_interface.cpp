@@ -21,12 +21,13 @@ void per_decoder_interface::parse_data(lte_rrc_message_aggregate &message) {
 
 decode_status per_decoder_interface::decode_data(const bit_stream_container &bit_stream, pdu_element_container &pdu_element) {
 	text_description_.clear();
+	sib_descriptons_.clear();
 
 	bits_consumed_ = 0;
 
 	auto status = per_decoder_container_.decode(pdu_element, bit_stream, bits_consumed_);
 
-	if(status == decode_success && store_text_description_) {
+	if(status == decode_success && store_descriptions_) {
 		rf_phreaker::temp_file file;
 		auto file_descriptor = file.get_file_descriptor();
 		if(file_descriptor != nullptr && asn_fprint(file_descriptor, pdu_element.pdu_type(), pdu_element.decoded_structure()) == 0) {

@@ -12,11 +12,20 @@ public:
 
 	template<typename Message> void populate_data(const bit_stream_container &bit_stream, Message &message);
 
-	virtual std::vector<std::string> get_text_description() const { 
+	virtual std::vector<std::string> get_text_description() const {
 		return text_description_.empty() ? std::vector<std::string>{} : std::vector<std::string>{text_description_};
 	}
 
-	virtual void store_text_description(bool store) { store_text_description_ = store; }
+	virtual std::vector<std::string> get_sib_description() const {
+		return sib_descriptons_.empty() ? std::vector<std::string>{} : sib_descriptons_;
+	}
+
+	virtual void store_descriptions(bool store) { store_descriptions_ = store; }
+
+	void clear_text_description() { 
+		text_description_.clear(); 
+		sib_descriptons_.clear();
+	}
 
 protected:
 	virtual decode_status decode_data(const bit_stream_container &bit_stream, pdu_element_container &pdu_element);
@@ -34,9 +43,9 @@ protected:
 
 	uint32_t bits_consumed_;
 
-	bool store_text_description_;
-
+	bool store_descriptions_;
 	std::string text_description_;
+	std::vector<std::string> sib_descriptons_;
 	
 private:
     layer_3_information::pdu_element_type pdu_element_type_;

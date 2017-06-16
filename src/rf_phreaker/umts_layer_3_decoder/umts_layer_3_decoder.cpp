@@ -70,8 +70,12 @@ std::vector<std::string> umts_asn1_decoder::get_text_description() {
 	return umts_bcch_bch_message_->get_text_description();
 }
 
-void umts_asn1_decoder::store_text_description(bool store_text) {
-	umts_bcch_bch_message_->store_text_description(store_text);
+void umts_asn1_decoder::store_descriptions(bool store_text) {
+	umts_bcch_bch_message_->store_descriptions(store_text);
+}
+
+std::vector<std::string> umts_asn1_decoder::get_sib_description() {
+	return std::vector<std::string>{};
 }
 
 

@@ -43,7 +43,7 @@ int main(int argc, char* argv[])
 	auto store_description = true;
 	gsm_layer_3_decoder decoder;
 
-	decoder.store_text_description(store_description);
+	decoder.store_descriptions(store_description);
 	
 	auto filename = folder_path + prefix + suffix;
 	std::ifstream f(filename.c_str());

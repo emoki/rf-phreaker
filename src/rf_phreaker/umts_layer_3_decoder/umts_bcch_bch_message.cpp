@@ -230,15 +230,17 @@ std::vector<std::string> umts_bcch_bch_message::get_text_description() const {
 		v.push_back(text_description_);
 	for(auto &i : system_information_to_decode_) {
 		auto k = i->get_text_description();
-		if(!k.empty())
+		if(!k.empty()) {
 			v.insert(std::end(v), std::begin(k), std::end(k));
+			i->clear_text_description();
+		}
 	}
 	return v;
 }
 
 void umts_bcch_bch_message::store_text_description(bool store) {
-	store_text_description_ = store;
+	store_descriptions_ = store;
 	for(auto &i : system_information_to_decode_) {
-		i->store_text_description(true);
+		i->store_descriptions(true);
 	}
 }

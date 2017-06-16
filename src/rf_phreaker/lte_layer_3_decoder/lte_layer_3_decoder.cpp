@@ -47,6 +47,11 @@ std::vector<std::string> lte_asn1_decoder::get_text_description() {
 	return lte_bcch_bch_message_->get_text_description();
 }
 
-void lte_asn1_decoder::store_text_description(bool store_text) {
-	lte_bcch_bch_message_->store_text_description(store_text);
+void lte_asn1_decoder::store_descriptions(bool store_text) {
+	lte_bcch_bch_message_->store_descriptions(store_text);
+}
+
+
+std::vector<std::string> lte_asn1_decoder::get_sib_description() {
+	return lte_bcch_bch_message_->get_sib_description();
 }

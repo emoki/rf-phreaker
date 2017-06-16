@@ -45,7 +45,9 @@ public:
 
 	std::vector<std::string> get_text_description();
 
-	void store_text_description(bool store_text);
+	void store_descriptions(bool store);
+
+	std::vector<std::string> get_sib_description();
 
 	void output_debug_bit_stream(bool out) { debug_ = out; }
 

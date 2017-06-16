@@ -9,7 +9,7 @@ void lte_decoding_tests::run_automated_tests()
 {
 	auto store_description = true;
 	lte_asn1_decoder decoder;
-	decoder.store_text_description(store_description);
+	decoder.store_descriptions(store_description);
 
 	std::string base_filename = "../../../../rf_phreaker/test_files/";
 	std::ifstream file(base_filename + "lte_bitstreams_sib6.txt");
