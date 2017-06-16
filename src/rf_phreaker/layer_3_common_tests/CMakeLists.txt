@@ -10,6 +10,7 @@ set (layer_3_common_tests_VERSION_PATCH 0)
 set (layer_3_common_tests_VERSION_TWEAK 0)
 
 set (layer_3_common_tests_SRCS 
+	aggregate_tests.h
 	layer_3_common_tests.cpp
 	test_uint16_string.cpp
 	test_uint16_string.h

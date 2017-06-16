@@ -1,12 +1,15 @@
 #pragma once
 
 #include <stdint.h>
+#include <functional>
 #include <vector>
+#include <unordered_map>
+#include "boost/functional/hash.hpp"
 #include "rf_phreaker/layer_3_common/uint16_string.h"
+
 
 namespace layer_3_information
 {
-
 
 static uint32_t not_decoded_32 = 0xFFFFFFFF;
 
@@ -40,6 +43,8 @@ struct bit_stream {
 	, unused_bits_(unused_bits) {
 		memcpy(bytes_.data(), stream, num_bytes);
 	}
+
+	size_t	hash_value() const { return boost::hash_range(begin(bytes_), end(bytes_)); }
 	
 	std::vector<uint8_t> bytes_;
 	uint32_t unused_bits_;
@@ -58,6 +63,7 @@ public:
 		std::swap(cid_, a.cid_);
 		std::swap(unique_sector_key_, a.unique_sector_key_);
 		std::swap(raw_layer_3_, a.raw_layer_3_);
+		std::swap(raw_layer_3_lookup_, a.raw_layer_3_lookup_);
 	}
 
 	bool is_mcc_decoded() const { return mcc_ != not_decoded_16; }
@@ -77,6 +83,8 @@ public:
 		mnc_ = not_decoded_16;
 		lac_ = not_decoded_16;
 		cid_ = not_decoded_32;
+		raw_layer_3_.clear();
+		raw_layer_3_lookup_.clear();
 	}
 
 	virtual void update_info(const bcch_bch_message_aggregate &a)
@@ -89,8 +97,13 @@ public:
 			lac_ = a.lac_;
 		if(a.is_cid_decoded())
 			cid_ = a.cid_;
-		for(auto &i : a.raw_layer_3_)
-			raw_layer_3_.push_back(i);
+		for (auto &i : a.raw_layer_3_) {
+			auto hash = i.hash_value();
+			if(raw_layer_3_lookup_.find(hash) == raw_layer_3_lookup_.end()) {
+				raw_layer_3_.push_back(i);
+				raw_layer_3_lookup_[hash] = raw_layer_3_.size() - 1;
+			}
+		}
 	}
 
 	friend std::ostream& operator<<(std::ostream &os, const bcch_bch_message_aggregate &t);
@@ -103,6 +116,7 @@ public:
 	unique_sector_key_type unique_sector_key_; // Key used when recombining segments.
 
 	std::vector<bit_stream> raw_layer_3_;
+	std::unordered_map<size_t, size_t> raw_layer_3_lookup_;
 };
 
 
