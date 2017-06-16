@@ -43,7 +43,6 @@ public:
 			{
 				QByteArray localMsg = msg.toLocal8Bit();
 				fprintf(stderr, "FATAL: %s (%s:%u, %s)\n", localMsg.constData(), context.file, context.line, context.function);
-				abort();
 			}
 			break;
 		default:;
@@ -52,9 +51,6 @@ public:
 		QString fn(context.file);
 		fn = fn.remove(0, fn.lastIndexOf(QRegExp("[/\\\\]")) + 1);
 		s += "[" + fn + " L: " + QString::number(context.line) + "]\t\"" + msg + "\"";
-
-		if(outputToApi_)
-			QCoreApplication::postEvent(Api::instance(), new LogUpdateEvent(s));
 
 		static std::ofstream f;
 		static bool fileOpenAttempt = false;
@@ -70,6 +66,12 @@ public:
 			f.open(QString(filePath + QDir::separator() + "rf_phreaker_gui.log").toStdString());
 		}
 		f << s.toStdString().c_str() << std::endl;
+
+		if(type == QtFatalMsg)
+			abort();
+
+		if(outputToApi_)
+			QCoreApplication::postEvent(Api::instance(), new LogUpdateEvent(s));
 	}
 
 private:
