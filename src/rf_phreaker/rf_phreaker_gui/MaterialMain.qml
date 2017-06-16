@@ -1,4 +1,5 @@
-import QtQuick 2.5
+import QtQuick 2.7
+import QtQuick.Window 2.2
 import QtQuick.Dialogs 1.2
 import Qt.labs.settings 1.0
 import Material 0.3
