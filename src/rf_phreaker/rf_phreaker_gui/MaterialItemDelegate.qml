@@ -8,7 +8,7 @@ import QtQuick.Controls 1.4 as Controls
 Rectangle {
     property var control
     property bool isNumber: true
-    property alias tooltip: tip
+    property bool isSelectionEnabled: true
 
     property alias text: listItem.text
     property alias valueText: listItem.valueText
@@ -42,7 +42,7 @@ Rectangle {
         selected: styleData.selected
         showDivider: false
         dividerInset: 0
-        text: styleData.value;
+        text: styleData.value
         itemLabel.horizontalAlignment: isNumber ? Qt.AlignRight : Qt.AlignLeft
         itemLabel.color: Theme.light.textColor
 
@@ -51,7 +51,7 @@ Rectangle {
                          : Palette.colors.grey[100]
 
         onClicked: {
-            if(control.selection.mode !== Controls.SelectionMode.NoSelection) {
+            if(isSelectionEnabled && control.selection.mode !== Controls.SelectionMode.NoSelection) {
 
                 if(control.selection.mode === Controls.SelectionMode.SingleSelection)
                     control.selection.mode.clear;
@@ -66,9 +66,5 @@ Rectangle {
 
         // Implement mouse area for other clicks
         //onDoubleClicked: control.doubleClicked(styleData.row)
-    }
-
-    Tooltip {
-        id: tip
     }
 }

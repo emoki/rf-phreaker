@@ -23,6 +23,7 @@
 	<file>MaterialExpansionButton.qml</file>
 	<file>MaterialHeaderDelegate.qml</file>
 	<file>MaterialItemDelegate.qml</file>
+	<file>MaterialLayer3RowDelegate.qml</file>
 	<file>MaterialMain.qml</file>
 	<file>MaterialMarbleLocationButton.qml</file>
 	<file>MaterialMarbleMap.qml</file>
@@ -33,7 +34,6 @@
 	<file>MaterialNavigationPage.qml</file>
 	<file>MaterialOpenScannerDialog.qml</file>
 	<file>MaterialRowDelegate.qml</file>
-	<file>MaterialRowDelegateExpansion.qml</file>
 	<file>MaterialScanConfigurationPage.qml</file>
 	<file>MaterialScanList.qml</file>
 	<file>MaterialScannerInfoPage.qml</file>
