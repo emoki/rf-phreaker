@@ -17,6 +17,7 @@ Item {
     property string lowerLineA: "_LowerA"
     property string lowerLineB: "_LowerB"
     property bool displaySecondArea: true
+    property bool shouldUpdate: true
 
     CategoryAxis {
         id: mainAxisY
@@ -27,6 +28,23 @@ Item {
         reverse: Qt.Vertical
         lineVisible: false
         //labelsFont: graphingLabel.font
+    }
+
+    Timer {
+        interval: 250
+        running: true
+        repeat: true
+        onTriggered: {
+            if(shouldUpdate) {
+                refresh();
+                shouldUpdate = false;
+            }
+        }
+    }
+
+    Connections {
+        target: chart
+        onHeightChanged: shouldUpdate = true
     }
 
     Repeater {
@@ -44,15 +62,13 @@ Item {
             item.mainAxisY = mainAxisY;
             createAttachMeasBar(barSeriesIndex, item)
             barSeriesIndex += 1;
-            if(barSeriesIndex == repeater.count)
-                refresh();
+            shouldUpdate = true;
         }
         onItemRemoved: {
             barSeriesIndex -= 1;
             //console.debug("item removed -----", barSeriesIndex);
             removeMeasBar(barSeriesIndex);
-            if(barSeriesIndex == repeater.count)
-                refresh();
+            shouldUpdate = true;
         }
     }
 
