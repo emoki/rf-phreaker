@@ -40,6 +40,10 @@ void umts_bcch_bch_message::set_system_information_to_decode(const std::vector<p
 			system_information_to_decode_.push_back(boost::shared_ptr<umts_system_information_container>(new umts_sib_1_container));
 			break;
 
+		case umts_sib2:
+//			system_information_to_decode_.push_back(boost::shared_ptr<umts_system_information_container>(new umts_sib_2_container));
+			break;
+
 		case umts_sib3:
 			system_information_to_decode_.push_back(boost::shared_ptr<umts_system_information_container>(new umts_sib_3_container));
 			break;
@@ -56,6 +60,10 @@ void umts_bcch_bch_message::set_system_information_to_decode(const std::vector<p
 
 		case umts_sib18:
 			system_information_to_decode_.push_back(boost::shared_ptr<umts_system_information_container>(new umts_sib_18_container));
+			break;
+
+		case umts_bcch_bch:
+			// umts_bcch_bch is always decoded - no need to specify pdu.
 			break;
 
 		default:
