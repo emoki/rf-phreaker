@@ -28,7 +28,6 @@ ApplicationWindow {
 
     function hideLog() {
         logVisible = false;
-        console.debug(logVisible, navPage.logHeight)
     }
 
     theme {
