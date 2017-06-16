@@ -464,7 +464,7 @@ public:
 		case CellMccRole:
 			return CellMccColumn;
 		case CellMncRole:
-			return CellMncRole;
+			return CellMncColumn;
 		case CellLacTacRole:
 			return CellLacTacColumn;
 		case CellCidRole:
