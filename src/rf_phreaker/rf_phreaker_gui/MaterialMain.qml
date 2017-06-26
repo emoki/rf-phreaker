@@ -108,7 +108,6 @@ ApplicationWindow {
 
     Component.onCompleted: {
         closing.connect(beforeClosing);
-        console.debug("settings", settings.x, settings.y, settings.width, settings.height)
         if(settings.visibility === Window.Maximized) {
             rpWindow.showMaximized();
         }
@@ -121,7 +120,6 @@ ApplicationWindow {
     }
 
     function beforeClosing() {
-        console.debug("closing window", rpWindow.visibility)
         settings.visibility = rpWindow.visibility
     }
 
