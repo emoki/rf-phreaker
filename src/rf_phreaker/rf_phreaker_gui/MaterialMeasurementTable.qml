@@ -17,16 +17,22 @@ Rectangle {
     implicitWidth: dataTable.contentItem.childrenRect.width
     implicitHeight: dataTable.contentItem.childrenRect.height
 
+    function resizeColumnsToContents() {
+        dataTable.resizeColumnsToContents();
+    }
+
     function removeAllColumns() {
         while(dataTable.columnCount) {
             dataTable.removeColumn(0);
         }
     }
 
-    function insertColumn(role, isString, index) {
+    function insertColumn(role, isString, columnIndex, fixedWidth) {
         var idx = dataTable.model.findRole(role);
         var title = dataTable.model.headerData(0, 0, idx);
-        dataTable.insertColumn(index, columnComponent.createObject(dataTable, {"role": role, "title": title, "isString": isString, "_control": dataTable}));
+        dataTable.insertColumn(columnIndex, columnComponent.createObject(dataTable, {"role": role, "title": title,
+                                                                       "isString": isString, "_control": dataTable,
+                                                                        "fixedWidth": fixedWidth}));
     }
 
     function sortAndUpdate(tableColumn, sortOrder) {

@@ -258,10 +258,11 @@ TabbedPage {
 
                     onTableViewCompleted: {
                         cwDataWorksheet.removeAllColumns();
-                        cwDataWorksheet.insertColumn("dwellTimeRole", false, 0);
-                        cwDataWorksheet.insertColumn("binSizeRole", false, 0);
-                        cwDataWorksheet.insertColumn("cellSignalLevel", false, 0);
-                        cwDataWorksheet.insertColumn("identifierRole", false, 0);
+                        cwDataWorksheet.insertColumn("dwellTimeRole", false, 0, 0);
+                        cwDataWorksheet.insertColumn("binSizeRole", false, 0, 1);
+                        cwDataWorksheet.insertColumn("cellSignalLevel", false, 0, 1);
+                        cwDataWorksheet.insertColumn("identifierRole", false, 0, 1);
+                        cwDataWorksheet.resizeColumnsToContents();
                     }
                 }
             }
