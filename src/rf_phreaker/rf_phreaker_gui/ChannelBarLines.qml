@@ -139,6 +139,9 @@ Item {
             var measLabel = repeater.model.data(repeater.model.index(i,0), MeasurementModel.GraphLabelRole);
             var channel = repeater.itemAt(i);
 
+            if(meas === undefined || measLabel === undefined || channel === undefined)
+                continue;
+
             createAttachMeasBar(i, channel)
             channel.meas = meas;
             channel.title = measLabel;
