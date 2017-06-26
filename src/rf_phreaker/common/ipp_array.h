@@ -69,9 +69,15 @@ public:
 
 	const ipp_array create_shallow_copy(int offset) const;
 
-	DataType& operator [](int position) { return array_[position]; }
+	DataType& operator [](int position) {
+		assert(position >= 0 && position < length_);
+		return array_[position]; 
+	}
 
-	const DataType& operator [](int position) const { return array_[position]; }
+	const DataType& operator [](int position) const {
+		assert(position >= 0 && position < length_);
+		return array_[position]; 
+	}
 
 	typedef DataType data_type_;
 
