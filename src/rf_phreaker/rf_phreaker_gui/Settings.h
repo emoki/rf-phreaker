@@ -29,9 +29,9 @@ class Settings : public QObject {
 	Q_PROPERTY(int spectrumBinSize MEMBER spectrumBinSize_ NOTIFY spectrumBinSizeChanged)
 	Q_PROPERTY(int spectrumDwellTime MEMBER spectrumDwellTime_ NOTIFY spectrumDwellTimeChanged)
 	Q_PROPERTY(int cwBinSize MEMBER cwBinSize_ NOTIFY cwBinSizeChanged)
-	Q_PROPERTY(int cwSpan MEMBER cwSpan_ NOTIFY cwSpanChanged)
+	Q_PROPERTY(int cwSpan MEMBER cwSpanFactor_ NOTIFY cwSpanChanged)
 	Q_PROPERTY(int cwDwellTime MEMBER cwDwellTime_ NOTIFY cwDwellTimeChanged)
-	Q_PROPERTY(int cwOffset MEMBER cwOffset_ NOTIFY cwOffsetChanged)
+	Q_PROPERTY(int cwOffset MEMBER cwOffsetFactor_ NOTIFY cwOffsetChanged)
 	Q_PROPERTY(int iqBandwidth MEMBER iqBandwidth_ NOTIFY iqBandwidthChanged)
 	Q_PROPERTY(int iqSamplingRate MEMBER iqSamplingRate_ NOTIFY iqSamplingRateChanged)
 	Q_PROPERTY(int iqDwellTime MEMBER iqDwellTime_ NOTIFY iqDwellTimeChanged)
@@ -93,9 +93,9 @@ public:
 		emit spectrumBinSizeChanged(spectrumBinSize_);
 		emit spectrumDwellTimeChanged(spectrumDwellTime_);
 		emit cwBinSizeChanged(cwBinSize_);
-		emit cwSpanChanged(cwSpan_);
+		emit cwSpanChanged(cwSpanFactor_);
 		emit cwDwellTimeChanged(cwDwellTime_);
-		emit cwOffsetChanged(cwOffset_);
+		emit cwOffsetChanged(cwOffsetFactor_);
 		emit iqBandwidthChanged(iqBandwidth_);
 		emit iqSamplingRateChanged(iqSamplingRate_);
 		emit iqDwellTimeChanged(iqDwellTime_);

@@ -200,8 +200,8 @@ void Api::startCollection() {
 		}
 		else if(ci->isCw()) {
 			rp_power_spectrum_spec spec;
-			spec.start_frequency_ = cfLow->toRpFreq() - Settings::instance()->cwOffset_;
-			spec.span_ = Settings::instance()->cwSpan_;
+			spec.start_frequency_ = cfLow->toRpFreq() - Settings::instance()->cwOffsetFactor_ * Settings::instance()->cwBinSize_;
+			spec.span_ = Settings::instance()->cwSpanFactor_ * Settings::instance()->cwBinSize_;
 			spec.bin_size_ = Settings::instance()->cwBinSize_;
 			spec.dwell_time_ = Settings::instance()->cwDwellTime_;
 			spec.identifier_ = cfLow->toRpFreq();

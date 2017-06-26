@@ -13,9 +13,9 @@ void SettingsIO::readSettings(Settings &settings) {
 	settings.spectrumBinSize_ = qs_.value(spectrumBinSizeKey, 2000).toInt();
 	settings.spectrumDwellTime_= qs_.value(spectrumDwellTimeKey, 25000000).toInt();
 	settings.cwBinSize_ = qs_.value(cwBinSizeKey, 2000).toInt();
-	settings.cwSpan_ = qs_.value(cwSpanKey, 10 * settings.cwBinSize_).toInt();
+	settings.cwSpanFactor_ = qs_.value(cwSpanKey, 6).toInt();
 	settings.cwDwellTime_ = qs_.value(cwDwellTimeKey, 25000000).toInt();
-	settings.cwOffset_ = qs_.value(cwOffsetKey, 2 * settings.cwBinSize_).toInt();
+	settings.cwOffsetFactor_ = qs_.value(cwOffsetKey, 2).toInt();
 	settings.iqBandwidth_= qs_.value(iqBandwidthKey, 5000000).toInt();
 	settings.iqSamplingRate_ = qs_.value(iqSamplingRateKey, 10000000).toInt();
 	settings.iqDwellTime_ = qs_.value(iqDwellTimeKey, 50000000).toInt();
@@ -32,9 +32,9 @@ void SettingsIO::writeSettings(const Settings &settings) {
 	qs_.setValue(spectrumBinSizeKey, settings.spectrumBinSize_);
 	qs_.setValue(spectrumDwellTimeKey, settings.spectrumDwellTime_);
 	qs_.setValue(cwBinSizeKey, settings.cwBinSize_);
-	qs_.setValue(cwSpanKey, settings.cwSpan_);
+	qs_.setValue(cwSpanKey, settings.cwSpanFactor_);
 	qs_.setValue(cwDwellTimeKey, settings.cwDwellTime_);
-	qs_.setValue(cwOffsetKey, settings.cwOffset_);
+	qs_.setValue(cwOffsetKey, settings.cwOffsetFactor_);
 	qs_.setValue(iqBandwidthKey, settings.iqBandwidth_);
 	qs_.setValue(iqSamplingRateKey, settings.iqSamplingRate_);
 	qs_.setValue(iqDwellTimeKey, settings.iqDwellTime_);
