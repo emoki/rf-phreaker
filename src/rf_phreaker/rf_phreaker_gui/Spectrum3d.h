@@ -125,11 +125,11 @@ public:
 		columnCount_ = row->size();
 		auto j = 0;
 		for(const auto &i : specs) {
-			float freq = i.second.params_.start_frequency_ / 1.0e6;
-			float step = i.second.params_.step_size_ / 1.0e6;
+			auto freq = i.second.params_.start_frequency_;
+			auto step = (rf_phreaker::frequency_type)i.second.params_.step_size_;
 			auto power = i.second.power_;
 			for(const auto &p : power) {
-				(*row)[j++].setPosition(QVector3D(freq, p, index));
+				(*row)[j++].setPosition(QVector3D(freq / 1e6f, p, index));
 				freq += step;
 			}
 		}
