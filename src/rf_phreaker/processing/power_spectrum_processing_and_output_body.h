@@ -17,11 +17,13 @@ public:
 	power_spectrum_processing_and_output_body(data_output_async *io)
 		: io_(io)
 		, filters_(1, 513)
+		, should_filter_(false)
 	{}
 
 	power_spectrum_processing_and_output_body(const power_spectrum_processing_and_output_body &body)
 		: io_(body.io_)
 		, filters_(1, 513)
+		, should_filter_(false)
 		// Cannot copy std::vector<std::future<>>. Use new one.
 	{}
 
@@ -32,32 +34,18 @@ public:
 		auto sig_length = params.num_windows_ * params.window_length_;
 		helper_.remove_futures();
 
-		std::string no_filter;
-		auto &filter = filters_.get_filter(meas.sampling_rate(), meas.sampling_rate(), ((params.span_) / meas.sampling_rate()) * .5);
+		auto *signal = &meas.get_iq();
+		
+		if(should_filter_)
+			signal = filter(meas, params, sig_length);
 
-		if(buffer_.length() < sig_length) {
-			buffer_.reset(filter.ensure_output_samples_large_enough(sig_length));
-		}
-		buffer_.zero_out();
-		int output_length = 0;
-		filter.filter(meas.get_iq().get(), sig_length, buffer_.get(), buffer_.length(), output_length);
-
-		if(output_length < sig_length) {
-			params.num_windows_ = output_length / params.window_length_;
-			sig_length = output_length;
-		}
-
-		// For debug output.
-		if(0) {
-			buffer_.copy(meas.get_iq().get(), sig_length);
-		}
-
-		calculator_.calculate_power_spectrum(buffer_, params.window_length_, sig_length);
+		calculator_.calculate_power_spectrum(*signal, params.window_length_, sig_length);
 
 		power_spectrum_data power_spec = convert_to_power_spectrum_data(meas, calculator_.power_spectra(), params);
-
+		
 		// For debug output
 		if(0) {
+			std::string no_filter;
 			no_filter = "no_filter_";
 			static int i = 0;
 			std::ofstream f1(std::string("power_spectrum_matlab_" + no_filter + std::to_string(i) + ".txt"));
@@ -77,6 +65,23 @@ public:
 	}
 
 private:
+	ipp_32fc_array* filter(const scanner::measurement_info &meas, power_spectrum_spec &params, int &sig_length) {
+		auto &filter = filters_.get_filter(meas.sampling_rate(), meas.sampling_rate(), ((params.span_) / meas.sampling_rate()) * .5);
+
+		if(buffer_.length() < sig_length) {
+			buffer_.reset(filter.ensure_output_samples_large_enough(sig_length));
+		}
+		buffer_.zero_out();
+		int output_length = 0;
+		filter.filter(meas.get_iq().get(), sig_length, buffer_.get(), buffer_.length(), output_length);
+
+		if(output_length < sig_length) {
+			params.num_windows_ = output_length / params.window_length_;
+			sig_length = output_length;
+		}
+		return &buffer_;
+	}
+
 	data_output_async *io_;
 
 	processing_and_feedback_helper helper_;
@@ -86,6 +91,8 @@ private:
 	filters filters_;
 
 	ipp_32fc_array buffer_;
+
+	bool should_filter_;
 };
 
 }}
