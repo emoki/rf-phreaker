@@ -1,5 +1,6 @@
 #include "rf_phreaker/rf_phreaker_gui/Settings.h"
 #include "rf_phreaker/rf_phreaker_gui/SettingsIO.h"
+#include "rf_phreaker/rf_phreaker_gui/ApiMessage.h"
 #include "rf_phreaker/qt_specific/settings_io.h"
 #include "rf_phreaker/qt_specific/qt_utility.h"
 
@@ -89,4 +90,46 @@ rf_phreaker::settings Settings::readRpSettings(const std::string &name) {
 void Settings::writeRpSettings(rf_phreaker::settings &s) {
 	rf_phreaker::settings_io io("rf_phreaker_api", rf_phreaker::qt_utility::app_name());
 	io.write(s);
+}
+
+void Settings::setProfile(int c) {
+	rf_phreaker::settings tmp_s;
+	switch(c) {
+	case FastScanRate: {
+		tmp_s = readRpSettings("rf_phreaker_api_fast_scan_rate");
+		break;
+	}
+	case PrioritizeLayer3: {
+		tmp_s = readRpSettings("rf_phreaker_api_prioritize_layer_3");
+		break;
+	}
+	default:
+		qWarning() << "Unknown collection config.";
+		return;
+	}
+
+	rf_phreaker::settings s = readRpSettings();
+
+	s.gsm_sweep_collection_ = tmp_s.gsm_sweep_collection_;
+	s.gsm_sweep_general_ = tmp_s.gsm_sweep_general_;
+	s.gsm_layer_3_collection_ = tmp_s.gsm_layer_3_collection_;
+	s.gsm_layer_3_decode_ = tmp_s.gsm_layer_3_decode_;
+	s.gsm_layer_3_general_ = tmp_s.gsm_layer_3_general_;
+
+	s.umts_sweep_collection_ = tmp_s.umts_sweep_collection_;
+	s.umts_sweep_general_ = tmp_s.umts_sweep_general_;
+	s.umts_layer_3_collection_ = tmp_s.umts_layer_3_collection_;
+	s.umts_layer_3_decode_ = tmp_s.umts_layer_3_decode_;
+	s.umts_layer_3_general_ = tmp_s.umts_layer_3_general_;
+
+	s.lte_sweep_collection_ = tmp_s.lte_sweep_collection_;
+	s.lte_sweep_general_ = tmp_s.lte_sweep_general_;
+	s.lte_layer_3_collection_ = tmp_s.lte_layer_3_collection_;
+	s.lte_layer_3_decode_ = tmp_s.lte_layer_3_decode_;
+	s.lte_layer_3_general_ = tmp_s.lte_layer_3_general_;
+
+	writeRpSettings(s);
+
+	currentCollectionProfile_ = (CollectionProfile)c;
+	emit currentProfileChanged(c);
 }

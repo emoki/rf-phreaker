@@ -44,6 +44,7 @@ Q_DECLARE_METATYPE(MeasurementModel::MeasurementRole)
 Q_DECLARE_METATYPE(MeasurementModel::MeasurementColumn)
 Q_DECLARE_METATYPE(CwMeasurementModel::CwMeasurementRole)
 Q_DECLARE_METATYPE(CwMeasurementModel::CwMeasurementColumn)
+Q_DECLARE_METATYPE(Settings::CollectionProfile)
 Q_DECLARE_METATYPE(CollectionInfoSearcher)
 
 QObject* ApiInterfaceSingletonTypeProvider(QQmlEngine *engine, QJSEngine *scriptEngine) {

@@ -14,13 +14,15 @@
 // Does not support multithreaded operations.
 class Settings : public QObject {
 	Q_OBJECT
+	Q_ENUMS(CollectionProfile)
 	Q_PROPERTY(bool apiOutput MEMBER apiOutput_ NOTIFY apiOutputChanged)
 	Q_PROPERTY(qreal rpfTrackMinDistance MEMBER rpfTrackMinDistance_ NOTIFY rpfTrackMinDistanceChanged)
 	Q_PROPERTY(QString themePrimaryColor MEMBER themePrimaryColor_ NOTIFY themePrimaryColorChanged)
 	Q_PROPERTY(QString themeAccentColor MEMBER themeAccentColor_ NOTIFY themeAccentColorChanged)
 	Q_PROPERTY(QString themeTabHighlightColor MEMBER themeTabHighlightColor_ NOTIFY themeTabHighlightColorChanged)
 	Q_PROPERTY(int measurementRemovalTime MEMBER measurementRemovalTime_ NOTIFY measurementRemovalTimeChanged)
-	Q_PROPERTY(bool convertRfpToAscii MEMBER convertRfpToAscii_ NOTIFY convertRfpToAsciiChanged)
+	Q_PROPERTY(bool convertRpfToAscii MEMBER convertRpfToAscii_ NOTIFY convertRpfToAsciiChanged)
+	Q_PROPERTY(bool addRpfToMap MEMBER addRpfToMap_ NOTIFY addRpfToMapChanged)
 	Q_PROPERTY(int logLevelAppVerbosity MEMBER logLevelAppVerbosity_ NOTIFY logLevelAppVerbosityChanged)
 	Q_PROPERTY(int logLevelHardwareVerbosity MEMBER logLevelHardwareVerbosity_ NOTIFY logLevelHardwareVerbosityChanged)
 	Q_PROPERTY(bool loggingGps MEMBER loggingGps_ NOTIFY loggingGpsChanged)
@@ -36,6 +38,7 @@ class Settings : public QObject {
 	Q_PROPERTY(int iqBandwidth MEMBER iqBandwidth_ NOTIFY iqBandwidthChanged)
 	Q_PROPERTY(int iqSamplingRate MEMBER iqSamplingRate_ NOTIFY iqSamplingRateChanged)
 	Q_PROPERTY(int iqDwellTime MEMBER iqDwellTime_ NOTIFY iqDwellTimeChanged)
+	Q_PROPERTY(int currentProfile READ currentProfile NOTIFY currentProfileChanged)
 
 signals:
 	void apiOutputChanged(bool);
@@ -44,7 +47,8 @@ signals:
 	void themeAccentColorChanged(QString);
 	void themeTabHighlightColorChanged(QString);
 	void measurementRemovalTimeChanged(int);
-	void convertRfpToAsciiChanged(bool);
+	void convertRpfToAsciiChanged(bool);
+	void addRpfToMapChanged(bool);
 	void logLevelAppVerbosityChanged(int);
 	void logLevelHardwareVerbosityChanged(int);
 	void loggingGpsChanged(bool);
@@ -60,11 +64,46 @@ signals:
 	void iqBandwidthChanged(int);
 	void iqSamplingRateChanged(int);
 	void iqDwellTimeChanged(int);
+	void currentProfileChanged(int);
 
 public:
 	Settings(QObject *parent = nullptr) 
 		: QObject(parent) {
 		loadSettings();
+	}
+
+	enum CollectionProfile {
+		FastScanRate,
+		PrioritizeLayer3,
+		CollectionProfileSize
+	};
+
+	Q_INVOKABLE int convertConfig(QString s) {
+		if(s == "Fast scan rate")
+			return FastScanRate;
+		else if(s == "Prioritize layer 3")
+			return PrioritizeLayer3;
+		else
+			return CollectionProfileSize;
+	}
+
+	Q_INVOKABLE QString convertConfig(int c) {
+		switch(c) {
+		case FastScanRate:
+			return "Fast scan rate";
+		case PrioritizeLayer3:
+			return "Prioritize layer 3";
+		default:
+			return "Unknown profile";
+		}
+	}
+
+	Q_INVOKABLE int currentProfile() {
+		return currentCollectionProfile_;
+	}
+
+	Q_INVOKABLE int collectionProfileSize() {
+		return CollectionProfileSize;
 	}
 
 	static Settings* instance();
@@ -74,6 +113,8 @@ public:
 	Q_INVOKABLE void saveSettings();
 
 	Q_INVOKABLE bool shouldReinitializeApi();
+
+	Q_INVOKABLE void setProfile(int collectionProfile);
 
 	rf_phreaker::settings readRpSettings(const std::string &name = "rf_phreaker_api");
 
@@ -86,7 +127,8 @@ public:
 		emit themeAccentColorChanged(themeAccentColor_);
 		emit themeTabHighlightColorChanged(themeTabHighlightColor_);
 		emit measurementRemovalTimeChanged(measurementRemovalTime_);
-		emit convertRfpToAsciiChanged(convertRfpToAscii_);
+        emit convertRpfToAsciiChanged(convertRpfToAscii_);
+		emit addRpfToMapChanged(addRpfToMap_);
 		emit logLevelAppVerbosityChanged(logLevelAppVerbosity_);
 		emit logLevelHardwareVerbosityChanged(logLevelAppVerbosity_);
 		emit loggingGpsChanged(loggingGps_);
@@ -110,7 +152,8 @@ public:
 	QString themeAccentColor_;
 	QString themeTabHighlightColor_;
 	int measurementRemovalTime_;
-	bool convertRfpToAscii_;
+	bool convertRpfToAscii_;
+	bool addRpfToMap_;
 	int logLevelAppVerbosity_;
 	int logLevelHardwareVerbosity_;
 	bool loggingGps_;
@@ -122,13 +165,15 @@ public:
 	int spectrumDwellTime_;
 
 	int cwBinSize_;
-	int cwSpan_;
+	int cwSpanFactor_;
 	int cwDwellTime_;
-	int cwOffset_;
+	int cwOffsetFactor_;
 
 	int iqBandwidth_;
 	int iqSamplingRate_;
 	int iqDwellTime_;
+
+	CollectionProfile currentCollectionProfile_;
 
 private:
 	friend class SettingsIO;

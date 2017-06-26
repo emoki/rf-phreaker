@@ -313,7 +313,8 @@ DSM.StateMachine {
                         Api.closeCollectionFile();
                         if(GuiSettings.convertRfpToAscii)
                             Api.convertRfp(Api.collectionFilename);
-                        MarbleLayerManager.addLayer(Api.collectionFilename);
+                        if(GuiSettings.addRpfToMap)
+                            MarbleLayerManager.addLayer(Api.collectionFilename);
                     }
                     DSM.SignalTransition {
                         targetState: smStopScanning

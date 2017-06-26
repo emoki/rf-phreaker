@@ -74,7 +74,7 @@ Page {
             spacing: dp(0)
 
             Item { height: dp(32); width: page.cardWidth }
-            ListItem.Subheader { text: "Data collection" }
+            ListItem.Subheader { text: "General" }
             Card {
                 width: page.cardWidth
                 height: dataColumn.height
@@ -82,7 +82,28 @@ Page {
                     id: dataColumn
                     width: parent.width
                     height: childrenRect.height
-                    ListItem.Standard {
+                    ListItem.Subtitled {
+                        id: cProfile
+                        text: "Collection profile"
+                        subText: "Changes scan rate and decode parameters based on profile"
+                        secondaryItem: MenuField {
+                            id: cProfileMenu
+                            anchors.centerIn: parent
+                            implicitWidth: dp(16*9)
+                            implicitHeight: parent.height
+                            floatingLabel: false
+                            maxVisibleItems: 6
+                            model: ["Fast scan rate", "Prioritize layer 3"]
+                            function setProfile(index) {
+                                GuiSettings.setProfile(index);
+                            }
+                            Component.onCompleted: {
+                                cProfileMenu.selectedIndex = GuiSettings.currentProfile
+                                cProfileMenu.itemSelected.connect(setProfile)
+                            }
+                        }
+                    }
+                    ListItem.Subtitled {
                         id: graphRemoval
                         text: "Remove old measurements from graphs after"
                         secondaryItem: MenuField {
@@ -143,12 +164,206 @@ Page {
                         }
                     }
                     ListItem.Standard {
-                        id: rfpConversion
-                        text: "Automatically convert RPF files to ASCII."
+                        id: rpfConversion
+                        text: "Automatically convert RPF files to ASCII"
                         secondaryItem: Switch {
                             anchors.centerIn: parent
-                            checked: GuiSettings.convertRfpToAscii
-                            onClicked: GuiSettings.convertRfpToAscii = !GuiSettings.convertRfpToAscii
+                            checked: GuiSettings.convertRpfToAscii
+                            onClicked: GuiSettings.convertRpfToAscii = !GuiSettings.convertRpfToAscii
+                        }
+                    }
+                    ListItem.Standard {
+                        id: rpfAddToMap
+                        text: "Automatically add RPF files to map layer"
+                        secondaryItem: Switch {
+                            anchors.centerIn: parent
+                            checked: GuiSettings.addRpfToMap
+                            onClicked: GuiSettings.addRpfToMap = !GuiSettings.addRpfToMap
+                        }
+                    }
+                }
+            }
+
+            Item { height: dp(32); width: page.cardWidth }
+            ListItem.Subheader { text: "Power Spectrum" }
+            Card {
+                width: page.cardWidth
+                height: spectrumColumn.height
+                Column {
+                    id: spectrumColumn
+                    width: parent.width
+                    height: childrenRect.height
+                    ListItem.Standard {
+                        height: dp(70)
+                        text: "Log spectrum data to file"
+                        secondaryItem: Switch {
+                            anchors.centerIn: parent
+                            checked: GuiSettings.isSpectrumLogged
+                            onClicked: GuiSettings.isSpectrumLogged = !GuiSettings.isSpectrumLogged
+                        }
+                    }
+                    ListItem.Standard {
+                        height: dp(70)
+                        text: "Dwell time"
+                        secondaryItem: Slider {
+                            id: spectrumDwellTimeSlider
+                            anchors.verticalCenter: parent.verticalCenter
+                            anchors.verticalCenterOffset: dp(5)
+                            numericValueLabel: true
+                            tickmarksEnabled: true
+                            stepSize: 5
+                            minimumValue: 10
+                            maximumValue: 60
+                            knobLabel: value + " ms"
+                            alwaysShowValueLabel: true
+                            value: GuiSettings.spectrumDwellTime / 1000000
+                            onValueChanged: GuiSettings.spectrumDwellTime = spectrumDwellTimeSlider.value * 1000000
+                        }
+                    }
+                    ListItem.Standard {
+                        height: dp(70)
+                        text: "Bin size"
+                        secondaryItem: Slider {
+                            id: spectrumBinSizeSlider
+                            anchors.verticalCenter: parent.verticalCenter
+                            anchors.verticalCenterOffset: dp(5)
+                            numericValueLabel: true
+                            tickmarksEnabled: true
+                            stepSize: 1
+                            minimumValue: 1
+                            maximumValue: 20
+                            knobLabel: value + " kHz"
+                            alwaysShowValueLabel: true
+                            value: GuiSettings.spectrumBinSize / 1000
+                            onValueChanged: GuiSettings.spectrumBinSize = spectrumBinSizeSlider.value * 1000
+                        }
+                    }
+                }
+            }
+
+            Item { height: dp(32); width: page.cardWidth }
+            ListItem.Subheader { text: "Carrier Wave" }
+            Card {
+                width: page.cardWidth
+                height: cwColumn.height
+                Column {
+                    id: cwColumn
+                    width: parent.width
+                    height: childrenRect.height
+                    ListItem.Standard {
+                        height: dp(70)
+                        text: "Dwell time"
+                        secondaryItem: Slider {
+                            id: cwDwellTimeSlider
+                            anchors.verticalCenter: parent.verticalCenter
+                            anchors.verticalCenterOffset: dp(5)
+                            numericValueLabel: true
+                            tickmarksEnabled: true
+                            stepSize: 5
+                            minimumValue: 10
+                            maximumValue: 60
+                            knobLabel: value + " ms"
+                            alwaysShowValueLabel: true
+                            value: GuiSettings.cwDwellTime / 1000000
+                            onValueChanged: GuiSettings.cwDwellTime = cwDwellTimeSlider.value * 1000000
+                        }
+                    }
+                    ListItem.Standard {
+                        height: dp(70)
+                        text: "Bandwidth"
+                        secondaryItem: Slider {
+                            id: cwBinSizeSlider
+                            anchors.verticalCenter: parent.verticalCenter
+                            anchors.verticalCenterOffset: dp(5)
+                            numericValueLabel: true
+                            tickmarksEnabled: true
+                            stepSize: .5
+                            minimumValue: .5
+                            maximumValue: 5
+                            knobLabel: value + " kHz"
+                            alwaysShowValueLabel: true
+                            value: GuiSettings.cwBinSize / 1000
+                            onValueChanged: GuiSettings.cwBinSize = cwBinSizeSlider.value * 1000
+                        }
+                    }
+                }
+            }
+
+            Item { height: dp(32); width: page.cardWidth }
+            ListItem.Subheader { text: "IQ Data" }
+            Card {
+                width: page.cardWidth
+                height: iqColumn.height
+                Column {
+                    id: iqColumn
+                    width: parent.width
+                    height: childrenRect.height
+                    ListItem.Standard {
+                        height: dp(70)
+                        text: "Dwell time"
+                        secondaryItem: Slider {
+                            id: iqDwellTimeSlider
+                            anchors.verticalCenter: parent.verticalCenter
+                            anchors.verticalCenterOffset: dp(5)
+                            numericValueLabel: true
+                            tickmarksEnabled: true
+                            stepSize: 5
+                            minimumValue: 10
+                            maximumValue: 100
+                            knobLabel: value + " ms"
+                            alwaysShowValueLabel: true
+                            value: GuiSettings.iqDwellTime / 1000000
+                            onValueChanged: GuiSettings.iqDwellTime = iqDwellTimeSlider.value * 1000000
+                        }
+                    }
+                    ListItem.Subtitled {
+                        height: dp(70)
+                        text: "Bandwidth"
+                        subText: "Valid bandwidth must be lower than sampling rate"
+                        secondaryItem: Slider {
+                            id: iqBandwidthSlider
+                            anchors.verticalCenter: parent.verticalCenter
+                            anchors.verticalCenterOffset: dp(5)
+                            numericValueLabel: true
+                            tickmarksEnabled: false
+                            stepSize: .5
+                            minimumValue: 1.5
+                            maximumValue: 28
+                            knobLabel: value + " mHz"
+                            alwaysShowValueLabel: true
+                            value: GuiSettings.iqBandwidth / 1000000
+                            onValueChanged: {
+                                 if(iqBandwidthSlider.value * 1000000 > GuiSettings.iqSamplingRate) {
+                                     value = GuiSettings.iqSamplingRate / 1000000;
+                                 }
+                                 else
+                                      GuiSettings.iqBandwidth = iqBandwidthSlider.value * 1000000
+                            }
+                        }
+                    }
+                    ListItem.Subtitled {
+                        height: dp(70)
+                        text: "SamplingRate"
+                        subText: "Valid sampling rates range from 0.8 mHz to 40 mHz"
+                        secondaryItem: RowLayout {
+                            anchors.centerIn: parent
+                            TextField {
+                                id: iqSamplingRateText
+                                Layout.alignment: Qt.AlignCenter
+                                validator: DoubleValidator{
+                                    bottom: .8
+                                    top: 40
+                                    decimals: 6
+                                    notation: DoubleValidator.StandardNotation
+                                }
+                                Component.onCompleted: text = GuiSettings.iqSamplingRate / 1000000
+                                onTextChanged: if(acceptableInput) GuiSettings.iqSamplingRate = text.valueOf(text) * 1000000
+                            }
+                            Label {
+                                Layout.alignment: Qt.AlignCenter
+                                style: "body1"
+                                text: "mHz"
+                            }
                         }
                     }
                 }

@@ -22,7 +22,8 @@ static const QString themePrimaryColorKey("theme_primary_color");
 static const QString themeAccentColorkey("theme_accent_color");
 static const QString themeTabHighlightColorKey("theme_tab_highlight_color");
 static const QString measurementRemovalTimeKey("measurement_removal_time");
-static const QString convertRfpToAsciiKey("convert_rfp_to_ascii");
+static const QString convertRpfToAsciiKey("convert_rpf_to_ascii");
+static const QString addRpfToMapKey("add_rpf_to_map");
 static const QString isSpectrumLoggedKey("log_spectrum_to_file");
 static const QString spectrumBinSizeKey("spectrum_bin_size");
 static const QString spectrumDwellTimeKey("spectrum_dwell_time");
@@ -33,6 +34,7 @@ static const QString cwOffsetKey("cw_offset_factor");
 static const QString iqBandwidthKey("iq_bandwidth");
 static const QString iqSamplingRateKey("iq_sampling_rate");
 static const QString iqDwellTimeKey("iq_dwell_time");
+static const QString collectionProfileKey("collectionProfile");
 
 
 class Settings;

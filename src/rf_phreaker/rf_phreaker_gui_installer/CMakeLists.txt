@@ -88,6 +88,14 @@ add_custom_command(TARGET rf_phreaker_build_install POST_BUILD COMMAND ${CMAKE_C
 		${RF_PHREAKER_INSTALLER_BUILD_INSTALL_DIR}/packages/rf_phreaker/data
 )
 add_custom_command(TARGET rf_phreaker_build_install POST_BUILD COMMAND ${CMAKE_COMMAND} -E copy_if_different
+		${CMAKE_SOURCE_DIR}/content/rf_phreaker_api_fast_scan_rate.ini
+		${RF_PHREAKER_INSTALLER_BUILD_INSTALL_DIR}/packages/rf_phreaker/data
+)
+add_custom_command(TARGET rf_phreaker_build_install POST_BUILD COMMAND ${CMAKE_COMMAND} -E copy_if_different
+		${CMAKE_SOURCE_DIR}/content/rf_phreaker_api_prioritize_layer_3.ini
+		${RF_PHREAKER_INSTALLER_BUILD_INSTALL_DIR}/packages/rf_phreaker/data
+)
+add_custom_command(TARGET rf_phreaker_build_install POST_BUILD COMMAND ${CMAKE_COMMAND} -E copy_if_different
 		${CMAKE_SOURCE_DIR}/content/rf_phreaker.kml
 		${RF_PHREAKER_INSTALLER_BUILD_INSTALL_DIR}/packages/rf_phreaker/data
 )
