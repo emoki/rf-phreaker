@@ -353,7 +353,8 @@ public:
 		: max_num_samples_((int)3e6)
 		, min_fft_order_(3)
 		, max_fft_order_(15)
-		, max_bandwidth_(get_upper_scanner_bandwidth(mhz(28)))
+		, max_bandwidth_(mhz(20)) // 2017.6.20 - the calibration routine only goes up to 20 mhz
+		//, max_bandwidth_(/*get_upper_scanner_bandwidth(mhz(28))*/) 
 		, min_sampling_rate_(khz(1500)) // Minimum sampling_rate must be at least 1.5khz to support the lowest scanner bandwidth of 1.5khz
 		, max_sampling_rate_(mhz(32))
 		, num_windows_(10)
