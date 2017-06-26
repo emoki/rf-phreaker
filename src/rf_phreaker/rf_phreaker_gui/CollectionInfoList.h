@@ -162,6 +162,8 @@ public:
 	}
 
 	Q_INVOKABLE bool add(CollectionInfo *info) {
+		if(info == nullptr)
+			return false;
 		beginInsertRows(QModelIndex(), list_.size(), list_.size());
 		auto ci = new CollectionInfo(info->channelFreqLow()->channelFreq(), info->channelFreqHigh()->channelFreq(),
 									 info->channelFreqLow()->tech(), this);
