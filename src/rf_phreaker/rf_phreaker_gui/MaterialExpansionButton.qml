@@ -32,8 +32,6 @@ Item {
             id: icon
             anchors {
                 centerIn: parent
-//                verticalCenter: parent.verticalCenter
-//                left: parent.left
             }
 
             name: "navigation/expand_more"
@@ -64,11 +62,6 @@ Item {
             onClicked: {
                 expBut.clicked()
             }
-        }
-
-        Tooltip {
-            text: tooltipText
-            mouseArea: ink
         }
     }
 }
