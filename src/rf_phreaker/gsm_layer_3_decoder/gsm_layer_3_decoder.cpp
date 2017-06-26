@@ -11,12 +11,13 @@
 #include "rf_phreaker/gsm_layer_3_library/gsm_bit_stream.h"
 #include "rf_phreaker/gsm_layer_3_decoder/gsm_layer_3_utility.h"
 #include "rf_phreaker/common/common_utility.h"
+#include "rf_phreaker/common/log.h"
 #include "rf_phreaker/qt_specific/file_io.h"
 
 using namespace layer_3_information;
 
-gsm_layer_3_decoder::gsm_layer_3_decoder()
-	: debug_(false)
+gsm_layer_3_decoder::gsm_layer_3_decoder(bool output_streams)
+	: debug_(output_streams)
 	, store_text_description_(false) {}
 
 gsm_layer_3_decoder::~gsm_layer_3_decoder() {}
@@ -28,7 +29,7 @@ int32_t gsm_layer_3_decoder::decode_bcch_message(const uint8_t *raw_bits, uint32
 	int32_t status = 0;
 	try
 	{
-		message.raw_layer_3_.emplace_back(bit_stream(raw_bits, num_of_bytes, unused_bits));
+		message.update_raw_layer_3(bit_stream(raw_bits, num_of_bytes, unused_bits));
 
 		gsm_bit_stream bits(raw_bits, num_of_bytes, unused_bits);
 
@@ -333,8 +334,8 @@ int32_t gsm_layer_3_decoder::decode_bcch_message(const uint8_t *raw_bits, uint32
 	}
 	catch(const std::exception &err)
 	{
-        std::cout << err.what();
-		status = -1;
+		LOG(LERROR) << err.what();
+		status = -2;
 	}
 	return status;
 }

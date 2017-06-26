@@ -35,7 +35,7 @@ class gsm_layer_3_container;
 class DLL_PUBLIC gsm_layer_3_decoder
 {
 public:
-	gsm_layer_3_decoder();
+	gsm_layer_3_decoder(bool output_streams = false);
 
 	~gsm_layer_3_decoder();
 

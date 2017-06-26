@@ -40,7 +40,7 @@ class lte_bcch_sch_message;
 class DLL_PUBLIC umts_asn1_decoder
 {
 public:
-	umts_asn1_decoder();
+	umts_asn1_decoder(bool output_streams = false);
 	~umts_asn1_decoder();
 	
 	int specify_sibs_for_decoding(const layer_3_information::pdu_element_type *elements, size_t num_elements);

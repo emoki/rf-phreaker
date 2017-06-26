@@ -37,7 +37,7 @@ class lte_bcch_dl_sch_message;
 class DLL_PUBLIC lte_asn1_decoder
 {
 public:
-	lte_asn1_decoder();
+	lte_asn1_decoder(bool output_streams = false);
 	~lte_asn1_decoder();
 	
 	int decode_bcch_bch_message(const uint8_t* bit_stream, uint32_t num_of_bytes, uint32_t unused_bits, layer_3_information::lte_rrc_message_aggregate &message);

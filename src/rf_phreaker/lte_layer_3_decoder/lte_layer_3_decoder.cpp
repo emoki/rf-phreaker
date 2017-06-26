@@ -5,14 +5,14 @@
 #include "rf_phreaker/lte_layer_3_decoder/lte_layer_3_decoder.h"
 #include "rf_phreaker/lte_layer_3_decoder/lte_bcch_dl_sch_message.h"
 #include "rf_phreaker/common/common_utility.h"
-
+#include "rf_phreaker/common/log.h"
 #include <fstream>
 
 using namespace layer_3_information;
 
-lte_asn1_decoder::lte_asn1_decoder()
+lte_asn1_decoder::lte_asn1_decoder(bool output_streams)
 : lte_bcch_bch_message_(new lte_bcch_dl_sch_message)
-, debug_(false) {}
+, debug_(output_streams) {}
 
 
 lte_asn1_decoder::~lte_asn1_decoder()
@@ -25,7 +25,7 @@ int lte_asn1_decoder::decode_bcch_bch_message(const uint8_t* raw_bits, uint32_t 
 	int status = 0;
 	try {
 		message.clear();
-		message.raw_layer_3_.emplace_back(bit_stream(raw_bits, num_of_bytes, unused_bits));
+
 		bit_stream_container bits(raw_bits, num_of_bytes, unused_bits);
 
 		if(debug_) {
@@ -34,11 +34,14 @@ int lte_asn1_decoder::decode_bcch_bch_message(const uint8_t* raw_bits, uint32_t 
 		}
 
 		lte_bcch_bch_message_->populate_data(bits, message);
+
+		auto unused_bits = lte_bcch_bch_message_->bits_consumed() ? lte_bcch_bch_message_->bits_consumed() % 8 : 0;
+		message.update_raw_layer_3(bit_stream(raw_bits, lte_bcch_bch_message_->bytes_consumed(), unused_bits));
 	}
 	catch(const std::exception &err)
 	{
-        std::cout << err.what();
-		status = -1;
+		LOG(LERROR) << err.what();
+		status = -2;
 	}
 	return status;
 }

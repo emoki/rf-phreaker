@@ -5,12 +5,13 @@
 #include "rf_phreaker/umts_layer_3_decoder/umts_layer_3_decoder.h"
 #include "rf_phreaker/umts_layer_3_decoder/umts_bcch_bch_message.h"
 #include "rf_phreaker/common/common_utility.h"
+#include "rf_phreaker/common/log.h"
 
 using namespace layer_3_information;
 
-umts_asn1_decoder::umts_asn1_decoder()
+umts_asn1_decoder::umts_asn1_decoder(bool output_streams)
 	: umts_bcch_bch_message_(new umts_bcch_bch_message)
-	, debug_(false) {}
+	, debug_(output_streams) {}
 
 umts_asn1_decoder::~umts_asn1_decoder()
 {
@@ -34,7 +35,7 @@ int umts_asn1_decoder::specify_sibs_for_decoding(const pdu_element_type *element
 	}
 	catch(const std::exception &err)
 	{
-        std::cout << err.what();
+		LOG(LERROR) << err.what();
 		status = -1;
 	}
 
@@ -47,7 +48,6 @@ int umts_asn1_decoder::decode_bcch_bch_message(const uint8_t* raw_bits, uint32_t
 	try
 	{
 		message.clear();
-		message.raw_layer_3_.emplace_back(bit_stream(raw_bits, num_of_bytes, unused_bits));
 		bit_stream_container bits(raw_bits, num_of_bytes, unused_bits);
 
 		if(debug_) {
@@ -56,11 +56,14 @@ int umts_asn1_decoder::decode_bcch_bch_message(const uint8_t* raw_bits, uint32_t
 		}
 
 		umts_bcch_bch_message_->populate_data(bits, message);
+
+		auto unused_bits = umts_bcch_bch_message_->bits_consumed() ? umts_bcch_bch_message_->bits_consumed() % 8 : 0;
+		message.update_raw_layer_3(bit_stream(raw_bits, umts_bcch_bch_message_->bytes_consumed(), unused_bits));
 	}
 	catch(const std::exception &err)
 	{
-        std::cout << err.what();
-		status = -1;
+		LOG(LERROR) << err.what();
+		status = -2;
 	}
 	return status;
 }
