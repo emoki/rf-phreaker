@@ -18,3 +18,8 @@ bool umts_system_information_container::does_sib_type_match(sib_type sib)
 {
 	return sib_type_ == sib;
 }
+
+void umts_system_information_container::parse_data(umts_bcch_bch_message_aggregate &message) {
+	// Do nothing.  There are multiple sibs where we only dump their description and don't need
+	// to parse anything.
+}

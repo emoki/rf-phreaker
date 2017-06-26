@@ -26,48 +26,138 @@ umts_bcch_bch_message::~umts_bcch_bch_message(void)
 
 void umts_bcch_bch_message::set_system_information_to_decode(const std::vector<pdu_element_type> &pdu_elements)
 {
+	// Most of the sibs commented out actually take the place of sibs already there.  For example, sib 11 and sib 11 bis
+	// are both scheduled under the SIB_Type_systemInformationBlockType11, which sib is actually there depends on what 
+	// the layer 3 scheduling.  Since we're not going to parse thru all of it, we try decoding both.
 	system_information_to_decode_.clear();
 
 	for(auto it = pdu_elements.begin(); it != pdu_elements.end(); it++)
 	{
 		switch(*it)
 		{
-		case umts_mib:
-			system_information_to_decode_.push_back(boost::shared_ptr<umts_system_information_container>(new umts_mib_container));
-			break;
-
-		case umts_sib1:
-			system_information_to_decode_.push_back(boost::shared_ptr<umts_system_information_container>(new umts_sib_1_container));
-			break;
-
-		case umts_sib2:
-//			system_information_to_decode_.push_back(boost::shared_ptr<umts_system_information_container>(new umts_sib_2_container));
-			break;
-
-		case umts_sib3:
-			system_information_to_decode_.push_back(boost::shared_ptr<umts_system_information_container>(new umts_sib_3_container));
-			break;
-
-		case umts_sib4:
-			system_information_to_decode_.push_back(boost::shared_ptr<umts_system_information_container>(new umts_sib_4_container));
-			break;
-
-		case umts_sib11:
-		case umts_sib11_bis:
-			if(find_available_system_information(SIB_Type_systemInformationBlockType11) == nullptr)
-				system_information_to_decode_.push_back(boost::shared_ptr<umts_system_information_container>(new umts_sib_11_and_11_bis_container));
-			break;
-
-		case umts_sib18:
-			system_information_to_decode_.push_back(boost::shared_ptr<umts_system_information_container>(new umts_sib_18_container));
-			break;
-
 		case umts_bcch_bch:
 			// umts_bcch_bch is always decoded - no need to specify pdu.
 			break;
+		case umts_mib:
+			system_information_to_decode_.push_back(boost::shared_ptr<umts_system_information_container>(new umts_mib_container));
+			break;
+		case umts_sib1:
+			system_information_to_decode_.push_back(boost::shared_ptr<umts_system_information_container>(new umts_sib_1_container));
+			break;
+		case umts_sib2:
+			system_information_to_decode_.push_back(boost::shared_ptr<umts_system_information_container>(new umts_sib_2_container));
+			break;
+		case umts_sib3:
+			system_information_to_decode_.push_back(boost::shared_ptr<umts_system_information_container>(new umts_sib_3_container));
+			break;
+		case umts_sib4:
+			system_information_to_decode_.push_back(boost::shared_ptr<umts_system_information_container>(new umts_sib_4_container));
+			break;
+		case umts_sib5:
+			system_information_to_decode_.push_back(boost::shared_ptr<umts_system_information_container>(new umts_sib_5_container));
+			break;
+		case umts_sib5bis:
+			system_information_to_decode_.push_back(boost::shared_ptr<umts_system_information_container>(new umts_sib_5bis_container));
+			break;
+		case umts_sib6:
+			system_information_to_decode_.push_back(boost::shared_ptr<umts_system_information_container>(new umts_sib_6_container));
+			break;
+		case umts_sib7:
+			system_information_to_decode_.push_back(boost::shared_ptr<umts_system_information_container>(new umts_sib_7_container));
+			break;
+		case umts_sib11:
+			if(find_available_system_information(SIB_Type_systemInformationBlockType11) == nullptr)
+				system_information_to_decode_.push_back(boost::shared_ptr<umts_system_information_container>(new umts_sib_11_and_11_bis_container));
+			break;
+		//case umts_sib11_bis:
+		//	if(find_available_system_information(SIB_Type_systemInformationBlockType11) == nullptr)
+		//		system_information_to_decode_.push_back(boost::shared_ptr<umts_system_information_container>(new umts_sib_11_and_11_bis_container));
+		//	break;
+		case umts_sib12:
+			system_information_to_decode_.push_back(boost::shared_ptr<umts_system_information_container>(new umts_sib_12_container));
+			break;
+		case umts_sib13:
+			system_information_to_decode_.push_back(boost::shared_ptr<umts_system_information_container>(new umts_sib_13_container));
+			break;
+		case umts_sib13_1:
+			system_information_to_decode_.push_back(boost::shared_ptr<umts_system_information_container>(new umts_sib_13_1_container));
+			break;
+		case umts_sib13_2:
+			system_information_to_decode_.push_back(boost::shared_ptr<umts_system_information_container>(new umts_sib_13_2_container));
+			break;
+		case umts_sib13_3:
+			system_information_to_decode_.push_back(boost::shared_ptr<umts_system_information_container>(new umts_sib_13_3_container));
+			break;
+		case umts_sib13_4:
+			system_information_to_decode_.push_back(boost::shared_ptr<umts_system_information_container>(new umts_sib_13_4_container));
+			break;
+		case umts_sib14:
+			system_information_to_decode_.push_back(boost::shared_ptr<umts_system_information_container>(new umts_sib_14_container));
+			break;
+		case umts_sib15:
+			system_information_to_decode_.push_back(boost::shared_ptr<umts_system_information_container>(new umts_sib_15_container));
+			break;
+		//case umts_sib15bis:
+		//	system_information_to_decode_.push_back(boost::shared_ptr<umts_system_information_container>(new umts_sib_15bis_container));
+		//	break;
+		case umts_sib15_1:
+			system_information_to_decode_.push_back(boost::shared_ptr<umts_system_information_container>(new umts_sib_15_1_container));
+			break;
+		case umts_sib15_2:
+			system_information_to_decode_.push_back(boost::shared_ptr<umts_system_information_container>(new umts_sib_15_2_container));
+			break;
+		//case umts_sib15_2bis:
+		//	system_information_to_decode_.push_back(boost::shared_ptr<umts_system_information_container>(new umts_sib_15_2bis_container));
+		//	break;
+		//case umts_sib15_2ter:
+		//	system_information_to_decode_.push_back(boost::shared_ptr<umts_system_information_container>(new umts_sib_15_2ter_container));
+		//	break;
+		case umts_sib15_3:
+			system_information_to_decode_.push_back(boost::shared_ptr<umts_system_information_container>(new umts_sib_15_3_container));
+			break;
+		//case umts_sib15_3bis:
+		//	system_information_to_decode_.push_back(boost::shared_ptr<umts_system_information_container>(new umts_sib_15_3bis_container));
+		//	break;
+		case umts_sib15_4:
+			system_information_to_decode_.push_back(boost::shared_ptr<umts_system_information_container>(new umts_sib_15_4_container));
+			break;
+		case umts_sib15_5:
+			system_information_to_decode_.push_back(boost::shared_ptr<umts_system_information_container>(new umts_sib_15_5_container));
+			break;
+		//case umts_sib15_6:
+		//	system_information_to_decode_.push_back(boost::shared_ptr<umts_system_information_container>(new umts_sib_15_6_container));
+		//	break;
+		//case umts_sib15_7:
+		//	system_information_to_decode_.push_back(boost::shared_ptr<umts_system_information_container>(new umts_sib_15_7_container));
+		//	break;
+		//case umts_sib15_8:
+		//	system_information_to_decode_.push_back(boost::shared_ptr<umts_system_information_container>(new umts_sib_15_8_container));
+		//	break;
+		case umts_sib16:
+			system_information_to_decode_.push_back(boost::shared_ptr<umts_system_information_container>(new umts_sib_16_container));
+			break;
+		case umts_sib17:
+			system_information_to_decode_.push_back(boost::shared_ptr<umts_system_information_container>(new umts_sib_17_container));
+			break;
+		case umts_sib18:
+			system_information_to_decode_.push_back(boost::shared_ptr<umts_system_information_container>(new umts_sib_18_container));
+			break;
+		//case umts_sib19:
+		//	system_information_to_decode_.push_back(boost::shared_ptr<umts_system_information_container>(new umts_sib_19_container));
+		//	break;
+		//case umts_sib20:
+		//	system_information_to_decode_.push_back(boost::shared_ptr<umts_system_information_container>(new umts_sib_20_container));
+		//	break;
+		case umts_scheduling_block1:
+			system_information_to_decode_.push_back(boost::shared_ptr<umts_system_information_container>(new umts_scheduling_block_1_container));
+			break;
+		case umts_scheduling_block2:
+			system_information_to_decode_.push_back(boost::shared_ptr<umts_system_information_container>(new umts_scheduling_block_2_container));
+			break;
 
 		default:
-			throw(std::invalid_argument("Unknown or incompatible pdu element specified for decoding UMTS layer 3."));
+			; // Ignore unknown pdus for now.
+			//throw(std::invalid_argument("Unknown or incompatible pdu element specified for decoding UMTS layer 3."));
 		}
 	}
 }
@@ -211,14 +301,12 @@ void umts_bcch_bch_message::handle_complete_sib_list(const CompleteSIB_List_t &c
 	}
 }
 
-umts_system_information_container *umts_bcch_bch_message::find_available_system_information(sib_type sib)
-{
+umts_system_information_container *umts_bcch_bch_message::find_available_system_information(sib_type sib) {
 	umts_system_information_container *sys_info = nullptr;
-	for(auto it = system_information_to_decode_.begin(); it != system_information_to_decode_.end(); it++)
-	{
+	for(auto it = system_information_to_decode_.begin(); it != system_information_to_decode_.end(); it++) {
 		if((*it)->does_sib_type_match(sib))
 			sys_info = it->get();
-	}	
+	}
 	return sys_info;
 }
 
