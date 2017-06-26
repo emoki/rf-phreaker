@@ -44,7 +44,7 @@ public:
 	SettingsIO()
 		: qs_(QSettings::IniFormat, QSettings::UserScope, "rf_phreaker", "gui") {
 		if(!QFile(qs_.fileName()).exists())
-			qWarning() << "Unable to access or find the configuration file!  Settings will be set to default.";
+			qCritical() << "Unable to access or find the configuration file!  Settings will be set to default.";
 	}
 
 	void readSettings(Settings &settings);
