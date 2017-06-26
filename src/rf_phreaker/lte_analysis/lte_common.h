@@ -1,5 +1,6 @@
 #pragma once
 
+#include "rf_phreaker/common/ipp_array.h"
 #include "rf_phreaker/lte_analysis/lte_types.h"
 #include "rf_phreaker/lte_analysis/lte_errors.h"
 #include "rf_phreaker/lte_analysis/lte_measurement.h"
@@ -50,7 +51,7 @@ void LTE_CC_decoding(unsigned int *bitSeq, Ipp32f* inLLR, unsigned int inLen);
 void multMatVect_fc(Ipp32fc *destVec, Ipp32fc *srcMat, unsigned int rows,
 	unsigned int cols, Ipp32fc *srcVec);
 
-void multMatVect_fc_fast(Ipp32fc *destVec, Ipp32fc *srcMat, unsigned int rows,
+void multMatVect_fc_fast(ipp_32fc_array &destVec, ipp_32fc_array &srcMat, unsigned int rows,
 	unsigned int cols, Ipp32fc *srcVec);
 
 void stDiversityDet(Ipp32f* detLLR, Ipp32fc* signalF, Ipp32fc* H, unsigned int subcarrierNum,

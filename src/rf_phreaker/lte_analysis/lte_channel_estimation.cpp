@@ -7,6 +7,7 @@
 #include "q_channel.h"
 #include "lte_channel_estimation.h"
 #include "lte_common.h"
+#include "rf_phreaker/common/log.h"
 
 namespace rf_phreaker {
 
@@ -918,36 +919,34 @@ void LteNoiseVarEst(Ipp32f* noiseVar, Ipp32fc* H, CYCLICPREFIX cyclicPrefixMode,
 		numSymbsPerSubframe = 12;
 	}
 
-	Ipp32fc* H1 = ippsMalloc_32fc(numSymbsPerSubframe*subframesToProcess*useSubCarriers);
-
+	ipp_32fc_array H1(numSymbsPerSubframe*subframesToProcess*useSubCarriers);
 	for(unsigned int ii=0;ii<subframesToProcess;ii++)
 	{
 		for(unsigned int jj=0;jj<numSymbsPerSubframe;jj++)
 		{
-//			printf("jj = %d\n", jj);
 			for(unsigned int kk=0;kk<useSubCarriers/2;kk++)
 			{
-				H1[ii*numSymbsPerSubframe*useSubCarriers+jj*useSubCarriers+kk].re = 
-					H[14*ii*FFTSize+jj*FFTSize+FFTSize/2-useSubCarriers/2].re;
-				H1[ii*numSymbsPerSubframe*useSubCarriers+jj*useSubCarriers+kk].im = 
-					H[14*ii*FFTSize+jj*FFTSize+FFTSize/2-useSubCarriers/2].im;
+				auto h1_pos = ii*numSymbsPerSubframe*useSubCarriers + jj*useSubCarriers + kk;
+				auto h_pos = 14 * ii*FFTSize + jj*FFTSize + FFTSize / 2 - useSubCarriers / 2;
+				H1[h1_pos] = H[h_pos];
 
-				H1[ii*numSymbsPerSubframe*useSubCarriers+jj*useSubCarriers+kk+useSubCarriers/2].re = 
-					H[14*ii*FFTSize+jj*FFTSize+kk+FFTSize/2+1].re;
-				H1[ii*numSymbsPerSubframe*useSubCarriers+jj*useSubCarriers+kk+useSubCarriers/2].im = 
-					H[14*ii*FFTSize+jj*FFTSize+kk+FFTSize/2+1].im;
+				auto h1_pos2 = h1_pos + useSubCarriers / 2;
+				auto h_pos2 = 14 * ii*FFTSize + jj*FFTSize + kk + FFTSize / 2 + 1;
+				H1[h1_pos2] = H[h_pos2];
 			}
 		}
 	}
 
 	//Q matrix can be precomputed to reduce complexity
-	Ipp32fc* QmatConj; // = ippsMalloc_32fc(useSubCarriers*useSubCarriers); 
-	//GetQmat(QmatConj, DLBW); //TODO::
-	
-	//QmatConj = QcChannelP[DLBW]; --Temporarily commented to work for other DLBW values -Raj,4 Oct 2011
-	QmatConj = QcChannelP[0];//--Hardcoded DLBW == 0 -Raj,4 Oct 2011
+	ipp_32fc_array qmat(useSubCarriers*useSubCarriers); 
+	//GetQmat(qmat.get(), FFTSize, useSubCarriers, curCPLen); 
 
-	Ipp32fc* vec1 = ippsMalloc_32fc(useSubCarriers); 
+	qmat.copy(QcChannelP[0], 5184);
+	Ipp32fc *tqmat = QcChannelP[0];//--Hardcoded DLBW == 0 -Raj,4 Oct 2011
+
+	//QmatConj = QcChannelP[DLBW]; --Temporarily commented to work for other DLBW values -Raj,4 Oct 2011
+	//QmatConj = QcChannelP[0];//--Hardcoded DLBW == 0 -Raj,4 Oct 2011
+	ipp_32fc_array vec1(useSubCarriers); 
 
 	for(unsigned int ii=0;ii<subframesToProcess;ii++)
 	{
@@ -955,8 +954,8 @@ void LteNoiseVarEst(Ipp32f* noiseVar, Ipp32fc* H, CYCLICPREFIX cyclicPrefixMode,
 
 		for(unsigned int jj=0;jj<numSymbsPerSubframe;jj++)
 		{
-			multMatVect_fc_fast(vec1, QmatConj, useSubCarriers, useSubCarriers, 
-				H1+ii*numSymbsPerSubframe*useSubCarriers+jj*useSubCarriers);
+			multMatVect_fc_fast(vec1, qmat, useSubCarriers, useSubCarriers,
+				H1.get(ii*numSymbsPerSubframe*useSubCarriers+jj*useSubCarriers));
 
 			for(unsigned int kk=curCPLen;kk<useSubCarriers;kk++)
 			{
@@ -972,27 +971,24 @@ void LteNoiseVarEst(Ipp32f* noiseVar, Ipp32fc* H, CYCLICPREFIX cyclicPrefixMode,
 
 		ii = ii+5;
 	}
-
-	ippsFree(H1);
-	ippsFree(vec1);
-	
 }
 
 
-/*
+
 void GetQmat(Ipp32fc *QmatConj, unsigned int FFTSize, unsigned int useSubCarriers, 
 	unsigned int curCPLen) //TODO::
 {
 	unsigned int row = 0;
 	
-	Ipp32fc *subFMat = ippsMalloc_32fc(useSubCarriers*curCPLen);
-	
+	ipp_32fc_array subFMat(useSubCarriers*curCPLen);
+
 	for(unsigned int ii=FFTSize/2-useSubCarriers/2;ii<FFTSize/2;ii++)
 	{
 		for(unsigned int jj=0;jj<curCPLen;jj++)
 		{
-			subFMat[row*curCPLen+jj].re = cos(2*PI*ii*jj/FFTSize);
-			subFMat[row*curCPLen+jj].im = sin(-2*PI*ii*jj/FFTSize);
+			auto pos = row*curCPLen + jj;
+			subFMat[pos].re = cos(2*PI*ii*jj/FFTSize);
+			subFMat[pos].im = sin(-2*PI*ii*jj/FFTSize);
 		}
 		row++;
 	}
@@ -1001,14 +997,15 @@ void GetQmat(Ipp32fc *QmatConj, unsigned int FFTSize, unsigned int useSubCarrier
 	{
 		for(unsigned int jj=0;jj<curCPLen;jj++)
 		{
-			subFMat[row*curCPLen+jj].re = cos(2*PI*ii*jj/FFTSize);
-			subFMat[row*curCPLen+jj].im = sin(-2*PI*ii*jj/FFTSize);
+			auto pos = row*curCPLen + jj;
+			subFMat[pos].re = cos(2*PI*ii*jj/FFTSize);
+			subFMat[pos].im = sin(-2*PI*ii*jj/FFTSize);
 		}
 		row++;
 	}
-
-	
-}*/
+	int i = 0;
+	//subFMat.output_text("subFMat.txt");
+}
 
 
 
@@ -1162,7 +1159,7 @@ void LteChannelEst(Ipp32fc* H, Ipp32f* pVar, Ipp32fc* inSignal,
 		2*RBNumRx, cyclicPrefixMode, useSubCarriers, FFTSize, subframesToProcess);
 
 clock_t begin_nvar=clock();	
-	LteNoiseVarEst(pVar, H, cyclicPrefixMode, useSubCarriers, FFTSize, 
+	LteNoiseVarEst(pVar, H, cyclicPrefixMode, useSubCarriers, FFTSize,
     	RBNumRx, subframesToProcess, DLBW); //average noise variance  estimate
 clock_t end_nvar=clock();
 //std::cout << "Lte Noise Var Time elapsed: " << lte_diffclock(end_nvar,begin_nvar) << " ms\n";
