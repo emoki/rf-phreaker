@@ -111,7 +111,7 @@ Page {
                             anchors.centerIn: parent
                             implicitWidth: dp(16*8)
                             implicitHeight: parent.height
-                            model: [ "1 second", "15 seconds", "30 seconds", "1 minute", "5 minutes", "Never"]
+                            model: [ "5 second", "15 seconds", "30 seconds", "1 minute", "5 minutes", "Never"]
                             floatingLabel: false
                             maxVisibleItems: 6
                             function setMeasurementRemovalTime(index) {
@@ -123,7 +123,7 @@ Page {
                             }
                             function convertValue(value) {
                                 switch(value) {
-                                case 1:
+                                case 5:
                                     return 0;
                                 case 15:
                                     return 1;
@@ -144,7 +144,7 @@ Page {
                             function convertIndex(index) {
                                 switch(index) {
                                 case 0:
-                                    return 1;
+                                    return 5;
                                 case 1:
                                     return 15;
                                 case 2:
