@@ -30,6 +30,19 @@ struct power_spectrum_spec {
 	int32_t window_length_;
 	int32_t num_windows_;
 	int64_t identifier_;
+
+	bool is_cw() const {
+		return is_cw(*this);
+	}
+	bool is_power_spectrum() const {
+		return !is_power_spectrum(*this);
+	}
+	static bool is_cw(const power_spectrum_spec &spec) {
+		return spec.identifier_ < SPECTRUM_MIN_IDENTIFIER;
+	}
+	static bool is_power_spectrum(const power_spectrum_spec &spec) {
+		return !is_cw(spec);
+	}
 };
 
 enum scheduling_algorithm_type {

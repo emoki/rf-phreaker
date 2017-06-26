@@ -379,7 +379,7 @@ bool Api::event(QEvent *e) {
 		}
 		case rf_phreaker::protobuf::rp_update::UpdateCase::kPowerSpectrum: {
 			auto t = update_pb_.get_power_spectrum();
-			if(t.params_.identifier_ >= SPECTRUM_MIN_IDENTIFIER) {
+			if(t.params_.is_power_spectrum()){
 				spectrumManager_.update(std::move(t));
 			}
 			else {

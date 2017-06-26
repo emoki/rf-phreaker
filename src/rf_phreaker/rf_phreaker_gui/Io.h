@@ -51,7 +51,7 @@ public:
 			break;
 		case rf_phreaker::protobuf::rp_update::UpdateCase::kPowerSpectrum: {
 			auto spec = update_pb.get_power_spectrum();
-			if(spec.params_.identifier_ > SPECTRUM_MIN_IDENTIFIER) {
+			if(spec.params_.is_power_spectrum()) {
 				output_data(rf_phreaker::protobuf::rp_update::kPowerSpectrumFieldNumber, filename.toStdString() + "_" + "power_spectrum", spec, g);
 			}
 			else {
@@ -168,7 +168,7 @@ public:
 					break;
 				case rf_phreaker::protobuf::rp_update::UpdateCase::kPowerSpectrum: {
 						auto spec = message.get_power_spectrum();
-						if(spec.params_.identifier_ > SPECTRUM_MIN_IDENTIFIER)
+						if(spec.params_.is_power_spectrum())
 							io.output_data(rf_phreaker::protobuf::rp_update::kPowerSpectrumFieldNumber, filename.toStdString() + "_converted_" + "power_spectrum", spec, gps);
 						else
 							io.output_data(rf_phreaker::protobuf::rp_update::kPowerSpectrumFieldNumber, filename.toStdString() + "_converted_" + "cw", spec, gps);
