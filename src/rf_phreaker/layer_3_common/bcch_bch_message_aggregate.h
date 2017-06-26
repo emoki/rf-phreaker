@@ -97,12 +97,20 @@ public:
 			lac_ = a.lac_;
 		if(a.is_cid_decoded())
 			cid_ = a.cid_;
-		for (auto &i : a.raw_layer_3_) {
-			auto hash = i.hash_value();
-			if(raw_layer_3_lookup_.find(hash) == raw_layer_3_lookup_.end()) {
-				raw_layer_3_.push_back(i);
-				raw_layer_3_lookup_[hash] = raw_layer_3_.size() - 1;
-			}
+		update_raw_layer_3(a.raw_layer_3_);
+	}
+
+	virtual void update_raw_layer_3(const std::vector<bit_stream> &raw) {
+		for(auto &i : raw){
+			update_raw_layer_3(i);
+		}
+	}
+
+	virtual void update_raw_layer_3(const bit_stream &raw) {
+		auto hash = raw.hash_value();
+		if(raw_layer_3_lookup_.find(hash) == raw_layer_3_lookup_.end()) {
+			raw_layer_3_.push_back(raw);
+			raw_layer_3_lookup_[hash] = raw_layer_3_.size() - 1;
 		}
 	}
 
