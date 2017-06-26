@@ -21,13 +21,13 @@ void calibration::clear() {
 rf_switch_setting calibration::get_rf_switch(frequency_type freq, bandwidth_type bw) const {
 	auto it = rf_switches_.lower_bound(bw);
 	if(it == rf_switches_.end()) {
-		LOG(LDEBUG) << "Bandwidth (" << bw / 1e6 << " mhz) or higher not found within RF switch settings.  Using default switch setting.";
+		LOG(LERROR) << "Bandwidth (" << bw / 1e6 << " mhz) or higher not found within RF switch settings.  Using default switch setting.";
 		return rf_switch_setting{};
 	}
 	else {
 		auto freq_it = it->second.lower_bound(freq);
 		if(freq_it == it->second.end()) {
-			LOG(LDEBUG) << "Frequency (" << freq / 1e6 << " mhz) not found within RF switch settings.  Using default switch setting.";
+			LOG(LERROR) << "Frequency (" << freq / 1e6 << " mhz) not found within RF switch settings.  Using default switch setting.";
 			return rf_switch_setting{};
 		}
 		else {
@@ -39,7 +39,7 @@ rf_switch_setting calibration::get_rf_switch(frequency_type freq, bandwidth_type
 double calibration::get_rf_board_adjustment(frequency_type freq, bandwidth_type bw) const {
 	auto sw = get_rf_switch(freq, bw);
 	if(sw.identifier_ == 0) {
-		LOG(LDEBUG) << "RF switch setting's identifer is zero.";
+		LOG(LERROR) << "RF switch setting's identifer is zero.";
 		return 0;
 	}
 	else {
@@ -48,7 +48,7 @@ double calibration::get_rf_board_adjustment(frequency_type freq, bandwidth_type 
 			return adj_it->second.adj_.find_adjustment(freq);
 		}
 		else {
-			LOG(LDEBUG) << "RF board adjustment value not found for frequency (" << freq / 1e6 << " mhz and bandwidth (" << bw / 1e6 << ").";
+			LOG(LERROR) << "RF board adjustment value not found for frequency (" << freq / 1e6 << " mhz and bandwidth (" << bw / 1e6 << ").";
 			return 0;
 		}
 	}
@@ -57,7 +57,7 @@ double calibration::get_rf_board_adjustment(frequency_type freq, bandwidth_type 
 double calibration::get_nuand_adjustment(lms::lna_gain_enum gain, frequency_type freq) const {
 	auto it = nuand_adjustments_.find(gain);
 	if(it == nuand_adjustments_.end()) {
-		LOG(LDEBUG) << "LNA gain adjustment (" << lms::to_string(gain) << ") not found within adjustment table.";
+		LOG(LERROR) << "LNA gain adjustment (" << lms::to_string(gain) << ") not found within adjustment table.";
 		return 0;
 	}
 	return it->second.adj_.find_adjustment(freq);
@@ -66,7 +66,7 @@ double calibration::get_nuand_adjustment(lms::lna_gain_enum gain, frequency_type
 rf_adjustment calibration::get_rf_board_adjustments(frequency_type freq, bandwidth_type bw, bandwidth_type calibration_width) const {
 	auto sw = get_rf_switch(freq, bw);
 	if(sw.identifier_ == 0) {
-		LOG(LDEBUG) << "RF switch setting's identifer is zero.";
+		LOG(LERROR) << "RF switch setting's identifer is zero.";
 		return rf_adjustment{};
 	}
 	else {
@@ -75,7 +75,7 @@ rf_adjustment calibration::get_rf_board_adjustments(frequency_type freq, bandwid
 			return adj_it->second.adj_.create_rf_adjustment(freq, calibration_width);
 		}
 		else {
-			LOG(LDEBUG) << "RF board adjustments not found for frequency (" << freq / 1e6 << " mhz and bandwidth (" << bw / 1e6 << ").";
+			LOG(LERROR) << "RF board adjustments not found for frequency (" << freq / 1e6 << " mhz and bandwidth (" << bw / 1e6 << ").";
 			return rf_adjustment{};
 		}
 	}
@@ -84,7 +84,7 @@ rf_adjustment calibration::get_rf_board_adjustments(frequency_type freq, bandwid
 rf_adjustment calibration::get_nuand_adjustments(lms::lna_gain_enum gain, frequency_type freq, bandwidth_type calibration_width) const {
 	auto it = nuand_adjustments_.find(gain);
 	if(it == nuand_adjustments_.end()) {
-		LOG(LDEBUG) << "LNA gain adjustment (" << lms::to_string(gain) << ") not found within adjustment table.";
+		LOG(LERROR) << "LNA gain adjustment (" << lms::to_string(gain) << ") not found within adjustment table.";
 		return rf_adjustment{};
 	}
 	return it->second.adj_.create_rf_adjustment(freq, calibration_width);
