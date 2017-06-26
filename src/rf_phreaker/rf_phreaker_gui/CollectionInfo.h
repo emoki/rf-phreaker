@@ -13,6 +13,9 @@ class CollectionInfo : public QObject
 	Q_PROPERTY(bool isGsm READ isGsm NOTIFY channelFreqLowChanged)
 	Q_PROPERTY(bool isWcdma READ isWcdma NOTIFY channelFreqLowChanged)
 	Q_PROPERTY(bool isLte READ isLte NOTIFY channelFreqLowChanged)
+	Q_PROPERTY(bool isSpectrum READ isSpectrum NOTIFY channelFreqLowChanged)
+	Q_PROPERTY(bool isCw READ isCw NOTIFY channelFreqLowChanged)
+	Q_PROPERTY(bool isIq READ isIq NOTIFY channelFreqLowChanged)
 	Q_PROPERTY(QString infoStr READ toInfoStr NOTIFY infoChanged)
 
 	Q_PROPERTY(QString channels READ toChannelsStr NOTIFY infoChanged)

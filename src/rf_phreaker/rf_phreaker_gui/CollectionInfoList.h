@@ -21,6 +21,9 @@ public:
 		ISGSM,
 		ISWCDMA,
 		ISLTE,
+		ISSPECTRUM,
+		ISCW,
+		ISIQ,
 		RADIOTYPE,
 		MAXCOLUMNS
 	};
@@ -37,6 +40,9 @@ public:
 		roleNames_[ISGSM] = "isGsm";
 		roleNames_[ISWCDMA] = "isWcdma";
 		roleNames_[ISLTE] = "isLte";
+		roleNames_[ISSPECTRUM] = "isSpectrum";
+		roleNames_[ISCW] = "isCw";
+		roleNames_[ISIQ] = "isIq";
 		roleNames_[RADIOTYPE] = "radioType";
 	}
 
@@ -69,6 +75,12 @@ public:
 				 return "Is Wcdma";
 			 case ISLTE:
 				 return "Is Lte";
+			 case ISSPECTRUM:
+				 return "Is Spectrum";
+			 case ISCW:
+				 return "Is Cw";
+			 case ISIQ:
+				 return "Is Iq";
 			 case RADIOTYPE:
 			   return "Radio Type";
 			default:
@@ -110,6 +122,12 @@ public:
 			return QVariant::fromValue(list_[index.row()]->isWcdma());
 		case ISLTE:
 			return QVariant::fromValue(list_[index.row()]->isLte());
+		case ISSPECTRUM:
+			return QVariant::fromValue(list_[index.row()]->isSpectrum());
+		case ISCW:
+			return QVariant::fromValue(list_[index.row()]->isCw());
+		case ISIQ:
+			return QVariant::fromValue(list_[index.row()]->isIq());
 		case RADIOTYPE:
 			return QVariant::fromValue(list_[index.row()]->toRadioTypeStr());
 		default:

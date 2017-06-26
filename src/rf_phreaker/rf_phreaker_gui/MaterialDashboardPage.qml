@@ -402,8 +402,19 @@ Page {
                                 subText: {
                                     if(isSweep || isGsm || isWcdma || isLte)
                                         band + " - " + info
-                                    else
-                                        "Placeholder for iq, spec, cw specific info"
+                                    else if(isSpectrum) {
+                                        "Dwell time: " + GuiSettings.spectrumDwellTime /  1e6
+                                                + " ms - Bin size: " + GuiSettings.spectrumBinSize / 1e3 + " kHz"
+                                    }
+                                    else if(isCw) {
+                                        "Dwell time: " + GuiSettings.cwDwellTime /  1e6
+                                                + " ms - Bin size: " + GuiSettings.cwBinSize / 1e3 + " kHz"
+                                    }
+                                    else if(isIq) {
+                                        "Dwell time: " + GuiSettings.iqDwellTime /  1e6
+                                                + " ms - Bin size: " + GuiSettings.iqBinSize / 1e3 + " kHz"
+                                                + " - Sampling rate: " + GuiSettings.iqSamplingRate / 1e6 + " mHz "
+                                    }
                                 }
                                 secondaryItem: IconButton {
                                     iconName: "content/remove"
