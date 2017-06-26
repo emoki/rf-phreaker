@@ -38,7 +38,7 @@ typedef struct PICH_ForHSDPASupportedPaging_TDD128 {
 			/* Context for parsing across buffer boundaries */
 			asn_struct_ctx_t _asn_ctx;
 		} implicit;
-		PICH_Info_LCR_r4_t	 explicit;
+		PICH_Info_LCR_r4_t	 explicit_; // Changed named so we can compile with microsoft.
 	} choice;
 	
 	/* Context for parsing across buffer boundaries */

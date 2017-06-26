@@ -22,15 +22,17 @@
 extern "C" {
 #endif
 
+typedef struct USCH_TransportChannelsInfo__Member {
+	TransportChannelIdentity_t	 usch_TransportChannelIdentity;
+	TransportFormatSet_t	 usch_TFS;
+
+	/* Context for parsing across buffer boundaries */
+	asn_struct_ctx_t _asn_ctx;
+} USCH_TransportChannelsInfo__Member_t;
+
 /* USCH-TransportChannelsInfo */
 typedef struct USCH_TransportChannelsInfo {
-	A_SEQUENCE_OF(struct USCH_TransportChannelsInfo__Member {
-		TransportChannelIdentity_t	 usch_TransportChannelIdentity;
-		TransportFormatSet_t	 usch_TFS;
-		
-		/* Context for parsing across buffer boundaries */
-		asn_struct_ctx_t _asn_ctx;
-	} ) list;
+	A_SEQUENCE_OF(USCH_TransportChannelsInfo__Member_t) list;
 	
 	/* Context for parsing across buffer boundaries */
 	asn_struct_ctx_t _asn_ctx;

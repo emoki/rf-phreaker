@@ -37,91 +37,105 @@ typedef enum TFCS_ReconfAdd__ctfcSize_PR {
 /* Forward declarations */
 struct PowerOffsetInformation;
 
+typedef struct TFCS_ReconfAdd__ctfcSize__ctfc2Bit__Member {
+	long	 ctfc2;
+	struct PowerOffsetInformation	*powerOffsetInformation	/* OPTIONAL */;
+
+	/* Context for parsing across buffer boundaries */
+	asn_struct_ctx_t _asn_ctx;
+} TFCS_ReconfAdd__ctfcSize__ctfc2Bit__Member_t;
+
+typedef struct TFCS_ReconfAdd__ctfcSize__ctfc4Bit__Member {
+	long	 ctfc4;
+	struct PowerOffsetInformation	*powerOffsetInformation	/* OPTIONAL */;
+
+	/* Context for parsing across buffer boundaries */
+	asn_struct_ctx_t _asn_ctx;
+} TFCS_ReconfAdd__ctfcSize__ctfc4Bit__Member_t;
+
+typedef struct TFCS_ReconfAdd__ctfcSize__ctfc6Bit__Member {
+	long	 ctfc6;
+	struct PowerOffsetInformation	*powerOffsetInformation	/* OPTIONAL */;
+
+	/* Context for parsing across buffer boundaries */
+	asn_struct_ctx_t _asn_ctx;
+} TFCS_ReconfAdd__ctfcSize__ctfc6Bit__Member_t;
+
+typedef struct TFCS_ReconfAdd__ctfcSize__ctfc8Bit__Member {
+	long	 ctfc8;
+	struct PowerOffsetInformation	*powerOffsetInformation	/* OPTIONAL */;
+
+	/* Context for parsing across buffer boundaries */
+	asn_struct_ctx_t _asn_ctx;
+} TFCS_ReconfAdd__ctfcSize__ctfc8Bit__Member_t;
+
+typedef struct TFCS_ReconfAdd__ctfcSize__ctfc12Bit__Member {
+	long	 ctfc12;
+	struct PowerOffsetInformation	*powerOffsetInformation	/* OPTIONAL */;
+
+	/* Context for parsing across buffer boundaries */
+	asn_struct_ctx_t _asn_ctx;
+} TFCS_ReconfAdd__ctfcSize__ctfc12Bit__Member_t;
+
+typedef struct TFCS_ReconfAdd__ctfcSize__ctfc16Bit__Member {
+	long	 ctfc16;
+	struct PowerOffsetInformation	*powerOffsetInformation	/* OPTIONAL */;
+
+	/* Context for parsing across buffer boundaries */
+	asn_struct_ctx_t _asn_ctx;
+} TFCS_ReconfAdd__ctfcSize__ctfc16Bit__Member_t;
+
+typedef struct TFCS_ReconfAdd__ctfcSize__ctfc24Bit__Member {
+	long	 ctfc24;
+	struct PowerOffsetInformation	*powerOffsetInformation	/* OPTIONAL */;
+
+	/* Context for parsing across buffer boundaries */
+	asn_struct_ctx_t _asn_ctx;
+} TFCS_ReconfAdd__ctfcSize__ctfc24Bit__Member_t;
+
 /* TFCS-ReconfAdd */
 typedef struct TFCS_ReconfAdd {
 	struct TFCS_ReconfAdd__ctfcSize {
 		TFCS_ReconfAdd__ctfcSize_PR present;
 		union TFCS_ReconfAdd__ctfcSize_u {
 			struct TFCS_ReconfAdd__ctfcSize__ctfc2Bit {
-				A_SEQUENCE_OF(struct TFCS_ReconfAdd__ctfcSize__ctfc2Bit__Member {
-					long	 ctfc2;
-					struct PowerOffsetInformation	*powerOffsetInformation	/* OPTIONAL */;
-					
-					/* Context for parsing across buffer boundaries */
-					asn_struct_ctx_t _asn_ctx;
-				} ) list;
+				A_SEQUENCE_OF(TFCS_ReconfAdd__ctfcSize__ctfc2Bit__Member_t) list;
 				
 				/* Context for parsing across buffer boundaries */
 				asn_struct_ctx_t _asn_ctx;
 			} ctfc2Bit;
 			struct TFCS_ReconfAdd__ctfcSize__ctfc4Bit {
-				A_SEQUENCE_OF(struct TFCS_ReconfAdd__ctfcSize__ctfc4Bit__Member {
-					long	 ctfc4;
-					struct PowerOffsetInformation	*powerOffsetInformation	/* OPTIONAL */;
-					
-					/* Context for parsing across buffer boundaries */
-					asn_struct_ctx_t _asn_ctx;
-				} ) list;
+				A_SEQUENCE_OF(TFCS_ReconfAdd__ctfcSize__ctfc4Bit__Member_t) list;
 				
 				/* Context for parsing across buffer boundaries */
 				asn_struct_ctx_t _asn_ctx;
 			} ctfc4Bit;
 			struct TFCS_ReconfAdd__ctfcSize__ctfc6Bit {
-				A_SEQUENCE_OF(struct TFCS_ReconfAdd__ctfcSize__ctfc6Bit__Member {
-					long	 ctfc6;
-					struct PowerOffsetInformation	*powerOffsetInformation	/* OPTIONAL */;
-					
-					/* Context for parsing across buffer boundaries */
-					asn_struct_ctx_t _asn_ctx;
-				} ) list;
+				A_SEQUENCE_OF(TFCS_ReconfAdd__ctfcSize__ctfc6Bit__Member_t) list;
 				
 				/* Context for parsing across buffer boundaries */
 				asn_struct_ctx_t _asn_ctx;
 			} ctfc6Bit;
 			struct TFCS_ReconfAdd__ctfcSize__ctfc8Bit {
-				A_SEQUENCE_OF(struct TFCS_ReconfAdd__ctfcSize__ctfc8Bit__Member {
-					long	 ctfc8;
-					struct PowerOffsetInformation	*powerOffsetInformation	/* OPTIONAL */;
-					
-					/* Context for parsing across buffer boundaries */
-					asn_struct_ctx_t _asn_ctx;
-				} ) list;
+				A_SEQUENCE_OF(TFCS_ReconfAdd__ctfcSize__ctfc8Bit__Member_t) list;
 				
 				/* Context for parsing across buffer boundaries */
 				asn_struct_ctx_t _asn_ctx;
 			} ctfc8Bit;
 			struct TFCS_ReconfAdd__ctfcSize__ctfc12Bit {
-				A_SEQUENCE_OF(struct TFCS_ReconfAdd__ctfcSize__ctfc12Bit__Member {
-					long	 ctfc12;
-					struct PowerOffsetInformation	*powerOffsetInformation	/* OPTIONAL */;
-					
-					/* Context for parsing across buffer boundaries */
-					asn_struct_ctx_t _asn_ctx;
-				} ) list;
+				A_SEQUENCE_OF(TFCS_ReconfAdd__ctfcSize__ctfc12Bit__Member_t) list;
 				
 				/* Context for parsing across buffer boundaries */
 				asn_struct_ctx_t _asn_ctx;
 			} ctfc12Bit;
 			struct TFCS_ReconfAdd__ctfcSize__ctfc16Bit {
-				A_SEQUENCE_OF(struct TFCS_ReconfAdd__ctfcSize__ctfc16Bit__Member {
-					long	 ctfc16;
-					struct PowerOffsetInformation	*powerOffsetInformation	/* OPTIONAL */;
-					
-					/* Context for parsing across buffer boundaries */
-					asn_struct_ctx_t _asn_ctx;
-				} ) list;
+				A_SEQUENCE_OF(TFCS_ReconfAdd__ctfcSize__ctfc16Bit__Member_t) list;
 				
 				/* Context for parsing across buffer boundaries */
 				asn_struct_ctx_t _asn_ctx;
 			} ctfc16Bit;
 			struct TFCS_ReconfAdd__ctfcSize__ctfc24Bit {
-				A_SEQUENCE_OF(struct TFCS_ReconfAdd__ctfcSize__ctfc24Bit__Member {
-					long	 ctfc24;
-					struct PowerOffsetInformation	*powerOffsetInformation	/* OPTIONAL */;
-					
-					/* Context for parsing across buffer boundaries */
-					asn_struct_ctx_t _asn_ctx;
-				} ) list;
+			A_SEQUENCE_OF(TFCS_ReconfAdd__ctfcSize__ctfc24Bit__Member_t) list;
 				
 				/* Context for parsing across buffer boundaries */
 				asn_struct_ctx_t _asn_ctx;

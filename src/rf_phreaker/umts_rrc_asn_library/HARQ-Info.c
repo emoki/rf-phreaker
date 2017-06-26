@@ -136,7 +136,7 @@ static asn_TYPE_member_t asn_MBR_memoryPartitioning_3[] = {
 		0,
 		"implicit"
 		},
-	{ ATF_NOFLAGS, 0, offsetof(struct HARQ_Info__memoryPartitioning, choice.explicit),
+	{ ATF_NOFLAGS, 0, offsetof(struct HARQ_Info__memoryPartitioning, choice.explicit_),
 		(ASN_TAG_CLASS_CONTEXT | (1 << 2)),
 		0,
 		&asn_DEF_explicit_5,

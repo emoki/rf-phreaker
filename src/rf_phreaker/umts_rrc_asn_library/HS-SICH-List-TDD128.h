@@ -46,7 +46,7 @@ typedef struct HS_SICH_List_TDD128 {
 				
 				/* Context for parsing across buffer boundaries */
 				asn_struct_ctx_t _asn_ctx;
-			} explicit;
+			} explicit_; // Changed so we can compile on microsoft.
 		} choice;
 		
 		/* Context for parsing across buffer boundaries */

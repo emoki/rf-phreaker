@@ -25,17 +25,19 @@
 extern "C" {
 #endif
 
+typedef struct PCCH_InformationList__paging_associatedHspdschInfo__Member {
+	HS_PDSCH_Midamble_Configuration_TDD128_t	 hs_pdsch_MidambleConfiguration;
+	BIT_STRING_t	 timeslotResourceRelatedInfo;
+	CodeResourceInformation_TDD128_t	 codeResourceInformation;
+
+	/* Context for parsing across buffer boundaries */
+	asn_struct_ctx_t _asn_ctx;
+} PCCH_InformationList__paging_associatedHspdschInfo__Member_t;
+
 /* PCCH-InformationList */
 typedef struct PCCH_InformationList {
 	struct PCCH_InformationList__paging_associatedHspdschInfo {
-		A_SEQUENCE_OF(struct PCCH_InformationList__paging_associatedHspdschInfo__Member {
-			HS_PDSCH_Midamble_Configuration_TDD128_t	 hs_pdsch_MidambleConfiguration;
-			BIT_STRING_t	 timeslotResourceRelatedInfo;
-			CodeResourceInformation_TDD128_t	 codeResourceInformation;
-			
-			/* Context for parsing across buffer boundaries */
-			asn_struct_ctx_t _asn_ctx;
-		} ) list;
+		A_SEQUENCE_OF(PCCH_InformationList__paging_associatedHspdschInfo__Member_t) list;
 		
 		/* Context for parsing across buffer boundaries */
 		asn_struct_ctx_t _asn_ctx;

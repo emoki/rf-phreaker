@@ -165,7 +165,7 @@ static asn_TYPE_member_t asn_MBR_Member_2[] = {
 		0,
 		"implicit"
 		},
-	{ ATF_NOFLAGS, 0, offsetof(struct HS_SICH_List_TDD128__Member, choice.explicit),
+	{ ATF_NOFLAGS, 0, offsetof(struct HS_SICH_List_TDD128__Member, choice.explicit_),
 		(ASN_TAG_CLASS_CONTEXT | (1 << 2)),
 		0,
 		&asn_DEF_explicit_5,

@@ -22,16 +22,18 @@
 extern "C" {
 #endif
 
+typedef struct Common_E_RNTI_Info__Member {
+	E_RNTI_t	 starting_E_RNTI;
+	long	 number_of_group;
+	long	 number_of_ENRTI_per_group;
+
+	/* Context for parsing across buffer boundaries */
+	asn_struct_ctx_t _asn_ctx;
+} Common_E_RNTI_Info__Member_t;
+
 /* Common-E-RNTI-Info */
 typedef struct Common_E_RNTI_Info {
-	A_SEQUENCE_OF(struct Common_E_RNTI_Info__Member {
-		E_RNTI_t	 starting_E_RNTI;
-		long	 number_of_group;
-		long	 number_of_ENRTI_per_group;
-		
-		/* Context for parsing across buffer boundaries */
-		asn_struct_ctx_t _asn_ctx;
-	} ) list;
+	A_SEQUENCE_OF(Common_E_RNTI_Info__Member_t) list;
 	
 	/* Context for parsing across buffer boundaries */
 	asn_struct_ctx_t _asn_ctx;

@@ -43,7 +43,7 @@ typedef struct HARQ_Info {
 				
 				/* Context for parsing across buffer boundaries */
 				asn_struct_ctx_t _asn_ctx;
-			} explicit;
+			} explicit_; // Changed so we can compile on microsoft.
 		} choice;
 		
 		/* Context for parsing across buffer boundaries */

@@ -79,7 +79,7 @@ static asn_TYPE_member_t asn_MBR_PICH_ForHSDPASupportedPaging_TDD128_1[] = {
 		0,
 		"implicit"
 		},
-	{ ATF_NOFLAGS, 0, offsetof(struct PICH_ForHSDPASupportedPaging_TDD128, choice.explicit),
+	{ ATF_NOFLAGS, 0, offsetof(struct PICH_ForHSDPASupportedPaging_TDD128, choice.explicit_),
 		(ASN_TAG_CLASS_CONTEXT | (1 << 2)),
 		-1,	/* IMPLICIT tag at current level */
 		&asn_DEF_PICH_Info_LCR_r4,

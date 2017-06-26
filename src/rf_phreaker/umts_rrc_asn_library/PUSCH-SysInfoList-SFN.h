@@ -24,15 +24,17 @@ extern "C" {
 /* Forward declarations */
 struct SFN_TimeInfo;
 
+typedef struct PUSCH_SysInfoList_SFN__Member {
+	PUSCH_SysInfo_t	 pusch_SysInfo;
+	struct SFN_TimeInfo	*sfn_TimeInfo	/* OPTIONAL */;
+
+	/* Context for parsing across buffer boundaries */
+	asn_struct_ctx_t _asn_ctx;
+} PUSCH_SysInfoList_SFN__Member_t;
+
 /* PUSCH-SysInfoList-SFN */
 typedef struct PUSCH_SysInfoList_SFN {
-	A_SEQUENCE_OF(struct PUSCH_SysInfoList_SFN__Member {
-		PUSCH_SysInfo_t	 pusch_SysInfo;
-		struct SFN_TimeInfo	*sfn_TimeInfo	/* OPTIONAL */;
-		
-		/* Context for parsing across buffer boundaries */
-		asn_struct_ctx_t _asn_ctx;
-	} ) list;
+	A_SEQUENCE_OF(PUSCH_SysInfoList_SFN__Member_t) list;
 	
 	/* Context for parsing across buffer boundaries */
 	asn_struct_ctx_t _asn_ctx;

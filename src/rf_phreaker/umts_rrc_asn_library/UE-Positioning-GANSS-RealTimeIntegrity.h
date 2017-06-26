@@ -22,15 +22,17 @@
 extern "C" {
 #endif
 
+typedef struct UE_Positioning_GANSS_RealTimeIntegrity__Member {
+	long	 bad_ganss_satId;
+	BIT_STRING_t	*bad_ganss_signalId	/* OPTIONAL */;
+
+	/* Context for parsing across buffer boundaries */
+	asn_struct_ctx_t _asn_ctx;
+} UE_Positioning_GANSS_RealTimeIntegrity__Member_t;
+
 /* UE-Positioning-GANSS-RealTimeIntegrity */
 typedef struct UE_Positioning_GANSS_RealTimeIntegrity {
-	A_SEQUENCE_OF(struct UE_Positioning_GANSS_RealTimeIntegrity__Member {
-		long	 bad_ganss_satId;
-		BIT_STRING_t	*bad_ganss_signalId	/* OPTIONAL */;
-		
-		/* Context for parsing across buffer boundaries */
-		asn_struct_ctx_t _asn_ctx;
-	} ) list;
+	A_SEQUENCE_OF(UE_Positioning_GANSS_RealTimeIntegrity__Member_t) list;
 	
 	/* Context for parsing across buffer boundaries */
 	asn_struct_ctx_t _asn_ctx;

@@ -22,15 +22,17 @@
 extern "C" {
 #endif
 
+typedef struct NumberOfTbSizeAndTTIList__Member {
+	NumberOfTransportBlocks_t	 numberOfTransportBlocks;
+	TransmissionTimeInterval_t	 transmissionTimeInterval;
+
+	/* Context for parsing across buffer boundaries */
+	asn_struct_ctx_t _asn_ctx;
+}NumberOfTbSizeAndTTIList__Member_t;
+
 /* NumberOfTbSizeAndTTIList */
 typedef struct NumberOfTbSizeAndTTIList {
-	A_SEQUENCE_OF(struct NumberOfTbSizeAndTTIList__Member {
-		NumberOfTransportBlocks_t	 numberOfTransportBlocks;
-		TransmissionTimeInterval_t	 transmissionTimeInterval;
-		
-		/* Context for parsing across buffer boundaries */
-		asn_struct_ctx_t _asn_ctx;
-	} ) list;
+	A_SEQUENCE_OF(NumberOfTbSizeAndTTIList__Member_t) list;
 	
 	/* Context for parsing across buffer boundaries */
 	asn_struct_ctx_t _asn_ctx;
