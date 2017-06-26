@@ -167,7 +167,6 @@ void Api::startCollection() {
 	qDebug() << "Starting collection.";
 
 	clearModels();
-	cwLookup_.clear();
 
 	// Create storage for all possible techs.  Note, QMap automatically inserts a default item if it is empty.
 	api_storage<rp_operating_band, rp_operating_band_group> sweep;
@@ -210,7 +209,6 @@ void Api::startCollection() {
 			spec.dwell_time_ = Settings::instance()->cwDwellTime_;
 			spec.identifier_ = cfLow->toRpFreq();
 			spec_data.push_back(spec);
-			cwLookup_.insert(spec);
 		}
 		else if(ci->isIq()) {
 			rp_iq_data_spec spec;

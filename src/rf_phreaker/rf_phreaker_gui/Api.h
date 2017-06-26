@@ -227,7 +227,6 @@ private:
 	ModelGroup wcdmaModels_;
 	ModelGroup lteModels_;
 	CwMeasurementModel cwModel_;
-	std::set<SpecSort> cwLookup_;
 	SpectrumManager spectrumManager_;
 
 	std::vector<std::future<void>> rpf_conversions_;
