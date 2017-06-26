@@ -243,9 +243,6 @@ int lte_pdsch_decode(Ipp32fc* inSignal,
 #endif
 
 	if(lte_pdsch_crc == 0) {
-
-		clock_t begin_asn = clock();
-
 		auto num_bit_stream_bytes = (transport_block_size + LTE_PDSCH_CRC_LEN) / 8;
 
 		lte_asn1_decoder decoder;
@@ -253,52 +250,8 @@ int lte_pdsch_decode(Ipp32fc* inSignal,
 		layer_3_information::lte_rrc_message_aggregate tmp;
 		decoder.decode_bcch_bch_message(lte_pdsch_byte_seq, 512, 0, tmp);
 
-		LteData[cell_no].layer_3_.raw_layer_3_.emplace_back(layer_3_information::bit_stream(lte_pdsch_byte_seq, num_bit_stream_bytes, 0));
+		LteData[cell_no].layer_3_.update_info(tmp);
 
-		// Only update sibs.
-		if(tmp.sib1_.is_decoded()) {
-			LteData[cell_no].layer_3_.mcc_ = tmp.mcc_;
-			LteData[cell_no].layer_3_.mnc_ = tmp.mnc_;
-			LteData[cell_no].layer_3_.lac_ = tmp.lac_;
-			LteData[cell_no].layer_3_.cid_ = tmp.cid_;
-			LteData[cell_no].layer_3_.sib1_ = tmp.sib1_;
-			LteData[cell_no].si_window = tmp.sib1_.si_window_length_ms_ != -1 ? tmp.sib1_.si_window_length_ms_ : LTE_NULL;
-		}
-		if(tmp.sib3_.is_decoded()) {
-			LteData[cell_no].layer_3_.sib3_ = tmp.sib3_;
-		}
-		if(tmp.sib4_.is_decoded()) {
-			LteData[cell_no].layer_3_.sib4_ = tmp.sib4_;
-		}
-		if(tmp.sib5_.is_decoded()) {
-			LteData[cell_no].layer_3_.sib5_ = tmp.sib5_;
-		}
-		if(tmp.sib6_.is_decoded()) {
-			LteData[cell_no].layer_3_.sib6_ = tmp.sib6_;
-		}
-		if(tmp.sib7_.is_decoded()) {
-			LteData[cell_no].layer_3_.sib7_ = tmp.sib7_;
-		}
-		if(tmp.sib8_.is_decoded()) {
-			LteData[cell_no].layer_3_.sib8_ = tmp.sib8_;
-		}
-
-		clock_t end_asn = clock();
-		//std::cout << "Lte ASN Time elapsed: " << lte_diffclock(end_asn,begin_asn) << " ms\n";
-
-		//std::cout<<"\n Decoded PDSCH \n";
-
-		//static std::ofstream file("debug_lte_layer_3_bitstream.txt");
-		//static bool write_header = true;
-		//if(write_header) {
-		//	write_header = false;
-		//	file << "sub_frame_index\tsubframe_start_sample_index\t";
-		//	output_lte_meas_debug_header(file);
-		//}
-		//file << sub_frame_index << "\t" << subframe_start_sample_index << "\t" << LteData[cell_no] << "\t";
-		//for(uint32_t i = 0, end = 512; i < end; ++i)
-		//	file << std::hex << std::setw(2) << std::setfill('0') << (int)lte_pdsch_byte_seq[i] << " ";
-		//file << std::dec << "\t" << tmp << std::endl;
 		return LTE_SUCCESS;
 	}
 
