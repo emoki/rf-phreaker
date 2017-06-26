@@ -128,8 +128,6 @@ Api::Api(QObject *parent)
 }
 
 Api::~Api() {
-	SettingsIO settingsIO;
-	settingsIO.writeScanList(scanList_.list());
 	thread_->quit();
 	thread_->wait();
 	rp_clean_up();
@@ -581,4 +579,9 @@ MeasurementModel* Api::getSweepModel(Base *b) {
 		return sweepModels_[b->cellBand()].get();
 	else
 		return nullptr;
+}
+
+void Api::saveScanList() {
+	SettingsIO settingsIO;
+	settingsIO.writeScanList(scanList_.list());
 }

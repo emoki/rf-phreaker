@@ -370,7 +370,10 @@ Page {
                                     anchors.bottom: parent.bottom
                                     iconName: "content/remove"
                                     color: Theme.light.textColor
-                                    onClicked: Api.scanList.remove(index);
+                                    onClicked: {
+                                        Api.scanList.remove(index);
+                                        Api.saveScanList();
+                                    }
                                 }
                             }
                         }
@@ -486,6 +489,7 @@ Page {
                             function doSelectionAction(item) {
                                 console.debug("Updating rpCollectionInfoList with ", selectedItem);
                                 Api.scanList.add(selectedItem);
+                                Api.saveScanList();
                             }
 
                             onClose: menu.close()

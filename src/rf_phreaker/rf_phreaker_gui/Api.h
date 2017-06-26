@@ -75,6 +75,7 @@ public:
 		messages_.prepend(new ApiMessage(static_cast<rp_status>(status), "", details));
 		emit messagesChanged();
 	}
+	Q_INVOKABLE void saveScanList();
 
 signals:
 	void scanListChanged();
