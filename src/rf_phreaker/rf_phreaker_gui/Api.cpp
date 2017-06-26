@@ -104,6 +104,12 @@ Api::Api(QObject *parent)
 		this->apiOutput_ = apiOutput;
 	});
 
+	isSpectrumLogged_ = Settings::instance()->isSpectrumLogged_;
+	QObject::connect(Settings::instance(), &Settings::isSpectrumLoggedChanged, [&](bool isSpectrumLogged) {
+		this->isSpectrumLogged_ = isSpectrumLogged;
+	});
+
+
 	auto timer = new QTimer(this);
 	QObject::connect(timer, &QTimer::timeout, [&] () {
 		if(this->shouldUpdateLog_) {
@@ -267,8 +273,8 @@ bool Api::event(QEvent *e) {
 		stats_.update_benchmark(proto.update_case());
 
 		if(canRecordData_) {
-			if(proto.update_case() != rf_phreaker::protobuf::rp_update::UpdateCase::kLog
-				&& proto.update_case() != rf_phreaker::protobuf::rp_update::UpdateCase::kPowerSpectrum)
+			if(proto.update_case() != rf_phreaker::protobuf::rp_update::UpdateCase::kLog && 
+				!(proto.update_case() == rf_phreaker::protobuf::rp_update::UpdateCase::kPowerSpectrum && !isSpectrumLogged_))
 				rf_phreaker::protobuf::write_delimited_to(proto, output_file_.get());
 			if(apiOutput_) {
 				api_debug_output_.output_api_data(update_pb_, collectionFilename_, current_gps_);

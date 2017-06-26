@@ -26,6 +26,7 @@ class Settings : public QObject {
 	Q_PROPERTY(bool loggingGps MEMBER loggingGps_ NOTIFY loggingGpsChanged)
 	Q_PROPERTY(bool loggingCollection MEMBER loggingCollection_ NOTIFY loggingCollectionChanged)
 	Q_PROPERTY(bool loggingPackets MEMBER loggingPackets_ NOTIFY loggingPacketsChanged)
+	Q_PROPERTY(bool isSpectrumLogged MEMBER isSpectrumLogged_ NOTIFY isSpectrumLoggedChanged)
 	Q_PROPERTY(int spectrumBinSize MEMBER spectrumBinSize_ NOTIFY spectrumBinSizeChanged)
 	Q_PROPERTY(int spectrumDwellTime MEMBER spectrumDwellTime_ NOTIFY spectrumDwellTimeChanged)
 	Q_PROPERTY(int cwBinSize MEMBER cwBinSize_ NOTIFY cwBinSizeChanged)
@@ -49,6 +50,7 @@ signals:
 	void loggingGpsChanged(bool);
 	void loggingCollectionChanged(bool);
 	void loggingPacketsChanged(bool);
+	void isSpectrumLoggedChanged(bool);
 	void spectrumBinSizeChanged(int);
 	void spectrumDwellTimeChanged(int);
 	void cwBinSizeChanged(int);
@@ -90,6 +92,7 @@ public:
 		emit loggingGpsChanged(loggingGps_);
 		emit loggingCollectionChanged(loggingCollection_);
 		emit loggingPacketsChanged(loggingPackets_);
+		emit isSpectrumLoggedChanged(isSpectrumLogged_);
 		emit spectrumBinSizeChanged(spectrumBinSize_);
 		emit spectrumDwellTimeChanged(spectrumDwellTime_);
 		emit cwBinSizeChanged(cwBinSize_);
@@ -114,6 +117,7 @@ public:
 	bool loggingCollection_;
 	bool loggingPackets_;
 
+	bool isSpectrumLogged_;
 	int spectrumBinSize_;
 	int spectrumDwellTime_;
 

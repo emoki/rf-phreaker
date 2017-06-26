@@ -214,6 +214,7 @@ private:
 
 	IO api_debug_output_;
 	bool apiOutput_;
+	bool isSpectrumLogged_;
 
 	Stats stats_;
 

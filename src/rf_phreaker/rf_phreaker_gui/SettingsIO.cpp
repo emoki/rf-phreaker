@@ -10,6 +10,7 @@ void SettingsIO::readSettings(Settings &settings) {
 	settings.themeTabHighlightColor_ = qs_.value(themeTabHighlightColorKey, "white").toString();
 	settings.measurementRemovalTime_ = qs_.value(measurementRemovalTimeKey, 60).toInt();
 	settings.convertRfpToAscii_ = qs_.value(convertRfpToAsciiKey, false).toBool();
+	settings.isSpectrumLogged_ = qs_.value(isSpectrumLoggedKey, false).toBool();
 	settings.spectrumBinSize_ = qs_.value(spectrumBinSizeKey, 2000).toInt();
 	settings.spectrumDwellTime_= qs_.value(spectrumDwellTimeKey, 25000000).toInt();
 	settings.cwBinSize_ = qs_.value(cwBinSizeKey, 2000).toInt();
@@ -29,6 +30,7 @@ void SettingsIO::writeSettings(const Settings &settings) {
 	qs_.setValue(themeTabHighlightColorKey, settings.themeTabHighlightColor_);
 	qs_.setValue(measurementRemovalTimeKey, settings.measurementRemovalTime_);
 	qs_.setValue(convertRfpToAsciiKey, settings.convertRfpToAscii_);
+	qs_.setValue(isSpectrumLoggedKey, settings.isSpectrumLogged_);
 	qs_.setValue(spectrumBinSizeKey, settings.spectrumBinSize_);
 	qs_.setValue(spectrumDwellTimeKey, settings.spectrumDwellTime_);
 	qs_.setValue(cwBinSizeKey, settings.cwBinSize_);
