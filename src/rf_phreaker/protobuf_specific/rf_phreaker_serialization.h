@@ -177,6 +177,26 @@ inline void set_raw_layer_3(const rp_raw_layer_3 &pb, layer_3_information::bit_s
 	t.unused_bits_ = pb.unused_bits();
 }
 
+template<typename RpLayer3>
+inline void set_raw_layer_3_list(const layer_3_information::bcch_bch_message_aggregate &t, RpLayer3 *pb) {
+	if(t.raw_layer_3_.size()) {
+		for(auto &i : t.raw_layer_3_)
+			set_raw_layer_3(i, pb->mutable_layer_3()->add_raw_layer_3());
+	}
+}
+
+template<typename RpLayer3>
+inline void set_raw_layer_3_list(const RpLayer3 &pb, layer_3_information::bcch_bch_message_aggregate &t) {
+	if(pb.raw_layer_3_size()) {
+		// We update thru the layer 3 struct so that each bit_stream is added to the hash lookup.
+		layer_3_information::bit_stream b;
+		for(int i = 0; i < pb.raw_layer_3_size(); ++i) {
+			set_raw_layer_3(pb.raw_layer_3().Get(i++), b);
+			t.update_raw_layer_3(b);
+		}
+	}
+}
+
 inline void set_plmn(const layer_3_information::plmn &t, rp_plmn *pb) {
 	pb->set_mcc(t.mcc_.to_string());
 	pb->set_mnc(t.mnc_.to_string());
@@ -246,12 +266,7 @@ public:
 		t.ctoi_ = pb.ctoi();
 		if(pb.has_layer_3()) {
 			auto l = pb.layer_3();
-			if(l.raw_layer_3_size()) {
-				t.layer_3_.raw_layer_3_.resize(l.raw_layer_3_size());
-				auto j = 0;
-				for(auto &i : t.layer_3_.raw_layer_3_)
-					set_raw_layer_3(l.raw_layer_3().Get(j++), i);
-			}
+			set_raw_layer_3_list(l, t.layer_3_);
 			if(l.has_si1()) populate(l.si1(), t.layer_3_.si_1_); else t.layer_3_.si_1_.is_decoded_ = false;
 			if(l.has_si2()) populate(l.si2(), t.layer_3_.si_2_); else t.layer_3_.si_2_.is_decoded_ = false;
 			if(l.has_si2_bis()) populate(l.si2_bis(), t.layer_3_.si_2bis_); else t.layer_3_.si_2bis_.is_decoded_ = false;
@@ -401,10 +416,7 @@ public:
 		pb->set_tdma_frame_number(t.tdma_frame_number_);
 		pb->set_bcch_signal_level(t.cell_signal_level_);
 		pb->set_ctoi(t.ctoi_);
-		if(t.layer_3_.raw_layer_3_.size()) {
-			for(auto &i : t.layer_3_.raw_layer_3_)
-				set_raw_layer_3(i, pb->mutable_layer_3()->add_raw_layer_3());
-		}
+		set_raw_layer_3_list(t.layer_3_, pb);
 		if(t.layer_3_.si_1_.is_decoded()) populate(t.layer_3_.si_1_, pb->mutable_layer_3()->mutable_si1());
 		if(t.layer_3_.si_2_.is_decoded()) populate(t.layer_3_.si_2_, pb->mutable_layer_3()->mutable_si2());
 		if(t.layer_3_.si_2bis_.is_decoded()) populate(t.layer_3_.si_2bis_, pb->mutable_layer_3()->mutable_si2_bis());
@@ -535,12 +547,7 @@ public:
 		t.rscp_ = pb.rscp();
 		if(pb.has_layer_3()) {
 			auto &l = pb.layer_3();
-			if(l.raw_layer_3_size()) {
-				t.layer_3_.raw_layer_3_.resize(pb.layer_3().raw_layer_3_size());
-				auto j = 0;
-				for(auto &i : t.layer_3_.raw_layer_3_)
-					set_raw_layer_3(l.raw_layer_3().Get(j++), i);
-			}
+			set_raw_layer_3_list(l, t.layer_3_);
 			if(l.has_mib()) populate(l.mib(), t.layer_3_.mib_); else t.layer_3_.mib_.is_decoded_ = false;
 			if(l.has_sib1()) populate(l.sib1(), t.layer_3_.sib1_); else t.layer_3_.sib1_.is_decoded_ = false;
 			if(l.has_sib3()) populate(l.sib3(), t.layer_3_.sib3_); else t.layer_3_.sib3_.is_decoded_ = false;
@@ -619,10 +626,7 @@ public:
 		pb->set_cpich(t.cpich_);
 		pb->set_ecio(t.ecio_);
 		pb->set_rscp(t.rscp_);
-		if(t.layer_3_.raw_layer_3_.size()) {
-			for(auto &i : t.layer_3_.raw_layer_3_)
-				set_raw_layer_3(i, pb->mutable_layer_3()->add_raw_layer_3());
-		}
+		set_raw_layer_3_list(t.layer_3_, pb);
 		if(t.layer_3_.mib_.is_decoded()) populate(t.layer_3_.mib_, pb->mutable_layer_3()->mutable_mib());
 		if(t.layer_3_.sib1_.is_decoded()) populate(t.layer_3_.sib1_, pb->mutable_layer_3()->mutable_sib1());
 		if(t.layer_3_.sib3_.is_decoded()) populate(t.layer_3_.sib3_, pb->mutable_layer_3()->mutable_sib3());
@@ -707,12 +711,7 @@ public:
 		t.frame_number_ = pb.frame_number();
 		if(pb.has_layer_3()) {
 			auto &l = pb.layer_3();
-			if(l.raw_layer_3_size()) {
-				t.layer_3_.raw_layer_3_.resize(l.raw_layer_3_size());
-				auto j = 0;
-				for(auto &i : t.layer_3_.raw_layer_3_)
-					set_raw_layer_3(l.raw_layer_3().Get(j++), i);
-			}
+			set_raw_layer_3_list(l, t.layer_3_);
 			if(l.has_sib1()) populate(pb.layer_3().sib1(), t.layer_3_.sib1_); else t.layer_3_.sib1_.is_decoded_ = false;
 			if(l.has_sib3()) populate(pb.layer_3().sib3(), t.layer_3_.sib3_); else t.layer_3_.sib3_.is_decoded_ = false;
 			if(l.has_sib4()) populate(pb.layer_3().sib4(), t.layer_3_.sib4_); else t.layer_3_.sib4_.is_decoded_ = false;
@@ -892,10 +891,7 @@ public:
 		pb->set_num_antenna_ports(t.num_antenna_ports_);
 		pb->set_downlink_bandwidth(t.dl_bandwidth_);
 		pb->set_frame_number(t.frame_number_);
-		if(t.layer_3_.raw_layer_3_.size()) {
-			for(auto &i : t.layer_3_.raw_layer_3_)
-				set_raw_layer_3(i, pb->mutable_layer_3()->add_raw_layer_3());
-		}
+		set_raw_layer_3_list(t.layer_3_, pb);
 		if(t.layer_3_.sib1_.is_decoded()) populate(t.layer_3_.sib1_, pb->mutable_layer_3()->mutable_sib1());
 		if(t.layer_3_.sib3_.is_decoded()) populate(t.layer_3_.sib3_, pb->mutable_layer_3()->mutable_sib3());
 		if(t.layer_3_.sib4_.is_decoded()) populate(t.layer_3_.sib4_, pb->mutable_layer_3()->mutable_sib4());
