@@ -866,7 +866,9 @@ Page {
                             onTriggered: filterCw.refilter()
                         }
 
-                        slMin: -120
+                        displaySecondArea: false
+
+                        slMin: -160
                         slMax: -10
                     }
                     Item {
