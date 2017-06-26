@@ -95,7 +95,7 @@ Page {
                             SequentialAnimation on value {
                                 running: Api.connectionStatus === ApiTypes.CONNECTING
                                 NumberAnimation {
-                                    duration: 18000
+                                    duration: 26000
                                     from: determinateProgress.minimumValue
                                     to: determinateProgress.maximumValue - 1
                                 }
