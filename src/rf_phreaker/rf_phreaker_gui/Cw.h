@@ -70,7 +70,7 @@ signals:
 
 private:
 	int get_power_index() const { 
-		auto pos = (spec_.measurement_frequency_ - spec_.params_.start_frequency_) / spec_.params_.step_size_; 
+		auto pos = (spec_.params_.identifier_ - spec_.params_.start_frequency_) / spec_.params_.step_size_;
 		return (pos >= 0 && pos < spec_.power_.size()) ? pos : 0;
 	}
 
