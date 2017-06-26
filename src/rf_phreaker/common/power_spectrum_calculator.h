@@ -85,7 +85,7 @@ public:
 			ipp_helper::check_status(ippsAdd_32f(power_buffer_.get(), summed_power_buffer_.get(), summed_power_buffer_.get(), summed_power_buffer_.length()));
 		}
 
-		helper_.fft_shift(calculate_power_buffer_);
+		helper_.fft_shift(summed_power_buffer_);
 
 		ipp_helper::check_status(ippsDivC_32f(summed_power_buffer_.get(), (Ipp32f)num_iterations, summed_power_buffer_.get(), summed_power_buffer_.length()));
 		// It should be the square root of the window size because later when calculating signal level we do 20 * log10 which means we're assuming the power

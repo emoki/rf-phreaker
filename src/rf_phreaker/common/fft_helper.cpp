@@ -81,12 +81,32 @@ void fft_helper::fft_shift(ipp_32fc_array &src_dst) {
 	if(tmp_length - src_dst.length() / 2.0 > .5)
 		odd_component = 1;
 
-	if(tmp_length + 1 > fft_shift_buffer_.length())
-		fft_shift_buffer_.reset(tmp_length + 1);
+	auto buffer = get_fft_shift_buffer<ipp_32fc_array>();
 
-	ipp_helper::check_status(ippsCopy_32fc(src_dst.get(), fft_shift_buffer_.get(), tmp_length + odd_component));
-	ipp_helper::check_status(ippsCopy_32fc((src_dst.get() + tmp_length + odd_component), src_dst.get(), tmp_length));
-	ipp_helper::check_status(ippsCopy_32fc(fft_shift_buffer_.get(), src_dst.get() + tmp_length + odd_component, tmp_length + odd_component));
+	if(tmp_length + 1 > buffer.length())
+		buffer.reset(tmp_length + 1);
+
+	copy(src_dst.get(), buffer.get(), tmp_length + odd_component);
+	copy(src_dst.get() + tmp_length + odd_component, src_dst.get(), tmp_length);
+	copy(buffer.get(), src_dst.get() + tmp_length + odd_component, tmp_length + odd_component);
+}
+
+void fft_helper::fft_shift(ipp_32f_array &src_dst) {
+	int tmp_length = (int)(src_dst.length() / 2.0);
+
+	// Account for odd array sizes.
+	int odd_component = 0;
+	if(tmp_length - src_dst.length() / 2.0 > .5)
+		odd_component = 1;
+
+	auto buffer = get_fft_shift_buffer<ipp_32f_array>();
+
+	if(tmp_length + 1 > buffer.length())
+		buffer.reset(tmp_length + 1);
+
+	copy(src_dst.get(), buffer.get(), tmp_length + odd_component);
+	copy(src_dst.get() + tmp_length + odd_component, src_dst.get(), tmp_length);
+	copy(buffer.get(), src_dst.get() + tmp_length + odd_component, tmp_length + odd_component);
 }
 
 void fft_helper::inverse_fft_shift(ipp_32fc_array &src_dst) {
@@ -97,12 +117,12 @@ void fft_helper::inverse_fft_shift(ipp_32fc_array &src_dst) {
 	if(tmp_length - src_dst.length() / 2.0 > .5)
 		odd_component = 1;
 
-	if(tmp_length + 1 > fft_shift_buffer_.length())
-		fft_shift_buffer_.reset(tmp_length + 1);
+	if(tmp_length + 1 > fft_shift_buffer_fc_.length())
+		fft_shift_buffer_fc_.reset(tmp_length + 1);
 
-	ipp_helper::check_status(ippsCopy_32fc(src_dst.get(), fft_shift_buffer_.get(), tmp_length));
+	ipp_helper::check_status(ippsCopy_32fc(src_dst.get(), fft_shift_buffer_fc_.get(), tmp_length));
 	ipp_helper::check_status(ippsCopy_32fc((src_dst.get() + tmp_length), src_dst.get(), tmp_length + odd_component));
-	ipp_helper::check_status(ippsCopy_32fc(fft_shift_buffer_.get(), src_dst.get() + tmp_length, tmp_length));
+	ipp_helper::check_status(ippsCopy_32fc(fft_shift_buffer_fc_.get(), src_dst.get() + tmp_length, tmp_length));
 }
 
 }
