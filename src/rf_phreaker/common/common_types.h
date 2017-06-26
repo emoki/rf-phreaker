@@ -35,7 +35,7 @@ struct power_spectrum_spec {
 		return is_cw(*this);
 	}
 	bool is_power_spectrum() const {
-		return !is_power_spectrum(*this);
+		return is_power_spectrum(*this);
 	}
 	static bool is_cw(const power_spectrum_spec &spec) {
 		return spec.identifier_ < SPECTRUM_MIN_IDENTIFIER;
