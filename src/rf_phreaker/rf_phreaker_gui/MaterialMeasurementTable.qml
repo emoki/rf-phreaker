@@ -1,4 +1,4 @@
-import QtQuick 2.6
+import QtQuick 2.7
 import Material 0.3
 import QtQuick.Layouts 1.1
 import QtQuick.Controls 1.4 as Controls
@@ -14,8 +14,8 @@ Rectangle {
     signal filteredModelUpdated()
     signal tableViewCompleted()
 
-    implicitWidth: dp(96) * 9 + dp(64) * 4
-    implicitHeight: Math.max(4, filter.rowCount()) * dp(48) + dp(16) + dp(56)
+    implicitWidth: dataTable.contentItem.childrenRect.width
+    implicitHeight: dataTable.contentItem.childrenRect.height
 
     function removeAllColumns() {
         while(dataTable.columnCount) {
@@ -32,15 +32,7 @@ Rectangle {
     function sortAndUpdate(tableColumn, sortOrder) {
         var column = dataTable.getColumn(tableColumn);
         if(column !== null && column.role !== null) {
-            var idxList = [];
-            dataTable.selection.forEach(function(rowIndex) {
-                idxList.push(filter.mapToSource(filter.index(rowIndex, 0)))
-            });
             filter.sort(dataTable.model.convertRoleToColumn(column.role), sortOrder);
-            dataTable.selection.clear();
-            for(var i = 0; i < idxList.length; i++) {
-                dataTable.selection.select(filter.mapFromSource(idxList[i]).row);
-            }
             root.filteredModelUpdated();
         }
     }
@@ -63,7 +55,8 @@ Rectangle {
 
         rowDelegate: MaterialLayer3RowDelegate {
             control: dataTable;
-            Component.onCompleted: root.filteredModelUpdated.connect(update)
+            function update() { meas = styleData !== undefined ? filter.data(filter.index(styleData.row,0)) : null }
+            Component.onCompleted: { update(); root.filteredModelUpdated.connect(update) }
         }
 
         model: FilterProxyMeasurementModel {
@@ -73,8 +66,6 @@ Rectangle {
             expirationTimeFilter: GuiSettings.measurementRemovalTime
             Component.onCompleted: root.sortAndUpdate(dataTable.sortIndicatorColumn, dataTable.sortIndicatorOrder)
             onRowsInserted: {
-                //console.debug("onRowsInserted")
-                dataTable.implicitHeight = filter.rowCount() * dp(48) + dp(16) + dp(56)
                 root.sortAndUpdate(dataTable.sortIndicatorColumn, dataTable.sortIndicatorOrder);
             }
         }
@@ -215,28 +206,28 @@ Rectangle {
             width: dp(44)
             movable: false
             resizable: false
-            delegate: Item {
+            title: ""
+            role: "basic"
+            delegate: Rectangle {
                 id: expDelegate
                 width: expBut.width
                 height: expBut.height
-                Component.onCompleted: {
-                    expBut.updateVisibility();
-                    root.filteredModelUpdated.connect(expBut.updateVisibility);
-                }
+                color: styleData.value.isSelected ? "transparent" : Palette.colors.grey[100]
                 MaterialExpansionButton {
                     id: expBut
                     anchors.top: parent.top
-                    function updateVisibility() {
-                        var meas = dataTable.model.data(dataTable.model.index(styleData.row, 0))
-                        expBut.visible = meas ? meas.rawLayer3.rowCount() > 0 : false;
-                        expBut.expanded = styleData.selected
-                    }
+                    visible: styleData !== undefined ? (styleData.value ? styleData.value.rawLayer3.rowCount() > 0 : false) : false
+                    expanded: styleData !== undefined && styleData.value.isSelected ? styleData.value.isSelected : false
                     onClicked: {
-                        if(expBut.expanded)
-                            dataTable.selection.select(styleData.row);
-                        else
-                            dataTable.selection.deselect(styleData.row);
+                        if(styleData !== undefined)
+                            dataTable.model.setData(dataTable.model.index(styleData.row,0), !styleData.value.isSelected, MeasurementModel.IsSelectedRole)
                     }
+                }
+                MouseArea {
+                    // Do not pass mouse clicks thru to tableview.  Only expBut should see mouse clicks.
+                    anchors.fill: parent
+                    visible: !expBut.visible
+                    propagateComposedEvents: false
                 }
             }
         }
@@ -254,7 +245,6 @@ Rectangle {
                 control: _control;
                 text: isString ? String(styleData.value) : Number(styleData.value).toFixed(fixedWidth);
             }
-            Component.onCompleted: console.debug("column ", role, title, isString, _control, delegate)
         }
     }
 }

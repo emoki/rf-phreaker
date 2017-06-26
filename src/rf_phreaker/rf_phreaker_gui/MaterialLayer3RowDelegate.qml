@@ -1,4 +1,5 @@
 import QtQuick 2.7
+import QtQml 2.2
 import Material 0.3
 import Material.Extras 0.1
 import Material.ListItems 0.1 as ListItem
@@ -9,12 +10,7 @@ import RfPhreaker 1.0
 Rectangle {
     id: _root
     property var control
-    property var meas: control ? control.model.data(control.model.index(styleData.row, 0)) : null
-
-
-    function update() {
-        meas = control ? control.model.data(control.model.index(styleData.row, 0)) : null;
-    }
+    property var meas
 
     height: childrenRect.height
     implicitHeight: childrenRect.height
@@ -24,16 +20,16 @@ Rectangle {
         height: dp(48)
         anchors.right: parent.right
         anchors.left: parent.left
-        color: styleData.selected ? Palette.colors.grey[300] : "transparent"
+        color: meas !== undefined && meas.isSelected ? Palette.colors.grey[300] : "transparent"
     }
 
     Rectangle {
         id: details
-        visible: styleData.selected
+        visible: meas !== undefined && meas.isSelected
         anchors.top: spacer.bottom
         anchors.right: parent.right
         anchors.left: parent.left
-        height: styleData.selected ? dp(350) : 0
+        height: meas !== undefined && meas.isSelected ? dp(350) : 0
         color: Palette.colors.grey[300]
 
         RowLayout {
@@ -41,7 +37,6 @@ Rectangle {
             anchors.fill: parent
             anchors.leftMargin: dp(16)
             anchors.rightMargin: dp(16)
-            anchors.bottomMargin: dp(16)
             spacing: dp(0)
 
             ListView {
@@ -49,8 +44,9 @@ Rectangle {
                 property int layer3ItemHeight: 0
                 property int layer3ItemWidth: 0
                 Layout.fillHeight: true
+                Layout.bottomMargin: dp(16)
                 Layout.preferredWidth: contentItem.childrenRect.width + dp(16)
-                model: details.visible && meas ? meas.rawLayer3 : null
+                model: meas !== undefined ? meas.rawLayer3 : null
                 highlightFollowsCurrentItem: false
                 clip: true
                 keyNavigationEnabled: true
@@ -96,6 +92,7 @@ Rectangle {
                 Flickable {
                     id: flick
                     anchors.fill: parent
+                    anchors.bottomMargin: dp(16)
                     contentWidth: contentItem.childrenRect.width
                     contentHeight: contentItem.childrenRect.height
                     clip: true
