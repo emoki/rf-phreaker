@@ -73,7 +73,7 @@ public:
 
 	Q_INVOKABLE bool shouldReinitializeApi();
 
-	rf_phreaker::settings readRpSettings();
+	rf_phreaker::settings readRpSettings(const std::string &name = "rf_phreaker_api");
 
 	void writeRpSettings(rf_phreaker::settings &s);
 

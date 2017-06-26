@@ -69,14 +69,20 @@ bool Settings::shouldReinitializeApi() {
 
 }
 
-rf_phreaker::settings Settings::readRpSettings() {
+rf_phreaker::settings Settings::readRpSettings(const std::string &name) {
 	rf_phreaker::settings s;
-	rf_phreaker::settings_io io("rf_phreaker_api", rf_phreaker::qt_utility::app_name());
-	if(!io.does_exist()) {
-		qCritical() << "The INI file (\"" << io.filename().c_str() <<
-			"\") was not found.  This may adversely affect API functionality.";
+	rf_phreaker::settings_io io(name, rf_phreaker::qt_utility::app_name());
+	try {
+		if(!io.does_exist()) {
+			qCritical() << "The INI file (\"" << io.filename().c_str() <<
+				"\") was not found.  Please repair the application before continuing.";
+		}
+		io.read(s);
 	}
-	io.read(s);
+	catch(const std::exception &err) {
+		qCritical() << "Error reading INI file (\"" << io.filename().c_str() << "\"). "
+			<< err.what();
+	}
 	return s;
 }
 
