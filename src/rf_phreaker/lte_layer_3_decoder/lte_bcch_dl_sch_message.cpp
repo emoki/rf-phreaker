@@ -45,6 +45,7 @@ void lte_bcch_dl_sch_message::parse_data(lte_rrc_message_aggregate &message)
 								sib_descriptons_.push_back("Nothing");
 								break;/* No components present */
 							case SystemInformation_r8_IEs__sib_TypeAndInfo__Member_PR_sib2:
+								message.sib2_.is_decoded_ = true;
 								sib_descriptons_.push_back("SystemInformationBlockType2");
 								break;
 							case SystemInformation_r8_IEs__sib_TypeAndInfo__Member_PR_sib3:
@@ -72,28 +73,36 @@ void lte_bcch_dl_sch_message::parse_data(lte_rrc_message_aggregate &message)
 								sib_descriptons_.push_back("SystemInformationBlockType8");
 								break;
 							case SystemInformation_r8_IEs__sib_TypeAndInfo__Member_PR_sib9:
+								message.sib9_.is_decoded_ = true;
 								sib_descriptons_.push_back("SystemInformationBlockType9");
 								break;
 							case SystemInformation_r8_IEs__sib_TypeAndInfo__Member_PR_sib10:
+								message.sib10_.is_decoded_ = true;
 								sib_descriptons_.push_back("SystemInformationBlockType10");
 								break;
 							case SystemInformation_r8_IEs__sib_TypeAndInfo__Member_PR_sib11:
+								message.sib11_.is_decoded_ = true;
 								sib_descriptons_.push_back("SystemInformationBlockType11");
 								break;
 							/* Extensions may appear below */
 							case SystemInformation_r8_IEs__sib_TypeAndInfo__Member_PR_sib12_v920:
+								message.sib12_.is_decoded_ = true;
 								sib_descriptons_.push_back("SystemInformationBlockType12_v920");
 								break;
 							case SystemInformation_r8_IEs__sib_TypeAndInfo__Member_PR_sib13_v920:
+								message.sib13_.is_decoded_ = true;
 								sib_descriptons_.push_back("SystemInformationBlockType13_v920");
 								break;
 							case SystemInformation_r8_IEs__sib_TypeAndInfo__Member_PR_sib14_v1130:
+								message.sib14_.is_decoded_ = true;
 								sib_descriptons_.push_back("SystemInformationBlockType14_v1130");
 								break;
 							case SystemInformation_r8_IEs__sib_TypeAndInfo__Member_PR_sib15_v1130:
+								message.sib15_.is_decoded_ = true;
 								sib_descriptons_.push_back("SystemInformationBlockType15_v1130");
 								break;
 							case SystemInformation_r8_IEs__sib_TypeAndInfo__Member_PR_sib16_v1130:
+								message.sib16_.is_decoded_ = true;
 								sib_descriptons_.push_back("SystemInformationBlockType16_v1130");
 								break;
 							default:

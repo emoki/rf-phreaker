@@ -184,14 +184,18 @@ struct cells_on_channel
 	}
 
 	bool has_decoded_sib(const lte_measurement &meas) const {
-		return meas.layer_3_.sib1_.is_decoded() || meas.layer_3_.sib3_.is_decoded() || meas.layer_3_.sib4_.is_decoded() || meas.layer_3_.sib5_.is_decoded()
-			|| meas.layer_3_.sib6_.is_decoded() || meas.layer_3_.sib7_.is_decoded() || meas.layer_3_.sib8_.is_decoded();
+		return meas.layer_3_.sib1_.is_decoded() || meas.layer_3_.sib2_.is_decoded() || meas.layer_3_.sib3_.is_decoded() || meas.layer_3_.sib4_.is_decoded()
+			|| meas.layer_3_.sib5_.is_decoded() || meas.layer_3_.sib6_.is_decoded() || meas.layer_3_.sib7_.is_decoded() || meas.layer_3_.sib8_.is_decoded()
+			|| meas.layer_3_.sib9_.is_decoded() || meas.layer_3_.sib10_.is_decoded() || meas.layer_3_.sib11_.is_decoded() || meas.layer_3_.sib12_.is_decoded()
+			|| meas.layer_3_.sib13_.is_decoded() || meas.layer_3_.sib14_.is_decoded() || meas.layer_3_.sib15_.is_decoded() || meas.layer_3_.sib16_.is_decoded();
 	}
 
 	bool is_decoded(const lte_measurement &meas, const lte_si_info &info) {
 		using namespace layer_3_information;
 		for(auto &i : info.scheduling_info_.sib_mapping_info_) {
 			switch(i) {
+			case SIB_2:
+				return meas.layer_3_.sib2_.is_decoded();
 			case SIB_3:
 				return meas.layer_3_.sib3_.is_decoded();
 			case SIB_4:
@@ -204,6 +208,22 @@ struct cells_on_channel
 				return meas.layer_3_.sib7_.is_decoded();
 			case SIB_8:
 				return meas.layer_3_.sib8_.is_decoded();
+			case SIB_9:
+				return meas.layer_3_.sib9_.is_decoded();
+			case SIB_10:
+				return meas.layer_3_.sib10_.is_decoded();
+			case SIB_11:
+				return meas.layer_3_.sib11_.is_decoded();
+			case SIB_12_V920:
+				return meas.layer_3_.sib12_.is_decoded();
+			case SIB_13_V920:
+				return meas.layer_3_.sib13_.is_decoded();
+			case SIB_14_V1130:
+				return meas.layer_3_.sib14_.is_decoded();
+			case SIB_15_V1130:
+				return meas.layer_3_.sib15_.is_decoded();
+			case SIB_16_V1130:
+				return meas.layer_3_.sib16_.is_decoded();
 			default:;
 			}
 		}

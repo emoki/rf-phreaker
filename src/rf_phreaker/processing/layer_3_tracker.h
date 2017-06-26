@@ -65,6 +65,9 @@ public:
 	template<typename Data>
 	void update(const Data &data);
 
+	template<typename Data>
+	void set_decode(const Data &data, Layer_3 t);
+
 	int unique_identifer() { return unique_identifer_; }
 
 	template<typename Data>
@@ -213,8 +216,15 @@ template<> template<> inline void all_layer_3_decoded<layer_3_information::umts_
 	}
 }
 
+template<> template<> inline void all_layer_3_decoded<layer_3_information::lte_sib_type, bool>::set_decode(const lte_measurement &data, layer_3_information::lte_sib_type t) {
+	auto it = all_layer_3_.find(layer_3_information::lte_sib_type::SIB_1);
+	if(it != all_layer_3_.end() && data.layer_3_.is_decoded(t))
+		it->second = true;
+}
+
 template<> template<> inline void all_layer_3_decoded<layer_3_information::lte_sib_type, bool>::update(const lte_measurement &data)
 {
+	using namespace layer_3_information;
 	++num_updated_;
 	auto it = all_layer_3_.find(layer_3_information::lte_sib_type::SIB_1);
 	if(it != all_layer_3_.end()) {
@@ -232,30 +242,21 @@ template<> template<> inline void all_layer_3_decoded<layer_3_information::lte_s
 			}	
 		}
 	}
-	it = all_layer_3_.find(layer_3_information::lte_sib_type::SIB_3);
-	if(it != all_layer_3_.end()) {
-		if(data.layer_3_.sib3_.is_decoded()) it->second = true;
-	}
-	it = all_layer_3_.find(layer_3_information::lte_sib_type::SIB_4);
-	if(it != all_layer_3_.end()) {
-		if(data.layer_3_.sib4_.is_decoded()) it->second = true;
-	}
-	it = all_layer_3_.find(layer_3_information::lte_sib_type::SIB_5);
-	if(it != all_layer_3_.end()) {
-		if(data.layer_3_.sib5_.is_decoded()) it->second = true;
-	}
-	it = all_layer_3_.find(layer_3_information::lte_sib_type::SIB_6);
-	if(it != all_layer_3_.end()) {
-		if(data.layer_3_.sib6_.is_decoded()) it->second = true;
-	}
-	it = all_layer_3_.find(layer_3_information::lte_sib_type::SIB_7);
-	if(it != all_layer_3_.end()) {
-		if(data.layer_3_.sib7_.is_decoded()) it->second = true;
-	}
-	it = all_layer_3_.find(layer_3_information::lte_sib_type::SIB_8);
-	if(it != all_layer_3_.end()) {
-		if(data.layer_3_.sib8_.is_decoded()) it->second = true;
-	}
+	set_decode(data, SIB_2);
+	set_decode(data, SIB_3);
+	set_decode(data, SIB_4);
+	set_decode(data, SIB_5);
+	set_decode(data, SIB_6);
+	set_decode(data, SIB_7);
+	set_decode(data, SIB_8);
+	set_decode(data, SIB_9);
+	set_decode(data, SIB_10);
+	set_decode(data, SIB_11);
+	set_decode(data, SIB_12_V920);
+	set_decode(data, SIB_13_V920);
+	set_decode(data, SIB_14_V1130);
+	set_decode(data, SIB_15_V1130);
+	set_decode(data, SIB_16_V1130);
 }
 
 

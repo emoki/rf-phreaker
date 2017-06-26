@@ -58,6 +58,10 @@ struct lte_sib1_type : public lte_sib_base {
 	int si_window_length_ms_;
 };
 
+struct lte_sib2_type : public lte_sib_base {
+	void clear() {}
+};
+
 // s_non_intra_search_ - Rx level threshold for cell reselection. Value is IE value * 2 {dB]
 // Remove the '* 2'.  Let the user do this on their side.
 struct reselection_threshold_type {
@@ -278,6 +282,33 @@ struct lte_sib8_type : public lte_sib_base {
 	cell_reselection_parameters_cmda_2000 parameters_1xrtt_;
 };
 
+struct lte_sib9_type : public lte_sib_base {
+	void clear() {}
+};
+struct lte_sib10_type : public lte_sib_base {
+	void clear() {}
+};
+struct lte_sib11_type : public lte_sib_base {
+	void clear() {}
+};
+struct lte_sib12_v920_type : public lte_sib_base {
+	void clear() {}
+};
+struct lte_sib13_v920_type : public lte_sib_base {
+	void clear() {}
+};
+struct lte_sib14_v1130_type : public lte_sib_base {
+	void clear() {}
+};
+struct lte_sib15_v1130_type : public lte_sib_base {
+	void clear() {}
+};
+struct lte_sib16_v1130_type : public lte_sib_base {
+	void clear() {}
+};
+
+
+
 class lte_rrc_message_aggregate : public bcch_bch_message_aggregate {
 public:
 	//lte_rrc_message_aggregate();
@@ -295,18 +326,29 @@ public:
 	void swap(lte_rrc_message_aggregate &a) {
 		bcch_bch_message_aggregate::swap(a);
 		sib1_.swap(a.sib1_);
+		std::swap(sib2_.is_decoded_, a.sib2_.is_decoded_);
 		sib3_.swap(a.sib3_);
 		sib4_.swap(a.sib4_);
 		sib5_.swap(a.sib5_);
 		sib6_.swap(a.sib6_);
 		sib7_.swap(a.sib7_);
 		sib8_.swap(a.sib8_);
+		std::swap(sib9_.is_decoded_, a.sib9_.is_decoded_);
+		std::swap(sib10_.is_decoded_, a.sib10_.is_decoded_);
+		std::swap(sib11_.is_decoded_, a.sib11_.is_decoded_);
+		std::swap(sib12_.is_decoded_, a.sib12_.is_decoded_);
+		std::swap(sib13_.is_decoded_, a.sib13_.is_decoded_);
+		std::swap(sib14_.is_decoded_, a.sib14_.is_decoded_);
+		std::swap(sib15_.is_decoded_, a.sib15_.is_decoded_);
+		std::swap(sib16_.is_decoded_, a.sib16_.is_decoded_);
 	}
 
-	bool is_decoded(lte_sib_type sib_type) {
+	bool is_decoded(lte_sib_type sib_type) const {
 		switch(sib_type) {
 		case SIB_1:
 			return sib1_.is_decoded();
+		case SIB_2:
+			return sib2_.is_decoded();
 		case SIB_3:
 			return sib3_.is_decoded();
 		case SIB_4:
@@ -319,6 +361,22 @@ public:
 			return sib7_.is_decoded();
 		case SIB_8:
 			return sib8_.is_decoded();
+		case SIB_9:
+			return sib9_.is_decoded();
+		case SIB_10:
+			return sib10_.is_decoded();
+		case SIB_11:
+			return sib11_.is_decoded();
+		case SIB_12_V920:
+			return sib12_.is_decoded();
+		case SIB_13_V920:
+			return sib13_.is_decoded();
+		case SIB_14_V1130:
+			return sib14_.is_decoded();
+		case SIB_15_V1130:
+			return sib15_.is_decoded();
+		case SIB_16_V1130:
+			return sib16_.is_decoded();
 		default:
 			return false;
 		}
@@ -328,6 +386,8 @@ public:
 		bcch_bch_message_aggregate::update_info(a);
 		if(a.sib1_.is_decoded())
 			sib1_ = a.sib1_;
+		if(a.sib2_.is_decoded())
+			sib2_ = a.sib2_;
 		if(a.sib3_.is_decoded())
 			sib3_ = a.sib3_;
 		if(a.sib4_.is_decoded())
@@ -340,15 +400,40 @@ public:
 			sib7_ = a.sib7_;
 		if(a.sib8_.is_decoded())
 			sib8_ = a.sib8_;
+		if(a.sib9_.is_decoded())
+			sib9_ = a.sib9_;
+		if(a.sib10_.is_decoded())
+			sib10_ = a.sib10_;
+		if(a.sib11_.is_decoded())
+			sib11_ = a.sib11_;
+		if(a.sib12_.is_decoded())
+			sib12_ = a.sib12_;
+		if(a.sib13_.is_decoded())
+			sib13_ = a.sib13_;
+		if(a.sib14_.is_decoded())
+			sib14_ = a.sib14_;
+		if(a.sib15_.is_decoded())
+			sib15_ = a.sib15_;
+		if(a.sib16_.is_decoded())
+			sib16_ = a.sib16_;
 	}
 	
 	lte_sib1_type sib1_;
+	lte_sib2_type sib2_;
 	lte_sib3_type sib3_;
 	lte_sib4_type sib4_;
 	lte_sib5_type sib5_;
 	lte_sib6_type sib6_;
 	lte_sib7_type sib7_;
 	lte_sib8_type sib8_;
+	lte_sib9_type sib9_;
+	lte_sib10_type sib10_;
+	lte_sib11_type sib11_;
+	lte_sib12_v920_type sib12_;
+	lte_sib13_v920_type sib13_;
+	lte_sib14_v1130_type sib14_;
+	lte_sib15_v1130_type sib15_;
+	lte_sib16_v1130_type sib16_;
 };
 
 
