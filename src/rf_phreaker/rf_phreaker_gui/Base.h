@@ -30,6 +30,7 @@ class Base : public QObject {
 	Q_PROPERTY(QString cellLacTacStr READ cellLacTacStr NOTIFY cellLayer3Changed)
 	Q_PROPERTY(QString cellCidStr READ cellCidStr NOTIFY cellLayer3Changed)
 	Q_PROPERTY(RawLayer3Model* rawLayer3 READ rawLayer3 NOTIFY rawLayer3Changed)
+	Q_PROPERTY(bool isSelected READ isSelected WRITE setIsSelected NOTIFY isSelectedChanged)
 
 public:
 
@@ -40,7 +41,8 @@ public:
 	explicit Base(rf_phreaker::basic_data& base, ApiTypes::Tech tech, QObject *parent = 0)
 		: QObject(parent)
 		, base_(base)
-		, tech_(tech) {
+		, tech_(tech)
+		, isSelected_(false) {
 		timeElapsed_.start();
 	}
 
@@ -84,6 +86,7 @@ public:
 	virtual QString cellMncStr() const { return ""; }
 	virtual QString cellLacTacStr() const { return ""; }
 	virtual QString cellCidStr() const { return ""; }
+	bool isSelected() const { return isSelected_; }
 
 	QTime timeElapsed() const { return timeElapsed_; }
 	QString serial() const { return base_.serial_.c_str(); }
@@ -93,6 +96,12 @@ public:
 	virtual QString measurementSignalLevelStr() const { return QString::number(base_.measurement_signal_level_, 'f', 1); }
 	const rf_phreaker::basic_data& base() const { return base_; }
 
+	void setIsSelected(bool s) {
+		if(isSelected_ != s) {
+			isSelected_ = s;
+			emit isSelectedChanged();
+		}
+	}
 signals:
 	void timeElapsedChanged();
 	void serialChanged();
@@ -108,6 +117,7 @@ signals:
 	void cellInterferenceChanged();
 	void cellLayer3Changed();
 	void rawLayer3Changed();
+	void isSelectedChanged();
 
 protected:
 
@@ -118,7 +128,8 @@ protected:
 			std::string messageType;
 			std::string description;
 			converter.update(v[i], bits, messageType, description);
-			rawLayerModel_.pushBack(std::move(bits), std::move(messageType), std::move(description));
+			if(messageType.size() && description.size())
+				rawLayerModel_.pushBack(std::move(bits), std::move(messageType), std::move(description));
 		}
 	}
 
@@ -126,6 +137,7 @@ protected:
 	ApiTypes::Tech tech_;
 	QTime timeElapsed_;
 	RawLayer3Model rawLayerModel_;
+	bool isSelected_;
 };
 
 class GenericMeasurement : public Base {

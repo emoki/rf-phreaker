@@ -42,6 +42,7 @@ public:
 		CellCidRole,
 		LteDownlinkBandwidthRole,
 		GraphLabelRole,
+		IsSelectedRole,
 		MeasurementRoleSize
 	};
 
@@ -67,6 +68,7 @@ public:
 		CellCidColumn,
 		LteDownlinkBandwidthColumn,
 		GraphLabelColumn,
+		IsSelectedColumn,
 		ColumnSize
 	};
 
@@ -92,6 +94,7 @@ public:
 		roles_[CellCidRole] = "cid";
 		roles_[LteDownlinkBandwidthRole] = "lteDownlinkBandwidth";
 		roles_[GraphLabelRole] = "graphLabelRole";
+		roles_[IsSelectedRole] = "isSelected";
 
 		for(auto i = roles_.begin(); i != roles_.end(); ++i)
 			roleLookup_.insert(i.value(), i.key());
@@ -265,105 +268,86 @@ public:
 		return ColumnSize;
 	}
 
+	bool setData(const QModelIndex &index, const QVariant &value, int role = Qt::EditRole) {
+		if(index.row() < 0 || index.row() >= (int)index_.size())
+			return false;
+
+		auto column = index.column();
+
+		if(role != Qt::DisplayRole && role != Qt::EditRole)
+			column = convertRoleToColumn((int)role);
+
+		if(column < 0 || column >= (int)ColumnSize)
+			return false;
+
+		switch(column) {
+		case IsSelectedColumn: {
+			auto selected = value.toBool();
+			index_.get<random_access>()[index.row()]->setIsSelected(selected);
+			return true;
+			}
+		default:
+			return false;
+		}
+	}
+
 	QVariant data(const QModelIndex &index, int role = Qt::DisplayRole) const {
 		if(index.row() < 0 || index.row() >= (int)index_.size())
 			return QVariant();
 
-		if(role != Qt::DisplayRole) {
-			switch(role) {
-			case BasicMeasRole:
-				return QVariant::fromValue((Base*)index_.get<random_access>()[index.row()]);
-			case GsmRole:
-				return QVariant::fromValue((Gsm*)index_.get<random_access>()[index.row()]);
-			case WcdmaRole:
-				return QVariant::fromValue((Wcdma*)index_.get<random_access>()[index.row()]);
-			case LteRole:
-				return QVariant::fromValue((Lte*)index_.get<random_access>()[index.row()]);
-			case CwRole:
-				return QVariant::fromValue((Cw*)index_.get<random_access>()[index.row()]);
-			case TimeElapsedRole:
-				return QVariant(index_.get<random_access>()[index.row()]->timeElapsed());
-			case MeasurementFreqRole:
-				return QVariant(index_.get<random_access>()[index.row()]->measurementFreq());
-			case MeasurementBandwidthRole:
-				return QVariant(index_.get<random_access>()[index.row()]->measurementBandwidth());
-			case MeasurementSignalLevelRole:
-				return QVariant(index_.get<random_access>()[index.row()]->measurementSignalLevel());
-			case CellTechRole:
-				return QVariant(index_.get<random_access>()[index.row()]->cellTech());
-			case CellBandRole:
-				return QVariant(index_.get<random_access>()[index.row()]->cellBand());
-			case CellChannelRole:
-				return QVariant(index_.get<random_access>()[index.row()]->cellChannel());
-			case CellIdRole:
-				return QVariant(index_.get<random_access>()[index.row()]->cellId());
-			case CellSignalLevelRole:
-				return QVariant(index_.get<random_access>()[index.row()]->cellSignalLevel());
-			case CellInterferenceRole:
-				return QVariant(index_.get<random_access>()[index.row()]->cellInterference());
-			case CellMccRole:
-				return QVariant(index_.get<random_access>()[index.row()]->cellMccStr());
-			case CellMncRole:
-				return QVariant(index_.get<random_access>()[index.row()]->cellMncStr());
-			case CellLacTacRole:
-				return QVariant(index_.get<random_access>()[index.row()]->cellLacTacStr());
-			case CellCidRole:
-				return QVariant(index_.get<random_access>()[index.row()]->cellCidStr());
-			case LteDownlinkBandwidthRole:
-				return QVariant(reinterpret_cast<Lte*>(index_.get<random_access>()[index.row()])->downlinkBandwidth());
-			case GraphLabelRole: {
-				return QVariant(graphLabel(index.row()));
-			}
-			default:
-				return QVariant();
-			}
-		}
-		else {
-			if(index.column() < 0 || index.column() >= (int)ColumnSize)
-				return QVariant();
+		auto column = index.column();
 
-			switch(index.column()) {
-			case BasicMeasColumn:
-				return QVariant::fromValue((Base*)index_.get<random_access>()[index.row()]);
-			case GsmColumn:
-				return QVariant::fromValue((Gsm*)index_.get<random_access>()[index.row()]);
-			case WcdmaColumn:
-				return QVariant::fromValue((Wcdma*)index_.get<random_access>()[index.row()]);
-			case LteColumn:
-				return QVariant::fromValue((Lte*)index_.get<random_access>()[index.row()]);
-			case CwColumn:
-				return QVariant::fromValue((Cw*)index_.get<random_access>()[index.row()]);
-			case TimeElapsedColumn:
-				return QVariant(index_.get<random_access>()[index.row()]->timeElapsed());
-			case MeasurementFreqColumn:
-				return QVariant(index_.get<random_access>()[index.row()]->measurementFreq());
-			case MeasurementBandwidthColumn:
-				return QVariant(index_.get<random_access>()[index.row()]->measurementBandwidth());
-			case MeasurementSignalLevelColumn:
-				return QVariant(index_.get<random_access>()[index.row()]->measurementSignalLevel());
-			case CellChannelColumn:
-				return QVariant(index_.get<random_access>()[index.row()]->cellChannel());
-			case CellIdColumn:
-				return QVariant(index_.get<random_access>()[index.row()]->cellId());
-			case CellSignalLevelColumn:
-				return QVariant(index_.get<random_access>()[index.row()]->cellSignalLevel());
-			case CellInterferenceColumn:
-				return QVariant(index_.get<random_access>()[index.row()]->cellInterference());
-			case CellMccColumn:
-				return QVariant(index_.get<random_access>()[index.row()]->cellMccStr());
-			case CellMncColumn:
-				return QVariant(index_.get<random_access>()[index.row()]->cellMncStr());
-			case CellLacTacColumn:
-				return QVariant(index_.get<random_access>()[index.row()]->cellLacTacStr());
-			case CellCidColumn:
-				return QVariant(index_.get<random_access>()[index.row()]->cellCidStr());
-			case LteDownlinkBandwidthColumn:
-				return QVariant(reinterpret_cast<Lte*>(index_.get<random_access>()[index.row()])->downlinkBandwidth());
-			case GraphLabelColumn: 
-				return QVariant(graphLabel(index.row()));
-			default:;
-				return QVariant();
-			}
+		if(role != Qt::DisplayRole) 
+			column = convertRoleToColumn((int)role);
+		
+		if(column < 0 || column >= (int)ColumnSize)
+			return QVariant();
+
+		switch(column) {
+		case BasicMeasColumn:
+			return QVariant::fromValue((Base*)index_.get<random_access>()[index.row()]);
+		case GsmColumn:
+			return QVariant::fromValue((Gsm*)index_.get<random_access>()[index.row()]);
+		case WcdmaColumn:
+			return QVariant::fromValue((Wcdma*)index_.get<random_access>()[index.row()]);
+		case LteColumn:
+			return QVariant::fromValue((Lte*)index_.get<random_access>()[index.row()]);
+		case CwColumn:
+			return QVariant::fromValue((Cw*)index_.get<random_access>()[index.row()]);
+		case TimeElapsedColumn:
+			return QVariant(index_.get<random_access>()[index.row()]->timeElapsed());
+		case MeasurementFreqColumn:
+			return QVariant(index_.get<random_access>()[index.row()]->measurementFreq());
+		case MeasurementBandwidthColumn:
+			return QVariant(index_.get<random_access>()[index.row()]->measurementBandwidth());
+		case MeasurementSignalLevelColumn:
+			return QVariant(index_.get<random_access>()[index.row()]->measurementSignalLevel());
+		case CellTechColumn:
+			return QVariant(index_.get<random_access>()[index.row()]->cellTech());
+		case CellBandColumn:
+			return QVariant(index_.get<random_access>()[index.row()]->cellBand());
+		case CellChannelColumn:
+			return QVariant(index_.get<random_access>()[index.row()]->cellChannel());
+		case CellIdColumn:
+			return QVariant(index_.get<random_access>()[index.row()]->cellId());
+		case CellSignalLevelColumn:
+			return QVariant(index_.get<random_access>()[index.row()]->cellSignalLevel());
+		case CellInterferenceColumn:
+			return QVariant(index_.get<random_access>()[index.row()]->cellInterference());
+		case CellMccColumn:
+			return QVariant(index_.get<random_access>()[index.row()]->cellMccStr());
+		case CellMncColumn:
+			return QVariant(index_.get<random_access>()[index.row()]->cellMncStr());
+		case CellLacTacColumn:
+			return QVariant(index_.get<random_access>()[index.row()]->cellLacTacStr());
+		case CellCidColumn:
+			return QVariant(index_.get<random_access>()[index.row()]->cellCidStr());
+		case LteDownlinkBandwidthColumn:
+			return QVariant(reinterpret_cast<Lte*>(index_.get<random_access>()[index.row()])->downlinkBandwidth());
+		case GraphLabelColumn: 
+			return QVariant(graphLabel(index.row()));
+		default:;
+			return QVariant();
 		}
 	}
 
@@ -421,6 +405,8 @@ public:
 				return "Downlink Bandwidth";
 			case GraphLabelRole:
 				return "Graph Label";
+			case IsSelectedRole:
+				return "Selected";
 			default:
 				return QVariant();
 			}
@@ -428,9 +414,13 @@ public:
 		return QVariant();
 	}
 
-	Q_INVOKABLE virtual int convertRoleToColumn(QString role) {
+	Q_INVOKABLE virtual int convertRoleToColumn(QString role) const {
 		auto r = findRole(role);
-		switch(r) {
+		return convertRoleToColumn(r);
+	}
+
+	Q_INVOKABLE virtual int convertRoleToColumn(int role) const {
+		switch(role) {
 		case BasicMeasRole:
 			return BasicMeasColumn;
 		case GsmRole:
@@ -473,13 +463,15 @@ public:
 			return LteDownlinkBandwidthColumn;
 		case GraphLabelRole:
 			return GraphLabelColumn;
+		case IsSelectedRole:
+			return IsSelectedColumn;
 		default:
 			qDebug() << "Unknown role when converting to column.";
-			return MeasurementFreqColumn;
+			return ColumnSize;
 		}
 	}
 
-	Q_INVOKABLE int findRole(QString role) {
+	Q_INVOKABLE int findRole(QString role) const {
 		return roleLookup_.find(role.toLocal8Bit()).value();
 	}
 
