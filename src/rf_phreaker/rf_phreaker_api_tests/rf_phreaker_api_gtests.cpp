@@ -61,17 +61,20 @@ TEST(RfPhreakerApi, GeneralTest) {
 		std::vector<rp_frequency_band> lte;
 		std::vector<rp_power_spectrum_spec> spec;
 		std::vector<rp_iq_data_spec> iq;
-		sweep.push_back(rp_operating_band::UMTS_OPERATING_BAND_4);
-		sweep.push_back(rp_operating_band::UMTS_OPERATING_BAND_2);
-		sweep.push_back(rp_operating_band::LTE_OPERATING_BAND_1);
-		sweep.push_back(rp_operating_band::LTE_OPERATING_BAND_2);
-		sweep.push_back(rp_operating_band::LTE_OPERATING_BAND_12);
-		
-		spec.push_back(rp_power_spectrum_spec{ mhz(1930), mhz(25), khz(2), milli_to_nano(30) });
-		spec.push_back(rp_power_spectrum_spec{ mhz(2110), mhz(40), khz(2), milli_to_nano(30) });
+		//sweep.push_back(rp_operating_band::UMTS_OPERATING_BAND_4);
+		//sweep.push_back(rp_operating_band::UMTS_OPERATING_BAND_2);
+		//sweep.push_back(rp_operating_band::LTE_OPERATING_BAND_1);
+		//sweep.push_back(rp_operating_band::LTE_OPERATING_BAND_2);
+		//sweep.push_back(rp_operating_band::LTE_OPERATING_BAND_12);
+		//
+		//spec.push_back(rp_power_spectrum_spec{ mhz(1930), mhz(25), khz(2), milli_to_nano(30) });
+		//spec.push_back(rp_power_spectrum_spec{ mhz(2110), mhz(40), khz(2), milli_to_nano(30) });
 
-		iq.push_back(rp_iq_data_spec{ mhz(875), mhz(5), mhz(10), milli_to_nano(20) });
-		iq.push_back(rp_iq_data_spec{mhz(750), mhz(2), mhz(4), milli_to_nano(20)});
+		//iq.push_back(rp_iq_data_spec{ mhz(875), mhz(5), mhz(10), milli_to_nano(20) });
+		//iq.push_back(rp_iq_data_spec{mhz(750), mhz(2), mhz(4), milli_to_nano(20)});
+
+		lte.push_back({mhz(2120), rp_operating_band::LTE_OPERATING_BAND_4});
+		lte.push_back({mhz(2140), rp_operating_band::LTE_OPERATING_BAND_4});
 
 		rp_collection_info info;
 		info.sweep_.e_ = sweep.data();
@@ -87,19 +90,15 @@ TEST(RfPhreakerApi, GeneralTest) {
 		info.power_spectrum_spec_.e_ = spec.data();
 		info.power_spectrum_spec_.size_ = spec.size();
 
-		rp_start_collection(d1, &info);
-
-		api_helper::instance().wait(std::chrono::minutes(60));
-
-		if(api_helper::instance().error_has_occurred()) {
-			auto status = rp_initialize(&output.cbs_);
-			status = rp_connect_device(serial[0], &d1);
+		for(int i = 0; i < 20; ++i) {
 			rp_start_collection(d1, &info);
-			api_helper::instance().wait(std::chrono::minutes(60));
+			api_helper::instance().wait(std::chrono::minutes(10));
+			if(api_helper::instance().error_has_occurred()) {
+				auto status = rp_initialize(&output.cbs_);
+				status = rp_connect_device(serial[0], &d1);
+			}
+			rp_stop_collection(d1);
 		}
-
-
-		rp_stop_collection(d1);
 
 		status = rp_disconnect_device(d1);
 		//status = rp_disconnect_device(d2);
