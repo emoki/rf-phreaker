@@ -27,6 +27,10 @@ public:
 		sib_descriptons_.clear();
 	}
 
+	uint32_t bytes_consumed() const;
+
+	uint32_t bits_consumed() const;
+
 protected:
 	virtual decode_status decode_data(const bit_stream_container &bit_stream, pdu_element_container &pdu_element);
 
@@ -35,9 +39,7 @@ protected:
 
 	void* decoded_structure();
 
-	uint32_t bits_consumed();
-
-	decode_status current_decode_status();
+	decode_status current_decode_status() const;
 
 	per_decoder_container per_decoder_container_;
 

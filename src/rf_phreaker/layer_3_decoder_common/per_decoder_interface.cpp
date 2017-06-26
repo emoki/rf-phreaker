@@ -43,10 +43,14 @@ void* per_decoder_interface::decoded_structure() {
 	return decoded_structure_;
 }
 
-uint32_t per_decoder_interface::bits_consumed() {
+uint32_t per_decoder_interface::bytes_consumed() const {
+	return (uint32_t)std::floor((bits_consumed_ / 8) + 1);
+}
+
+uint32_t per_decoder_interface::bits_consumed() const {
 	return bits_consumed_;
 }
 
-decode_status per_decoder_interface::current_decode_status() {
+decode_status per_decoder_interface::current_decode_status() const {
 	return current_decode_status_;
 }
