@@ -2,6 +2,7 @@
 
 #include <map>
 #include <algorithm>
+#include <tuple>
 #include "rf_phreaker/common/common_types.h"
 #include "rf_phreaker/common/common_utility.h"
 #include "rf_phreaker/common/operating_band_range_specifier.h"
@@ -356,7 +357,7 @@ public:
 		, max_bandwidth_(mhz(20)) // 2017.6.20 - the calibration routine only goes up to 20 mhz
 		//, max_bandwidth_(/*get_upper_scanner_bandwidth(mhz(28))*/) 
 		, min_sampling_rate_(khz(1500)) // Minimum sampling_rate must be at least 1.5khz to support the lowest scanner bandwidth of 1.5khz
-		, max_sampling_rate_(mhz(32))
+		, max_sampling_rate_(32768000)
 		, num_windows_(10)
 	{}
 
@@ -375,7 +376,7 @@ public:
 		return sampling_rate;
 	}
 
-	std::vector<power_spectrum_spec>& power_specs() { return power_specs_; }
+	std::vector<std::tuple<power_spectrum_spec, frequency_type, bandwidth_type>>& power_specs() { return power_specs_; }
 
 private:	
 	void determine_spectrum_parameters_(frequency_type start_freq, frequency_type span, frequency_type bin_size, time_type dwell_time_ns, int64_t identifier) {
@@ -402,12 +403,12 @@ private:
 			}
 			auto bw_based_on_sr = calculate_allowed_bandwidth(sampling_rate);
 			scanner_bandwidth = get_upper_scanner_bandwidth(std::min(span, bw_based_on_sr));
-			if(scanner_bandwidth > span && scanner_bandwidth < sampling_rate) {
+			if(scanner_bandwidth >= span && scanner_bandwidth < sampling_rate && scanner_bandwidth <= (max_bandwidth_ - bin_size)) {
 				break;
 			}
 		}
 
-		if(scanner_bandwidth < span || scanner_bandwidth > sampling_rate) {
+		if(scanner_bandwidth < span || scanner_bandwidth > sampling_rate || scanner_bandwidth > (max_bandwidth_ - bin_size)) {
 			determine_spectrum_parameters_(start_freq, span / 2, bin_size, dwell_time_ns, identifier);
 			determine_spectrum_parameters_(start_freq + span / 2, span / 2, bin_size, dwell_time_ns, identifier);
 		}
@@ -418,10 +419,11 @@ private:
 			auto max_dwell_time = rf_phreaker::convert_to_time(max_num_samples_, spec.sampling_rate_);
 			spec.dwell_time_ = std::max(std::min(max_dwell_time, dwell_time_ns), min_dwell_time);
 			spec.num_windows_ = rf_phreaker::convert_to_samples(spec.dwell_time_, spec.sampling_rate_) / spec.window_length_;
-			spec.start_frequency_ = start_freq - bin_size / 2;
-			spec.end_frequency_ = start_freq + span + bin_size / 2;
+			spec.start_frequency_ = start_freq;
+			spec.end_frequency_ = start_freq + span;
 			spec.span_ = span + bin_size;
-			power_specs_.push_back(spec);
+			auto bandwidth = get_lower_scanner_bandwidth(spec.sampling_rate_);
+			power_specs_.push_back({spec, spec.start_frequency_ + spec.span_ / 2 - bin_size / 2, bandwidth});
 		}
 	}
 
@@ -432,7 +434,7 @@ private:
 	frequency_type min_sampling_rate_;
 	frequency_type max_sampling_rate_;
 	int num_windows_;
-	std::vector<power_spectrum_spec> power_specs_;
+	std::vector<std::tuple<power_spectrum_spec, frequency_type, bandwidth_type>> power_specs_;
 };
 
 }}

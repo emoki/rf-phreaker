@@ -622,8 +622,8 @@ rp_status rf_phreaker_impl::add_power_spectrum_frequency(rp_device *device, cons
 		approx.determine_spectrum_parameters(spec.start_frequency_, spec.span_, spec.bin_size_, spec.dwell_time_, spec.identifier_);
 
 		// Ensure we can collect on center freqs.
-		for(auto s : approx.power_specs()) {
-			check_calibration(hw, s.start_frequency_ + s.span_ / 2);
+		for(auto t : approx.power_specs()) {
+			check_calibration(hw, std::get<frequency_type>(t));
 		}
 
 		// Check for license.
@@ -641,11 +641,14 @@ rp_status rf_phreaker_impl::add_power_spectrum_frequency(rp_device *device, cons
 			});
 		}
 
-		for(auto s : approx.power_specs()) {
+		for(auto t : approx.power_specs()) {
 			// We use the span as the bandwidth knowing that if will be bumped up to the next valid bandwidth.
 			// power_spectrum_approximator takes into account the scanner's valid bandwidth when calculating specs.
-			it->adjust(add_collection_info(rf_phreaker::processing::power_spectrum_collection_info(s.start_frequency_ + s.span_ / 2, s.dwell_time_, 0,
-				processing::get_lower_scanner_bandwidth(s.sampling_rate_), s.sampling_rate_, s)));
+			auto s = std::get<power_spectrum_spec>(t);
+			auto f = std::get<frequency_type>(t);
+			auto b = std::get<bandwidth_type>(t);
+			it->adjust(add_collection_info(rf_phreaker::processing::power_spectrum_collection_info(f, s.dwell_time_, 0,
+				b, s.sampling_rate_, s)));
 		}
 	}
 	catch(const rf_phreaker_error &err) {

@@ -137,7 +137,8 @@ TEST(PowerSpectrumApproximator, GeneralTest) {
 				approx.determine_spectrum_parameters(spec.start_frequency_, spec.span_, spec.bin_size_, spec.dwell_time_, k * inner_loop + i);
 				if(file) {
 					for(auto s : approx.power_specs()) {
-						file << spec << "\t" << s << std::endl;
+						file << spec << "\t" << std::get<frequency_type>(s) << "\t" << std::get<bandwidth_type>(s) << "\t"
+							<< std::get<power_spectrum_spec>(s) << std::endl;
 					}
 				}
 			}
