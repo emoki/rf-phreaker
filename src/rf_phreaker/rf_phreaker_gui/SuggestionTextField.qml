@@ -40,6 +40,8 @@ TextField {
         sView.selection.select(sView.currentRow);
     }
     Keys.onReturnPressed: {
+        if(sView.currentRow === -1 && sView.rowCount > 0)
+            sView.currentRow = 0;
         sView.sendCurrentSelection(sView.currentRow);
     }
 
