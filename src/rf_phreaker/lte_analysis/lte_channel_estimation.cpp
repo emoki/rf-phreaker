@@ -916,69 +916,69 @@ void LteNoiseVarEst(Ipp32f* noiseVar, Ipp32fc* H, CYCLICPREFIX cyclicPrefixMode,
 {
 	unsigned int numSymbsPerSubframe, curCPLen;
 
-	if(cyclicPrefixMode==Normal)
-		curCPLen = 10*FFTSize/128;
+	//----------------------------------------------
+	// The only qmat array generated is for 72 subcarriers therefore we only copy 72 subcarriers to determine
+	// noise variance. This also means the cplen should be set for 72 subcarriers.  
+	if(cyclicPrefixMode == Normal)
+		curCPLen = 10;
 	else
-		curCPLen = 32*FFTSize/128;
+		curCPLen = 32;
 
-	if(cyclicPrefixMode==Normal)
-	{
+	if(cyclicPrefixMode == Normal) {
 		numSymbsPerSubframe = 14;
 	}
-	else
-	{
+	else {
 		numSymbsPerSubframe = 12;
 	}
 
-	ipp_32fc_array H1(numSymbsPerSubframe*subframesToProcess*useSubCarriers);
-	for(unsigned int ii=0;ii<subframesToProcess;ii++)
-	{
-		for(unsigned int jj=0;jj<numSymbsPerSubframe;jj++)
-		{
-			for(unsigned int kk=0;kk<useSubCarriers/2;kk++)
-			{
-				auto h1_pos = ii*numSymbsPerSubframe*useSubCarriers + jj*useSubCarriers + kk;
-				auto h_pos = 14 * ii*FFTSize + jj*FFTSize + FFTSize / 2 - useSubCarriers / 2;
+	auto hard_coded_subcarriers = 72;
+	ipp_32fc_array H1(numSymbsPerSubframe*subframesToProcess*hard_coded_subcarriers);
+	H1.zero_out();
+
+	for(unsigned int ii = 0; ii<subframesToProcess; ii++) {
+		for(unsigned int jj = 0; jj<numSymbsPerSubframe; jj++) {
+			for(unsigned int kk = 0; kk < hard_coded_subcarriers / 2; kk++) {
+				auto h1_pos = ii*numSymbsPerSubframe*hard_coded_subcarriers + jj*hard_coded_subcarriers + kk;
+				auto h_pos = MAX_OFDM_SYMBOLS_PER_SUBFRAME * ii*FFTSize + jj*FFTSize + FFTSize / 2 - useSubCarriers / 2;
 				H1[h1_pos] = H[h_pos];
 
-				auto h1_pos2 = h1_pos + useSubCarriers / 2;
-				auto h_pos2 = 14 * ii*FFTSize + jj*FFTSize + kk + FFTSize / 2 + 1;
+				auto h1_pos2 = h1_pos + hard_coded_subcarriers / 2;
+				auto h_pos2 = MAX_OFDM_SYMBOLS_PER_SUBFRAME * ii*FFTSize + jj*FFTSize + kk + FFTSize / 2 + 1;
 				H1[h1_pos2] = H[h_pos2];
 			}
 		}
 	}
 
 	//Q matrix can be precomputed to reduce complexity
-	ipp_32fc_array qmat(useSubCarriers*useSubCarriers); 
+	ipp_32fc_array qmat(hard_coded_subcarriers *hard_coded_subcarriers);
+
+	// Q matrix is not currently generated.
 	//GetQmat(qmat.get(), FFTSize, useSubCarriers, curCPLen); 
 
 	qmat.copy(QcChannelP[0], 5184);
 	Ipp32fc *tqmat = QcChannelP[0];//--Hardcoded DLBW == 0 -Raj,4 Oct 2011
+	ipp_32fc_array vec1(hard_coded_subcarriers);
 
-	//QmatConj = QcChannelP[DLBW]; --Temporarily commented to work for other DLBW values -Raj,4 Oct 2011
-	//QmatConj = QcChannelP[0];//--Hardcoded DLBW == 0 -Raj,4 Oct 2011
-	ipp_32fc_array vec1(useSubCarriers); 
-
-	for(unsigned int ii=0;ii<subframesToProcess;ii++)
+	for(unsigned int ii=0;ii<subframesToProcess;/*ii++*/)
 	{
 		double noise0=0;
 
 		for(unsigned int jj=0;jj<numSymbsPerSubframe;jj++)
 		{
-			multMatVect_fc_fast(vec1, qmat, useSubCarriers, useSubCarriers,
-				H1.get(ii*numSymbsPerSubframe*useSubCarriers+jj*useSubCarriers));
+			multMatVect_fc_fast(vec1, qmat, hard_coded_subcarriers, hard_coded_subcarriers,
+				H1.get(ii*numSymbsPerSubframe*hard_coded_subcarriers + jj*hard_coded_subcarriers));
 
-			for(unsigned int kk=curCPLen;kk<useSubCarriers;kk++)
+			for(unsigned int kk=curCPLen;kk<hard_coded_subcarriers;kk++)
 			{
 				noise0 = noise0 + vec1[kk].re*vec1[kk].re+vec1[kk].im*vec1[kk].im;
 			}
 		}
 
-		noiseVar[ii] = noise0/(numSymbsPerSubframe*(useSubCarriers-curCPLen));
-		noiseVar[ii+1] = noise0/(numSymbsPerSubframe*(useSubCarriers-curCPLen));
-		noiseVar[ii+2] = noise0/(numSymbsPerSubframe*(useSubCarriers-curCPLen));
-		noiseVar[ii+3] = noise0/(numSymbsPerSubframe*(useSubCarriers-curCPLen));
-		noiseVar[ii+4] = noise0/(numSymbsPerSubframe*(useSubCarriers-curCPLen));
+		noiseVar[ii] = noise0/(numSymbsPerSubframe*(hard_coded_subcarriers -curCPLen));
+		noiseVar[ii+1] = noise0/(numSymbsPerSubframe*(hard_coded_subcarriers -curCPLen));
+		noiseVar[ii+2] = noise0/(numSymbsPerSubframe*(hard_coded_subcarriers -curCPLen));
+		noiseVar[ii+3] = noise0/(numSymbsPerSubframe*(hard_coded_subcarriers -curCPLen));
+		noiseVar[ii+4] = noise0/(numSymbsPerSubframe*(hard_coded_subcarriers -curCPLen));
 
 		ii = ii+5;
 	}
