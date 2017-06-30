@@ -405,6 +405,7 @@ void LteLinearInterpolat(Ipp32fc* H, unsigned int *subframesProcessed, Ipp32fc* 
 
 					for(unsigned int kk=0;kk<numSymbsPerSubframe;kk++)
 					{
+						// Looking at first subframe therefore we don't need to use MAX_OFDM_SYMBOLS_PER_SUBFRAME to index H.
 						if(jj<useSubCarriers/2)
 						{
 							H[kk*FFTSize+jj+(FFTSize-useSubCarriers)/2].re = H5[kk].re;
@@ -548,13 +549,13 @@ void LteLinearInterpolat(Ipp32fc* H, unsigned int *subframesProcessed, Ipp32fc* 
 					{
 						if(jj<useSubCarriers/2)
 						{
-							H[(kk+14*ii)*FFTSize+jj+(FFTSize-useSubCarriers)/2].re = H5[kk].re;
-							H[(kk+14*ii)*FFTSize+jj+(FFTSize-useSubCarriers)/2].im = H5[kk].im;
+							H[(kk+ MAX_OFDM_SYMBOLS_PER_SUBFRAME*ii)*FFTSize+jj+(FFTSize-useSubCarriers)/2].re = H5[kk].re;
+							H[(kk+ MAX_OFDM_SYMBOLS_PER_SUBFRAME*ii)*FFTSize+jj+(FFTSize-useSubCarriers)/2].im = H5[kk].im;
 						}
 						else
 						{
-							H[(kk+14*ii)*FFTSize+jj+FFTSize/2-useSubCarriers/2+1].re = H5[kk].re;
-							H[(kk+14*ii)*FFTSize+jj+FFTSize/2-useSubCarriers/2+1].im = H5[kk].im;
+							H[(kk+ MAX_OFDM_SYMBOLS_PER_SUBFRAME*ii)*FFTSize+jj+FFTSize/2-useSubCarriers/2+1].re = H5[kk].re;
+							H[(kk+ MAX_OFDM_SYMBOLS_PER_SUBFRAME*ii)*FFTSize+jj+FFTSize/2-useSubCarriers/2+1].im = H5[kk].im;
 						}
 					}
 				}
@@ -647,13 +648,13 @@ void LteLinearInterpolat(Ipp32fc* H, unsigned int *subframesProcessed, Ipp32fc* 
 					{
 						if(jj<useSubCarriers/2)
 						{
-							H[(kk+14*ii)*FFTSize+jj+(FFTSize-useSubCarriers)/2].re = H5[kk].re;
-							H[(kk+14*ii)*FFTSize+jj+(FFTSize-useSubCarriers)/2].im = H5[kk].im;
+							H[(kk+ MAX_OFDM_SYMBOLS_PER_SUBFRAME*ii)*FFTSize+jj+(FFTSize-useSubCarriers)/2].re = H5[kk].re;
+							H[(kk+ MAX_OFDM_SYMBOLS_PER_SUBFRAME*ii)*FFTSize+jj+(FFTSize-useSubCarriers)/2].im = H5[kk].im;
 						}
 						else
 						{
-							H[(kk+14*ii)*FFTSize+jj+FFTSize/2-useSubCarriers/2+1].re = H5[kk].re;
-							H[(kk+14*ii)*FFTSize+jj+FFTSize/2-useSubCarriers/2+1].im = H5[kk].im;
+							H[(kk+ MAX_OFDM_SYMBOLS_PER_SUBFRAME*ii)*FFTSize+jj+FFTSize/2-useSubCarriers/2+1].re = H5[kk].re;
+							H[(kk+ MAX_OFDM_SYMBOLS_PER_SUBFRAME*ii)*FFTSize+jj+FFTSize/2-useSubCarriers/2+1].im = H5[kk].im;
 						}
 					}
 				}
@@ -759,6 +760,7 @@ void LteLinearInterpolat(Ipp32fc* H, unsigned int *subframesProcessed, Ipp32fc* 
 
 					for(unsigned int kk=0;kk<numSymbsPerSubframe;kk++)
 					{
+						// Looking at first subframe therefore we don't need to use MAX_OFDM_SYMBOLS_PER_SUBFRAME to index H.
 						if(jj<useSubCarriers/2)
 						{
 							H[kk*FFTSize+jj+(FFTSize-useSubCarriers)/2].re = H5[kk].re;
@@ -809,13 +811,13 @@ void LteLinearInterpolat(Ipp32fc* H, unsigned int *subframesProcessed, Ipp32fc* 
 					{
 						if(jj<useSubCarriers/2)
 						{
-							H[(kk+14*ii)*FFTSize+jj+(FFTSize-useSubCarriers)/2].re = H5[kk].re;
-							H[(kk+14*ii)*FFTSize+jj+(FFTSize-useSubCarriers)/2].im = H5[kk].im;
+							H[(kk+ MAX_OFDM_SYMBOLS_PER_SUBFRAME*ii)*FFTSize+jj+(FFTSize-useSubCarriers)/2].re = H5[kk].re;
+							H[(kk+ MAX_OFDM_SYMBOLS_PER_SUBFRAME*ii)*FFTSize+jj+(FFTSize-useSubCarriers)/2].im = H5[kk].im;
 						}
 						else
 						{
-							H[(kk+14*ii)*FFTSize+jj+FFTSize/2-useSubCarriers/2+1].re = H5[kk].re;
-							H[(kk+14*ii)*FFTSize+jj+FFTSize/2-useSubCarriers/2+1].im = H5[kk].im;
+							H[(kk+ MAX_OFDM_SYMBOLS_PER_SUBFRAME*ii)*FFTSize+jj+FFTSize/2-useSubCarriers/2+1].re = H5[kk].re;
+							H[(kk+ MAX_OFDM_SYMBOLS_PER_SUBFRAME*ii)*FFTSize+jj+FFTSize/2-useSubCarriers/2+1].im = H5[kk].im;
 						}
 					}
 				}
@@ -878,13 +880,13 @@ void LteLinearInterpolat(Ipp32fc* H, unsigned int *subframesProcessed, Ipp32fc* 
 					{
 						if(jj<useSubCarriers/2)
 						{
-							H[(kk+14*ii)*FFTSize+jj+(FFTSize-useSubCarriers)/2].re = H5[kk].re;
-							H[(kk+14*ii)*FFTSize+jj+(FFTSize-useSubCarriers)/2].im = H5[kk].im;
+							H[(kk+ MAX_OFDM_SYMBOLS_PER_SUBFRAME*ii)*FFTSize+jj+(FFTSize-useSubCarriers)/2].re = H5[kk].re;
+							H[(kk+ MAX_OFDM_SYMBOLS_PER_SUBFRAME*ii)*FFTSize+jj+(FFTSize-useSubCarriers)/2].im = H5[kk].im;
 						}
 						else
 						{
-							H[(kk+14*ii)*FFTSize+jj+FFTSize/2-useSubCarriers/2+1].re = H5[kk].re;
-							H[(kk+14*ii)*FFTSize+jj+FFTSize/2-useSubCarriers/2+1].im = H5[kk].im;
+							H[(kk+ MAX_OFDM_SYMBOLS_PER_SUBFRAME*ii)*FFTSize+jj+FFTSize/2-useSubCarriers/2+1].re = H5[kk].re;
+							H[(kk+ MAX_OFDM_SYMBOLS_PER_SUBFRAME*ii)*FFTSize+jj+FFTSize/2-useSubCarriers/2+1].im = H5[kk].im;
 						}
 					}
 				}
