@@ -36,7 +36,6 @@ rf_phreaker_impl::~rf_phreaker_impl() {
 		processing_graph_.reset();
 		frequency_correction_graph_.reset();
 		data_output_.reset();
-		tbb_task_scheduler_.reset();
 		handler_.reset();
 		handler_pb_.reset();
 		scanners_.clear();
@@ -143,10 +142,6 @@ rp_status rf_phreaker_impl::initialize(rp_callbacks *callbacks) {
 
 		processing::initialize_collection_info_defaults(config_);
 
-		tbb_task_scheduler_ = std::make_unique<tbb::task_scheduler_init>();
-		if(!tbb_task_scheduler_->is_active())
-			tbb_task_scheduler_->initialize(-1);
-
 		LOG(LINFO) << "Initialization complete.";
 		is_initialized_ = true;
 	}
@@ -211,7 +206,6 @@ rp_status rf_phreaker_impl::clean_up() {
 		clear_queues();
 		data_output_.reset();
 		scanners_.clear();
-		tbb_task_scheduler_.reset();
 		LOG(LINFO) << "Cleaned up successfully.";
 	}
 	catch(const rf_phreaker_error &err) {

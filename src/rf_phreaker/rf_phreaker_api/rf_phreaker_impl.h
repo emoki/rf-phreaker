@@ -144,8 +144,6 @@ private:
 
 	std::recursive_mutex mutex_;
 
-	std::unique_ptr<tbb::task_scheduler_init> tbb_task_scheduler_;
-
 	rp_callbacks *callbacks_;
 
 	protobuf::update_pb update_;
