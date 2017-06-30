@@ -879,7 +879,7 @@ Page {
 
                         displaySecondArea: false
 
-                        slMin: -160
+                        slMin: -140
                         slMax: -10
                     }
                     Item {

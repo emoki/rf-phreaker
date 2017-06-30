@@ -11,7 +11,7 @@ OverviewChart {
           ? 300 : spectrumManager.freqLimits.low - Math.round((spectrumManager.freqLimits.high - spectrumManager.freqLimits.low) * .05)
     xMax: spectrumManager === null || (spectrumManager.freqLimits.high > 2600 || spectrumManager.freqLimits.high < 300)
           ? 2600 : spectrumManager.freqLimits.high + Math.round((spectrumManager.freqLimits.high - spectrumManager.freqLimits.low) * .05)
-    yMin: -160
+    yMin: -140
     yMax: -10
 
 
