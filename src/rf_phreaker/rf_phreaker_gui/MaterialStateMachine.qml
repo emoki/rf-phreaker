@@ -25,12 +25,28 @@ DSM.StateMachine {
     signal goIdle()
     signal reinitialize()
     signal transition()
+    signal shutdown()
+
+    DSM.FinalState {
+        id: smShutdown
+        onEntered: {
+            console.debug("Entered smShutdown.")
+            Api.cleanUpApi();
+            dsmOperation.stop();
+        }
+    }
 
     DSM.State {
         id: parentState
         initialState: smInitialize
         onFinished: console.debug("Statemachine finished!");
         onEntered: console.debug("Entered main state.")
+
+
+        DSM.SignalTransition {
+            targetState: smShutdown
+            signal: dsmOperation.shutdown
+        }
 
         DSM.SignalTransition {
             signal: Api.errorReinitialize

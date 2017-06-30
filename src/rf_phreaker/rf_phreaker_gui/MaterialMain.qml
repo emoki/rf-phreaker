@@ -79,9 +79,20 @@ ApplicationWindow {
     }
 
     onClosing: {
-        console.debug("Closing main app!");
-        dsmOperation.stop();
-        Api.cleanUpApi();
+        settings.visibility = rpWindow.visibility
+        dsmOperation.shutdown();
+    }
+
+    Component.onCompleted: {
+        if(settings.visibility === Window.Maximized) {
+            rpWindow.showMaximized();
+        }
+        else {
+            rpWindow.x = settings.x;
+            rpWindow.y = settings.y
+            rpWindow.width = settings.width
+            rpWindow.height = settings.height
+        }
     }
 
     Settings {
@@ -104,23 +115,6 @@ ApplicationWindow {
             width = widthHistory;
             height = heightHistory;
         }
-    }
-
-    Component.onCompleted: {
-        closing.connect(beforeClosing);
-        if(settings.visibility === Window.Maximized) {
-            rpWindow.showMaximized();
-        }
-        else {
-            rpWindow.x = settings.x;
-            rpWindow.y = settings.y
-            rpWindow.width = settings.width
-            rpWindow.height = settings.height
-        }
-    }
-
-    function beforeClosing() {
-        settings.visibility = rpWindow.visibility
     }
 
     onVisibilityChanged: {
