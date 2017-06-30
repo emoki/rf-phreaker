@@ -64,7 +64,7 @@ public:
 	Q_INVOKABLE void cleanUpApi();
 	Q_INVOKABLE bool openCollectionFile();
 	Q_INVOKABLE void closeCollectionFile();
-	Q_INVOKABLE void convertRfp(QString filename);
+	Q_INVOKABLE void convertRpf(QString filename);
 	Q_INVOKABLE QString getColorTheme(Base *b);
 	Q_INVOKABLE MeasurementModel* getSweepModel(Base *b);
 	Q_INVOKABLE void addMessageAsync(QString details, int status = 0) {

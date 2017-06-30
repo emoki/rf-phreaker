@@ -311,8 +311,8 @@ DSM.StateMachine {
                     onExited: {
                         console.debug("Exiting smRecording");
                         Api.closeCollectionFile();
-                        if(GuiSettings.convertRfpToAscii)
-                            Api.convertRfp(Api.collectionFilename);
+                        if(GuiSettings.convertRpfToAscii)
+                            Api.convertRpf(Api.collectionFilename);
                         if(GuiSettings.addRpfToMap)
                             MarbleLayerManager.addLayer(Api.collectionFilename);
                     }

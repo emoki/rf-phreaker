@@ -538,7 +538,7 @@ void Api::close_collection_file() {
 	stats_.stop_benchmark();
 }
 
-void Api::convertRfp(QString filename) {
+void Api::convertRpf(QString filename) {
 	rpf_conversions_.push_back(std::async(std::launch::async, [=](QString fn) {
 		try {
 			fn.remove("file:///");
