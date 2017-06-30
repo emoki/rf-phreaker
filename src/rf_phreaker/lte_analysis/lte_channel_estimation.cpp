@@ -109,54 +109,63 @@ void LteLsEstPilot(Ipp32fc* H_LS, Ipp32fc* pilotF, Ipp32fc* signalF, unsigned in
 	
 	Ipp16u* pilotSubCarrierIdx1;
 
-	if(cyclicPrefixMode==Normal)
-	{
-		switch(RBNum) //Added handling for other bandwidths --Raj,4 Oct 2011
-				{
-				case 6: //Bandwidth 1.4 Mhz
-					curCpLen[0]=10;
-					curCpLen[1]=9;
-					break;
+	//if(cyclicPrefixMode==Normal)
+	//{
+	//	switch(RBNum) //Added handling for other bandwidths --Raj,4 Oct 2011
+	//			{
+	//			case 6: //Bandwidth 1.4 Mhz
+	//				curCpLen[0]=10;
+	//				curCpLen[1]=9;
+	//				break;
 
-				case 15: //Bandwidth 3 Mhz
-				curCpLen[0]=20;
-				curCpLen[1]=18;
-				break;
+	//			case 15: //Bandwidth 3 Mhz
+	//			curCpLen[0]=20;
+	//			curCpLen[1]=18;
+	//			break;
 
-				case 25: //Bandwidth 5 Mhz
-				curCpLen[0]=40;
-				curCpLen[1]=36;
-				break;
+	//			case 25: //Bandwidth 5 Mhz
+	//			curCpLen[0]=40;
+	//			curCpLen[1]=36;
+	//			break;
 
-				case 50: //Bandwidth 10 Mhz
-				curCpLen[0]=80;
-				curCpLen[1]=72;
-				break;
+	//			case 50: //Bandwidth 10 Mhz
+	//			curCpLen[0]=80;
+	//			curCpLen[1]=72;
+	//			break;
 
-				case 75: //Bandwidth 15 Mhz
-				curCpLen[0]=120;
-				curCpLen[1]=108;
-				break;
+	//			case 75: //Bandwidth 15 Mhz
+	//			curCpLen[0]=120;
+	//			curCpLen[1]=108;
+	//			break;
 
-				case 100: //Bandwidth 20 Mhz
-				curCpLen[0]=160;
-				curCpLen[1]=144;
-				break;
+	//			case 100: //Bandwidth 20 Mhz
+	//			curCpLen[0]=160;
+	//			curCpLen[1]=144;
+	//			break;
 
-				default:
-					printf("\nFunction %s:line %d --Unknown Bandwidth\n",__FUNCTION__,__LINE__);
-					break;	
-		
-				}
-		
-		
-	}
-	else
-	{
-		curCpLen[0] = 32;
-		curCpLen[1] = 32;
-	}
+	//			default:
+	//				printf("\nFunction %s:line %d --Unknown Bandwidth\n",__FUNCTION__,__LINE__);
+	//				break;	
+	//	
+	//			}
+	//	
+	//	
+	//}
+	//else
+	//{
+	//	curCpLen[0] = 32;
+	//	curCpLen[1] = 32;
+	//}
 	
+	if(cyclicPrefixMode == Normal) {
+		curCpLen[0] = 10 * FFTSize / 128;
+		curCpLen[1] = 9 * FFTSize / 128;
+	}
+	else {
+		curCpLen[0] = 32 * FFTSize / 128;
+		curCpLen[1] = 32 * FFTSize / 128;
+	}
+
 	for(unsigned int ii=0;ii<2;ii++) //for two slots
 	{
 		unsigned int slotNo=2*subFrameNo+ii;
