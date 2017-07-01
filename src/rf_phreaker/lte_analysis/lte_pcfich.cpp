@@ -56,8 +56,10 @@ int lteDecodePCFICH(Ipp32fc* inSignal,
 	                     -1,-1,1,-1,-1,1,-1,-1,1,-1,-1,1,-1,-1,1,-1,-1,1,-1,-1,1,-1,-1,1,-1,-1,1,-1,-1,1,-1,-1,
                           0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0};
 
+	ipp_32f_array noise_var(NUM_ANTENNA_MAX);
 
-	hNoiseVar[0] = hNoiseVar[1] = 169800.0;
+	// Removing hardcoded noise 
+	//hNoiseVar[0] = hNoiseVar[1] = 169800.0;
 	//hNoiseVar[0] = hNoiseVar[1] = 298800.0;
 	//hNoiseVar[1] = hNoiseVar[0];
 
@@ -88,14 +90,22 @@ int lteDecodePCFICH(Ipp32fc* inSignal,
 	
 		for (unsigned int ii=0;ii<NUM_PCFICH_MODULATION_SYMBOLS;++ii )
 		{
-		HestPcfich[antNum * NUM_PCFICH_MODULATION_SYMBOLS + ii] = hEst[antNum * LteData[cellNo].fftSize * OFDM_SYMBOLS_PER_FRAME
+			HestPcfich[antNum * NUM_PCFICH_MODULATION_SYMBOLS + ii] = hEst[antNum * LteData[cellNo].fftSize * OFDM_SYMBOLS_PER_FRAME
 		                                                               + subFrameIndex * OFDM_SYMBOLS_PER_SUBFRAME *LteData[cellNo].fftSize
 																	   + ofdmSymbolIndex * LteData[cellNo].fftSize
 		                                                               + ltePCFICHFreqIndices[ii]
 		                                                              ];
-			
 		}
 	}
+	// The presumption is the we're only looking at one subframe here.
+	// Change this when/if we change noise estimate.
+	auto ant_i = 0;
+	for(unsigned int jj = 0; jj<4; jj++) {
+		if(jj == 2) continue;
+		auto ant_start_idx = jj * NUM_SUBFRAMES_PER_FRAME;
+		noise_var[ant_i++] = ant_start_idx + subFrameIndex;
+	}
+
 
 	//TODO - Proper Noise Variance Calculation --Raj,4 Oct 2011
 
@@ -106,7 +116,7 @@ int lteDecodePCFICH(Ipp32fc* inSignal,
 		                NUM_PCFICH_MODULATION_SYMBOLS,
 	                    LteData[cellNo].NumAntennaPorts, // Number of Antennas 
 	                    MQPSK,//Modulation Type == QPSK
-	                    hNoiseVar);
+	                    noise_var.get());
 	 
 	/* Descrambling */
    nSlotNum = 2*subFrameIndex;

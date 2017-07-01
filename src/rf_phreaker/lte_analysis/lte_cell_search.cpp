@@ -36,8 +36,6 @@ const int signal_max_size = 655345;
 /* Static Allocation of  memory for Channel Estimates per frame for all the antennas */	
 Ipp32fc hEst[OFDM_SYMBOLS_PER_FRAME * NUM_FRAMES * MAX_FFT_SIZE * NUM_ANTENNA_MAX];
 
-Ipp32f hNoiseVariance[256];
-
 
 
 /*
@@ -60,6 +58,8 @@ int lte_cell_search(const Ipp32fc* SignalSamples,
 	LTEProc_CorrRecordType sschCorrRecord[record_size] = {};
 	PBCHINFO pbchInfo[record_size] = {};
 	CYCLICPREFIX cyclicPrefixMode[record_size] = {};
+	ipp_32f_array noise_variance(256);
+
 
 	unsigned int signalLength384, processSignalLength,current_frame_number;
 	double delayTime1, delayTime2;
@@ -135,14 +135,14 @@ int lte_cell_search(const Ipp32fc* SignalSamples,
 			{
 				if(antNum !=2)
 				{
-				LteChannelEst(hEst+antNum*uTmp1, hNoiseVariance+antNum*uTmp2, signal192,  
+				LteChannelEst(hEst+antNum*uTmp1, noise_variance.get(antNum*uTmp2), signal192,
 					sschCorrRecord[ii].StartSampleNum, sschCorrRecord[ii].ID, cyclicPrefixMode[ii],   
 					antNum, NumHalfFramesToProcess/2,  LteBandwidth_1_4MHZ);
 				}
 
 			}
 
-			mib_decode_status = BCH_decoding(pbchInfo+ii, signal192, hEst, hNoiseVariance, sschCorrRecord[ii].ID, cyclicPrefixMode[ii],
+			mib_decode_status = BCH_decoding(pbchInfo+ii, signal192, hEst, noise_variance.get(), sschCorrRecord[ii].ID, cyclicPrefixMode[ii],
 				                            sschCorrRecord[ii].StartSampleNum, NumHalfFramesToProcess/2, LteBandwidth_1_4MHZ);
 
 			// std::cout << "Lte PBCH Time elapsed: " << lte_diffclock(end,begin) << " ms\n";

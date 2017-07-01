@@ -23,7 +23,7 @@ namespace rf_phreaker {
 /* Static pointer to Channel Estimates per frame for all the antennas */
 Ipp32fc *h_est;
 
-// TODO - signal_max_size should be dynamic.
+// Signal_max_size should be dynamic.
 static int signal_max_size = 655345;
 
 static double SampleRate192 = 1.92e6;
@@ -42,7 +42,7 @@ int lte_decode_data(const Ipp32fc* SignalSamples,
 	static ipp_32fc_array h_est_buf(OFDM_SYMBOLS_PER_FRAME * NUM_FRAMES * MAX_FFT_SIZE * NUM_ANTENNA_MAX);
 	h_est = h_est_buf.get();
 
-	// TODO - Declaring the signal statically is OK for now because the processing functions are protected by a mutex 
+	// Declaring the signal statically is OK for now because the processing functions are protected by a mutex 
 	// so only one thread will enter this function at a time.  However once multhreading is implmented we should switch it to 
 	// a member variable.
 	static ipp_32fc_array signal_384;
@@ -54,7 +54,7 @@ int lte_decode_data(const Ipp32fc* SignalSamples,
 	unsigned int num_filter_output = 0;
 	unsigned int frameStartSampleIndex, subframeStartSampleIndex;
 	unsigned int ratio_dl_vrb_step_rb;
-	Ipp32f hNoiseVariance[256];
+	ipp_32f_array noise_variance(256);
 
 	double SampleRate;
 
@@ -266,8 +266,9 @@ int lte_decode_data(const Ipp32fc* SignalSamples,
 			memset(h_est, 0, OFDM_SYMBOLS_PER_FRAME * NUM_FRAMES * MAX_FFT_SIZE * NUM_ANTENNA_MAX * 8);
 			/* Channel Estimation per Frame per Antenna */
 			for(int antNum = 0; antNum < LteData[ii].NumAntennaPorts; antNum++) {
+				if(antNum == 2) continue;
 				LteChannelEst(h_est + antNum * OFDM_SYMBOLS_PER_FRAME * NUM_FRAMES * LteData[ii].fftSize,
-					hNoiseVariance + antNum*NUM_SUBFRAMES_PER_FRAME,
+					noise_variance.get(antNum*NUM_SUBFRAMES_PER_FRAME),
 					signal_384.get(),//signal768,
 					frameStartSampleIndex,
 					LteData[ii].RsRecord.ID,
@@ -279,6 +280,8 @@ int lte_decode_data(const Ipp32fc* SignalSamples,
 				//std::cout << "LteChannelEst Time elapsed: " << lte_diffclock(end,begin) << " ms\n";
 				//exit(0);
 			}
+
+			//h_est_buf.output_text("h.txt");
 
 #ifdef OUTPUT_LTE_DEBUG
 			h_est_buf.output_matlab_compatible_array("h_est.txt");
@@ -307,7 +310,7 @@ int lte_decode_data(const Ipp32fc* SignalSamples,
 
 				lteDecodePCFICH(signal_384.get(),//signal768,
 					h_est,
-					hNoiseVariance,
+					noise_variance.get(),
 					LteData,
 					ii, //CellNo
 					subFrameIndex,
@@ -319,7 +322,7 @@ int lte_decode_data(const Ipp32fc* SignalSamples,
 
 				lte_decode_pdcch(signal_384.get(),//signal768,
 					h_est,
-					hNoiseVariance,
+					noise_variance.get(),
 					LteData,
 					ii,//cell_no
 					subFrameIndex,
@@ -338,7 +341,7 @@ int lte_decode_data(const Ipp32fc* SignalSamples,
 				for(unsigned int index_dci_1a = 0; index_dci_1a < dci_format_info.num_dci_format_1a; index_dci_1a++) {
 					auto status = lte_pdsch_decode(signal_384.get(),//signal768,
 						h_est,
-						hNoiseVariance,
+						noise_variance.get(),
 						LteData,
 						ii,
 						subFrameIndex,
@@ -357,7 +360,7 @@ int lte_decode_data(const Ipp32fc* SignalSamples,
 
 					auto status = lte_pdsch_decode(signal_384.get(),//signal768,
 						h_est,
-						hNoiseVariance,
+						noise_variance.get(),
 						LteData,
 						ii,
 						subFrameIndex,

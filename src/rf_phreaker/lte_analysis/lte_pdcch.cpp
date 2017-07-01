@@ -51,6 +51,7 @@ int lte_decode_pdcch(Ipp32fc* inSignal,
 	Ipp32fc fft_output[3][4096], fft_output_shifted[3][4096];	// Static Allocation for Maximum size FFT 
 	Ipp32fc h_est_pdcch[NUM_RE_PER_REG * NUM_ANTENNA_MAX];
 	Ipp32fc lte_pdcch_reg_symbols[NUM_RE_PER_REG];
+	ipp_32f_array noise_var(NUM_ANTENNA_MAX * NUM_RE_PER_REG);
 	st_pdcch_regs pdcch_regs[1024]; // PDCCH Resource Element Groups
 
 	Ipp32u re_index_kk = 0, re_index_ll = 0, num_reg_pdcch = 0;
@@ -73,11 +74,11 @@ int lte_decode_pdcch(Ipp32fc* inSignal,
 	dci_format_info.num_dci_format_1c = 0;
 	dci_format_info.current_idx_dci_format_1c = 0;
 
+	//Removing hardcoded noise
 	//h_noise_var[0] = h_noise_var[1] = 169800.0;
-	h_noise_var[0] = h_noise_var[1] = 10000.0;
+	//h_noise_var[0] = h_noise_var[1] = 10000.0;
 	//h_noise_var[0] = h_noise_var[1] = 100.0;
 
-	// TODO - ecs removed - if(subFrameIndex==5)
 	temp = 0;
 
 	//FFT Operation
@@ -129,7 +130,16 @@ int lte_decode_pdcch(Ipp32fc* inSignal,
 				];
 			}
 
-
+			auto ant_i = 0;
+			for(unsigned int jj = 0; jj<4; jj++) {
+				if(jj == 2) continue;
+				// There 
+				auto ant_start_idx = jj * NUM_SUBFRAMES_PER_FRAME;
+				// Only look at one subframe.  Is this correct?  Right now the noise variance estimation gives 
+				// the same estimate for each subframe in a frame so it should matter what subframe we look at.
+				// Change this when/if we change noise estimate.
+				noise_var[ff * NUM_RE_PER_REG + ant_i++] = ant_start_idx + subFrameIndex;
+			}
 		}
 		/* MIMO Detection - Transmit Diversity */
 		stDiversityDet(&pdcch_llr[(2 * NUM_RE_PER_REG * pdcch_regs_interleaved_shifted_index[regs])],

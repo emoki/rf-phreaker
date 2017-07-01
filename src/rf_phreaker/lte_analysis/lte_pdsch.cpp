@@ -89,6 +89,7 @@ int lte_pdsch_decode(Ipp32fc* inSignal,
 	memset(&lte_pdsch_byte_seq, 0, 512);
 	memset(&scrambling_seq_pdsch_buf[0], 0, MAX_SUBCARRIER_MODULATION_SIZE * sizeof(unsigned int));
 	memset(&turbo_decoded_bits_buf[0], 0, MAX_SUBCARRIER_MODULATION_SIZE * sizeof(unsigned int));
+	ipp_32f_array noise_var(NUM_ANTENNA_MAX);
 	h_est_pdsch_buf.zero_out();
 	h_est_pdsch_temp_buf.zero_out();
 	lte_pdsch_re_buf.zero_out();
@@ -110,7 +111,8 @@ int lte_pdsch_decode(Ipp32fc* inSignal,
 	int c_init;
 	unsigned int n_rnti = 0xFFFF, temp, lte_pdsch_crc;
 	unsigned int q = 0; // For single port and transmit diversity only 1 codeword is allowed hence q = 0.
-	h_noise_var[0] = h_noise_var[1] = 10000.0;//raj: 4th Oct 2014
+	// Removing hardcoded noise
+	//h_noise_var[0] = h_noise_var[1] = 10000.0;//raj: 4th Oct 2014
 	//h_noise_var[0] = h_noise_var[1] = 100.0;
 	//h_noise_var[0] = h_noise_var[1] = 169800.0;
 	//h_noise_var[0] = h_noise_var[1] = 2.2149e5;
@@ -184,7 +186,15 @@ int lte_pdsch_decode(Ipp32fc* inSignal,
 			dci_format_info);
 
 	}
-	//////////////// temp - ecs - testing  
+
+	// The presumption is the we're only looking at one subframe here.
+	// Change this when/if we change noise estimate.
+	auto ant_i = 0;
+	for(unsigned int jj = 0; jj<4; jj++) {
+		if(jj == 2) continue;
+		auto ant_start_idx = jj * NUM_SUBFRAMES_PER_FRAME;
+		noise_var[ant_i++] = ant_start_idx + sub_frame_index;
+	}
 
 
 	/* MIMO Detection - Transmit Diversity */

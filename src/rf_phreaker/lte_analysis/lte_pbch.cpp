@@ -365,10 +365,17 @@ int BCH_decoding(PBCHINFO* pbchInfo, Ipp32fc* inSignal, Ipp32fc* H,  Ipp32f* noi
 			myfftshift(signalF+jj*FFTSize, signal2, FFTSize);
 		}
 
-		for(unsigned int jj=0;jj<3;jj++) 
+		auto ant_i = 0;
+		for(unsigned int jj=0;jj<4;jj++) 
 		{
-			noiseVar0[jj] = (noiseVar[jj*2*framesToProcess+ii]+
-				noiseVar[jj*2*framesToProcess+ii+1])/2;
+			if(jj == 2) continue;
+			auto ant_start_idx = jj * framesToProcess * NUM_SUBFRAMES_PER_FRAME;
+			auto frame_idx = ii * NUM_SUBFRAMES_PER_FRAME;
+			// Look at the first two subframes.  Is this correct?  Right now the noise variance estimation gives 
+			// the same estimate for each subframe in a frame.  Change this if we change noise estimation.
+			auto val_1 = noiseVar[ant_start_idx + frame_idx];
+			auto val_2 = noiseVar[ant_start_idx + frame_idx + 1];
+			noiseVar0[ant_i++] = (val_1 + val_2) / 2;
 		}
 		
 		for(unsigned int jj=0;jj<3;jj++)  // 3 antenna setup assumption:  [1, 2, 4]
