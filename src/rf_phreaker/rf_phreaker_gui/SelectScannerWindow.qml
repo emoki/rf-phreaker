@@ -19,7 +19,7 @@ Window {
     flags: Qt.Dialog
     modality: Qt.WindowModal
 
-    function highlighSerial() {
+    function highlightSerial() {
         var idx = 0;
         for(var i = 0; i < scannerList.rowCount; i++) {
             console.debug(scannerList.selection[i], " ", Api.deviceSerial);
